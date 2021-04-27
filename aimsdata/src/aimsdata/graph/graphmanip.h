@@ -48,7 +48,6 @@ class AffineTransformation3d;
 }
 typedef aims::AffineTransformation3d Motion;
 class Void;
-template <typename T> class AimsData;
 
 namespace aims
 {
@@ -190,18 +189,7 @@ namespace aims
                                    std::map<T, std::string> *trans = 0 );
     /// builds a ROI graph from a volume of labels
     template <typename T>
-    static Graph* graphFromVolume( const AimsData<T> & vol,
-                                   T background = 0,
-                                   std::map<T, std::string> *trans = 0 );
-    /// builds a ROI graph from a volume of labels
-    template <typename T>
     static void graphFromVolume( const carto::VolumeRef<T> & vol , Graph & g,
-                                 T background = 0,
-                                 std::map<T,std::string> *trans = 0,
-                                 bool automaticBackgroundSearch = true );
-    /// builds a ROI graph from a volume of labels
-    template <typename T>
-    static void graphFromVolume( const AimsData<T> & vol , Graph & g,
                                  T background = 0,
                                  std::map<T,std::string> *trans = 0,
                                  bool automaticBackgroundSearch = true );

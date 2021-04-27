@@ -1057,24 +1057,6 @@ Graph* GraphManip::graphFromVolume( const VolumeRef<T> & vol,
 
 
 template <typename T>
-Graph* GraphManip::graphFromVolume( const AimsData<T> & vol,
-                                    T background, map<T, string> *trans )
-{
-  return graphFromVolume( VolumeRef<T>( vol.volume() ), background, trans );
-}
-
-
-template <typename T>
-void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
-                                  T background,  map<T, string> *trans,
-                                  bool automaticBackgroundSearch )
-{
-  graphFromVolume( VolumeRef<T>( vol.volume() ), g, background, trans,
-                   automaticBackgroundSearch );
-}
-
-
-template <typename T>
 void GraphManip::graphFromVolume( const VolumeRef<T> & vol, Graph & g,
                                   T background,  map<T, string> *trans,
                                   bool automaticBackgroundSearch )
@@ -1666,39 +1648,19 @@ template void GraphManip::storeAims( Graph &, GraphObject*, const string &,
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
                                      rc_ptr<BucketMap<Void> > );
 template Graph*
-GraphManip::graphFromVolume( const AimsData<int16_t> & vol,
-                             int16_t background = 0,
-                             map<int16_t, string> *trans = 0 );
-template Graph*
 GraphManip::graphFromVolume( const VolumeRef<int16_t> & vol,
                              int16_t background = 0,
                              map<int16_t, string> *trans = 0 );
-template void
-GraphManip::graphFromVolume( const AimsData<int16_t> & vol,
-                             Graph & g,
-                             int16_t background = 0,
-                             map<int16_t, string> *trans = 0,
-                             bool automaticBackgroundSearch = true );
 template void
 GraphManip::graphFromVolume( const VolumeRef<int16_t> & vol,
                              Graph & g,
                              int16_t background = 0,
                              map<int16_t, string> *trans = 0,
                              bool automaticBackgroundSearch = true );
-template Graph*
-GraphManip::graphFromVolume( const AimsData<int32_t> & vol,
-                             int32_t background = 0,
-                             map<int32_t, string> *trans = 0 );
 template Graph*
 GraphManip::graphFromVolume( const VolumeRef<int32_t> & vol,
                              int32_t background = 0,
                              map<int32_t, string> *trans = 0 );
-template void
-GraphManip::graphFromVolume( const AimsData<int32_t> & vol,
-                             Graph & g,
-                             int32_t background = 0,
-                             map<int32_t, string> *trans = 0,
-                             bool automaticBackgroundSearch = true );
 template void
 GraphManip::graphFromVolume( const VolumeRef<int32_t> & vol,
                              Graph & g,
