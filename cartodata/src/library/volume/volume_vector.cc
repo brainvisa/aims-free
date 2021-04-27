@@ -104,6 +104,26 @@ template class Creator< VolumeRef< Point3dd > >;
 template class Creator< VolumeRef< Point2d > >;
 template class Creator< VolumeRef< vectorf6 > >;
 
+template class VolumeUtilBase< std::map<int, float>, false >;
+template class VolumeUtilBase< VoxelRGB, false >;
+template class VolumeUtilBase< VoxelRGBA, false >;
+template class VolumeUtilBase< VoxelHSV, false >;
+template class VolumeUtilBase< Point3df, false >;
+template class VolumeUtilBase< Point3d, false >;
+template class VolumeUtilBase< Point3dd, false >;
+template class VolumeUtilBase< Point2d, false >;
+template class VolumeUtilBase< vectorf6, false >;
+
+template class VolumeUtil< std::map<int, float> >;
+template class VolumeUtil< VoxelRGB >;
+template class VolumeUtil< VoxelRGBA >;
+template class VolumeUtil< VoxelHSV >;
+template class VolumeUtil< Point3df >;
+template class VolumeUtil< Point3d >;
+template class VolumeUtil< Point3dd >;
+template class VolumeUtil< Point2d >;
+template class VolumeUtil< vectorf6 >;
+
 } // namespace carto
 
 // utilities

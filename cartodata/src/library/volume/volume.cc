@@ -161,6 +161,50 @@ template class Creator<VolumeRef< long > >;
 template class Creator<VolumeRef< unsigned long > >;
 #endif
 
+template class VolumeUtilBase< bool, true >;
+template class VolumeUtilBase< int8_t, true >;
+template class VolumeUtilBase< uint8_t, true >;
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template class VolumeUtilBase< char, true >;
+#endif
+template class VolumeUtilBase< int16_t, true >;
+template class VolumeUtilBase< uint16_t, true >;
+template class VolumeUtilBase< int32_t, true >;
+template class VolumeUtilBase< uint32_t, true >;
+template class VolumeUtilBase< int64_t, true >;
+template class VolumeUtilBase< uint64_t, true >;
+template class VolumeUtilBase< float, true >;
+template class VolumeUtilBase< double, true >;
+template class VolumeUtilBase< cfloat, false >;
+template class VolumeUtilBase< cdouble, false >;
+#ifdef CARTO_LONG_IS_DISTINCT
+template class VolumeUtilBase< long, true >;
+template class VolumeUtilBase< unsigned long, true >;
+#endif
+
+template class VolumeUtil< bool >;
+template class VolumeUtil< int8_t >;
+template class VolumeUtil< uint8_t >;
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template class VolumeUtil< char >;
+#endif
+template class VolumeUtil< int16_t >;
+template class VolumeUtil< uint16_t >;
+template class VolumeUtil< int32_t >;
+template class VolumeUtil< uint32_t >;
+template class VolumeUtil< int64_t >;
+template class VolumeUtil< uint64_t >;
+template class VolumeUtil< float >;
+template class VolumeUtil< double >;
+template class VolumeUtil< cfloat >;
+template class VolumeUtil< cdouble >;
+#ifdef CARTO_LONG_IS_DISTINCT
+template class VolumeUtil< long >;
+template class VolumeUtil< unsigned long >;
+#endif
+
 } // namespace carto
 
 // utilities
