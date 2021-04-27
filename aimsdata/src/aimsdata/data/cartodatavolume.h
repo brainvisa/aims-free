@@ -94,6 +94,8 @@ class AimsData : public carto::RCObject, public aims::Border
   /// cast to Volume
   operator carto::rc_ptr<carto::Volume<T> >();
   operator const carto::rc_ptr<carto::Volume<T> >() const;
+  operator carto::VolumeRef<T>();
+  operator const carto::VolumeRef<T>() const;
 
   const carto::AllocatorContext & allocator() const;
   int dimX() const;
@@ -252,6 +254,20 @@ template <typename T>
 AimsData<T>::operator carto::rc_ptr<carto::Volume<T> >()
 {
   return volume();
+}
+
+
+template <typename T>
+AimsData<T>::operator const carto::VolumeRef<T>() const
+{
+  return carto::VolumeRef<T>( volume() );
+}
+
+
+template <typename T>
+AimsData<T>::operator carto::VolumeRef<T>()
+{
+  return carto::VolumeRef<T>( volume() );
 }
 
 
