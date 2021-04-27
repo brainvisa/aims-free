@@ -36,7 +36,6 @@
 
 
 //--- cartodata --------------------------------------------------------------
-#include <cartodata/volume/volumebase.h>
 #include <cartodata/volume/volumeutil.h>
 #include <cartodata/volume/functional.h>
 //----------------------------------------------------------------------------
