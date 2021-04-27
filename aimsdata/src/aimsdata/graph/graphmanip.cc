@@ -41,8 +41,10 @@
 #include <aims/mesh/surfaceOperation.h>
 #include <aims/mesh/texture.h>
 #include <graph/graph/graph.h>
+#include <aims/data/data.h>
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/type/string_conversion.h>
+#include <cartobase/containers/nditerator.h>
 #include <vector>
 #include <map>
 
@@ -137,16 +139,47 @@ namespace aims
     {
     }
 
+    template<>
+    void adjustVoxelSize( rc_ptr<Volume<short> > & x,
+                          const rc_ptr<Volume<short> > & y )
+    {
+      try
+      {
+        Object vs = y->header().getProperty( "voxel_size" );
+        x->header().setProperty( "voxel_size", vs );
+      }
+      catch( ... )
+      {
+      }
+    }
+
     template<> 
     void adjustVoxelSize( AimsData<short> & x, const AimsData<short> & y )
     {
-      x.setSizeXYZT( y.sizeX(), y.sizeY(), y.sizeZ(), y.sizeT() );
+      rc_ptr<Volume<short> > xx = x.volume();
+      adjustVoxelSize( xx, y.volume() );
     }
 
     template<>
-    void adjustVoxelSize( AimsData<int32_t> & x, const AimsData<int32_t> & y )
+    void adjustVoxelSize( rc_ptr<Volume<int32_t> > & x,
+                          const rc_ptr<Volume<int32_t> > & y )
     {
-      x.setSizeXYZT( y.sizeX(), y.sizeY(), y.sizeZ(), y.sizeT() );
+      try
+      {
+        Object vs = y->header().getProperty( "voxel_size" );
+        x->header().setProperty( "voxel_size", vs );
+      }
+      catch( ... )
+      {
+      }
+    }
+
+    template<>
+    void adjustVoxelSize( AimsData<int32_t> & x,
+                          const AimsData<int32_t> & y )
+    {
+      rc_ptr<Volume<int32_t> > xx = x.volume();
+      adjustVoxelSize( xx, y.volume() );
     }
 
 
@@ -1014,7 +1047,7 @@ GraphManip::graphElementCodeByAtt( Graph & g, const string & syntax,
 
 
 template <typename T>
-Graph* GraphManip::graphFromVolume( const AimsData<T> & vol,
+Graph* GraphManip::graphFromVolume( const VolumeRef<T> & vol,
                                     T background, map<T, string> *trans )
 {
   Graph	*g = new Graph( "RoiArg" );
@@ -1024,25 +1057,53 @@ Graph* GraphManip::graphFromVolume( const AimsData<T> & vol,
 
 
 template <typename T>
+Graph* GraphManip::graphFromVolume( const AimsData<T> & vol,
+                                    T background, map<T, string> *trans )
+{
+  return graphFromVolume( VolumeRef<T>( vol.volume() ), background, trans );
+}
+
+
+template <typename T>
 void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
-                                  T background,  map<T, string> *trans ,
+                                  T background,  map<T, string> *trans,
+                                  bool automaticBackgroundSearch )
+{
+  graphFromVolume( VolumeRef<T>( vol.volume() ), g, background, trans,
+                   automaticBackgroundSearch );
+}
+
+
+template <typename T>
+void GraphManip::graphFromVolume( const VolumeRef<T> & vol, Graph & g,
+                                  T background,  map<T, string> *trans,
                                   bool automaticBackgroundSearch )
 {
   g.setSyntax( "RoiArg" );
   // global attributes
-  vector<float>	vs(3);
-  vs[0] = vol.sizeX();
-  vs[1] = vol.sizeY();
-  vs[2] = vol.sizeZ();
+  vector<float>	vs(3, 1.);
+  try
+  {
+    Object vso = vol->header().getProperty( "voxel_size" );
+    if( vso )
+      for( size_t i=0; i<std::max(size_t(3), vso->size()); ++i )
+        vs[i] = vso->getArrayItem( i )->getScalar();
+  }
+  catch( ... )
+  {
+  }
   g.setProperty( "voxel_size", vs );
   vector<int>	dims(3);
   dims[0] = 0;
   dims[1] = 0;
   dims[2] = 0;
   g.setProperty( "boundingbox_min", dims );
-  dims[0] = vol.dimX() - 1;
-  dims[1] = vol.dimY() - 1;
-  dims[2] = vol.dimZ() - 1;
+  dims = vol->getSize();
+  --dims[0];
+  --dims[1];
+  --dims[2];
+  while( dims.size() > 3 )
+    dims.erase( dims.begin() + ( dims.size() - 1 ) );
   g.setProperty( "boundingbox_max", dims );
   
   rc_ptr<GraphElementTable>	mgec( new GraphElementTable );
@@ -1061,8 +1122,7 @@ void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
   gec.syntax = "roi";
 
   rc_ptr<AimsData<T> >	volume( new AimsData<T>( vol ) );
-  if( vol.header() )
-    volume->setHeader( vol.header()->cloneHeader() );
+//   volume->header().copyProperties( vol->header() );
   g.setProperty( gec.global_attribute, volume );
   typename map<T, string>::iterator im, em ;
 
@@ -1074,10 +1134,11 @@ void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
   map<T, Vertex *>      nodes;
   T                     label;
   if( automaticBackgroundSearch )
-     background = vol.minimum() ;
-  ForEach3d( vol, x, y, z )
+     background = VolumeUtil<T>::min( *vol );
+  NDIterator<T> vit( &vol->at( 0 ), vol->getSize(), vol->getStrides() );
+  for( ; !vit.ended(); ++vit )
   {
-    label = vol( x, y, z );
+    label = vol->at( vit.position() );
     if( label != background )
     {
       Vertex	*& v = nodes[ label ];
@@ -1105,25 +1166,19 @@ void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
   }
 
   // copy volume header properties into the graph "header" property
-  Header *hdr = vol.header()->cloneHeader();
-  PythonHeader *ph = dynamic_cast<PythonHeader *>( hdr );
-  if( ph )
-  {
-    Object gh = Object::value( Dictionary() );
-    gh->copyProperties( Object::reference( *ph ) );
-    g.setProperty( "header", gh );
+  Object gh = Object::value( Dictionary() );
+  gh->copyProperties( Object::reference( vol->header() ) );
+  g.setProperty( "header", gh );
 
-    set<string> forbidden;
-    forbidden.insert( "object_type" );
-    forbidden.insert( "data_type" );
-    forbidden.insert( "preferred_data_type" );
-    forbidden.insert( "bits_allocated" );
-    set<string>::iterator i, e = forbidden.end();
-    for( i=forbidden.begin(); i!=e; ++i )
-      if( gh->hasProperty( *i ) )
-        gh->removeProperty( *i );
-  }
-  delete hdr;
+  set<string> forbidden;
+  forbidden.insert( "object_type" );
+  forbidden.insert( "data_type" );
+  forbidden.insert( "preferred_data_type" );
+  forbidden.insert( "bits_allocated" );
+  set<string>::iterator i, e = forbidden.end();
+  for( i=forbidden.begin(); i!=e; ++i )
+    if( gh->hasProperty( *i ) )
+      gh->removeProperty( *i );
 }
 
 
@@ -1614,8 +1669,19 @@ template Graph*
 GraphManip::graphFromVolume( const AimsData<int16_t> & vol,
                              int16_t background = 0,
                              map<int16_t, string> *trans = 0 );
+template Graph*
+GraphManip::graphFromVolume( const VolumeRef<int16_t> & vol,
+                             int16_t background = 0,
+                             map<int16_t, string> *trans = 0 );
 template void
-GraphManip::graphFromVolume( const AimsData<int16_t> & vol , Graph & g,
+GraphManip::graphFromVolume( const AimsData<int16_t> & vol,
+                             Graph & g,
+                             int16_t background = 0,
+                             map<int16_t, string> *trans = 0,
+                             bool automaticBackgroundSearch = true );
+template void
+GraphManip::graphFromVolume( const VolumeRef<int16_t> & vol,
+                             Graph & g,
                              int16_t background = 0,
                              map<int16_t, string> *trans = 0,
                              bool automaticBackgroundSearch = true );
@@ -1623,8 +1689,19 @@ template Graph*
 GraphManip::graphFromVolume( const AimsData<int32_t> & vol,
                              int32_t background = 0,
                              map<int32_t, string> *trans = 0 );
+template Graph*
+GraphManip::graphFromVolume( const VolumeRef<int32_t> & vol,
+                             int32_t background = 0,
+                             map<int32_t, string> *trans = 0 );
 template void
-GraphManip::graphFromVolume( const AimsData<int32_t> & vol , Graph & g,
+GraphManip::graphFromVolume( const AimsData<int32_t> & vol,
+                             Graph & g,
+                             int32_t background = 0,
+                             map<int32_t, string> *trans = 0,
+                             bool automaticBackgroundSearch = true );
+template void
+GraphManip::graphFromVolume( const VolumeRef<int32_t> & vol,
+                             Graph & g,
                              int32_t background = 0,
                              map<int32_t, string> *trans = 0,
                              bool automaticBackgroundSearch = true );

@@ -36,7 +36,7 @@
 #include <aims/io/argW.h>
 #include <aims/io/reader.h>
 #include <aims/io/process.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/def/path.h>
 #include <aims/graph/graphmanip.h>
 #include <graph/graph/graph.h>
@@ -177,16 +177,15 @@ namespace
 
 
   template <typename T>
-  bool GraphVolumeFormat_VolReader::read( Process & p, const string & filename,
-                                          Finder & )
+  bool GraphVolumeFormat_VolReader::read(
+    Process & p, const string & filename, Finder & )
   {
     GraphVolumeFormat_VolReader
       & gvr = static_cast<GraphVolumeFormat_VolReader &>( p );
-    Reader<AimsData<T> >      r( filename );
+    Reader<Volume<T> >      r( filename );
     r.setOptions( gvr.options );
     r.setAllocatorContext( gvr.context );
-    AimsData<T> data;
-    r.read( data );
+    VolumeRef<T> data = r.read();
     if( gvr.graph )
       GraphManip::graphFromVolume( data, *gvr.graph );
     else
