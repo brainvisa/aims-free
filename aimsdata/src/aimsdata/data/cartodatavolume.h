@@ -83,8 +83,10 @@ class AimsData : public carto::RCObject, public aims::Border
   virtual ~AimsData();
 
   // conversions with carto::Volume
-  AimsData( carto::rc_ptr<carto::Volume<T> > vol );
-  AimsData<T> & operator = ( carto::rc_ptr<carto::Volume<T> > vol );
+  AimsData( const carto::rc_ptr<carto::Volume<T> > vol );
+  AimsData( const carto::VolumeRef<T> vol );
+  AimsData<T> & operator = (
+    const carto::rc_ptr<carto::Volume<T> > vol );
 
   AimsData<T> & operator = ( const AimsData<T> & );
   AimsData<T> & operator = ( const T & );
@@ -420,7 +422,7 @@ AimsData<T>::~AimsData()
 
 template < typename T >
 inline 
-AimsData<T>::AimsData( carto::rc_ptr<carto::Volume<T> > vol )
+AimsData<T>::AimsData( const carto::rc_ptr<carto::Volume<T> > vol )
   : carto::RCObject(), 
     aims::Border( vol->getSizeX(),
                   vol->getSizeY(),
@@ -433,10 +435,26 @@ AimsData<T>::AimsData( carto::rc_ptr<carto::Volume<T> > vol )
   initBorder();
 }
 
+template < typename T >
+inline
+AimsData<T>::AimsData( const carto::VolumeRef<T> vol )
+  : carto::RCObject(),
+    aims::Border( vol->getSizeX(),
+                  vol->getSizeY(),
+                  vol->getSizeZ(),
+                  vol->getBorders() ),
+    _volume( vol ),
+    d( new Private )
+{
+  d->header = new aims::PythonHeader( *_volume );
+  initBorder();
+}
+
 
 template < typename T >
 inline 
-AimsData<T> & AimsData<T>::operator = ( carto::rc_ptr<carto::Volume<T> > vol )
+AimsData<T> & AimsData<T>::operator = (
+  const carto::rc_ptr<carto::Volume<T> > vol )
 {
   if( _volume.get() == vol.get() )
     return *this;
