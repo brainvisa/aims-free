@@ -35,7 +35,7 @@
 #define CARTODATA_VOLUME_VOLUMEUTIL_H
 
 //--- cartodata --------------------------------------------------------------
-#include <cartodata/volume/volumebase.h>
+#include <cartodata/volume/volumeref.h>
 #include <cartodata/volume/functional.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/type/datatypetraits.h>
@@ -285,6 +285,14 @@ namespace carto
   template <typename T>
   rc_ptr<Volume<T> > invertMinMax( const rc_ptr<Volume<T> > & volume );
   /// @}
+
+  /// matrix product
+  template <typename T>
+  VolumeRef<T> matrix_product( const Volume<T> & v1, const Volume<T> & v2 );
+  /// matrix product
+  template <typename T>
+  VolumeRef<T> matrix_product( const VolumeRef<T> & v1,
+                               const VolumeRef<T> & v2 );
 
   //==========================================================================
   // Borders

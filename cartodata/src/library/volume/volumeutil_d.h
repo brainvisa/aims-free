@@ -366,6 +366,40 @@ namespace carto
               internal_max<T>, o, min_limit<T>() );
   }
 
+
+  // matrix product
+  template <typename T>
+  VolumeRef<T> matrix_product( const Volume<T> & v1, const Volume<T> & v2 )
+  {
+    std::vector<int> size1 = v1.getSize();
+    std::vector<int> size2 = v2.getSize();
+    if( size1[1] != size2[0] )
+      throw std::runtime_error( "matrix dimensions do not match" );
+
+    VolumeRef<T> prod( size1[0], size2[1], 1, 1,
+                       std::max( v1.getBorders()[0], v2.getBorders()[0] ) );
+    for( long y = 0; y < size2[1]; y++ )
+      for( long x = 0; x < size1[0]; x++ )
+    {
+      prod->at( x, y ) = T( 0 );
+      for( long k = 0; k < size2[1]; k++ )
+        prod->at( x, y ) += v1.at( x, k ) * v2.at( k, y );
+    }
+
+    return prod;
+  }
+
+
+  // matrix product
+  template <typename T>
+  VolumeRef<T> matrix_product( const VolumeRef<T> & v1,
+                               const VolumeRef<T> & v2 )
+  {
+    return matrix_product( *v1, *v2 );
+  }
+
+
+
 #if 0
   // VolumeUtil declarations (needed on Mac)
   extern template VolumeRef<VoxelRGB>

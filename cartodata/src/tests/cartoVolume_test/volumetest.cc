@@ -271,6 +271,9 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << "filling vol2 with value 10" << endl;
 
   vol2->fill( 10 );
+  cout << "min: " << carto::min( vol2 ) << ", max: " << carto::max( vol2 )
+       << endl;
+
   cout << "value at pos( 1, 1, 1 ) (should be 10) : " << (*vol2)( 1, 1, 1 )
        << endl;
   if( (*vol2)( 1, 1, 1 ) != 10 )
