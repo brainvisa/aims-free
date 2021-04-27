@@ -1020,7 +1020,11 @@ def __fixsipclasses__(classes):
             # useful shortcut: volume.np is handier than np.asarray(volume)
             if hasattr(y, '__array__') and not hasattr(y, 'np'):
                 y.np = property(lambda self: self.__array__())
-                y.np.__doc__ = '''The ``np`` property is a shortcut to the ``__array__`` method. Thus::
+                if not six.PY2:
+                    # we cannot set the __doc__ attribute (or any other
+                    # attribute actually) on a property object in python2
+                    y.np.__doc__ = \
+'''The ``np`` property is a shortcut to the ``__array__`` method. Thus::
 
     something.np
 
