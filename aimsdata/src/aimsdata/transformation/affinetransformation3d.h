@@ -39,7 +39,7 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <soma-io/transformation/affinetransformation3d_base.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <iosfwd>
 
 namespace aims
@@ -185,22 +185,21 @@ namespace aims
     inline Point3df translation();
     inline Point3df translation() const;
 
-    inline AimsData<float> rotation();
-    inline const AimsData<float> rotation() const;
+    inline carto::VolumeRef<float> rotation();
+    inline const carto::VolumeRef<float> rotation() const;
 
     // get the matrix as a volume
     inline carto::VolumeRef<float> affine();
     inline const carto::VolumeRef<float> affine() const;
 
     virtual void setMatrix(const carto::VolumeRef<float> & mat);
-    virtual void setMatrix(const AimsData<float> & mat);
     virtual void setRotationAffine( float rx, float ry, float rz,
                                     const Point3df &cg = Point3df( 0.0 )  );
     //virtual void setRotationVectorial( const Point3df& v1, const Point3df& v2 );
 
-    static AimsData<float> rotationaroundx(float rx) ;
-    static AimsData<float> rotationaroundy(float ry) ;
-    static AimsData<float> rotationaroundz(float rz) ;
+    static carto::VolumeRef<float> rotationaroundx(float rx) ;
+    static carto::VolumeRef<float> rotationaroundy(float ry) ;
+    static carto::VolumeRef<float> rotationaroundz(float rz) ;
 
 
   protected:
@@ -222,7 +221,7 @@ namespace aims
     return Point3df( _matrix[12], _matrix[13], _matrix[14] );
   }
 
-  AimsData<float> AffineTransformation3d::rotation()
+  carto::VolumeRef<float> AffineTransformation3d::rotation()
   {
     // return a 3x3 view into the 4x4 matrix
     carto::VolumeRef<float> matrix(
@@ -232,10 +231,10 @@ namespace aims
       matrix, carto::Volume<float>::Position4Di( 0, 0, 0, 0 ),
       carto::Volume<float>::Position4Di( 3, 3, 1, 1 ) );
 
-    return AimsData<float>( view );
+    return view;
   }
 
-  const AimsData<float> AffineTransformation3d::rotation() const
+  const carto::VolumeRef<float> AffineTransformation3d::rotation() const
   {
     // return a 3x3 view into the 4x4 matrix
     carto::VolumeRef<float> matrix(
@@ -245,7 +244,7 @@ namespace aims
       matrix, carto::Volume<float>::Position4Di( 0, 0, 0, 0 ),
       carto::Volume<float>::Position4Di( 3, 3, 1, 1 ) );
 
-    return AimsData<float>( view );
+    return view;
   }
 
   carto::VolumeRef<float> AffineTransformation3d::affine()

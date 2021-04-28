@@ -326,13 +326,14 @@ in the current code but it would be better to follow specification in NOTE,
 line 38. */
 {
   
-  AimsData<float> Rx = rotationaroundx(rx);
-  AimsData<float> Ry = rotationaroundy(ry);
-  AimsData<float> Rz = rotationaroundz(rz);
-  AimsData<float> vectRot = Rz.cross(Ry.cross(Rx));  //Produit transpose!!
+  VolumeRef<float> Rx = rotationaroundx(rx);
+  VolumeRef<float> Ry = rotationaroundy(ry);
+  VolumeRef<float> Rz = rotationaroundz(rz);
+  //Product transpose!!
+  VolumeRef<float> vectRot = matrix_product( Rz, matrix_product( Ry, Rx ));
 
 
-  AimsData<float> T(4,4), Tmoins1(4,4);
+  VolumeRef<float> T(4,4), Tmoins1(4,4);
   T = 0.0; Tmoins1 = 0.0;
 
 
@@ -342,46 +343,44 @@ line 38. */
   T(0,0) = T(1,1) = T(2,2) = T(3, 3) = 1.0;
   Tmoins1(0,0) = Tmoins1(1,1) = Tmoins1(2,2) = Tmoins1(3,3) = 1.0;
   
-
-
-  AimsData<float> tmp = T.cross( vectRot.cross( Tmoins1 ) ); //Produit transpos
+  //Product transpos
+  VolumeRef<float> tmp = matrix_product(T,
+                                        matrix_product( vectRot, Tmoins1 ) );
   _matrix[12] = tmp(3,0);
   _matrix[13] = tmp(3,1);
   _matrix[14] = tmp(3,2);
 
-  rotation()(0,0) = tmp(0,0);  //Transpo
-  rotation()(0,1) = tmp(1,0);
-  rotation()(0,2) = tmp(2,0);
-  rotation()(1,0) = tmp(0,1);
-  rotation()(1,1) = tmp(1,1);
-  rotation()(1,2) = tmp(2,1);
-  rotation()(2,0) = tmp(0,2);
-  rotation()(2,1) = tmp(1,2);
-  rotation()(2,2) = tmp(2,2);
+  VolumeRef<float> m = affine();
+  m->at(0,0) = tmp(0,0);  //Transpo
+  m->at(0,1) = tmp(1,0);
+  m->at(0,2) = tmp(2,0);
+  m->at(1,0) = tmp(0,1);
+  m->at(1,1) = tmp(1,1);
+  m->at(1,2) = tmp(2,1);
+  m->at(2,0) = tmp(0,2);
+  m->at(2,1) = tmp(1,2);
+  m->at(2,2) = tmp(2,2);
 }
 
 
 //-----------------------------------------------------------------------------
 void AffineTransformation3d::setMatrix(const carto::VolumeRef<float> & mat)
 {
+  VolumeRef<float> m = affine();
+
   for(int16_t i=0; i<3; i++)
     for(int16_t j=0; j<3; j++)
-      rotation()(i, j) = mat->at(i, j);
+      m->at(i, j) = mat->at(i, j);
 }
 
 //-----------------------------------------------------------------------------
-void AffineTransformation3d::setMatrix(const AimsData<float> & mat)
-{
-  setMatrix(carto::VolumeRef<float>(mat.volume()));
-}
-
-//-----------------------------------------------------------------------------
-AimsData<float> AffineTransformation3d::rotationaroundx(float rx)
+VolumeRef<float> AffineTransformation3d::rotationaroundx(float rx)
 /* this method return a 4-by-4 matrix, but a 3-by-3 matrix would be
 enough and better. see NOTE, line 38. */
 {
-  AimsData<float> thing( 4,4 );
-  thing = 0.0; thing(3,3) = 1.0;
+  VolumeRef<float> thing( 4,4 );
+  thing.fill( 0.0 );
+  thing->at(3,3) = 1.0;
   
   double a = (double) rx / 180.0 * M_PI;
   thing(0,0) = 1.0;
@@ -396,17 +395,18 @@ enough and better. see NOTE, line 38. */
   thing(2,1) = (float)-sin(a);
   thing(2,2) = (float) cos(a);
 
-  return( thing );
+  return thing;
 }
 
 //-----------------------------------------------------------------------------
-AimsData<float> AffineTransformation3d::rotationaroundy(float ry)
+VolumeRef<float> AffineTransformation3d::rotationaroundy(float ry)
 /* this method return a 4-by-4 matrix, but a 3-by-3 matrix would be
 enough and better. see NOTE, line 38. */
 {
-  AimsData<float> thing( 4,4 );
-  thing = 0.0; thing(3,3) = 1.0;
-	
+  VolumeRef<float> thing( 4,4 );
+  thing->fill( 0.0 );
+  thing(3,3) = 1.0;
+
   double a = (double) ry / 180.0 * M_PI;
   thing(0,0) = (float) cos(a);
   thing(0,1) = 0.0;
@@ -420,15 +420,15 @@ enough and better. see NOTE, line 38. */
   thing(2,1) = 0.0;
   thing(2,2) = (float) cos(a);
 
-  return( thing );
+  return thing;
 }
 
 //-----------------------------------------------------------------------------
-AimsData<float> AffineTransformation3d::rotationaroundz(float rz)
+VolumeRef<float> AffineTransformation3d::rotationaroundz(float rz)
 /* this method return a 4-by-4 matrix, but a 3-by-3 matrix would be
 enough and better. see NOTE, line 38. */
 {
-  AimsData<float> thing( 4,4 );
+  VolumeRef<float> thing( 4,4 );
   thing = 0.0; thing(3,3) = 1.0;
 
   double a = (double) rz / 180.0 * M_PI;
@@ -444,100 +444,8 @@ enough and better. see NOTE, line 38. */
   thing(2,1) = 0.0;
   thing(2,2) = 1.0;
 
-  return( thing );
+  return thing;
 }
-
-
-
-//-----------------------------------------------------------------------------
-// void AffineTransformation3d::setRotationVectorial( const Point3df& u1, const Point3df& v1,
-// 				   const Point3df& u2, const Point3df& v2 )
-// {
-  
-
-  
-//   Point3df axis, u1(v1), u2(v2) ;
-//   double angle, c, s, t ;
-  
-//   u1.normalize() ; u2.normalize() ;
-//   angle = acos( ( u1.dot( u2 ) < 0. ? 0. : (u1.dot( u2 ) > 1. ? 1. : u1.dot( u2 ) ) ) ) ; 
-//   axis[0] = u1[1]*u2[2] - u2[1]*u1[2] ;
-//   axis[1] = -u1[0]*u2[2] + u2[0]*u1[2] ;
-//   axis[2] = u1[0]*u2[1] - u2[0]*u1[1] ;
-
-//   cout << "Axis dot v1 = " << axis.dot(u1) 
-//        << "\t" << "Axis dot v2 = " << axis.dot(u2) << endl ; 
-  
-//   axis.normalize() ;
-  
-//   c = cos(angle) ; s = sin(angle) ; t = 1- cos(angle) ;
-  
-//   rotation()(0, 0) = t * axis[0] * axis[0] + c ;
-//   rotation()(0, 1) = t * axis[0] * axis[1] - s * axis[2] ;
-//   rotation()(0, 2) = t * axis[0] * axis[2] + s * axis[1] ;
-//   rotation()(1, 0) = t * axis[0] * axis[1] + s * axis[2] ;
-//   rotation()(1, 1) = t * axis[1] * axis[1] + c ;
-//   rotation()(1, 2) = t * axis[1] * axis[2] - s * axis[0] ;
-//   rotation()(2, 0) = t * axis[0] * axis[2] - s * axis[1] ;
-//   rotation()(2, 1) = t * axis[1] * axis[2] + s * axis[0] ;
-//   rotation()(2, 2) = t * axis[2] * axis[2] + c ;
-  
-//   AimsData<float> vect( 3, 1 ) ;
-//   vect(0, 0) = v1[0] ; vect(1, 0) = v1[1] ; vect(2, 0) = v1[2] ;
-//   AimsData<float> vectTransformed = rotation().cross( vect ) ;
-//   Point3df v1Transformed( vectTransformed(0, 0), vectTransformed(1, 0), vectTransformed(2, 0) ) ;
-  
-//   //DEBUG START
-//   cout << "v1Transformed = " << v1Transformed << endl ;
-  
-//   vect(0, 0) = axis[0] ; vect(1, 0) = axis[1] ; vect(2, 0) = axis[2] ;
-//   vectTransformed = rotation().cross( vect ) ;
-  
-//   cout << "axis = " << axis 
-//        << "\taxis transformed = ( " << vectTransformed(0, 0) << " , " 
-//        << vectTransformed(1, 0) << " , " 
-//        << vectTransformed(2, 0) << " ) " << endl ;
-//     // DEBUG END
-//   if( v2.dot( v1Transformed ) < 0 )
-//     {
-//       //Transposition
-//       rotation()(0, 1) = t * axis[0] * axis[1] + s * axis[2] ;
-//       rotation()(0, 2) = t * axis[0] * axis[2] - s * axis[1] ;
-//       rotation()(1, 0) = t * axis[0] * axis[1] - s * axis[2] ;
-//       rotation()(1, 2) = t * axis[1] * axis[2] + s * axis[0] ;
-//       rotation()(2, 0) = t * axis[0] * axis[2] + s * axis[1] ;
-//       rotation()(2, 1) = t * axis[1] * axis[2] - s * axis[0] ;      
-//     }
-
-  
-  
-  
-// //   Point3df u1, u2, r, t(translation()), cross ;
-
-// //   for( int i = 0 ; i < 3 ; ++i ){
-// //     u1 = v1 ; u2 = v2 ;
-// //     u1[i] = 0. ; 
-// //     if( u1 != Point3df(0., 0.,0.) ) u1.normalize() ;
-// //     u2[i] = 0. ; 
-// //     if( u2 != Point3df(0., 0.,0.) ) u2.normalize() ;
-// //     r[i] = acos( ( u1.dot( u2 ) < 0. ? 0. : (u1.dot( u2 ) > 1. ? 1. : u1.dot( u2 ) ) ) ) * 180. / M_PI ;
-// //   }
-// //   if( v1[0]*v2[1] - v2[0]*v1[1] < 0. ) 
-// //     r[2] += M_PI ;
-// //   if( v1[0]*v2[2] - v2[0]*v1[2] < 0. ) 
-// //     r[1] += M_PI ;
-// //   if( v1[1]*v2[2] - v2[1]*v1[2] < 0. ) 
-// //     r[0] += M_PI ;
-    
-// //   AimsData<float> Rx = rotationaroundx(r[0]);
-// //   AimsData<float> Ry = rotationaroundy(r[1]);
-// //   AimsData<float> Rz = rotationaroundz(r[2]);
-// //   AimsData<float> vectRot = Rz.cross(Ry.cross(Rx));  //Produit transpose!!
-  
-// //   for( int i = 0 ; i < 3 ; ++i )
-// //     for( int j = 0 ; j < 3 ; ++j )
-// //       _rotation(i, j) = vectRot(i, j) ;
-// }
 
 
 AffineTransformation3d & AffineTransformation3d::operator *= ( const AffineTransformation3dBase & m )

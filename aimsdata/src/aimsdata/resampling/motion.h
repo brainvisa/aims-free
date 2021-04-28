@@ -50,7 +50,7 @@ namespace aims
 
 
 //-----------------------------------------------------------------------------
-class AIMSDATA_API DecomposedAffineTransformation3d
+class DecomposedAffineTransformation3d
   : public AffineTransformation3d
 {
 public:
@@ -62,16 +62,16 @@ public:
   virtual AffineTransformation3d &operator = ( const AffineTransformation3d& other );
 
   // Get shearing
-  AimsData<float>& shearing() { return _shear; }
-  const AimsData<float>& shearing() const { return _shear; }
+  carto::VolumeRef<float>& shearing() { return _shear; }
+  const carto::VolumeRef<float>& shearing() const { return _shear; }
 
   // Get scaling
-  AimsData<float>& scaling() { return _scaling; }
-  const AimsData<float>& scaling() const { return _scaling; }
+  carto::VolumeRef<float>& scaling() { return _scaling; }
+  const carto::VolumeRef<float>& scaling() const { return _scaling; }
 
   // Get rot
-  AimsData<float>& rot() { return _rot;}
-  const AimsData<float>& rot() const { return _rot;}
+  carto::VolumeRef<float>& rot() { return _rot;}
+  const carto::VolumeRef<float>& rot() const { return _rot;}
 
   virtual void setToIdentity() ;
 
@@ -89,9 +89,9 @@ public:
 
 protected:
 
-  AimsData<float> _shear;
-  AimsData<float> _scaling;
-  AimsData<float> _rot;
+  carto::VolumeRef<float> _shear;
+  carto::VolumeRef<float> _scaling;
+  carto::VolumeRef<float> _rot;
 
 };
 

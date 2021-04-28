@@ -116,9 +116,9 @@ using namespace std;
 //-----------------------------------------------------------------------------
 DecomposedAffineTransformation3d::DecomposedAffineTransformation3d() :
   AffineTransformation3d(),
-  _shear( AimsData<float>( 3, 3 ) ),
-  _scaling( AimsData<float>( 3, 3 ) ),
-  _rot( AimsData<float>( 3, 3 ) )
+  _shear( VolumeRef<float>( 3, 3 ) ),
+  _scaling( VolumeRef<float>( 3, 3 ) ),
+  _rot( VolumeRef<float>( 3, 3 ) )
 			
 {
   _shear = 0.0f;
@@ -136,9 +136,9 @@ DecomposedAffineTransformation3d::DecomposedAffineTransformation3d() :
 //-----------------------------------------------------------------------------
 DecomposedAffineTransformation3d::DecomposedAffineTransformation3d( const DecomposedAffineTransformation3d& other ) :
   RCObject(), AffineTransformation3d( other ),
-  _shear( other._shear.clone() ),
-  _scaling( other._scaling.clone() ),
-  _rot ( other._rot.clone() )
+  _shear( other._shear.deepcopy() ),
+  _scaling( other._scaling.deepcopy() ),
+  _rot ( other._rot.deepcopy() )
 {
 }
 
@@ -148,9 +148,9 @@ DecomposedAffineTransformation3d &
 DecomposedAffineTransformation3d::operator =( const DecomposedAffineTransformation3d& other )
 {
   AffineTransformation3d::operator =( other );
-  _scaling = (other._scaling).clone();
-  _shear = (other._shear).clone();
-  _rot = (other._rot).clone();
+  _scaling = other._scaling.deepcopy();
+  _shear = other._shear.deepcopy();
+  _rot = other._rot.deepcopy();
   return *this;
 }
 
@@ -240,11 +240,11 @@ void DecomposedAffineTransformation3d::setRotation(float Rx, float Ry, float Rz 
 /* this method sets uses 4-by-4 matrices, but 3-by-3 matrices would be
 enough and better. see NOTE, line 38. */
 {
-  AimsData<float> rx = rotationaroundx(Rx);
-  AimsData<float> ry = rotationaroundy(Ry);
-  AimsData<float> rz = rotationaroundz(Rz);
-  AimsData<float> uselessMatrix_seeLine38( 4, 4 );
-  uselessMatrix_seeLine38 = rz.cross(ry.cross(rx));
+  VolumeRef<float> rx = rotationaroundx(Rx);
+  VolumeRef<float> ry = rotationaroundy(Ry);
+  VolumeRef<float> rz = rotationaroundz(Rz);
+  VolumeRef<float> uselessMatrix_seeLine38( 4, 4 );
+  uselessMatrix_seeLine38 = matrix_product( rz, matrix_product( ry, rx ));
   for( int16_t i=0; i<3; i++ ){
   	for( int16_t j=0; j<3; j++ ){
 			rot()( i, j ) = uselessMatrix_seeLine38( i, j );
@@ -267,7 +267,7 @@ void DecomposedAffineTransformation3d::transAffine(Point3df C)
 // in spite of those IMPROPER terms. see NOTE, line 38.
 
   AffineTransformation3d::Table<float> & m = matrix();
-  setMatrix(_rot.cross( _scaling.cross( _shear ) ));
+  setMatrix( matrix_product( _rot, matrix_product( _scaling, _shear ) ) );
 
   m(0, 3) += C.item(0) - m(0,0)*C.item(0) - m(0,1)*C.item(1) - m(0,2)*C.item(2);
 
