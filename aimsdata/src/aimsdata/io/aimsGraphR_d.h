@@ -108,15 +108,15 @@ namespace aims
     T		*obj = new T;
     Reader<T>	r( fname );
     try
-      {
-	r.read( *obj );
-      }
+    {
+      r.read( *obj );
+    }
     catch( std::exception & e )
-      {
-	std::cerr << e.what() << std::endl;
-	delete obj;
-	return false;
-      }
+    {
+      std::cerr << e.what() << std::endl;
+      delete obj;
+      return false;
+    }
 
     AimsGraphReader			& ap = (AimsGraphReader &) p;
     internal::AimsGraphReader_Private	& ps = *ap._priv;
@@ -128,14 +128,24 @@ namespace aims
     std::map<std::string, std::map<std::string, ProcFunc> >::const_iterator 
       ipcs = pcs.find( f.objectType() );
     if( ipcs == pcs.end() 
-	|| ipcs->second.find( f.dataType() ) == ipcs->second.end() )
+        || ipcs->second.find( f.dataType() ) == ipcs->second.end() )
       ps.postproc.registerProcessType
-	( f.objectType(), f.dataType(), 
-#if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
-	  &defaultInsertFunction<T> );
-#else
-	  &AimsGraphReader::defaultInsertFunction<T> );
-#endif
+        ( f.objectType(), f.dataType(),
+          &AimsGraphReader::defaultInsertFunction<T> );
+
+    // also register my own type because Volume/CartoVolume may be mixed
+    if( f.objectType() != carto::DataTypeCode<T>::objectType()
+        || f.dataType() != carto::DataTypeCode<T>::dataType() )
+    {
+      ipcs = pcs.find( carto::DataTypeCode<T>::objectType() );
+      if( ipcs == pcs.end()
+          || ipcs->second.find( carto::DataTypeCode<T>::dataType() )
+            == ipcs->second.end() )
+        ps.postproc.registerProcessType(
+          carto::DataTypeCode<T>::objectType(),
+          carto::DataTypeCode<T>::dataType(),
+          &AimsGraphReader::defaultInsertFunction<T> );
+    }
 
     info.object = new AimsGraphReader::ObjectWrapper<T>( obj );
     return( true );
@@ -144,7 +154,7 @@ namespace aims
 
   template<class T> bool
   AimsGraphReader::defaultInsertFunction( Process & p, const std::string &, 
-					  Finder & )
+                                          Finder & )
   {
     PostProcessor	& pp = (PostProcessor &) p;
     const ElementInfo	& info = pp.elementInfo();

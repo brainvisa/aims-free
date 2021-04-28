@@ -126,6 +126,7 @@ namespace aims
 
     template<class T> 
     static bool defaultTakeObject( Process &, const std::string &, Finder & );
+    template <typename T> static bool isEmpty( const T & obj );
 
     const ElementInfo & elementInfo() const { return( info ); }
     ElementInfo & elementInfo() { return( info ); }
