@@ -975,12 +975,11 @@ namespace carto
                               const AllocatorContext& ac,
                               const std::vector<size_t> *nstrides )
   {
-
     std::vector<unsigned long long int> strides(Volume<T>::DIM_MAX, 0);
     int i = 0, n = oldSize.size(), nn = VolumeProxy<T>::_size.size();
 
     unsigned long long int stride_max = 0;
-    int i_smax = 1;
+    unsigned long long int total_len = 0;
 
     if( nstrides )
     {
@@ -988,10 +987,9 @@ namespace carto
       {
         strides[i] = (*nstrides)[i];
         if( strides[i] > stride_max )
-        {
           stride_max = strides[i];
-          i_smax = i;
-        }
+        if( strides[i] * VolumeProxy<T>::_size[i] > total_len )
+          total_len = strides[i] * VolumeProxy<T>::_size[i];
       }
     }
 
@@ -999,17 +997,13 @@ namespace carto
     {
       strides[i] = ( i == 0 ? 1 : VolumeProxy<T>::_size[i-1] * stride_max );
       if( strides[i] > stride_max )
-      {
         stride_max = strides[i];
-        i_smax = i;
-      }
+      if( strides[i] * VolumeProxy<T>::_size[i] > total_len )
+        total_len = strides[i] * VolumeProxy<T>::_size[i];
     }
     for( ; i<Volume<T>::DIM_MAX; ++i )
       strides[i] = ( i == nn ? VolumeProxy<T>::_size[i-1] * stride_max
                      : strides[i-1] );
-
-    unsigned long long int total_len
-      = stride_max * VolumeProxy<T>::_size[i_smax];
 
     if ( total_len * sizeof(T) >
          (unsigned long long int) std::numeric_limits< size_t >::max() )
