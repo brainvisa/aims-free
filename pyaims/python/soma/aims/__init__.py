@@ -111,6 +111,7 @@ import os
 import six
 import sys
 import numbers
+import inspect
 
 
 __docformat__ = 'restructuredtext en'
@@ -1006,7 +1007,8 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
                 y.__getstate__ = __fixsipclasses__._aimsdata_getstate
                 y.__setstate__ = __fixsipclasses__._aimsdata_setstate
-                y.__array__ = lambda self: self.volume().__array__()
+                y.__array__ = lambda self, dtype=None: \
+                    self.volume().__array__(dtype=dtype)
 
             if (hasattr(y, 'next')
                     and hasattr(y, '__iter__')
@@ -1017,13 +1019,43 @@ def __fixsipclasses__(classes):
                               'iterator under Python 3'.format(y),
                               DeprecationWarning)
 
-            # useful shortcut: volume.np is handier than np.asarray(volume)
-            if hasattr(y, '__array__') and not hasattr(y, 'np'):
-                y.np = property(lambda self: self.__array__())
-                if not six.PY2:
-                    # we cannot set the __doc__ attribute (or any other
-                    # attribute actually) on a property object in python2
-                    y.np.__doc__ = \
+            # fix the __array__ methods to handle dtype argument
+            if hasattr(y, '__array__'):
+                patch = True
+                try:
+                    if six.PY2:
+                        s = inspect.getargspec(y.__array__)
+                    else:
+                        s = inspect.getfullargspec(y.__array__)
+                    if 'dtype' in s.args:
+                        # dtype is already an argument of __array__:
+                        # don't need a patch
+                        patch = False
+                except TypeError:
+                    pass
+                if patch:
+                    # Moving the method __array__ prevents it from being called
+                    # with the self argument. This is not the case for the
+                    # __call__ method above for instance... I don't understand.
+                    if six.PY2:
+                        y.__oldarray__ = y.__array__
+                        y.__array__ = lambda self, dtype=None: \
+                            self.__oldarray__(self).astype(dtype=dtype,
+                                                           copy=False)
+                    else:
+                        # better fix in python3 (or less bad...)
+                        y.__oldarray__ = functools.partialmethod(y.__array__)
+                        y.__array__ = lambda self, dtype=None: \
+                            self.__oldarray__().astype(dtype=dtype, copy=False)
+                del patch
+
+                # useful shortcut: volume.np is handier than np.asarray(volume)
+                if not hasattr(y, 'np'):
+                    y.np = property(lambda self: self.__array__())
+                    if not six.PY2:
+                        # we cannot set the __doc__ attribute (or any other
+                        # attribute actually) on a property object in python2
+                        y.np.__doc__ = \
 '''The ``np`` property is a shortcut to the ``__array__`` method. Thus::
 
     something.np
