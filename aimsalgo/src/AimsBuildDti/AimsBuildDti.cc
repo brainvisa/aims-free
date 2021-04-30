@@ -113,7 +113,7 @@ int main( int argc, const char *argv[] )
       if ( verbose ) cout << "done" << endl;
     } else {
       if ( verbose )  cout << "using non null T2 image points as mask" << endl;
-      maskIterator = getMaskIterator( amp );
+      maskIterator = getMaskIterator( amp.volume() );
     }
     
     AimsData< AimsVector< float, 6 > > bcoef;
