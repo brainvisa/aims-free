@@ -96,8 +96,8 @@ list< Point4dl > PerfusionAifPoints::search( AimsData< short >& d,
     }
 
   AimsBucket< Void > Vcompo;
-  AimsConnectedComponent( Vcompo, newVol, 
-			  Connectivity::CONNECTIVITY_26_XYZ );
+  AimsConnectedComponent<short>( Vcompo, newVol,
+                                 Connectivity::CONNECTIVITY_26_XYZ );
 
   // Look for the maximum amplitude variations of each connected component
   multimap< short, Point4dl, greater< short > > md;

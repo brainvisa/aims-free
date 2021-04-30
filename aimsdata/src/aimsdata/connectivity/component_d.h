@@ -52,9 +52,10 @@ namespace aims
 
 
   template<typename T, typename O>
-  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::filterInFrame(
+  void ConnectedComponentEngine<carto::VolumeRef<T>,
+                                carto::VolumeRef<O> >::filterInFrame(
     const carto::VolumeRef<T> & cc,
-    carto::VolumeRef<O>& out,
+    carto::VolumeRef<O> out,
     std::map<O, size_t>& valids,
     int t,
     bool verbose )
@@ -91,9 +92,10 @@ namespace aims
 
 
   template<typename T, typename O>
-  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connectedInFrame(
+  void ConnectedComponentEngine<carto::VolumeRef<T>,
+                                carto::VolumeRef<O> >::connectedInFrame(
     const carto::VolumeRef<T>& data,
-    carto::VolumeRef<O>& out,
+    carto::VolumeRef<O> out,
     Connectivity::Type connectivity,
     std::multimap<size_t, O>& compSizes,
     int t,
@@ -203,18 +205,16 @@ namespace aims
 
 
   template<typename T, typename O>
-  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected(
-    const AimsData<T>& adata,
-    AimsData<O>& aout,
+  void ConnectedComponentEngine<carto::VolumeRef<T>,
+                                carto::VolumeRef<O> >::connected(
+    const carto::VolumeRef<T>& data,
+    carto::VolumeRef<O> out,
     Connectivity::Type connectivity,
     std::map<O, size_t>& valids,
     const T & backg, bool bin, 
     size_t minSize, size_t maxSize,
     size_t numMax, bool verbose )
   {
-    const carto::VolumeRef<T> data = adata;
-    carto::VolumeRef<O> out = aout;
-
     std::multimap<size_t, size_t> compSizes;
     int t=0;
     int dimX = data->getSizeX();
@@ -228,7 +228,7 @@ namespace aims
       // before filtering
       carto::VolumeRef<size_t> cc( dimX, dimY, dimZ );
 
-      ConnectedComponentEngine<AimsData<T>, AimsData<size_t> >
+      ConnectedComponentEngine<carto::VolumeRef<T>, carto::VolumeRef<size_t> >
         ::connectedInFrame( data, 
                             cc,
                             connectivity, 
@@ -257,7 +257,7 @@ namespace aims
         }
       }
 
-      ConnectedComponentEngine<AimsData<size_t>, AimsData<O> >
+      ConnectedComponentEngine<carto::VolumeRef<size_t>, carto::VolumeRef<O> >
         ::filterInFrame( cc, out, valids, t, verbose );
 
       if( verbose )
@@ -268,13 +268,12 @@ namespace aims
   
   template <typename T> 
   void AimsConnectedComponent( AimsBucket<Void>& components,
-                               const AimsData<T>& adata,
+                               const carto::VolumeRef<T>& data,
                                Connectivity::Type connectivity, 
                                const T & backgrnd, bool bin, 
                                size_t minsize, size_t maxsize,
                                size_t maxcomp, bool verbose )
   {
-    const carto::VolumeRef<T> data = adata;
     AimsBucket<Void>			*cbk;
     std::unique_ptr<AimsBucket<Void> >	abk;
     if( minsize == 0 && maxsize == 0 && maxcomp == 0 )
@@ -543,15 +542,14 @@ namespace aims
 
 
   template <typename T> 
-  AimsData<int16_t> AimsLabeledConnectedComponent(
+  carto::VolumeRef<int16_t> AimsLabeledConnectedComponent(
     AimsBucket<Void>& components,
-    const AimsData<T>& adata,
+    const carto::VolumeRef<T>& data,
     Connectivity::Type connectivity,
     const T & backgrnd, bool bin,
     size_t minsize, size_t maxsize,
     size_t maxcomp, bool verbose )
   {
-    const carto::VolumeRef<T> data = adata;
     AimsBucket<Void>      *cbk;
     // added to return the labels image
     carto::VolumeRef<int16_t> labelImage( data->getSizeX(), data->getSizeY(),

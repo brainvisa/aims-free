@@ -11,22 +11,22 @@ namespace aims
   {
 
     public :
-      static void filterInFrame( const AimsData<T>& cc,
-                                 AimsData<O>& out,
+      static void filterInFrame( const VolumeRef<T>& cc,
+                                 VolumeRef<O>& out,
                                  std::map<O, size_t>& valids,
                                  int t,
                                  bool verbose = true );
 
-      static void connectedInFrame( const AimsData<T>& data,
-                                    AimsData<O>& out,
+      static void connectedInFrame( const VolumeRef<T>& data,
+                                    VolumeRef<O>& out,
                                     Connectivity::Type connectivity,
                                     std::multimap<size_t, O>& compSizes,
                                     int t,
                                     const T & backgrnd = 0, bool bin = true,
                                     bool verbose = true );
 
-      static void connected( const AimsData<T>& data,
-                             AimsData<O>& out,
+      static void connected( const VolumeRef<T>& data,
+                             VolumeRef<O>& out,
                              aims::Connectivity::Type connectivity,
                              std::map<O, size_t>& valids,
                              const T & backgrnd = 0, bool bin = true,
@@ -34,8 +34,8 @@ namespace aims
                              size_t numMax = 0, bool verbose = true );
 
 
-      static void connected( const AimsData<T>& data,
-                             AimsData<O>& out,
+      static void connected( const VolumeRef<T>& data,
+                             VolumeRef<O>& out,
                              aims::Connectivity::Type connectivity,
                              const T & backgrnd = 0, bool bin = true,
                              size_t minSize = 0, size_t maxSize = 0,
@@ -47,7 +47,7 @@ namespace aims
 */
 
 %#if SIP_VERSION < 0x04130e%
-  void AimsConnectedComponent( AimsData_%Template1typecode% & data,
+  void AimsConnectedComponent( rc_ptr_Volume_%Template1typecode% data,
                                aims::Connectivity::Type connectivity,
                                std::map<%Template1%, size_t>& valids,
                                const %Template1% & backgrnd = 0,
@@ -64,7 +64,7 @@ namespace aims
 
   Parameters
   ----------
-  data: AimsData_%Template1typecode% instance
+  data: Volume_%Template1typecode% instance
       data will be modified during the process.
   connectivity: Connectivity.Type enum code
   valids: dict %Template1%: size_t
@@ -78,7 +78,7 @@ namespace aims
 
 %End
 %#else%
-  void AimsConnectedComponent( AimsData_%Template1typecode% & data,
+  void AimsConnectedComponent( rc_ptr_Volume_%Template1typecode% data,
                                aims::Connectivity::Type connectivity,
                                map_%Template1typecode%_SIZE_T & valids,
                                const %Template1% & backgrnd = 0,
@@ -94,21 +94,25 @@ namespace aims
 
   Parameters
   ----------
-  data: AimsData_%Template1typecode% instance
+  data: Volume_%Template1typecode% instance
       data will be modified during the process.
   connectivity: Connectivity.Type enum code
   valids: dict %Template1%: size_t
   backgrnd: %Template1%
   bin: bool (optional)
-  minsize: size_t (optional)
+  minSize: size_t (optional)
   numMax: size_t (optional)
   verbose: bool (optional)
 
 
 %End
 %#endif%
+%MethodCode
+  aims::AimsConnectedComponent<%Template1%>(
+    *a0, a1, *a2, a3, a4, a5, a6, a7);
+%End
 
-  void AimsConnectedComponent( AimsData_%Template1typecode% & data,
+  void AimsConnectedComponent( rc_ptr_Volume_%Template1typecode% data,
                                aims::Connectivity::Type connectivity,
                                const %Template1% & backgrnd = 0,
                                bool bin = true,
@@ -123,17 +127,21 @@ namespace aims
 
   Parameters
   ----------
-  data: AimsData_%Template1typecode% instance
+  data: Volume_%Template1typecode% instance
       data will be modified during the process.
   connectivity: Connectivity.Type enum code
   backgrnd: %Template1%
   bin: bool (optional)
   minsize: size_t (optional)
-  maxsize: size_t (optional)
+  maxSize: size_t (optional)
   numMax: size_t (optional)
   verbose: bool (optional)
 
 
+%End
+%MethodCode
+  aims::AimsConnectedComponent<%Template1%>(
+    *a0, a1, a2, a3, a4, a5, a6, a7 );
 %End
 
   void AimsConnectedComponent( BucketMap_%Template1typecode% & data,
@@ -167,7 +175,7 @@ namespace aims
 
 /*
   void AimsConnectedComponent( AimsBucket_%Template1typecode% & component,
-                               const AimsData_%Template1typecode%& data,
+                               const rc_ptr_Volume_%Template1typecode%& data,
                                aims::Connectivity::Type connectivity,
                                const %Template1% & backgrnd = 0,
                                bool bin = true,
@@ -182,9 +190,9 @@ namespace aims
                                size_t minsize = 0, size_t maxsize = 0, 
                                size_t maxcomp = 0, bool verbose = true );
 
-  AimsData_S16 AimsLabeledConnectedComponent(
+  rc_ptr_Volume_S16 AimsLabeledConnectedComponent(
     AimsBucket_VOID & component,
-    const AimsData_%Template1typecode% & data,
+    const rc_ptr_Volume_%Template1typecode% & data,
     aims::Connectivity::Type connectivity,
     const %Template1% & backgrnd = 0,
     bool bin = true,

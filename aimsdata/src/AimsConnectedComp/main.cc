@@ -58,7 +58,7 @@ namespace
 
 
   template <typename T> 
-  class datatype<AimsData<T> >
+  class datatype<VolumeRef<T> >
   {
   public:
     typedef T data_type;
@@ -194,14 +194,14 @@ CCConverter<T>::CCConverter()
   : CCProcess()
 {
   
-  registerProcessType( "Volume", "U8", &DataConverter<AimsData<T>, AimsData<uint8_t> >::doit );
-  registerProcessType( "Volume", "S8", &DataConverter<AimsData<T>, AimsData<int8_t> >::doit );
-  registerProcessType( "Volume", "U16", &DataConverter<AimsData<T>, AimsData<uint16_t> >::doit );
-  registerProcessType( "Volume", "S16", &DataConverter<AimsData<T>, AimsData<int16_t> >::doit );
-  registerProcessType( "Volume", "U32", &DataConverter<AimsData<T>, AimsData<uint32_t> >::doit );
-  registerProcessType( "Volume", "S32", &DataConverter<AimsData<T>, AimsData<int32_t> >::doit );
-  registerProcessType( "Volume", "FLOAT", &DataConverter<AimsData<T>, AimsData<float> >::doit );
-  registerProcessType( "Volume", "DOUBLE", &DataConverter<AimsData<T>, AimsData<double> >::doit );
+  registerProcessType( "Volume", "U8", &DataConverter<carto::VolumeRef<T>, carto::VolumeRef<uint8_t> >::doit );
+  registerProcessType( "Volume", "S8", &DataConverter<VolumeRef<T>, VolumeRef<int8_t> >::doit );
+  registerProcessType( "Volume", "U16", &DataConverter<VolumeRef<T>, VolumeRef<uint16_t> >::doit );
+  registerProcessType( "Volume", "S16", &DataConverter<VolumeRef<T>, VolumeRef<int16_t> >::doit );
+  registerProcessType( "Volume", "U32", &DataConverter<VolumeRef<T>, VolumeRef<uint32_t> >::doit );
+  registerProcessType( "Volume", "S32", &DataConverter<VolumeRef<T>, VolumeRef<int32_t> >::doit );
+  registerProcessType( "Volume", "FLOAT", &DataConverter<VolumeRef<T>, VolumeRef<float> >::doit );
+  registerProcessType( "Volume", "DOUBLE", &DataConverter<VolumeRef<T>, VolumeRef<double> >::doit );
 }
 
 template <typename T, typename O>
@@ -217,8 +217,8 @@ bool DataConverter<T, O>::doit( Process & p, const string & /*filename*/, Finder
   
   // Allocate output volume using output data_type
   cout << "output file: " << c.out << " is processed as " << finder.objectType() << " / " << finder.dataType() << " (data type changed)" << endl << flush;
-  O out(data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
-  out.volume()->header() = data.volume()->header();
+  O out( data->getSize() );
+  out->header() = data->header();
 
   cout << "minsize: " << c.minSize << ", maxsize: " << c.maxSize << ", nummax: " << c.numMax << endl;
   ConnectedComponentEngine<T, O>::connected( data, out, c.connectivity, 
