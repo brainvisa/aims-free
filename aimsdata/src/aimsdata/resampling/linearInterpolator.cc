@@ -91,8 +91,8 @@ bool LinearInterpolatorFactory::createInterpolator( Process & p,
                                                     const string & filename, 
                                                     Finder & finder )
 {
-  AimsData<T> image;
-  Reader< AimsData<T> > r( filename );
+  VolumeRef<T> image;
+  Reader< VolumeRef<T> > r( filename );
   r.setMode( MAP_RO );
   string format = finder.format();
   if( ! r.read( image, 0, &format ) ) {
@@ -132,6 +132,40 @@ template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const AimsData<float> & );
 template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const AimsData<double> & );
+
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const VolumeRef<uint8_t> & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const VolumeRef<int8_t> & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const VolumeRef<uint16_t> & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const VolumeRef<int16_t> & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const VolumeRef<uint32_t> & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const VolumeRef<int32_t> & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const VolumeRef<float> & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const VolumeRef<double> & );
+
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const rc_ptr<Volume<uint8_t> > & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const rc_ptr<Volume<int8_t> > & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const rc_ptr<Volume<uint16_t> > & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const rc_ptr<Volume<int16_t> > & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const rc_ptr<Volume<uint32_t> > & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const rc_ptr<Volume<int32_t> > & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const rc_ptr<Volume<float> > & );
+template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const rc_ptr<Volume<double> > & );
 
 
   //--------------------------//
