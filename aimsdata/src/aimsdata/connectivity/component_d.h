@@ -53,15 +53,12 @@ namespace aims
 
   template<typename T, typename O>
   void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::filterInFrame(
-    const AimsData<T>& acc,
-    AimsData<O>& aout,
+    const carto::VolumeRef<T> & cc,
+    carto::VolumeRef<O>& out,
     std::map<O, size_t>& valids,
     int t,
     bool verbose )
   {
-    const carto::VolumeRef<T> cc = acc.volume();
-    carto::VolumeRef<O> out = aout.volume();
-
     int x = 0, y = 0, z = 0;
     
     if( verbose )
@@ -95,8 +92,8 @@ namespace aims
 
   template<typename T, typename O>
   void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connectedInFrame(
-    const AimsData<T>& adata,
-    AimsData<O>& aout,
+    const carto::VolumeRef<T>& data,
+    carto::VolumeRef<O>& out,
     Connectivity::Type connectivity,
     std::multimap<size_t, O>& compSizes,
     int t,
@@ -104,9 +101,6 @@ namespace aims
     bool bin,
     bool verbose )
   {
-    const carto::VolumeRef<T> data = adata.volume();
-    carto::VolumeRef<O> out = aout;
-
     int x = 0, y = 0, z = 0, n = 0;
     std::vector<int> dims = data->getSize();
     int dimX = dims[0];
@@ -233,11 +227,10 @@ namespace aims
       // Get Volume of size_t to avoid risk of overflow in char types
       // before filtering
       carto::VolumeRef<size_t> cc( dimX, dimY, dimZ );
-      AimsData<size_t> acc( cc ); // temp FIXME
 
       ConnectedComponentEngine<AimsData<T>, AimsData<size_t> >
         ::connectedInFrame( data, 
-                            acc,
+                            cc,
                             connectivity, 
                             compSizes,
                             t,
@@ -265,7 +258,7 @@ namespace aims
       }
 
       ConnectedComponentEngine<AimsData<size_t>, AimsData<O> >
-        ::filterInFrame( cc, aout, valids, t, verbose );
+        ::filterInFrame( cc, out, valids, t, verbose );
 
       if( verbose )
         std::cout << "after filtering: " << valids.size() << " components\n";

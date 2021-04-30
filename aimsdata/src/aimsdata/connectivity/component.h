@@ -63,20 +63,6 @@ namespace aims
   {
 
     public :
-      static void filterInFrame( const carto::VolumeRef<T>& cc,
-                                 carto::VolumeRef<O>& out,
-                                 std::map<O, size_t>& valids,
-                                 int t,
-                                 bool verbose = true );
-
-      static void connectedInFrame( const carto::VolumeRef<T>& data,
-                                    carto::VolumeRef<O>& out,
-                                    Connectivity::Type connectivity,
-                                    std::multimap<size_t, O>& compSizes,
-                                    int t,
-                                    const T & backgrnd = 0, bool bin = true,
-                                    bool verbose = true );
-
       static void connected( const carto::VolumeRef<T>& data,
                              carto::VolumeRef<O>& out,
                              aims::Connectivity::Type connectivity,
@@ -93,46 +79,61 @@ namespace aims
                              size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0,
                              bool verbose = true );
 
-    private:
+      static void filterInFrame( const carto::VolumeRef<T>& cc,
+                                 carto::VolumeRef<O>& out,
+                                 std::map<O, size_t>& valids,
+                                 int t,
+                                 bool verbose = true );
+      static void connectedInFrame( const carto::VolumeRef<T>& data,
+                                    carto::VolumeRef<O>& out,
+                                    Connectivity::Type connectivity,
+                                    std::multimap<size_t, O>& compSizes,
+                                    int t,
+                                    const T & backgrnd = 0, bool bin = true,
+                                    bool verbose = true );
+
+  private:
       ConnectedComponentEngine();
+
   };
   */
 
   // Specialization
   template <typename T, typename O>
-  class ConnectedComponentEngine<AimsData<T>, AimsData<O> > {
+  class ConnectedComponentEngine<AimsData<T>, AimsData<O> >
+  {
 
     public :
-      static void filterInFrame( const AimsData<T>& cc, 
-                                 AimsData<O>& out,
+
+      static void connected( const AimsData<T>& data,
+                             AimsData<O>& out,
+                             aims::Connectivity::Type connectivity,
+                             std::map<O, size_t>& valids,
+                             const T & backgrnd = 0, bool bin = true,
+                             size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0,
+                             bool verbose = true );
+
+
+      static void connected( const AimsData<T>& data,
+                             AimsData<O>& out,
+                             aims::Connectivity::Type connectivity,
+                             const T & backgrnd = 0, bool bin = true,
+                             size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0,
+                             bool verbose = true );
+
+      static void filterInFrame( const carto::VolumeRef<T>& cc,
+                                 carto::VolumeRef<O>& out,
                                  std::map<O, size_t>& valids,
                                  int t,
                                  bool verbose = true );
-                                 
-      static void connectedInFrame( const AimsData<T>& data, 
-                                    AimsData<O>& out,
-                                    Connectivity::Type connectivity, 
-                                    std::multimap<size_t, O>& compSizes, 
+      static void connectedInFrame( const carto::VolumeRef<T>& data,
+                                    carto::VolumeRef<O>& out,
+                                    Connectivity::Type connectivity,
+                                    std::multimap<size_t, O>& compSizes,
                                     int t,
-                                    const T & backgrnd = 0, bool bin = true, 
+                                    const T & backgrnd = 0, bool bin = true,
                                     bool verbose = true );
-                                                                              
-      static void connected( const AimsData<T>& data, 
-                             AimsData<O>& out, 
-                             aims::Connectivity::Type connectivity,
-                             std::map<O, size_t>& valids, 
-                             const T & backgrnd = 0, bool bin = true, 
-                             size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0, 
-                             bool verbose = true );
-                             
-    
-      static void connected( const AimsData<T>& data, 
-                             AimsData<O>& out, 
-                             aims::Connectivity::Type connectivity,
-                             const T & backgrnd = 0, bool bin = true, 
-                             size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0, 
-                             bool verbose = true );
-                                  
+
     private:
       ConnectedComponentEngine();
   };
