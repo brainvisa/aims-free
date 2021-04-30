@@ -41,6 +41,7 @@
 #include <aims/data/data.h>
 #include <aims/utility/threshold.h>
 #include <aims/bucket/bucket.h>
+#include <cartobase/containers/nditerator.h>
 #include <map>
 #include <queue>
 #include <iostream>
@@ -49,41 +50,53 @@
 namespace aims
 {
 
-    
-//   template<typename T, typename O>
-//   std::map<O, size_t> ConnectedComponentEngine<AimsData<T>, AimsData<O> >::sizes( AimsData<T>& data, bool verbose )
-//   {
-//   }
+
   template<typename T, typename O>
   void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::filterInFrame(
-    const AimsData<T>& cc,
-    AimsData<O>& out,
+    const AimsData<T>& acc,
+    AimsData<O>& aout,
     std::map<O, size_t>& valids,
     int t,
     bool verbose )
   {
+    const carto::VolumeRef<T> cc = acc.volume();
+    carto::VolumeRef<O> out = aout.volume();
+
     int x = 0, y = 0, z = 0;
     
     if( verbose )
       std::cout << "filtering...\n";
 
-    ForEach3d( out, x, y, z )
-      out(x, y, z, t) = 0 ;
+    out->fill( 0 );
 
     typename std::map<O, size_t>::iterator  is, es = valids.end();
 
-    ForEach3d( cc, x, y, z )
+    carto::const_line_NDIterator<T> it( &cc->at( 0 ), cc->getSize(),
+                                        cc->getStrides() );
+    carto::line_NDIterator<O> oit( &out->at( 0, 0, 0, t ), out->getSize(),
+                                   out->getStrides() );
+    const T *p, *pn;
+    O* o;
+
+    for( ; !it.ended(); ++it, ++oit )
     {
-      is = valids.find( (O) cc( x, y, z ) );
-      if( is != es )
-        out( x, y, z, t ) = (O) is->second; // RISK OF OVERFLOW on char types
+      p = &*it;
+      o = &*oit;
+      for( pn=p + it.line_length(); p!=pn;
+           it.inc_line_ptr( p ), oit.inc_line_ptr( o ) )
+      {
+        is = valids.find( (O) *p );
+        if( is != es )
+          *o = (O) is->second; // RISK OF OVERFLOW on char types
+      }
     }
   }
-  
+
+
   template<typename T, typename O>
   void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connectedInFrame(
-    const AimsData<T>& data,
-    AimsData<O>& out,
+    const AimsData<T>& adata,
+    AimsData<O>& aout,
     Connectivity::Type connectivity,
     std::multimap<size_t, O>& compSizes,
     int t,
@@ -91,27 +104,44 @@ namespace aims
     bool bin,
     bool verbose )
   {
-    int x = 0, y = 0, z = 0, n = 0;
-    int dimX = data.dimX();
-    int dimY = data.dimY();
-    int dimZ = data.dimZ();
+    const carto::VolumeRef<T> data = adata.volume();
+    carto::VolumeRef<O> out = aout;
 
-    out = 0;
+    int x = 0, y = 0, z = 0, n = 0;
+    std::vector<int> dims = data->getSize();
+    int dimX = dims[0];
+    int dimY = dims[1];
+    int dimZ = dims[2];
+
+    out->fill( 0 );
 
     //
     // boolean volume to say if a voxel is already used
     //
 
-    AimsData<byte> flag( dimX, dimY, dimZ );
+    carto::Volume<byte> flag( dimX, dimY, dimZ );
 
-    flag = false;
-    ForEach3d( flag, x, y, z )
-      if ( data( x, y, z, t ) == backg )
-        flag( x, y, z ) = true;
+    flag.fill( false );
+    carto::line_NDIterator<byte> bit( &flag.at(0), flag.getSize(),
+                                      flag.getStrides() );
+    carto::const_line_NDIterator<T> it( &data->at( 0, 0, 0, t ),
+                                        data->getSize(),
+                                        data->getStrides() );
 
-    Connectivity cd( data.oLine(), data.oSlice(), connectivity );
-    //Connectivity cf( flag.oLine(), flag.oSlice(), connectivity );
+    byte *bp, *bpn;
+    const T *p;
 
+    for( ; !bit.ended(); ++bit )
+    {
+      bp = &*bit;
+      for( bpn=bp + bit.line_length(); bp!=bpn;
+          bit.inc_line_ptr( bp ), it.inc_line_ptr( p ) )
+        if( *p == backg )
+          *bp = true;
+    }
+
+    Connectivity cd( data->getStrides()[1], data->getStrides()[2],
+                     connectivity );
 
     O    label = 1;
     Point3dl   pos, newpos;
@@ -180,30 +210,34 @@ namespace aims
 
   template<typename T, typename O>
   void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected(
-    const AimsData<T>& data,
-    AimsData<O>& out,
+    const AimsData<T>& adata,
+    AimsData<O>& aout,
     Connectivity::Type connectivity,
     std::map<O, size_t>& valids,
     const T & backg, bool bin, 
     size_t minSize, size_t maxSize,
     size_t numMax, bool verbose )
   {
+    const carto::VolumeRef<T> data = adata;
+    carto::VolumeRef<O> out = aout;
+
     std::multimap<size_t, size_t> compSizes;
     int t=0;
-    int dimX = data.dimX();
-    int dimY = data.dimY();
-    int dimZ = data.dimZ();
-    int dimT = data.dimT() ;
+    int dimX = data->getSizeX();
+    int dimY = data->getSizeY();
+    int dimZ = data->getSizeZ();
+    int dimT = data->getSizeT() ;
 
     for( t = 0 ; t < dimT ; ++t )
     {
-      // Get AimsData of size_t to avoid risk of overflow in char types
+      // Get Volume of size_t to avoid risk of overflow in char types
       // before filtering
-      AimsData<size_t> cc( dimX, dimY, dimZ );
+      carto::VolumeRef<size_t> cc( dimX, dimY, dimZ );
+      AimsData<size_t> acc( cc ); // temp FIXME
 
       ConnectedComponentEngine<AimsData<T>, AimsData<size_t> >
         ::connectedInFrame( data, 
-                            cc, 
+                            acc,
                             connectivity, 
                             compSizes,
                             t,
@@ -231,7 +265,7 @@ namespace aims
       }
 
       ConnectedComponentEngine<AimsData<size_t>, AimsData<O> >
-        ::filterInFrame( cc, out, valids, t, verbose );
+        ::filterInFrame( cc, aout, valids, t, verbose );
 
       if( verbose )
         std::cout << "after filtering: " << valids.size() << " components\n";
@@ -241,52 +275,66 @@ namespace aims
   
   template <typename T> 
   void AimsConnectedComponent( AimsBucket<Void>& components,
-                               const AimsData<T>& data,
+                               const AimsData<T>& adata,
                                Connectivity::Type connectivity, 
                                const T & backgrnd, bool bin, 
                                size_t minsize, size_t maxsize,
                                size_t maxcomp, bool verbose )
   {
+    const carto::VolumeRef<T> data = adata;
     AimsBucket<Void>			*cbk;
     std::unique_ptr<AimsBucket<Void> >	abk;
     if( minsize == 0 && maxsize == 0 && maxcomp == 0 )
       cbk = &components;
     else
+    {
 
-      {
-
-        abk.reset( new AimsBucket<Void> );
-        cbk = abk.get();
-      }
+      abk.reset( new AimsBucket<Void> );
+      cbk = abk.get();
+    }
     AimsBucket<Void>	& component = *cbk;
 
     int x=0, y=0, z=0, t=0, n=0;
 
-    int dimX = data.dimX();
-    int dimY = data.dimY();
-    int dimZ = data.dimZ();
-    int dimT = data.dimT() ;
-
+    int dimX = data->getSizeX();
+    int dimY = data->getSizeY();
+    int dimZ = data->getSizeZ();
+    int dimT = data->getSizeT();
 
 
     //
     // boolean volume to say if a voxel is already used
     //
 
-    for( t = 0 ; t < dimT ; ++t ){
-      AimsData<byte> flag( dimX, dimY, dimZ );
-      flag = false;
-      ForEach3d( flag, x, y, z )
-        if ( data( x, y, z, t ) == backgrnd )
-          flag( x, y, z ) = true;
+    for( t = 0 ; t < dimT ; ++t )
+    {
+      carto::VolumeRef<byte> flag( dimX, dimY, dimZ );
+      flag->fill( false );
+      carto::line_NDIterator<byte> bit( &flag->at( 0 ), flag->getSize(),
+                                        flag->getStrides() );
+      carto::const_line_NDIterator<T> it( &data->at( 0, 0, 0, t ),
+                                          data->getSize(),
+                                          data->getStrides() );
+      byte *bp;
+      const T *p, *pn;
 
-      Connectivity cd( data.oLine(), data.oSlice(), connectivity );
+      for( ; !bit.ended(); ++bit, ++it )
+      {
+        p = &*it;
+        bp = &*bit;
+        for( pn=p + it.line_length(); p!=pn;
+            it.inc_line_ptr( p ), bit.inc_line_ptr( bp ) )
+          if( *p == backgrnd )
+            *bp = true;
+      }
+
+      Connectivity cd( data->getStrides()[1], data->getStrides()[2],
+                       connectivity );
       //Connectivity cf( flag.oLine(), flag.oSlice(), connectivity );
       size_t					label = 1;
-      AimsBucketItem<Void>			item,newItem;
+      AimsBucketItem<Void>		item,newItem;
       std::queue< AimsBucketItem< Void > >	que;
       T						val;
-
 
 
       //
@@ -502,22 +550,24 @@ namespace aims
 
 
   template <typename T> 
-  AimsData<int16_t> AimsLabeledConnectedComponent( AimsBucket<Void>& components,
-                                                   const AimsData<T>& data,
-                                                   Connectivity::Type connectivity, 
-                                                   const T & backgrnd, bool bin, 
-                                                   size_t minsize, size_t maxsize,
-                                                   size_t maxcomp, bool verbose )
+  AimsData<int16_t> AimsLabeledConnectedComponent(
+    AimsBucket<Void>& components,
+    const AimsData<T>& adata,
+    Connectivity::Type connectivity,
+    const T & backgrnd, bool bin,
+    size_t minsize, size_t maxsize,
+    size_t maxcomp, bool verbose )
   {
+    const carto::VolumeRef<T> data = adata;
     AimsBucket<Void>      *cbk;
-//     ajout  pour retourner l'image de labels des composantes
-    AimsData<int16_t> labelImage (data.dimX(), data.dimY(), data.dimZ());
-    labelImage = 0;
+    // added to return the labels image
+    carto::VolumeRef<int16_t> labelImage( data->getSizeX(), data->getSizeY(),
+                                          data->getSizeZ(), data->getSizeT() );
+    labelImage->fill( 0 );
     std::unique_ptr<AimsBucket<Void> >  abk;
     if( minsize == 0 && maxsize == 0 && maxcomp == 0 )
       cbk = &components;
     else
-
     {
 
       abk.reset( new AimsBucket<Void> );
@@ -527,26 +577,40 @@ namespace aims
 
     int x=0, y=0, z=0, t=0, n=0;
 
-    int dimX = data.dimX();
-    int dimY = data.dimY();
-    int dimZ = data.dimZ();
-    int dimT = data.dimT() ;
-
-
+    int dimX = data->getSizeX();
+    int dimY = data->getSizeY();
+    int dimZ = data->getSizeZ();
+    int dimT = data->getSizeT();
 
     
-//     boolean volume to say if a voxel is already used
+    //     boolean volume to say if a voxel is already used
     
 
-    for( t = 0 ; t < dimT ; ++t ){
-      AimsData<byte> flag( dimX, dimY, dimZ );
-      flag = false;
-      ForEach3d( flag, x, y, z )
-          if ( data( x, y, z, t ) == backgrnd )
-          flag( x, y, z ) = true;
+    for( t = 0 ; t < dimT ; ++t )
+    {
+      carto::VolumeRef<byte> flag( dimX, dimY, dimZ );
+      flag->fill( false );
+      carto::line_NDIterator<byte> bit( &flag->at( 0 ), flag->getSize(),
+                                        flag->getStrides() );
+      carto::const_line_NDIterator<T> it( &data->at( 0, 0, 0, t ),
+                                          data->getSize(),
+                                          data->getStrides() );
+      byte *bp;
+      const T *p, *pn;
+      for( ; !bit.ended(); ++it, ++bit )
+      {
+        p = &*it;
+        bp = &*bit;
+        for( pn=p + it.line_length(); p!=pn;
+            it.inc_line_ptr( p ), bit.inc_line_ptr( bp ) )
+          if( *p == backgrnd )
+            *bp = true;
+      }
 
-      Connectivity cd( data.oLine(), data.oSlice(), connectivity );
-      Connectivity cf( flag.oLine(), flag.oSlice(), connectivity );
+      Connectivity cd( data->getStrides()[1], data->getStrides()[2],
+                       connectivity );
+      Connectivity cf( flag->getStrides()[1], flag->getStrides()[2],
+                       connectivity );
       size_t          label = 1;
       AimsBucketItem<Void>      item,newItem;
       std::queue< AimsBucketItem< Void > >  que;
