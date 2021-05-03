@@ -389,6 +389,21 @@ namespace carto
     template <typename OUTP>
     Volume<OUTP> copyStructure() const;
 
+    /// Copy voxels values from another volume.
+    /// pos is the position into the destination (this) volume, and defaults
+    /// to 0.
+    /// Contrarily to the = operator, the destination (this) volume is not
+    /// reallocated or reshaped, and its header is left unchanged.
+    void copySubVolume( const Volume<T> & source,
+                        const std::vector<int> & pos = std::vector<int>() );
+    /// Copy voxels values from another volume
+    /// pos is the position into the destination (this) volume, and defaults
+    /// to 0.
+    /// Contrarily to the = operator, the destination (this) volume is not
+    /// reallocated or reshaped, and its header is left unchanged.
+    void copySubVolume( const rc_ptr<Volume<T> > & source,
+                        const std::vector<int> & pos = std::vector<int>() );
+
     /// Cast to Volume of different datatype
     template <typename OUTP>
     operator Volume<OUTP>() const;

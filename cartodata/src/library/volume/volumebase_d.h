@@ -47,6 +47,7 @@
 #include <cartobase/object/object.h>
 #include <cartobase/object/property.h>
 #include <cartobase/object/propertyfilter.h>
+#include <cartobase/containers/nditerator.h>
 //--- soma-io ----------------------------------------------------------------
 #include <soma-io/allocator/allocator.h>
 //--- std --------------------------------------------------------------------
@@ -872,6 +873,46 @@ namespace carto
 
     return *this;
 
+  }
+
+  template <typename T>
+  void Volume<T>::copySubVolume( const Volume<T> & source,
+                                 const std::vector<int> & pos )
+  {
+    std::vector<int> size = this->getSize();
+    std::vector<int> osize = source.getSize();
+    int i;
+
+    for( i=0; i<size.size() && i<osize.size(); ++i )
+    {
+      int ip = 0;
+      if( pos.size() > i )
+        ip = pos[i];
+      size[i] = std::min( size[i] - ip, osize[i] );
+    }
+    for( ; i<size.size(); ++i )
+      size[i] = 1;
+
+    line_NDIterator<T> it( &at( pos ), size, this->getStrides() );
+    const_line_NDIterator<T> oit( &source.at( 0 ), size, source.getStrides() );
+    T *p, *pn;
+    const T *op;
+
+    for( ; !it.ended(); ++it, ++oit )
+    {
+      p = &*it;
+      op = &*oit;
+      for( pn=p + it.line_length(); p!=pn;
+           it.inc_line_ptr( p ), oit.inc_line_ptr( op ) )
+        *p = *op;
+    }
+  }
+
+  template <typename T>
+  void Volume<T>::copySubVolume( const rc_ptr<Volume<T> > & source,
+                                 const std::vector<int> & pos )
+  {
+    copySubVolume( *source, pos );
   }
 
   template < typename T >
