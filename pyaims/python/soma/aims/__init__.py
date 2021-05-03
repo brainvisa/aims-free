@@ -1154,12 +1154,7 @@ def __AffineTransformation3dFromMatrix(self, value):
     if value.shape[0] == 3:
         numpy.asarray(self.affine())[:3, :, 0, 0] = value
     else:
-        print('fromMatrix 4x4:', value)
         numpy.asarray(self.affine())[:, :, 0, 0] = value
-        print('array:', self.affine())
-    #self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
-        #= value[0:3, 0:3]
-    #self.translation().arraydata()[:] = value[0:3, 3].flatten()
 
 
 def __AffineTransformation3d__init__(self, *args):
