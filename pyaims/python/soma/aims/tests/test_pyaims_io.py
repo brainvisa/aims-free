@@ -90,7 +90,8 @@ class TestPyaimsIO(unittest.TestCase):
                 return '_t0000_s0'
             else:
                 return '_0000'
-        suffixes = {'.dcm': '*', '.tiff': sliced_suffix}
+        suffixes = {'.dcm': '*', '.tiff': sliced_suffix, '.jpg': sliced_suffix,
+                    '.bmp': sliced_suffix}
         suffix = suffixes.get(format, '')
         if not isinstance(suffix, str):
             suffix = suffix(vol)
@@ -138,6 +139,7 @@ class TestPyaimsIO(unittest.TestCase):
 
         # re-read it
         fname = self.file_name(vol, dtype, format)
+        #print('re-read:', fname, file=sys.stderr)
         vol2_name = os.path.basename(fname) + ' (re-read)'
         vol2 = aims.read(fname)
 
@@ -201,8 +203,9 @@ class TestPyaimsIO(unittest.TestCase):
                                            'patially written', thresh,
                                            rel_thresh))
             # compare a part of the original volume
-            vol2 = aims.VolumeView(vol, (0, 0, 0, 0), (10, 10, 5, 1))
-            vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), (10, 10, 5, 1))
+            view_size = [min(x, s) for x, s in zip((10, 10, 5, 1), vol.shape)]
+            vol2 = aims.VolumeView(vol, (0, 0, 0, 0), view_size)
+            vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), view_size)
             self.assertTrue(compare_images(vol4, vol2,
                                            'sub-volume %s (write, format %s)'
                                            % (aims.typeCode(vol), format),
@@ -685,7 +688,24 @@ class TestPyaimsIO(unittest.TestCase):
                 
             if self.verbose:
                 print()
-        
+
+    def test_io_with_strides(self):
+        #formats = ['.nii', '.ima', '.tiff', '.mnc', '.v', '.jpg', '.bmp']
+        formats = ['.nii', '.ima', '.mnc']
+        failing_files = set()
+        view = ((3, 1, 0, 0), (3, 3, 1, 1),
+                (4, 2, 1, 0), (3, 3, 1, 1))
+        options = {}
+
+        for format in formats:
+            arr = np.arange(100, dtype=np.int16).reshape((10, 5, 2, 1))
+            vol = aims.Volume(arr)
+            vol.header()['voxel_size'] = [0.8, 0.7, 0.6, 1.]
+            failing_files.update(self.use_format(vol, format, view, options))
+        if failing_files:
+            raise RuntimeError('There are still open files: %s'
+                % repr(failing_files) )
+
     def tearDown(self):
         if self.debug:
             print('leaving files in', self.work_dir)
