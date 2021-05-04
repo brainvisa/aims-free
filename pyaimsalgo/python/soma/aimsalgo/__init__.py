@@ -66,6 +66,8 @@ def ResamplerFactory(volume):
         dtype = cname[7:]
     elif cname.startswith('AimsData_'):
         dtype = cname[9:]
+    else:
+        dtype = aims.typeCode(volume)
     rfac = getattr(aims, 'ResamplerFactory_%s' % dtype)
     return rfac
 
