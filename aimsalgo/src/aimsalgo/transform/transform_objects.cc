@@ -341,12 +341,12 @@ resampleBucket( const BucketMap<Void> & bck,
       transform_chain.push_back(external_ref(inverse_transformation));
       rc_ptr<aims::AffineTransformation3d> translation_and_scaling_to_voxel(
         new aims::AffineTransformation3d);
-      translation_and_scaling_to_voxel->translation()[0] = -in_bbmin[0];
-      translation_and_scaling_to_voxel->translation()[1] = -in_bbmin[1];
-      translation_and_scaling_to_voxel->translation()[2] = -in_bbmin[2];
-      translation_and_scaling_to_voxel->rotation()(0, 0) = 1.f / in_vs[0];
-      translation_and_scaling_to_voxel->rotation()(1, 1) = 1.f / in_vs[1];
-      translation_and_scaling_to_voxel->rotation()(2, 2) = 1.f / in_vs[2];
+      translation_and_scaling_to_voxel->affine()(0, 3) = -in_bbmin[0];
+      translation_and_scaling_to_voxel->affine()(1, 3) = -in_bbmin[1];
+      translation_and_scaling_to_voxel->affine()(2, 3) = -in_bbmin[2];
+      translation_and_scaling_to_voxel->affine()(0, 0) = 1.f / in_vs[0];
+      translation_and_scaling_to_voxel->affine()(1, 1) = 1.f / in_vs[1];
+      translation_and_scaling_to_voxel->affine()(2, 2) = 1.f / in_vs[2];
       transform_chain.push_back(translation_and_scaling_to_voxel);
     }
 
