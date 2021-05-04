@@ -250,11 +250,16 @@ class TestPyaimsIO(unittest.TestCase):
             os.unlink(fname)
         if os.path.exists(minf_fname):
             os.unlink(minf_fname)
-        vol2 = aims.VolumeView(vol, (2, 3, 2, 0), (7, 5, 4, 1))
+        pos = [max(min(x, s - 2), 0) for x, s in zip((2, 3, 2, 0), vol.shape)]
+        view_size = [min(x, s-p)
+                     for x, s, p in zip((7, 5, 4, 1), vol.shape, pos)]
+        pos = tuple(pos)
+        view_size = tuple(view_size)
+        vol2 = aims.VolumeView(vol, pos, view_size)
         aims.write(vol2, w_fname)
         fname = self.file_name(vol2, dtype, format)
         vol3 = aims.read(fname)
-        self.assertEqual(tuple(vol3.getSize()), (7, 5, 4, 1))
+        self.assertEqual(tuple(vol3.getSize()), view_size)
         self.assertTrue(compare_images(vol2, vol3, 'volume view',
                                        're-read volume view', thresh,
                                        rel_thresh))
@@ -691,7 +696,7 @@ class TestPyaimsIO(unittest.TestCase):
 
     def test_io_with_strides(self):
         #formats = ['.nii', '.ima', '.tiff', '.mnc', '.v', '.jpg', '.bmp']
-        formats = ['.nii', '.ima', '.mnc']
+        formats = ['.nii', '.ima', '.mnc', ]
         failing_files = set()
         view = ((3, 1, 0, 0), (3, 3, 1, 1),
                 (4, 2, 1, 0), (3, 3, 1, 1))
