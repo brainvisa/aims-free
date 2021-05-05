@@ -1425,7 +1425,12 @@ namespace carto
   {
     std::vector<int> dims( 4, 1 );
     bool        unalloc = false, partial = false, keep_allocation = false;
-    options->getProperty( "partial_reading", partial );
+    try
+    {
+      carto::Object p = options->getProperty( "partial_reading" );
+      partial = bool( p->getScalar() );
+    }
+    catch( ... ) {}
     if( !partial )
     {
       if( !header->getProperty( "volume_dimension", dims ) )
@@ -1435,9 +1440,21 @@ namespace carto
         header->getProperty( "sizeZ", dims[2] );
         header->getProperty( "sizeT", dims[3] );
       }
-      options->getProperty( "unallocated", unalloc );
-      options->getProperty( "keep_allocation", keep_allocation );
-      if( !keep_allocation || !obj.allocatorContext().isAllocated() )
+      try
+      {
+        carto::Object p = options->getProperty( "unallocated" );
+        unalloc = bool( p->getScalar() );
+      }
+      catch( ... ) {}
+      try
+      {
+        carto::Object p = options->getProperty( "keep_allocation" );
+        keep_allocation = bool( p->getScalar() );
+      }
+      catch( ... ) {}
+      if( !keep_allocation || !obj.allocatorContext().isAllocated()
+          || obj.allocatorContext().allocatorType()
+             != AllocatorStrategy::Unallocated )
         obj.reallocate( dims, false, context, !unalloc );
     }
     else
