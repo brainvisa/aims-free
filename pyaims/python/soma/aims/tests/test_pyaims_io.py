@@ -65,7 +65,9 @@ class TestPyaimsIO(unittest.TestCase):
                    ('.tiff', {'max_dims': 4}),
                    # minc 4D is OK except voxel size
                    ('.mnc', {'max_dims': 3}),
-                   ('.v', {'max_dims': 3})] # ecat >= 4D unsupported
+                   ('.v', {'max_dims': 3}), # ecat >= 4D unsupported
+                   # ('.vimg', {'max_dims': 4}), # disabled: too much imprecise
+                   ]
 
         # create test volume for 8D IO
         vol = aims.Volume((9, 8, 7, 6, 5, 4, 3, 3), dtype=dtype)
@@ -662,8 +664,7 @@ class TestPyaimsIO(unittest.TestCase):
                              #('SPM', '.spm'),
                              #('SVG', '.svg'),
                              #('SVGZ', '.svgz'),
-                             #('TGA', '.tga'),
-                             #('VIDA', '.vida'))
+                             #('TGA', '.tga'))
 
         read_write_formats = (('BMP', '.bmp'), 
                               ('ECAT', '.v'),  
@@ -680,8 +681,9 @@ class TestPyaimsIO(unittest.TestCase):
                               ('TIFF', '.tiff'),
                               ('TIFF(Qt)', '.tiff'),
                               ('XBM', '.xbm'),
-                              ('XPM', '.xpm'))
-                
+                              ('XPM', '.xpm'),
+                              ('VIDA', '.vimg'))
+
         for s, e in read_write_formats:
             
             if self.verbose:
@@ -696,7 +698,7 @@ class TestPyaimsIO(unittest.TestCase):
 
     def test_io_with_strides(self):
         #formats = ['.nii', '.ima', '.tiff', '.mnc', '.v', '.jpg', '.bmp']
-        formats = ['.nii', '.ima', '.mnc', '.tiff', '.v']
+        formats = ['.nii', '.ima', '.mnc', '.tiff', '.v', '.vimg']
         failing_files = set()
         view = ((3, 1, 0, 0), (3, 3, 1, 1),
                 (4, 2, 1, 0), (3, 3, 1, 1))

@@ -75,6 +75,7 @@ namespace aims
     float sizeY() const;
     float sizeZ() const;
     float sizeT() const;
+    std::vector<float> getVoxelSize() const;
  
     /// Read the header
     void read();
