@@ -698,7 +698,7 @@ class TestPyaimsIO(unittest.TestCase):
 
     def test_io_with_strides(self):
         #formats = ['.nii', '.ima', '.tiff', '.mnc', '.v', '.jpg', '.bmp']
-        formats = ['.nii', '.ima', '.mnc', '.tiff', '.v', '.vimg']
+        formats = ['.nii', '.ima', '.mnc', '.tiff', '.v', '.vimg', '.bmp']
         failing_files = set()
         view = ((3, 1, 0, 0), (3, 3, 1, 1),
                 (4, 2, 1, 0), (3, 3, 1, 1))
