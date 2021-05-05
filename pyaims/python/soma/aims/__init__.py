@@ -344,7 +344,7 @@ class Reader(object):
                 'carto.AllocatorStrategy.DataAccess')
         self.options = options
 
-    def read(self, filename, border=0, frame=-1, dtype=None):
+    def read(self, filename, border=0, frame=-1, dtype=None, object=None):
         '''Reads the object contained in the file <filename>, whatever the type
         of the contents of the file. All objects types supported by Aims IO
         system can be read. A border width and a frame number may be specified
@@ -355,13 +355,26 @@ class Reader(object):
         string or a type object, as accepted by :py:func:`soma.aims.typeCode`.
         The read function may follow other object/data types rules, allocators
         and options, as specified in the Reader constructor.
+
+        Parameters
+        ----------
+        filename: str
+        border: int
+        frame: int
+        dtype:
+        object: existing object to be read/filled
+            If not specified the function will return a new object. If
+            specified, this is considered the existing object to be read and
+            filled by the reader.
         '''
         f = Finder()
         if not f.check(filename):
             open(filename).close()  # "file not found"-case raising first
             raise IOError(
                 'Unknown file format or missing meta-file(s): ' + filename)
-        if dtype is not None:
+        if object is not None:
+            finaltype = typeCode(object)
+        elif dtype is not None:
             finaltype = typeCode(dtype)
         else:
             otype = f.objectType()
@@ -392,7 +405,13 @@ class Reader(object):
             if 'format' in self.options:
                 format = self.options['format']
 
-        result = r.read(border, format, frame)
+        if object is not None:
+            result = r.read(object, border, format, frame)
+            if not result:
+                raise IOError('read failed for %s' % filename)
+            reslult = object
+        else:
+            result = r.read(border, format, frame)
         return result
 
     def mapType(self, iotype, aimstype):
@@ -482,25 +501,53 @@ class Writer(object):
 # simple IO functions
 
 def read(filename, border=0, frame=-1, dtype=None, allocmode=None,
-         options=None):
-    '''Equivalent to:
+         options=None, object=None):
+    '''Equivalent to::
 
-    .. code-block:: python
+    r = Reader(allocmode=allocmode, options=options)
+    return r.read(filename, border=border, frame=frame, dtype=dtype,
+                  object=object)
 
-      r = Reader( allocmode=allocmode, options=options )
-      return r.read( filename, border=border, frame=frame, dtype=dtype )
+    Ex:
+
+    * read a volume::
+
+        vol = aims.read('file.nii')
+
+    * read a mesh::
+
+        mesh = aims.read('file.gii')
+
+    * read part of a volume, with borders::
+
+        vol = aims.read(
+            'file.nii', options={'border': 2, 'ox': 100, 'sx': 100,
+                                 'oy': 50, 'sy': 150, 'oz': 20, 'sz': 60})
+
+      or (equivalent)::
+
+          vol = aims.read(
+            'file.nii?border=2&ox=100&sx=100&oy=50&sy=150&oz=20&sz=60')
+
+    * read a view inside a larger volume::
+
+          border = aims.Volume_S16(500, 500, 200)
+          view = aims.VolumeView(border, [50, 50, 50], [256, 256, 124])
+          view[0,0,0,0] = 45
+          border[50,50,50,0]
+          aims.read('file.nii', object=view, options={'keep_allocation': True})
+
     '''
     r = Reader(allocmode=allocmode, options=options)
-    return r.read(filename, border=border, frame=frame, dtype=dtype)
+    return r.read(filename, border=border, frame=frame, dtype=dtype,
+                  object=object)
 
 
 def write(obj, filename, format=None, options={}):
-    '''Equivalent to:
+    '''Equivalent to::
 
-    .. code-block:: python
-
-      w = Writer()
-      w.write( obj, filename, format=format, options=options )
+    w = Writer()
+    w.write(obj, filename, format=format, options=options)
     '''
     w = Writer()
     w.write(obj, filename, format=format, options=options)
