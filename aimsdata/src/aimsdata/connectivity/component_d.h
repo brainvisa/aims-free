@@ -127,9 +127,10 @@ namespace aims
     byte *bp, *bpn;
     const T *p;
 
-    for( ; !bit.ended(); ++bit )
+    for( ; !bit.ended(); ++bit, ++it )
     {
       bp = &*bit;
+      p = &*it;
       for( bpn=bp + bit.line_length(); bp!=bpn;
           bit.inc_line_ptr( bp ), it.inc_line_ptr( p ) )
         if( *p == backg )
@@ -174,11 +175,11 @@ namespace aims
                                         cd.xyzOffset( n )[2]);
                 
                 if ( newpos[0] >= 0   &&
-                      newpos[0] < dimX &&
-                      newpos[1] >= 0   &&
-                      newpos[1] < dimY &&
-                      newpos[2] >= 0   &&
-                      newpos[2] < dimZ   )
+                     newpos[0] < dimX &&
+                     newpos[1] >= 0   &&
+                     newpos[1] < dimY &&
+                     newpos[2] >= 0   &&
+                     newpos[2] < dimZ   )
             
                   if ( !flag( newpos ) 
                         && ( bin || data( newpos[0], newpos[1], newpos[2], t ) == val ) )
@@ -188,8 +189,8 @@ namespace aims
                   }
               }
             }
-            /*std::cout << "comp. " << label << ", val: " << val << " (" 
-              << sz << " voxels)\n";*/
+            /* std::cout << "comp. " << label << ", val: " << val << " ("
+              << sz << " voxels)\n"; */
 
             compSizes.insert( std::pair<size_t, O>( sz, label ) );
             ++label;
