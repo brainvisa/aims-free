@@ -266,6 +266,24 @@ class TestPyaimsIO(unittest.TestCase):
                                        're-read volume view', thresh,
                                        rel_thresh))
 
+        # test reading inside a larger volume
+        # (only available in soma-io readers, say allowing partial read,
+        # which is not exactly the same I admit)
+        if format in partial_read:
+            # print('test read in view for', format, file=sys.stderr)
+            bsize = [x + 4 for x in vol2.getSize()[:3]] + vol2.getSize()[3:]
+            vol3 = aims.Volume(bsize, dtype=aims.typeCode(vol.np.dtype))
+            vol4 = aims.VolumeView(vol3, [2, 2, 2], vol.getSize())
+            aims.read(fname, object=vol4, options={'keep_allocation': True})
+            self.assertEqual(tuple(vol4.getSize()), tuple(vol2.getSize()))
+            self.assertEqual(tuple(vol4.getVoxelSize()),
+                            tuple(vol2.getVoxelSize()))
+            self.assertTrue(compare_images(vol2, vol4, 'volume',
+                                          'volume inside view', thresh,
+                                          rel_thresh))
+            self.assertTrue(np.all(vol2.np == vol3[2:-2, 2:-2, 2:-2, :]))
+
+
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
         return failing_files
@@ -697,7 +715,7 @@ class TestPyaimsIO(unittest.TestCase):
                 print()
 
     def test_io_with_strides(self):
-        #formats = ['.nii', '.ima', '.tiff', '.mnc', '.v', '.jpg', '.bmp']
+        #formats = ['.nii', '.ima', '.mnc', '.tiff', '.v', '.jpg', '.bmp']
         formats = ['.nii', '.ima', '.mnc', '.tiff', '.v', '.vimg', '.bmp']
         failing_files = set()
         view = ((3, 1, 0, 0), (3, 3, 1, 1),
