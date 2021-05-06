@@ -362,7 +362,7 @@ void EcatReader< float >::read( AimsData<float>& thing,
   data.setHeader( hdr );
 
   // Caracteristiques des images
-  cout << "Image units are: "  << EcatCalibUnit(uei) << endl;
+  // cout << "Image units are: "  << EcatCalibUnit(uei) << endl;
 
 
   // --------------------------------------------Lecture frame par frame
