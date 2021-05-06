@@ -51,10 +51,12 @@
 
 
 <!-- -->
-<h4> <a name="version-5.1.0"></a>Apr. 21, 2021, Version 5.1.0</h4>
+<h4> <a name="version-5.1.0"></a>May 6, 2021, Version 5.1.0</h4>
 
 <ul>
   <li>Support Volume classes with strides on X axis. Strides were present in the volume structure but most functions assumed that voxels were contiguous on the first (X) axis. This forbid for instance bindings to numpy arrays which had a "C" ordering convention. This limitation is now gone in main Volume methods and operator. However many algorithms are still assuming that the first axis is contiguous (and use pointers with ++ incrementation), so these volumes should be reserved for specific and tested uses.</li>
+  <li>Volume IO have been updated to support strides.</li>
+  <li>PyAims bindings to readers taking existing data as input/output. This allows partial reading views in allocated volumes.</li>
 </ul>
 
 <!-- -->
