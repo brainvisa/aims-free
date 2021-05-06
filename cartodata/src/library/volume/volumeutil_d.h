@@ -380,11 +380,11 @@ namespace carto
                        std::max( v1.getBorders()[0], v2.getBorders()[0] ) );
     for( long y = 0; y < size2[1]; y++ )
       for( long x = 0; x < size1[0]; x++ )
-    {
-      prod->at( x, y ) = T( 0 );
-      for( long k = 0; k < size2[1]; k++ )
-        prod->at( x, y ) += v1.at( x, k ) * v2.at( k, y );
-    }
+      {
+        prod->at( x, y ) = T( 0 );
+        for( long k = 0; k < size1[1]; k++ )
+          prod->at( x, y ) += v1.at( x, k ) * v2.at( k, y );
+      }
 
     return prod;
   }
