@@ -508,34 +508,33 @@ def read(filename, border=0, frame=-1, dtype=None, allocmode=None,
     return r.read(filename, border=border, frame=frame, dtype=dtype,
                   object=object)
 
-    Ex:
+Ex:
 
-    * read a volume::
+* read a volume::
 
-        vol = aims.read('file.nii')
+    vol = aims.read('file.nii')
 
-    * read a mesh::
+* read a mesh::
 
-        mesh = aims.read('file.gii')
+    mesh = aims.read('file.gii')
 
-    * read part of a volume, with borders::
+* read part of a volume, with borders (warning, all formats do not allow it)::
 
-        vol = aims.read(
-            'file.nii', options={'border': 2, 'ox': 100, 'sx': 100,
-                                 'oy': 50, 'sy': 150, 'oz': 20, 'sz': 60})
+    vol = aims.read(
+        'file.nii', options={'border': 2, 'ox': 100, 'sx': 100,
+                             'oy': 50, 'sy': 150, 'oz': 20, 'sz': 60})
 
-      or (equivalent)::
+  or (equivalent)::
 
-          vol = aims.read(
-            'file.nii?border=2&ox=100&sx=100&oy=50&sy=150&oz=20&sz=60')
+      vol = aims.read(
+        'file.nii?border=2&ox=100&sx=100&oy=50&sy=150&oz=20&sz=60')
 
-    * read a view inside a larger volume::
+* read a view inside a larger volume (warning, all formats do not allow it,
+  and they may produce inpredictible results, and probably crashes)::
 
-          border = aims.Volume_S16(500, 500, 200)
-          view = aims.VolumeView(border, [50, 50, 50], [256, 256, 124])
-          view[0,0,0,0] = 45
-          border[50,50,50,0]
-          aims.read('file.nii', object=view, options={'keep_allocation': True})
+      border = aims.Volume_S16(500, 500, 200)
+      view = aims.VolumeView(border, [50, 50, 50], [256, 256, 124])
+      aims.read('file.nii', object=view, options={'keep_allocation': True})
 
     '''
     r = Reader(allocmode=allocmode, options=options)

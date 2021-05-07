@@ -60,6 +60,8 @@
 #include <cartobase/type/string_conversion.h>
 #define localMsg( message ) cartoCondMsg( 4, message, "VOLUMEFORMATREADER" )
 // localMsg must be undef at end of file
+// #undef localMsg
+// #define localMsg( message ) std::cerr << (message) << std::endl;
 //----------------------------------------------------------------------------
 
 namespace soma

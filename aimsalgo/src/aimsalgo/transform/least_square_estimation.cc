@@ -262,10 +262,8 @@ RigidLeastSquareEstimation::computeRigidMotion()
 //         cout << "!! rotation()(" << toString(x) << ", " 
 //              << toString(y) << "): " << toString(_motion->rotation()(x, y))
 //              << endl;
-             
-  _motion->rot() = _motion->rotation().deepcopy();
+  _motion->rot() = _motion->rotation(); // .deepcopy();
 //   cout << "!! rot(): " << toString(_motion->rot()) << endl;
-  
   _motion->setTranslation(Point3df(0.));
 //   cout << "!! meanX: " << toString(meanX) << endl;
 //   cout << "!! meanY: " << toString(meanY) << endl;
@@ -411,7 +409,7 @@ SimiLeastSquareEstimation::computeMotion()
   int u, v;
   unsigned size = _pointsFrom.size();
   AimsData<double> Rotation(3,3);
-  AimsData<float> RotationF = _motion->rotation().deepcopy();
+  AimsData<float> RotationF = _motion->rotation();
   ForEach2d(Rotation, u, v)	Rotation(u,v) = double( RotationF(u,v) );
 
 

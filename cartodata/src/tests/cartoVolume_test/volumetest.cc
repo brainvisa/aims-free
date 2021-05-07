@@ -211,8 +211,9 @@ int main( int /*argc*/, const char** /*argv*/ )
 {
   test( container<float>(), container<float>() );
   int   result = EXIT_SUCCESS;
+  int ntest = 0;
 
-  cout << "-- Test 0: volume copy --" << endl;
+  cout << "-- Test " << ntest++ << ": volume copy --" << endl;
   carto::Volume<int16_t> first( 5, 5, 5 );
   carto::Volume<int16_t> second( 3, 3, 3 );
   first = second;
@@ -229,7 +230,8 @@ int main( int /*argc*/, const char** /*argv*/ )
   }
   cout << endl;
 
-  cout << "-- Test 1: regular volume: vol1 ( 10, 10, 10 ) --" << endl;
+  cout << "-- Test " << ntest++ << ": regular volume: vol1 ( 10, 10, 10 ) --"
+       << endl;
   VolumeRef<int16_t>	vol1( new Volume<int16_t>( 10, 10, 10 ) );
   cout << "vol1 allocated. filling with value 5" << endl;
   vol1->fill( 5 );
@@ -247,7 +249,8 @@ int main( int /*argc*/, const char** /*argv*/ )
       result = EXIT_FAILURE;
     }
 
-  cout << "-- Test 2: volume view: vol2 ( 6, 6, 6 ) in vol1 --" << endl;
+  cout << "-- Test " << ntest++ << ": volume view: vol2 ( 6, 6, 6 ) in vol1 --"
+       << endl;
   VolumeRef<int16_t>	vol2
     ( new Volume<int16_t>( vol1,
                            Volume<int16_t>::Position4Di( 2, 2, 2 ),
@@ -320,7 +323,8 @@ int main( int /*argc*/, const char** /*argv*/ )
   else cout << "OK";
   cout << endl << endl;
 
-  cout << "-- Test 3: virtual volume: vol3 ( 10, 10, 10 ) --" << endl;
+  cout << "-- Test " << ntest++ << ": virtual volume: vol3 ( 10, 10, 10 ) --"
+       << endl;
   VolumeRef<int16_t>	vol3
     ( new Volume<int16_t>( 10, 10, 10, 1, AllocatorContext(), false ) );
   cout << "vol3 allocated" << endl;
@@ -332,7 +336,8 @@ int main( int /*argc*/, const char** /*argv*/ )
        << ", " << vol3->getSizeZ() << ", " << vol3->getSizeT() << std::endl;
   cout << endl;
 
-  cout << "-- Test 4: volume view: vol4 ( 6, 6, 6 ) in vol3 --" << endl;
+  cout << "-- Test " << ntest++ << ": volume view: vol4 ( 6, 6, 6 ) in vol3 --"
+       << endl;
   VolumeRef<int16_t>	vol4
     ( new Volume<int16_t>( vol3,
                            Volume<int16_t>::Position4Di( 2, 2, 2 ),
@@ -355,7 +360,7 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << endl;
 
 
-  cout << "-- Test 5: volume with strides -- " << endl;
+  cout << "-- Test " << ntest++ << ": volume with strides -- " << endl;
   vector<int16_t> vec9( 3*4*5, 0 );
   vector<int> dims9( 3 );
   dims9[0] = 3;
@@ -439,7 +444,7 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << endl;
 
 
-  cout << "-- Test 6: operators -- " << endl;
+  cout << "-- Test " << ntest++ << ": operators -- " << endl;
   cout << "vol1" << endl << vol1 << endl;
   VolumeRef<int16_t> vol5 = vol1 + vol1;
   cout << "vol5 = vol1 + vol1" << endl << vol5 << endl;
@@ -455,7 +460,7 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << "vol5 += 5." << endl << vol5 << endl;
 
 
-  cout << "-- Test 7: N-D iterators test --" << endl;
+  cout << "-- Test " << ntest++ << ": N-D iterators test --" << endl;
   vector<int> dims( 8, 1 );
   dims[0] = 3;
   dims[1] = 3;
@@ -522,7 +527,57 @@ int main( int /*argc*/, const char** /*argv*/ )
   }
 
 
-  cout << "-- Test 8: speed test --" << endl;
+  // matrix_product test
+  cout << "-- Test " << ntest++ << ": matrix_product test --" << endl;
+
+  VolumeRef<float> mat1( 3, 4 );
+  VolumeRef<float> mat2( 5, 3);
+  VolumeRef<float> mat3;
+
+  try
+  {
+    mat3 = matrix_product( mat1, mat2 );
+    // if we are here the test hasn't fired the correct exception...
+    cerr << "matrix_product dimensions check did not operate" << endl;
+    result = EXIT_FAILURE;
+  }
+  catch( runtime_error & )
+  {
+    // OK this should fail...
+  }
+  mat2 = VolumeRef<float>( 4, 2 );
+  mat1.fill( 0. );
+  mat2.fill( 0. );
+  mat1(0, 0) = 1.;
+  mat1(1, 1) = 1.5;
+  mat1(2, 2) = .8;
+  mat1(2, 3) = 2.;
+  mat2(0, 0) = -0.5;
+  mat2(1, 1) = 1.2;
+  mat2(2, 0) = 1.1;
+  mat2(3, 1) = 0.7;
+  // std::cout << mat1 << endl;
+  // std::cout << mat2 << endl;
+  mat3 = matrix_product( mat1, mat2 );
+  // std::cout << mat3 << endl;
+  VolumeRef<float> mat4( 3, 2 );
+  mat4( 0, 0 ) = -0.5;
+  mat4( 0, 1 ) = 0;
+  mat4( 1, 0 ) = 0;
+  mat4( 1, 1 ) = 1.8;
+  mat4( 2, 0 ) = 0.88;
+  mat4( 2, 1 ) = 1.4;
+
+  mat4 -= mat3;
+  // cout << min( mat4 ) << ", " << max( mat4 ) << endl;
+  if( min( mat4 ) < -0.001 || max( mat4 ) > 0.001 )
+  {
+    cerr << "matrix_product is buggy" << endl;
+    result = EXIT_FAILURE;
+  }
+
+
+  cout << "-- Test " << ntest++ << ": speed test --" << endl;
   // allocate a 16 MB volume
   VolumeRef<int16_t>	vol6( 256, 256, 128 );
   int		n, nn = 0, x, y, z, t, nx = vol6->getSizeX(),
@@ -695,7 +750,7 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << nn << " x 8M voxels in " << ck2
        << "s : " << sz * nn / ck2 << " vox/s" << endl;
 
-  cout << "-- Test 9: fill methods --" << endl;
+  cout << "-- Test " << ntest++ << ": fill methods --" << endl;
   vector<int> dims8, pos, view_dims;
   dims8.push_back( 15 );
   dims8.push_back( 15 );
@@ -735,6 +790,7 @@ int main( int /*argc*/, const char** /*argv*/ )
          << endl;
     result = EXIT_FAILURE;
   }
+
 
   cout << "===========\n";
   cout << "Overall result: "
