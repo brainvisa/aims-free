@@ -247,7 +247,7 @@ RigidLeastSquareEstimation::computeRigidMotion()
   _motion->rotation()(2, 1) = t * axis[1] * axis[2] + s * axis[0] ;
   _motion->rotation()(2, 2) = t * axis[2] * axis[2] + c ;
     
-  _motion->rot() = _motion->rotation().deepcopy();
+  _motion->rot() = _motion->rotation(); // .deepcopy();
 
   _motion->setTranslation(Point3df(0.));
   _motion->setTranslation(meanY - _motion->transform(meanX));
@@ -389,7 +389,7 @@ SimiLeastSquareEstimation::computeMotion()
   int u, v;
   unsigned size = _pointsFrom.size();
   AimsData<double> Rotation(3,3);
-  AimsData<float> RotationF = _motion->rotation().deepcopy();
+  AimsData<float> RotationF = _motion->rotation();
   ForEach2d(Rotation, u, v)	Rotation(u,v) = double( RotationF(u,v) );
 
 
