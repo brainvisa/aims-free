@@ -782,10 +782,10 @@ namespace carto {
     
       // Display position in parent
       typename Volume<T>::Position pos = v->posInRefVolume();
-      if (v->refVolume().isNull()) {
+      if (!v->refVolume().isNull()) {
         std::vector<int> pos = v->posInRefVolume();
         std::cout << "Volume " << (p ? carto::toString(p) + " " : "") 
-                  << " position in parent [";
+                  << "position in parent [";
         for(int i=0; i<pos.size()-1; ++i)
           std::cout << pos[i] << ", ";
         std::cout << pos[pos.size()-1] << "]" << std::endl << std::flush;
