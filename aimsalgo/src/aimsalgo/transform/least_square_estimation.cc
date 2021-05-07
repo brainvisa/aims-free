@@ -72,6 +72,8 @@ SimiLeastSquareEstimation::SimiLeastSquareEstimation(
 bool 
 AffineLeastSquareEstimation::computeMotion()
 {
+//   cout << "!! Is 2d estimation: " << carto::toString(_is2D) << endl;
+
   if( _pointsFrom.size() != _pointsTo.size() )
     throw runtime_error("AffineLeastSquareEstimation:Both vectors must have same size !") ;
   unsigned size = _pointsFrom.size();
@@ -97,8 +99,10 @@ AffineLeastSquareEstimation::computeMotion()
   }
   
   xx = x.clone().transpose().cross(x) ;
-//  cout << "xx dims : " << xx.dimX() << ", " << xx.dimY() << endl ;
+//   cout << "!! xx: " << xx << endl;
+// cout << "xx dims : " << xx.dimX() << ", " << xx.dimY() << endl ;
   yx = (y.clone().transpose()).cross(x) ;
+//   cout << "!! yx: " << yx << endl;
 // cout << "yx dims : " << yx.dimX() << ", " << yx.dimY() << endl ;
 
 
@@ -161,6 +165,8 @@ RigidLeastSquareEstimation::computeRigidMotion()
 
   //Faux dans qqs cas rares : changer, detecter des le main le cas 2D.
   if( (meanX[2]==0) && (meanY[2]==0) )	_is2D=true;
+
+//   cout << "!! Is 2d estimation: " << carto::toString(_is2D) << endl;
   
   
   AimsData<float> criterionMatrix(4, 4);
@@ -203,6 +209,8 @@ RigidLeastSquareEstimation::computeRigidMotion()
 
     ++iterFrom; ++iterTo;
   }
+  
+//   cout << "!! Criterion matrix: " <<  criterionMatrix << endl;
 
 #ifdef AIMS_USE_MPI
   COMM_WORLD.Allreduce(IN_PLACE, &criterionMatrix[0], 16, FLOAT, SUM);
@@ -222,6 +230,7 @@ RigidLeastSquareEstimation::computeRigidMotion()
   }
     
   q.normalize() ;
+//   cout << "!! q: " << q << endl;
 
 
   Point3df axis( q[1], q[2], q[3] ) ;
@@ -235,6 +244,7 @@ RigidLeastSquareEstimation::computeRigidMotion()
     axis[0]=0;axis[1]=0;
   }
 
+//   cout << "!! axis: " << axis << endl;
   _motion = new DecomposedMotion ;   
 
   _motion->rotation()(0, 0) = t * axis[0] * axis[0] + c ;
@@ -246,11 +256,23 @@ RigidLeastSquareEstimation::computeRigidMotion()
   _motion->rotation()(2, 0) = t * axis[0] * axis[2] - s * axis[1] ;
   _motion->rotation()(2, 1) = t * axis[1] * axis[2] + s * axis[0] ;
   _motion->rotation()(2, 2) = t * axis[2] * axis[2] + c ;
-    
+  
+//   for (int y=0; y<3; ++y)
+//     for (int x=0; x<3; ++x)
+//         cout << "!! rotation()(" << toString(x) << ", " 
+//              << toString(y) << "): " << toString(_motion->rotation()(x, y))
+//              << endl;
+             
   _motion->rot() = _motion->rotation().deepcopy();
-
+//   cout << "!! rot(): " << toString(_motion->rot()) << endl;
+  
   _motion->setTranslation(Point3df(0.));
+//   cout << "!! meanX: " << toString(meanX) << endl;
+//   cout << "!! meanY: " << toString(meanY) << endl;
+//   cout << "!! transformed meanX: " << toString(_motion->transform(meanX)) << endl;
+//   cout << "!! translation to be set: " << toString(meanY - _motion->transform(meanX)) << endl;
   _motion->setTranslation(meanY - _motion->transform(meanX));
+  
   
   if(_is2D)
     _motion->translation()[2] = 0;
@@ -448,7 +470,7 @@ SimiLeastSquareEstimation::computeMotion()
   // calcul de s, coefficient de similitude
   float s = float(trace/sigmax2), s0 = 1;
 
-//	cout<<endl<<"Le coefficient de similitude vaut :"<<s<<endl;
+//   cout<<endl<<"Le coefficient de similitude vaut :"<<s<<endl;
 
   if(!_is2D)
     s0 = s;
@@ -456,9 +478,9 @@ SimiLeastSquareEstimation::computeMotion()
   _motion->setScaling(s,s,s0);
   _motion->transAffine();
 
-//	cout<<endl<<"scaling vaut : "<<endl<<_motion->scaling()<<endl;
-//	cout<<endl<<"rot vaut (pareil que motion rigide?) : "<<endl<<_motion->rot()<<endl;
-//	cout<<endl<<"...et le motion final (sc * rot?) : "<<endl<<*(_motion)<<endl;
+//   cout<<endl<<"scaling vaut : "<<endl<<_motion->scaling()<<endl;
+//   cout<<endl<<"rot vaut (pareil que motion rigide?) : "<<endl<<_motion->rot()<<endl;
+//   cout<<endl<<"...et le motion final (sc * rot?) : "<<endl<<*(_motion)<<endl;
 
   return 1;
 }

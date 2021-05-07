@@ -34,6 +34,24 @@ Motion Minimisation::quaternion(DisplacementField<T>& displacementField)
   int size = ptstest.size();
   unsigned sizekept = unsigned ( double(ptstest.size())*_Pkept );
   
+//   Point3dd sumtest(0,0,0);
+//   std::vector<Point3df>::iterator it, ite = ptstest.end();
+//   for(it = ptstest.begin(); it!=ite; ++it) {
+//       sumtest[0] += (*it)[0];
+//       sumtest[1] += (*it)[1];
+//       sumtest[2] += (*it)[2];
+//   }
+//   std::cout << "!! Test points sum: " << carto::toString(sumtest) << std::endl;
+//   
+//   Point3dd sumref(0,0,0);
+//   ite = ptsref.end();
+//   for(it = ptsref.begin(); it!=ite; ++it) {
+//       sumref[0] += (*it)[0];
+//       sumref[1] += (*it)[1];
+//       sumref[2] += (*it)[2];
+//   }
+//   std::cout << "!! Ref points sum: " << carto::toString(sumref) << std::endl;
+  
   Motion m;
 
   if ((sizekept > 0) && (ptsref.size() > 0))
@@ -97,7 +115,7 @@ Motion Minimisation::quaternion(DisplacementField<T>& displacementField)
     for(int boucle=0; boucle < 3; boucle++)
     {
 
-      //std::cout << "Minimisation - s : " << size << ", m : " << m << std::endl << std::flush;
+//       std::cout << "Minimisation - s : " << size << ", m : " << m << std::endl << std::flush;
 
       mt.clear(); mr.clear();
       ptstestkept.clear(); ptsrefkept.clear();
