@@ -523,6 +523,26 @@ namespace carto
   }
 
 
+  // view + buffer (only for IO)
+
+  template < typename T >
+  Volume< T >::Volume( rc_ptr<Volume<T> > other, const Position & pos,
+                       const Position & size, T* buffer,
+                       const std::vector<size_t> & strides )
+    : VolumeProxy<T>( size ),
+      _items( (long) Position4Di::size_num_elements( size ), buffer ),
+      _refvol( other ),
+#ifndef CARTO_USE_BLITZ
+      _lineoffset( 0 ),
+      _sliceoffset( 0 ),
+      _volumeoffset( 0 ),
+#endif
+      _pos( pos )
+  {
+    allocate( -1, -1, -1, -1, true, allocatorContext(), &strides );
+  }
+
+
   /***************************************************************************
    * Copy Constructor
    **************************************************************************/

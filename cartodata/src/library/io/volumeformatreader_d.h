@@ -96,6 +96,7 @@ namespace soma
                                        carto::Object options )
   {
     //=== Reading URI ========================================================
+    localMsg( "Reading existing object ( " + dsi->url() + " )" );
     std::string uri = dsi->list().dataSource()->url();
     std::string url = FileUtil::uriFilename( uri );
     carto::Object urioptions = FileUtil::uriOptions( uri );
@@ -117,6 +118,7 @@ namespace soma
     {
       if( options->hasProperty( *p ) )
       {
+        localMsg( "use VolumeUtilIO::read()" );
         VolumeUtilIO<T>::read( &obj, dsi, options );
         bool convert = false;
         options->getProperty( "convert_to_aims", convert );
@@ -132,6 +134,7 @@ namespace soma
       // needed in VolumeUtilIO
     }
     //=== if no known property -> classic reading ============================
+    localMsg( "Fallback to FormatReader<Volume<T> >::setupAndRead()" );
     return FormatReader<Volume<T> >::setupAndRead( obj, dsi, context,
                                                    options );
   }
@@ -388,10 +391,11 @@ namespace soma
       strides[i] = &obj( stride_pos ) - &obj( 0,0,0,0 );
     }
 
-    //=== region's origine ===================================================
+    //=== region's origin ===================================================
     localMsg( "reading view position in reference to full volume..." );
     std::vector<int>  pos ( ndim, 0 );
     if( parent1 && !parent1->allocatorContext().isAllocated() ) {
+      localMsg( "parent is not allocated" );
       pos = obj.posInRefVolume();
     } else if( parent2 ) {
       pos = obj.posInRefVolume();

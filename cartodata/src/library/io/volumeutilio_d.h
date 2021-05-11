@@ -50,6 +50,8 @@
 //--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
 #define localMsg( message ) cartoCondMsg( 3, message, "VOLUMEUTILIO" )
+// #undef localMsg
+// #define localMsg( message ) std::cerr << (message) << std::endl;
 // localMsg must be undef at end of file
 //----------------------------------------------------------------------------
 
@@ -100,6 +102,9 @@ namespace soma {
                          carto::rc_ptr<DataSourceInfo>  dsi,
                          carto::Object                  options )
   {
+    localMsg( "VolumeUtilIO<T>::read" );
+    if( obj )
+      localMsg( "with existing object" );
     std::vector<int> position( 4, 0 );
     std::vector<int> frame( 4, 0 );
     std::vector<int> borders( 4, 0 );
@@ -334,6 +339,7 @@ namespace soma {
                                 carto::Object                  options )
   {
     //=== VARIABLES ==========================================================
+    localMsg( "VolumeUtilIO<T>::readPartial" );
     std::vector<int> viewframe( frame );
     size_t dim, ndim = std::max( position.size(), frame.size() );
     if( viewframe.size() < ndim )
@@ -500,7 +506,20 @@ namespace soma {
                 + carto::toString( viewpos[3] ) + " )"
                  );
       if(obj)
-        *obj = carto::Volume<T>( bordersVolume, viewpos, viewframe );
+      {
+        bool keep_allocation = false;
+        try
+        {
+          carto::Object keep_alloc = newoptions->getProperty(
+            "keep_allocation" );
+          keep_allocation = bool( keep_alloc->getScalar() );
+        }
+        catch( ... )
+        {
+        }
+        if( !keep_allocation )
+          *obj = carto::Volume<T>( bordersVolume, viewpos, viewframe );
+      }
       else
         obj = new carto::Volume<T>( bordersVolume, viewpos, viewframe );
 
@@ -542,8 +561,44 @@ namespace soma {
       newoptions->copyProperties( options );
       rView.setOptions( newoptions );
       localMsg( "creating volume..." );
+      VolumeRef<T> tmp;
       if( obj )
-        *obj = carto::Volume<T>( fullVolume, viewpos, viewframe );
+      {
+        localMsg( "existing volume" );
+        bool keep_allocation = false;
+        try
+        {
+          carto::Object keep_alloc = newoptions->getProperty(
+            "keep_allocation" );
+          keep_allocation = bool( keep_alloc->getScalar() );
+        }
+        catch( ... )
+        {
+        }
+        if( keep_allocation )
+        {
+          /* read inside an existing allocated volume.
+
+             The problem here is that we need a view which is attached both
+             to a file parent (fullVolume) with a certain position, and at
+             the same time to an allocated parent volume, with another
+             position.
+
+             The trick here is to build a view in the unallocated fullVolume
+             (representing the whole file) with the size/position of the
+             patch to be read from file, and pointing to the memory block of
+             the view (obj) in memory. Then read the "file view" as for the
+             border case.
+          */
+
+          tmp.reset( new Volume<T>( fullVolume, viewpos, viewframe,
+                                    &obj->at(0), obj->getStrides() ) );
+
+          obj = tmp.get(); // read the temp volume
+        }
+        else
+          *obj = carto::Volume<T>( fullVolume, viewpos, viewframe );
+      }
       else
         obj = new carto::Volume<T>( fullVolume, viewpos, viewframe );
 

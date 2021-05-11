@@ -257,6 +257,12 @@ namespace carto
             const Position & pos,
             const Position & size = Position(),
             const AllocatorContext & allocContext = AllocatorContext() );
+    /// This "very special" constructor should not be used in regular programs.
+    /// It is meant for the IO system to map file views into memory views.
+    Volume( rc_ptr<Volume<T> > other,
+            const Position & pos,
+            const Position & size,
+            T* buffer, const std::vector<size_t> & strides );
     /// Copy constructor
     /// The copy constructors actually duplicates data buffers. In the case
     /// of a volume view, the underlying volume is also duplicated, so the
