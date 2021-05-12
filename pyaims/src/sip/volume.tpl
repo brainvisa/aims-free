@@ -261,6 +261,7 @@ Set a voxel value at given position
 %#endif%
 
   vector_SIZE_T getStrides() const;
+  vector_S32 getBorders() const;
 
   SIP_PYOBJECT header() /Factory/;
 %Docstring
