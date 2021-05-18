@@ -46,6 +46,7 @@
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/type/voxelrgba.h>
 #include <cartobase/type/voxelrgb.h>
+#include <aims/resampling/motion.h>
 //--- system -------------------------------------------------------------------
 #include <iostream>
 //------------------------------------------------------------------------------
@@ -180,6 +181,12 @@ int main( int argc, const char** argv )
     if( readVolumeRef )
       testReadVolumeRef( ifname );
     
+  aims::DecomposedAffineTransformation3d m;
+  m.affine()(0, 0) = 2.;
+  m.setRotation( .5, 1.5, 2. );
+  cout << "DecomposedAffineTransformation3d:\n";
+  cout << m << endl;
+
   }
   catch( user_interruption & )
   {

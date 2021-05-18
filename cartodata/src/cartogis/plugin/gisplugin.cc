@@ -514,7 +514,6 @@ bool GisPlugin::noop()
 
 #include <soma-io/image/gisimagereader_d.h>
 #include <soma-io/image/gisimagewriter_d.h>
-#include <aims/io/asciidatasourcetraits_aims.h>
 
 namespace carto
 {
