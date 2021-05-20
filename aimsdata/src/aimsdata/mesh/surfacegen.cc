@@ -1960,7 +1960,14 @@ AimsTimeSurface<2,Void>* SurfaceGenerator::circle_wireframe(
     + v3 * radius * sin( stopangle );
   if( ( lastver - vert[0] ).norm2() < 1e-5 ) // closed circle
   {
-    poly[nseg-1][1] = 0; // last segment loops to 1st point
+    if( ( vert[0] - vert[vert.size() - 1] ).norm2() < 1e-5 )
+    {
+      // remove last point
+      vert.erase( vert.begin() + ( vert.size() - 1 ) );
+      poly.erase( poly.begin() + ( poly.size() - 1 ) );
+    }
+
+    poly[poly.size()-1][1] = 0; // last segment loops to 1st point
   }
   else
     vert.push_back( lastver ); // open circle
