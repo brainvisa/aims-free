@@ -168,9 +168,9 @@ def fslMatToTrm(matfile, srcimage, dstimage):
     s2m1 = aims.Motion(s2m1)
     s2m2 = aims.Motion(s2m2)
     vsm1 = aims.Motion()
-    vsm1.fromMatrix(numpy.diag(vs1 + [0]))
+    vsm1.fromMatrix(numpy.diag(vs1 + [1]))
     vsm2 = aims.Motion()
-    vsm2.fromMatrix(numpy.diag(vs2 + [0]))
+    vsm2.fromMatrix(numpy.diag(vs2 + [1]))
     m2s1 = s2m1.inverse()
     m2s2 = s2m2.inverse()
     dimd1 = [abs(x) for x in m2s1.transform(im1['volume_dimension'][:3])
@@ -179,24 +179,27 @@ def fslMatToTrm(matfile, srcimage, dstimage):
              - m2s2.transform([0, 0, 0])]
     x = [abs(x) for x in m2s1.transform(vs1) - m2s1.transform([0, 0, 0])]
     vsd1 = aims.Motion()
-    vsd1.fromMatrix(numpy.diag(x + [0]))
+    vsd1.fromMatrix(numpy.diag(x + [1]))
     x = [abs(x) for x in m2s2.transform(vs2) - m2s2.transform([0, 0, 0])]
     vsd2 = aims.Motion()
-    vsd2.fromMatrix(numpy.diag(x + [0]))
+    vsd2.fromMatrix(numpy.diag(x + [1]))
     flip1 = aims.Motion()
     flip2 = aims.Motion()
     if not s2m1.isDirect():
         flip1.rotation().setValue(-1., 0, 0)
-        flip1.translation()[0] = vsd1.rotation().value(0, 0) * (dimd1[0] - 1)
+        flip1.setTranslation([vsd1.rotation().value(0, 0) * (dimd1[0] - 1),
+                              0, 0])
     if not s2m2.isDirect():
         flip2.rotation().setValue(-1., 0, 0)
-        flip2.translation()[0] = vsd2.rotation().value(0, 0) * (dimd2[0] - 1)
+        flip2.setTranslation([vsd2.rotation().value(0, 0) * (dimd2[0] - 1),
+                              0, 0])
 
-    mat = [x.split() for x in open(matfile).readlines()]
+    with open(matfile) as f:
+        mat = [x.split() for x in f.readlines()]
     mot = aims.Motion()
     mot.fromMatrix(numpy.mat(mat))
 
-    trm = vsm2 * s2m2 * vsd2.inverse() * flip2.inverse() * mot \
-        * flip1 * vsd1 * m2s1 * vsm1.inverse()
+    trm = (vsm2 * s2m2 * vsd2.inverse() * flip2.inverse() * mot
+           * flip1 * vsd1 * m2s1 * vsm1.inverse())
 
     return trm
