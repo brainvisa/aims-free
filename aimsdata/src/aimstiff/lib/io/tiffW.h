@@ -215,13 +215,31 @@ namespace aims
     TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, RESUNIT_CENTIMETER);
     TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, sampleformat);
 
-    // Write the information to the file
     tsize_t res;
-    int y, ny = data.dimY();
+    int y, ny = data.dimY(), nx = data.dimX();
+
+    long stride = &data( 1 ) - &data( 0 );
+    std::vector<T> buffer;
+    if( stride != 1 )
+      // allocate buffer for un-strided data
+      buffer.resize( nx );
+    void *ptr;
+
+    // Write the information to the file
     for( y=0; y<ny; ++y )
     {
-      res = TIFFWriteEncodedStrip(tif, y, (byte *)&data(0, y, z, t),
-                                          (bps / 8) * spp * data.dimX() );
+      if( stride == 1 )
+        ptr = (void *) &data(0, y, z, t);
+      else
+      {
+        // stides along X axis: must copy things
+        const T* p = &data( 0, y, z, t );
+        for( long x=0; x<nx; ++x, p+=stride )
+          buffer[x] = *p;
+        ptr = (void *) &buffer[0];
+      }
+
+      res = TIFFWriteEncodedStrip(tif, y, ptr, (bps / 8) * spp * data.dimX() );
 
       if( res < 0 )
         throw carto::file_error( filename );

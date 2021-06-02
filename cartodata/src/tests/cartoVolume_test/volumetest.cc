@@ -211,8 +211,9 @@ int main( int /*argc*/, const char** /*argv*/ )
 {
   test( container<float>(), container<float>() );
   int   result = EXIT_SUCCESS;
+  int ntest = 0;
 
-  cout << "-- Test 0: volume copy --" << endl;
+  cout << "-- Test " << ntest++ << ": volume copy --" << endl;
   carto::Volume<int16_t> first( 5, 5, 5 );
   carto::Volume<int16_t> second( 3, 3, 3 );
   first = second;
@@ -229,7 +230,8 @@ int main( int /*argc*/, const char** /*argv*/ )
   }
   cout << endl;
 
-  cout << "-- Test 1: regular volume: vol1 ( 10, 10, 10 ) --" << endl;
+  cout << "-- Test " << ntest++ << ": regular volume: vol1 ( 10, 10, 10 ) --"
+       << endl;
   VolumeRef<int16_t>	vol1( new Volume<int16_t>( 10, 10, 10 ) );
   cout << "vol1 allocated. filling with value 5" << endl;
   vol1->fill( 5 );
@@ -247,7 +249,8 @@ int main( int /*argc*/, const char** /*argv*/ )
       result = EXIT_FAILURE;
     }
 
-  cout << "-- Test 2: volume view: vol2 ( 6, 6, 6 ) in vol1 --" << endl;
+  cout << "-- Test " << ntest++ << ": volume view: vol2 ( 6, 6, 6 ) in vol1 --"
+       << endl;
   VolumeRef<int16_t>	vol2
     ( new Volume<int16_t>( vol1,
                            Volume<int16_t>::Position4Di( 2, 2, 2 ),
@@ -271,6 +274,9 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << "filling vol2 with value 10" << endl;
 
   vol2->fill( 10 );
+  cout << "min: " << carto::min( vol2 ) << ", max: " << carto::max( vol2 )
+       << endl;
+
   cout << "value at pos( 1, 1, 1 ) (should be 10) : " << (*vol2)( 1, 1, 1 )
        << endl;
   if( (*vol2)( 1, 1, 1 ) != 10 )
@@ -317,7 +323,8 @@ int main( int /*argc*/, const char** /*argv*/ )
   else cout << "OK";
   cout << endl << endl;
 
-  cout << "-- Test 3: virtual volume: vol3 ( 10, 10, 10 ) --" << endl;
+  cout << "-- Test " << ntest++ << ": virtual volume: vol3 ( 10, 10, 10 ) --"
+       << endl;
   VolumeRef<int16_t>	vol3
     ( new Volume<int16_t>( 10, 10, 10, 1, AllocatorContext(), false ) );
   cout << "vol3 allocated" << endl;
@@ -329,7 +336,8 @@ int main( int /*argc*/, const char** /*argv*/ )
        << ", " << vol3->getSizeZ() << ", " << vol3->getSizeT() << std::endl;
   cout << endl;
 
-  cout << "-- Test 4: volume view: vol4 ( 6, 6, 6 ) in vol3 --" << endl;
+  cout << "-- Test " << ntest++ << ": volume view: vol4 ( 6, 6, 6 ) in vol3 --"
+       << endl;
   VolumeRef<int16_t>	vol4
     ( new Volume<int16_t>( vol3,
                            Volume<int16_t>::Position4Di( 2, 2, 2 ),
@@ -345,14 +353,98 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << "value at pos( 1, 1, 1 ) (should be 15) : " << (*vol4)( 1, 1, 1 )
        << endl;
   if( (*vol4)( 1, 1, 1 ) != 15 )
-    {
-      cerr << "*** error ***" << endl;
-      result = EXIT_FAILURE;
-    }
+  {
+    cerr << "*** error ***" << endl;
+    result = EXIT_FAILURE;
+  }
   cout << endl;
 
 
-  cout << "-- Test 5: operators -- " << endl;
+  cout << "-- Test " << ntest++ << ": volume with strides -- " << endl;
+  vector<int16_t> vec9( 3*4*5, 0 );
+  vector<int> dims9( 3 );
+  dims9[0] = 3;
+  dims9[1] = 4;
+  dims9[2] = 5;
+  vector<size_t> strides9( 3 );
+  strides9[0] = 4 * 5; // stored as z, y, x
+  strides9[1] = 5;
+  strides9[2] = 1;
+
+  VolumeRef<int16_t> vol9( new Volume<int16_t>( dims9, &vec9[0], &strides9 ) );
+  vol9->fill( 1 );
+  // set value 87 at position (1, 2, 3)
+  vec9[ 1 * 20 + 2 * 5 + 3 ] = 87;
+  cout << "value at pos( 1, 2, 3 ) (should be 87): " << (*vol9)( 1, 2, 3 )
+       << endl;
+  if( (*vol9)( 1, 2, 3 ) != 87 )
+  {
+    cerr << "*** error ***" << endl;
+    result = EXIT_FAILURE;
+  }
+  cout << endl;
+
+  // iterators
+  NDIterator<int16_t> it9( &vol9->at( 0 ), dims9, strides9 );
+  unsigned long long n9 = 0;
+  for( ; !it9.ended(); ++it9 )
+    n9 += *it9;
+  cout << "sum via NDIterartor: (should be " << 3 * 4 * 5 + 86 << "): " << n9
+       << endl;
+  if( n9 != 3 * 4 * 5 + 86 )
+  {
+    cerr << "*** error ***" << endl;
+    result = EXIT_FAILURE;
+  }
+  cout << endl;
+
+  line_NDIterator<int16_t> lit9( &vol9->at( 0 ), dims9, strides9, true );
+  cout << "line_iterator is_contiguous (should be true): "
+       << lit9.is_contiguous() << endl;
+  cout << "line_iterator line_direction (should be 2): "
+       << lit9.line_direction() << endl;
+  cout << "line_iterator line_length (should be 5): "
+       << lit9.line_length() << endl;
+  if( !lit9.is_contiguous() || lit9.line_direction() != 2
+      || lit9.line_length() != 5 )
+  {
+    cerr << "*** error ***" << endl;
+    result = EXIT_FAILURE;
+  }
+
+  line_NDIterator<int16_t> lit9b( &vol9->at( 0 ), dims9, strides9 );
+  cout << "line_iterator2 is_contiguous (should be false): "
+       << lit9b.is_contiguous() << endl;
+  cout << "line_iterator2 line_direction (should be 0): "
+       << lit9b.line_direction() << endl;
+  cout << "line_iterator line_length (should be 60): "
+       << lit9b.line_length() << endl;
+  if( lit9b.is_contiguous() || lit9b.line_direction() != 0
+      || lit9b.line_length() != 60 )
+  {
+    cerr << "*** error ***" << endl;
+    result = EXIT_FAILURE;
+  }
+
+  n9 = 0;
+  int16_t *p9, *pp9;
+  for( ; !lit9.ended(); ++lit9 )
+  {
+    p9 = &*lit9;
+    for( pp9=p9 + lit9.line_length(); p9!=pp9; lit9.inc_line_ptr( p9 ) )
+      n9 += *p9;
+  }
+  cout << "sum via line_NDIterartor: (should be " << 3 * 4 * 5 + 86 << "): "
+       << n9 << endl;
+  if( n9 != 3 * 4 * 5 + 86 )
+  {
+    cerr << "*** error ***" << endl;
+    result = EXIT_FAILURE;
+  }
+  cout << endl;
+
+
+  cout << "-- Test " << ntest++ << ": operators -- " << endl;
   cout << "vol1" << endl << vol1 << endl;
   VolumeRef<int16_t> vol5 = vol1 + vol1;
   cout << "vol5 = vol1 + vol1" << endl << vol5 << endl;
@@ -368,7 +460,7 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << "vol5 += 5." << endl << vol5 << endl;
 
 
-  cout << "-- Test 6: N-D iterators test --" << endl;
+  cout << "-- Test " << ntest++ << ": N-D iterators test --" << endl;
   vector<int> dims( 8, 1 );
   dims[0] = 3;
   dims[1] = 3;
@@ -392,8 +484,7 @@ int main( int /*argc*/, const char** /*argv*/ )
     cerr << endl;
   }
   size_t dim, ndim = vol7->getSize().size();
-  vector<size_t> sstrides = vol7->getStrides();
-  vector<int> strides( sstrides.begin(), sstrides.end() );
+  vector<size_t> strides = vol7->getStrides();
   NDIterator<int16_t> it( &vol7->at( 0 ), vol7->getSize(), strides );
   size_t cnt = 0;
   for( ; !it.ended(); ++it, ++cnt )
@@ -436,17 +527,70 @@ int main( int /*argc*/, const char** /*argv*/ )
   }
 
 
-  cout << "-- Test 7: speed test --" << endl;
+  // matrix_product test
+  cout << "-- Test " << ntest++ << ": matrix_product test --" << endl;
+
+  VolumeRef<float> mat1( 3, 4 );
+  VolumeRef<float> mat2( 5, 3);
+  VolumeRef<float> mat3;
+
+  try
+  {
+    mat3 = matrix_product( mat1, mat2 );
+    // if we are here the test hasn't fired the correct exception...
+    cerr << "matrix_product dimensions check did not operate" << endl;
+    result = EXIT_FAILURE;
+  }
+  catch( runtime_error & )
+  {
+    // OK this should fail...
+  }
+  mat2 = VolumeRef<float>( 4, 2 );
+  mat1.fill( 0. );
+  mat2.fill( 0. );
+  mat1(0, 0) = 1.;
+  mat1(1, 1) = 1.5;
+  mat1(2, 2) = .8;
+  mat1(2, 3) = 2.;
+  mat2(0, 0) = -0.5;
+  mat2(1, 1) = 1.2;
+  mat2(2, 0) = 1.1;
+  mat2(3, 1) = 0.7;
+  // std::cout << mat1 << endl;
+  // std::cout << mat2 << endl;
+  mat3 = matrix_product( mat1, mat2 );
+  // std::cout << mat3 << endl;
+  VolumeRef<float> mat4( 3, 2 );
+  mat4( 0, 0 ) = -0.5;
+  mat4( 0, 1 ) = 0;
+  mat4( 1, 0 ) = 0;
+  mat4( 1, 1 ) = 1.8;
+  mat4( 2, 0 ) = 0.88;
+  mat4( 2, 1 ) = 1.4;
+
+  mat4 -= mat3;
+  // cout << min( mat4 ) << ", " << max( mat4 ) << endl;
+  if( min( mat4 ) < -0.001 || max( mat4 ) > 0.001 )
+  {
+    cerr << "matrix_product is buggy" << endl;
+    result = EXIT_FAILURE;
+  }
+
+
+  cout << "-- Test " << ntest++ << ": speed test --" << endl;
   // allocate a 16 MB volume
   VolumeRef<int16_t>	vol6( 256, 256, 128 );
   int		n, nn = 0, x, y, z, t, nx = vol6->getSizeX(),
     ny = vol6->getSizeY(), nz = vol6->getSizeZ(), nt = vol6->getSizeT();
   long long     sz = nx * ny * nz * nt;
+  clock_t ck;
+
   cout << "accessors : " << flush;
 //   cout << "value before: " << vol6->at( 200, 200, 100 ) << endl;
-  clock_t	ck = clock();
+  ck = clock();
   float		ck2;
   int		testtime = 5;
+
   do
   {
     for( t=0; t<nt; ++t )
@@ -566,9 +710,8 @@ int main( int /*argc*/, const char** /*argv*/ )
        << "s : " << sz * nn / ck2 << " vox/s" << endl;
 
   cout << "N-D iterators : " << flush;
-  sstrides = vol6->getStrides();
-  strides.clear();
-  strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
+  strides = vol6->getStrides();
+  int stride0 = strides[0];
   ck = clock();
 //   for( n=0; n<nn; ++n )
   nn = 0;
@@ -584,17 +727,20 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << nn << " x 8M voxels in " << ck2
        << "s : " << sz * nn / ck2 << " vox/s" << endl;
 
+  int16_t	*pp3 = 0;
+
   cout << "line iterators : " << flush;
   ck = clock();
-//   for( n=0; n<nn; ++n )
   nn = 0;
   do
   {
     line_NDIterator<int16_t> it3( &vol6->at( 0 ), vol6->getSize(), strides );
+    pp3 = &vol6->at( 0 );
     for( ; !it3.ended(); ++it3 )
     {
       p = &*it3;
-      for( pp=p + vol6->getSizeX(); p!=pp; ++p )
+      pp3 = p;
+      for( pp=p + it3.line_size() * strides[0]; p!=pp; it3.inc_line_ptr( p ) )
         ++(*p);
     }
     ++nn;
@@ -604,8 +750,7 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << nn << " x 8M voxels in " << ck2
        << "s : " << sz * nn / ck2 << " vox/s" << endl;
 
-
-  cout << "-- Test 8: fill methods --" << endl;
+  cout << "-- Test " << ntest++ << ": fill methods --" << endl;
   vector<int> dims8, pos, view_dims;
   dims8.push_back( 15 );
   dims8.push_back( 15 );
@@ -645,6 +790,7 @@ int main( int /*argc*/, const char** /*argv*/ )
          << endl;
     result = EXIT_FAILURE;
   }
+
 
   cout << "===========\n";
   cout << "Overall result: "

@@ -161,6 +161,118 @@ template class Creator<VolumeRef< long > >;
 template class Creator<VolumeRef< unsigned long > >;
 #endif
 
+template class VolumeUtilBase< bool, true >;
+template class VolumeUtilBase< int8_t, true >;
+template class VolumeUtilBase< uint8_t, true >;
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template class VolumeUtilBase< char, true >;
+#endif
+template class VolumeUtilBase< int16_t, true >;
+template class VolumeUtilBase< uint16_t, true >;
+template class VolumeUtilBase< int32_t, true >;
+template class VolumeUtilBase< uint32_t, true >;
+template class VolumeUtilBase< int64_t, true >;
+template class VolumeUtilBase< uint64_t, true >;
+template class VolumeUtilBase< float, true >;
+template class VolumeUtilBase< double, true >;
+template class VolumeUtilBase< cfloat, false >;
+template class VolumeUtilBase< cdouble, false >;
+#ifdef CARTO_LONG_IS_DISTINCT
+template class VolumeUtilBase< long, true >;
+template class VolumeUtilBase< unsigned long, true >;
+#endif
+
+template class VolumeUtil< bool >;
+template class VolumeUtil< int8_t >;
+template class VolumeUtil< uint8_t >;
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template class VolumeUtil< char >;
+#endif
+template class VolumeUtil< int16_t >;
+template class VolumeUtil< uint16_t >;
+template class VolumeUtil< int32_t >;
+template class VolumeUtil< uint32_t >;
+template class VolumeUtil< int64_t >;
+template class VolumeUtil< uint64_t >;
+template class VolumeUtil< float >;
+template class VolumeUtil< double >;
+template class VolumeUtil< cfloat >;
+template class VolumeUtil< cdouble >;
+#ifdef CARTO_LONG_IS_DISTINCT
+template class VolumeUtil< long >;
+template class VolumeUtil< unsigned long >;
+#endif
+
+template VolumeRef< bool > matrix_product<bool>(
+  const Volume< bool > &, const Volume< bool > & );
+template VolumeRef< int8_t > matrix_product(
+  const Volume< int8_t > &, const Volume< int8_t > & );
+template VolumeRef< uint8_t > matrix_product(
+  const Volume< uint8_t > &, const Volume< uint8_t > & );
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template VolumeRef< char > matrix_product(
+  const Volume< char > &, const Volume< char > & );
+#endif
+template VolumeRef< int16_t > matrix_product(
+  const Volume< int16_t > &, const Volume< int16_t > & );
+template VolumeRef< uint16_t > matrix_product(
+  const Volume< uint16_t > &, const Volume< uint16_t > & );
+template VolumeRef< int32_t > matrix_product(
+  const Volume< int32_t > &, const Volume< int32_t > & );
+template VolumeRef< uint32_t > matrix_product(
+  const Volume< uint32_t > &, const Volume< uint32_t > & );
+template VolumeRef< int64_t > matrix_product(
+  const Volume< int64_t > &, const Volume< int64_t > & );
+template VolumeRef< uint64_t > matrix_product(
+  const Volume< uint64_t > &, const Volume< uint64_t > & );
+template VolumeRef< float > matrix_product(
+  const Volume< float > &, const Volume< float > & );
+template VolumeRef< double > matrix_product(
+  const Volume< double > &, const Volume< double > & );
+#ifdef CARTO_LONG_IS_DISTINCT
+template VolumeRef< long > matrix_product(
+  const Volume< long > &, const Volume< long > & );
+template VolumeRef< unsigned long > matrix_product(
+  const Volume< unsigned long > &, const Volume< unsigned long > & );
+#endif
+
+template VolumeRef< bool > matrix_product<bool>(
+  const VolumeRef< bool > &, const VolumeRef< bool > & );
+template VolumeRef< int8_t > matrix_product(
+  const VolumeRef< int8_t > &, const VolumeRef< int8_t > & );
+template VolumeRef< uint8_t > matrix_product(
+  const VolumeRef< uint8_t > &, const VolumeRef< uint8_t > & );
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template VolumeRef< char > matrix_product(
+  const VolumeRef< char > &, const VolumeRef< char > & );
+#endif
+template VolumeRef< int16_t > matrix_product(
+  const VolumeRef< int16_t > &, const VolumeRef< int16_t > & );
+template VolumeRef< uint16_t > matrix_product(
+  const VolumeRef< uint16_t > &, const VolumeRef< uint16_t > & );
+template VolumeRef< int32_t > matrix_product(
+  const VolumeRef< int32_t > &, const VolumeRef< int32_t > & );
+template VolumeRef< uint32_t > matrix_product(
+  const VolumeRef< uint32_t > &, const VolumeRef< uint32_t > & );
+template VolumeRef< int64_t > matrix_product(
+  const VolumeRef< int64_t > &, const VolumeRef< int64_t > & );
+template VolumeRef< uint64_t > matrix_product(
+  const VolumeRef< uint64_t > &, const VolumeRef< uint64_t > & );
+template VolumeRef< float > matrix_product(
+  const VolumeRef< float > &, const VolumeRef< float > & );
+template VolumeRef< double > matrix_product(
+  const VolumeRef< double > &, const VolumeRef< double > & );
+#ifdef CARTO_LONG_IS_DISTINCT
+template VolumeRef< long > matrix_product(
+  const VolumeRef< long > &, const VolumeRef< long > & );
+template VolumeRef< unsigned long > matrix_product(
+  const VolumeRef< unsigned long > &, const VolumeRef< unsigned long > & );
+#endif
+
 } // namespace carto
 
 // utilities

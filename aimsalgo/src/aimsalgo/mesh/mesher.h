@@ -39,6 +39,7 @@
 #include <aims/mesh/facet.h>
 #include <aims/mesh/surface.h>
 #include <aims/data/data.h>
+#include <aims/bucket/bucket.h>
 #include <map>
 #include <list>
 #include <vector>
@@ -48,7 +49,7 @@ typedef std::map< uint, Facet*, std::less< int > > MapOfFacet;
 template <typename T> class TimeTexture;
 
 
-class AIMSALGO_API Mesher
+class Mesher
 {
   public:
     enum SmoothingType
@@ -66,6 +67,10 @@ class AIMSALGO_API Mesher
                _smoothForce( 0.2 ),
                _smoothType( LOWPASS ),
                _deciFlag( false ),
+               _deciReductionRate( 99. ),
+               _deciMaxClearance( 3. ),
+               _deciMaxError( .2 ),
+               _deciFeatureAngle( 180. ),
                _splittingFlag( false ),
                _labelInf( 1 ),
                _labelSup( 32767 ),	// should maybe disapear ?
@@ -81,14 +86,22 @@ class AIMSALGO_API Mesher
                        const AimsData<short>& thing );
     void doit( const AimsData<short>& thing, const std::string& name,
                const std::string& mode = "binar" );
+    void doit( const aims::BucketMap<Void>& thing, const std::string& name,
+               const std::string& mode = "binar" );
     void doit( const AimsData<short>& thing,
                std::map<size_t, std::list<AimsSurfaceTriangle> >& surface );
-    void getBrain( const AimsData<short>& thing, 
-		   AimsSurfaceTriangle& surface, bool insideinterface=false );
-  // like getBrain but dedicated to gray/white interface in 6 connectivity,
-  // which solves hole problems. JFM
+    void doit( const aims::BucketMap<Void>& thing,
+               std::map<size_t, std::list<AimsSurfaceTriangle> >& surface );
+    void getBrain( const AimsData<short>& thing,
+                   AimsSurfaceTriangle& surface, bool insideinterface=false );
+    void getBrain( const aims::BucketMap<Void>& thing,
+                   AimsSurfaceTriangle& surface, bool insideinterface=false );
+    // like getBrain but dedicated to gray/white interface in 6 connectivity,
+    // which solves hole problems. JFM
     void getWhite( const AimsData<short>& thing, 
-		   AimsSurfaceTriangle& surface );
+                   AimsSurfaceTriangle& surface );
+    void getWhite( const aims::BucketMap<Void>& thing,
+                   AimsSurfaceTriangle& surface );
 
     // create one mesh for all components of each label
     void getSingleLabel( const AimsData<short>& thing,
@@ -99,25 +112,28 @@ class AIMSALGO_API Mesher
     void getMeshFromMapOfFacet(const AimsData<short>& thing,
              AimsSurfaceTriangle& surface, MapOfFacet &mof);
 
-    // SMOOTHING
-    // =========
-    // default : smoothType = LOWPASS
-    //           smoothIt = 30
-    //           smoothRate in [0.0;1.0] (instance : 0.4)
-    //           smoothFeatureAngle = 180.0 deg
-    //           smoothForce in [0.0;1.0] (instance : 0.2)
+    /** Smoothing
+
+    default : smoothType = LOWPASS (other values are LAPLACIAN, SIMPLESPRING,
+                                    POLYGONSPRING)
+              smoothIt = 30
+              smoothRate in [0.0;1.0] (instance : 0.4)
+              smoothForce in [0.0;1.0] (instance : 0.2)
+    */
     void setSmoothing( SmoothingType smoothType, int smoothIt, float smoothRate );
+    // smoothFeatureAngle good value: 180. degrees
     void setSmoothingLaplacian( float smoothFeatureAngle );
     void setSmoothingSpring( float smoothForce );
     void unsetSmoothing();
     void smooth( AimsSurfaceTriangle& surface );
 
-    // DECIMATION
-    // ==========
-    // default : deciReductionRate = 100.0 %
-    //           deciMaxClearance = 5.0
-    //           deciMaxError = 0.003
-    //           deciFeatureAngle = 120.0 deg
+    /** Decimation
+
+    default : deciReductionRate = 99.0 %
+              deciMaxClearance = 3.0
+              deciMaxError = 0.2
+              deciFeatureAngle = 180.0 deg
+    */
     void setDecimation( float deciReductionRate,
                         float deciMaxClearance,
                         float deciMaxError,
@@ -139,8 +155,11 @@ class AIMSALGO_API Mesher
     // SPLITTING SURFACE OF CONNECTED COMP.
     // ====================================
     void doit( const AimsData<short>& thing,
-               std::map< size_t, std::list< std::map<short, 
-	       std::list<AimsSurfaceTriangle > > > >& surface );
+               std::map< size_t, std::list< std::map<short,
+                  std::list<AimsSurfaceTriangle > > > >& surface );
+    void doit( const aims::BucketMap<Void>& thing,
+               std::map< size_t, std::list< std::map<short,
+                  std::list<AimsSurfaceTriangle > > > >& surface );
     void setSplitting();
     void unsetSplitting();
 
@@ -255,13 +274,16 @@ class AIMSALGO_API Mesher
     void splitting( const AimsData< short >& thing,
                     const std::vector< Facet* >& vfac,
                     const AimsSurfaceTriangle& surface,
-                    std::map<short,std::list< AimsSurfaceTriangle> >& 
-		    splitted );
+                    std::map<short,std::list< AimsSurfaceTriangle> >&
+                      splitted );
 
     void getFacet( const AimsSurfaceTriangle& surface, 
-		   std::vector< Facet* >& vfac );
+                   std::vector< Facet* >& vfac );
 
     void clear( std::map< size_t, std::list< MapOfFacet > >& interface );
+    /// reshape (if needed) the input volume to add a border filled with -1
+    static carto::VolumeRef<int16_t> reshapedVolume(
+      const carto::VolumeRef<int16_t> in_vol );
 };
 
 

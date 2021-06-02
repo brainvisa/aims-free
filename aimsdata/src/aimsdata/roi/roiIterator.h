@@ -61,13 +61,13 @@ namespace aims
   {
   public:
 
-    VolumeROILabelMap( AimsData< int32_t > & );
+    VolumeROILabelMap( carto::VolumeRef< int32_t > & );
     virtual ~VolumeROILabelMap() {}
 
     virtual int32_t at( const Point3df & ) const;
 
   private:
-    AimsData< int32_t > _volume;
+    carto::VolumeRef< int32_t > _volume;
   };
 
 
@@ -76,7 +76,7 @@ namespace aims
   {
   public:
 
-    MotionedVolumeROILabelMap( AimsData< int32_t > &, const Motion & );
+    MotionedVolumeROILabelMap( carto::VolumeRef< int32_t > &, const Motion & );
     virtual ~MotionedVolumeROILabelMap() {}
 
     virtual int32_t at( const Point3df & ) const;
@@ -221,10 +221,9 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  class RoiIteratorOf< AimsData<T> > : public RoiIterator
+  class RoiIteratorOf< carto::VolumeRef<T> > : public RoiIterator
   {
-    mutable AimsData<T> *_data;
-    bool _freeData;
+    mutable carto::VolumeRef<T> _data;
     Point3d _current;
     typename std::map< T, specifiedLabels > _labels;
     typename std::map< T, specifiedLabels >::const_iterator _label;
@@ -234,7 +233,7 @@ namespace aims
 
   public:
 
-    RoiIteratorOf( const AimsData<T> &data,
+    RoiIteratorOf( const carto::VolumeRef<T> &data,
                    carto::rc_ptr< VoxelSampler > voxelSampler =
                    carto::rc_ptr< VoxelSampler >() );
     RoiIteratorOf( const std::string &fileName,
@@ -256,10 +255,10 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  RoiIteratorOf< AimsData<T> >::RoiIteratorOf( const AimsData<T> &data,
-                   carto::rc_ptr< VoxelSampler > voxelSampler ) :
-    _data( const_cast< AimsData<T> *>( &data ) ),
-    _freeData( false ),
+  RoiIteratorOf< carto::VolumeRef<T> >::RoiIteratorOf(
+    const carto::VolumeRef<T> &data,
+    carto::rc_ptr< VoxelSampler > voxelSampler ) :
+    _data( data ),
     _voxelSampler( voxelSampler )
   {
     buildLabels();
@@ -268,28 +267,27 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  RoiIteratorOf< AimsData<T> >::RoiIteratorOf( const std::string &fileName,
-                   carto::rc_ptr< VoxelSampler > voxelSampler ) :
-    _data( new AimsData<T> ),
-    _freeData( true ),
+  RoiIteratorOf< carto::VolumeRef<T> >::RoiIteratorOf(
+    const std::string &fileName, carto::rc_ptr< VoxelSampler > voxelSampler ) :
+    _data(),
     _voxelSampler( voxelSampler )
   {
-    Reader< AimsData<T> > reader( fileName );
-    reader.read( *_data );
+    Reader< carto::Volume<T> > reader( fileName );
+    _data.reset( reader.read() );
     buildLabels();
     restart();
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  void RoiIteratorOf< AimsData<T> >::buildLabels()
+  void RoiIteratorOf< carto::VolumeRef<T> >::buildLabels()
   {
     Point3d p;
     typename std::map< T, specifiedLabels >::iterator it;
 
-    for( p[2] = 0; p[2] < _data->dimZ(); ++p[2] ) {
-      for( p[1] = 0; p[1] < _data->dimY(); ++p[1] ) {
-        for( p[0] = 0; p[0] < _data->dimX(); ++p[0] ) {
+    for( p[2] = 0; p[2] < _data->getSizeZ(); ++p[2] ) {
+      for( p[1] = 0; p[1] < _data->getSizeY(); ++p[1] ) {
+        for( p[0] = 0; p[0] < _data->getSizeX(); ++p[0] ) {
           T v = (*_data)( p );
           // NaN values are considered background like 0 (SPM does so)
           if ( v && !std::isnan( v ) ) {
@@ -308,25 +306,25 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  RoiIteratorOf< AimsData<T> >::~RoiIteratorOf()
+  RoiIteratorOf< carto::VolumeRef<T> >::~RoiIteratorOf()
   {
-    if ( _freeData ) delete _data;
   }
 
 
   //---------------------------------------------------------------------------
   template <class T>
-  carto::rc_ptr< MaskIterator > RoiIteratorOf< AimsData<T> >::
+  carto::rc_ptr< MaskIterator >
+  RoiIteratorOf< carto::VolumeRef<T> >::
   maskIterator() const
   {
     return carto::rc_ptr< MaskIterator >
-      ( new MaskIteratorOf< AimsData<T> >( *_data, _label->second,
-                                           _voxelSampler ) );
+      ( new MaskIteratorOf< carto::VolumeRef<T> >( _data, _label->second,
+                                                   _voxelSampler ) );
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  void RoiIteratorOf< AimsData<T> >::next()
+  void RoiIteratorOf< carto::VolumeRef<T> >::next()
   {
     ++_label;
   }
@@ -334,28 +332,28 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  bool RoiIteratorOf< AimsData<T> >::isValid() const
+  bool RoiIteratorOf< carto::VolumeRef<T> >::isValid() const
   {
     return _label != _labels.end();
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  void RoiIteratorOf< AimsData<T> >::restart()
+  void RoiIteratorOf< carto::VolumeRef<T> >::restart()
   {
     _label = _labels.begin();
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  size_t  RoiIteratorOf< AimsData<T> >::count() const
+  size_t  RoiIteratorOf< carto::VolumeRef<T> >::count() const
   {
     return _labels.size();
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  std::string RoiIteratorOf< AimsData<T> >::regionName() const
+  std::string RoiIteratorOf< carto::VolumeRef<T> >::regionName() const
   {
     return carto::toString( _label->first );
   }
@@ -372,12 +370,34 @@ namespace aims
   //---------------------------------------------------------------------------
   template <class T>
   carto::rc_ptr< RoiIterator >
+  getRoiIterator( const carto::VolumeRef< T > &data,
+                  carto::rc_ptr< VoxelSampler > voxelSampler =
+                  carto::rc_ptr< VoxelSampler >() )
+  {
+    return carto::rc_ptr< RoiIterator >
+      ( new RoiIteratorOf< carto::VolumeRef<T> >( data, voxelSampler ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< RoiIterator >
+  getRoiIterator( const carto::rc_ptr<carto::Volume< T > > &data,
+                  carto::rc_ptr< VoxelSampler > voxelSampler =
+                  carto::rc_ptr< VoxelSampler >() )
+  {
+    return carto::rc_ptr< RoiIterator >
+      ( new RoiIteratorOf< carto::VolumeRef<T> >( data, voxelSampler ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< RoiIterator >
   getRoiIterator( const AimsData< T > &data,
                   carto::rc_ptr< VoxelSampler > voxelSampler =
                   carto::rc_ptr< VoxelSampler >() )
   {
     return carto::rc_ptr< RoiIterator >
-      ( new RoiIteratorOf< AimsData<T> >( data, voxelSampler ) );
+      ( new RoiIteratorOf< carto::VolumeRef<T> >( data, voxelSampler ) );
   }
 
   //---------------------------------------------------------------------------
@@ -398,8 +418,28 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  carto::rc_ptr< RoiIterator > getRoiIterator( const AimsData< T > &data,
-                                               const Motion &motion )
+  carto::rc_ptr< RoiIterator > getRoiIterator(
+    const carto::VolumeRef< T > &data, const Motion &motion )
+  {
+    return carto::
+      rc_ptr< RoiIterator >( new MotionedRoiIterator( getRoiIterator( data ),
+                                                      motion ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< RoiIterator > getRoiIterator(
+    const carto::rc_ptr<carto::Volume< T > > &data, const Motion &motion )
+  {
+    return carto::
+      rc_ptr< RoiIterator >( new MotionedRoiIterator( getRoiIterator( data ),
+                                                      motion ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< RoiIterator > getRoiIterator(
+    const AimsData< T > &data, const Motion &motion )
   {
     return carto::
       rc_ptr< RoiIterator >( new MotionedRoiIterator( getRoiIterator( data ),
@@ -409,6 +449,32 @@ namespace aims
   //---------------------------------------------------------------------------
   carto::rc_ptr< RoiIterator > getRoiIterator( const Graph &data,
                                                const Motion &motion ) ;
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< RoiIterator >
+  getRoiIterator( const carto::VolumeRef< T > &data,
+                  carto::rc_ptr< VoxelSampler > voxelSampler,
+                  const Motion &motion )
+  {
+    return carto::
+      rc_ptr< RoiIterator >
+      ( new MotionedRoiIterator( getRoiIterator( data, voxelSampler ),
+                                 motion ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< RoiIterator >
+  getRoiIterator( const carto::rc_ptr<carto::Volume< T > > &data,
+                  carto::rc_ptr< VoxelSampler > voxelSampler,
+                  const Motion &motion )
+  {
+    return carto::
+      rc_ptr< RoiIterator >
+      ( new MotionedRoiIterator( getRoiIterator( data, voxelSampler ),
+                                 motion ) );
+  }
 
   //---------------------------------------------------------------------------
   template <class T>
@@ -430,7 +496,7 @@ namespace aims
                   const Motion &motion ) ;
 
   //---------------------------------------------------------------------------
-  extern template class RoiIteratorOf<AimsData<int16_t> >;
+  extern template class RoiIteratorOf<carto::VolumeRef<int16_t> >;
   extern template class RoiIteratorOf<Graph>;
   
 } // namespace aims

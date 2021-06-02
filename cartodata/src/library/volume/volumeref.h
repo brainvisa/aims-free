@@ -36,9 +36,6 @@
 
 //--- cartodata --------------------------------------------------------------
 #include <cartodata/volume/volumebase.h>
-#include <cartodata/volume/volumebase_d_operators.h>
-#include <cartodata/volume/volumebase_d_inline.h>
-#include <cartodata/volume/volumebase_d_instantiate.h>
 //--- soma-io ----------------------------------------------------------------
 #include <soma-io/utilities/creator.h>
 //--- cartobase --------------------------------------------------------------

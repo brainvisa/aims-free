@@ -70,51 +70,18 @@ buildObjectsAttributes( const Graph & gr,
 namespace aims
 {
   template<> AimsGraphReader::Wrapper * 
-  AimsGraphReader::ObjectWrapper<AimsData<short> >::extract( int )
+  AimsGraphReader::ObjectWrapper<Volume<short> >::extract( int )
   {
-    return( new ObjectWrapper<AimsData<short> >( 0 ) );
+    return( new ObjectWrapper<Volume<short> >( 0 ) );
   }
 
   template<> AimsGraphReader::Wrapper *
-  AimsGraphReader::ObjectWrapper<AimsData<int32_t> >::extract( int )
+  AimsGraphReader::ObjectWrapper<Volume<int32_t> >::extract( int )
   {
-    return( new ObjectWrapper<AimsData<int32_t> >( 0 ) );
+    return( new ObjectWrapper<Volume<int32_t> >( 0 ) );
   }
 }
 
-
-#if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 == 95 )
-static void AimsGraphReader_construct( AimsGraphReader & gr )
-{
-  string	bck = DataTypeCode<BucketMap<Void> >().objectType();
-  string	seg = DataTypeCode<AimsTimeSurface<2, Void> >().objectType();
-  string	msh = DataTypeCode<AimsSurfaceTriangle>().objectType();
-  string	vol = DataTypeCode<AimsData<short> >().objectType();
-  string        vol32 = DataTypeCode<AimsData<int32_t> >().objectType();
-  string	tex = DataTypeCode<Texture1d>().objectType();
-  string	p2f = DataTypeCode<Point2df>::name();
-  string	vod = DataTypeCode<Void>::name();
-  string	flt = DataTypeCode<float>::name();
-  string	s16 = DataTypeCode<int16_t>::name();
-  string        s32 = DataTypeCode<int32_t>::name();
-  gr.registerProcessType( bck, vod,
-                          &AimsGraphReader::read<BucketMap<Void> > );
-  gr.registerProcessType( msh, vod,
-                          &AimsGraphReader::read<AimsSurfaceTriangle> );
-  gr.registerProcessType( seg, vod,
-                          &AimsGraphReader::read<AimsTimeSurface<2, Void> > );
-  gr.registerProcessType( tex, flt,
-                          &AimsGraphReader::read<Texture1d> );
-  gr.registerProcessType( tex, s16,
-                          &AimsGraphReader::read<TimeTexture<short> > );
-  gr.registerProcessType( tex, p2f,
-                          &AimsGraphReader::read<Texture2d> );
-  gr.registerProcessType( vol, s16,
-                          &AimsGraphReader::read<AimsData<short> > );
-  gr.registerProcessType( vol32, s32,
-                          &AimsGraphReader::read<AimsData<int32_t> > );
-}
-#endif
 
 AimsGraphReader::AimsGraphReader( const string & fname )
   : Process(), _priv( new AimsGraphReader_Private )
@@ -123,8 +90,9 @@ AimsGraphReader::AimsGraphReader( const string & fname )
   string	bck = DataTypeCode<BucketMap<Void> >().objectType();
   string	seg = DataTypeCode<AimsTimeSurface<2, Void> >().objectType();
   string	msh = DataTypeCode<AimsSurfaceTriangle>().objectType();
-  string	vol = DataTypeCode<AimsData<short> >().objectType();
-  string        vol32 = DataTypeCode<AimsData<int32_t> >().objectType();
+  string	vol = DataTypeCode<Volume<short> >().objectType();
+  string        vol32 = DataTypeCode<Volume<int32_t> >().objectType();
+  string	avol = DataTypeCode<AimsData<short> >().objectType();
   string	tex = DataTypeCode<Texture1d>().objectType();
   string	p2f = DataTypeCode<Point2df>::name();
   string	vod = DataTypeCode<Void>::name();
@@ -132,20 +100,6 @@ AimsGraphReader::AimsGraphReader( const string & fname )
   string	s16 = DataTypeCode<int16_t>::name();
   string        s32 = DataTypeCode<int32_t>::name();
 
-#if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 == 95 )
-  // workaround bug in gcc-2.95
-  AimsGraphReader_construct( *this );
-#elif ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
-  // workaround bug in egcs-1.1.2, avoid it in gcc-2.96
-  registerProcessType( bck, vod, &read<BucketMap<Void> > );
-  registerProcessType( msh, vod, &read<AimsSurfaceTriangle> );
-  registerProcessType( seg, vod, &read<AimsTimeSurface<2, Void> > );
-  registerProcessType( tex, flt, &read<Texture1d> );
-  registerProcessType( tex, s16, &read<TimeTexture<short> > );
-  registerProcessType( tex, p2f, &read<Texture2d> );
-  registerProcessType( vol, s16, &read<AimsData<short> > );
-  registerProcessType( vol32, s32, &read<AimsData<int32_t> > );
-#else
   registerProcessType( bck, vod, &AimsGraphReader::read<BucketMap<Void> > );
   registerProcessType( msh, vod, &AimsGraphReader::read<AimsSurfaceTriangle> );
   registerProcessType( seg, vod, 
@@ -153,9 +107,10 @@ AimsGraphReader::AimsGraphReader( const string & fname )
   registerProcessType( tex, flt, &AimsGraphReader::read<Texture1d> );
   registerProcessType( tex, s16, &AimsGraphReader::read<TimeTexture<short> > );
   registerProcessType( tex, p2f, &AimsGraphReader::read<Texture2d> );
-  registerProcessType( vol, s16, &AimsGraphReader::read<AimsData<short> > );
-  registerProcessType( vol32, s32, &AimsGraphReader::read<AimsData<int32_t> > );
-#endif
+  registerProcessType( vol, s16, &AimsGraphReader::read<Volume<short> > );
+  registerProcessType( vol32, s32, &AimsGraphReader::read<Volume<int32_t> > );
+  registerProcessType( avol, s16, &AimsGraphReader::read<Volume<short> > );
+  registerProcessType( avol, s32, &AimsGraphReader::read<Volume<int32_t> > );
 }
 
 
@@ -210,26 +165,26 @@ scanGlobalObjectAttribute( const Graph & gr,
   vector<int>	col;
 
   while( !sst.eof() )
+  {
+    sst >> str;	// attribute describing a syntactic attribute
+
+    if ( gr.getProperty( str, al ) )	// list of attributes
     {
-      sst >> str;	// attribute describing a syntactic attribute
+      istringstream	sa( al.c_str() ); //, al.length() );
 
-      if ( gr.getProperty( str, al ) )	// list of attributes
-	{
-	  istringstream	sa( al.c_str() ); //, al.length() );
-
-	  sa >> syntA;	// first: syntactic att
-	  while( !sa.eof() )
-	    {
-	      sa >> filen;	// filename for bucket / mesh
-	      sa >> str;	// attribute for [time] index in bck/mesh
-	      attlist[ syntA ][ filen ] = str;
-	      // cout << "global attrib, synt : " << syntA 
-	      //    << ", attrib : " << str << ", file : " << filen << endl;
-	      if ( gr.getProperty( str, col ) && col.size() >= 3 )
-		colors[ str ] = col;
-	    }
-	}
+      sa >> syntA;	// first: syntactic att
+      while( !sa.eof() )
+      {
+        sa >> filen;	// filename for bucket / mesh
+        sa >> str;	// attribute for [time] index in bck/mesh
+        attlist[ syntA ][ filen ] = str;
+        /* cout << "global attrib, synt : " << syntA
+            << ", attrib : " << str << ", file : " << filen << endl; */
+        if ( gr.getProperty( str, col ) && col.size() >= 3 )
+          colors[ str ] = col;
+      }
     }
+  }
 }
 
 
@@ -271,14 +226,14 @@ buildObjectsAttributes( const Graph & gr,
 //  Loads objects and stores them in a list of wrappers
 void 
 AimsGraphReader_Private::loadGlobalObjects( map<string, 
-					    AimsGraphReader::Wrapper*> 
-					    & objects, 
-					    const map<string, map<string, 
-					    string> > & globals, 
-					    const string & basepath, 
-					    map<string, map<string, 
-					    GraphElementCode> > & objmap, 
-					    AimsGraphReader &agr )
+                                            AimsGraphReader::Wrapper*>
+                                            & objects,
+                                            const map<string, map<string,
+                                            string> > & globals,
+                                            const string & basepath,
+                                            map<string, map<string,
+                                            GraphElementCode> > & objmap,
+                                            AimsGraphReader &agr )
 {
   map<string, map<string, string> >::const_iterator 
     ig, ige = globals.end();
@@ -339,7 +294,8 @@ AimsGraphReader_Private::loadGlobalObjects( map<string,
           ec.attribute = string( "aims_" ) + attid;
         ec.objectType = info.object->objectType();
         ec.dataType = info.object->dataType();
-        if( ec.objectType == "Volume" )
+        if( ec.objectType == "Volume" || ec.objectType == "CartoVolume"
+            || ec.objectType == "VolumeRef" )
           ec.storageType = GraphElementCode::GlobalPacked;
         else
           ec.storageType = GraphElementCode::Global;
@@ -404,106 +360,106 @@ void AimsGraphReader::readElement( AttributedObject* v,
   map<string, string>::const_iterator	ila, ela;
   int					ind = 0;
 
-  //cout << "readElement " << v->getSyntax() << endl;
+  // cout << "readElement " << v->getSyntax() << endl;
 
   // look if there are things to load for this syntax
   itl = es.locals.find( v->getSyntax() );
   if ( itl != es.locals.end() )
-    {
-      list<string> 			& tl = (*itl).second;
+  {
+    list<string> 			& tl = (*itl).second;
 
-      // look for loadable objects attributes in node
-      for ( il=tl.begin(), fl=tl.end(); il!=fl; ++il )
-	if ( v->getProperty( *il, filename ) )
-	  {
-	    name = es.path + filename;
-	    pos = il->rfind( "_filename" );
-	    if ( pos == il->length() - 9 )
-	      attid = il->substr( 0, pos );
-	    else
-	      attid = *il;
-	    if ( es.filter == AimsGraphReader_ElemStruct::None 
-		|| ( es.filter == AimsGraphReader_ElemStruct::Exclude 
-		     && set<string>::const_iterator
-		     ( _priv->excludefilter.find( attid ) ) == ee ) 
-		|| ( es.filter == AimsGraphReader_ElemStruct::Read 
-		     && set<string>::const_iterator
-		     ( _priv->readfilter.find( attid ) ) != er ) )
-	      {
-		info.element = v;
-		info.attribute = string( "aims_" ) + attid;
-		if ( execute( name ) )
-		  {
-		    //attid2 = v->getSyntax() + '_' + attid;
-		    GraphElementCode	& ec = om[attid];
-		    ec.id = attid;
-		    ec.attribute = info.attribute;
-		    ec.objectType = info.object->objectType();
-		    ec.dataType = info.object->dataType();
-		    ec.storageType = GraphElementCode::Local;
-		    ec.local_file_attribute = *il;
-                    if( ec.global_filename.empty() )
-                      ec.global_filename = attid + '_' + ec.objectType;
-		    ec.global_index_attribute = attid + "_label";
-		    if ( !ec.syntax.empty() && ec.syntax != v->getSyntax() )
-		      cerr << "warning: changing syntax of ElementCode, " 
-			   << ec.syntax << " -> " << v->getSyntax() << endl;
-		    ec.syntax = v->getSyntax();
-		    es.fdr.setObjectType( ec.objectType );
-		    es.fdr.setDataType( ec.dataType );
-		    _priv->postproc.execute( es.fdr, name );
-		    delete info.object;
-		  }
-		else
-		  cerr << "loading " << name << " FAILED.\n";
-	      }
-	  }
-    }
+    // look for loadable objects attributes in node
+    for ( il=tl.begin(), fl=tl.end(); il!=fl; ++il )
+      if ( v->getProperty( *il, filename ) )
+      {
+        name = es.path + filename;
+        pos = il->rfind( "_filename" );
+        if ( pos == il->length() - 9 )
+          attid = il->substr( 0, pos );
+        else
+          attid = *il;
+        if ( es.filter == AimsGraphReader_ElemStruct::None
+            || ( es.filter == AimsGraphReader_ElemStruct::Exclude
+                  && set<string>::const_iterator
+                  ( _priv->excludefilter.find( attid ) ) == ee )
+            || ( es.filter == AimsGraphReader_ElemStruct::Read
+                  && set<string>::const_iterator
+                  ( _priv->readfilter.find( attid ) ) != er ) )
+        {
+          info.element = v;
+          info.attribute = string( "aims_" ) + attid;
+          if ( execute( name ) )
+          {
+            //attid2 = v->getSyntax() + '_' + attid;
+            GraphElementCode	& ec = om[attid];
+            ec.id = attid;
+            ec.attribute = info.attribute;
+            ec.objectType = info.object->objectType();
+            ec.dataType = info.object->dataType();
+            ec.storageType = GraphElementCode::Local;
+            ec.local_file_attribute = *il;
+            if( ec.global_filename.empty() )
+              ec.global_filename = attid + '_' + ec.objectType;
+            ec.global_index_attribute = attid + "_label";
+            if ( !ec.syntax.empty() && ec.syntax != v->getSyntax() )
+              cerr << "warning: changing syntax of ElementCode, "
+                    << ec.syntax << " -> " << v->getSyntax() << endl;
+            ec.syntax = v->getSyntax();
+            es.fdr.setObjectType( ec.objectType );
+            es.fdr.setDataType( ec.dataType );
+            _priv->postproc.execute( es.fdr, name );
+            delete info.object;
+          }
+          else
+            cerr << "loading " << name << " FAILED.\n";
+        }
+      }
+  }
 
   //	global objects
   igl = es.globals.find( v->getSyntax() );
   if ( igl != igle )
     //	for each (filename,attribute)
     for ( ila=(*igl).second.begin(), ela=(*igl).second.end(); ila!=ela; 
-	 ++ila )
+          ++ila )
       if ( v->getProperty( (*ila).second, ind ) )
-	{	// corresponding attribute present in node
-	  filename = (*ila).first;
-	  pos = filename.rfind( '.' );
-          attid = ila->second;
-	  pos = attid.rfind( '_' );
-          if( pos != string::npos )	// remove filename/label suffix
+      {	// corresponding attribute present in node
+        filename = (*ila).first;
+        pos = filename.rfind( '.' );
+        attid = ila->second;
+        pos = attid.rfind( '_' );
+        if( pos != string::npos )	// remove filename/label suffix
+        {
+          string suffix = attid.substr( pos, attid.length() - pos );
+          if( suffix == "_label" || suffix == "_filename" )
+            attid.erase( pos, attid.length() - pos );
+        }
+        if ( es.filter == AimsGraphReader_ElemStruct::None
+             || ( es.filter == AimsGraphReader_ElemStruct::Exclude
+                  && set<string>::const_iterator
+                  ( _priv->excludefilter.find( attid ) ) == ee )
+             || ( es.filter == AimsGraphReader_ElemStruct::Read
+                  && set<string>::const_iterator
+                  ( _priv->readfilter.find( attid ) ) != er ) )
+        {
+          attrib = string( "aims_" ) + attid;
+          info.element = v;
+          info.attribute = attrib;
+          map<string, AimsGraphReader::Wrapper*>::iterator	igo
+            = es.gobjects.find( filename );
+          if ( igo != es.gobjects.end() )
           {
-            string suffix = attid.substr( pos, attid.length() - pos );
-            if( suffix == "_label" || suffix == "_filename" )
-              attid.erase( pos, attid.length() - pos );
+            if ( igo->second )
+              info.object = igo->second->extract( ind );
+            else cerr << "object " << igo->first << " declared but "
+                      << "not found\n";
+            es.fdr.setObjectType( info.object->objectType() );
+            es.fdr.setDataType( info.object->dataType() );
+            _priv->postproc.execute( es.fdr, "dummy" );
+            delete info.object;
           }
-	  if ( es.filter == AimsGraphReader_ElemStruct::None 
-	      || ( es.filter == AimsGraphReader_ElemStruct::Exclude 
-		   && set<string>::const_iterator
-		   ( _priv->excludefilter.find( attid ) ) == ee ) 
-	      || ( es.filter == AimsGraphReader_ElemStruct::Read 
-		   && set<string>::const_iterator
-		   ( _priv->readfilter.find( attid ) ) != er ) )
-	    {
-	      attrib = string( "aims_" ) + attid;
-	      info.element = v;
-	      info.attribute = attrib;
-	      map<string, AimsGraphReader::Wrapper*>::iterator	igo 
-		= es.gobjects.find( filename );
-	      if ( igo != es.gobjects.end() )
-		{
-		  if ( igo->second )
-		    info.object = igo->second->extract( ind );
-		  else cerr << "object " << igo->first << " declared but "
-			    << "not found\n";
-		  es.fdr.setObjectType( info.object->objectType() );
-		  es.fdr.setDataType( info.object->dataType() );
-		  _priv->postproc.execute( es.fdr, "dummy" );
-		  delete info.object;
-		}
-	    }
-	}
+        }
+      }
 }
 
 
@@ -572,7 +528,7 @@ void AimsGraphReader::readElements( Graph & g, int mask )
   g.setProperty( "object_attributes_colors", objAttColors );
 
   AimsGraphReader_Private::loadGlobalObjects( es.gobjects, es.globals, 
-					      es.path, *es.objTable, *this );
+                                              es.path, *es.objTable, *this );
   // cout << "loadGlobalObjects done\n";
   // cout << "gobjects : " << es.gobjects.size() << endl;
 
@@ -584,20 +540,20 @@ void AimsGraphReader::readElements( Graph & g, int mask )
     es.filter = AimsGraphReader_ElemStruct::Exclude;
 
   if ( mask & 1 )
-    {
-      // cout << "graph : " << g.order() << " nodes\n";
-      for ( iv=g.begin(); iv!=fv; ++iv )
-        readElement( *iv, es );
-    }
+  {
+    // cout << "graph : " << g.order() << " nodes\n";
+    for ( iv=g.begin(); iv!=fv; ++iv )
+      readElement( *iv, es );
+  }
 
   if ( mask & 2 )
-    {
-      const set<Edge *>			&edg = g.edges();
-      set<Edge *>::const_iterator	ie, ee = edg.end();
+  {
+    const set<Edge *>	&edg = g.edges();
+    set<Edge *>::const_iterator	ie, ee = edg.end();
 
-      for ( ie=edg.begin(); ie!=ee; ++ie )
-	readElement( *ie, es );
-    }
+    for ( ie=edg.begin(); ie!=ee; ++ie )
+      readElement( *ie, es );
+  }
 
   g.setProperty( "aims_objects_table", es.objTable );
 
@@ -609,43 +565,45 @@ void AimsGraphReader::readElements( Graph & g, int mask )
   map<string, GraphElementCode>::const_iterator	iot, eot;
 
   for ( ig=es.globals.begin(); ig!=ige; ++ig )
+  {
+    map<string, GraphElementCode>	& om = (*es.objTable)[ ig->first ];
+    for ( iot=om.begin(), eot=om.end(); iot!=eot; ++iot )
     {
-      map<string, GraphElementCode>	& om = (*es.objTable)[ ig->first ];
-      for ( iot=om.begin(), eot=om.end(); iot!=eot; ++iot )
-	{
-	  ib = es.gobjects.find( iot->second.global_filename );
-	  if ( ib != ibe )
-	    {
-              /*
-	      cout << "cleanup - " << iot->second.attribute << ", file "
-		   << iot->second.global_filename << ", id: " 
-		   << iot->first << endl;
-              */
-	      // keep volumes in GlobalPacked mode
-	      if ( ib->second->objectType() == "Volume" )
-		{
-		  //cout << "Volume: keep GlobalPacked\n";
-		  //cout << iot->second.global_attribute << endl;
-		  es.fdr.setObjectType( ib->second->objectType() );
-		  es.fdr.setDataType( ib->second->dataType() );
-		  ElementInfo & ei = _priv->postproc.elementInfo();
-		  ei.graph = &g;
-		  ei.element = &g;
-		  ei.attribute = iot->second.global_attribute;
-		  ei.object = ib->second;
-		  _priv->postproc.execute( es.fdr, 
-					   iot->second.global_filename );
-		}
-	      else
-		{
-		  // cout << "destroy " << iot->second.attribute << endl;
-		  ib->second->destroy();
-		}
-	      delete ib->second;
-	      es.gobjects.erase( ib );
-	    }
-	}
+      ib = es.gobjects.find( iot->second.global_filename );
+      if ( ib != ibe )
+      {
+        /*
+        cout << "cleanup - " << iot->second.attribute << ", file "
+              << iot->second.global_filename << ", id: "
+              << iot->first << endl;
+        */
+        // keep volumes in GlobalPacked mode
+        if ( ib->second->objectType() == "Volume"
+             || ib->second->objectType() == "CartoVolume"
+             || ib->second->objectType() == "VolumeRef" )
+        {
+          // cout << "Volume: keep GlobalPacked\n";
+          // cout << iot->second.global_attribute << endl;
+          es.fdr.setObjectType( ib->second->objectType() );
+          es.fdr.setDataType( ib->second->dataType() );
+          ElementInfo & ei = _priv->postproc.elementInfo();
+          ei.graph = &g;
+          ei.element = &g;
+          ei.attribute = iot->second.global_attribute;
+          ei.object = ib->second;
+          _priv->postproc.execute( es.fdr,
+                                    iot->second.global_filename );
+        }
+        else
+        {
+          // cout << "destroy " << iot->second.attribute << endl;
+          ib->second->destroy();
+        }
+        delete ib->second;
+        es.gobjects.erase( ib );
+      }
     }
+  }
 
   // debug
   /*
@@ -676,7 +634,7 @@ void AimsGraphReader::readElements( Graph & g, int mask )
   mask2 |= mask;
   g.setProperty( "aims_reader_loaded_objects", mask2 );
 
-  //cout << "readElements done\n";
+  // cout << "readElements done\n";
 }
 
 
@@ -695,8 +653,8 @@ void AimsGraphReader::setExcludeFilter( const set<string> & filt )
 
 
 void AimsGraphReader::setInsertionFunction( const std::string & objType, 
-					    const std::string & dataType, 
-					    ProcFunc procFunc )
+                                            const std::string & dataType,
+                                            ProcFunc procFunc )
 {
   _priv->postproc.registerProcessType( objType, dataType, procFunc );
 }

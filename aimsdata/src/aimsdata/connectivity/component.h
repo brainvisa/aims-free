@@ -37,10 +37,11 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/connectivity/connectivity.h>
+#include <aims/data/data.h>
 
 template <typename T> class AimsBucket;
 class Void;
-template <typename T> class AimsData;
+
 
 namespace aims
 {
@@ -48,7 +49,8 @@ namespace aims
   template <typename T> class BucketMap;
   
   template <typename T, typename O>
-  class ConnectedComponentEngine {
+  class ConnectedComponentEngine
+  {
 
     private :
       ConnectedComponentEngine();
@@ -56,109 +58,124 @@ namespace aims
   
   // Specialization
   template <typename T, typename O>
-  class ConnectedComponentEngine<AimsData<T>, AimsData<O> > {
+  class ConnectedComponentEngine<carto::VolumeRef<T>, carto::VolumeRef<O> >
+  {
 
     public :
-      static void filterInFrame( const AimsData<T>& cc, 
-                                 AimsData<O>& out,
+      static void connected( const carto::VolumeRef<T>& data,
+                             carto::VolumeRef<O> out,
+                             aims::Connectivity::Type connectivity,
+                             std::map<O, size_t>& valids,
+                             const T & backgrnd = 0, bool bin = true,
+                             size_t minSize = 0, size_t maxSize = 0,
+                             size_t numMax = 0,
+                             bool verbose = true );
+
+
+      static void connected( const carto::VolumeRef<T>& data,
+                             carto::VolumeRef<O> out,
+                             aims::Connectivity::Type connectivity,
+                             const T & backgrnd = 0, bool bin = true,
+                             size_t minSize = 0, size_t maxSize = 0,
+                             size_t numMax = 0,
+                             bool verbose = true );
+
+      static void filterInFrame( const carto::VolumeRef<T>& cc,
+                                 carto::VolumeRef<O> out,
                                  std::map<O, size_t>& valids,
                                  int t,
                                  bool verbose = true );
-                                 
-      static void connectedInFrame( const AimsData<T>& data, 
-                                    AimsData<O>& out,
-                                    Connectivity::Type connectivity, 
-                                    std::multimap<size_t, O>& compSizes, 
+      static void connectedInFrame( const carto::VolumeRef<T>& data,
+                                    carto::VolumeRef<O> out,
+                                    Connectivity::Type connectivity,
+                                    std::multimap<size_t, O>& compSizes,
                                     int t,
-                                    const T & backgrnd = 0, bool bin = true, 
+                                    const T & backgrnd = 0, bool bin = true,
                                     bool verbose = true );
-                                                                              
-      static void connected( const AimsData<T>& data, 
-                             AimsData<O>& out, 
-                             aims::Connectivity::Type connectivity,
-                             std::map<O, size_t>& valids, 
-                             const T & backgrnd = 0, bool bin = true, 
-                             size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0, 
-                             bool verbose = true );
-                             
-    
-      static void connected( const AimsData<T>& data, 
-                             AimsData<O>& out, 
-                             aims::Connectivity::Type connectivity,
-                             const T & backgrnd = 0, bool bin = true, 
-                             size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0, 
-                             bool verbose = true );
-                                  
-    private:
+
+  private:
       ConnectedComponentEngine();
+
   };
-         
+
+  // inline
+
   template<typename T, typename O>
   inline
-  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected( const AimsData<T>& data, 
-                                                                       AimsData<O>& out, 
-                                                                       aims::Connectivity::Type connectivity,
-                                                                       const T & backgrnd, bool bin, 
-                                                                       size_t minSize, size_t maxSize, size_t numMax,
-                                                                       bool verbose )
+  void ConnectedComponentEngine<carto::VolumeRef<T>,
+                                carto::VolumeRef<O> >::connected(
+    const carto::VolumeRef<T>& data,
+    carto::VolumeRef<O> out,
+    aims::Connectivity::Type connectivity,
+    const T & backgrnd, bool bin,
+    size_t minSize, size_t maxSize, size_t numMax,
+    bool verbose )
   {
     std::map<O, size_t> valids;
-    ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected(data, 
-                                                                   out,
-                                                                   connectivity, 
-                                                                   valids, 
-                                                                   backgrnd, bin, minSize, maxSize,
-                                                                   numMax, verbose);
+    connected(data,
+              out,
+              connectivity,
+              valids,
+              backgrnd, bin, minSize, maxSize,
+              numMax, verbose);
   }
 
   template<typename T>
   inline
-  void AimsConnectedComponent( AimsData<T>& data, 
+  void AimsConnectedComponent( carto::VolumeRef<T> data,
                                aims::Connectivity::Type connectivity,
                                std::map<T, size_t>& valids, 
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0,
+                               size_t minSize = 0, size_t maxSize = 0,
+                               size_t numMax = 0,
                                bool verbose = true )
   {
-    ConnectedComponentEngine<AimsData<T>, AimsData<T> >::connected(data, 
-                                              data,
-                                              connectivity, 
-                                              valids, 
-                                              backgrnd, bin, minSize, maxSize,
-                                              numMax, verbose);
+    ConnectedComponentEngine<carto::VolumeRef<T>,
+                             carto::VolumeRef<T> >::connected(
+      data,
+      data,
+      connectivity,
+      valids,
+      backgrnd, bin, minSize, maxSize,
+      numMax, verbose);
   }
 
   template<typename T>
   inline
-  void AimsConnectedComponent( AimsData<T>& data,
+  void AimsConnectedComponent( carto::VolumeRef<T> data,
                                aims::Connectivity::Type connectivity,
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0,
+                               size_t minSize = 0, size_t maxSize = 0,
+                               size_t numMax = 0,
                                bool verbose = true )
   {
       std::map<T, size_t> valids;
     
-      ConnectedComponentEngine<AimsData<T>, AimsData<T> >::connected(data, 
-                                                data,
-                                                connectivity, 
-                                                valids, 
-                                                backgrnd, bin, minSize, maxSize,
-                                                numMax, verbose);
+      ConnectedComponentEngine<carto::VolumeRef<T>,
+                               carto::VolumeRef<T> >::connected(
+        data,
+        data,
+        connectivity,
+        valids,
+        backgrnd, bin, minSize, maxSize,
+        numMax, verbose);
   }
 
   template<typename T>
   void AimsConnectedComponent( BucketMap<T>& data,
                                aims::Connectivity::Type connectivity,
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0,
+                               size_t minSize = 0, size_t maxSize = 0,
+                               size_t numMax = 0,
                                bool verbose = true );
 
   template <typename T>
   void AimsConnectedComponent( AimsBucket<Void>& component,
-                               const AimsData<T>& data,
+                               const carto::VolumeRef<T>& data,
                                aims::Connectivity::Type connectivity, 
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minsize = 0, size_t maxSize = 0, size_t maxcomp = 0,
+                               size_t minsize = 0, size_t maxSize = 0,
+                               size_t maxcomp = 0,
                                bool verbose = true );
     
   template <typename T>
@@ -166,16 +183,18 @@ namespace aims
                                const BucketMap<T>& data,
                                Connectivity::Type connectivity, 
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minsize = 0, size_t maxSize = 0, size_t maxcomp = 0,
+                               size_t minsize = 0, size_t maxSize = 0,
+                               size_t maxcomp = 0,
                                bool verbose = true );
                                
   template <typename T>
-  AimsData<int16_t> AimsLabeledConnectedComponent( AimsBucket<Void>& component,
-                                                   const AimsData<T>& data,
-                                                   aims::Connectivity::Type connectivity, 
-                                                   const T & backgrnd = 0, bool bin = true, 
-                                                   size_t minsize = 0, size_t maxSize = 0, size_t maxcomp = 0,
-                                                   bool verbose = true );
+  carto::VolumeRef<int16_t> AimsLabeledConnectedComponent(
+    AimsBucket<Void>& component,
+    const carto::VolumeRef<T>& data,
+    aims::Connectivity::Type connectivity,
+    const T & backgrnd = 0, bool bin = true,
+    size_t minsize = 0, size_t maxSize = 0, size_t maxcomp = 0,
+    bool verbose = true );
                                                    
 }
 

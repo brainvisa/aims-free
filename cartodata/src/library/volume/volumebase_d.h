@@ -47,6 +47,7 @@
 #include <cartobase/object/object.h>
 #include <cartobase/object/property.h>
 #include <cartobase/object/propertyfilter.h>
+#include <cartobase/containers/nditerator.h>
 //--- soma-io ----------------------------------------------------------------
 #include <soma-io/allocator/allocator.h>
 //--- std --------------------------------------------------------------------
@@ -294,7 +295,8 @@ namespace carto
    * Buffer Constructor
    **************************************************************************/
   template < typename T >
-  Volume< T >::Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer )
+  Volume< T >::Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer,
+                       const std::vector<size_t> *strides )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
       _items( sizeX * sizeY * sizeZ * sizeT, buffer ),
 #ifndef CARTO_USE_BLITZ
@@ -304,12 +306,13 @@ namespace carto
 #endif
       _pos( 4, 0 )
   {
-    allocate( -1, -1, -1, -1, true, allocatorContext() );
+    allocate( -1, -1, -1, -1, true, allocatorContext(), strides );
   }
 
 
   template < typename T >
-  Volume< T >::Volume( const Position4Di & size, T* buffer ):
+  Volume< T >::Volume( const Position4Di & size, T* buffer,
+                       const std::vector<size_t> *strides ):
     VolumeProxy< T >( size[0] > 0 ? size[0] : 1,
                       size[1] > 0 ? size[1] : 1,
                       size[2] > 0 ? size[2] : 1,
@@ -325,12 +328,13 @@ namespace carto
 #endif
     _pos( 4, 0 )
   {
-    allocate( -1, -1, -1, -1, true, allocatorContext() );
+    allocate( -1, -1, -1, -1, true, allocatorContext(), strides );
   }
 
 
   template < typename T >
-  Volume< T >::Volume( const std::vector<int> & size, T* buffer ):
+  Volume< T >::Volume( const std::vector<int> & size, T* buffer,
+                       const std::vector<size_t> *strides ):
     VolumeProxy< T >( size ),
     _items( (long) Position4Di::size_num_elements( size ), buffer ),
 #ifndef CARTO_USE_BLITZ
@@ -340,7 +344,7 @@ namespace carto
 #endif
     _pos( 4, 0 )
   {
-    allocate( std::vector<int>( 1, -1 ), true, allocatorContext() );
+    allocate( std::vector<int>( 1, -1 ), true, allocatorContext(), strides );
   }
 
 
@@ -519,6 +523,26 @@ namespace carto
   }
 
 
+  // view + buffer (only for IO)
+
+  template < typename T >
+  Volume< T >::Volume( rc_ptr<Volume<T> > other, const Position & pos,
+                       const Position & size, T* buffer,
+                       const std::vector<size_t> & strides )
+    : VolumeProxy<T>( size ),
+      _items( (long) Position4Di::size_num_elements( size ), buffer ),
+      _refvol( other ),
+#ifndef CARTO_USE_BLITZ
+      _lineoffset( 0 ),
+      _sliceoffset( 0 ),
+      _volumeoffset( 0 ),
+#endif
+      _pos( pos )
+  {
+    allocate( -1, -1, -1, -1, true, allocatorContext(), &strides );
+  }
+
+
   /***************************************************************************
    * Copy Constructor
    **************************************************************************/
@@ -532,6 +556,7 @@ namespace carto
       // _blitz = other.blitz;
       _blitz( &_items[0],
               other._blitz.shape(),
+              other._blitz.stride(),
               blitz::GeneralArrayStorage<8>
               ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ),
 #else
@@ -870,6 +895,46 @@ namespace carto
 
   }
 
+  template <typename T>
+  void Volume<T>::copySubVolume( const Volume<T> & source,
+                                 const std::vector<int> & pos )
+  {
+    std::vector<int> size = this->getSize();
+    std::vector<int> osize = source.getSize();
+    int i;
+
+    for( i=0; i<size.size() && i<osize.size(); ++i )
+    {
+      int ip = 0;
+      if( pos.size() > i )
+        ip = pos[i];
+      size[i] = std::min( size[i] - ip, osize[i] );
+    }
+    for( ; i<size.size(); ++i )
+      size[i] = 1;
+
+    line_NDIterator<T> it( &at( pos ), size, this->getStrides() );
+    const_line_NDIterator<T> oit( &source.at( 0 ), size, source.getStrides() );
+    T *p, *pn;
+    const T *op;
+
+    for( ; !it.ended(); ++it, ++oit )
+    {
+      p = &*it;
+      op = &*oit;
+      for( pn=p + it.line_length(); p!=pn;
+           it.inc_line_ptr( p ), oit.inc_line_ptr( op ) )
+        *p = *op;
+    }
+  }
+
+  template <typename T>
+  void Volume<T>::copySubVolume( const rc_ptr<Volume<T> > & source,
+                                 const std::vector<int> & pos )
+  {
+    copySubVolume( *source, pos );
+  }
+
   template < typename T >
   typename Volume< T >::iterator Volume< T >::begin()
   {
@@ -953,35 +1018,53 @@ namespace carto
                               int oldSizeZ,
                               int oldSizeT,
                               bool allocate,
-                              const AllocatorContext& ac )
+                              const AllocatorContext& ac,
+                              const std::vector<size_t> *strides )
   {
     std::vector<int> oldSize(4);
     oldSize[0] = oldSizeX;
     oldSize[1] = oldSizeY;
     oldSize[2] = oldSizeZ;
     oldSize[3] = oldSizeT;
-    Volume< T >::allocate( oldSize, allocate, ac );
+    Volume< T >::allocate( oldSize, allocate, ac, strides );
   }
 
 
   template < typename T >
   void Volume< T >::allocate( const std::vector<int> & oldSize,
                               bool allocate,
-                              const AllocatorContext& ac )
+                              const AllocatorContext& ac,
+                              const std::vector<size_t> *nstrides )
   {
-
     std::vector<unsigned long long int> strides(Volume<T>::DIM_MAX, 0);
-    int i, n = oldSize.size(), nn = VolumeProxy<T>::_size.size();
+    int i = 0, n = oldSize.size(), nn = VolumeProxy<T>::_size.size();
 
-    for( i=0; i<nn; ++i )
+    unsigned long long int stride_max = 0;
+    unsigned long long int total_len = 0;
+
+    if( nstrides )
     {
-      strides[i] = ( i == 0 ? VolumeProxy<T>::_size[0]
-                    : VolumeProxy<T>::_size[i] * strides[i-1] );
+      for( ; i<std::min(nstrides->size(), size_t(nn)); ++i )
+      {
+        strides[i] = (*nstrides)[i];
+        if( strides[i] > stride_max )
+          stride_max = strides[i];
+        if( strides[i] * VolumeProxy<T>::_size[i] > total_len )
+          total_len = strides[i] * VolumeProxy<T>::_size[i];
+      }
+    }
+
+    for( ; i<nn; ++i )
+    {
+      strides[i] = ( i == 0 ? 1 : VolumeProxy<T>::_size[i-1] * stride_max );
+      if( strides[i] > stride_max )
+        stride_max = strides[i];
+      if( strides[i] * VolumeProxy<T>::_size[i] > total_len )
+        total_len = strides[i] * VolumeProxy<T>::_size[i];
     }
     for( ; i<Volume<T>::DIM_MAX; ++i )
-      strides[i] = strides[i-1];
-
-    unsigned long long int total_len = strides[nn-1];
+      strides[i] = ( i == nn ? VolumeProxy<T>::_size[i-1] * stride_max
+                     : strides[i-1] );
 
     if ( total_len * sizeof(T) >
          (unsigned long long int) std::numeric_limits< size_t >::max() )
@@ -1013,102 +1096,135 @@ namespace carto
     }
     else if ( oldSize != VolumeProxy<T>::_size
               || &ac != &_items.allocatorContext() )
+    {
+
+      // allocating a new memory space
+      AllocatedVector<T> newItems( ( size_t ) total_len, ac );
+
+      std::vector<int> minSize = VolumeProxy<T>::_size;
+      for( i=0; i<std::min(n, nn); ++i )
+        if( oldSize[i] < minSize[i] )
+          minSize[i] = oldSize[i];
+
+      // preserving data
+      int x, y, z, t;
+      if( newItems.allocatorContext().allocatorType()
+          != AllocatorStrategy::ReadOnlyMap )
+        for ( t = 0; t < minSize[3]; t++ )
+          {
+
+            for ( z = 0; z < minSize[2]; z++ )
+              {
+
+                for ( y = 0; y < minSize[1]; y++ )
+                  {
+
+                    for ( x = 0; x < minSize[0]; x++ )
+                      {
+                        // TODO: handle former strides with oldSize
+                        newItems[ x * strides[0] +
+                                  y * strides[1] +
+                                  z * ( size_t ) strides[2] +
+                                  t * ( size_t ) strides[3] ] =
+                          _items[ x +
+                                  y * oldSize[0] +
+                                  z * ( size_t ) oldSize[0]
+                                  * ( size_t ) oldSize[1] +
+                                  t * ( size_t ) oldSize[0] *
+                                  ( size_t ) oldSize[1]
+                                  * ( size_t ) oldSize[2] ];
+
+                      }
+
+                  }
+
+              }
+
+        }
+
+      // copying new data to old one
+      _items = newItems;
+
+    }
+
+    blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX> bstrides;
+    if( nstrides )
+    {
+      for( i=0; i<nn; ++i )
+        bstrides[i] = strides[i];
+      for( ; i<Volume<T>::DIM_MAX; ++i )
       {
-
-        // allocating a new memory space
-        AllocatedVector<T> newItems( ( size_t ) total_len, ac );
-
-        std::vector<int> minSize = VolumeProxy<T>::_size;
-        for( i=0; i<std::min(n, nn); ++i )
-          if( oldSize[i] < minSize[i] )
-            minSize[i] = oldSize[i];
-
-        // preserving data
-        int x, y, z, t;
-        if( newItems.allocatorContext().allocatorType()
-            != AllocatorStrategy::ReadOnlyMap )
-          for ( t = 0; t < minSize[3]; t++ )
-            {
-
-              for ( z = 0; z < minSize[2]; z++ )
-                {
-
-                  for ( y = 0; y < minSize[1]; y++ )
-                    {
-
-                      for ( x = 0; x < minSize[0]; x++ )
-                        {
-                          newItems[ x +
-                                    y * strides[0] +
-                                    z * ( size_t ) strides[1] +
-                                    t * ( size_t ) strides[2] ] =
-                            _items[ x +
-                                    y * oldSize[0] +
-                                    z * ( size_t ) oldSize[0]
-                                    * ( size_t ) oldSize[1] +
-                                    t * ( size_t ) oldSize[0] *
-                                    ( size_t ) oldSize[1]
-                                    * ( size_t ) oldSize[2] ];
-
-                        }
-
-                    }
-
-                }
-
-          }
-
-        // copying new data to old one
-        _items = newItems;
-
+        bstrides[i] = ( i == 0 ? VolumeProxy<T>::_size[0]
+                      : VolumeProxy<T>::_size[i] * stride_max );
+        if( strides[i] > stride_max )
+          stride_max = bstrides[i];
       }
+    }
 
     if( allocate )
-      {
+    {
 #ifdef CARTO_USE_BLITZ
-        // TODO: test blitz ownership / strides
-        /*
-        std::cout << "alloc blitz: " << VolumeProxy<T>::_size[0] << ", "
-                  << VolumeProxy<T>::_size[1] << ", "
-                  << VolumeProxy<T>::_size[2] << ", "
-                  << VolumeProxy<T>::_size[3] << std::endl;
-        */
-        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
-        for( i=0; i<nn; ++i )
-          dims[i] = VolumeProxy<T>::_size[i];
-        for( ; i<Volume<T>::DIM_MAX; ++i )
-          dims[i] = 1;
+      // TODO: test blitz ownership / strides
+      /*
+      std::cout << "alloc blitz: " << VolumeProxy<T>::_size[0] << ", "
+                << VolumeProxy<T>::_size[1] << ", "
+                << VolumeProxy<T>::_size[2] << ", "
+                << VolumeProxy<T>::_size[3] << std::endl;
+      */
+      blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
+      for( i=0; i<nn; ++i )
+        dims[i] = VolumeProxy<T>::_size[i];
+      for( ; i<Volume<T>::DIM_MAX; ++i )
+        dims[i] = 1;
+      if( nstrides)
+        _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
+                          ( &_items[0],
+                            dims,
+                            bstrides,
+                            blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+                            ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ),
+                              true ) ) );
+      else
         _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
                           ( &_items[0],
                             dims,
                             blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
                             ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ),
                               true ) ) );
-        /*
-        std::cout << &_items[0] << " / " << &_blitz( 0 ) << std::endl;
-        std::cout << blitz::shape( VolumeProxy<T>::_size[0],
-                                   VolumeProxy<T>::_size[1],
-                                   VolumeProxy<T>::_size[2],
-                                   VolumeProxy<T>::_size[3}] ) << std::endl;
-        std::cout << "blitz data: " << _blitz.data() << std::endl;
-        std::cout << "blitz ordering: " << _blitz.ordering() << std::endl;
-        std::cout << "blitz numEl: " << _blitz.numElements() << std::endl;
-        std::cout << "blitz strides: " << _blitz.stride() << std::endl;
-        */
+      /*
+      std::cout << &_items[0] << " / " << &_blitz( 0 ) << std::endl;
+      std::cout << blitz::shape( VolumeProxy<T>::_size[0],
+                                  VolumeProxy<T>::_size[1],
+                                  VolumeProxy<T>::_size[2],
+                                  VolumeProxy<T>::_size[3}] ) << std::endl;
+      std::cout << "blitz data: " << _blitz.data() << std::endl;
+      std::cout << "blitz ordering: " << _blitz.ordering() << std::endl;
+      std::cout << "blitz numEl: " << _blitz.numElements() << std::endl;
+      std::cout << "blitz strides: " << _blitz.stride() << std::endl;
+      */
 #else
-        _lineoffset = VolumeProxy<T>::_size[0];
-        _sliceoffset = strides[1];
-        _volumeoffset = strides[2];
+      _lineoffset = strides[1];
+      _sliceoffset = strides[2];
+      _volumeoffset = strides[3];
 #endif
-      }
+    }
     else
-      {
+    {
 #ifdef CARTO_USE_BLITZ
-        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
-        for( i=0; i<nn; ++i )
-          dims[i] = VolumeProxy<T>::_size[i];
-        for( ; i<Volume<T>::DIM_MAX; ++i )
-          dims[i] = 1;
+      blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
+      for( i=0; i<nn; ++i )
+        dims[i] = VolumeProxy<T>::_size[i];
+      for( ; i<Volume<T>::DIM_MAX; ++i )
+        dims[i] = 1;
+      if( nstrides )
+        // TODO: test blitz ownership
+        _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
+                      ( 0,
+                        dims,
+                        bstrides,
+                        blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+                        ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
+      else
         // TODO: test blitz ownership / strides
         _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
                       ( 0,
@@ -1116,11 +1232,20 @@ namespace carto
                         blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
                         ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
+      if( nstrides )
+      {
+        _lineoffset = strides[1];
+        _sliceoffset = strides[2];
+        _volumeoffset = strides[3];
+      }
+      else
+      {
         _lineoffset = 0;
         _sliceoffset = 0;
         _volumeoffset = 0;
-#endif
       }
+#endif
+    }
 
   }
 
@@ -1129,7 +1254,11 @@ namespace carto
   void Volume< T >::allocate()
   {
     if( !allocatorContext().isAllocated() )
-      allocate( VolumeProxy<T>::getSize(), true, allocatorContext() );
+    {
+      std::vector<size_t> strides = getStrides();
+      allocate( VolumeProxy<T>::getSize(), true, allocatorContext(),
+                &strides );
+    }
   }
 
 
@@ -1137,9 +1266,9 @@ namespace carto
   void Volume< T >::slotSizeChanged( const PropertyFilter& propertyFilter )
   {
 
-    std::cout << "Volume< " << DataTypeCode<T>::name()
+    /* std::cout << "Volume< " << DataTypeCode<T>::name()
               << " >::slotSizeChanged"
-              << std::endl;
+              << std::endl; */
 
     std::vector<int> oldSize = VolumeProxy<T>::_size;
 
@@ -1171,12 +1300,14 @@ namespace carto
           propertyFilter.getOldValue( "sizeT" )->GenericObject::value< int >();
 
       }
+    /*
     std::cout << "old size: " << oldSize[0] << ", " << oldSize[1] << ", "
               << oldSize[2] << ", " << oldSize[3] << std::endl;
     std::cout << "new size: " << VolumeProxy<T>::_size[0] << ", "
               << VolumeProxy<T>::_size[1] << ", "
               << VolumeProxy<T>::_size[2] << ", " << VolumeProxy<T>::_size[3]
               << std::endl;
+    */
     allocate( oldSize,
               _items.allocatorContext().isAllocated(), allocatorContext() );
 
@@ -1190,7 +1321,8 @@ namespace carto
                                 int sizeT,
                                 bool keepcontents,
                                 const AllocatorContext & ac,
-                                bool alloc )
+                                bool alloc,
+                                const std::vector<size_t> *strides )
   {
     int oldx = VolumeProxy<T>::_size[0];
     int oldy = VolumeProxy<T>::_size[1];
@@ -1203,9 +1335,9 @@ namespace carto
     VolumeProxy<T>::_size[3] = sizeT;
     if( keepcontents || ( sizeX == oldx && sizeY == oldy && sizeZ == oldz
                           && sizeT ==  oldt ) )
-      allocate( oldx, oldy, oldz, oldt, alloc, ac );
+      allocate( oldx, oldy, oldz, oldt, alloc, ac, strides );
     else
-      allocate( std::vector<int>(1, -1), alloc, ac );
+      allocate( std::vector<int>(1, -1), alloc, ac, strides );
     // emit a signal ?
   }
 
@@ -1213,20 +1345,22 @@ namespace carto
   void Volume< T >::reallocate( const Position4Di & size,
                                 bool keepcontents,
                                 const AllocatorContext & ac,
-                                bool alloc )
+                                bool alloc,
+                                const std::vector<size_t> *strides )
   {
     return reallocate( size[0] > 0 ? size[0] : 1,
                        size[1] > 0 ? size[1] : 1,
                        size[2] > 0 ? size[2] : 1,
                        size[3] > 0 ? size[3] : 1,
-                       keepcontents, ac, alloc );
+                       keepcontents, ac, alloc, strides );
   }
 
   template < typename T >
   void Volume< T >::reallocate( const std::vector<int> & size,
                                 bool keepcontents,
                                 const AllocatorContext & ac,
-                                bool alloc )
+                                bool alloc,
+                                const std::vector<size_t> *strides )
   {
     std::vector<int> old = VolumeProxy<T>::_size;
 
@@ -1244,9 +1378,9 @@ namespace carto
                                                     VolumeProxy<T>::_size[3] );
 
     if( keepcontents || size == old )
-      allocate( old, alloc, ac );
+      allocate( old, alloc, ac, strides );
     else
-      allocate( std::vector<int>(1, -1), alloc, ac );
+      allocate( std::vector<int>(1, -1), alloc, ac, strides );
     // emit a signal ?
   }
 
@@ -1311,7 +1445,12 @@ namespace carto
   {
     std::vector<int> dims( 4, 1 );
     bool        unalloc = false, partial = false, keep_allocation = false;
-    options->getProperty( "partial_reading", partial );
+    try
+    {
+      carto::Object p = options->getProperty( "partial_reading" );
+      partial = bool( p->getScalar() );
+    }
+    catch( ... ) {}
     if( !partial )
     {
       if( !header->getProperty( "volume_dimension", dims ) )
@@ -1321,9 +1460,21 @@ namespace carto
         header->getProperty( "sizeZ", dims[2] );
         header->getProperty( "sizeT", dims[3] );
       }
-      options->getProperty( "unallocated", unalloc );
-      options->getProperty( "keep_allocation", keep_allocation );
-      if( !keep_allocation || !obj.allocatorContext().isAllocated() )
+      try
+      {
+        carto::Object p = options->getProperty( "unallocated" );
+        unalloc = bool( p->getScalar() );
+      }
+      catch( ... ) {}
+      try
+      {
+        carto::Object p = options->getProperty( "keep_allocation" );
+        keep_allocation = bool( p->getScalar() );
+      }
+      catch( ... ) {}
+      if( !keep_allocation || !obj.allocatorContext().isAllocated()
+          || obj.allocatorContext().allocatorType()
+             != AllocatorStrategy::Unallocated )
         obj.reallocate( dims, false, context, !unalloc );
     }
     else

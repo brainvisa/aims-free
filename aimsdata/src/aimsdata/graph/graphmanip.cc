@@ -41,8 +41,10 @@
 #include <aims/mesh/surfaceOperation.h>
 #include <aims/mesh/texture.h>
 #include <graph/graph/graph.h>
+#include <aims/data/data.h>
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/type/string_conversion.h>
+#include <cartobase/containers/nditerator.h>
 #include <vector>
 #include <map>
 
@@ -137,16 +139,47 @@ namespace aims
     {
     }
 
+    template<>
+    void adjustVoxelSize( Volume<short> & x,
+                          const Volume<short> & y )
+    {
+      try
+      {
+        Object vs = y.header().getProperty( "voxel_size" );
+        x.header().setProperty( "voxel_size", vs );
+      }
+      catch( ... )
+      {
+      }
+    }
+
     template<> 
     void adjustVoxelSize( AimsData<short> & x, const AimsData<short> & y )
     {
-      x.setSizeXYZT( y.sizeX(), y.sizeY(), y.sizeZ(), y.sizeT() );
+      rc_ptr<Volume<short> > xx = x.volume();
+      adjustVoxelSize( *xx, *y.volume() );
     }
 
     template<>
-    void adjustVoxelSize( AimsData<int32_t> & x, const AimsData<int32_t> & y )
+    void adjustVoxelSize( Volume<int32_t> & x,
+                          const Volume<int32_t> & y )
     {
-      x.setSizeXYZT( y.sizeX(), y.sizeY(), y.sizeZ(), y.sizeT() );
+      try
+      {
+        Object vs = y.header().getProperty( "voxel_size" );
+        x.header().setProperty( "voxel_size", vs );
+      }
+      catch( ... )
+      {
+      }
+    }
+
+    template<>
+    void adjustVoxelSize( AimsData<int32_t> & x,
+                          const AimsData<int32_t> & y )
+    {
+      rc_ptr<Volume<int32_t> > xx = x.volume();
+      adjustVoxelSize( *xx, *y.volume() );
     }
 
 
@@ -154,33 +187,100 @@ namespace aims
     insertElement( T & dest, int index, const T & src )
     {
       if( src.empty() )
-	dest[ index ];
+        dest[ index ];
       else
-	dest[ index ] = src.begin()->second;
+        dest[ index ] = src.begin()->second;
     }
 
     template<> void
-    insertElement( AimsData<short> & dest, int index,
-                  const AimsData<short> & src )
+    insertElement( Volume<short> & dest, int index,
+                   const Volume<short> & src )
     {
       if( &dest == &src )
         return;
-      short x, y, z;
-      ForEach3d( src, x, y, z )
-        if( src( x, y, z ) >= 0 )
-          dest( x, y, z ) = index;
+      const_line_NDIterator<short> sit( &src.at( 0 ), src.getSize(),
+                                        src.getStrides() );
+      line_NDIterator<short> dit( &dest.at( 0 ), dest.getSize(),
+                                  dest.getStrides() );
+      const short *sp, *spp;
+      short *dp;
+      for( ; !sit.ended(); ++sit, ++dit )
+      {
+        sp = &*sit;
+        dp = &*dit;
+        for( spp=sp + sit.line_length(); sp!=spp;
+             sit.inc_line_ptr( sp ), dit.inc_line_ptr( dp ) )
+          if( *sp >= 0 )
+            *dp = index;
+      }
+    }
+
+    template<> void
+    insertElement( VolumeRef<short> & dest, int index,
+                   const VolumeRef<short> & src )
+    {
+      insertElement( *dest, index, *src );
+    }
+
+
+    template<> void
+    insertElement( AimsData<short> & dest, int index,
+                   const AimsData<short> & src )
+    {
+      VolumeRef<short> vol = dest.volume();
+      const VolumeRef<short> svol = src.volume();
+      insertElement( vol, index, svol );
+    }
+
+    template<> void
+    insertElement( Volume<int32_t> & dest, int index,
+                   const Volume<int32_t> & src )
+    {
+      if( &dest == &src )
+        return;
+      const_line_NDIterator<int32_t> sit( &src.at( 0 ), src.getSize(),
+                                          src.getStrides() );
+      line_NDIterator<int32_t> dit( &dest.at( 0 ), dest.getSize(),
+                                    dest.getStrides() );
+      const int32_t *sp, *spp;
+      int32_t *dp;
+      for( ; !sit.ended(); ++sit, ++dit )
+      {
+        sp = &*sit;
+        dp = &*dit;
+        for( spp=sp + sit.line_length(); sp!=spp;
+             sit.inc_line_ptr( sp ), dit.inc_line_ptr( dp ) )
+          if( *sp >= 0 )
+            *dp = index;
+      }
+    }
+
+    template<> void
+    insertElement( VolumeRef<int32_t> & dest, int index,
+                   const VolumeRef<int32_t> & src )
+    {
+      insertElement( *dest, index, *src );
     }
 
     template<> void
     insertElement( AimsData<int32_t> & dest, int index,
                    const AimsData<int32_t> & src )
     {
-      if( &dest == &src )
-        return;
-      short x, y, z;
-      ForEach3d( src, x, y, z )
-        if( src( x, y, z ) >= 0 )
-          dest( x, y, z ) = index;
+      VolumeRef<int32_t> vol = dest.volume();
+      const VolumeRef<int32_t> svol = src.volume();
+      insertElement( vol, index, svol );
+    }
+
+
+    template <> inline PropertySet & getHeader( Volume<short> & obj )
+    {
+      return obj.header();
+    }
+
+
+    template <> inline PropertySet & getHeader( Volume<int32_t> & obj )
+    {
+      return obj.header();
     }
 
 
@@ -272,6 +372,8 @@ namespace aims
     template void insertElement( AimsSurfaceFacet & dest, int index,
                                 const AimsSurfaceFacet & src );
 
+    template PropertySet & getHeader( Volume<short> & );
+    template PropertySet & getHeader( Volume<int32_t> & );
     template PropertySet & getHeader( AimsData<short> & );
     template PropertySet & getHeader( AimsData<int32_t> & );
     template PropertySet & getHeader( BucketMap<Void> & );
@@ -282,8 +384,8 @@ namespace aims
     template PropertySet & getHeader( Texture2d & );
     template PropertySet & getHeader( TimeTexture<short> & );
 
-    template void setHeaderInfo( AimsData<short> &, const GenericObject & );
-    template void setHeaderInfo( AimsData<int32_t> &, const GenericObject & );
+    template void setHeaderInfo( Volume<short> &, const GenericObject & );
+    template void setHeaderInfo( Volume<int32_t> &, const GenericObject & );
     template void setHeaderInfo( BucketMap<Void> &, const GenericObject & );
     template void setHeaderInfo( AimsSurfaceTriangle &,
                                  const GenericObject & );
@@ -431,8 +533,8 @@ void GraphManip::storeTalairach( Graph & g, const Motion & m,
   if(force_old_attributes || hasOldTalairachTransform(g))
   {
     vector<float>		rot(9), scl(3, 1.), trans(3);
-    Motion		minv = m.inverse();
-    const AimsData<float>	& r = m.rotation();
+    AffineTransformation3d	minv = m.inverse();
+    const VolumeRef<float>	r = m.rotation();
     rot[0] = r( 0, 0 );
     rot[1] = r( 0, 1 );
     rot[2] = r( 0, 2 );
@@ -463,45 +565,41 @@ static string volumeProperty( const string &attribute )
 }
 
 
-static rc_ptr<AimsData<short> >
+static rc_ptr<Volume<short> >
 retreiveVol( Graph & g, const string & attribute, const Point3d & dims, 
-	     const vector<float> & vs )
+             const vector<float> & vs )
 {
-  rc_ptr<AimsData<short> >	vol;
-  string			att = volumeProperty( attribute );
+  rc_ptr<Volume<short> > vol;
+  string		att = volumeProperty( attribute );
   if( !g.getProperty( att, vol ) )
-    {
-      // cout << "creating volume in attrib " << att << endl;
-      vol = rc_ptr<AimsData<short> >
-	( new AimsData<short>( dims[0], dims[1], dims[2] ) );
-      *vol = -1;
-      PythonHeader	*ph = new PythonHeader;
-      vol->setHeader( ph );
-      vol->setSizeXYZT( vs[0], vs[1], vs[2] );
-      ph = static_cast<PythonHeader *>( vol->header() );
-      vector<float>	org;
-      if( g.getProperty( "origin", org ) && org.size() >= 3 )
-        ph->setProperty( "origin", org );
-      int	norm = 0;
-      if( g.getProperty( "spm_normalized", norm ) )
-        ph->setProperty( "spm_normalized", (bool) norm );
-      g.setProperty( att, vol );
-    }
+  {
+    // cout << "creating volume in attrib " << att << endl;
+    vol = VolumeRef<short>( dims[0], dims[1], dims[2] );
+    vol->fill( -1 );
+    PropertySet & ph = vol->header();
+    ph.setProperty( "voxel_size", vs );
+    vector<float>	org;
+    if( g.getProperty( "origin", org ) && org.size() >= 3 )
+      ph.setProperty( "origin", org );
+    int	norm = 0;
+    if( g.getProperty( "spm_normalized", norm ) )
+      ph.setProperty( "spm_normalized", (bool) norm );
+    g.setProperty( att, vol );
+  }
   return vol;
 }
 
 
-static AimsData<short> *
+static rc_ptr<Volume<short> >
 retreiveVol2( Graph & g, const string & attribute )
 {
-  rc_ptr<AimsData<short> >	vol;
+  rc_ptr<Volume<short> >	vol;
   string			att = attribute;
   /*if( att.rfind( "_Bucket" ) == att.length() - 7 )
     att.erase( att.length() - 7, 7 );
     att += "_Volume";*/
-  if( !g.getProperty( att, vol ) )
-    return 0;
-  return &*vol;
+  g.getProperty( att, vol );
+  return vol;
 }
 
 
@@ -542,7 +640,7 @@ namespace aims
       Point3d			offset;
       vector<float>		vs;
       GraphElementTable		get;
-      map<AimsData<short> *, map<int, BucketMap<Void>::Bucket *> > 
+      map<rc_ptr<Volume<short> >, map<int, BucketMap<Void>::Bucket *> >
       buckets;
       GraphManip::CreateBucketFunc	createfunc;
 
@@ -565,32 +663,32 @@ void ConversionStruct::bucket2Vol( GraphObject* ao )
   int						index;
 
   if( imgec != get.end() )
+  {
+    for( igec=imgec->second.begin(), egec=imgec->second.end();
+          igec!=egec; ++igec )
     {
-      for( igec=imgec->second.begin(), egec=imgec->second.end(); 
-	   igec!=egec; ++igec )
-	{
-	  GraphElementCode			& gec = igec->second;
-	  if( ao->getProperty( gec.attribute, bck ) )
-	    {
-	      if( !ao->getProperty( gec.global_index_attribute, index ) )
-		delayed[ ao ] = Delay( synt, gec );
-	      else
-		{
-		  /*cout << "elem index " << index << ", att: " 
-		    << gec.attribute << endl;*/
-		  rc_ptr<AimsData<short> >	vol 
-		    = retreiveVol( *graph, gec.attribute, dims, vs );
-		  // print bucket to volume
-		  for( ib=bck->begin()->second.begin(), 
-			 eb=bck->begin()->second.end(); ib!=eb; ++ib )
-		    (*vol)( ib->first - offset ) = (short) index;
-		  usedatt[ gec.attribute ].insert( index );
-		  ao->removeProperty( gec.attribute );
-		}
-	      gecs.insert( &gec );
-	    }
-	}
+      GraphElementCode			& gec = igec->second;
+      if( ao->getProperty( gec.attribute, bck ) )
+      {
+        if( !ao->getProperty( gec.global_index_attribute, index ) )
+          delayed[ ao ] = Delay( synt, gec );
+        else
+        {
+          /* cout << "elem index " << index << ", att: "
+            << gec.attribute << endl; */
+          rc_ptr<Volume<short> >	vol
+            = retreiveVol( *graph, gec.attribute, dims, vs );
+          // print bucket to volume
+          for( ib=bck->begin()->second.begin(),
+               eb=bck->begin()->second.end(); ib!=eb; ++ib )
+            (*vol)( ib->first - offset ) = (short) index;
+          usedatt[ gec.attribute ].insert( index );
+          ao->removeProperty( gec.attribute );
+        }
+        gecs.insert( &gec );
+      }
     }
+  }
 }
 
 
@@ -599,36 +697,38 @@ void ConversionStruct::vol2Bucket( GraphObject* ao )
   string					synt = ao->getSyntax();
   GraphElementTable::iterator			imgec = get.find( synt );
   map<string, GraphElementCode>::iterator	igec, egec;
-  AimsData<short>				*vol;
+  rc_ptr<Volume<short> >			vol;
   int						index;
 
   if( imgec != get.end() )
+  {
+    for( igec=imgec->second.begin(), egec=imgec->second.end();
+          igec!=egec; ++igec )
     {
-      for( igec=imgec->second.begin(), egec=imgec->second.end(); 
-	   igec!=egec; ++igec )
-	{
-	  GraphElementCode			& gec = igec->second;
-	  if( ao->getProperty( gec.global_index_attribute, index ) )
-	    {
-	      vol = retreiveVol2( *graph, gec.global_attribute );
-	      if( vol )
-		{
-		  // print volume to bucket
-                  BucketMap<Void>	*bck = createfunc( ao, gec.attribute );
-		  bck->setSizeXYZT( vol->sizeX(), vol->sizeY(), 
-				    vol->sizeZ(), 1 );
-		  BucketMap<Void>::Bucket	& b = (*bck)[0];
-		  buckets[vol][index] = &b;
-		  usedatt[ gec.attribute ].insert( index );
-		  //ao->setProperty( gec.attribute, bck );
-		  gecs.insert( &gec );
-		}
-	      else
-		cerr << "Global volume not found: " 
-		     << gec.global_attribute << "\n";
-	    }
-	}
+      GraphElementCode			& gec = igec->second;
+      if( ao->getProperty( gec.global_index_attribute, index ) )
+      {
+        vol = retreiveVol2( *graph, gec.global_attribute );
+        if( vol )
+        {
+          // print volume to bucket
+          BucketMap<Void>	*bck = createfunc( ao, gec.attribute );
+          Object vs = vol->header().getProperty( "voxel_size" );
+          bck->setSizeXYZT( vs->getArrayItem( 0 )->getScalar(),
+                            vs->getArrayItem( 1 )->getScalar(),
+                            vs->getArrayItem( 2 )->getScalar(), 1 );
+          BucketMap<Void>::Bucket	& b = (*bck)[0];
+          buckets[vol][index] = &b;
+          usedatt[ gec.attribute ].insert( index );
+          //ao->setProperty( gec.attribute, bck );
+          gecs.insert( &gec );
+        }
+        else
+          cerr << "Global volume not found: "
+                << gec.global_attribute << "\n";
+      }
     }
+  }
 }
 
 
@@ -705,94 +805,101 @@ bool GraphManip::buckets2Volume( Graph & g )
   int					index;
 
   for( id=cs.delayed.begin(); id!=ed; ++id )
-    {
-      GraphElementCode			& gec = *id->second.gec;
-      id->first->getProperty( gec.attribute, bck );
-      set<int>				& used = cs.usedatt[ gec.attribute ];
-      index = 1;
-      iu = used.begin();
-      eu = used.end();
-      if( iu != eu && *iu == 0 )
-        index = 0;
-      for( ; iu!=eu && index==*iu; ++index, ++iu ) {}
-      used.insert( index );
+  {
+    GraphElementCode			& gec = *id->second.gec;
+    id->first->getProperty( gec.attribute, bck );
+    set<int>				& used = cs.usedatt[ gec.attribute ];
+    index = 1;
+    iu = used.begin();
+    eu = used.end();
+    if( iu != eu && *iu == 0 )
+      index = 0;
+    for( ; iu!=eu && index==*iu; ++index, ++iu ) {}
+    used.insert( index );
 
-      rc_ptr<AimsData<short> >	vol 
-	= retreiveVol( g, gec.attribute, cs.dims, cs.vs );
-      // print bucket to volume
-      for( ib=bck->begin()->second.begin(), 
-	     eb=bck->begin()->second.end(); ib!=eb; ++ib )
-	(*vol)( ib->first - cs.offset ) = (short) index;
-      id->first->removeProperty( gec.attribute );
-      id->first->removeProperty( gec.local_file_attribute );
-    }
+    rc_ptr<Volume<short> >	vol
+      = retreiveVol( g, gec.attribute, cs.dims, cs.vs );
+    // print bucket to volume
+    for( ib=bck->begin()->second.begin(),
+            eb=bck->begin()->second.end(); ib!=eb; ++ib )
+      (*vol)( ib->first - cs.offset ) = (short) index;
+    id->first->removeProperty( gec.attribute );
+    id->first->removeProperty( gec.local_file_attribute );
+  }
 
   // check for min value (0 or -1)
   map<string, set<int> >::const_iterator	iua, eua = cs.usedatt.end();
   for( iua = cs.usedatt.begin(); iua != eua; ++iua )
     if( !iua->second.empty() && *iua->second.begin() > 0 )
+    {
+      // change background to 0
+      rc_ptr<Volume<short> >	vol;
+      string				att = volumeProperty( iua->first );
+      int				x, y, z;
+      short *p, *pn;
+
+      if( g.getProperty( att, vol ) )
       {
-        // change background to 0
-        rc_ptr<AimsData<short> >	vol;
-        string				att = volumeProperty( iua->first );
-        int				x, y, z;
-        if( g.getProperty( att, vol ) )
-          ForEach3d( (*vol), x, y, z )
-          {
-            short	& val = (*vol)( x, y, z );
-            if( val == -1 )
-              val = 0;
-          }
+        line_NDIterator<short> it( &vol->at( 0 ), vol->getSize(),
+                                    vol->getStrides() );
+        for( ; !it.ended(); ++it )
+        {
+          p = &*it;
+          for( pn=p + it.line_length(); p!=pn; it.inc_line_ptr(p) )
+            if( *p == -1 )
+              *p = 0;
+        }
       }
+    }
 
   //cout << "global attributes...\n";
   // update global attributes
   set<GraphElementCode *>::iterator	igecs, egecs = cs.gecs.end();
-  DataTypeCode<AimsData<short> >	dtcv;
-  string				att;
+  DataTypeCode<Volume<short> >	dtcv;
+  string			att;
 
   for( igecs=cs.gecs.begin(); igecs!=egecs; ++igecs )
-    {
-      GraphElementCode	& gec1 = **igecs;
-      GraphElementCode	& gec = (*mgec)[ gec1.syntax ][ gec1.id ];
-      gec.storageType = GraphElementCode::GlobalPacked;
-      gec.objectType = dtcv.objectType();
-      gec.dataType = dtcv.dataType();
-      gec.global_filename = gec.id + "_Volume"
-        + defaultExtensionForObjectType( gec.objectType, gec.dataType );
-      gec.global_attribute =  volumeProperty( gec.attribute );
-      /*cout << "GEC: id: " << gec.id << endl;
-      cout << "     objectType: " << gec.objectType << endl;
-      cout << "     global_filename: " << gec.global_filename << endl;
-      cout << "     global_attribute: " << gec.global_attribute << endl;
-      cout << "     global_index_attribute: " << gec.global_index_attribute 
-	   << endl;
-	   cout << "     attribute:" << gec.attribute << endl;*/
-      att = gec.id + ".global.bck";
-      if( g.hasProperty( att ) )
-	g.removeProperty( att );
-      att = gec.id + ".bck";
-      if( g.hasProperty( att ) )
-	g.removeProperty( att );
-    }
+  {
+    GraphElementCode	& gec1 = **igecs;
+    GraphElementCode	& gec = (*mgec)[ gec1.syntax ][ gec1.id ];
+    gec.storageType = GraphElementCode::GlobalPacked;
+    gec.objectType = dtcv.objectType();
+    gec.dataType = dtcv.dataType();
+    gec.global_filename = gec.id + "_Volume"
+      + defaultExtensionForObjectType( gec.objectType, gec.dataType );
+    gec.global_attribute =  volumeProperty( gec.attribute );
+    /* cout << "GEC: id: " << gec.id << endl;
+    cout << "     objectType: " << gec.objectType << endl;
+    cout << "     global_filename: " << gec.global_filename << endl;
+    cout << "     global_attribute: " << gec.global_attribute << endl;
+    cout << "     global_index_attribute: " << gec.global_index_attribute
+          << endl;
+    cout << "     attribute:" << gec.attribute << endl; */
+    att = gec.id + ".global.bck";
+    if( g.hasProperty( att ) )
+      g.removeProperty( att );
+    att = gec.id + ".bck";
+    if( g.hasProperty( att ) )
+      g.removeProperty( att );
+  }
 
   // empty (unchanged) GECs
   for( imgec=cs.get.begin(), emgec=cs.get.end(); imgec!=emgec; ++imgec )
     for( igec=imgec->second.begin(), egec=imgec->second.end(); igec!=egec; 
-	 ++igec )
+         ++igec )
+    {
+      GraphElementCode	& geco = igec->second;
+      GraphElementCode	& gec = (*mgec)[ geco.syntax ][ geco.id ];
+      if( gec.objectType != dtcv.objectType() )
       {
-	GraphElementCode	& geco = igec->second;
-	GraphElementCode	& gec = (*mgec)[ geco.syntax ][ geco.id ];
-	if( gec.objectType != dtcv.objectType() )
-	  {
-	    gec.storageType = GraphElementCode::GlobalPacked;
-	    gec.objectType = dtcv.objectType();
-	    gec.dataType = dtcv.dataType();
-	    gec.global_filename = gec.id + "_Volume"
-              + defaultExtensionForObjectType( gec.objectType, gec.dataType );
-	    gec.global_attribute =  volumeProperty( gec.attribute );
-	  }
+        gec.storageType = GraphElementCode::GlobalPacked;
+        gec.objectType = dtcv.objectType();
+        gec.dataType = dtcv.dataType();
+        gec.global_filename = gec.id + "_Volume"
+          + defaultExtensionForObjectType( gec.objectType, gec.dataType );
+        gec.global_attribute =  volumeProperty( gec.attribute );
       }
+    }
 
   if( g.hasProperty( "type.bck" ) )
     g.removeProperty( "type.bck" );
@@ -831,7 +938,7 @@ bool GraphManip::volume2Buckets( Graph & g, CreateBucketFunc createfunc )
   ConversionStruct				cs;
   GraphElementTable::iterator			imgec, emgec = mgec->end();
   map<string, GraphElementCode>::iterator	igec, egec;
-  DataTypeCode<AimsData<short> >		dtc;
+  DataTypeCode<Volume<short> >		dtc;
 
   int   loaded = 0;
   g.getProperty( "aims_reader_loaded_objects", loaded );
@@ -881,21 +988,30 @@ bool GraphManip::volume2Buckets( Graph & g, CreateBucketFunc createfunc )
 
   // fill in buckets, voume by volume
   //cout << "filling buckets...\n";
-  map<AimsData<short> *, map<int, BucketMap<Void>::Bucket *> >::iterator 
+  map<rc_ptr<Volume<short> >, map<int, BucketMap<Void>::Bucket *> >::iterator
     ibm, ebm = cs.buckets.end();
   map<int, BucketMap<Void>::Bucket *>::iterator	isbm, esbm;
   short						x, y, z;
 
   for( ibm=cs.buckets.begin(); ibm!=ebm; ++ibm )
   {
-    AimsData<short>	& volu = *ibm->first;
+    VolumeRef<short>	volu = ibm->first;
     map<int, BucketMap<Void>::Bucket *>	& bcks = ibm->second;
     esbm = bcks.end();
-    ForEach3d( volu, x, y, z )
+    line_NDIterator<short> it( &volu->at( 0 ), volu->getSize(),
+                               volu->getStrides() );
+    short *p, *pn;
+    for( ; !it.ended(); ++it )
     {
-      isbm = bcks.find( (int) volu( x, y, z ) );
-      if( isbm != esbm )
-        (*isbm->second)[ cs.offset + Point3d( x, y, z ) ];
+      p = &*it;
+      vector<int> pos = it.position();
+      int x = pos[0], y = pos[1], z = pos[2];
+      for( pn=p + it.line_length(); p!=pn; it.inc_line_ptr(p), ++x )
+      {
+        isbm = bcks.find( (int) *p );
+        if( isbm != esbm )
+          (*isbm->second)[ cs.offset + Point3d( x, y, z ) ];
+      }
     }
   }
 
@@ -1014,7 +1130,7 @@ GraphManip::graphElementCodeByAtt( Graph & g, const string & syntax,
 
 
 template <typename T>
-Graph* GraphManip::graphFromVolume( const AimsData<T> & vol,
+Graph* GraphManip::graphFromVolume( const VolumeRef<T> & vol,
                                     T background, map<T, string> *trans )
 {
   Graph	*g = new Graph( "RoiArg" );
@@ -1024,31 +1140,41 @@ Graph* GraphManip::graphFromVolume( const AimsData<T> & vol,
 
 
 template <typename T>
-void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
-                                  T background,  map<T, string> *trans ,
+void GraphManip::graphFromVolume( const VolumeRef<T> & vol, Graph & g,
+                                  T background,  map<T, string> *trans,
                                   bool automaticBackgroundSearch )
 {
   g.setSyntax( "RoiArg" );
   // global attributes
-  vector<float>	vs(3);
-  vs[0] = vol.sizeX();
-  vs[1] = vol.sizeY();
-  vs[2] = vol.sizeZ();
+  vector<float>	vs(3, 1.);
+  try
+  {
+    Object vso = vol->header().getProperty( "voxel_size" );
+    if( vso )
+      for( size_t i=0; i<std::max(size_t(3), vso->size()); ++i )
+        vs[i] = vso->getArrayItem( i )->getScalar();
+  }
+  catch( ... )
+  {
+  }
   g.setProperty( "voxel_size", vs );
   vector<int>	dims(3);
   dims[0] = 0;
   dims[1] = 0;
   dims[2] = 0;
   g.setProperty( "boundingbox_min", dims );
-  dims[0] = vol.dimX() - 1;
-  dims[1] = vol.dimY() - 1;
-  dims[2] = vol.dimZ() - 1;
+  dims = vol->getSize();
+  --dims[0];
+  --dims[1];
+  --dims[2];
+  while( dims.size() > 3 )
+    dims.erase( dims.begin() + ( dims.size() - 1 ) );
   g.setProperty( "boundingbox_max", dims );
   
   rc_ptr<GraphElementTable>	mgec( new GraphElementTable );
   GraphElementCode	& gec = (*mgec)[ "roi" ][ "roi" ];
   g.setProperty( "aims_objects_table", mgec );
-  DataTypeCode<AimsData<T> >	dtcv;
+  DataTypeCode<Volume<T> >	dtcv;
   gec.id = "roi";
   gec.attribute = "aims_roi";
   gec.objectType = dtcv.objectType();
@@ -1060,9 +1186,8 @@ void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
   gec.global_index_attribute = "roi_label";
   gec.syntax = "roi";
 
-  rc_ptr<AimsData<T> >	volume( new AimsData<T>( vol ) );
-  if( vol.header() )
-    volume->setHeader( vol.header()->cloneHeader() );
+  VolumeRef<T>	volume( vol );
+//   volume->header().copyProperties( vol->header() );
   g.setProperty( gec.global_attribute, volume );
   typename map<T, string>::iterator im, em ;
 
@@ -1074,10 +1199,11 @@ void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
   map<T, Vertex *>      nodes;
   T                     label;
   if( automaticBackgroundSearch )
-     background = vol.minimum() ;
-  ForEach3d( vol, x, y, z )
+     background = carto::min( *vol );
+  NDIterator<T> vit( &vol->at( 0 ), vol->getSize(), vol->getStrides() );
+  for( ; !vit.ended(); ++vit )
   {
-    label = vol( x, y, z );
+    label = vol->at( vit.position() );
     if( label != background )
     {
       Vertex	*& v = nodes[ label ];
@@ -1105,25 +1231,19 @@ void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
   }
 
   // copy volume header properties into the graph "header" property
-  Header *hdr = vol.header()->cloneHeader();
-  PythonHeader *ph = dynamic_cast<PythonHeader *>( hdr );
-  if( ph )
-  {
-    Object gh = Object::value( Dictionary() );
-    gh->copyProperties( Object::reference( *ph ) );
-    g.setProperty( "header", gh );
+  Object gh = Object::value( Dictionary() );
+  gh->copyProperties( Object::reference( vol->header() ) );
+  g.setProperty( "header", gh );
 
-    set<string> forbidden;
-    forbidden.insert( "object_type" );
-    forbidden.insert( "data_type" );
-    forbidden.insert( "preferred_data_type" );
-    forbidden.insert( "bits_allocated" );
-    set<string>::iterator i, e = forbidden.end();
-    for( i=forbidden.begin(); i!=e; ++i )
-      if( gh->hasProperty( *i ) )
-        gh->removeProperty( *i );
-  }
-  delete hdr;
+  set<string> forbidden;
+  forbidden.insert( "object_type" );
+  forbidden.insert( "data_type" );
+  forbidden.insert( "preferred_data_type" );
+  forbidden.insert( "bits_allocated" );
+  set<string>::iterator i, e = forbidden.end();
+  for( i=forbidden.begin(); i!=e; ++i )
+    if( gh->hasProperty( *i ) )
+      gh->removeProperty( *i );
 }
 
 
@@ -1590,7 +1710,8 @@ string GraphManip::defaultExtensionForObjectType( const string & otype,
     ext = ".gii";
   else if( otype == "Segments" || otype == "Mesh4" )
     ext = ".mesh";
-  else if( otype == "Volume" )
+  else if( otype == "Volume" || otype == "CartoVolume"
+           || otype == "VolumeRef" )
     ext = ".nii";
   else if( otype == "Bucket" )
     ext = ".bck";
@@ -1602,7 +1723,9 @@ string GraphManip::defaultExtensionForObjectType( const string & otype,
 
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
                                      rc_ptr<AimsData<short> > );
-template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
+template void GraphManip::storeAims( Graph &, GraphObject*, const string &,
+                                     rc_ptr<Volume<short> > );
+template void GraphManip::storeAims( Graph &, GraphObject*, const string &,
                                      rc_ptr<AimsSurfaceTriangle> );
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
                                      rc_ptr<AimsTimeSurface<2, Void> > );
@@ -1611,20 +1734,22 @@ template void GraphManip::storeAims( Graph &, GraphObject*, const string &,
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
                                      rc_ptr<BucketMap<Void> > );
 template Graph*
-GraphManip::graphFromVolume( const AimsData<int16_t> & vol,
+GraphManip::graphFromVolume( const VolumeRef<int16_t> & vol,
                              int16_t background = 0,
                              map<int16_t, string> *trans = 0 );
 template void
-GraphManip::graphFromVolume( const AimsData<int16_t> & vol , Graph & g,
+GraphManip::graphFromVolume( const VolumeRef<int16_t> & vol,
+                             Graph & g,
                              int16_t background = 0,
                              map<int16_t, string> *trans = 0,
                              bool automaticBackgroundSearch = true );
 template Graph*
-GraphManip::graphFromVolume( const AimsData<int32_t> & vol,
+GraphManip::graphFromVolume( const VolumeRef<int32_t> & vol,
                              int32_t background = 0,
                              map<int32_t, string> *trans = 0 );
 template void
-GraphManip::graphFromVolume( const AimsData<int32_t> & vol , Graph & g,
+GraphManip::graphFromVolume( const VolumeRef<int32_t> & vol,
+                             Graph & g,
                              int32_t background = 0,
                              map<int32_t, string> *trans = 0,
                              bool automaticBackgroundSearch = true );

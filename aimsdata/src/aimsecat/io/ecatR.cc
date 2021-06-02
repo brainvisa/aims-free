@@ -190,120 +190,120 @@ void EcatReader< short >::read( AimsData<short>& thing,
   options->getProperty( "border", border );
 
   if( frame >= 0 )
-    {
-      frameRead( thing, context, frame, border );
-      return;
-    }
+  {
+    frameRead( thing, context, frame, border );
+    return;
+  }
 
   UnifiedEcatInfo    *uei;
   string             fileName;
   EcatHeader         *hdr;
  
 
-  // --------------------------------Initialisation du header propri�taire
+  // --------------------------------Initialisation du header proprietaire
   hdr = new EcatHeader( _name );
   try
-    {
-      hdr->read();
-    }
+  {
+    hdr->read();
+  }
   catch( exception & e )
-    {
-      delete hdr;
-      throw( e );
-    }
+  {
+    delete hdr;
+    throw( e );
+  }
 
   // ----------------------------------------Ouverture du uei
   fileName = _name;   // .i, .v, .p are different ECAT volumes
   if ( (uei = EcatOpen( (char*) hdr->name().c_str(),
-    const_cast<char*>( "r" ) )) == ECATSHFJ_FAIL )
+        const_cast<char*>( "r" ) )) == ECATSHFJ_FAIL )
     throw format_error( fileName );
 
-    carto::AllocatorContext 
-      cont2( context.accessMode(), 
-             rc_ptr<DataSource>
-             ( new FileDataSource( hdr->name(), 0, carto::DataSource::Read ) ),
-             false, context.useFactor() );
+  carto::AllocatorContext
+    cont2( context.accessMode(),
+            rc_ptr<DataSource>
+            ( new FileDataSource( hdr->name(), 0, carto::DataSource::Read ) ),
+            false, context.useFactor() );
 
   AimsData<short> data( uei->size.x, uei->size.y, uei->size.z, uei->size.t,
-			border, cont2 );
+                        border, cont2 );
   data.setSizeXYZT( uei->voxelsize.x, uei->voxelsize.y,
-		    uei->voxelsize.z, uei->voxelsize.t );
+                    uei->voxelsize.z, uei->voxelsize.t );
   data.setHeader( hdr );
   short *s_pt, *s_ima;
+  // (data is a temp allocated here so always has stride == 1)
+  long stride = &data(1) - &data(0);
 
   // --------------------------------------------Lecture frame par frame
   for(int frame=0; frame < uei->size.t; frame++)
-    {
-      if( ( s_ima = EcatReadVolume_S16( uei ,frame))==ECATSHFJ_FAIL )
-        throw logic_error( "Internal error: read failed" );
-      s_pt = s_ima;
-      for(int slice=0; slice<uei->size.z;slice++)
-	for(int line=0;line <uei->size.y;line++)
-	  {
-	    memcpy((char*)&data(0,line,slice,frame),(char*)s_pt,
-		   uei->size.x*sizeof(short));
-	    s_pt += uei->size.x;
-	  }
-      free( s_ima );
-    }
+  {
+    if( ( s_ima = EcatReadVolume_S16( uei, frame)) == ECATSHFJ_FAIL )
+      throw logic_error( "Internal error: read failed" );
+    s_pt = s_ima;
+    for(int slice=0; slice<uei->size.z;slice++)
+      for(int line=0;line <uei->size.y;line++)
+      {
+        memcpy((char*)&data(0,line,slice,frame),(char*)s_pt,
+               uei->size.x*sizeof(short));
+        s_pt += uei->size.x;
+      }
+    free( s_ima );
+  }
 
   // ------------------------------Remise en coherence des scale factors
   if (string(EcatCalibUnit( uei )) != "Labels")
+  {
+    short *it;
+    double maxi = data(0) * (double)EcatVolScale(uei,0)
+      * (double)EcatCalib(uei);
+    double mini = maxi;
+
+    for(int frame=0; frame< EcatSizeT(uei); frame++)
     {
-      AimsData<short>::const_iterator it = data.begin() + data.oFirstPoint();
-      double maxi = (double)*it * (double)EcatVolScale(uei,0) 
-	* (double)EcatCalib(uei);
-      double mini = maxi;
-      for(int frame=0; frame< EcatSizeT(uei); frame++)
-	{
-	  double sf = (double)EcatVolScale(uei,frame ); // EcatCalib( uei ) inutile 
-	                                                //car constant pour toutes les frames;
-	  for( int z = 0; z < EcatSizeZ(uei); z++ )
-	    {
-	      for ( int y = 0; y < EcatSizeY(uei); y++ )
-		{
-		  for ( int x = 0; x < EcatSizeX(uei); x++ )
-		    {
-		      double tmp =(double)*it * sf;
-		      if ( tmp > maxi ) maxi = tmp;
-		      if ( tmp < mini ) mini = tmp;
-		      it++;
-		    }
-		  it += data.oPointBetweenLine();
-		}
-	      it += data.oLineBetweenSlice();
-	    }
-	  it += data.oSliceBetweenVolume();
-	}
-      
-      double ratio;
-      if (maxi > -mini ) ratio = (double) 32767 / maxi;
-      else               ratio = (double) 32768 / (-mini);
-      _scale = (float )((double) 1.0 / ratio);
-      
-      
-      AimsData<short>::iterator wit = data.begin() + data.oFirstPoint();
-      for(int frame=0; frame< EcatSizeT(uei); frame++)
-	{
-	  double sf = (double)EcatVolScale(uei,frame ) * (double)EcatCalib( uei );
-	  for( int z = 0; z < EcatSizeZ(uei); z++ )
-	    {
-	      for ( int y = 0; y < EcatSizeY(uei); y++ )
-		{
-		  for ( int x = 0; x < EcatSizeX(uei); x++ )
-		    {
-		      int tmp =  (int) ((double)*wit * sf * ratio);
-		      if (tmp > 32767) *wit++ = 32767;
-		      else if (tmp < -32768 ) *wit++ = -32768;
-		      else *wit++ = (short) tmp;
-		    }
-		  wit += data.oPointBetweenLine();
-		}
-	      wit += data.oLineBetweenSlice();
-	    }
-	  wit += data.oSliceBetweenVolume();
-	}  
+      double sf = (double)EcatVolScale(uei,frame ); // EcatCalib( uei ) inutile
+                                                    //car constant pour toutes les frames;
+      for( int z = 0; z < EcatSizeZ(uei); z++ )
+      {
+        for ( int y = 0; y < EcatSizeY(uei); y++ )
+        {
+          it = &data( 0, y, z, frame );
+          for ( int x = 0; x < EcatSizeX(uei); x++ )
+          {
+            double tmp =(double)*it * sf;
+            if ( tmp > maxi ) maxi = tmp;
+            if ( tmp < mini ) mini = tmp;
+            it += stride;
+          }
+        }
+      }
     }
+
+    double ratio;
+    if (maxi > -mini ) ratio = (double) 32767 / maxi;
+    else               ratio = (double) 32768 / (-mini);
+    _scale = (float )((double) 1.0 / ratio);
+
+
+    short *wit;
+    for(int frame=0; frame< EcatSizeT(uei); frame++)
+    {
+      double sf = (double)EcatVolScale(uei,frame ) * (double)EcatCalib( uei );
+      for( int z = 0; z < EcatSizeZ(uei); z++ )
+      {
+        for ( int y = 0; y < EcatSizeY(uei); y++ )
+        {
+          wit = &data( 0, y, z, frame );
+          for ( int x = 0; x < EcatSizeX(uei); x++ )
+            {
+              int tmp =  (int) ((double)*wit * sf * ratio);
+              if (tmp > 32767) *wit = 32767;
+              else if (tmp < -32768 ) *wit = -32768;
+              else *wit = (short) tmp;
+              wit += stride;
+            }
+        }
+      }
+    }
+  }
   // -------------------------------------------------fermeture de l'uei
   EcatClose( uei );
 
@@ -362,7 +362,7 @@ void EcatReader< float >::read( AimsData<float>& thing,
   data.setHeader( hdr );
 
   // Caracteristiques des images
-  cout << "Image units are: "  << EcatCalibUnit(uei) << endl;
+  // cout << "Image units are: "  << EcatCalibUnit(uei) << endl;
 
 
   // --------------------------------------------Lecture frame par frame

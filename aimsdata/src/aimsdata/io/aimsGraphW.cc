@@ -42,6 +42,7 @@
 #include <cartobase/stream/directory.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/file.h>
+#include <cartobase/containers/nditerator.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -74,13 +75,20 @@ namespace aims
   }
 
   template<> int 
-  AimsGraphWriter::ObjectWrapper<AimsData<short> >::freeindex() const
+  AimsGraphWriter::ObjectWrapper<Volume<short> >::freeindex() const
   {
     // extremely not optimal...
-    short	x, y, z;
     set<short>	values;
-    ForEach3d( (*data), x, y, z )
-      values.insert( (*data)( x, y, z ) );
+    line_NDIterator<short> it( &data->at( 0 ), data->getSize(),
+                               data->getStrides(), true );
+    short *p, *pn;
+
+    for( ; !it.ended(); ++it )
+    {
+      p = &*it;
+      for( pn=p + it.line_length(); p!=pn; it.inc_line_ptr( p ) )
+        values.insert( *p );
+    }
 
     set<short>::const_iterator	i = values.begin(), e = values.end();
     short	n = 1;
@@ -92,16 +100,23 @@ namespace aims
 
 
   template<> int
-  AimsGraphWriter::ObjectWrapper<AimsData<int32_t> >::freeindex() const
+  AimsGraphWriter::ObjectWrapper<Volume<int32_t> >::freeindex() const
   {
     // extremely not optimal...
-    short       x, y, z;
-    set<int32_t>  values;
-    ForEach3d( (*data), x, y, z )
-      values.insert( (*data)( x, y, z ) );
+    set<int32_t>	values;
+    line_NDIterator<int32_t> it( &data->at( 0 ), data->getSize(),
+                                 data->getStrides(), true );
+    int32_t *p, *pn;
 
-    set<int32_t>::const_iterator  i = values.begin(), e = values.end();
-    short       n = 1;
+    for( ; !it.ended(); ++it )
+    {
+      p = &*it;
+      for( pn=p + it.line_length(); p!=pn; it.inc_line_ptr( p ) )
+        values.insert( *p );
+    }
+
+    set<int32_t>::const_iterator	i = values.begin(), e = values.end();
+    int32_t	n = 1;
     if( i != e && *i == 0 )
       n = 0;
     for( ; i!=e && *i==n; ++i, ++n ) {}
@@ -110,7 +125,7 @@ namespace aims
 
 }
 
-#if ( __GNUC__-0 >= 3 ) || ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 >= 95 )
+
 static void AimsGraphWriter_construct( AimsGraphWriter & gw )
 {
   gw.registerProcessType( "Bucket", "VOID",
@@ -130,40 +145,24 @@ static void AimsGraphWriter_construct( AimsGraphWriter & gw )
   gw.registerProcessType( "Texture", "POINT2DF",
                           &AimsGraphWriter::defaultTakeObject<Texture2d> );
   gw.registerProcessType( "Volume", "S16",
-                          &AimsGraphWriter::defaultTakeObject<AimsData<short> >
+                          &AimsGraphWriter::defaultTakeObject<Volume<short> >
+                          );
+  gw.registerProcessType( "CartoVolume", "S16",
+                          &AimsGraphWriter::defaultTakeObject<Volume<short> >
                           );
   gw.registerProcessType( "Volume", "S32",
-      &AimsGraphWriter::defaultTakeObject<AimsData<int32_t> >
-    );
+      &AimsGraphWriter::defaultTakeObject<Volume<int32_t> > );
+  gw.registerProcessType( "CartoVolume", "S32",
+      &AimsGraphWriter::defaultTakeObject<Volume<int32_t> > );
 }
-#endif
 
 
 AimsGraphWriter::AimsGraphWriter( const string & fname )
   : Process(), d( new AimsGraphWriter_Private )
 {
   d->filename = fname;
-#if ( __GNUC__-0 >= 3 ) || ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 >= 95 )
   // workaround bug in gcc-2.95
   AimsGraphWriter_construct( *this );
-#else	// ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
-  registerProcessType( string( "Bucket" ), string( "VOID" ), 
-                      &defaultTakeObject<BucketMap<Void> > );
-  registerProcessType( string( "Mesh" ), string( "VOID" ),
-                      &defaultTakeObject<AimsSurfaceTriangle> );
-  registerProcessType( string( "Segments" ), string( "VOID" ),
-                      &defaultTakeObject<AimsTimeSurface<2, Void> > );
-  registerProcessType( "Texture", "FLOAT",
-                      &defaultTakeObject<Texture1d> );
-  registerProcessType( "Texture", "S16",
-                      &defaultTakeObject<TimeTexture<short> > );
-  registerProcessType( "Texture", "POINT2DF",
-                      &defaultTakeObject<Texture2d> );
-  registerProcessType( "Volume", "S16",
-                      &defaultTakeObject<AimsData<short> > );
-  registerProcessType( "Volume", "S32",
-                      &defaultTakeObject<AimsData<int32_t> > );
-#endif
 }
 
 
@@ -377,97 +376,98 @@ void AimsGraphWriter::writeElement( AttributedObject *ao,
   if( iot != eot )
     // { cout << "  " << ao->getSyntax() << " found" << endl;
     for( ige=iot->second.begin(), ege=iot->second.end(); ige!=ege; ++ige )
+    {
+      d->elemcode = ige->second;
+      // cout << "try " << d->elemcode.attribute << endl;
+      if( ao->hasProperty( d->elemcode.attribute ) )
       {
-	d->elemcode = ige->second;
-        // cout << "try " << d->elemcode.attribute << endl;
-	if( ao->hasProperty( d->elemcode.attribute ) )
-	  {
-            /*
-            cout << "fill element table: " << d->elemcode.id << ", att: " 
-               << d->elemcode.attribute << ", otype: " 
-                 << d->elemcode.objectType 
-               << ", dtype: " << d->elemcode.dataType << ", gfile: " 
-               << d->elemcode.global_filename << ", storage: " 
-               << d->elemcode.storageType << endl;
-            */
-	    // sub-optimal: will search twice for attribute in element
-	    es.fdr.setObjectType( d->elemcode.objectType );
-	    es.fdr.setDataType( d->elemcode.dataType );
-	    info.element = ao;
-	    info.attribute = d->elemcode.attribute;
-	    d->delayindex = false;
-	    d->modified = false;
-	    findObjectAndFilename( ao, ige->first, *d, info );
-	    ige->second = d->elemcode;	// back to objTable
-	    if( d->delayindex )
-	      {
-		// cout << "element " << d->elemcode.attribute << " delayed\n";
-		DelayStruct & ds = es.delayed[ ao ][ d->elemcode.attribute ];
-		ds.first = info;
-		ds.second = d->elemcode;
-	      }
-	    if( !d->delayindex 
-		|| !d->globalobjects[ d->elemcode.global_filename ] )
-	      try
-		{
-		  if( execute( es.fdr, "dummy" ) )
-		    {
-		      info.object->write( *this );
-		      delete info.object;
-		    }
-		  else
-		    cerr << "could not find object of type " 
-			 << d->elemcode.objectType << " / " 
-			 << d->elemcode.dataType << " in current vertex" 
-			 << endl;
-		}
-	      catch( exception & e )
-		{
-		  cerr << "error saving object of type " 
-		       << d->elemcode.objectType << " / " 
-		       << d->elemcode.dataType << " in current vertex: ";
-                  cerr << e.what() << endl;
-		}
-	  }
-	else if( d->elemcode.storageType == GraphElementCode::GlobalPacked 
-		 && ao->hasProperty( d->elemcode.global_index_attribute ) 
-		 && info.graph->hasProperty( d->elemcode.global_attribute ) )
-	  {
-	    /*cout << d->elemcode.attribute << ": global packed\n";
-	    cout << "global_attribute: " << d->elemcode.global_attribute 
-		 << endl;
-	    cout << "global_index_attribute: " 
-		 << d->elemcode.global_index_attribute << endl;
-		 cout << "object type: " << d->elemcode.objectType << endl; */
-	    es.fdr.setObjectType( d->elemcode.objectType );
-	    es.fdr.setDataType( d->elemcode.dataType );
-	    info.element = info.graph;
-	    info.attribute = d->elemcode.global_attribute;
-	    d->delayindex = false;
-	    d->modified = false;
-	    ige->second = d->elemcode;	// back to objTable
-	    try
-	      {
-		if( execute( es.fdr, "dummy" ) )
-		  {
-		    info.object->write( *this );
-		    delete info.object;
-		  }
-		else
-		  cerr << "could not find object of type " 
-		       << d->elemcode.objectType << " / " 
-		       << d->elemcode.dataType << " in current graph" 
-		       << endl;
-	      }
-	    catch( exception & )
-	      {
-		cerr << "could not find object of type " 
-		     << d->elemcode.objectType << " / " 
-		     << d->elemcode.dataType << " in current graph" 
-		     << endl;
-	      }
-	  }
+        /*
+        cout << "fill element table: " << d->elemcode.id << ", att: "
+            << d->elemcode.attribute << ", otype: "
+              << d->elemcode.objectType
+            << ", dtype: " << d->elemcode.dataType << ", gfile: "
+            << d->elemcode.global_filename << ", storage: "
+            << d->elemcode.storageType << endl;
+        */
+        // sub-optimal: will search twice for attribute in element
+        es.fdr.setObjectType( d->elemcode.objectType );
+        es.fdr.setDataType( d->elemcode.dataType );
+        info.element = ao;
+        info.attribute = d->elemcode.attribute;
+        d->delayindex = false;
+        d->modified = false;
+        findObjectAndFilename( ao, ige->first, *d, info );
+        ige->second = d->elemcode;	// back to objTable
+        if( d->delayindex )
+        {
+          // cout << "element " << d->elemcode.attribute << " delayed\n";
+          DelayStruct & ds = es.delayed[ ao ][ d->elemcode.attribute ];
+          ds.first = info;
+          ds.second = d->elemcode;
+        }
+        if( !d->delayindex
+            || !d->globalobjects[ d->elemcode.global_filename ] )
+          try
+          {
+            if( execute( es.fdr, "dummy" ) )
+            {
+              info.object->write( *this );
+              delete info.object;
+            }
+            else
+              cerr << "could not find object of type "
+                    << d->elemcode.objectType << " / "
+                    << d->elemcode.dataType << " in current vertex"
+                    << endl;
+          }
+          catch( exception & )
+          {
+            cerr << "error saving object of type "
+                  << d->elemcode.objectType << " / "
+                  << d->elemcode.dataType << " in current vertex: ";
+          }
       }
+      else if( d->elemcode.storageType == GraphElementCode::GlobalPacked
+                && ao->hasProperty( d->elemcode.global_index_attribute )
+                && info.graph->hasProperty( d->elemcode.global_attribute ) )
+      {
+        /*cout << d->elemcode.attribute << ": global packed\n";
+        cout << "global_attribute: " << d->elemcode.global_attribute
+              << endl;
+        cout << "global_index_attribute: "
+              << d->elemcode.global_index_attribute << endl;
+              cout << "object type: " << d->elemcode.objectType << endl; */
+        es.fdr.setObjectType( d->elemcode.objectType );
+        es.fdr.setDataType( d->elemcode.dataType );
+        info.element = info.graph;
+        info.attribute = d->elemcode.global_attribute;
+        d->delayindex = false;
+        d->modified = false;
+        ige->second = d->elemcode;	// back to objTable
+        try
+        {
+          if( execute( es.fdr, "dummy" ) )
+          {
+            info.object->write( *this );
+            delete info.object;
+          }
+          else
+          {
+            cerr << "could not find object of type "
+                  << d->elemcode.objectType << " / "
+                  << d->elemcode.dataType << " in current graph"
+                  << endl;
+          }
+        }
+        catch( exception & )
+        {
+          cerr << "could not find object of type "
+                << d->elemcode.objectType << " / "
+                << d->elemcode.dataType << " in current graph"
+                << endl;
+        }
+      }
+    }
   //}
 }
 
@@ -656,6 +656,8 @@ void AimsGraphWriter::writeElements( Graph & g, SavingMode newmode,
   typec[ "Mesh4" ] = "tri";
   typec[ "Texture" ] = "tex";
   typec[ "Volume" ] = "vol";
+  typec[ "CartoVolume" ] = "vol";
+  typec[ "VolumeRef" ] = "vol";
 
   for( iot=objTable->begin(); iot!=eot; ++iot )
     //{ cout << "objTable synt: " << iot->first << endl;

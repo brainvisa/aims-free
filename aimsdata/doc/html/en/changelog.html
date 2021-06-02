@@ -16,6 +16,9 @@
 
 <hr width="100%"> <br>
 
+ <b><a href="#version-5.1.0">Version 5.1.0</a></b><br>
+ <b><a href="#version-5.0.2">Version 5.0.2</a></b><br>
+ <b><a href="#version-5.0.1">Version 5.0.1</a></b><br>
  <b><a href="#version-5.0.0">Version 5.0.0</a></b><br>
  <b><a href="#version-4.6.1">Version 4.6.1</a></b><br>
  <b><a href="#version-4.6.0">Version 4.6.0</a></b><br>
@@ -46,6 +49,31 @@
  <b><a href="#version-2.11">Version 2.11</a></b><br>
  <b><a href="#version-2.10">Version 2.10</a></b><br>
 
+
+<!-- -->
+<h4> <a name="version-5.1.0"></a>May 6, 2021, Version 5.1.0</h4>
+
+<ul>
+  <li>Support Volume classes with strides on X axis. Strides were present in the volume structure but most functions assumed that voxels were contiguous on the first (X) axis. This forbid for instance bindings to numpy arrays which had a "C" ordering convention. This limitation is now gone in main Volume methods and operator. However many algorithms are still assuming that the first axis is contiguous (and use pointers with ++ incrementation), so these volumes should be reserved for specific and tested uses.</li>
+  <li>Volume IO have been updated to support strides.</li>
+  <li>PyAims bindings to readers taking existing data as input/output. This allows partial reading views in allocated volumes.</li>
+</ul>
+
+<!-- -->
+<h4> <a name="version-5.0.2"></a>Apr. 14, 2021, Version 5.0.2</h4>
+
+<ul>
+  <li>added a convenience shortcut to access numpy array of objects with bindings with nuppy: something.np (property)</li>
+</ul>
+
+<!-- -->
+<h4> <a name="version-5.0.1"></a>Mar., 2021, Version 5.0.1</h4>
+
+<ul>
+  <li>Improved IO of FFD (free form deformations, vector fields) and python bindings. FFDs can now be read/written as 5D (or more) NIFTI or any other volume format where the last dimension size is 3 (3D vector).
+  </li>
+  <li>Improved bundles formats (.bundles, .trk, .tck) introspection in Finder and BundleReader</li>
+</ul>
 
 <!-- -->
 <h4> <a name="version-5.0.0"></a>Jan. 20, 2021, Version 5.0.0</h4>

@@ -76,8 +76,8 @@ BucketMap< Void > PerfusionMask::doit( AimsData< short >& d,
 					 (short)( pp.lvThres() * maxv ) );
       AimsData< short > maskLV = tLV.bin( lastvol );
 
-      AimsConnectedComponent( LVcompo, maskLV, 
-			      Connectivity::CONNECTIVITY_26_XYZ );
+      AimsConnectedComponent<short>( LVcompo, maskLV,
+                                     Connectivity::CONNECTIVITY_26_XYZ );
 
       //Look for the bigest one
       n = LVcompo.size();
@@ -98,7 +98,8 @@ BucketMap< Void > PerfusionMask::doit( AimsData< short >& d,
     }
 
   AimsBucket< Void > Bcompo;
-  AimsConnectedComponent( Bcompo, mask, Connectivity::CONNECTIVITY_26_XYZ );
+  AimsConnectedComponent<short>( Bcompo, mask,
+                                 Connectivity::CONNECTIVITY_26_XYZ );
 
   //Look for the bigest one
   int index = 0;

@@ -176,26 +176,34 @@ void EcatWriter::write(const AimsData<short>& thing)
   */
   size_t sbuf = thing.dimX() * thing.dimY() * thing.dimZ()
     + 512 / sizeof(int16_t);
-  short *s_pt,*s_vol = new short[ sbuf ];
-  ASSERT(s_vol);
+  vector<short> s_vol( sbuf );
+  short *s_pt;
+  long stride = &thing(1) - &thing(0);
   
   for (int t=0;t<EcatSizeT(uei);t++)
+  {
+    s_pt = &s_vol[0];
+    for (int slice=0;slice<EcatSizeZ(uei);slice++)
     {
-      s_pt = s_vol;
-      for (int slice=0;slice<EcatSizeZ(uei);slice++)
-	{
-	for(int line=0;line<EcatSizeY(uei);line++)
-	  {
-	    memcpy((char *)s_pt,(char *) &thing(0,line,slice,t),
-		   EcatSizeX(uei) * sizeof(short));
-	    s_pt  += EcatSizeX(uei);
-	  }
-	} 
-      if(EcatWriteVolume_S16(uei,s_vol,t) == -1)
-        throw logic_error( "Internal error: EcatWriteVolume_S16 failed" );
+      for(int line=0;line<EcatSizeY(uei);line++)
+      {
+        if( stride == 1 )
+          memcpy((char *)s_pt, (char *) &thing(0, line, slice, t),
+                 EcatSizeX(uei) * sizeof(short));
+        else
+        {
+          // stides along X axis
+          const short* p = &thing( 0, line, slice, t );
+          for( long k=0; k<EcatSizeX(uei); ++k, p+=stride )
+            s_pt[k] = *p;
+        }
+        s_pt  += EcatSizeX(uei);
+      }
     }
+    if(EcatWriteVolume_S16(uei, &s_vol[0], t) == -1)
+      throw logic_error( "Internal error: EcatWriteVolume_S16 failed" );
+  }
 
-  delete[] s_vol;
   EcatClose(uei);
 
   hdr.write();
@@ -267,26 +275,34 @@ void EcatWriter::write(const AimsData<float>& thing)
   */
   size_t sbuf = thing.dimX() * thing.dimY() * thing.dimZ()
     + 512 / sizeof(float);
-  float *f_pt,*f_vol = new float[ sbuf ];
-  ASSERT(f_vol);
-  
-  for (int t=0;t<EcatSizeT(uei);t++)
-    {
-      f_pt = f_vol;
-      for (int slice=0;slice<EcatSizeZ(uei);slice++)
-	{
-	for(int line=0;line<EcatSizeY(uei);line++)
-	  {
-	    memcpy((char *)f_pt,(char *) &thing(0,line,slice,t),
-		   EcatSizeX(uei) * sizeof(float));
-	    f_pt  += EcatSizeX(uei);
-	  }
-	} 
-      if(EcatWriteVolume_FLOAT(uei,f_vol,t) == -1)
-        throw logic_error( "Internal error: EcatWriteVolume_FLOAT failed" );
-    }
+  vector<float> f_vol( sbuf );
+  float *f_pt;
+  long stride = &thing(1) - &thing(0);
 
-  delete[] f_vol;
+  for (int t=0;t<EcatSizeT(uei);t++)
+  {
+    f_pt = &f_vol[0];
+    for (int slice=0;slice<EcatSizeZ(uei);slice++)
+    {
+      for(int line=0;line<EcatSizeY(uei);line++)
+      {
+        if( stride == 1 )
+          memcpy((char *)f_pt,(char *) &thing(0, line, slice, t),
+                 EcatSizeX(uei) * sizeof(float));
+        else
+        {
+          // stides along X axis
+          const float* p = &thing( 0, line, slice, t );
+          for( long k=0; k<EcatSizeX(uei); ++k, p+=stride )
+            f_pt[k] = *p;
+        }
+        f_pt  += EcatSizeX(uei);
+      }
+    }
+    if(EcatWriteVolume_FLOAT(uei, &f_vol[0], t) == -1)
+      throw logic_error( "Internal error: EcatWriteVolume_FLOAT failed" );
+  }
+
   EcatClose(uei);
 
   hdr.write();

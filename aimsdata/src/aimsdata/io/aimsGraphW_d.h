@@ -124,13 +124,34 @@ namespace aims
   }
 
 
-  template<class T> 
+  template <typename T>
+  bool AimsGraphWriter::isEmpty( const T & obj )
+  {
+    return obj.empty();
+  }
+
+
+  template <>
+  bool AimsGraphWriter::isEmpty( const carto::Volume<short> & obj )
+  {
+    return !obj.any();
+  }
+
+
+  template <>
+  bool AimsGraphWriter::isEmpty( const carto::Volume<int32_t> & obj )
+  {
+    return !obj.any();
+  }
+
+
+  template<class T>
   bool AimsGraphWriter::write( const T & obj ) const
   {
     // write in file or in global object
     if ( d->mode == Local )
       {
-	if ( d->saveall || ( d->modified && !obj.empty() ) )
+	if ( d->saveall || ( d->modified && !isEmpty( obj ) ) )
 	  {
             std::string dir = carto::FileUtil::dirname( d->elemfname );
             if( carto::FileUtil::fileStat( dir ).find( '+' ) 
@@ -178,24 +199,27 @@ namespace aims
 
   template<class T> 
   bool AimsGraphWriter::defaultTakeObject( Process & p, const std::string &, 
-					   Finder & )
+                                           Finder & f )
   {
     AimsGraphWriter	& wp = (AimsGraphWriter &) p;
     ElementInfo		& info = wp.info;
     carto::rc_ptr<T>	obj;
-    
+
     try
+    {
+      if ( !info.element->getProperty( info.attribute, obj ) )
       {
-	if ( !info.element->getProperty( info.attribute, obj ) )
-	  return false;
-	info.object = new ObjectWrapper<T>( obj.get() );
-	return true;
+        carto::Object o = info.element->getProperty( info.attribute );
+        return false;
       }
+      info.object = new ObjectWrapper<T>( obj.get() );
+      return true;
+    }
     catch( std::exception & e )
-      {
-	std::cerr << e.what() << std::endl;
-	return false;
-      }
+    {
+      std::cerr << e.what() << std::endl;
+      return false;
+    }
   }
 
 }

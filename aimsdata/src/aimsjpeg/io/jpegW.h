@@ -115,8 +115,8 @@ namespace aims
   template<class T>
   inline
   void JpegWriter<T>::writeFrame( const AimsData<T> & thing, 
-				  const std::string & filename, unsigned z, 
-				  unsigned t )
+                                  const std::string & filename, unsigned z,
+                                  unsigned t )
   {
     struct jpeg_compress_struct	cinfo;
     struct jpeg_error_mgr	jerr;
@@ -147,12 +147,27 @@ namespace aims
 
     jpeg_stdio_dest( &cinfo, fp );
     jpeg_start_compress( &cinfo, TRUE );
+    long stride = &thing( 1 ) - &thing( 0 );
+    std::vector<T> buffer;
+    if( stride != 1 )
+      // allocate buffer for un-strided data
+      buffer.resize( cinfo.image_width );
 
     for( i=0; i<cinfo.image_height; ++i )
+    {
+
+      if( stride == 1 )
+        row_pointer[0] = (JSAMPROW) &thing( 0, i, z, t );
+      else
       {
-	row_pointer[0] = (JSAMPROW) &thing( 0, i, z, t );
-	jpeg_write_scanlines( &cinfo, row_pointer, 1 );
+        // stides along X axis: must copy things
+        const T* p = &thing( 0, i, z, t );
+        for( long k=0; k<cinfo.image_width; ++k, p+=stride )
+          buffer[k] = *p;
+        row_pointer[0] = (JSAMPROW) &buffer[0];
       }
+      jpeg_write_scanlines( &cinfo, row_pointer, 1 );
+    }
 
     jpeg_finish_compress( &cinfo );
     fclose( fp );

@@ -49,74 +49,84 @@ using namespace std;
 void VidaWriter::write(const AimsData<short>& thing)
 {
   VidaHeader	hdr( thing.dimX(), thing.dimY(), thing.dimZ(), thing.dimT(), 
-		     thing.sizeX(), thing.sizeY(), thing.sizeZ(), 
-		     thing.sizeT(), _name );
+                     thing.sizeX(), thing.sizeY(), thing.sizeZ(),
+                     thing.sizeT(), _name );
   string fileName = hdr.removeExtension(_name);
 
-  VIDAim *vp =  VidaOpen((char*)fileName.c_str(),VidaConsigne(VMODE,"w",
-                                          VMDTYPE,   FX_SHORT_FX,
-                                          VSIZE_X,   (int)thing.dimX(), 
-		                          VSIZE_Y,   (int)thing.dimY(),
-		                          VSIZE_Z,   (int)thing.dimZ(),
-		                          VSIZE_T,   (int)thing.dimT(),
-		                          VSIZE_PX,  (double)thing.sizeX(),
-		                          VSIZE_PY,  (double)thing.sizeY(),
-		                          VSIZE_PZ,  (double)thing.sizeZ(),
-		                          VSIZE_PT,  (double)thing.sizeT(),
-		                          NULL));
+  VIDAim *vp =  VidaOpen((char*)fileName.c_str(),
+                         VidaConsigne(VMODE,"w",
+                                      VMDTYPE,   FX_SHORT_FX,
+                                      VSIZE_X,   (int)thing.dimX(),
+                                      VSIZE_Y,   (int)thing.dimY(),
+                                      VSIZE_Z,   (int)thing.dimZ(),
+                                      VSIZE_T,   (int)thing.dimT(),
+                                      VSIZE_PX,  (double)thing.sizeX(),
+                                      VSIZE_PY,  (double)thing.sizeY(),
+                                      VSIZE_PZ,  (double)thing.sizeZ(),
+                                      VSIZE_PT,  (double)thing.sizeT(),
+                                      NULL));
    if( !vp )
      io_error::launchErrnoExcept( _name );
 
-   short *s_pt,*s_ima = new short[ thing.dimX() * thing.dimY() ];
-   ASSERT(s_ima);
-   bool ok = true;
-   for (int frame=0;frame<VIDA_T(vp);frame++)
-   {
-     for (int slice=0;slice<VIDA_Z(vp);slice++)
-     {
-       s_pt = s_ima;
-       for(int line=0;line<VIDA_Y(vp);line++)
-       {
-         memcpy((char *)s_pt,(char *)&thing(0,line,slice,frame),
-                VIDA_X(vp)*sizeof(short));
-         s_pt  += VIDA_X(vp);
-       }
-       if(VidaWrite((char *)s_ima,slice,frame,vp) == -1)
-         ok = false;
-     } 
-   }
-   delete[] s_ima;
-   VidaClose(vp);
-   if( !ok )
-     io_error::launchErrnoExcept( _name );
+  vector<short> s_ima( thing.dimX() * thing.dimY() );
+  short *s_pt;
+  bool ok = true;
+  long stride = &thing(1) - &thing(0);
 
-    const PythonHeader 
-      *ph = dynamic_cast<const PythonHeader *>( thing.header() );
-    if( ph )
+  for (int frame=0;frame<VIDA_T(vp);frame++)
+  {
+    for (int slice=0;slice<VIDA_Z(vp);slice++)
     {
-      hdr.copy( *ph );
-      vector<int>	dims(4);
-      dims[0] = thing.dimX();
-      dims[1] = thing.dimY();
-      dims[2] = thing.dimZ();
-      dims[3] = thing.dimT();
-      hdr.setProperty( "volume_dimension", dims );
-      vector<float>	vs(4);
-      vs[0] = thing.sizeX();
-      vs[1] = thing.sizeY();
-      vs[2] = thing.sizeZ();
-      vs[3] = thing.sizeT();
-      hdr.setProperty( "voxel_size", vs );
+      s_pt = &s_ima[0];
+      for(int line=0;line<VIDA_Y(vp);line++)
+      {
+        if( stride == 1 )
+          memcpy((char *)s_pt,(char *)&thing(0,line,slice,frame),
+                 VIDA_X(vp)*sizeof(short));
+        else
+        {
+          // stides along X axis
+          const short* p = &thing( 0, line, slice, frame );
+          for( long k=0; k<VIDA_X(vp); ++k, p+=stride )
+            s_pt[k] = *p;
+        }
+        s_pt  += VIDA_X(vp);
+      }
+      if(VidaWrite((char *)&s_ima[0], slice, frame, vp) == -1)
+        ok = false;
     }
-    hdr.write();
+  }
+  VidaClose(vp);
+  if( !ok )
+    io_error::launchErrnoExcept( _name );
+
+  const PythonHeader
+    *ph = dynamic_cast<const PythonHeader *>( thing.header() );
+  if( ph )
+  {
+    hdr.copy( *ph );
+    vector<int>	dims(4);
+    dims[0] = thing.dimX();
+    dims[1] = thing.dimY();
+    dims[2] = thing.dimZ();
+    dims[3] = thing.dimT();
+    hdr.setProperty( "volume_dimension", dims );
+    vector<float>	vs(4);
+    vs[0] = thing.sizeX();
+    vs[1] = thing.sizeY();
+    vs[2] = thing.sizeZ();
+    vs[3] = thing.sizeT();
+    hdr.setProperty( "voxel_size", vs );
+  }
+  hdr.write();
 }
 
 
 void VidaWriter::write(const AimsData<float>& thing)
 {
   VidaHeader	hdr( thing.dimX(), thing.dimY(), thing.dimZ(), thing.dimT(), 
-		     thing.sizeX(), thing.sizeY(), thing.sizeZ(), 
-		     thing.sizeT(), _name );
+                     thing.sizeX(), thing.sizeY(), thing.sizeZ(),
+                     thing.sizeT(), _name );
   string fileName = hdr.removeExtension(_name);
 
   VIDAim *vp = VidaOpen( fileName.c_str(), 
@@ -132,38 +142,51 @@ void VidaWriter::write(const AimsData<float>& thing)
                                        VSIZE_PT,  (double)thing.sizeT(),
                                        VUNITE,    VIDA_SANSUNITE,
                                        NULL ) );
-   ASSERT( vp != NULL ); 
+  ASSERT( vp != NULL );
 
-   float *f_pt,*f_ima = new float[ thing.dimX() * thing.dimY() ];
-   ASSERT(f_ima);
-            
-   for (int frame=0;frame<VIDA_T(vp);frame++)
-   { for (int slice=0;slice<VIDA_Z(vp);slice++)
-     { f_pt = f_ima;
-       for(int line=0;line<VIDA_Y(vp);line++)
-       { memcpy((char *)f_pt,(char *)&thing(0,line,slice,frame),
-                VIDA_X(vp)*sizeof(float));
-         f_pt  += VIDA_X(vp);
-       }
-       if(VidaWrite((char *)f_ima,slice,frame,vp) == -1)
-        throw logic_error( "Internal error: write failed" );
-     } 
-   }
-   delete[] f_ima;
-   VidaClose(vp);
+  vector<float> f_ima( thing.dimX() * thing.dimY() );
+  float *f_pt;
+  bool ok = true;
+  long stride = &thing(1) - &thing(0);
 
-    const PythonHeader 
-      *ph = dynamic_cast<const PythonHeader *>( thing.header() );
-    if( ph )
-      hdr.copy( *ph );
-    hdr.write();
+  for (int frame=0;frame<VIDA_T(vp);frame++)
+  {
+    for (int slice=0;slice<VIDA_Z(vp);slice++)
+    {
+      f_pt = &f_ima[0];
+      for(int line=0;line<VIDA_Y(vp);line++)
+      {
+        if( stride == 1 )
+          memcpy((char *)f_pt,(char *)&thing(0,line,slice,frame),
+                  VIDA_X(vp)*sizeof(float));
+        else
+        {
+          // stides along X axis
+          const float* p = &thing( 0, line, slice, frame );
+          for( long k=0; k<VIDA_X(vp); ++k, p+=stride )
+            f_pt[k] = *p;
+        }
+        f_pt  += VIDA_X(vp);
+      }
+      if(VidaWrite((char *)&f_ima[0], slice, frame, vp) == -1)
+      throw logic_error( "Internal error: write failed" );
+    }
+  }
+  VidaClose(vp);
+
+  const PythonHeader
+    *ph = dynamic_cast<const PythonHeader *>( thing.header() );
+  if( ph )
+    hdr.copy( *ph );
+  hdr.write();
 }
 
 
 VidaWriter&
 operator << (VidaWriter& writer,
              const AimsData<short>& thing)
-{ writer.write(thing);
+{
+  writer.write(thing);
   return(writer);
 }
 
@@ -172,7 +195,8 @@ operator << (VidaWriter& writer,
 VidaWriter&
 operator << (VidaWriter& writer,
              const AimsData<float>& thing)
-{ writer.write(thing);
+{
+  writer.write(thing);
   return(writer);
 }
 

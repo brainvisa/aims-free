@@ -65,7 +65,9 @@ class TestPyaimsIO(unittest.TestCase):
                    ('.tiff', {'max_dims': 4}),
                    # minc 4D is OK except voxel size
                    ('.mnc', {'max_dims': 3}),
-                   ('.v', {'max_dims': 3})] # ecat >= 4D unsupported
+                   ('.v', {'max_dims': 3}), # ecat >= 4D unsupported
+                   # ('.vimg', {'max_dims': 4}), # disabled: too much imprecise
+                   ]
 
         # create test volume for 8D IO
         vol = aims.Volume((9, 8, 7, 6, 5, 4, 3, 3), dtype=dtype)
@@ -90,7 +92,8 @@ class TestPyaimsIO(unittest.TestCase):
                 return '_t0000_s0'
             else:
                 return '_0000'
-        suffixes = {'.dcm': '*', '.tiff': sliced_suffix}
+        suffixes = {'.dcm': '*', '.tiff': sliced_suffix, '.jpg': sliced_suffix,
+                    '.bmp': sliced_suffix}
         suffix = suffixes.get(format, '')
         if not isinstance(suffix, str):
             suffix = suffix(vol)
@@ -138,6 +141,7 @@ class TestPyaimsIO(unittest.TestCase):
 
         # re-read it
         fname = self.file_name(vol, dtype, format)
+        #print('re-read:', fname, file=sys.stderr)
         vol2_name = os.path.basename(fname) + ' (re-read)'
         vol2 = aims.read(fname)
 
@@ -201,8 +205,9 @@ class TestPyaimsIO(unittest.TestCase):
                                            'patially written', thresh,
                                            rel_thresh))
             # compare a part of the original volume
-            vol2 = aims.VolumeView(vol, (0, 0, 0, 0), (10, 10, 5, 1))
-            vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), (10, 10, 5, 1))
+            view_size = [min(x, s) for x, s in zip((10, 10, 5, 1), vol.shape)]
+            vol2 = aims.VolumeView(vol, (0, 0, 0, 0), view_size)
+            vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), view_size)
             self.assertTrue(compare_images(vol4, vol2,
                                            'sub-volume %s (write, format %s)'
                                            % (aims.typeCode(vol), format),
@@ -247,14 +252,37 @@ class TestPyaimsIO(unittest.TestCase):
             os.unlink(fname)
         if os.path.exists(minf_fname):
             os.unlink(minf_fname)
-        vol2 = aims.VolumeView(vol, (2, 3, 2, 0), (7, 5, 4, 1))
+        pos = [max(min(x, s - 2), 0) for x, s in zip((2, 3, 2, 0), vol.shape)]
+        view_size = [min(x, s-p)
+                     for x, s, p in zip((7, 5, 4, 1), vol.shape, pos)]
+        pos = tuple(pos)
+        view_size = tuple(view_size)
+        vol2 = aims.VolumeView(vol, pos, view_size)
         aims.write(vol2, w_fname)
         fname = self.file_name(vol2, dtype, format)
         vol3 = aims.read(fname)
-        self.assertEqual(tuple(vol3.getSize()), (7, 5, 4, 1))
+        self.assertEqual(tuple(vol3.getSize()), view_size)
         self.assertTrue(compare_images(vol2, vol3, 'volume view',
                                        're-read volume view', thresh,
                                        rel_thresh))
+
+        # test reading inside a larger volume
+        # (only available in soma-io readers, say allowing partial read,
+        # which is not exactly the same I admit)
+        if format in partial_read:
+            # print('test read in view for', format, file=sys.stderr)
+            bsize = [x + 4 for x in vol2.getSize()[:3]] + vol2.getSize()[3:]
+            vol3 = aims.Volume(bsize, dtype=aims.typeCode(vol.np.dtype))
+            vol4 = aims.VolumeView(vol3, [2, 2, 2], vol.getSize())
+            aims.read(fname, object=vol4, options={'keep_allocation': True})
+            self.assertEqual(tuple(vol4.getSize()), tuple(vol2.getSize()))
+            self.assertEqual(tuple(vol4.getVoxelSize()),
+                            tuple(vol2.getVoxelSize()))
+            self.assertTrue(compare_images(vol2, vol4, 'volume',
+                                          'volume inside view', thresh,
+                                          rel_thresh))
+            self.assertTrue(np.all(vol2.np == vol3[2:-2, 2:-2, 2:-2, :]))
+
 
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
@@ -654,8 +682,7 @@ class TestPyaimsIO(unittest.TestCase):
                              #('SPM', '.spm'),
                              #('SVG', '.svg'),
                              #('SVGZ', '.svgz'),
-                             #('TGA', '.tga'),
-                             #('VIDA', '.vida'))
+                             #('TGA', '.tga'))
 
         read_write_formats = (('BMP', '.bmp'), 
                               ('ECAT', '.v'),  
@@ -672,8 +699,9 @@ class TestPyaimsIO(unittest.TestCase):
                               ('TIFF', '.tiff'),
                               ('TIFF(Qt)', '.tiff'),
                               ('XBM', '.xbm'),
-                              ('XPM', '.xpm'))
-                
+                              ('XPM', '.xpm'),
+                              ('VIDA', '.vimg'))
+
         for s, e in read_write_formats:
             
             if self.verbose:
@@ -685,7 +713,24 @@ class TestPyaimsIO(unittest.TestCase):
                 
             if self.verbose:
                 print()
-        
+
+    def test_io_with_strides(self):
+        #formats = ['.nii', '.ima', '.mnc', '.tiff', '.v', '.jpg', '.bmp']
+        formats = ['.nii', '.ima', '.mnc', '.tiff', '.v', '.vimg', '.bmp']
+        failing_files = set()
+        view = ((3, 1, 0, 0), (3, 3, 1, 1),
+                (4, 2, 1, 0), (3, 3, 1, 1))
+        options = {}
+
+        for format in formats:
+            arr = np.arange(100, dtype=np.int16).reshape((10, 5, 2, 1))
+            vol = aims.Volume(arr)
+            vol.header()['voxel_size'] = [0.8, 0.7, 0.6, 1.]
+            failing_files.update(self.use_format(vol, format, view, options))
+        if failing_files:
+            raise RuntimeError('There are still open files: %s'
+                % repr(failing_files) )
+
     def tearDown(self):
         if self.debug:
             print('leaving files in', self.work_dir)

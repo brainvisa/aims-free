@@ -126,7 +126,7 @@ void VidaReader< int16_t >::frameRead(AimsData<int16_t>& thing,
  
   AimsData<int16_t> data( VIDA_X(vp), VIDA_Y(vp), VIDA_Z(vp), 1, border,
                           al );
-  data.setSizeXYZT( VIDA_PX(vp), VIDA_PY(vp), VIDA_PZ(vp), 1 );
+  data.setSizeXYZT( VIDA_PX(vp), VIDA_PY(vp), VIDA_PZ(vp), VIDA_PT(vp) );
 
 
   AllocatorStrategy::MappingMode 
@@ -215,7 +215,7 @@ void VidaReader< float >::frameRead(AimsData<float>& thing,
  
   AimsData<float> data( VIDA_X(vp), VIDA_Y(vp), VIDA_Z(vp), 1, border,
                         al );
-  data.setSizeXYZT( VIDA_PX(vp), VIDA_PY(vp), VIDA_PZ(vp), 1 );
+  data.setSizeXYZT( VIDA_PX(vp), VIDA_PY(vp), VIDA_PZ(vp), VIDA_PT(vp) );
 
   AllocatorStrategy::MappingMode 
     mode = data.allocator().allocatorType();

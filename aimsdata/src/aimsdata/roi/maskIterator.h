@@ -254,10 +254,9 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  class MaskIteratorOf< AimsData<T> > : public MaskIterator
+  class MaskIteratorOf< carto::VolumeRef<T> > : public MaskIterator
   {
-    mutable AimsData<T> *_data;
-    bool _freeData;
+    mutable carto::VolumeRef<T> _data;
     Point3d _current;
     T _label;
     Point3d _lastPoint;
@@ -266,13 +265,14 @@ namespace aims
 
   public:
 
-    MaskIteratorOf( const AimsData<T> &data,
+    MaskIteratorOf( const carto::VolumeRef<T> &data,
                     carto::rc_ptr< VoxelSampler > voxelSampler =
                     carto::rc_ptr< VoxelSampler >() );
-    MaskIteratorOf( const AimsData<T> &data, const T &label,
+    MaskIteratorOf( const carto::VolumeRef<T> &data, const T &label,
                     carto::rc_ptr< VoxelSampler > voxelSampler =
                     carto::rc_ptr< VoxelSampler >() );
-    MaskIteratorOf( const AimsData<T> &data, const specifiedLabels &labels,
+    MaskIteratorOf( const carto::VolumeRef<T> &data,
+                    const specifiedLabels &labels,
                     carto::rc_ptr< VoxelSampler > voxelSampler =
                     carto::rc_ptr< VoxelSampler >() );
     MaskIteratorOf( const std::string &fileName,
@@ -288,11 +288,23 @@ namespace aims
 
     virtual const Point3df voxelSize() const
     {
-      return Point3df( _data->sizeX(), _data->sizeY(), _data->sizeZ() );
+      Point3df vs( 3, 1. );
+      try
+      {
+        carto::Object o = _data->header().getProperty( "voxel_size" );
+        vs[0] = o->getArrayItem( 0 )->getScalar();
+        vs[1] = o->getArrayItem( 1 )->getScalar();
+        vs[2] = o->getArrayItem( 2 )->getScalar();
+      }
+      catch( ... )
+      {
+      }
+      return vs;
     }
     virtual float voxelVolume() const
     {
-      return _data->sizeX() * _data->sizeY() * _data->sizeZ();
+      Point3df vs = voxelSize();
+      return vs[0] * vs[1] * vs[2];
     }
     virtual const Point3d &value() const;
     virtual const Point3df valueMillimeters() const;
@@ -317,11 +329,10 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  MaskIteratorOf< AimsData<T> >::
-  MaskIteratorOf( const AimsData<T> &data,
+  MaskIteratorOf< carto::VolumeRef<T> >::
+  MaskIteratorOf( const carto::VolumeRef<T> &data,
                   carto::rc_ptr< VoxelSampler > voxelSampler ) :
-    _data( const_cast< AimsData<T> *>( &data ) ),
-    _freeData( false ),
+    _data( data ),
     _voxelSampler( voxelSampler )
   {
     _useLabel = false;
@@ -330,11 +341,10 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  MaskIteratorOf< AimsData<T> >::
-  MaskIteratorOf( const AimsData<T> &data, const T  &label,
+  MaskIteratorOf< carto::VolumeRef<T> >::
+  MaskIteratorOf( const carto::VolumeRef<T> &data, const T  &label,
                   carto::rc_ptr< VoxelSampler > voxelSampler ) :
-    _data( const_cast< AimsData<T> *>( &data ) ),
-    _freeData( false ),
+    _data( data ),
     _voxelSampler( voxelSampler )
   {
     _useLabel = true;
@@ -343,11 +353,11 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  MaskIteratorOf< AimsData<T> >::
-  MaskIteratorOf( const AimsData<T> &data, const specifiedLabels &labels,
+  MaskIteratorOf< carto::VolumeRef<T> >::
+  MaskIteratorOf( const carto::VolumeRef<T> &data,
+                  const specifiedLabels &labels,
                   carto::rc_ptr< VoxelSampler > voxelSampler ) :
-    _data( const_cast< AimsData<T> *>( &data ) ),
-    _freeData( false ),
+    _data( data ),
     _voxelSampler( voxelSampler )
   {
     _useLabel = true;
@@ -356,30 +366,28 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  MaskIteratorOf< AimsData<T> >::
+  MaskIteratorOf< carto::VolumeRef<T> >::
   MaskIteratorOf( const std::string &fileName,
                   carto::rc_ptr< VoxelSampler > voxelSampler ) :
-    _data( new AimsData<T> ),
-    _freeData( true ),
+    _data(),
     _voxelSampler( voxelSampler )
   {
-    Reader< AimsData<T> > reader( fileName );
-    reader.read( *_data );
+    Reader< carto::Volume<T> > reader( fileName );
+    _data.reset( reader.read() );
     _useLabel = false;
     restart();
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  MaskIteratorOf< AimsData<T> >::
+  MaskIteratorOf< carto::VolumeRef<T> >::
   MaskIteratorOf( const std::string &fileName, const T &label,
                   carto::rc_ptr< VoxelSampler > voxelSampler ) :
-    _data( new AimsData<T> ),
-    _freeData( true ),
+    _data(),
     _voxelSampler( voxelSampler )
   {
-    Reader< AimsData<T> > reader( fileName );
-    reader.read( *_data );
+    Reader< carto::Volume<T> > reader( fileName );
+    _data.reset( reader.read() );
     _useLabel = true;
     restart( label );
   }
@@ -387,53 +395,53 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  MaskIteratorOf< AimsData<T> >::
+  MaskIteratorOf< carto::VolumeRef<T> >::
   MaskIteratorOf( const std::string &fileName, const specifiedLabels &labels,
                   carto::rc_ptr< VoxelSampler > voxelSampler ) :
-    _data( new AimsData<T> ),
-    _freeData( true ),
+    _data(),
     _voxelSampler( voxelSampler )
   {
-    Reader< AimsData<T> > reader( fileName );
-    reader.read( *_data );
+    Reader< carto::Volume<T> > reader( fileName );
+    _data.reset( reader.read() );
     _useLabel = true;
     restart( labels );
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  MaskIteratorOf< AimsData<T> >::~MaskIteratorOf()
+  MaskIteratorOf< carto::VolumeRef<T> >::~MaskIteratorOf()
   {
-    if ( _freeData ) delete _data;
   }
 
 
   //---------------------------------------------------------------------------
   template <class T>
-  const Point3d &MaskIteratorOf< AimsData<T> >::value() const
+  const Point3d &MaskIteratorOf< carto::VolumeRef<T> >::value() const
   {
     return _current;
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  const Point3df MaskIteratorOf< AimsData<T> >::valueMillimeters() const
+  const Point3df MaskIteratorOf< carto::VolumeRef<T> >::valueMillimeters() const
   {
-    if ( _voxelSampler.isNull() ) {
-      return Point3df( _current[0] * _data->sizeX(),
-                       _current[1] * _data->sizeY(),
-                       _current[2] * _data->sizeZ() );
+    Point3df vs = voxelSize();
+    if ( _voxelSampler.isNull() )
+    {
+      return Point3df( _current[0] * vs[0],
+                       _current[1] * vs[1],
+                       _current[2] * vs[2] );
     } else {
       const Point3df &voxelSample = _voxelSampler->value();
-      return Point3df( ( _current[0] + voxelSample[ 0 ] ) * _data->sizeX(),
-                       ( _current[1] + voxelSample[ 1 ] ) * _data->sizeY(),
-                       ( _current[2] + voxelSample[ 2 ] ) * _data->sizeZ() );
+      return Point3df( ( _current[0] + voxelSample[ 0 ] ) * vs[0],
+                       ( _current[1] + voxelSample[ 1 ] ) * vs[1],
+                       ( _current[2] + voxelSample[ 2 ] ) * vs[2] );
     }
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  void MaskIteratorOf< AimsData<T> >::next()
+  void MaskIteratorOf< carto::VolumeRef<T> >::next()
   {
     if ( (_useLabel && (*_data)( _current ) == (T) _label) ||
       (!_useLabel && (*_data)( _current  ) ) )
@@ -454,17 +462,17 @@ namespace aims
 
     if ( _current == _lastPoint ) // (to make it not valid )
     {
-      _current[ 0 ] = _data->dimX();
-      _current[ 1 ] = _data->dimY();
-      _current[ 2 ] = _data->dimZ();
+      _current[ 0 ] = _data->getSizeX();
+      _current[ 1 ] = _data->getSizeY();
+      _current[ 2 ] = _data->getSizeZ();
     }
     // Next point
     do {
       ++_current[ 0 ];
-      if ( _current[ 0 ] == _data->dimX() ) {
+      if ( _current[ 0 ] == _data->getSizeX() ) {
         _current[ 0 ] = 0;
         ++_current[ 1 ];
-        if ( _current[ 1 ] == _data->dimY() ) {
+        if ( _current[ 1 ] == _data->getSizeY() ) {
           _current[ 1 ] = 0;
           ++_current[ 2 ];
         }
@@ -477,14 +485,14 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  bool MaskIteratorOf< AimsData<T> >::isValid() const
+  bool MaskIteratorOf< carto::VolumeRef<T> >::isValid() const
   {
-    return _current[ 2 ] < _data->dimZ();
+    return _current[ 2 ] < _data->getSizeZ();
   }
 
   //---------------------------------------------------------------------------
   template <class T>
-  void MaskIteratorOf< AimsData<T> >::restart()
+  void MaskIteratorOf< carto::VolumeRef<T> >::restart()
   {
     if ( ! _voxelSampler.isNull() )
     {
@@ -492,9 +500,9 @@ namespace aims
     }
 
     _current[ 0 ] = _current[ 1 ] = _current[ 2 ] = 0;
-    _lastPoint[ 0 ] = _data->dimX()-1;
-    _lastPoint[ 1 ] = _data->dimY()-1;
-    _lastPoint[ 2 ] = _data->dimZ()-1;
+    _lastPoint[ 0 ] = _data->getSizeX()-1;
+    _lastPoint[ 1 ] = _data->getSizeY()-1;
+    _lastPoint[ 2 ] = _data->getSizeZ()-1;
 
     if ( isValid() &&  ( _useLabel ?
                          (*_data)( _current ) != (T) _label :
@@ -503,7 +511,7 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  void MaskIteratorOf< AimsData<T> >::restart( const T &label )
+  void MaskIteratorOf< carto::VolumeRef<T> >::restart( const T &label )
   {
     if ( ! _voxelSampler.isNull() )
     {
@@ -513,9 +521,9 @@ namespace aims
     _label = label;
     _useLabel = true;
     _current[ 0 ] = _current[ 1 ] = _current[ 2 ] = 0;
-    _lastPoint[ 0 ] = _data->dimX()-1;
-    _lastPoint[ 1 ] = _data->dimY()-1;
-    _lastPoint[ 2 ] = _data->dimZ()-1;
+    _lastPoint[ 0 ] = _data->getSizeX()-1;
+    _lastPoint[ 1 ] = _data->getSizeY()-1;
+    _lastPoint[ 2 ] = _data->getSizeZ()-1;
 
     if ( isValid() && (  (*_data)( _current ) != _label ) )
     {
@@ -525,7 +533,8 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  void MaskIteratorOf< AimsData<T> >::restart( const specifiedLabels &labels )
+  void MaskIteratorOf< carto::VolumeRef<T> >::restart(
+    const specifiedLabels &labels )
   {
     if ( ! _voxelSampler.isNull() )
     {
@@ -540,15 +549,20 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  bool MaskIteratorOf< AimsData<T> >::contains( const Point3d &p ) const
+  bool MaskIteratorOf< carto::VolumeRef<T> >::contains(
+    const Point3d &p ) const
   {
-    if ( p[ 0 ] >= 0 && p[ 0 ] < _data->dimX() &&
-	 p[ 1 ] >= 0 && p[ 1 ] < _data->dimY() &&
-	 p[ 2 ] >= 0 && p[ 2 ] < _data->dimZ() ) {
-      if ( _useLabel ) {
-	return (*_data)( p ) == _label;
-      } else {
-	return (*_data)( p );
+    if ( p[ 0 ] >= 0 && p[ 0 ] < _data->getSizeX() &&
+	 p[ 1 ] >= 0 && p[ 1 ] < _data->getSizeY() &&
+	 p[ 2 ] >= 0 && p[ 2 ] < _data->getSizeZ() )
+    {
+      if ( _useLabel )
+      {
+        return (*_data)( p ) == _label;
+      }
+      else
+      {
+        return (*_data)( p );
       }
     }
     return false;
@@ -556,26 +570,28 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  bool MaskIteratorOf< AimsData<T> >::contains( const Point3df &p ) const
+  bool MaskIteratorOf< carto::VolumeRef<T> >::contains(
+    const Point3df &p ) const
   {
-    const Point3d pixel( (short) rint( p[ 0 ] / _data->sizeX() ),
-			 (short) rint( p[ 1 ] / _data->sizeY() ),
-			 (short) rint( p[ 2 ] / _data->sizeZ() ) );
+    Point3df vs = voxelSize();
+    const Point3d pixel( (short) rint( p[ 0 ] / vs[0] ),
+			 (short) rint( p[ 1 ] / vs[1] ),
+			 (short) rint( p[ 2 ] / vs[2] ) );
     return contains( pixel );
   }
 
 
   //---------------------------------------------------------------------------
   template <class T>
-  const Point3d MaskIteratorOf< AimsData<T> >::volumeDimension() const
+  const Point3d MaskIteratorOf< carto::VolumeRef<T> >::volumeDimension() const
   {
-    return Point3d( _data->dimX(), _data->dimY(), _data->dimZ() );
+    return Point3d( _data->getSizeX(), _data->getSizeY(), _data->getSizeZ() );
   }
 
 
   //---------------------------------------------------------------------------
   template <class T>
-  std::string MaskIteratorOf< AimsData<T> >::regionName() const
+  std::string MaskIteratorOf< carto::VolumeRef<T> >::regionName() const
   {
     if ( _useLabel ) return carto::toString( _label );
     return "unknown";
@@ -595,10 +611,49 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  carto::rc_ptr< MaskIterator > getMaskIterator( const AimsData< T > &data )
+  carto::rc_ptr< MaskIterator > getMaskIterator(
+    const carto::rc_ptr<carto::Volume< T > > &data )
   {
     return carto::rc_ptr< MaskIterator >
-      ( new MaskIteratorOf< AimsData<T> >( data ) );
+      ( new MaskIteratorOf< carto::VolumeRef<T> >( data ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< MaskIterator > getMaskIterator(
+    const carto::VolumeRef< T > &data )
+  {
+    return carto::rc_ptr< MaskIterator >
+      ( new MaskIteratorOf< carto::VolumeRef<T> >( data ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< MaskIterator > getMaskIterator(
+    const AimsData< T > &data )
+  {
+    return carto::rc_ptr< MaskIterator >
+      ( new MaskIteratorOf< carto::VolumeRef<T> >( data ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< MaskIterator >
+  getMaskIterator( const carto::VolumeRef< T > &data,
+                   carto::rc_ptr< VoxelSampler > voxelSampler )
+  {
+    return carto::rc_ptr< MaskIterator >
+      ( new MaskIteratorOf< carto::VolumeRef<T> >( data, voxelSampler ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< MaskIterator >
+  getMaskIterator( const carto::rc_ptr<carto::Volume< T > > &data,
+                   carto::rc_ptr< VoxelSampler > voxelSampler )
+  {
+    return carto::rc_ptr< MaskIterator >
+      ( new MaskIteratorOf< carto::VolumeRef<T> >( data, voxelSampler ) );
   }
 
   //---------------------------------------------------------------------------
@@ -608,23 +663,42 @@ namespace aims
                    carto::rc_ptr< VoxelSampler > voxelSampler )
   {
     return carto::rc_ptr< MaskIterator >
-      ( new MaskIteratorOf< AimsData<T> >( data, voxelSampler ) );
+      ( new MaskIteratorOf< carto::VolumeRef<T> >( data, voxelSampler ) );
   }
 
   //---------------------------------------------------------------------------
-  carto::rc_ptr< MaskIterator > getMaskIterator( const std::string &fileName,
-                                                 const Motion &motion );
+  carto::rc_ptr< MaskIterator > getMaskIterator(
+    const std::string &fileName, const AffineTransformation3d &motion );
 
   //---------------------------------------------------------------------------
   carto::rc_ptr< MaskIterator >
   getMaskIterator( const std::string &fileName,
                    carto::rc_ptr< VoxelSampler > voxelSampler,
-                   const Motion &motion );
+                   const AffineTransformation3d &motion );
 
   //---------------------------------------------------------------------------
   template <class T>
-  carto::rc_ptr< MaskIterator > getMaskIterator( const AimsData< T > &data,
-                                                 const Motion &motion )
+  carto::rc_ptr< MaskIterator > getMaskIterator(
+    const carto::VolumeRef< T > &data, const AffineTransformation3d &motion )
+  {
+    return carto::rc_ptr< MaskIterator >
+      ( new MotionedMaskIterator( getMaskIterator( data ), motion ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< MaskIterator > getMaskIterator(
+    const carto::rc_ptr<carto::Volume< T > > &data,
+    const AffineTransformation3d &motion )
+  {
+    return carto::rc_ptr< MaskIterator >
+      ( new MotionedMaskIterator( getMaskIterator( data ), motion ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< MaskIterator > getMaskIterator(
+    const AimsData< T > &data, const AffineTransformation3d &motion )
   {
     return carto::rc_ptr< MaskIterator >
       ( new MotionedMaskIterator( getMaskIterator( data ), motion ) );
@@ -633,9 +707,33 @@ namespace aims
   //---------------------------------------------------------------------------
   template <class T>
   carto::rc_ptr< MaskIterator >
+  getMaskIterator( const carto::VolumeRef< T > &data,
+                   carto::rc_ptr< VoxelSampler > voxelSampler,
+                   const AffineTransformation3d &motion )
+  {
+    return carto::rc_ptr< MaskIterator >
+      ( new MotionedMaskIterator( getMaskIterator( data, voxelSampler ),
+                                  motion ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< MaskIterator >
+  getMaskIterator( const carto::rc_ptr<carto::Volume< T > > &data,
+                   carto::rc_ptr< VoxelSampler > voxelSampler,
+                   const AffineTransformation3d &motion )
+  {
+    return carto::rc_ptr< MaskIterator >
+      ( new MotionedMaskIterator( getMaskIterator( data, voxelSampler ),
+                                  motion ) );
+  }
+
+  //---------------------------------------------------------------------------
+  template <class T>
+  carto::rc_ptr< MaskIterator >
   getMaskIterator( const AimsData< T > &data,
                    carto::rc_ptr< VoxelSampler > voxelSampler,
-                   const Motion &motion )
+                   const AffineTransformation3d &motion )
   {
     return carto::rc_ptr< MaskIterator >
       ( new MotionedMaskIterator( getMaskIterator( data, voxelSampler ),

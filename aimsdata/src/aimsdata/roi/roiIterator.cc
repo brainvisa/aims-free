@@ -38,10 +38,11 @@
 using namespace std;
 using namespace carto;
 
-namespace aims {
+namespace aims
+{
 
 //----------------------------------------------------------------------------
-VolumeROILabelMap::VolumeROILabelMap( AimsData< int32_t > &v ) :
+VolumeROILabelMap::VolumeROILabelMap( carto::VolumeRef< int32_t > &v ) :
   _volume( v )
 {
 }
@@ -49,21 +50,32 @@ VolumeROILabelMap::VolumeROILabelMap( AimsData< int32_t > &v ) :
 //----------------------------------------------------------------------------
 int32_t VolumeROILabelMap::at( const Point3df &point ) const
 {
-  const short x = (short) rint( point[ 0 ] / _volume.sizeX() );
-  const short y = (short) rint( point[ 1 ] / _volume.sizeY() );
-  const short z = (short) rint( point[ 2 ] / _volume.sizeZ() );
+  vector<float> vs( 3, 1. );
+  try
+  {
+    Object v = _volume->header().getProperty( "voxel_size" );
+    vs[0] = v->getArrayItem( 0 )->getScalar();
+    vs[1] = v->getArrayItem( 1 )->getScalar();
+    vs[2] = v->getArrayItem( 2 )->getScalar();
+  }
+  catch( ... )
+  {
+  }
+  const short x = (short) rint( point[ 0 ] / vs[0] );
+  const short y = (short) rint( point[ 1 ] / vs[1] );
+  const short z = (short) rint( point[ 2 ] / vs[2] );
   int32_t label = 0;
-  if ( x >= 0 && x < _volume.dimX() &&
-       y >= 0 && y < _volume.dimY() &&
-       z >= 0 && z < _volume.dimZ() ) {
-    label = _volume( x, y, z );
+  if ( x >= 0 && x < _volume->getSizeX() &&
+       y >= 0 && y < _volume->getSizeY() &&
+       z >= 0 && z < _volume->getSizeZ() ) {
+    label = _volume->at( x, y, z );
   }
   return label;
 }
 
 //----------------------------------------------------------------------------
-MotionedVolumeROILabelMap::MotionedVolumeROILabelMap( AimsData< int32_t > &v,
-                                                      const Motion &m ) :
+MotionedVolumeROILabelMap::MotionedVolumeROILabelMap(
+  carto::VolumeRef< int32_t > &v, const Motion &m ) :
   VolumeROILabelMap( v ),
   _motion( m )
 {
@@ -89,13 +101,15 @@ rc_ptr< ROILabelMap > RoiIterator::createLabelMap()
   const Point3df &voxelSize = this->voxelSize();
   const Point3d &volumeDimension = this->volumeDimension();
 
-  AimsData<int32_t> volume( volumeDimension[ 0 ],
-                            volumeDimension[ 1 ],
-                            volumeDimension[ 2 ] );
-  volume.setSizeXYZT( voxelSize[ 0 ],
-                           voxelSize[ 1 ],
-                           voxelSize[ 2 ] );
-  volume = 0UL;
+  carto::VolumeRef<int32_t> volume( volumeDimension[ 0 ],
+                                    volumeDimension[ 1 ],
+                                    volumeDimension[ 2 ] );
+  vector<float> vs( 3, 1. );
+  vs[0] = voxelSize[ 0 ];
+  vs[1] = voxelSize[ 1 ];
+  vs[2] = voxelSize[ 2 ];
+  volume->header().setProperty( "voxel_size", vs );
+  volume->fill( 0UL );
 
   rc_ptr< ROILabelMap > result( new VolumeROILabelMap( volume ) );
   result->roiNames.push_back( "background" );
@@ -195,13 +209,15 @@ rc_ptr< ROILabelMap > MotionedRoiIterator::createLabelMap()
   const Point3df &voxelSize = _roiIterator->voxelSize();
   const Point3d &volumeDimension = _roiIterator->volumeDimension();
 
-  AimsData<int32_t> volume( volumeDimension[ 0 ],
-                            volumeDimension[ 1 ],
-                            volumeDimension[ 2 ] );
-  volume.setSizeXYZT( voxelSize[ 0 ],
-                      voxelSize[ 1 ],
-                      voxelSize[ 2 ] );
-  volume = 0UL;
+  VolumeRef<int32_t> volume( volumeDimension[ 0 ],
+                             volumeDimension[ 1 ],
+                             volumeDimension[ 2 ] );
+  vector<float> vs( 3, 1. );
+  vs[0] = voxelSize[ 0 ];
+  vs[1] = voxelSize[ 1 ];
+  vs[2] = voxelSize[ 2 ];
+  volume->header().setProperty( "voxel_size", vs );
+  volume->fill( 0UL );
 
   rc_ptr< ROILabelMap >
     result( new MotionedVolumeROILabelMap( volume, _motion.inverse() ) );
@@ -380,8 +396,8 @@ bool buildFromVolume
 {
   RoiIteratorFactory &rif = static_cast< RoiIteratorFactory & >( p );
   rif.roiIterator =
-    rc_ptr< RoiIterator>( new RoiIteratorOf< AimsData<T> >( filename,
-                                                          rif.voxelSampler ) );
+    rc_ptr< RoiIterator>( new RoiIteratorOf< VolumeRef<T> >(
+      filename, rif.voxelSampler ) );
   return true;
 }
 
@@ -506,7 +522,7 @@ getRoiIterator( const Graph &data,
 }
 
 //---------------------------------------------------------------------------
-  template class RoiIteratorOf<AimsData<int16_t> >;
+  template class RoiIteratorOf<VolumeRef<int16_t> >;
   template class RoiIteratorOf<Graph>;
   
 } // namespace aims

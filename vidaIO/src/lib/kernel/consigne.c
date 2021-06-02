@@ -143,6 +143,7 @@ consigne *VidaConsigne( int n, ... )
   VIDA_PRIV_CONS.psize_x     = 1.0;
   VIDA_PRIV_CONS.psize_y     = 1.0;
   VIDA_PRIV_CONS.psize_z     = 1.0;
+  VIDA_PRIV_CONS.psize_t     = 1.0;
   VIDA_PRIV_CONS.unite       = VIDA_NOCALIB;
 
   while( param != 0 )

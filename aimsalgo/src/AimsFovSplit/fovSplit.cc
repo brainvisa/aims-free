@@ -575,7 +575,7 @@ int main(int argc, const char **argv)
 // 		  wriErode.write(erode) ;
 
 		  //   Instanciation de l'image labellis
-		  AimsConnectedComponent( erode, connectivity, short(0), true, 
+		  AimsConnectedComponent<short>( erode, connectivity, short(0), true,
                                           minSize /*/ (LEVEL*LEVEL*LEVEL)*/ ) ;
 
 

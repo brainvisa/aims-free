@@ -34,11 +34,43 @@
 
 #include <aims/mesh/mesher.h>
 #include <aims/mesh/surfaceOperation.h>
+#include <aims/bucket/bucketutil.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <iomanip>
 #include <stdio.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
+
+
+namespace
+{
+
+  void translateMesh( AimsSurfaceTriangle & surface, const Point3d & pos,
+                      const BucketMap<Void> & bucket )
+  {
+    AffineTransformation3d tr;
+    tr.setTranslation( Point3df( pos[0] * bucket.sizeX(),
+                                 pos[1] * bucket.sizeY(),
+                                 pos[2] * bucket.sizeZ() ) );
+    SurfaceManip::meshTransform( surface, tr );
+  }
+
+}
+
+
+void Mesher::getBrain( const BucketMap<Void>& thing,
+                       AimsSurfaceTriangle& surface, bool insideinterface )
+{
+  Point3d pos;
+
+  VolumeRef<int16_t> vol = BucketUtil::volumeFromBucket<Void, int16_t>(
+    thing, 1, &pos );
+
+  getBrain( vol, surface, insideinterface );
+  translateMesh( surface, pos, thing );
+}
 
 
 void Mesher::getBrain( const AimsData<short>& thing,
@@ -84,6 +116,19 @@ void Mesher::getBrain( const AimsData<short>& thing,
 //the surrounding cube is unfortunatelly also tracked which
 //is expensive.
 //We should refine getInterface( interface, thing ); latter
+
+
+void Mesher::getWhite( const BucketMap<Void>& thing,
+                       AimsSurfaceTriangle& surface )
+{
+  Point3d pos;
+
+  VolumeRef<int16_t> vol = BucketUtil::volumeFromBucket<Void, int16_t>(
+    thing, 1, &pos );
+
+  getWhite( vol, surface );
+  translateMesh( surface, pos, thing );
+}
 
 
 void Mesher::getWhite( const AimsData<short>& thing,

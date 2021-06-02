@@ -13,11 +13,6 @@ class AffineTransformation3d : soma::Transformation3d
 {
 %TypeHeaderCode
 #include <aims/transformation/affinetransformation3d.h>
-#if SIP_VERSION < 0x040700
-#include "sipaimssipAimsData_FLOAT.h"
-#include "sipaimssipAimsVector_FLOAT_3.h"
-#include "sipaimssipvector_FLOAT.h"
-#endif
 %End
 
 %TypeCode
@@ -56,8 +51,8 @@ public:
 
   Point3df translation();
   // const Point3df translation() const;
-  AimsData_FLOAT rotation();
-  // const AimsData_FLOAT rotation() const;
+  rc_ptr_Volume_FLOAT rotation();
+  // const rc_ptr_Volume_FLOAT rotation() const;
   rc_ptr_Volume_FLOAT affine();
   bool isIdentity() const;
   virtual void setToIdentity();
@@ -73,9 +68,9 @@ public:
   vector_FLOAT toColumnVector() const;
   void fromColumnVector( const vector_FLOAT & );
 
-  static AimsData_FLOAT rotationaroundx( float );
-  static AimsData_FLOAT rotationaroundy( float );
-  static AimsData_FLOAT rotationaroundz( float );
+  static rc_ptr_Volume_FLOAT rotationaroundx( float );
+  static rc_ptr_Volume_FLOAT rotationaroundy( float );
+  static rc_ptr_Volume_FLOAT rotationaroundz( float );
 
   carto::GenericObject* header();
 

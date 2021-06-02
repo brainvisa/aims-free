@@ -204,27 +204,21 @@ namespace carto
     convenient ways of walking through a Volume:
     \code
     Volume<float> vol( 10, 10, 10 ); // fill volume
-    std::vector<size_t> sstrides = vol.getStrides();
-    std::vector<int> strides;
-    strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
     float sum = 0.;
-    NDIterator<float> it( &vol.at( 0 ), vol.getSize(), strides );
+    NDIterator<float> it( &vol.at( 0 ), vol.getSize(), vol.getStrides() );
     for( ; !it.ended(); ++it )
       sum += *it;
     \endcode
     or, using line_NDIterator:
     \code
     Volume<float> vol( 10, 10, 10 ); // fill volume
-    std::vector<size_t> sstrides = vol.getStrides();
-    std::vector<int> strides;
-    strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
     float *p, *pp;
     float sum = 0.;
-    line_NDIterator<float> it( &vol.at( 0 ), vol.getSize(), strides );
+    line_NDIterator<float> it( &vol.at( 0 ), vol.getSize(), vol.getStrides(), true );
     for( ; !it.ended(); ++it )
     {
       p = &*it;
-      for( pp=p + vol.getSizeX(); p!=pp; ++p )
+      for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
         ++(*p);
     }
     \endcode

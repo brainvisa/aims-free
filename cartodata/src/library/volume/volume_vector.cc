@@ -60,6 +60,7 @@ template class VolumeProxy< VoxelRGBA >;
 template class VolumeProxy< VoxelHSV >;
 template class VolumeProxy< Point3df >;
 template class VolumeProxy< Point3d >;
+template class VolumeProxy< Point3dd >;
 template class VolumeProxy< Point2d >;
 template class VolumeProxy< vectorf6 >;
 
@@ -69,6 +70,7 @@ template class Volume< VoxelRGBA >;
 template class Volume< VoxelHSV >;
 template class Volume< Point3df >;
 template class Volume< Point3d >;
+template class Volume< Point3dd >;
 template class Volume< Point2d >;
 template class Volume< vectorf6 >;
 
@@ -78,6 +80,7 @@ template class VolumeRef< VoxelRGBA >;
 template class VolumeRef< VoxelHSV >;
 template class VolumeRef< Point3df >;
 template class VolumeRef< Point3d >;
+template class VolumeRef< Point3dd >;
 template class VolumeRef< Point2d >;
 template class VolumeRef< vectorf6 >;
 
@@ -87,6 +90,7 @@ template class Creator< Volume< VoxelRGBA > >;
 template class Creator< Volume< VoxelHSV > >;
 template class Creator< Volume< Point3df > >;
 template class Creator< Volume< Point3d > >;
+template class Creator< Volume< Point3dd > >;
 template class Creator< Volume< Point2d > >;
 template class Creator< Volume< vectorf6 > >;
 
@@ -96,8 +100,29 @@ template class Creator< VolumeRef< VoxelRGBA > >;
 template class Creator< VolumeRef< VoxelHSV > >;
 template class Creator< VolumeRef< Point3df > >;
 template class Creator< VolumeRef< Point3d > >;
+template class Creator< VolumeRef< Point3dd > >;
 template class Creator< VolumeRef< Point2d > >;
 template class Creator< VolumeRef< vectorf6 > >;
+
+template class VolumeUtilBase< std::map<int, float>, false >;
+template class VolumeUtilBase< VoxelRGB, false >;
+template class VolumeUtilBase< VoxelRGBA, false >;
+template class VolumeUtilBase< VoxelHSV, false >;
+template class VolumeUtilBase< Point3df, false >;
+template class VolumeUtilBase< Point3d, false >;
+template class VolumeUtilBase< Point3dd, false >;
+template class VolumeUtilBase< Point2d, false >;
+template class VolumeUtilBase< vectorf6, false >;
+
+template class VolumeUtil< std::map<int, float> >;
+template class VolumeUtil< VoxelRGB >;
+template class VolumeUtil< VoxelRGBA >;
+template class VolumeUtil< VoxelHSV >;
+template class VolumeUtil< Point3df >;
+template class VolumeUtil< Point3d >;
+template class VolumeUtil< Point3dd >;
+template class VolumeUtil< Point2d >;
+template class VolumeUtil< vectorf6 >;
 
 } // namespace carto
 
@@ -176,6 +201,10 @@ instantiate_volutil( Point3d )
 instantiate_volutil2( Point3d, std::plus<Point3d> )
 instantiate_volutil2( Point3d, std::minus<Point3d> )
 
+instantiate_volutil( Point3dd )
+instantiate_volutil2( Point3dd, std::plus<Point3dd> )
+instantiate_volutil2( Point3dd, std::minus<Point3dd> )
+
 instantiate_volutil( Point2d )
 instantiate_volutil2( Point2d, std::plus<Point2d> )
 instantiate_volutil2( Point2d, std::minus<Point2d> )
@@ -194,6 +223,7 @@ namespace carto
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelHSV > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3df > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3d > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3dd > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point2d > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< vectorf6 > )
 
@@ -202,6 +232,7 @@ namespace carto
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelHSV > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3d > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3dd > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point2d > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< vectorf6 > > )
 

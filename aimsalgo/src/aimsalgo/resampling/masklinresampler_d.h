@@ -146,7 +146,7 @@ void MaskLinearResampler<T>::resample( const carto::Volume< T >& input_data,
       }
 
       _sliceResamp( input_data, thing, background, it, start, t - 1,
-                    invMotion.rotation().volume() );
+                    invMotion.rotation() );
       it = &thing.at( 0, 0, s, t - 1 );
       start[ 0 ] += invMotion.rotation()( 0, 2 );
       start[ 1 ] += invMotion.rotation()( 1, 2 );

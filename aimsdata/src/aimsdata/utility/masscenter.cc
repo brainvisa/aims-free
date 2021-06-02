@@ -35,6 +35,9 @@
 #include <cartobase/config/verbose.h>
 #include <aims/utility/masscenter.h>
 
+using namespace carto;
+
+
 template <class T>
 MassCenters<T>::MassCenters(const AimsData<T> & data, 
                             bool bin)
@@ -73,7 +76,8 @@ void MassCenters<T>::doit(bool force) {
     }
     else {
       maskIterator = 
-      carto::rc_ptr< aims::MaskIterator>( new aims::MaskIteratorOf< AimsData<T> >( _data ) );
+      carto::rc_ptr< aims::MaskIterator>(
+        new aims::MaskIteratorOf< VolumeRef<T> >( _data ) );
       tm = maskedmasscenter(*(maskIterator.get()));
       _masscenterinfos[ "0" ] = tm;
     }

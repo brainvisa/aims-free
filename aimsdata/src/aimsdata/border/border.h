@@ -37,6 +37,8 @@
 #ifndef AIMS_BORDER_BORDER_H
 #define AIMS_BORDER_BORDER_H
 
+#include <algorithm>
+#include <vector>
 #include <aims/config/aimsdata_config.h>
 
 namespace aims {
@@ -57,7 +59,33 @@ class AIMSDATA_API Border
           @param width border width
       */
       Border(int dimx,int dimy,int dimz,int width=0);
-
+      
+      /** The constructor precalculates offsets to speed-up
+          access to data during loops
+          @param dimx X dimension
+          @param dimy Y dimension
+          @param dimz Z dimension
+          @param bx1 first border along X dimension
+          @param bx2 second border along X dimension
+          @param by1 first border along Y dimension
+          @param by2 second border along Y dimension
+          @param bz1 first border along Z dimension
+          @param bz2 second border along Z dimension
+      */
+      Border(int dimx,int dimy,int dimz,
+             int bx1, int bx2,
+             int by1, int by2,
+             int bz1, int bz2);
+      
+      /** The constructor precalculates offsets to speed-up
+          access to data during loops
+          @param dimx X dimension
+          @param dimy Y dimension
+          @param dimz Z dimension
+          @param borders std::vector<int> containing border sizes
+      */
+      Border(int dimx,int dimy,int dimz,
+             const std::vector<int> & borders);
       ///
       virtual ~Border();
     //@}
@@ -82,14 +110,16 @@ class AIMSDATA_API Border
       int oVolume() const;
       /// Number of slices between 2 consecutive volumes
       int oSliceBetweenVolume() const;
+      /// Sizes of the border
+      const std::vector<int> & borders() const;
     //@}
 
  protected: 
     /**@name Data*/
     //@{
 
-    /// Border width            
-    int _borderWidth;
+    /// Borders
+    std::vector<int> _borders;
     /// Offset up to first point
     int _oFirstPoint;
     /// Offset up to last point
@@ -114,16 +144,51 @@ class AIMSDATA_API Border
     /// Function that sets up all protected datas
     void _setBorder(int dimx,int dimy,int dimz,int width);
     //@}
+    
+    //@{
+    /// Function that sets up all protected datas
+    /// for non uniform borders
+    void _setBorder(int dimx,int dimy,int dimz,
+                    int bx1, int bx2,
+                    int by1, int by2,
+                    int bz1, int bz2);
+    //@}
 
+
+    //@{
+    /// Function that sets up all protected datas
+    /// for non uniform borders
+    void _setBorder(int dimx,int dimy,int dimz,
+                    const std::vector<int> & borders);
+    //@}
 };
 
 
 inline
-Border::Border(int dimx,int dimy,int dimz,int width)
+Border::Border(int dimx,int dimy,int dimz,int width):
+    _borders(6, 0)
 {
     _setBorder(dimx,dimy,dimz,width);
 }
 
+inline
+Border::Border(int dimx,int dimy,int dimz,
+               int bx1, int bx2,
+               int by1, int by2,
+               int bz1, int bz2):
+    _borders(6, 0)
+{
+    _setBorder(dimx,dimy,dimz,
+               bx1,bx2,by1,by2,bz1,bz2);
+}
+
+inline
+Border::Border(int dimx,int dimy,int dimz,
+               const std::vector<int> & borders):
+    _borders(6, 0)
+{
+    _setBorder(dimx,dimy,dimz,borders);
+}
 
 inline
 Border::~Border()
@@ -134,7 +199,15 @@ Border::~Border()
 inline
 int Border::borderWidth() const
 {
-    return _borderWidth;
+    int s = _borders.size();
+    if (s > 0) {
+        int width;
+        width = _borders[0];
+        for (int i = 1; i < s; ++i)
+            width = std::min(width, _borders[i]);
+        return width;
+    }
+    return 0;
 }
 
 

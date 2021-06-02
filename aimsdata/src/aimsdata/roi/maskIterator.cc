@@ -579,9 +579,8 @@ bool buildFromVolume
 {
   MaskIteratorFactory &mif = static_cast< MaskIteratorFactory & >( p );
   mif.maskIterator =
-    rc_ptr< MaskIterator>( new MaskIteratorOf< AimsData<T> >( filename,
-                                                              mif.
-                                                              voxelSampler ) );
+    rc_ptr< MaskIterator>( new MaskIteratorOf< VolumeRef<T> >(
+      filename, mif.voxelSampler ) );
   return true;
 }
 

@@ -242,6 +242,8 @@ typedef int int32_t;
 %Include reader_BucketMap_FLOAT.sip
 %Include reader_BucketMap_DOUBLE.sip
 
+%Include bucket_util.sip
+
 %Include aimsdata_BOOL.sip
 %Include aimsdata_U8.sip
 %Include aimsdata_S16.sip

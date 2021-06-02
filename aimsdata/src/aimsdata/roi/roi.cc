@@ -233,18 +233,17 @@ AimsRoi* AimsRoi::clipBucket( int x, int y, int z, int lx, int ly, int lz)
 
   if( gec.storageType == GraphElementCode::GlobalPacked 
       && gec.objectType == "Volume" )
-    {
-      rc_ptr<AimsData<int16_t> > vol;
-      getProperty( gec.global_attribute, vol );
-      rc_ptr<AimsData<int16_t> > newvol( new AimsData<int16_t>( lx, ly, lz ) );
-      newvol->setSizeXYZT( vol->sizeX(), vol->sizeY(), vol->sizeZ(), 1 );
-      if( vol->header() )
-	newvol->setHeader( vol->header()->cloneHeader() );
-      int ix, iy, iz;
-      ForEach3d( (*newvol), ix, iy, iz )
-	(*newvol)( ix, iy, iz ) = (*vol)( ix+x, iy+y, iz+z );
-      outRoi->setProperty( gec.global_attribute, newvol );
-    }
+  {
+    VolumeRef<int16_t> vol;
+    getProperty( gec.global_attribute, vol );
+    VolumeRef<int16_t> newvol( lx, ly, lz );
+    newvol->header().setProperty(
+      "voxel_size",  vol->header().getProperty( "voxel_size" ) );
+    newvol->copyHeaderFrom( vol->header() );
+
+    newvol->copySubVolume( vol );
+    outRoi->setProperty( gec.global_attribute, newvol );
+  }
 
   // copy nodes
   Graph::const_iterator			iv, ev = end();
@@ -253,31 +252,31 @@ AimsRoi* AimsRoi::clipBucket( int x, int y, int z, int lx, int ly, int lz)
   BucketMap<Void>::Bucket::iterator	ib, eb;
 
   for( iv=begin(); iv!=ev; ++iv )
+  {
+    v = outRoi->addVertex( "roi" );
+    v->copyProperties( Object::reference( (*iv)->value<Dictionary>() ) );
+    if( buckets )
     {
-      v = outRoi->addVertex( "roi" );
-      v->copyProperties( Object::reference( (*iv)->value<Dictionary>() ) );
-      if( buckets )
-	{
-	  v->getProperty( gec.attribute, bck );
-	  if( bck.get() )
-	    {
-	      bck2 = rc_ptr<BucketMap<Void> >( new BucketMap<Void> );
-	      BucketMap<Void>::Bucket	& b2 = bck2->begin()->second;
-	      for( ib=bck->begin()->second.begin(), 
-		     eb=bck->begin()->second.end(); ib!=eb; ++ib )
-		{
-		  const Point3d & tmp = ib->first;
-		  if ( (tmp[0] >= x) && (tmp[0] < X) &&
-		       (tmp[1] >= y) && (tmp[1] < Y) && 
-		       (tmp[2] >= z) && (tmp[2] < Z) )
-		    b2[ tmp - Off ];
-		}
-	      v->setProperty( "point_number", (int) b2.size() );
-	      v->setProperty( "size", (float) pVox * b2.size() );
-	      v->setProperty( gec.attribute, bck2 );
-	    }
-	}
+      v->getProperty( gec.attribute, bck );
+      if( bck.get() )
+      {
+        bck2 = rc_ptr<BucketMap<Void> >( new BucketMap<Void> );
+        BucketMap<Void>::Bucket	& b2 = bck2->begin()->second;
+        for( ib=bck->begin()->second.begin(),
+             eb=bck->begin()->second.end(); ib!=eb; ++ib )
+        {
+          const Point3d & tmp = ib->first;
+          if ( (tmp[0] >= x) && (tmp[0] < X) &&
+                (tmp[1] >= y) && (tmp[1] < Y) &&
+                (tmp[2] >= z) && (tmp[2] < Z) )
+            b2[ tmp - Off ];
+        }
+        v->setProperty( "point_number", (int) b2.size() );
+        v->setProperty( "size", (float) pVox * b2.size() );
+        v->setProperty( gec.attribute, bck2 );
+      }
     }
+  }
 
   return( outRoi );
 }
@@ -286,24 +285,20 @@ void AimsRoi::bucket2data( int borderWidth )
 {
   GraphManip::buckets2Volume( *this );
   if( borderWidth > 0 )
-    {
-      rc_ptr<GraphElementTable>	get;
-      getProperty( "aims_objects_table", get );
-      GraphElementCode		& gec = (*get)[ "roi" ][ "roi" ];
-      rc_ptr<AimsData<int16_t> >	vol;
-      getProperty( gec.global_attribute, vol );
-      rc_ptr<AimsData<int16_t> > 
-	vol2( new AimsData<int16_t>( vol->dimX(), vol->dimX(), vol->dimX(), 1, 
-				   borderWidth ) );
-      vol2->setSizeXYZT( vol->sizeX(), vol->sizeY(), vol->sizeZ(), 1 );
-      if( vol->header() )
-	vol2->setHeader( vol->header()->cloneHeader() );
-
-      int	x, y, z;
-      ForEach3d( (*vol), x, y, z )
-	(*vol2)( x, y, z ) = (*vol)( x, y, z );
-      setProperty( gec.global_attribute, vol2 );
-    }
+  {
+    rc_ptr<GraphElementTable>	get;
+    getProperty( "aims_objects_table", get );
+    GraphElementCode		& gec = (*get)[ "roi" ][ "roi" ];
+    VolumeRef<int16_t> vol;
+    getProperty( gec.global_attribute, vol );
+    vector<int> dims = vol->getSize();
+    dims[3] = 1;
+    vector<int> border( 3, borderWidth );
+    VolumeRef<int16_t> vol2( new Volume<int16_t>( dims, border ) );
+    vol2->copyHeaderFrom( vol->header() );
+    vol2->copySubVolume( *vol );
+    setProperty( gec.global_attribute, vol2 );
+  }
 }
 
 
@@ -323,17 +318,10 @@ void AimsRoi::setLabel( AimsData<int16_t> &label)
   setProperty( "boundingbox_min", bmin) ;
   setProperty( "voxel_size", voxSize) ;
   GraphManip::buckets2Volume( *this );
-  rc_ptr<AimsData<int16_t> >	vol( new AimsData<int16_t>( label ) );
+  VolumeRef<int16_t>	vol( new Volume<int16_t>( label.volume() ) );
   
-  if( label.header() )
-    vol->setHeader( label.header()->cloneHeader() );
-/*   cerr << "!!!! Cloning " << label.header() << endl ;
-  label.header()->cloneHeader() ;
-  cerr << "!!!! Cloned " << endl ;
-  
-
-  vol->setHeader( label.header()->cloneHeader() );
- */
+  vol->copyHeaderFrom( dynamic_cast<PythonHeader *>(
+    label.header() )->getValue() );
   setProperty( "aims_roi", vol );
 
   // check nodes and add new ones

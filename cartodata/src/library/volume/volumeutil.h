@@ -35,7 +35,7 @@
 #define CARTODATA_VOLUME_VOLUMEUTIL_H
 
 //--- cartodata --------------------------------------------------------------
-#include <cartodata/volume/volumebase.h>
+#include <cartodata/volume/volumeref.h>
 #include <cartodata/volume/functional.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/type/datatypetraits.h>
@@ -286,6 +286,14 @@ namespace carto
   rc_ptr<Volume<T> > invertMinMax( const rc_ptr<Volume<T> > & volume );
   /// @}
 
+  /// matrix product
+  template <typename T>
+  VolumeRef<T> matrix_product( const Volume<T> & v1, const Volume<T> & v2 );
+  /// matrix product
+  template <typename T>
+  VolumeRef<T> matrix_product( const VolumeRef<T> & v1,
+                               const VolumeRef<T> & v2 );
+
   //==========================================================================
   // Borders
   //==========================================================================
@@ -517,10 +525,9 @@ namespace carto
   template <typename OUTP, typename INP>
   Volume<OUTP> deepcopy( const Volume<INP> & src )
   {
-    Volume<OUTP> dst( src.getSizeX(), src.getSizeY(),
-                     src.getSizeZ(), src.getSizeT(),
-                     src.allocatorContext(),
-                     src.allocatorContext().isAllocated() );
+    Volume<OUTP> dst( src.getSize(),
+                      src.allocatorContext(),
+                      src.allocatorContext().isAllocated() );
     dst.copyHeaderFrom( src.header() );
     if( src.allocatorContext().isAllocated() )
       transfer( src, dst );
@@ -529,8 +536,7 @@ namespace carto
     {
       rc_ptr<Volume<INP> > srcparent = src.refVolume();
       rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
-          srcparent->getSizeX(), srcparent->getSizeY(),
-          srcparent->getSizeZ(), srcparent->getSizeT(),
+          srcparent->getSize(),
           srcparent->allocatorContext(),
           srcparent->allocatorContext().isAllocated() ) );
       if( srcparent->allocatorContext().isAllocated() )
@@ -546,8 +552,7 @@ namespace carto
     {
       rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
       rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
-          srcparent->getSizeX(), srcparent->getSizeY(),
-          srcparent->getSizeZ(), srcparent->getSizeT(),
+          srcparent->getSize(),
           srcparent->allocatorContext(),
           srcparent->allocatorContext().isAllocated() ) );
       dstparent->copyHeaderFrom( srcparent->header() );
@@ -566,8 +571,7 @@ namespace carto
   rc_ptr<Volume<OUTP> > deepcopy( const rc_ptr<Volume<INP> > & src )
   {
     rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>(
-        src->getSizeX(), src->getSizeY(),
-        src->getSizeZ(), src->getSizeT(),
+        src->getSize(),
         src->allocatorContext(),
         src->allocatorContext().isAllocated() ) );
     dst->copyHeaderFrom( src->header() );
@@ -581,8 +585,7 @@ namespace carto
     {
       rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
       rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
-          srcparent->getSizeX(), srcparent->getSizeY(),
-          srcparent->getSizeZ(), srcparent->getSizeT(),
+          srcparent->getSize(),
           srcparent->allocatorContext(),
           srcparent->allocatorContext().isAllocated() ) );
       dstparent->copyHeaderFrom( srcparent->header() );
@@ -615,8 +618,7 @@ namespace carto
   template <typename OUTP, typename INP>
   Volume<OUTP> copy( const Volume<INP> & src )
   {
-    Volume<OUTP> dst( src.getSizeX(), src.getSizeY(),
-                     src.getSizeZ(), src.getSizeT() );
+    Volume<OUTP> dst( src.getSize() );
     dst.copyHeaderFrom( src.header() );
     transfer( src, dst );
     return dst;
@@ -625,9 +627,7 @@ namespace carto
   template <typename OUTP, typename INP>
   rc_ptr<Volume<OUTP> > copy( const rc_ptr<Volume<INP> > & src )
   {
-    rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>(
-        src->getSizeX(), src->getSizeY(),
-        src->getSizeZ(), src->getSizeT() ) );
+    rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>( src->getSize() ) );
     dst->copyHeaderFrom( src->header() );
     transfer( src, dst );
     return dst;
@@ -651,10 +651,9 @@ namespace carto
   template <typename OUTP, typename INP>
   Volume<OUTP> copyStructure( const Volume<INP> & src )
   {
-    Volume<OUTP> dst( src.getSizeX(), src.getSizeY(),
-                     src.getSizeZ(), src.getSizeT(),
-                     src.allocatorContext(),
-                     src.allocatorContext().isAllocated() );
+    Volume<OUTP> dst( src.getSize(),
+                      src.allocatorContext(),
+                      src.allocatorContext().isAllocated() );
     dst.copyHeaderFrom( src.header() );
     // if( src.allocatorContext().isAllocated() )
     //   dst.fill(0);
@@ -663,8 +662,7 @@ namespace carto
     {
       rc_ptr<Volume<INP> > srcparent = src.refVolume();
       rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
-          srcparent->getSizeX(), srcparent->getSizeY(),
-          srcparent->getSizeZ(), srcparent->getSizeT(),
+          srcparent->getSize(),
           srcparent->allocatorContext(),
           srcparent->allocatorContext().isAllocated() ) );
       // if( srcparent->allocatorContext().isAllocated() )
@@ -679,8 +677,7 @@ namespace carto
       {
         rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
         rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
-            srcparent->getSizeX(), srcparent->getSizeY(),
-            srcparent->getSizeZ(), srcparent->getSizeT(),
+            srcparent->getSize(),
             srcparent->allocatorContext(),
             srcparent->allocatorContext().isAllocated() ) );
         dstparent->copyHeaderFrom( srcparent->header() );
@@ -704,8 +701,7 @@ namespace carto
       return rc_ptr<Volume<OUTP> >( (Volume<OUTP>*)0 );
 
     rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>(
-        src->getSizeX(), src->getSizeY(),
-        src->getSizeZ(), src->getSizeT(),
+        src->getSize(),
         src->allocatorContext(),
         src->allocatorContext().isAllocated() ) );
     dst->copyHeaderFrom( src->header() );
@@ -719,8 +715,7 @@ namespace carto
     {
       rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
       rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
-          srcparent->getSizeX(), srcparent->getSizeY(),
-          srcparent->getSizeZ(), srcparent->getSizeT(),
+          srcparent->getSize(),
           srcparent->allocatorContext(),
           srcparent->allocatorContext().isAllocated() ) );
       dstparent->copyHeaderFrom( srcparent->header() );

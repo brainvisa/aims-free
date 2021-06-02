@@ -129,15 +129,18 @@ using namespace std;
 //
 //
 void Mesher::getInterface( map< size_t, list< MapOfFacet > >& interface,
-                           const AimsData<short>& thing )
+                           const AimsData<short>& in_thing )
 {
   int x, y, z, f, v;
+
+  cout << "getInterface in_thing.dimZ: " << in_thing.dimZ() << endl;
+
+  AimsData<short> thing = reshapedVolume( in_thing.volume() );
+  cout << "getInterface thing.dimZ: " << thing.dimZ() << endl;
+
   int dimX = thing.dimX();
   int dimY = thing.dimY();
   int dimZ = thing.dimZ();
-
-  ASSERT( thing.borderWidth() != 0 );
-  ASSERT( thing[ -1 ] == -1 );
 
   AimsData<short>::const_iterator it;
   it = thing.begin() + thing.oFirstPoint();

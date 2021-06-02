@@ -67,7 +67,6 @@ namespace carto {
 
 //--- std --------------------------------------------------------------------
 #include <vector>
-#include <iostream>
 //--- forward declarations ---------------------------------------------------
 namespace carto {
   class AllocatorContext;
@@ -231,12 +230,15 @@ namespace carto
                      bool allocated = true );
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
-    Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer );
+    Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer,
+            const std::vector<size_t> *strides = 0 );
     /// Position4Di version
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
-    Volume( const Position4Di & size, T* buffer );
-    Volume( const std::vector<int> & size, T* buffer );
+    Volume( const Position4Di & size, T* buffer,
+            const std::vector<size_t> *strides = 0 );
+    Volume( const std::vector<int> & size, T* buffer,
+            const std::vector<size_t> *strides = 0 );
     /// This is the volume view constructor.
     /// Beware not to mix it up with the copy constructor ( it takes a pointer
     /// to volume instead of a volume )
@@ -255,6 +257,12 @@ namespace carto
             const Position & pos,
             const Position & size = Position(),
             const AllocatorContext & allocContext = AllocatorContext() );
+    /// This "very special" constructor should not be used in regular programs.
+    /// It is meant for the IO system to map file views into memory views.
+    Volume( rc_ptr<Volume<T> > other,
+            const Position & pos,
+            const Position & size,
+            T* buffer, const std::vector<size_t> & strides );
     /// Copy constructor
     /// The copy constructors actually duplicates data buffers. In the case
     /// of a volume view, the underlying volume is also duplicated, so the
@@ -352,15 +360,18 @@ namespace carto
     virtual void reallocate( int sizeX = 1, int sizeY = 1, int sizeZ = 1,
                              int sizeT = 1, bool keepcontents = false,
                              const AllocatorContext& allocatorContext
-                             = AllocatorContext(), bool allocate = true );
+                             = AllocatorContext(), bool allocate = true,
+                             const std::vector<size_t> *strides = 0 );
     virtual void reallocate( const Position4Di & size,
                              bool keepcontents = false,
                              const AllocatorContext& allocatorContext
-                             = AllocatorContext(), bool allocate = true );
+                             = AllocatorContext(), bool allocate = true,
+                             const std::vector<size_t> *strides = 0 );
     virtual void reallocate( const std::vector<int> & size,
                              bool keepcontents = false,
                              const AllocatorContext& allocatorContext
-                             = AllocatorContext(), bool allocate = true );
+                             = AllocatorContext(), bool allocate = true,
+                             const std::vector<size_t> *strides = 0 );
 
     //========================================================================
     //   COPY / VIEW
@@ -383,6 +394,21 @@ namespace carto
     /// Copy the full data structure without copying the actual data.
     template <typename OUTP>
     Volume<OUTP> copyStructure() const;
+
+    /// Copy voxels values from another volume.
+    /// pos is the position into the destination (this) volume, and defaults
+    /// to 0.
+    /// Contrarily to the = operator, the destination (this) volume is not
+    /// reallocated or reshaped, and its header is left unchanged.
+    void copySubVolume( const Volume<T> & source,
+                        const std::vector<int> & pos = std::vector<int>() );
+    /// Copy voxels values from another volume
+    /// pos is the position into the destination (this) volume, and defaults
+    /// to 0.
+    /// Contrarily to the = operator, the destination (this) volume is not
+    /// reallocated or reshaped, and its header is left unchanged.
+    void copySubVolume( const rc_ptr<Volume<T> > & source,
+                        const std::vector<int> & pos = std::vector<int>() );
 
     /// Cast to Volume of different datatype
     template <typename OUTP>
@@ -501,9 +527,11 @@ namespace carto
     //   PRIVATE UTILS
     //========================================================================
     void allocate( int oldSizeX, int oldSizeY, int oldSizeZ, int oldSizeT,
-                   bool allocate, const AllocatorContext& allocatorContext );
+                   bool allocate, const AllocatorContext& allocatorContext,
+                   const std::vector<size_t> *strides = 0 );
     void allocate( const std::vector<int> & oldSize,
-                   bool allocate, const AllocatorContext& allocatorContext );
+                   bool allocate, const AllocatorContext& allocatorContext,
+                   const std::vector<size_t> *strides = 0 );
     void slotSizeChanged( const PropertyFilter& propertyFilter );
     void updateItemsBuffer();
 

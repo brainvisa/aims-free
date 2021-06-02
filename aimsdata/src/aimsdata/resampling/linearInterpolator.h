@@ -146,6 +146,12 @@ private:
 carto::rc_ptr< Interpolator > getLinearInterpolator( const std::string & );
 template <typename T>
 carto::rc_ptr< Interpolator > getLinearInterpolator( const AimsData<T> & );
+template <typename T>
+carto::rc_ptr< Interpolator > getLinearInterpolator(
+  const carto::VolumeRef<T> & );
+template <typename T>
+carto::rc_ptr< Interpolator > getLinearInterpolator(
+  const carto::rc_ptr<carto::Volume<T> > & );
 
 
   //--------------------------//
@@ -160,7 +166,7 @@ class LinearInterpolator : public Interpolator
 {
 
 public:
-  LinearInterpolator( const AimsData<T> & image );
+  LinearInterpolator( const carto::VolumeRef<T> & image );
   virtual ~LinearInterpolator();
 
   bool isValid( Coordinate_t x, Coordinate_t y, Coordinate_t z ) const;
@@ -168,7 +174,7 @@ public:
   virtual const carto::PropertySet &header() const;
 
 private:
-  const AimsData<T> _image;
+  const carto::VolumeRef<T> _image;
 
   Scalar_t do_interpolation( Coordinate_t x, Coordinate_t y,
                              Coordinate_t z ) const;
@@ -215,6 +221,26 @@ carto::rc_ptr< Interpolator > getLinearInterpolator( const AimsData<T> &image )
 
 
 //-----------------------------------------------------------------------------
+template <typename T>
+inline
+carto::rc_ptr< Interpolator > getLinearInterpolator(
+  const carto::VolumeRef<T> &image )
+{
+  return carto::rc_ptr< Interpolator >( new LinearInterpolator<T>( image ) );
+}
+
+
+//-----------------------------------------------------------------------------
+template <typename T>
+inline
+carto::rc_ptr< Interpolator > getLinearInterpolator(
+  const carto::rc_ptr<carto::Volume<T> > &image )
+{
+  return carto::rc_ptr< Interpolator >( new LinearInterpolator<T>( image ) );
+}
+
+
+//-----------------------------------------------------------------------------
 extern template carto::rc_ptr< Interpolator > 
  getLinearInterpolator( const AimsData<uint8_t> & );
 extern template carto::rc_ptr< Interpolator >
@@ -234,6 +260,45 @@ extern template carto::rc_ptr< Interpolator >
 extern template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const AimsData<double> & );
 
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::VolumeRef<uint8_t> & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::VolumeRef<int8_t> & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::VolumeRef<uint16_t> & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::VolumeRef<int16_t> & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::VolumeRef<short> & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::VolumeRef<uint32_t> & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::VolumeRef<int32_t> & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::VolumeRef<float> & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::VolumeRef<double> & );
+
+//-----------------------------------------------------------------------------
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::rc_ptr<carto::Volume<uint8_t> > & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::rc_ptr<carto::Volume<int8_t> > & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::rc_ptr<carto::Volume<uint16_t> > & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::rc_ptr<carto::Volume<int16_t> > & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::rc_ptr<carto::Volume<short> > & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::rc_ptr<carto::Volume<uint32_t> > & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::rc_ptr<carto::Volume<int32_t> > & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::rc_ptr<carto::Volume<float> > & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const carto::rc_ptr<carto::Volume<double> > & );
+
 
   //--------------------------//
  //   LinearInterpolator<T>  //
@@ -242,19 +307,32 @@ extern template carto::rc_ptr< Interpolator >
 //-----------------------------------------------------------------------------
 template <typename T>
 inline
-LinearInterpolator<T>::LinearInterpolator( const AimsData<T> & image ) :
+LinearInterpolator<T>::LinearInterpolator(
+    const carto::VolumeRef<T> & image ) :
   _image( image )
 {
-  _dimX = _image.dimX();
-  _dimY = _image.dimY();
-  _dimZ = _image.dimZ();
+  _dimX = _image->getSizeX();
+  _dimY = _image->getSizeY();
+  _dimZ = _image->getSizeZ();
 
-  assert(_image.sizeX() > 0);
-  _invsizeX = float(1.0 / _image.sizeX());
-  assert(_image.sizeY() > 0);
-  _invsizeY = float(1.0 / _image.sizeY());
-  assert(_image.sizeZ() > 0);
-  _invsizeZ = float(1.0 / _image.sizeZ());
+  std::vector<float> vs( 3, 1. );
+  try
+  {
+    carto::Object o = _image->header().getProperty( "voxel_size" );
+    vs[0] = o->getArrayItem( 0 )->getScalar();
+    vs[1] = o->getArrayItem( 1 )->getScalar();
+    vs[2] = o->getArrayItem( 2 )->getScalar();
+  }
+  catch( ... )
+  {
+  }
+
+  assert( vs[0] > 0 );
+  _invsizeX = float( 1.0 / vs[0] );
+  assert( vs[1] > 0 );
+  _invsizeY = float( 1.0 / vs[1] );
+  assert( vs[2] > 0 );
+  _invsizeZ = float( 1.0 / vs[2] );
 }
 
 
@@ -272,13 +350,25 @@ bool LinearInterpolator<T>::isValid( Interpolator::Coordinate_t x,
                                      Interpolator::Coordinate_t y, 
                                      Interpolator::Coordinate_t z ) const
 {
-  const Interpolator::Coordinate_t hx = - _image.sizeX() / 2;
-  const Interpolator::Coordinate_t hy = - _image.sizeY() / 2;
-  const Interpolator::Coordinate_t hz = - _image.sizeZ() / 2;
+  std::vector<float> vs( 3, 1. );
+  try
+  {
+    carto::Object o = _image->header().getProperty( "voxel_size" );
+    vs[0] = o->getArrayItem( 0 )->getScalar();
+    vs[1] = o->getArrayItem( 1 )->getScalar();
+    vs[2] = o->getArrayItem( 2 )->getScalar();
+  }
+  catch( ... )
+  {
+  }
+
+  const Interpolator::Coordinate_t hx = - vs[0] / 2;
+  const Interpolator::Coordinate_t hy = - vs[1] / 2;
+  const Interpolator::Coordinate_t hz = - vs[2] / 2;
   return x >= hx && y >= hy && z >= hz &&
-    x < _image.dimX() * _image.sizeX() + hx &&
-    y < _image.dimY() * _image.sizeY() + hy &&
-    z < _image.dimZ() * _image.sizeZ() + hz;
+    x < _dimX * vs[0] + hx &&
+    y < _dimY * vs[1] + hy &&
+    z < _dimZ * vs[2] + hz;
 }
 
 
@@ -347,14 +437,14 @@ void LinearInterpolator<T>::
                      Interpolator::Coordinate_t zz,
                      std::vector< Interpolator::Scalar_t > &values ) const
 {
-  values.resize( _image.dimT() );
+  values.resize( _image->getSizeT() );
   int x, X, y, Y, z, Z;
   Interpolator::Coordinate_t ax, ay, az;
   _interpolationCoefficients(xx, x, X, ax, _dimX, _invsizeX);
   _interpolationCoefficients(yy, y, Y, ay, _dimY, _invsizeY);
   _interpolationCoefficients(zz, z, Z, az, _dimZ, _invsizeZ);
 
-  for( int t = 0; t < _image.dimT(); ++t ) {
+  for( int t = 0; t < _image->getSizeT(); ++t ) {
     values[ t ] = 
       linint(
              linint(
@@ -374,7 +464,7 @@ template <typename T>
 inline
 const carto::PropertySet & LinearInterpolator<T>::header() const
 {
-  return _image.volume()->header();
+  return _image->header();
 }
 
 } // namespace aims

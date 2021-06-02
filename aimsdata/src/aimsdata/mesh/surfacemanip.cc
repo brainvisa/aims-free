@@ -2353,6 +2353,8 @@ void SurfaceManip::meshPlanarPolygon( const Point4df & plane,
 
 float SurfaceManip::meshArea( const AimsSurfaceTriangle & surf )
 {
+  if( surf.size() == 0 )
+    return 0.;
   return meshArea( surf.begin()->second );
 }
 
@@ -2366,26 +2368,26 @@ float SurfaceManip::meshArea( const AimsSurface<3, Void> & surf )
   Point3df				v, n, ca, cb;
 
   for( ip=0; ip<np; ++ip )
+  {
+    const Point3df  & p1 = vert[ poly[ip][0] ];
+    const Point3df  & p2 = vert[ poly[ip][1] ];
+    const Point3df  & p3 = vert[ poly[ip][2] ];
+    ca = p1 - p3;
+    cb = p2 - p3;
+    // normal to plane
+    n = Point3df( ca[1] * cb[2] - ca[2] * cb[1],
+                  ca[2] * cb[0] - ca[0] * cb[2],
+                  ca[0] * cb[1] - ca[1] * cb[0] );
+    // orthogonal to ca in plane
+    v = Point3df( ca[1] * n[2] - ca[2] * n[1],
+                  ca[2] * n[0] - ca[0] * n[2],
+                  ca[0] * n[1] - ca[1] * n[0] );
+    if( !v.isNull() )
     {
-      const Point3df  & p1 = vert[ poly[ip][0] ];
-      const Point3df  & p2 = vert[ poly[ip][1] ];
-      const Point3df  & p3 = vert[ poly[ip][2] ];
-      ca = p1 - p3;
-      cb = p2 - p3;
-      // normal to plane
-      n = Point3df( ca[1] * cb[2] - ca[2] * cb[1], 
-		    ca[2] * cb[0] - ca[0] * cb[2], 
-		    ca[0] * cb[1] - ca[1] * cb[0] );
-      // orthogonal to ca in plane
-      v = Point3df( ca[1] * n[2] - ca[2] * n[1], 
-		    ca[2] * n[0] - ca[0] * n[2], 
-		    ca[0] * n[1] - ca[1] * n[0] );
-      if( !v.isNull() )
-	{
-	  v /= v.norm();
-          area += ca.norm() * fabs( cb.dot( v ) ) * 0.5;
-        }
+      v /= v.norm();
+      area += ca.norm() * fabs( cb.dot( v ) ) * 0.5;
     }
+  }
   return area;
 }
 

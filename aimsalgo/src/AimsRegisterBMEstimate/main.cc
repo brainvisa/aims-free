@@ -436,11 +436,24 @@ bool doit( Process & process, const string & fileinr, Finder & )
       
       // mise a jour transfo ancienne a ancienne nouvelle...	  
       p = q * p ;
+//       std::cout << "!! New p: " << p << std::endl;
       
       // Calcul effectif du champ
       cartoMsg( 2, "Processing displacement field...", "BlockMatching" );
       AimsData< Point3d > df = displacementField.getField( testtrans);
-
+    
+//       int dfcount = 0;
+//       int dfsx = df.dimX(), dfsy = df.dimY(), dfsz = df.dimZ(), dfst = df.dimT();
+//       for(int t=0; t<dfst; ++t)
+//           for(int z=0; z<dfsz; ++z)
+//               for(int y=0; y<dfsy; ++y)
+//                   for(int x=0; x<dfsx; ++x)
+//                       if (df(x, y, z, t) != Point3d(0,0,0))
+//                           dfcount++;
+//                       
+//           
+//       std::cout << "!! Displacement field non null values: " << dfcount<< std::endl; 
+      
       if(abm.filefield.length() != 0)
       {
         Writer< AimsData<Point3d> > PtWriter(string(abm.filefield) + toString(pyra) + "_" + toString(count) );  
@@ -469,7 +482,9 @@ bool doit( Process & process, const string & fileinr, Finder & )
       
       cartoMsg( 2, "Processing quaternion...", "BlockMatching" );
       // Calcul de la transformation d'etape a partir du champ estime, rappel : q est un motion
-      q = minimisation.quaternion(displacementField);		//transfo de test vers ref !!!!
+      q = minimisation.quaternion(displacementField);
+//       std::cout << "!! Quaternion: " << q << std::endl;
+      //transfo de test vers ref !!!!
       
       // Rappel : r est la transformation totale actualisee, q la calculee courante et p l'ancienne totale
       // On actualise effectivement r en composant q avec r
@@ -479,6 +494,8 @@ bool doit( Process & process, const string & fileinr, Finder & )
       r.matrix()(0, 3) *= test.sizeX();
       r.matrix()(1, 3) *= test.sizeY();
       r.matrix()(2, 3) *= test.sizeZ();
+      
+//       std::cout << "!! New matrix: " << r << std::endl;
       
       cartoMsg( 2, "Resampling using transformation ...", "BlockMatching" );
       // Resampling de test en testtrans par r la transfo totale la plus recente

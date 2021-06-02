@@ -32,8 +32,8 @@
  */
 
 
-#ifndef AIMS_SIGNALFILTER_FILTERINGFUNCTION_NONLINEAR_D_H
-#define AIMS_SIGNALFILTER_FILTERINGFUNCTION_NONLINEAR_D_H
+#ifndef AIMS_SIGNALFILTER_FILTERINGFUNCTION_ELEMENT_D_H
+#define AIMS_SIGNALFILTER_FILTERINGFUNCTION_ELEMENT_D_H
 
 //--- aims -------------------------------------------------------------------
 #include <aims/signalfilter/filteringfunction_element.h>

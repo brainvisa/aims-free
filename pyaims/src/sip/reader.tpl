@@ -22,6 +22,10 @@ public:
     throw ( carto::io_error, std::exception ) /Factory, ReleaseGIL/;
 %End
 
+  virtual bool read( %Template1PyType% & obj, int border=0,
+                     const std::string* format = 0, int frame = -1 )
+    throw ( carto::io_error, std::exception ) /Factory, ReleaseGIL/;
+
   void setFileName( std::string & );
   const std::string & fileName() const;
   void setAllocatorContext( const carto::AllocatorContext & ac );

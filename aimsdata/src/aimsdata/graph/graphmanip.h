@@ -35,6 +35,7 @@
 #define AIMS_GRAPH_GRAPHMANIP_H
 
 #include <aims/rgb/rgb.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/object/object.h>
 #include <cartobase/type/types.h>
 #include <cartobase/object/property.h>
@@ -47,7 +48,6 @@ class AffineTransformation3d;
 }
 typedef aims::AffineTransformation3d Motion;
 class Void;
-template<typename T> class AimsData;
 
 namespace aims
 {
@@ -184,12 +184,12 @@ namespace aims
                            carto::rc_ptr<T> obj );
     /// builds a ROI graph from a volume of labels
     template <typename T>
-    static Graph* graphFromVolume( const AimsData<T> & vol,
+    static Graph* graphFromVolume( const carto::VolumeRef<T> & vol,
                                    T background = 0,
                                    std::map<T, std::string> *trans = 0 );
     /// builds a ROI graph from a volume of labels
     template <typename T>
-    static void graphFromVolume( const AimsData<T> & vol , Graph & g,
+    static void graphFromVolume( const carto::VolumeRef<T> & vol , Graph & g,
                                  T background = 0,
                                  std::map<T,std::string> *trans = 0,
                                  bool automaticBackgroundSearch = true );

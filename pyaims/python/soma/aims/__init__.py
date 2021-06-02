@@ -111,6 +111,7 @@ import os
 import six
 import sys
 import numbers
+import inspect
 
 
 __docformat__ = 'restructuredtext en'
@@ -343,7 +344,7 @@ class Reader(object):
                 'carto.AllocatorStrategy.DataAccess')
         self.options = options
 
-    def read(self, filename, border=0, frame=-1, dtype=None):
+    def read(self, filename, border=0, frame=-1, dtype=None, object=None):
         '''Reads the object contained in the file <filename>, whatever the type
         of the contents of the file. All objects types supported by Aims IO
         system can be read. A border width and a frame number may be specified
@@ -354,13 +355,26 @@ class Reader(object):
         string or a type object, as accepted by :py:func:`soma.aims.typeCode`.
         The read function may follow other object/data types rules, allocators
         and options, as specified in the Reader constructor.
+
+        Parameters
+        ----------
+        filename: str
+        border: int
+        frame: int
+        dtype:
+        object: existing object to be read/filled
+            If not specified the function will return a new object. If
+            specified, this is considered the existing object to be read and
+            filled by the reader.
         '''
         f = Finder()
         if not f.check(filename):
             open(filename).close()  # "file not found"-case raising first
             raise IOError(
                 'Unknown file format or missing meta-file(s): ' + filename)
-        if dtype is not None:
+        if object is not None:
+            finaltype = typeCode(object)
+        elif dtype is not None:
             finaltype = typeCode(dtype)
         else:
             otype = f.objectType()
@@ -391,7 +405,13 @@ class Reader(object):
             if 'format' in self.options:
                 format = self.options['format']
 
-        result = r.read(border, format, frame)
+        if object is not None:
+            result = r.read(object, border, format, frame)
+            if not result:
+                raise IOError('read failed for %s' % filename)
+            reslult = object
+        else:
+            result = r.read(border, format, frame)
         return result
 
     def mapType(self, iotype, aimstype):
@@ -481,25 +501,52 @@ class Writer(object):
 # simple IO functions
 
 def read(filename, border=0, frame=-1, dtype=None, allocmode=None,
-         options=None):
-    '''Equivalent to:
+         options=None, object=None):
+    '''Equivalent to::
 
-    .. code-block:: python
+    r = Reader(allocmode=allocmode, options=options)
+    return r.read(filename, border=border, frame=frame, dtype=dtype,
+                  object=object)
 
-      r = Reader( allocmode=allocmode, options=options )
-      return r.read( filename, border=border, frame=frame, dtype=dtype )
+Ex:
+
+* read a volume::
+
+    vol = aims.read('file.nii')
+
+* read a mesh::
+
+    mesh = aims.read('file.gii')
+
+* read part of a volume, with borders (warning, all formats do not allow it)::
+
+    vol = aims.read(
+        'file.nii', options={'border': 2, 'ox': 100, 'sx': 100,
+                             'oy': 50, 'sy': 150, 'oz': 20, 'sz': 60})
+
+  or (equivalent)::
+
+      vol = aims.read(
+        'file.nii?border=2&ox=100&sx=100&oy=50&sy=150&oz=20&sz=60')
+
+* read a view inside a larger volume (warning, all formats do not allow it,
+  and they may produce inpredictible results, and probably crashes)::
+
+      border = aims.Volume_S16(500, 500, 200)
+      view = aims.VolumeView(border, [50, 50, 50], [256, 256, 124])
+      aims.read('file.nii', object=view, options={'keep_allocation': True})
+
     '''
     r = Reader(allocmode=allocmode, options=options)
-    return r.read(filename, border=border, frame=frame, dtype=dtype)
+    return r.read(filename, border=border, frame=frame, dtype=dtype,
+                  object=object)
 
 
 def write(obj, filename, format=None, options={}):
-    '''Equivalent to:
+    '''Equivalent to::
 
-    .. code-block:: python
-
-      w = Writer()
-      w.write( obj, filename, format=format, options=options )
+    w = Writer()
+    w.write(obj, filename, format=format, options=options)
     '''
     w = Writer()
     w.write(obj, filename, format=format, options=options)
@@ -1006,6 +1053,8 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
                 y.__getstate__ = __fixsipclasses__._aimsdata_getstate
                 y.__setstate__ = __fixsipclasses__._aimsdata_setstate
+                y.__array__ = lambda self, dtype=None: \
+                    self.volume().__array__(dtype=dtype)
 
             if (hasattr(y, 'next')
                     and hasattr(y, '__iter__')
@@ -1015,6 +1064,55 @@ def __fixsipclasses__(classes):
                               'Python 2 next() method, it will not work as an '
                               'iterator under Python 3'.format(y),
                               DeprecationWarning)
+
+            # fix the __array__ methods to handle dtype argument
+            if hasattr(y, '__array__'):
+                patch = True
+                try:
+                    if six.PY2:
+                        s = inspect.getargspec(y.__array__)
+                    else:
+                        s = inspect.getfullargspec(y.__array__)
+                    if 'dtype' in s.args:
+                        # dtype is already an argument of __array__:
+                        # don't need a patch
+                        patch = False
+                except TypeError:
+                    pass
+                if patch:
+                    # Moving the method __array__ prevents it from being called
+                    # with the self argument. This is not the case for the
+                    # __call__ method above for instance... I don't understand.
+                    if six.PY2:
+                        y.__oldarray__ = y.__array__
+                        y.__array__ = lambda self, dtype=None: \
+                            self.__oldarray__(self).astype(
+                                dtype=dtype or self.__oldarray__(self).dtype,
+                                copy=False)
+                    else:
+                        # better fix in python3 (or less bad...)
+                        y.__oldarray__ = functools.partialmethod(y.__array__)
+                        y.__array__ = lambda self, dtype=None: \
+                            self.__oldarray__().astype(
+                                dtype=dtype or self.__oldarray__().dtype, 
+                                copy=False)
+                del patch
+
+                # useful shortcut: volume.np is handier than np.asarray(volume)
+                if not hasattr(y, 'np'):
+                    y.np = property(lambda self: self.__array__())
+                    if not six.PY2:
+                        # we cannot set the __doc__ attribute (or any other
+                        # attribute actually) on a property object in python2
+                        y.np.__doc__ = \
+'''The ``np`` property is a shortcut to the ``__array__`` method. Thus::
+
+    something.np
+
+is a handier equivalent to::
+
+    numpy.asarray(something)'''
+
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
 
@@ -1103,9 +1201,6 @@ def __AffineTransformation3dFromMatrix(self, value):
         numpy.asarray(self.affine())[:3, :, 0, 0] = value
     else:
         numpy.asarray(self.affine())[:, :, 0, 0] = value
-    #self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
-        #= value[0:3, 0:3]
-    #self.translation().arraydata()[:] = value[0:3, 3].flatten()
 
 
 def __AffineTransformation3d__init__(self, *args):
@@ -2418,13 +2513,17 @@ method.
 For standard numeric types, it is also possible to get the voxels array as a
 numpy_ array, using the ``__array__()`` method, or more conveniently,
 ``numpy.asarray(volume)`` or ``numpy.array(volume, copy=False)``.
+In aims >= 5.0.2, a more concise shortcut is also available: volume.np (this is available on all types providing numpy bindings actually).
+
 The array returned is a reference to the actual data block, so any
 modification to its contents also affect the Volume contents, so it is
 generally an easy way of manipulating volume voxels because all the power of
 the numpy module can be used on Volumes.
-The ``arraydata()`` method returns a numpy array just like it is in memory,
-that is a 4D (or more) array indexed by ``[t][z][y][x]``, which is generally not what you like and is not consistent with AIMS indexing. Contrarily, using
-``numpy.asarray(volume)`` sets strides in the returned numpy
+The obsoloete ``arraydata()`` method used to return a numpy array just like it
+is in memory, that is a 4D (or more) array generally indexed by
+``[t][z][y][x]`` (but it depands how it has been built), which is generally not
+what you like and is not consistent with AIMS indexing. Contrarily, using
+``volume.np`` sets strides in the returned numpy
 array, so that indexing is in the "normal" order ``[x][y][z][t]``, while still sharing the same memory block.
 The Volume object now also wraps the numpy accessors to the volume object itself, so that ``volume[x, y, z, t]`` is the same as
 ``nupmy.asarray(volume)[x, y, z, t]``.
@@ -2434,14 +2533,14 @@ The Volume object now also wraps the numpy accessors to the volume object itself
 Since PyAims 4.7 the numpy arrays bindings have notably improved, and are now able to bind arrays to voxels types which are not scalar numeric types. Volumes of RGB, RGBA, HSV, or Point3df now have numpy bindings. The bound object have generally a "numpy struct" binding, that is not the usual C++/python object binding, but instead a structure managed by numpy which also supports indexing. For most objects we are using, they also have an array stucture (a RGB is an array with 3 int8 items), and are bound under a sturcture with a unique field, named "v" (for "vector"):
 
     >>> v = aims.Volume('RGB', 100, 100, 10)
-    >>> numpy.asarray(v)[0, 0, 0, 0]
+    >>> v.np[0, 0, 0, 0]
     ([0, 0, 0],)
 
 Such an array may be indexed by the field name, which returns another array with scalar values and additional dimensions:
 
-    >>> numpy.asarray(v)['v'].dtype
+    >>> v.np['v'].dtype
     dtype('uint8')
-    >>> numpy.asarray(v)['v'].shape
+    >>> v.['v'].shape
     (100, 100, 10, 1, 3)
 
 Both arrays share their memory with the aims volume.
@@ -2489,13 +2588,34 @@ Note that passing a 1D numpy array of ints will build a volume mapping the array
     >>> v = aims.Volume(numpy.array([100, 100, 10]).astype('int32'))
     >>> print(v.getSize())
     [ 3, 1, 1, 1 ]
-    >>> print(np.asarray(v))
+    >>> print(v.np)
     [100 100  10]
     >>> v = aims.Volume([100, 100, 10])
     >>> print(v.getSize())
     [ 100, 100, 10, 1 ]
 
 .. _numpy: http://numpy.scipy.org/
+
+Array ordering:
+
+In pyaims <= 5.0.x the Volume classes were only working with the X axis (the
+first) being contiguous, and, for numpy, should be interpreted as
+"Fortran-contiguous". So to convert a numpy array into a Volume and keep the
+same axes ordering, you had to convert it to Fortran order first:
+
+    >>> v = aims.Volume(numpy.zeros((2, 3, 4, dtype='int32')))
+    # v.getSize() used to return [4, 3, 2, 1]
+    >>> v = aims.Volume(np.asfortranarray(numpy.zeros((2, 3, 4), dtype='int32')))
+    >>> print(v.getSize())
+    [2, 3, 4, 1]
+
+In pyaims 5.1 this limitation is gone, you can omit the fortran order
+conversion. Strides are taken into account in the C++ volume. But you have to
+be careful with such volumes as many C++ programs assume internally that the X
+axis is contiguous in memory, which is not true in this situation. These
+programs and functions may not work, crash, or produce incorrect results when
+used with non-contiguous X axis volumes.
+
 '''
 
 _aimsdatadoc = '''

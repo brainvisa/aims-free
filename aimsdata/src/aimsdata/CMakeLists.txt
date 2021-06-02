@@ -6,6 +6,8 @@ set( _headers
     border/borderiterator.h
     bucket/bucket.h
     bucket/bucketMap.h
+    bucket/bucketutil.h
+    bucket/bucketutil_d.h
     bucket/item.h
     bucket/sparsevolume.h
     bucket/bucketgen.h
@@ -62,7 +64,6 @@ set( _headers
     io/argheader.h
     io/argR.h
     io/argW.h
-    io/asciidatasourcetraits_aims.h
     io/baseFormats_bucket.h
     io/baseFormats_bucket_d.h
     io/baseFormats_cartovolume.h
@@ -247,6 +248,7 @@ set(_aimsdata_sources
     border/border.cc
     bucket/bucketMap.cc
     bucket/bucketgen.cc
+    bucket/bucketutil.cc
     color/colormap.cc
     connectivity/component.cc
     connectivity/connectivity.cc

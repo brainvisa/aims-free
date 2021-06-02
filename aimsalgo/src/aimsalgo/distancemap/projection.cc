@@ -170,8 +170,9 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
   cout << "Extracting connex components (with at least " << MINCC << " points in each components)" << endl;
   ForEach3d(sulcvol,x,y,z)
     ccvol(x,y,z) = sulcvol(x,y,z);
-  AimsConnectedComponent( ccvol, aims::Connectivity::CONNECTIVITY_26_XYZ, 
-                          (short)0, false, (size_t) MINCC );
+  AimsConnectedComponent<short>( ccvol,
+                                 aims::Connectivity::CONNECTIVITY_26_XYZ,
+                                 (short)0, false, (size_t) MINCC );
   
   //-----------------------------------------------------------------------------------------------------
   //           First projection - Closest points according to euclidean and curvature/depth
@@ -395,8 +396,9 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
   cout << "Extracting connex components (with at least " << MINCC << " points in each components)" << endl;
   ForEach3d(sulcvol,x,y,z)
     ccvol(x,y,z) = sulcvol(x,y,z);
-  AimsConnectedComponent( ccvol, aims::Connectivity::CONNECTIVITY_26_XYZ, 
-                          short(0), false, MINCC );
+  AimsConnectedComponent<short>( ccvol,
+                                 aims::Connectivity::CONNECTIVITY_26_XYZ,
+                                 short(0), false, MINCC );
   
 
 

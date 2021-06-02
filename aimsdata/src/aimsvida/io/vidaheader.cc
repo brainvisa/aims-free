@@ -137,28 +137,39 @@ int VidaHeader::dimT() const
   return( 1 );
 }
 
+vector<float> VidaHeader::getVoxelSize() const
+{
+  vector<float> vs( 4, 1. );
+  try
+  {
+    Object ovs = getProperty( "voxel_size" );
+    if( !ovs.isNull() )
+    {
+      size_t n = std::min( ovs->size(), vs.size() );
+      for( size_t i=0; i<n; ++i )
+        vs[i] = ovs->getArrayItem( i )->getScalar();
+    }
+  }
+  catch( ... )
+  {
+  }
+
+  return vs;
+}
+
 float VidaHeader::sizeX() const
 {
-  vector< float > vs;
-  if( getProperty("voxel_size", vs) )
-    return( vs[0] );
-  return( 1 );
+  return getVoxelSize()[0];
 }
 
 float VidaHeader::sizeY() const
 {
-  vector< float > vs;
-  if( getProperty("voxel_size", vs) )
-    return( vs[1] );
-  return( 1 );
+  return getVoxelSize()[1];
 }
 
 float VidaHeader::sizeZ() const
 {
-  vector< float > vs;
-  if( getProperty("voxel_size", vs) )
-    return( vs[2] );
-  return( 1 );
+  return getVoxelSize()[2];
 }
 
 float VidaHeader::sizeT() const
@@ -166,7 +177,7 @@ float VidaHeader::sizeT() const
   float tr;
   if( getProperty( "time_resolution", tr ) )
     return( tr );
-  return( 1 );
+  return getVoxelSize()[3];
 }
 
 void VidaHeader::read()
@@ -197,6 +208,7 @@ void VidaHeader::read()
   voxSize.push_back( (float) VIDA_PX(vp) );
   voxSize.push_back( (float) VIDA_PY(vp) );
   voxSize.push_back( (float) VIDA_PZ(vp) );
+  voxSize.push_back( (float) VIDA_PT(vp) );
   setProperty( "voxel_size", voxSize );
 
   setProperty( "time_resolution", (float) VIDA_PT(vp)); // VIDA_PT(vp) ??
@@ -260,7 +272,7 @@ void VidaHeader::write()
   vs.push_back( sizeX() );
   vs.push_back( sizeY() );
   vs.push_back( sizeZ() );
-  vs.push_back( sizeY() );
+  vs.push_back( sizeT() );
   setProperty( "voxel_size", vs );
   //cout << "write minf: " << removeExtension( _name ) + extension() << endl;
   writeMinf( removeExtension( _name ) + extension() + ".minf" );
