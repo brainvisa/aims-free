@@ -580,6 +580,9 @@ load_transformations(const ApplyTransformProc& proc,
     // Detect special values
     if(iequals(trimmed_input_coords, "first")) {
       transform_position = 0;
+    } else if(iequals(trimmed_input_coords, "last")) {
+      transform_position = std::min(referentials->size(),
+                                    transformations->size()) - 1;
     } else if(iequals(trimmed_input_coords, "qform")
        || iequals(trimmed_input_coords, "ITK")
        || iequals(trimmed_input_coords, "ANTS")) {
@@ -1174,6 +1177,8 @@ int main(int argc, const char **argv)
       "  to assuming a RAS+ on-disk orientation.\n"
       "- 'first': use the first transformation defined in the AIMS metadata,\n"
       "  i.e. the first or qform or sform to be defined.\n"
+      "- 'last': use the last transformation defined in the AIMS metadata,\n"
+      "  i.e. the last or qform or sform to be defined.\n"
       "- '0', '1'... or any non-negative integer: use the transformation\n"
       "  in that position (0-based) in the AIMS metadata field\n"
       "  'transformations' (0 is a synonym of 'first').\n"
