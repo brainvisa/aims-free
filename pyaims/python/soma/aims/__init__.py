@@ -1335,6 +1335,14 @@ def getPython(self):
         return self.getString()
     except:
         pass
+    if t.find('carto_volume') >= 0:
+        dt = t.split()[-1]
+        try:
+            res = eval('Volume_' + dt).fromObject(gen)
+            res.__genericobject__ = gen
+            return res
+        except:
+            pass
     if t.find('volume') >= 0:
         dt = t.split()[-1]
         try:
