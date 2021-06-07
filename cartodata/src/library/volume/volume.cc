@@ -424,6 +424,7 @@ instantiate_volutil2( cdouble, std::divides<cdouble> )
 namespace carto
 {
 
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< bool > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< uint8_t > )
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
@@ -444,6 +445,7 @@ namespace carto
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
 #endif
 
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< bool > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int8_t > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint8_t > > )
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)

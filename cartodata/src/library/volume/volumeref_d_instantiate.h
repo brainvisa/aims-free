@@ -49,6 +49,7 @@ namespace carto
 //   I N S T A N C I A T I O N
 //============================================================================
 
+  extern template class Creator<VolumeRef<bool> >;
   extern template class Creator<VolumeRef<int8_t> >;
   extern template class Creator<VolumeRef<uint8_t> >;
   // ### remove after everything has been moved to intN_t/uintN_t
@@ -79,6 +80,7 @@ namespace carto
   extern template class Creator<VolumeRef<unsigned long> >;
 #endif
 
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< bool > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< uint8_t > )
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)

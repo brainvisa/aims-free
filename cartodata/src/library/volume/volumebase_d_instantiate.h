@@ -50,6 +50,7 @@ namespace carto {
 //   I N S T A N C I A T I O N
 //============================================================================
 
+  extern template class Volume<bool>;
   extern template class Volume<int8_t>;
   extern template class Volume<uint8_t>;
   // ### remove after everything has been moved to intN_t/uintN_t
@@ -80,6 +81,7 @@ namespace carto {
   extern template class Volume<unsigned long>;
 #endif
 
+  extern template class Creator<Volume<bool> >;
   extern template class Creator<Volume<int8_t> >;
   extern template class Creator<Volume<uint8_t> >;
   // ### remove after everything has been moved to intN_t/uintN_t
@@ -110,6 +112,7 @@ namespace carto {
   extern template class Creator<Volume<unsigned long> >;
 #endif
 
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< bool > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int8_t > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint8_t > > )
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
