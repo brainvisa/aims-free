@@ -96,14 +96,34 @@ bool doit( Process & p, const string & fname, Finder & f )
   resamplers[ "seven" ] = 7;
   resamplers[ "seventhorder" ] = 7;
   resamplers[ "7" ] = 7;
+  resamplers[ "maj" ] = 101;
+  resamplers[ "majority" ] = 101;
+  resamplers[ "mef" ] = 201;
+  resamplers[ "median" ] = 201;
 
-  typename map<string, int>::iterator	i 
-    = resamplers.find( rp.resampler );
-  if( i == resamplers.end() )
-    throw invalid_argument( "invalid resampler type: " + rp.resampler );
+  int order = 0;
+
+  typename map<string, int>::iterator	i = resamplers.find( rp.resampler );
+  if( i != resamplers.end() )
+    order = i->second;
+  else
+  {
+    // try another numeric value
+    stringstream s( rp.resampler );
+    try
+    {
+      s >> order;
+    }
+    catch( ... )
+    {
+      throw invalid_argument( "invalid resampler type: " + rp.resampler );
+    }
+    if( order == 0 )
+      throw invalid_argument( "invalid resampler type: " + rp.resampler );
+  }
 
   ResamplerFactory<T>	rf;
-  rc_ptr<Resampler<T> >	resamp( rf.getResampler( i->second ) );
+  rc_ptr<Resampler<T> >	resamp( rf.getResampler( order ) );
   VolumeRef<T>		data;
   string		format = f.format();
   Reader<Volume<T> >	r( fname );
@@ -198,10 +218,12 @@ int main( int argc, const char **argv )
                    "--sz", "voxel z dimension of the resampled volume", 
                    true );
     app.addOption( rt, "-t", 
-                   "Resampling type: n[earest], l[inear], q[uadratic], " 
-                   "c[cubic], quartic, quintic, six[thorder], seven[thorder] " 
-                   "[default=linear]. Modes may also be specified as order " 
-                   "number: 0=nearest, 1=linear etc.",
+                   "Type of interpolation used: n[earest], "
+                   "l[inear], q[uadratic], c[cubic], quartic, quintic, "
+                   "six[thorder], seven[thorder], maj[ority], med[ian] "
+                   "[default=linear]. Modes may "
+                   "also be specified as order number: 0=nearest, 1=linear... "
+                   "Additional values: 101=majority, 201=median",
                    true );
     app.addOption( referenceFile, "-r", "Volume used to define output voxel "
                    "size and volume dimension (values are overrided by --dx, "

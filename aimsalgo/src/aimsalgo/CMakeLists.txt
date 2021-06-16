@@ -269,6 +269,8 @@ set( _headers
     resampling/harmonicCageResampler.h
     resampling/linearresampler.h
     resampling/linearresampler_d.h
+    resampling/majoritylabelresampler.h
+    resampling/majoritylabelresampler_d.h
     resampling/masklinresampler.h
     resampling/masklinresampler_d.h
     resampling/meshToVoxelsResampler.h
@@ -290,6 +292,8 @@ set( _headers
     resampling/majoritysubsampling.h
     resampling/maxsubsampling.h
     resampling/meansubsampling.h
+    resampling/medianresampler.h
+    resampling/medianresampler_d.h
     resampling/mediansubsampling.h
     resampling/minsubsampling.h
     resampling/notnullmeansubsampling.h

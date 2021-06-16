@@ -39,6 +39,8 @@
 
 #include <aims/resampling/nearestneighborresampler.h>
 #include <aims/resampling/linearresampler.h>
+#include <aims/resampling/majoritylabelresampler.h>
+#include <aims/resampling/medianresampler.h>
 #include <aims/resampling/quadraticresampler.h>
 #include <aims/resampling/cubicresampler.h>
 #include <aims/resampling/quarticresampler.h>
@@ -80,6 +82,10 @@ namespace aims
         return make_ptr(new SixthOrderResampler<T>);
       case 7:
         return make_ptr(new SeventhOrderResampler<T>);
+      case 101:
+        return make_ptr(new MajorityLabelResampler<T>);
+      case 201:
+        return make_ptr(new MedianResampler<T>);
       default:
         std::cerr << "no resampler for order " << order
                   << ", taking order 3 (cubic) instead" << std::endl;
