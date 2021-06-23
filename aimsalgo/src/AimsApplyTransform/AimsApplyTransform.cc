@@ -571,11 +571,15 @@ load_transformations(const ApplyTransformProc& proc,
 
   // boost::iequals is used for case-insensitive comparison
   using boost::iequals;
-  const string trimmed_input_coords = boost::trim_copy(proc.input_coords);
-  if(!iequals(trimmed_input_coords, "AIMS")) {
-    if(proc.points_mode) {
+  string effective_input_coords = boost::trim_copy(proc.input_coords);
+  if(proc.points_mode) {
+    if(iequals(effective_input_coords, "auto"))
+      effective_input_coords = "AIMS";
+    else if(!iequals(effective_input_coords, "AIMS"))
       throw FatalError("--input-coords cannot be used in points mode");
-    }
+  }
+
+  if(!iequals(effective_input_coords, "AIMS")) {
     if(!input_header || !input_header->isDictionary()) {
       throw FatalError("--input-coords cannot be used, because no header "
                        "could be read for the input data");
@@ -593,45 +597,50 @@ load_transformations(const ApplyTransformProc& proc,
       throw FatalError("--input-coords cannot be used, because no "
                        "transformations could be read in the input header");
     }
+    if(referentials.isNull() || transformations.isNull()) {
+      throw FatalError("--input-coords cannot be used, because no "
+                       "transformations could be read in the input header");
+    }
 
     // Valid values are >= 0
     int transform_position = -1;
     // Detect special values
-    if(iequals(trimmed_input_coords, "first")) {
+    if(iequals(effective_input_coords, "first")) {
       transform_position = 0;
-    } else if(iequals(trimmed_input_coords, "last")) {
+    } else if(iequals(effective_input_coords, "last")
+              || iequals(effective_input_coords, "auto")) {
       transform_position = std::min(referentials->size(),
                                     transformations->size()) - 1;
-    } else if(iequals(trimmed_input_coords, "qform")
-       || iequals(trimmed_input_coords, "ITK")
-       || iequals(trimmed_input_coords, "ANTS")) {
+    } else if(iequals(effective_input_coords, "qform")
+       || iequals(effective_input_coords, "ITK")
+       || iequals(effective_input_coords, "ANTS")) {
       // TODO determine transform_position
       throw FatalError("--input-coords qform not implemented yet");
-    } else if(iequals(trimmed_input_coords, "sform")) {
+    } else if(iequals(effective_input_coords, "sform")) {
       // TODO determine transform_position
       throw FatalError("--input-coords sform not implemented yet");
     } else {
       try {
-        transform_position = boost::lexical_cast<int>(trimmed_input_coords);
+        transform_position = boost::lexical_cast<int>(effective_input_coords);
       } catch(const boost::bad_lexical_cast &) {}
     }
 
     if(transform_position < 0) {
       string referential_name, referential_id;
 
-      if(iequals(trimmed_input_coords, "mni")
-         || iequals(trimmed_input_coords, "mni152")) {
+      if(iequals(effective_input_coords, "mni")
+         || iequals(effective_input_coords, "mni152")) {
         referential_name = StandardReferentials::mniTemplateReferential();
         referential_id = StandardReferentials::mniTemplateReferentialID();
-      } else if(iequals(trimmed_input_coords, "scanner")) {
+      } else if(iequals(effective_input_coords, "scanner")) {
         referential_name = StandardReferentials::commonScannerBasedReferential();
         referential_id = StandardReferentials::commonScannerBasedReferentialID();
-      } else if(iequals(trimmed_input_coords, "acpc")) {
+      } else if(iequals(effective_input_coords, "acpc")) {
         referential_name = StandardReferentials::acPcReferential();
         referential_id = StandardReferentials::acPcReferentialID();
-      } else if(iequals(trimmed_input_coords, "talairach")) {
+      } else if(iequals(effective_input_coords, "talairach")) {
         referential_name = StandardReferentials::talairachReferential();
-      } else if(iequals(trimmed_input_coords, "aligned")) {
+      } else if(iequals(effective_input_coords, "aligned")) {
         referential_name = "Coordinates aligned to another file or to anatomical truth";
       } else {
         referential_name = proc.input_coords;
@@ -686,6 +695,9 @@ load_transformations(const ApplyTransformProc& proc,
       } else {
         throw FatalError("Error in the input header, --input-coords failed");
       }
+    } else if(iequals(effective_input_coords, "auto")) {
+      // Do nothing: fall back to AIMS coordinates
+      // (aims_to_input_space_transform is a null pointer)
     } else {
       throw FatalError("Cannot find the header transformation corresponding "
                        "to --input-coords '" + proc.input_coords + "'");
@@ -1194,6 +1206,9 @@ int main(int argc, const char **argv)
       "  format-dependent manner. For NIfTI it uses first qform then sform\n"
       "  if they point to a referential of known orientation, and falls back\n"
       "  to assuming a RAS+ on-disk orientation.\n"
+      "- 'auto': use the last transformation defined in the AIMS metadata\n"
+      "  (i.e. the last or qform or sform to be defined) or fallback to\n"
+      "  AIMS coordinates if no transformation is found.\n"
       "- 'first': use the first transformation defined in the AIMS metadata,\n"
       "  i.e. the first or qform or sform to be defined.\n"
       "- 'last': use the last transformation defined in the AIMS metadata,\n"
