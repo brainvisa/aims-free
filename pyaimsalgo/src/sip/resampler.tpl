@@ -34,7 +34,9 @@ ResamplerFactory classes are used to instantiate a Resampler object for the chos
       Quartic = 4,
       Quintic = 5,
       SixthOrder = 6,
-      SeventhOrder = 7
+      SeventhOrder = 7,
+      MajorityLabel = 101,
+      Median = 201
     };
 
     static Resampler_%Template1typecode% * getResampler( int order ) /Factory/;
@@ -644,6 +646,78 @@ public:
 
   LinearResampler_%Template1typecode%();
   ~LinearResampler_%Template1typecode%();
+
+  int getOrder() const;
+};
+
+
+class MedianResampler_%Template1typecode% : SplineResampler_%Template1typecode%
+{
+%TypeHeaderCode
+  #include <aims/resampling/medianresampler.h>
+
+  #ifndef PYAIMSALGOSIP_MEDIANRESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_MEDIANRESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::MedianResampler<%Template1%> MedianResampler_%Template1typecode%;
+  #endif
+
+  #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  #endif
+
+  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
+  #endif
+%End
+%Docstring
+Volume resampler using median interpolation.
+
+The resampling API is described in the base classes,
+Resampler_%Template1typecode% and SplineResampler_%Template1typecode%.
+%End
+
+public:
+
+  MedianResampler_%Template1typecode%();
+  ~MedianResampler_%Template1typecode%();
+
+  int getOrder() const;
+};
+
+
+class MajorityLabelResampler_%Template1typecode% : SplineResampler_%Template1typecode%
+{
+%TypeHeaderCode
+  #include <aims/resampling/majoritylabelresampler.h>
+
+  #ifndef PYAIMSALGOSIP_MAJORITYLABELRESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_MAJORITYLABELRESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::MajorityLabelResampler<%Template1%> MajorityLabelResampler_%Template1typecode%;
+  #endif
+
+  #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  #endif
+
+  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
+  #endif
+%End
+%Docstring
+Volume resampler using majority vote interpolation.
+
+The resampling API is described in the base classes,
+Resampler_%Template1typecode% and SplineResampler_%Template1typecode%.
+%End
+
+public:
+
+  MajorityLabelResampler_%Template1typecode%();
+  ~MajorityLabelResampler_%Template1typecode%();
 
   int getOrder() const;
 };

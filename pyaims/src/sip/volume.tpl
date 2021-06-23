@@ -115,6 +115,26 @@ public:
 
     virtual ~Volume_%Template1typecode%() /ReleaseGIL/;
 
+  // conversion from Object
+  static  rc_ptr_Volume_%Template1typecode%
+  fromObject( carto::GenericObject ) /Factory, ReleaseGIL/;
+%MethodCode
+  try
+    {
+      carto::rc_ptr<carto::Volume<%Template1% > > &
+        rcp = a0->value<carto::rc_ptr<carto::Volume<%Template1% > > >();
+      sipRes = new carto::rc_ptr<carto::Volume<%Template1% > >( rcp );
+    }
+  catch( std::exception & e )
+    {
+      sipIsErr = 1;
+      SIP_BLOCK_THREADS
+      PyErr_SetString( PyExc_RuntimeError, e.what() );
+      SIP_UNBLOCK_THREADS
+      sipRes = 0;
+    }
+%End
+
     int getSizeX() const;
     int getSizeY() const;
     int getSizeZ() const;

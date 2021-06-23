@@ -144,12 +144,31 @@ get_resampler(const std::string& interp_type)
   resamplers[ "seven" ] = 7;
   resamplers[ "seventhorder" ] = 7;
   resamplers[ "7" ] = 7;
+  resamplers[ "maj" ] = 101;
+  resamplers[ "majority" ] = 101;
+  resamplers[ "mef" ] = 201;
+  resamplers[ "median" ] = 201;
+  int order = 0;
 
   typename map<string, int>::iterator	i = resamplers.find( interp_type );
-  if( i == resamplers.end() ) {
-    throw invalid_argument( "invalid resampler type: " + interp_type );
+  if( i != resamplers.end() )
+    order = i->second;
+  else
+  {
+    // try another numeric value
+    stringstream s( interp_type );
+    try
+    {
+      s >> order;
+    }
+    catch( ... )
+    {
+      throw invalid_argument( "invalid resampler type: " + interp_type );
+    }
+    if( order == 0 )
+      throw invalid_argument( "invalid resampler type: " + interp_type );
   }
-  return ResamplerFactory<T>::getResampler( i->second );
+  return ResamplerFactory<T>::getResampler( order );
 }
 
 
@@ -1258,8 +1277,10 @@ int main(int argc, const char **argv)
     app.addOption(proc.interp_type, "--interp",
                   "Type of interpolation used for Volumes: n[earest], "
                   "l[inear], q[uadratic], c[cubic], quartic, quintic, "
-                  "six[thorder], seven[thorder] [default=linear]. Modes may "
-                  "also be specified as order number: 0=nearest, 1=linear...",
+                  "six[thorder], seven[thorder], maj[ority], med[ian] "
+                  "[default=linear]. Modes may "
+                  "also be specified as order number: 0=nearest, 1=linear... "
+                  "Additional values: 101=majority, 201=median",
                   true);
     app.addOption(proc.background_value, "--background",
                   "Value used for the background of Volumes", true);

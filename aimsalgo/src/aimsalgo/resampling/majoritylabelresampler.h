@@ -32,43 +32,41 @@
  */
 
 
-#ifndef AIMS_RESAMPLING_RESAMPLERFACTORY_H
-#define AIMS_RESAMPLING_RESAMPLERFACTORY_H
+#ifndef AIMS_RESAMPLING_MAJORITYLABELRESAMPLER_H
+#define AIMS_RESAMPLING_MAJORITYLABELRESAMPLER_H
 
-#include <memory>
-
-#include <aims/resampling/resampler.h>
+#include <aims/resampling/splineresampler.h>
 
 namespace aims
 {
 
-  template <typename T>
-  class ResamplerFactory
-  {
-  public:
-    enum ResamplerType {
-      NearestNeighbor = 0,
-      Linear = 1,
-      Quadratic = 2,
-      Cubic = 3,
-      Quartic = 4,
-      Quintic = 5,
-      SixthOrder = 6,
-      SeventhOrder = 7,
-      MajorityLabel = 101,
-      Median = 201,
-    };
+/** Volume resampler using linear (order 1) interpolation, then selects the majority
+    label in the neighbouring values.
 
-    /** Instantiate a Resampler of the given order
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
+template <class T>
+class MajorityLabelResampler : public SplineResampler< T >
+{
+public:
 
-    \param order order of interpolation: 0 is nearest neighbour (no
-                 interpolation), 1 is linear, 3 is cubic, etc. up to 7th order.
-    \return a new instance of the selected resampler type
-    */
-    static std::unique_ptr<Resampler<T> > getResampler( int order );
+  MajorityLabelResampler();
+  ~MajorityLabelResampler();
 
-  };
+  int getOrder() const CARTO_OVERRIDE;
+
+protected:
+  typedef typename SplineResampler<T>::ChannelType ChannelType;
+
+  void doResampleChannel( const carto::Volume< ChannelType >& inVolume,
+                          const soma::Transformation3d& transform3d,
+                          const ChannelType& outBackground,
+                          const Point3df& outLocation,
+                          ChannelType& outValue, int t ) const CARTO_OVERRIDE;
+  double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
+};
 
 } // namespace aims
 
-#endif // !defined(AIMS_RESAMPLING_RESAMPLERFACTORY_H)
+#endif
