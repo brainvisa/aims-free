@@ -264,8 +264,6 @@ def checkVolume(vol):
     # get specified palette information if any
 
     try:
-        print('hdr:', type(hdr))
-        print(hdr)
         pal = hdr['palette']
         p = pal['palette']
         hints['palette'] = p
