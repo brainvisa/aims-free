@@ -82,6 +82,7 @@ namespace aims
 
   };
 
+
   /**	Generic writer for *every* format of Aims object.
 	The Writer classes are built on the same model as the Reader classes
 	and share the same FileFormatDictionary with them to store all
@@ -127,6 +128,23 @@ namespace aims
   {
     writer.write( thing );
     return writer;
+  }
+
+
+  /*! \brief Finds the correct format and writes the object, global version
+
+  If \c format is specified, this format is tried first, so you can use it
+  to force the format, otherwise it will be determined from the filename
+  extension. If no extension and no format are given, the first working
+  format will be used. */
+  template <typename T>
+  inline bool write( const T & obj, const std::string & filename,
+                     carto::Object options = carto::none(),
+                     const std::string* format = 0 )
+  {
+    Writer<T> w( filename );
+    w.setOptions( options );
+    w.write( obj, false, format );
   }
 
 }
