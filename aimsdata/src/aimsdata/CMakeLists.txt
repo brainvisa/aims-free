@@ -229,6 +229,7 @@ set( _headers
     utility/merge.h
     utility/minmax.h
     utility/progress.h
+    utility/stl_conversion.h
     utility/threshold.h
     utility/utility_g.h
     vector/vector.h
