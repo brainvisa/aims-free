@@ -35,14 +35,12 @@
 #include <aims/distancemap/meshdistance.h>
 #include <aims/distancemap/meshvoronoi.h>
 #include <map>
-#include <set>
-#include <float.h>
 
 
 template<class T>
-Texture<float> aims::meshdistance::MeshDistance( const AimsSurface<3,Void> &  mesh, 
-						 const Texture<T> & inittex, 
-						 bool allowUnreached )
+Texture<float> aims::meshdistance::MeshDistance(
+  const AimsSurface<3,Void> &  mesh, const Texture<T> & inittex,
+  bool allowUnreached, float max_dist )
 {
   Texture<float>			tex;
   const std::vector<Point3df>		& vert = mesh.vertex();
@@ -58,48 +56,48 @@ Texture<float> aims::meshdistance::MeshDistance( const AimsSurface<3,Void> &  me
   unsigned			v1, v2, v3;
 
   for( i=0; i<poly.size(); ++i )
+  {
+    v1 = poly[i][0];
+    v2 = poly[i][1];
+    v3 = poly[i][2];
+    if( inittex.item(v1)!=MESHDISTANCE_FORBIDDEN
+        && inittex.item(v2)!=MESHDISTANCE_FORBIDDEN )
     {
-      v1 = poly[i][0];
-      v2 = poly[i][1];
-      v3 = poly[i][2];
-      if(inittex.item(v1)!=MESHDISTANCE_FORBIDDEN 
-	 && inittex.item(v2)!=MESHDISTANCE_FORBIDDEN)
-	{
-	  neighbours[v1].insert( v2 );
-	  neighbours[v2].insert( v1 );
-	}
-      if(inittex.item(v1)!=MESHDISTANCE_FORBIDDEN 
-	 && inittex.item(v3)!=MESHDISTANCE_FORBIDDEN) 
-	{
-	  neighbours[v1].insert( v3 );
-	  neighbours[v3].insert( v1 );
-	}
-      if(inittex.item(v2)!=MESHDISTANCE_FORBIDDEN 
-	 && inittex.item(v3)!=MESHDISTANCE_FORBIDDEN)  
-	{
-	  neighbours[v2].insert( v3 );
-	  neighbours[v3].insert( v2 );
-	}
+      neighbours[v1].insert( v2 );
+      neighbours[v2].insert( v1 );
     }
+    if( inittex.item(v1)!=MESHDISTANCE_FORBIDDEN
+        && inittex.item(v3)!=MESHDISTANCE_FORBIDDEN )
+    {
+      neighbours[v1].insert( v3 );
+      neighbours[v3].insert( v1 );
+    }
+    if( inittex.item(v2)!=MESHDISTANCE_FORBIDDEN
+        && inittex.item(v3)!=MESHDISTANCE_FORBIDDEN )
+    {
+      neighbours[v2].insert( v3 );
+      neighbours[v3].insert( v2 );
+    }
+  }
 
   // init texture
 
   for( i=0; i<n; ++i )
-    {
-      if( inittex.item(i) == 0 )
-	tex.push_back( FLT_MAX );
-      else if( inittex.item(i) == MESHDISTANCE_FORBIDDEN )
-	tex.push_back( MESHDISTANCE_FORBIDDEN );
-      else
-	tex.push_back( 0 );
-    }
+  {
+    if( inittex.item(i) == 0 )
+      tex.push_back( FLT_MAX );
+    else if( inittex.item(i) == MESHDISTANCE_FORBIDDEN )
+      tex.push_back( MESHDISTANCE_FORBIDDEN );
+    else
+      tex.push_back( 0 );
+  }
 
   std::multimap<float,unsigned>	front1, front2;
   std::multimap<float,unsigned>	*cfront = &front1, *nfront = &front2, *tmpf;
   std::multimap<float,unsigned>::iterator	iv, fv;
   std::set<unsigned>				neigh;
   std::set<unsigned>::iterator		in, fn;
-  float					d, d2, l;
+  float					d, d2, l, nd;
   Point3df				pos;
 
   //	init first front
@@ -111,40 +109,41 @@ Texture<float> aims::meshdistance::MeshDistance( const AimsSurface<3,Void> &  me
   //	loop until current front is empty
 
   while( cfront->size() > 0  )
+  {
+    nfront->clear();
+    neigh.clear();
+
+    for( iv=cfront->begin(), fv=cfront->end(); iv!=fv; ++iv )
     {
-      nfront->clear();
-      neigh.clear();
-
-      for( iv=cfront->begin(), fv=cfront->end(); iv!=fv; ++iv )
-	{
-	  i = (*iv).second;
-	  d = (*iv).first;
-	  for( in=neighbours[i].begin(), fn=neighbours[i].end(); in!=fn; ++in )
-	    {
-	      d2 = tex.item( *in );
-	      pos = vert[i] - vert[*in];
-	      l = sqrt( pos[0] * pos[0] + pos[1] * pos[1] + pos[2] * pos[2] );
-	      if( d2 > d + l )
-		{
-		  tex.item( *in ) = d + l;
-		  neigh.insert( *in );
-		}
-	    }
-	}
-
-      for( in=neigh.begin(), fn=neigh.end(); in!=fn; ++in )
-	nfront->insert( std::pair<float,unsigned>( tex.item( *in ), *in ) );
-
-      tmpf = cfront;
-      cfront = nfront;
-      nfront = tmpf;
+      i = (*iv).second;
+      d = (*iv).first;
+      for( in=neighbours[i].begin(), fn=neighbours[i].end(); in!=fn; ++in )
+      {
+        d2 = tex.item( *in );
+        pos = vert[i] - vert[*in];
+        l = sqrt( pos[0] * pos[0] + pos[1] * pos[1] + pos[2] * pos[2] );
+        nd = d + l;
+        if( d2 > nd && nd < max_dist )
+        {
+          tex.item( *in ) = nd;
+          neigh.insert( *in );
+        }
+      }
     }
+
+    for( in=neigh.begin(), fn=neigh.end(); in!=fn; ++in )
+      nfront->insert( std::pair<float,unsigned>( tex.item( *in ), *in ) );
+
+    tmpf = cfront;
+    cfront = nfront;
+    nfront = tmpf;
+  }
 
 
   if( !allowUnreached )
     for( i=0; i<n; ++i )
       if( tex.item(i) == FLT_MAX )
-	tex.item(i) = MESHDISTANCE_UNREACHED;
+        tex.item(i) = MESHDISTANCE_UNREACHED;
 
   return( tex );
 }

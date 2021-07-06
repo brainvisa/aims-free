@@ -82,7 +82,7 @@ Texture<float> aims::meshdistance::GeodesicDepth ( const AimsSurface<3,Void> & m
 
     }
   cout << "Compute the geodesic distance\n";
-  dist = MeshDistance(mesh,inittex,true);
+  dist = MeshDistance( mesh, inittex, true );
   
   return(dist) ;
 }
@@ -93,12 +93,14 @@ namespace aims
   {
     template
     Texture<float> MeshDistance( const AimsSurface<3,Void> & mesh, 
-				 const Texture<short> & 
-				 inittex, bool allowUnreached );
+                                 const Texture<short> &
+                                 inittex, bool allowUnreached,
+                                 float max_dist = FLT_MAX );
     template
     Texture<float> MeshDistance( const AimsSurface<3,Void> & mesh,
                                  const Texture<float> &
-                                 inittex, bool allowUnreached );
+                                 inittex, bool allowUnreached,
+                                 float max_dist = FLT_MAX );
   }
 
 }

@@ -41,6 +41,7 @@
 #include <aims/mesh/surface.h>
 #include <set>
 #include <aims/data/data.h>
+#include <float.h>
 
 namespace aims
 {
@@ -58,13 +59,16 @@ namespace aims
 
     template<class T>
     Texture<float> MeshDistance( const AimsSurface<3,Void> &  mesh, 
-				 const Texture<T> & inittex, 
-				 bool allowUnreached );
+                                 const Texture<T> & inittex,
+                                 bool allowUnreached,
+                                 float max_dist = FLT_MAX );
 
     extern template Texture<float> 
-    MeshDistance( const AimsSurface<3,Void> &, const Texture<short> &, bool );
+    MeshDistance( const AimsSurface<3,Void> &, const Texture<short> &, bool,
+                  float = FLT_MAX );
     extern template Texture<float>
-    MeshDistance( const AimsSurface<3,Void> &, const Texture<float> &, bool );
+    MeshDistance( const AimsSurface<3,Void> &, const Texture<float> &, bool,
+                  float = FLT_MAX );
   }
 
 }
