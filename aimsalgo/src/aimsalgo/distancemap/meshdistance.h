@@ -39,8 +39,9 @@
 #include <aims/config/aimsalgo_config.h>
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
-#include <set>
 #include <aims/data/data.h>
+#include <set>
+#include <map>
 #include <float.h>
 
 namespace aims
@@ -51,17 +52,34 @@ namespace aims
     
 
     /** Compute the geodesic depth of a triangulation
-	The vol define the object and the background
-	The radius-* are morphological parameter */
-    Texture<float> GeodesicDepth ( const AimsSurface<3,Void> & mesh, 
-				   const AimsData <short> & vol ,
-				   float radius_close, float radius_erode) ; 
+        The vol define the object and the background
+        The radius-* are morphological parameter */
+    Texture<float> GeodesicDepth ( const AimsSurface<3,Void> & mesh,
+                    const AimsData <short> & vol ,
+                    float radius_close, float radius_erode) ;
 
-    template<class T>
-    Texture<float> MeshDistance( const AimsSurface<3,Void> &  mesh, 
+    template<typename T>
+    Texture<float> MeshDistance( const AimsSurface<3,Void> & mesh,
                                  const Texture<T> & inittex,
                                  bool allowUnreached,
                                  float max_dist = FLT_MAX );
+
+    template <typename T,
+              typename MapType=std::vector< std::map<size_t, float> > >
+    void
+    pairwiseDistanceMaps( const AimsSurface<3,Void> & mesh,
+                          MapType & distmaps,
+                          const Texture<T> & inittex,
+                          float max_dist = FLT_MAX );
+
+    template <typename MapType=std::vector< std::map<size_t, float> > >
+    void
+    pairwiseDistanceMaps( const AimsSurface<3,Void> & mesh,
+                          MapType & distmaps,
+                          float max_dist = FLT_MAX )
+    {
+      pairwiseDistanceMaps( mesh, distmaps, Texture<int16_t>(), max_dist );
+    }
 
     extern template Texture<float> 
     MeshDistance( const AimsSurface<3,Void> &, const Texture<short> &, bool,
@@ -69,6 +87,15 @@ namespace aims
     extern template Texture<float>
     MeshDistance( const AimsSurface<3,Void> &, const Texture<float> &, bool,
                   float = FLT_MAX );
+
+    extern template
+    void
+    pairwiseDistanceMaps( const AimsSurface<3,Void> & mesh,
+                          std::vector<std::map<size_t, float> > & distmaps,
+                          const Texture<int16_t> & inittex
+                            = Texture<int16_t>(),
+                          float max_dist = FLT_MAX );
+
   }
 
 }

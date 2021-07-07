@@ -91,6 +91,7 @@ namespace aims
 {
   namespace meshdistance 
   {
+
     template
     Texture<float> MeshDistance( const AimsSurface<3,Void> & mesh, 
                                  const Texture<short> &
@@ -101,6 +102,15 @@ namespace aims
                                  const Texture<float> &
                                  inittex, bool allowUnreached,
                                  float max_dist = FLT_MAX );
+
+    template
+    void
+    pairwiseDistanceMaps( const AimsSurface<3,Void> & mesh,
+                          std::vector<std::map<size_t, float> > & distmaps,
+                          const Texture<int16_t> & inittex
+                            = Texture<int16_t>(),
+                          float max_dist = FLT_MAX );
+
   }
 
 }
