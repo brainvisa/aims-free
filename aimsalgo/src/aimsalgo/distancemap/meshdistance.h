@@ -58,12 +58,22 @@ namespace aims
                     const AimsData <short> & vol ,
                     float radius_close, float radius_erode) ;
 
+    /** Computes a distance texture over a mesh
+    */
     template<typename T>
     Texture<float> MeshDistance( const AimsSurface<3,Void> & mesh,
                                  const Texture<T> & inittex,
                                  bool allowUnreached,
                                  float max_dist = FLT_MAX );
 
+    /** Computes a distance matrix over a mesh.
+
+        The output \param distmaps may be a dense matrix or a sparse storage.
+        (if the \param max_dist distance is small, sparse is of course the
+        best, otherwise the matrix will be very large).
+        \param inittex may specify forbidden points which will be excluided from the matrix. As for MeshDistance(), forbidden points should take the value MESHDISTANCE_FORBIDDEN (defined in
+        <aims/distancemap/meshvoronoi.h>).
+    */
     template <typename T,
               typename MapType=std::vector< std::map<size_t, float> > >
     void
@@ -72,6 +82,12 @@ namespace aims
                           const Texture<T> & inittex,
                           float max_dist = FLT_MAX );
 
+    /** Computes a distance matrix over a mesh.
+
+        The output \param distmaps may be a dense matrix or a sparse storage.
+        (if the \param max_dist distance is small, sparse is of course the
+        best, otherwise the matrix will be very large).
+    */
     template <typename MapType=std::vector< std::map<size_t, float> > >
     void
     pairwiseDistanceMaps( const AimsSurface<3,Void> & mesh,
