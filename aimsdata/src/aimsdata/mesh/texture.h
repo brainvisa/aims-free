@@ -68,6 +68,8 @@ public:
   virtual ~Texture() { }
 
   size_t nItem() const { return _data.size(); }
+  /// alias for nItem()
+  size_t size() const { return _data.size(); }
 
   const T& item( int n ) const { return _data[ n ]; }
   const T & operator [] ( int n ) const { return _data[ n ]; }
