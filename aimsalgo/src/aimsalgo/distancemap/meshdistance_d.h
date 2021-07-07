@@ -175,6 +175,32 @@ namespace aims
       {
         mat.resize( size1 );
       }
+
+      static void storeLine( std::vector<T> & mat, size_t line,
+                             const std::vector<float> & tex )
+      {
+        LineType & map = mat[line];
+        size_t i, n = tex.size();
+
+        for( i=0; i<n; ++i )
+          DistMapMatrixTraits<LineType>::storeElement( map, i, tex[i] );
+      }
+
+    };
+
+    template <typename T, typename U>
+    class DistMapMatrixTraits<std::map<T, U> >
+    {
+    public:
+      static void resize( T & mat, size_t size1, size_t size2 = 0 )
+      {
+      }
+
+      static void storeElement( std::map<T, U> & map, T i, float value )
+      {
+        if( value != FLT_MAX )
+          map[i] = U( value );
+      }
     };
 
   }
@@ -293,10 +319,7 @@ aims::meshdistance::pairwiseDistanceMaps( const AimsSurface<3,Void> & mesh,
     }
 
     // fill in the output sparse map
-    typename DistMapMatrixTraits<MapType>::LineType & map = distmaps[start];
-    for( i=0; i<n; ++i )
-      if( tex[i] != FLT_MAX )
-        map[i] = tex[i];
+    DistMapMatrixTraits<MapType>::storeLine( distmaps, start, tex );
 
   }
 }
