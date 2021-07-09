@@ -38,6 +38,7 @@
 
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
+#include <cartobase/smart/rcptr.h>
 #include <list>
 
 template <class T>
@@ -53,29 +54,37 @@ inline float sign(T x)
  
 
 // Cross product between two 3D points
-inline Point3df cross(Point3df a, Point3df b)
+inline Point3df cross( const Point3df & a, const Point3df & b )
 {
   
   Point3df n;
   n[0] = a[1]*b[2] - a[2]*b[1];
   n[1] = a[2]*b[0] - a[0]*b[2];
   n[2] = a[0]*b[1] - a[1]*b[0];
-  return (n);
+  return n;
+}
+
+// Cross product between two 2D points
+inline float cross( const Point2df & a, const Point2df & b )
+{
+  (a[0] * b[1]) - (a[1] * b[0]);
 }
 
 namespace aims
 {
+
   class GeometricProperties 
   {
   public:
-    typedef std::vector< std::list<unsigned> > NeighborList;
+    typedef std::list<unsigned> Neighborhood;
+    typedef std::vector< Neighborhood > NeighborList;
     typedef std::vector< std::list<float> > WeightNeighborList;
     typedef std::vector<float> WeightList;
 
-  protected:
     GeometricProperties(const AimsSurfaceTriangle & mesh);
-    virtual ~GeometricProperties(); //car class derivee
+    virtual ~GeometricProperties();
 
+  protected:
     void doPhi();
     void doTheta();
     void doAlpha();
@@ -164,7 +173,131 @@ namespace aims
     virtual Texture<float> doIt();  
   };
 
-  
+  // This is another Gaussian Curvature estimate (from aims-til/Cathier)
+
+  class GaussianCurvature : public Curvature
+  {
+  public:
+    GaussianCurvature(const AimsSurfaceTriangle & mesh);
+    virtual ~GaussianCurvature();
+    virtual Texture<float> doIt();
+    void localProcess( size_t i_vert, float & gaussianCurvature,
+                       float & meanCurvature,
+                       std::pair<float, float> & principalCurvatures,
+                       float & orientedMeanCurvature,
+                       float & orientedGaussianCurvature,
+                       Point3df & normal, float & voronoiArea );
+  };
+
+
+  /** A class to remove a vertex from a mesh, and remeshing the hole.
+
+      NB: remeshing is not always possible, therefore removing a given point in
+      a mesh is not always possible.
+      Therefore, it may be important to check the return value of operator() to
+      check if the point has actually been removed.
+  */
+  class VertexRemover
+  {
+  public: // enum
+
+    enum Error {
+      none = 0,
+      invalid_neighborhood,
+      triangulation_failure,
+    };
+
+#if 0
+    typedef SimpleOrientedGraphNode<typename std::list<TVertexNode>::iterator> NeighborGraphNode;
+    typedef std::list<NeighborGraphNode> NeighborGraph;
+    typedef typename TVertexNode::VertexIndexCollection::value_type VertexPointer;
+#endif
+
+    // constructors
+
+    VertexRemover( carto::rc_ptr<GeometricProperties> geom );
+
+    // set & get
+
+    Error error() const { return _error; }
+    const GeometricProperties & geometricProperties() const { return *_geom; }
+    GeometricProperties & geometricProperties() { return *_geom; }
+
+    // functions
+
+#if 0
+    /// Check that vertex i can be removed from the mesh
+    bool isRemovable( size_t i );
+
+    /// Remove a vertex that has already been nodded as removable by the 'isRemovable' method.
+    /// Return a pointer to the vertex 'after' the vertex that has been removed, in the list sense.
+    VertexPointer remove( size_t i );
+#endif
+
+    /// Checks if a vertex is removable, and if so, removes it.
+    /// Returns true if the operation is successful.
+    bool operator()( size_t i );
+
+  private: // functions
+
+  // NB: neighbors should be a std::vector so far
+  //   template < typename Neighborhood >
+  std::vector<Point2df>
+  simple_neighborhood_flattening(
+    const Point3df & point,
+    const GeometricProperties::Neighborhood & neighbors );
+
+#if 0
+    /// Triangularize the neighbors of i.
+    /// Return true if successful.
+    bool neighborTriangulation(VertexPointer i);
+
+    /// Initialize the oriented graph of the neighbors of the neighbors of i, as they were
+    /// before triangulation.
+    void initializeOrientedEdges(VertexPointer i);
+
+    /// Complete the neighborhood graph of i's neighbors by taking into account the triangulation
+    /// of the whole left by removing i.
+    void updateNeighborGraph();
+
+    /// Check that neighbors have at least three neighbors.
+    bool checkNeighborsHaveThreeNeighbors();
+    /// Check that neighbors have an adequate circular neighborhood.
+    bool checkCorrectNeighborhood();
+    void addFaces(VertexPointer i);
+    void addNeighbors(VertexPointer i);
+#endif
+
+    // data, input
+    carto::rc_ptr<GeometricProperties> _geom;
+
+//     std::list<TFaceNode> &    m_graph_faces;
+
+    // data, output
+
+    Error _error;
+
+#if 0
+    // data, internal
+
+    std::vector<VertexPointer> m_neighbors;
+    std::vector<NeighborGraph> m_neighborGraph;
+    std::vector<std::map<VertexPointer, typename std::list<NeighborGraphNode>::iterator, Lesser_PointeeAddress<VertexPointer> > > m_convmap;
+    std::list<boost::array<std::size_t,3> > m_tri;
+#endif
+  };
+
+
+  /** SimpleDelaunayTriangulation
+
+      Get a Delaunay triangulation for a polygon. Poins in the polygon should
+      be ordered in a clockwise or counterclockwise order.
+
+      Note that it is different from a classical Delaunay algorithm wich meshes
+      a cloud point (and its convex hull), not a polygon as here.
+  */
+  std::list<AimsVector<uint, 3> >
+  simple_delaunay_triangulation( const std::vector<Point2df> & points );
 
 }
 

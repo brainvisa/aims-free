@@ -44,28 +44,34 @@
 inline float fsign(float x);
 inline Point3df cross(Point3df a, Point3df b); 
 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 
 TimeTexture<float> AimsMeshCurvature( const AimsSurface<3,Void> & mesh);
 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 //Estimation of the time step dt for the diffusion equation.
 float AimsMeshFiniteElementDt( const Texture<float> &tex,
 			       const Texture<float> &lapl,
 			       float tmax);
 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 //Estimation of the curvature. Boix method
 Texture<float> AimsMeshBoixCurvature( const AimsSurface<3,Void> & mesh,
 				      const std::vector<float> & ALPHA,
 				      const std::vector<float> & BETA,
 				      const std::vector<std::list<float> > & SURFACE);
 
-//Regularization of a texture map. 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
+//Regularization of a texture map.
 //Definition of the Outliers from the histogram
 Texture<float> AimsRegularizeTexture( const Texture<float> &tex,
 				      const AimsSurface<3,Void> & mesh, 
 				      float alpha ); 
 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 Texture<float> AimsRegularizeTexture(const Texture<float> & tex,
 				     float ratio );
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 //Estimation of the curvature (finite element method)
 Texture<float> AimsMeshFiniteElementCurvature( const AimsSurface<3,Void> & mesh,
 						   const std::vector< std::list<unsigned> > & neighbourso,
@@ -74,29 +80,35 @@ Texture<float> AimsMeshFiniteElementCurvature( const AimsSurface<3,Void> & mesh,
 						   const std::vector< std::list<float> > & SURFACE,
 						   const std::vector< std::list<float> > & DOT);
 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 //Eequired for the curvature and the laplacian estimation (finite element method).
 std::vector< std::list<float> > AimsMeshFiniteElementPhi( const AimsSurface<3,Void> & mesh,
 						const std::vector< std::list<unsigned> > & neighbourso,
 						const std::vector< std::list<float> > & surf);
 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 //Eequired for the curvature and the laplacian estimation (finite element method).
 std::vector< std::list<float> > AimsMeshFiniteElementTheta( const AimsSurface<3,Void> & mesh,
 						  const std::vector< std::list<unsigned> > & neighbourso,
 						  const std::vector< std::list<float> > & surf);
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 //Eequired for the curvature and the laplacian estimation (finite element method).
 std::vector<float> AimsMeshFiniteElementAlpha( const AimsSurface<3,Void> & mesh,
 					  const std::vector< std::list<unsigned> > & neighbourso);
 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 //Eequired for the curvature  estimation (boix method).
 std::vector<float>  AimsMeshFiniteElementBeta( const AimsSurface<3,Void> & mesh,
 					  const std::vector< std::list<unsigned> > & neighbourso);
 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 //Required for the curvature and the laplacian estimation (finite element and boix method).
 //The first list element for each coordinate i of the vector
 //Correspond to the total surface of the patch surrounding the node i.
 std::vector< std::list<float> > AimsMeshFiniteElementSurface( const AimsSurface<3,Void> & mesh,
 						    const std::vector< std::list<unsigned> > & neighbourso);
 
+/// obsolete, see Curvature clases in <aims/mesh/geometric.h>
 //Eequired for the curvature and the laplacian estimation (finite element method).
 std::vector< std::list<float> > AimsMeshFiniteElementDot( const AimsSurface<3,Void> & mesh,
 						const std::vector< std::list<unsigned> > & neighbourso);

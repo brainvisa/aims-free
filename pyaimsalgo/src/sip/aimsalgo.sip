@@ -76,3 +76,4 @@
 %Include rcptr_SplineFfd.sip
 %Include rcptr_TrilinearFfd.sip
 %Include transform_objects.sip
+%Include geometric.sip
