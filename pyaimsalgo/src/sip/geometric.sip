@@ -3,11 +3,134 @@
 #include <aims/mesh/geometric.h>
 %End
 
-/* namespace aims
-{ */
+namespace aims
+{
+  class GeometricProperties
+  {
+  public:
+    typedef list_U32 Neighborhood;
+    typedef vector_list_U32 NeighborList;
 
-  vector_AimsVector_U32_3*
-  simple_delaunay_triangulation( const vector_POINT2DF & points ) /Factory/;
+    typedef vector_FLOAT WeightList;
+
+    /* typedef std::list<unsigned> Neighborhood;
+    typedef std::vector< Neighborhood > NeighborList;
+    typedef std::vector< std::list<float> > WeightNeighborList;
+    typedef std::vector<float> WeightList; */
+
+    GeometricProperties(const AimsSurfaceTriangle & mesh);
+    virtual ~GeometricProperties();
+
+    /*
+    const WeightNeighborList & getPhi() const ;
+    const WeightNeighborList & getTheta() const ;
+    const WeightNeighborList & getDot() const ;
+    const WeightNeighborList & getSurface() const ;
+    */
+    const WeightList & getAlpha() const ;
+    const WeightList & getSimpleAlpha() const ;
+    const WeightList & getBeta() const ;
+    GeometricProperties::NeighborList & getNeighbor();
+    const AimsSurfaceTriangle & getMesh() const;
+  };
+
+
+  class Curvature : aims::GeometricProperties
+  {
+  public:
+    Curvature(const AimsSurfaceTriangle & mesh);
+    virtual ~Curvature();
+    virtual Texture_FLOAT doIt() = 0;
+    static void regularize(Texture_FLOAT & tex, float ratio);
+    static void getTextureProperties(const Texture_FLOAT & tex);
+  };
+
+  class CurvatureFactory
+  {
+  public:
+    Curvature * createCurvature(const AimsSurfaceTriangle & mesh, const std::string & method );
+
+  };
+
+  class FiniteElementCurvature : public aims::Curvature
+  {
+  public:
+    FiniteElementCurvature(const AimsSurfaceTriangle & mesh);
+    virtual ~FiniteElementCurvature();
+    virtual Texture_FLOAT doIt();
+  };
+
+
+  // All these are Mean Curvature estimates
+
+  class BoixCurvature : public aims::Curvature
+  {
+  public:
+    BoixCurvature(const AimsSurfaceTriangle & mesh);
+    virtual ~BoixCurvature();
+    virtual Texture_FLOAT doIt();
+  };
+
+  class BarycenterCurvature : public aims::Curvature
+  {
+  public:
+    BarycenterCurvature(const AimsSurfaceTriangle & mesh);
+    virtual ~BarycenterCurvature();
+    virtual Texture_FLOAT doIt();
+  };
+
+  // This is a Gaussian Curvature estimate
+
+  class BoixGaussianCurvature : public aims::Curvature
+  {
+  public:
+    BoixGaussianCurvature(const AimsSurfaceTriangle & mesh);
+    virtual ~BoixGaussianCurvature();
+    virtual Texture_FLOAT doIt();
+  };
+
+  // This is another Gaussian Curvature estimate (from aims-til/Cathier)
+
+  class GaussianCurvature : public aims::Curvature
+  {
+  public:
+    GaussianCurvature(const AimsSurfaceTriangle & mesh);
+    virtual ~GaussianCurvature();
+    virtual Texture_FLOAT doIt();
+    /*
+    void localProcess( size_t i_vert, float & gaussianCurvature,
+                       float & meanCurvature,
+                       std::pair<float, float> & principalCurvatures,
+                       float & orientedMeanCurvature,
+                       float & orientedGaussianCurvature,
+                       Point3df & normal, float & voronoiArea );
+    */
+  };
+
+
+  /** A class to remove a vertex from a mesh, and remeshing the hole.
+
+      NB: remeshing is not always possible, therefore removing a given point in
+      a mesh is not always possible.
+      Therefore, it may be important to check the return value of operator() to
+      check if the point has actually been removed.
+  */
+  class VertexRemover
+  {
+  public:
+    VertexRemover( AimsSurfaceTriangle & mesh /*,
+                   carto::rc_ptr<aims::GeometricProperties> geom
+                     = carto::rc_ptr<aims::GeometricProperties>( 0 )*/ );
+    aims::GeometricProperties & geometricProperties();
+    bool operator()( size_t i );
+
+  };
+
+};
+
+
+vector_AimsVector_U32_3*
+simple_delaunay_triangulation( const vector_POINT2DF & points ) /Factory/;
 %Docstring
     SimpleDelaunayTriangulation
 
@@ -24,5 +147,4 @@
   sipRes = new vector_AimsVector_U32_3( res.begin(), res.end() );
 %End
 
-// };
 

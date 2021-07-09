@@ -39,6 +39,7 @@
 #include <set>
 #include <algorithm>
 #include <stdexcept>
+#include <numeric>
 #include <float.h>
 
 using namespace std;
@@ -387,11 +388,9 @@ void GeometricProperties::doSurface()
 
 void GeometricProperties::doNeighbor()
 {
-  cout << "doNeighbor before, " << _neighbourso.size() << endl;
   if ( ! _neighbourso.empty() )
     return;
 
-  cout << "doNeighbor " << _mesh.vertex().size() << endl;
   const vector<Point3df>			& vert = _mesh.vertex(), & normal = _mesh.normal() ;
   const vector< AimsVector<uint,3> >		& poly = _mesh.polygon();
   unsigned					i,n = vert.size();
@@ -576,8 +575,6 @@ const AimsSurfaceTriangle & GeometricProperties::getMesh() const
 }    
 
 
-
-
 const GeometricProperties::WeightList & GeometricProperties::getAlpha() const 
 {
   return(_alpha);
@@ -594,6 +591,11 @@ const GeometricProperties::WeightList & GeometricProperties::getBeta() const
 }
 
 const GeometricProperties::NeighborList & GeometricProperties::getNeighbor() const
+{
+  return(_neighbourso);
+}
+
+GeometricProperties::NeighborList & GeometricProperties::getNeighbor()
 {
   return(_neighbourso);
 }
@@ -1038,306 +1040,19 @@ void GaussianCurvature::localProcess(
 // ---
 
 
-VertexRemover::VertexRemover( rc_ptr<GeometricProperties> geom )
-  : _geom( geom )
+VertexRemover::VertexRemover( AimsSurfaceTriangle & mesh,
+                              rc_ptr<GeometricProperties> geom )
+  : _mesh( mesh ), _geom( geom )
 {
-}
-
-#if 0
-bool VertexRemover::neighborTriangulation(VertexPointer i)
-{
-  // get delaunay faces for more than 4 neighbors
-  std::size_t nneigh = m_neighbors.size();
-  // NB: I don't know why we need this, but we do -- it crashes otherwise
-  m_tri.clear();
-  if (nneigh >= 4)
+  if( geom.isNull() )
   {
-    m_tri = simple_delaunay_triangulation(simple_neighborhood_flattening(i->pos(), m_neighbors));
+    _geom.reset( new GeometricProperties( mesh ) );
+    _geom->doNeighbor();
   }
-  // For three neighbors, simply add the only triangle possible
-  else if (nneigh == 3)
-  {
-    boost::array<std::size_t,3> tmp = { {0,1,2} };
-    m_tri.push_back(tmp);
-  }
-  // For two points or less, do not add any face. Note that if this happens, it means that the mesh
-  // is in really bad shape -- actually the following might crash.
-  else
-  {
-    m_error = invalid_neighborhood;
-    std::cout << "w2!";
-    return false;
-  }
-  // Check consistency between number of points and number of faces
-  if (m_tri.size() != nneigh - 2)
-  {
-    m_error = triangulation_failure;
-    std::cout << "wK!" << m_tri.size() << "-" << nneigh-2;
-    return false;
-  }
-  return true;
 }
 
 
-    /// Initialize the oriented graph of the neighbors of the neighbors of i, as they were
-    /// before triangulation.
-    void initializeOrientedEdges(VertexPointer i)
-    {
-      std::size_t nneigh = m_neighbors.size();
-      m_convmap.resize(nneigh);
-      for (std::size_t j = 0; j < nneigh; ++j)
-      {
-        // first pass: vertices
-        {
-          for (typename TVertexNode::VertexIndexCollection::const_iterator k = m_neighbors[j]->neighbors().begin(); k != m_neighbors[j]->neighbors().end(); ++k)
-          {
-            if (*k == i) continue;
-            NeighborGraphNode node(*k);
-            m_convmap[j][*k] = m_neighborGraph[j].insert(m_neighborGraph[j].end(), node);
-          }
-        }
-        // second pass: edges
-        {
-          typename TVertexNode::VertexIndexCollection::const_iterator k = m_neighbors[j]->neighbors().begin();
-          const_cyclic_iterator<typename TVertexNode::VertexIndexCollection> k2(m_neighbors[j]->neighbors(), m_neighbors[j]->neighbors().begin());
-          ++k2;
-          const_cyclic_iterator<typename TVertexNode::VertexIndexCollection> k3(m_neighbors[j]->neighbors(), m_neighbors[j]->neighbors().begin());
-          ++k3;
-          ++k3;
-          for (; k != m_neighbors[j]->neighbors().end(); ++k, ++k2, ++k3)
-          {
-            if (*k2 == i) continue;
-            if (*k != i)  m_convmap[j][*k2]->from.push_back(m_convmap[j][*k]);
-            if (*k3 != i) m_convmap[j][*k2]->to.push_back(m_convmap[j][*k3]);
-          }
-        }
-      }
-    }
-
-    /// Complete the neighborhood graph of i's neighbors by taking into account the triangulation
-    /// of the whole left by removing i.
-    void updateNeighborGraph()
-    {
-      for (std::list<boost::array<std::size_t,3> >::iterator newf = m_tri.begin(); newf != m_tri.end(); ++newf)
-      {
-        for (std::size_t n = 0; n < 3; ++n)
-        {
-          typename NeighborGraph::iterator p2, p3;
-
-          p2 = std::find_if(m_neighborGraph[(*newf)[n]].begin(), m_neighborGraph[(*newf)[n]].end(), valueFinder(m_neighbors[(*newf)[(n+1)%3]]));
-          p3 = std::find_if(m_neighborGraph[(*newf)[n]].begin(), m_neighborGraph[(*newf)[n]].end(), valueFinder(m_neighbors[(*newf)[(n+2)%3]]));
-          if (p2 == m_neighborGraph[(*newf)[n]].end()) p2 = m_neighborGraph[(*newf)[n]].insert(p2, NeighborGraphNode(m_neighbors[(*newf)[(n+1)%3]]));
-          if (p3 == m_neighborGraph[(*newf)[n]].end()) p3 = m_neighborGraph[(*newf)[n]].insert(p3, NeighborGraphNode(m_neighbors[(*newf)[(n+2)%3]]));
-
-          p2->to.push_back(p3);
-          p3->from.push_back(p2);
-        }
-      }
-    }
-
-
-    /// Check that neighbors have at least three neighbors.
-    bool checkNeighborsHaveThreeNeighbors()
-    {
-      for (std::size_t k = 0; k < m_neighborGraph.size(); ++k)
-      {
-        if (m_neighborGraph[k].size() < 3)
-        {
-          //std::cout << "WREJECT!(small-neighborhood)";
-          return false;
-        }
-      }
-      return true;
-    }
-
-    /// Check that neighbors have an adequate circular neighborhood.
-    bool checkCorrectNeighborhood()
-    {
-      for (std::size_t k = 0; k < m_neighborGraph.size(); ++k)
-      {
-        //std::cout << k << "/" << m_neighborGraph.size() << std::endl;
-        typename NeighborGraph::iterator p = m_neighborGraph[k].begin();
-        typename NeighborGraph::iterator p0 = p;
-        bool flag = false;
-        for (;;)
-        {
-          //std::cout << ":" << &*p << " " << std::flush;
-          if (flag)
-          {
-            //std::cout << "R" << std::flush;
-            if (p == p0) break;
-            //std::cout << "T" << std::flush;
-          }
-          else
-          {
-            //std::cout << "S" << std::flush;
-            flag = true;
-          }
-          //std::cout << "P" << std::flush;
-          if (p->to.size() != 1 || p->from.size() != 1)
-          {
-            //std::cout << "WREJECT!(incorrect-neighborhood)";
-            return false;
-          }
-          //std::cout << "%" << std::flush;
-          p = p->to.front();
-          //std::cout << "*" << std::flush;
-        }
-      }
-      return true;
-    }
-
-
-    void addFaces(VertexPointer i)
-    {
-      for (std::list<boost::array<std::size_t,3> >::iterator newf = m_tri.begin(); newf != m_tri.end(); ++newf)
-      {
-        // convert into graph faces
-        TFaceNode f;
-        for (std::size_t n = 0; n < 3; ++n)
-        {
-          f.face[n] = m_neighbors[(*newf)[n]];
-        }
-        // add face to graph
-        typename std::list<TFaceNode>::iterator gf = m_graph_faces.insert(m_graph_faces.end(), f);
-        numeric_array<float,3> normal = cross(
-          i->faces().front()->face[0]->pos() - i->faces().front()->face[1]->pos(),
-          i->faces().front()->face[0]->pos() - i->faces().front()->face[2]->pos()
-        );
-        // add face index to face points
-        for (std::size_t n = 0; n < 3; ++n)
-        {
-          GroComp<VertexPointer> grocomp(f.face[0], f.face[1], f.face[2]);
-          typename TVertexNode::FaceIndexCollection::iterator p = find_if(f.face[n]->faces().begin(), f.face[n]->faces().end(), grocomp);
-          if (p != f.face[n]->faces().end())
-          {
-            std::cout << "FATAL: face already there: " << std::endl;
-            std::cout << &*f.face[0] << " " << &*f.face[1] << " " << &*f.face[2] << std::endl;
-            std::cout << &*(*p)->face[0] << " " << &*(*p)->face[1] << " " << &*(*p)->face[2] << std::endl;
-            std::cout << "I'll continue as if nothing happened, but this is a bug and your algorithm is likely to go bananas :)" << std::endl;
-          }
-
-          // checking normal consistency
-          // I removed this test because normality consistency is broken very often, and yet this is legal.
-          // Actually, I know it is legal -- it is just surprising that this happens so often (like 1/10th of the
-          // cases!).
-          /*
-          {
-            Vector<float,3> mynormal = cross(
-              f.face[0]->pos() - f.face[1]->pos(),
-              f.face[0]->pos() - f.face[2]->pos());
-            if (dot(normal, mynormal) < 0) std::cout << "wY!";
-          }
-          */
-          f.face[n]->faces().push_back(gf);
-        }
-      }
-    }
-
-    void addNeighbors(VertexPointer i)
-    {
-      for (std::size_t j = 0; j < i->neighbors().size(); ++j)
-      {
-        typename TVertexNode::VertexIndexCollection ntmp = m_neighbors[j]->neighbors();
-
-        // remove all neighbors
-        m_neighbors[j]->neighbors().clear();
-
-        typename NeighborGraph::iterator p = m_neighborGraph[j].begin();
-        typename NeighborGraph::iterator p0 = p;
-        bool flag = false;
-        for (;;)
-        {
-          if (flag) { if (p == p0) break; }
-          else flag = true;
-          m_neighbors[j]->neighbors().push_back(p->value);
-          if (p->to.size() != 1)
-          {
-            std::cout << "wW!";
-            /*
-            std::cout << "ori neighbors" << std::endl;
-            for (typename std::vector<VertexPointer>::const_iterator i = neighbors.begin(); i != neighbors.end(); ++i)
-            {
-              std::cout << (*i)->pos() << std::endl;
-            }
-            std::cout << "end ori neighbors" << std::endl;
-
-            std::cout << "my neighbor number is " << j << std::endl;
-
-            std::cout << "neighbors" << std::endl;
-            for (typename TVertexNode::VertexIndexCollection::const_iterator i = ntmp.begin(); i != ntmp.end(); ++i)
-            {
-              std::cout << (*i)->pos() << std::endl;
-            }
-            std::cout << "end neighbors" << std::endl;
-            std::cout << "triangles" << std::endl;
-            for (typename std::list<boost::array<std::size_t,3> >::const_iterator i = tri.begin(); i != tri.end(); ++i)
-            {
-              std::cout << (*i)[0] << " " << (*i)[1] << " " << (*i)[2] << std::endl;
-            }
-            //std::copy(tri.begin(), tri.end(), std::ostream_iterator<boost::array<std::size_t,3> >(std::cout, std::endl));
-            std::cout << "end triangles" << std::endl;
-            //std::copy(norms.begin(), norms.end(), std::ostream_iterator<double>(std::cout, " "));
-            for (std::list<boost::array<std::size_t,3> >::iterator i = tri.begin(); i != tri.end(); ++i)
-            {
-              std::cout << (*i)[0] << " " << (*i)[1] << " " << (*i)[2] << std::endl;
-            }
-
-            exit(1);
-            */
-          }
-          if (p->to.size() == 0) break;
-          p = p->to.front();
-        }
-      }
-    }
-
-
-
-    /// Check that vertex i can be removed from the mesh
-    bool Vertex_remover::isRemovable( VertexPointer i )
-    {
-      m_error = none;
-      //std::cout << "A" << std::endl;
-      // copy list of neighbors in a vector, for fast random indexing
-      //std::cout << m_neighbors.size() << " " << i->neighbors().size() << " = " << std::flush;
-      m_neighbors.resize(i->neighbors().size());
-      //std::cout << m_neighbors.size() << std::endl;
-      std::copy(i->neighbors().begin(), i->neighbors().end(), m_neighbors.begin());
-      if (!this->neighborTriangulation(i)) return false;
-      // initialize oriented edges
-      //std::cout << m_neighborGraph.size() << " " << m_neighbors.size() << " = ";
-      m_neighborGraph.clear();
-      m_neighborGraph.resize(m_neighbors.size());
-      //std::cout << m_neighborGraph.size() << std::endl;
-      this->initializeOrientedEdges(i);
-      // Updating neighbor graphs
-      this->updateNeighborGraph();
-      // Checking that all neighbors have at least 3 neighbors
-      if (!this->checkNeighborsHaveThreeNeighbors()) return false;
-      // Checking that neighbors have correct neighborhood
-      // Incorrect neighborhood may appear when a neighbor was already sharing an edge with another neighbor of
-      // i that is not on its side, i.e that is not n-1 or n+1.
-      //std::cout << "H" << std::endl;
-      if (!this->checkCorrectNeighborhood()) return false;
-      //std::cout << "I" << std::endl;
-      return true;
-    }
-
-    /// Remove a vertex that has already been nodded as removable by the 'isRemovable' method.
-    /// Return a pointer to the vertex 'after' the vertex that has been removed, in the list sense.
-    VertexPointer remove(VertexPointer i)
-    {
-      // adding faces
-      this->addFaces(i);
-      // adding neighbors
-      this->addNeighbors(i);
-      // remove point
-      return remove_vertex(i, m_graph_vertices, m_graph_faces);
-    }
-#endif
-
-#if 0
+// #if 0
 namespace
 {
 
@@ -1361,9 +1076,10 @@ bool VertexRemover::operator()( size_t i )
   //std::cout << "." << std::flush;
 
   // list of neighbors
-  Neighborhood & i_neighbors = geometricProperties().neighbor()[i];
-  Neighborhood neighbors = i_neighbors;
-  Point3df i_pos = geometricProperties().getMesh().vertex()[i];
+  GeometricProperties::NeighborList & all_neigh
+    = geometricProperties().getNeighbor();
+  GeometricProperties::Neighborhood neighbors = all_neigh[i]; // COPY it.
+  Point3df i_pos = _mesh.vertex()[i];
 
   // Add new faces
   list<AimsVector<uint, 3> > tri;
@@ -1381,7 +1097,11 @@ bool VertexRemover::operator()( size_t i )
   }
   // For two points or less, do not add any face. Note that if this happens, it means that the mesh
   // is in really bad shape -- actually the following might crash.
-  else std::cout << "w2!";
+  else
+  {
+    std::cout << "w2!";
+    return false;
+  }
 
   // Check consistency between number of points and number of faces
   if( tri.size() != neighbors.size() - 2 )
@@ -1389,156 +1109,124 @@ bool VertexRemover::operator()( size_t i )
     std::cout << "wK!" << tri.size() << "-" << neighbors.size() - 2;
   }
 
-  //initialize oriented edges
-  //std::vector<NeighborGraph> neighborGraph(i->neighbors().size());
-  typedef SimpleOrientedGraphNode<std::list<size_t>::iterator> NeighborGraphNode;
-  vector< list< > > neighborGraph;
+  // remove triangles involving i
 
-  // TODO: we need this -- dunno why
-  m_neighborGraph.clear();
-  m_neighborGraph.resize(i->neighbors().size());
-  //std::vector<std::map<VertexPointer, typename std::list<NeighborGraphNode>::iterator, ItComp<VertexPointer> > > convmap(i->neighbors().size());
-  m_convmap.resize(i->neighbors().size());
+  vector<size_t> poly;
+  size_t count = 0, p_index = 0, nn = neighbors.size() - 1;
+  poly.reserve( nn );
+  vector<AimsVector<uint, 3> >::iterator ip, jp, ep = _mesh.polygon().end();
 
-  for (std::size_t j = 0; j < i_neighbors.size(); ++j)
+  for( ip=_mesh.polygon().begin(); ip!=ep && count<nn; ++ip, ++p_index )
   {
-    // first pass: vertices
+    if( (*ip)[0] == i || (*ip)[1] == i || (*ip)[2] == i )
     {
-      for (typename TVertexNode::VertexIndexCollection::const_iterator k = m_neighbors[j]->neighbors().begin(); k != m_neighbors[j]->neighbors().end(); ++k)
-      {
-        if (*k == i) continue;
-        NeighborGraphNode node(*k);
-        m_convmap[j][*k] = m_neighborGraph[j].insert(m_neighborGraph[j].end(), node);
-      }
-    }
-    // second pass: edges
-    {
-      typename TVertexNode::VertexIndexCollection::const_iterator k = m_neighbors[j]->neighbors().begin();
-      const_cyclic_iterator<typename TVertexNode::VertexIndexCollection> k2(m_neighbors[j]->neighbors(), m_neighbors[j]->neighbors().begin());
-      ++k2;
-      const_cyclic_iterator<typename TVertexNode::VertexIndexCollection> k3(m_neighbors[j]->neighbors(), m_neighbors[j]->neighbors().begin());
-      ++k3;
-      ++k3;
-      for (; k != m_neighbors[j]->neighbors().end(); ++k, ++k2, ++k3)
-      {
-        if (*k2 == i) continue;
-        if (*k != i)  m_convmap[j][*k2]->from.push_back(m_convmap[j][*k]);
-        if (*k3 != i) m_convmap[j][*k2]->to.push_back(m_convmap[j][*k3]);
-      }
+      ++count;
+      poly.push_back( p_index ); // record index of polygon
     }
   }
 
-  // Updating neighbor graphs
+  // rewrite (partially) poly list with removed elements, and shift numbers,
+  // once
+  vector<size_t>::const_iterator ipv = poly.begin(), epv = poly.end();
+  size_t pp = 0;
+  ip = _mesh.polygon().begin(); // write iterator
+  jp = ip; // read iter
+  while( jp != ep ) // until all have been read
   {
-    for (std::list<boost::array<std::size_t,3> >::iterator newf = m_tri.begin(); newf != m_tri.end(); ++newf)
+    while( ipv != epv && pp == *ipv )
     {
-      for (std::size_t n = 0; n < 3; ++n)
-      {
-        typename NeighborGraph::iterator p2, p3;
+      // skip this
+      ++jp;
+      ++ipv;
+      ++pp;
+    }
+    if( jp == ep )
+      break;
 
-        p2 = std::find_if(m_neighborGraph[(*newf)[n]].begin(), m_neighborGraph[(*newf)[n]].end(), valueFinder(m_neighbors[(*newf)[(n+1)%3]]));
-        p3 = std::find_if(m_neighborGraph[(*newf)[n]].begin(), m_neighborGraph[(*newf)[n]].end(), valueFinder(m_neighbors[(*newf)[(n+2)%3]]));
-        if (p2 == m_neighborGraph[(*newf)[n]].end()) p2 = m_neighborGraph[(*newf)[n]].insert(p2, NeighborGraphNode(m_neighbors[(*newf)[(n+1)%3]]));
-        if (p3 == m_neighborGraph[(*newf)[n]].end()) p3 = m_neighborGraph[(*newf)[n]].insert(p3, NeighborGraphNode(m_neighbors[(*newf)[(n+2)%3]]));
+    if( ip != jp )
+      *ip = *jp; // copy polygon
+    if( (*ip)[0] >= i ) // shift vertices numbers
+      --(*ip)[0];
+    if( (*ip)[1] >= i )
+      --(*ip)[1];
+    if( (*ip)[2] >= i )
+      --(*ip)[2];
 
-        p2->to.push_back(p3);
-        p3->from.push_back(p2);
-      }
+    ++ip;  // increment both pointers
+    ++jp;
+    ++pp;
+  }
+  // erase the last ones
+  _mesh.polygon().resize( _mesh.polygon().size() - poly.size() );
+
+  // remove i from neighbors
+  GeometricProperties::Neighborhood::iterator in, en = neighbors.end();
+  for( in=neighbors.begin(); in!=en; ++in )
+  {
+    GeometricProperties::Neighborhood & nbr = all_neigh[*in];
+    nbr.erase( std::find( nbr.begin(), nbr.end(), i ) );
+  }
+  // and remove the neigborhood of i
+  all_neigh.erase( all_neigh.begin() + i );
+  // remove vertex i in mesh
+  _mesh.vertex().erase( _mesh.vertex().begin() + i );
+  if( _mesh.normal().size() > i )
+    _mesh.normal().erase( _mesh.normal().begin() + i );
+
+  // shift vertices nums in neighbors (we still need them)
+  nn = neighbors.size();
+  for( in=neighbors.begin(), en=neighbors.end(); in!=en; ++in )
+    if( *in >= i )
+      --*in;
+  // shift vertices nums in all_neigh
+  GeometricProperties::NeighborList::iterator ian, ean = all_neigh.end();
+  for( ian=all_neigh.begin(); ian!=ean; ++ian )
+  {
+    for( in=ian->begin(), en=ian->end(); in!=en; ++in )
+      if( *in >= i )
+        --*in;
+  }
+
+  // add new delaunay polygons
+  // (we need an indexed access in neighbors, soon...)
+  vector<unsigned> vneighbors( neighbors.begin(), neighbors.end() );
+  vector<AimsVector<uint, 3> > & mpoly = _mesh.polygon();
+  list<AimsVector<uint, 3> >::const_iterator it, et = tri.end();
+
+  for( it=tri.begin(); it!=et; ++it )
+  {
+    const AimsVector<uint, 3> & tpoly = *it;
+    // use real vertices indices, from delaunay sub-mesh
+    AimsVector<uint, 3> npoly( vneighbors[tpoly[0]],
+                               vneighbors[tpoly[1]],
+                               vneighbors[tpoly[2]] );
+    mpoly.push_back( npoly );
+    // update neigbors of joined vertices
+    // FIXME TODO we mess up the neighbors ordering by appending at the end
+    // vertices should be reordered (how?) in each neighborhood
+    {
+      GeometricProperties::Neighborhood & nbr = all_neigh[npoly[0]];
+      if( std::find( nbr.begin(), nbr.end(), npoly[1] ) == nbr.end() )
+        nbr.push_back( npoly[1] );
+      if( std::find( nbr.begin(), nbr.end(), npoly[2] ) == nbr.end() )
+        nbr.push_back( npoly[2] );
+    }
+    {
+      GeometricProperties::Neighborhood & nbr = all_neigh[npoly[1]];
+      if( std::find( nbr.begin(), nbr.end(), npoly[2] ) == nbr.end() )
+        nbr.push_back( npoly[2] );
+      if( std::find( nbr.begin(), nbr.end(), npoly[0] ) == nbr.end() )
+        nbr.push_back( npoly[0] );
+    }
+    {
+      GeometricProperties::Neighborhood & nbr = all_neigh[npoly[2]];
+      if( std::find( nbr.begin(), nbr.end(), npoly[0] ) == nbr.end() )
+        nbr.push_back( npoly[0] );
+      if( std::find( nbr.begin(), nbr.end(), npoly[1] ) == nbr.end() )
+        nbr.push_back( npoly[1] );
     }
   }
 
-  // Checking that neighbors have at least 3 neighbors
-  for (std::size_t k = 0; k < m_neighborGraph.size(); ++k)
-  {
-    if (m_neighborGraph[k].size() < 3)
-    {
-      //std::cout << "WREJECT!(small-neighborhood)";
-      return false;
-    }
-  }
-
-  // Checking that neighbors have correct neighborhood
-  // Incorrect neighborhood may appear when a neighbor was already sharing an edge with another neighbor of
-  // i that is not on its side, i.e that is not n-1 or n+1.
-  for (std::size_t k = 0; k < m_neighborGraph.size(); ++k)
-  {
-    typename NeighborGraph::iterator p = m_neighborGraph[k].begin();
-    typename NeighborGraph::iterator p0 = p;
-    bool flag = false;
-    for (;;)
-    {
-      if (flag) { if (p == p0) break; }
-      else flag = true;
-      if (p->to.size() != 1 || p->from.size() != 1)
-      {
-        //std::cout << "WREJECT!(incorrect-neighborhood)";
-        return false;
-      }
-      p = p->to.front();
-    }
-  }
-
-
-  // adding faces
-  {
-    for (std::list<boost::array<std::size_t,3> >::iterator newf = m_tri.begin(); newf != m_tri.end(); ++newf)
-    {
-      // convert into graph faces
-      TFaceNode f;
-      for (std::size_t n = 0; n < 3; ++n)
-      {
-        f.face[n] = m_neighbors[(*newf)[n]];
-      }
-      // add face to graph
-      typename std::list<TFaceNode>::iterator gf = m_graph_faces.insert(m_graph_faces.end(), f);
-      /*numeric_array<float,3> normal = cross(
-        i->faces().front()->face[0]->pos() - i->faces().front()->face[1]->pos(),
-        i->faces().front()->face[0]->pos() - i->faces().front()->face[2]->pos()
-      );*/
-      // add face index to face points
-      for (std::size_t n = 0; n < 3; ++n)
-      {
-        GroComp<VertexPointer> grocomp(f.face[0], f.face[1], f.face[2]);
-        typename TVertexNode::FaceIndexCollection::iterator p = find_if(f.face[n]->faces().begin(), f.face[n]->faces().end(), grocomp);
-        if (p != f.face[n]->faces().end())
-        {
-          std::cout << "FATAL: face already there: " << std::endl;
-          std::cout << &*f.face[0] << " " << &*f.face[1] << " " << &*f.face[2] << std::endl;
-          std::cout << &*(*p)->face[0] << " " << &*(*p)->face[1] << " " << &*(*p)->face[2] << std::endl;
-          std::cout << "I'll continue as if nothing happened, but this is a bug and your algorithm is likely to go bananas :)" << std::endl;
-        }
-        f.face[n]->faces().push_back(gf);
-      }
-    }
-  }
-
-  // Adding neighbors
-  for (std::size_t j = 0; j < i->neighbors().size(); ++j)
-  {
-    typename TVertexNode::VertexIndexCollection ntmp = m_neighbors[j]->neighbors();
-
-    // remove all neighbors
-    m_neighbors[j]->neighbors().clear();
-
-    typename NeighborGraph::iterator p = m_neighborGraph[j].begin();
-    typename NeighborGraph::iterator p0 = p;
-    bool flag = false;
-    for (;;)
-    {
-      if (flag) { if (p == p0) break; }
-      else flag = true;
-      m_neighbors[j]->neighbors().push_back(p->value);
-      if (p->to.size() != 1)
-      {
-        std::cout << "wW!";
-      }
-      if (p->to.size() == 0) break;
-      p = p->to.front();
-    }
-  }
-
-  // remove point
-  i = remove_vertex(i, m_graph_vertices, m_graph_faces);
   return true;
 }
 
@@ -1553,29 +1241,30 @@ VertexRemover::simple_neighborhood_flattening(
   std::vector<double> norms;
   angles.reserve(neighbors.size());
   norms.reserve(neighbors.size());
-  vector<Point3df> & vert = geometricProperties().getMesh().vertex();
+  const vector<Point3df> & vert = _mesh.vertex();
 
-  typename Neighborhood::const_iterator n = neighbors.begin();
-  const_cyclic_iterator<Neighborhood> n2(neighbors, ++neighbors.begin());
+  typename GeometricProperties::Neighborhood::const_iterator n
+    = neighbors.begin();
+  const_cyclic_iterator<GeometricProperties::Neighborhood>
+    n2(neighbors, ++neighbors.begin());
   //std::cout << "point: " << point << std::endl;
   for (; n != neighbors.end(); ++n, ++n2)
   {
     const Point3df & p = vert[*n];
     const Point3df & p2 = vert[*n2];
-    norms.push_back( double( (p - point ).norm() );
+    norms.push_back( double( (p - point).norm() ) );
     angles.push_back(std::acos( (p2 - point).dot(p - point)
-      / double( norm(p2 - point).norm() ) * double( (p - point).norm() ) ) );
+      / double( (p2 - point).norm() ) * double( (p - point).norm() ) ) );
   }
 
   std::partial_sum(angles.begin(), angles.end(), angles.begin());
 
-  //double totalAngle = std::accumulate(angles.begin(), angles.end(), 0.0);
   std::transform(angles.begin(), angles.end(), angles.begin(),
                  std::bind2nd(std::multiplies<double>(),
                               2*M_PI/angles.back()));
 
   std::vector<Point2df> res(neighbors.size());
-  for (std::size_t i = 0; i < size(res); ++i)
+  for (std::size_t i = 0; i < res.size(); ++i)
   {
     res[i][0] = std::cos(angles[i]) * norms[i];
     res[i][1] = std::sin(angles[i]) * norms[i];
@@ -1583,7 +1272,8 @@ VertexRemover::simple_neighborhood_flattening(
 
   return res;
 }
-#endif
+// #endif
+
 
 // ---
 

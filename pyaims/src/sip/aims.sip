@@ -90,6 +90,7 @@ typedef int int32_t;
 %Include vector_vector_STRING.sip
 %Include vector_vector_POINT3DF.sip
 %Include vector_rc_ptr_AimsTimeSurface_3_VOID.sip
+%Include vector_list_U32.sip
 //%Include vector_InfoPtr.sip
 %Include set_S16.sip
 %Include set_S32.sip

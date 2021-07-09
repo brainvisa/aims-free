@@ -84,6 +84,17 @@ namespace aims
     GeometricProperties(const AimsSurfaceTriangle & mesh);
     virtual ~GeometricProperties();
 
+    const WeightNeighborList & getPhi() const ;
+    const WeightNeighborList & getTheta() const ;
+    const WeightNeighborList & getDot() const ;
+    const WeightNeighborList & getSurface() const ;
+    const WeightList & getAlpha() const ;
+    const WeightList & getSimpleAlpha() const ;
+    const WeightList & getBeta() const ;
+    const NeighborList & getNeighbor() const;
+    NeighborList & getNeighbor();
+    const AimsSurfaceTriangle & getMesh() const;
+
   protected:
     void doPhi();
     void doTheta();
@@ -93,16 +104,6 @@ namespace aims
     void doDot();
     void doSurface();
     void doNeighbor();
-    
-    const WeightNeighborList & getPhi() const ;
-    const WeightNeighborList & getTheta() const ;
-    const WeightNeighborList & getDot() const ;
-    const WeightNeighborList & getSurface() const ;
-    const WeightList & getAlpha() const ;
-    const WeightList & getSimpleAlpha() const ;
-    const WeightList & getBeta() const ;
-    const NeighborList & getNeighbor() const;
-    const AimsSurfaceTriangle & getMesh() const;
 
   private:
     const AimsSurfaceTriangle & _mesh;
@@ -116,6 +117,8 @@ namespace aims
     WeightNeighborList		_dot;
     WeightNeighborList		_surface; 
     NeighborList doTriangleNeighbor() ;
+
+    friend class VertexRemover;
     
   };
   
@@ -215,7 +218,9 @@ namespace aims
 
     // constructors
 
-    VertexRemover( carto::rc_ptr<GeometricProperties> geom );
+    VertexRemover( AimsSurfaceTriangle & mesh,
+                   carto::rc_ptr<GeometricProperties> geom
+                     = carto::rc_ptr<GeometricProperties>( 0 ) );
 
     // set & get
 
@@ -269,6 +274,7 @@ namespace aims
 #endif
 
     // data, input
+    AimsSurfaceTriangle & _mesh;
     carto::rc_ptr<GeometricProperties> _geom;
 
 //     std::list<TFaceNode> &    m_graph_faces;

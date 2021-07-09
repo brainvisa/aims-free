@@ -2919,6 +2919,35 @@ typessub = {'bool':
                'compareElement': '',
             },
 
+            'std::list<uint32_t>':
+            {
+                'typecode': 'list_U32',
+                'pyFromC': 'pyaimsConvertFrom_list',
+                'CFromPy': 'pyaimsConvertTo_list<uint32_t>',
+                'castFromSip': '',
+                'deref': '*',
+                'pyderef': '*',
+                'address': '&',
+                'pyaddress': '&',
+                'defScalar': '',
+                'defNumpyBindings': '',
+                'new': 'new list_U32',
+                'NumType': 'NPY_OBJECT',
+                'PyType': 'list_U32',
+                'sipClass': 'list_U32',
+                'typeinclude': '#include <list>',
+                'sipinclude': '#include <pyaims/vector/sipstdvector.h>\n'
+                '#ifndef PYAIMS_WRAPPER_LIST_U32\n'
+                '#define PYAIMS_WRAPPER_LIST_U32\n'
+                'template <> inline const sipTypeDef*\n'
+                'sipType_list<uint32_t>()\n'
+                '{ return sipFindType( "list_U32" ); }\n'
+                '#endif',
+                'module': 'aims',
+                'testPyType': 'pyaimsCheck_list<uint32_t>',
+                'compareElement': '',
+            },
+
             'carto::PluginLoader::PluginFile':
             classInNamespace('cartobase/plugin/plugin.h',
                              'PluginFile', 'carto_PluginLoader',
