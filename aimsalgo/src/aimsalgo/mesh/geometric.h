@@ -91,9 +91,11 @@ namespace aims
     const WeightList & getAlpha() const ;
     const WeightList & getSimpleAlpha() const ;
     const WeightList & getBeta() const ;
+    const AimsSurfaceTriangle & getMesh() const;
     const NeighborList & getNeighbor() const;
     NeighborList & getNeighbor();
-    const AimsSurfaceTriangle & getMesh() const;
+    const NeighborList & getTriangleNeighbor() const;
+    NeighborList & getTriangleNeighbor();
 
   protected:
     void doPhi();

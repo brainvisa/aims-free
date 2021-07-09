@@ -30,8 +30,9 @@ namespace aims
     const WeightList & getAlpha() const ;
     const WeightList & getSimpleAlpha() const ;
     const WeightList & getBeta() const ;
-    GeometricProperties::NeighborList & getNeighbor();
     const AimsSurfaceTriangle & getMesh() const;
+    GeometricProperties::NeighborList & getNeighbor();
+    GeometricProperties::NeighborList & getTriangleNeighbor();
   };
 
 
@@ -132,7 +133,7 @@ namespace aims
 vector_AimsVector_U32_3*
 simple_delaunay_triangulation( const vector_POINT2DF & points ) /Factory/;
 %Docstring
-    SimpleDelaunayTriangulation
+    triangles = simple_delaunay_triangulation(points)
 
     Get a Delaunay triangulation for a polygon. Poins in the polygon should
     be ordered in a clockwise or counterclockwise order.
