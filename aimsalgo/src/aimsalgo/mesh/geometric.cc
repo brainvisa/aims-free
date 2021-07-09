@@ -401,13 +401,37 @@ void GeometricProperties::doNeighbor()
   _triangleNeighbourso = doTriangleNeighbor();
 
   for ( i=0; i<n; ++i)
+  {
+    set<unsigned> setinter;
+    insert_iterator<set<unsigned> > ii( setinter,setinter.begin() );
+    elist=_triangleNeighbourso[i].end();
+    --elist;
+    ilist=_triangleNeighbourso[i].begin();  // assumes --end() is valid...
+    set<unsigned> tn1,tn2;
+    tn1.insert(poly[*ilist][0]);
+    tn1.insert(poly[*ilist][1]);
+    tn1.insert(poly[*ilist][2]);
+    //cout << poly[*ilist][0] << " " << poly[*ilist][1] << " "<< poly[*ilist][2]<< endl;
+    tn1.erase(i);
+    ++ilist;
+    tn2.insert(poly[*ilist][0]);
+    tn2.insert(poly[*ilist][1]);
+    tn2.insert(poly[*ilist][2]);
+    //cout << poly[*ilist][0] << " " << poly[*ilist][1] << " "<< poly[*ilist][2]<< endl;
+    tn2.erase(i);
+    set_intersection( tn1.begin(),tn1.end(),tn2.begin(),tn2.end(),ii );
+    tn1.erase(*setinter.begin());
+    tn2.erase(*setinter.begin());
+    //cout << "setinter size: " << setinter.size() << endl;
+    _neighbourso[i].push_back(*tn1.begin() );
+    _neighbourso[i].push_back(*setinter.begin());
+    _neighbourso[i].push_back(*tn2.begin() );
+
+    while (ilist != elist)
     {
-      set<unsigned> setinter;
-      insert_iterator<set<unsigned> > ii( setinter,setinter.begin() );
-      elist=_triangleNeighbourso[i].end();
-      --elist;
-      ilist=_triangleNeighbourso[i].begin();
-      set<unsigned> tn1,tn2;
+      //cout << "in loop" << endl;
+      tn1.clear();
+      tn2.clear();
       tn1.insert(poly[*ilist][0]);
       tn1.insert(poly[*ilist][1]);
       tn1.insert(poly[*ilist][2]);
@@ -419,42 +443,20 @@ void GeometricProperties::doNeighbor()
       tn2.insert(poly[*ilist][2]);
       //cout << poly[*ilist][0] << " " << poly[*ilist][1] << " "<< poly[*ilist][2]<< endl;
       tn2.erase(i);
-      set_intersection( tn1.begin(),tn1.end(),tn2.begin(),tn2.end(),ii );
-      tn1.erase(*setinter.begin());
-      tn2.erase(*setinter.begin());
-      //cout << "setinter size: " << setinter.size() << endl;
-      _neighbourso[i].push_back(*tn1.begin() );
-      _neighbourso[i].push_back(*setinter.begin());
-      _neighbourso[i].push_back(*tn2.begin() );
-      
-      while (ilist != elist)
-	{
-	  //cout << "in loop" << endl;
-	  tn1.clear();
-	  tn2.clear();
-	  tn1.insert(poly[*ilist][0]);
-	  tn1.insert(poly[*ilist][1]);
-	  tn1.insert(poly[*ilist][2]);
-	  //cout << poly[*ilist][0] << " " << poly[*ilist][1] << " "<< poly[*ilist][2]<< endl;
-	  tn1.erase(i);
-	  ++ilist;
-	  tn2.insert(poly[*ilist][0]);
-	  tn2.insert(poly[*ilist][1]);
-	  tn2.insert(poly[*ilist][2]);
-	  //cout << poly[*ilist][0] << " " << poly[*ilist][1] << " "<< poly[*ilist][2]<< endl;
-	  tn2.erase(i);
 
-	  setinter.clear();
-	  insert_iterator<set<unsigned> > jj( setinter,setinter.begin() );
-	  set_intersection( tn1.begin(),tn1.end(),tn2.begin(),tn2.end(),jj );
-	  //cout << "setinter size: " << setinter.size() << endl;
-	  tn2.erase(*setinter.begin());
-	  _neighbourso[i].push_back(*tn2.begin() );
-	}
+      setinter.clear();
+      insert_iterator<set<unsigned> > jj( setinter,setinter.begin() );
+      set_intersection( tn1.begin(),tn1.end(),tn2.begin(),tn2.end(),jj );
+      //cout << "setinter size: " << setinter.size() << endl;
+      tn2.erase(*setinter.begin());
+      _neighbourso[i].push_back(*tn2.begin() );
     }
+  }
 
   for (i=0; i<n;++i)
-    _neighbourso[i].pop_front();//remove the repeated first element
+    if( _neighbourso[i].size() >= 2
+        && *_neighbourso[i].begin() == *_neighbourso[i].rbegin() )
+      _neighbourso[i].pop_front();//remove the repeated first element
 
   for (i=0; i<n;++i)
     {
@@ -514,37 +516,41 @@ GeometricProperties::NeighborList GeometricProperties::doTriangleNeighbor()
   set<unsigned>		tmpNodes;
   bool			stopLoop=false;
   for ( i=0; i<n; ++i)
+  {
+    // cout << i << " -> " ;
+    tmpNodes = trineigh[i];
+    inei = tmpNodes.begin();
+    if( inei != tmpNodes.end() )
     {
-      // cout << i << " -> " ;
-      tmpNodes = trineigh[i];
-      inei = tmpNodes.begin();
       _triangleNeighbourso[i].push_back( *inei );
       tmpNodes.erase( inei );
-      while ( !tmpNodes.empty() )
-	{
-	  enei = tmpNodes.end();
-	  stopLoop = false;
-	  for ( inei=tmpNodes.begin(); inei!=enei && !stopLoop; ++inei )
-	    {
-	      nodes.clear();
-	      j = _triangleNeighbourso[i].back();
-	      nodes.insert(poly[*inei][0]);
-	      nodes.insert(poly[*inei][1]);
-	      nodes.insert(poly[*inei][2]);
-	      nodes.insert(poly[j][0]);
-	      nodes.insert(poly[j][1]);
-	      nodes.insert(poly[j][2]);
-	      if (nodes.size() == 4) // 2 adjacent triangles ?
-		{
-		  _triangleNeighbourso[i].push_back(*inei);
-		  tmpNodes.erase( inei );
-		  stopLoop = true;
-		  //cout << *inei << " ";
-		}
-	    }
-	}
-      // cout << endl;
-    } 
+    }
+
+    while ( !tmpNodes.empty() )
+    {
+      enei = tmpNodes.end();
+      stopLoop = false;
+      for ( inei=tmpNodes.begin(); inei!=enei && !stopLoop; ++inei )
+      {
+        nodes.clear();
+        j = _triangleNeighbourso[i].back();
+        nodes.insert(poly[*inei][0]);
+        nodes.insert(poly[*inei][1]);
+        nodes.insert(poly[*inei][2]);
+        nodes.insert(poly[j][0]);
+        nodes.insert(poly[j][1]);
+        nodes.insert(poly[j][2]);
+        if (nodes.size() == 4) // 2 adjacent triangles ?
+        {
+          _triangleNeighbourso[i].push_back(*inei);
+          tmpNodes.erase( inei );
+          stopLoop = true;
+          //cout << *inei << " ";
+        }
+      }
+    }
+    // cout << endl;
+  }
   return(_triangleNeighbourso);
 }
 
@@ -598,6 +604,17 @@ const GeometricProperties::NeighborList & GeometricProperties::getNeighbor() con
 GeometricProperties::NeighborList & GeometricProperties::getNeighbor()
 {
   return(_neighbourso);
+}
+
+const GeometricProperties::NeighborList &
+  GeometricProperties::getTriangleNeighbor() const
+{
+  return(_triangleNeighbourso);
+}
+
+GeometricProperties::NeighborList & GeometricProperties::getTriangleNeighbor()
+{
+  return(_triangleNeighbourso);
 }
 
 Curvature::Curvature(const AimsSurfaceTriangle & mesh) : GeometricProperties(mesh)
