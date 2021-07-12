@@ -70,7 +70,7 @@ inline std::vector<T> *pyaimsConvertTo_vector( PyObject* p )
   int	iserr = 0;
   return (std::vector<T> *)
     sipConvertToType( p, sipType_vector<T>(), 0,
-                      SIP_NO_CONVERTORS, 0, &iserr );
+                      /*SIP_NO_CONVERTORS*/ 0, 0, &iserr );
 }
 
 
@@ -80,7 +80,7 @@ inline std::list<T> *pyaimsConvertTo_list( PyObject* p )
   int	iserr = 0;
   return (std::list<T> *)
     sipConvertToType( p, sipType_list<T>(), 0,
-                      SIP_NO_CONVERTORS, 0, &iserr );
+                      /*SIP_NO_CONVERTORS*/ 0, 0, &iserr );
 }
 
 
