@@ -391,23 +391,48 @@ void GeometricProperties::doNeighbor()
   if ( ! _neighbourso.empty() )
     return;
 
-  const vector<Point3df>			& vert = _mesh.vertex(), & normal = _mesh.normal() ;
-  const vector< AimsVector<uint,3> >		& poly = _mesh.polygon();
-  unsigned					i,n = vert.size();
-  list<unsigned>::iterator			ilist,elist,jlist;
+  unsigned i, n = _mesh.vertex().size();
 
-  _neighbourso.insert(_neighbourso.end(),n,list<unsigned>());
+  _neighbourso.insert( _neighbourso.end(), n, list<unsigned>() );
 
   _triangleNeighbourso = doTriangleNeighbor();
 
   for ( i=0; i<n; ++i)
+    buildSortVerticesNeighborhood( i );
+}
+
+
+void GeometricProperties::buildSortVerticesNeighborhood( size_t i )
+{
+  set<unsigned> setinter;
+  insert_iterator<set<unsigned> > ii( setinter, setinter.begin() );
+  Neighborhood & tn = _triangleNeighbourso[i];
+  Neighborhood & nbo = _neighbourso[i];
+  const vector< AimsVector<uint,3> > & poly = _mesh.polygon();
+  const vector<Point3df> & vert = _mesh.vertex(), & normal = _mesh.normal();
+  list<unsigned>::iterator ilist, elist, jlist;
+
+  nbo.clear();
+
+  if( tn.size() < 2 )
   {
-    set<unsigned> setinter;
-    insert_iterator<set<unsigned> > ii( setinter,setinter.begin() );
-    elist=_triangleNeighbourso[i].end();
-    --elist;
-    ilist=_triangleNeighbourso[i].begin();  // assumes --end() is valid...
-    set<unsigned> tn1,tn2;
+    if( tn.empty() )
+      return;
+    // 1 polygon
+    const AimsVector<uint, 3> & p = poly[*tn.begin()];
+    if( p[0] != i )
+      nbo.push_back( p[0] );
+    if( p[1] != i )
+      nbo.push_back( p[1] );
+    if( p[2] != i )
+      nbo.push_back( p[2] );
+  }
+  else
+  {
+    elist = tn.end();
+    --elist;  // assumes --end() is valid...
+    ilist = tn.begin();
+    set<unsigned> tn1, tn2;
     tn1.insert(poly[*ilist][0]);
     tn1.insert(poly[*ilist][1]);
     tn1.insert(poly[*ilist][2]);
@@ -423,9 +448,9 @@ void GeometricProperties::doNeighbor()
     tn1.erase(*setinter.begin());
     tn2.erase(*setinter.begin());
     //cout << "setinter size: " << setinter.size() << endl;
-    _neighbourso[i].push_back(*tn1.begin() );
-    _neighbourso[i].push_back(*setinter.begin());
-    _neighbourso[i].push_back(*tn2.begin() );
+    nbo.push_back(*tn1.begin() );
+    nbo.push_back(*setinter.begin());
+    nbo.push_back(*tn2.begin() );
 
     while (ilist != elist)
     {
@@ -449,29 +474,23 @@ void GeometricProperties::doNeighbor()
       set_intersection( tn1.begin(),tn1.end(),tn2.begin(),tn2.end(),jj );
       //cout << "setinter size: " << setinter.size() << endl;
       tn2.erase(*setinter.begin());
-      _neighbourso[i].push_back(*tn2.begin() );
+      nbo.push_back(*tn2.begin() );
     }
+
+    if( nbo.size() >= 2 && *nbo.begin() == *nbo.rbegin() )
+      nbo.pop_front();//remove the repeated first element
   }
 
-  for (i=0; i<n;++i)
-    if( _neighbourso[i].size() >= 2
-        && *_neighbourso[i].begin() == *_neighbourso[i].rbegin() )
-      _neighbourso[i].pop_front();//remove the repeated first element
-
-  for (i=0; i<n;++i)
-    {
-      //cout << i << " " << neighbourso[i].size() << endl;
-      Point3df nor = normal[i],a,b;
-      //elist=neighbourso[i].end();
-      ilist=_neighbourso[i].begin();
-      a = vert[*ilist] - vert[i];
-      jlist = ilist;
-      ++jlist;
-      b = vert[*jlist] - vert[*ilist];
-      if ( cross(a,b).dot(nor) < 0 )//clockwise ordering
-	_neighbourso[i].reverse();
-    }
-  
+  Point3df nor( 0, 0, 1 ), a, b;
+  if( normal.size() > i )
+    nor = normal[i];
+  ilist = nbo.begin();
+  a = vert[*ilist] - vert[i];
+  jlist = ilist;
+  ++jlist;
+  b = vert[*jlist] - vert[*ilist];
+  if ( cross(a,b).dot(nor) < 0 ) //clockwise ordering
+    nbo.reverse();
 }
 
 
@@ -487,7 +506,7 @@ GeometricProperties::NeighborList GeometricProperties::doTriangleNeighbor()
   unsigned					v1, v2, v3;
   map<unsigned, set<unsigned> >			neighbours;//give for each vertex a list of the  adjacent triangles 
   vector< set <unsigned> >                      trineigh(n); //give for each vertex a list of the  adjacent triangles 
-  set<unsigned>::iterator 	                inei,enei;
+  set<unsigned>::iterator 	                inei, enei;
 
   _triangleNeighbourso.insert(_triangleNeighbourso.end(),n,list<unsigned>());
 
@@ -512,17 +531,21 @@ GeometricProperties::NeighborList GeometricProperties::doTriangleNeighbor()
     }
 
   //order neighbour nodes 
-  set<unsigned>	        nodes;
-  set<unsigned>		tmpNodes;
-  bool			stopLoop=false;
+  // same as sortPolygons() but avoids copies of list into set for each
+  // (since we already have them in trineigh)
+  set<unsigned> nodes;
+  set<unsigned> tmpNodes;
+  bool stopLoop=false;
+
   for ( i=0; i<n; ++i)
   {
     // cout << i << " -> " ;
     tmpNodes = trineigh[i];
+    Neighborhood & npoly = _triangleNeighbourso[i];
     inei = tmpNodes.begin();
     if( inei != tmpNodes.end() )
     {
-      _triangleNeighbourso[i].push_back( *inei );
+      npoly.push_back( *inei );
       tmpNodes.erase( inei );
     }
 
@@ -533,7 +556,7 @@ GeometricProperties::NeighborList GeometricProperties::doTriangleNeighbor()
       for ( inei=tmpNodes.begin(); inei!=enei && !stopLoop; ++inei )
       {
         nodes.clear();
-        j = _triangleNeighbourso[i].back();
+        j = npoly.back();
         nodes.insert(poly[*inei][0]);
         nodes.insert(poly[*inei][1]);
         nodes.insert(poly[*inei][2]);
@@ -542,16 +565,99 @@ GeometricProperties::NeighborList GeometricProperties::doTriangleNeighbor()
         nodes.insert(poly[j][2]);
         if (nodes.size() == 4) // 2 adjacent triangles ?
         {
-          _triangleNeighbourso[i].push_back(*inei);
+          npoly.push_back(*inei);
           tmpNodes.erase( inei );
           stopLoop = true;
           //cout << *inei << " ";
+        }
+        else if( npoly.size() > 1 )
+        {
+          // not connected to the end of the chain: try the beginning
+          nodes.clear();
+          j = npoly.front();
+          nodes.insert(poly[*inei][0]);
+          nodes.insert(poly[*inei][1]);
+          nodes.insert(poly[*inei][2]);
+          nodes.insert(poly[j][0]);
+          nodes.insert(poly[j][1]);
+          nodes.insert(poly[j][2]);
+          if( nodes.size() == 4 ) // 2 adjacent triangles ?
+          {
+            // insert at beginning
+            npoly.insert( npoly.begin(), *inei );
+            tmpNodes.erase( inei );
+            stopLoop = true;
+            // cout << "insert " << *inei << " ";
+          }
         }
       }
     }
     // cout << endl;
   }
   return(_triangleNeighbourso);
+}
+
+
+void GeometricProperties::sortPolygons( Neighborhood & npoly )
+{
+  //order neighbour nodes
+  set<unsigned>  nodes;
+  set<unsigned>  tmpNodes( npoly.begin(), npoly.end() );
+  bool           stopLoop = false;
+  const vector< AimsVector<uint,3> > & poly = _mesh.polygon();
+  set<unsigned>::iterator inei, enei;
+  unsigned j;
+
+  npoly.clear();
+
+  inei = tmpNodes.begin();
+  if( inei != tmpNodes.end() )
+  {
+    npoly.push_back( *inei );
+    tmpNodes.erase( inei );
+  }
+
+  while( !tmpNodes.empty() )
+  {
+    enei = tmpNodes.end();
+    stopLoop = false;
+    for( inei=tmpNodes.begin(); inei!=enei && !stopLoop; ++inei )
+    {
+      nodes.clear();
+      j = npoly.back();
+      nodes.insert(poly[*inei][0]);
+      nodes.insert(poly[*inei][1]);
+      nodes.insert(poly[*inei][2]);
+      nodes.insert(poly[j][0]);
+      nodes.insert(poly[j][1]);
+      nodes.insert(poly[j][2]);
+      if( nodes.size() == 4 ) // 2 adjacent triangles ?
+      {
+        npoly.push_back( *inei );
+        tmpNodes.erase( inei );
+        stopLoop = true;
+      }
+      else if( npoly.size() > 1 )
+      {
+        // not connected to the end of the chain: try the beginning
+        nodes.clear();
+        j = npoly.front();
+        nodes.insert(poly[*inei][0]);
+        nodes.insert(poly[*inei][1]);
+        nodes.insert(poly[*inei][2]);
+        nodes.insert(poly[j][0]);
+        nodes.insert(poly[j][1]);
+        nodes.insert(poly[j][2]);
+        if( nodes.size() == 4 ) // 2 adjacent triangles ?
+        {
+          // insert at beginning
+          npoly.insert( npoly.begin(), *inei );
+          tmpNodes.erase( inei );
+          stopLoop = true;
+        }
+      }
+    }
+  }
 }
 
 
@@ -1128,23 +1234,15 @@ bool VertexRemover::operator()( size_t i )
 
   // remove triangles involving i
 
-  vector<size_t> poly;
-  size_t count = 0, p_index = 0, nn = neighbors.size() - 1;
-  poly.reserve( nn );
-  vector<AimsVector<uint, 3> >::iterator ip, jp, ep = _mesh.polygon().end();
-
-  for( ip=_mesh.polygon().begin(); ip!=ep && count<nn; ++ip, ++p_index )
-  {
-    if( (*ip)[0] == i || (*ip)[1] == i || (*ip)[2] == i )
-    {
-      ++count;
-      poly.push_back( p_index ); // record index of polygon
-    }
-  }
+  GeometricProperties::NeighborList & polyNeigh
+    = geometricProperties().getTriangleNeighbor();
+  GeometricProperties::Neighborhood & poly = polyNeigh[i];
 
   // rewrite (partially) poly list with removed elements, and shift numbers,
   // once
-  vector<size_t>::const_iterator ipv = poly.begin(), epv = poly.end();
+  vector<AimsVector<uint, 3> >::iterator ip, jp, ep = _mesh.polygon().end();
+  GeometricProperties::Neighborhood::const_iterator
+    ipv = poly.begin(), epv = poly.end();
   size_t pp = 0;
   ip = _mesh.polygon().begin(); // write iterator
   jp = ip; // read iter
@@ -1176,14 +1274,35 @@ bool VertexRemover::operator()( size_t i )
   // erase the last ones
   _mesh.polygon().resize( _mesh.polygon().size() - poly.size() );
 
-  // remove i from neighbors
+  // remove polygons from list poly for neighbors of i
   GeometricProperties::Neighborhood::iterator in, en = neighbors.end();
+  set<uint> spoly( poly.begin(), poly.end() ); // set for perf
+  for( in=neighbors.begin(); in!=en; ++in )
+  {
+    GeometricProperties::Neighborhood & np = polyNeigh[*in];
+    for( GeometricProperties::Neighborhood::iterator ipn=np.begin();
+         ipn!=np.end(); )
+    {
+      if( spoly.find( *ipn ) != spoly.end() )
+      {
+        GeometricProperties::Neighborhood::iterator jpn = ipn;
+        ++ipn;
+        np.erase( jpn );
+      }
+      else
+        ++ipn;
+    }
+  }
+  // and erase poly from list
+  polyNeigh.erase( polyNeigh.begin() + i );
+
+  // remove i from neighbors
   for( in=neighbors.begin(); in!=en; ++in )
   {
     GeometricProperties::Neighborhood & nbr = all_neigh[*in];
     nbr.erase( std::find( nbr.begin(), nbr.end(), i ) );
   }
-  // and remove the neigborhood of i
+  // and remove the neighborhood of i
   all_neigh.erase( all_neigh.begin() + i );
   // remove vertex i in mesh
   _mesh.vertex().erase( _mesh.vertex().begin() + i );
@@ -1191,7 +1310,6 @@ bool VertexRemover::operator()( size_t i )
     _mesh.normal().erase( _mesh.normal().begin() + i );
 
   // shift vertices nums in neighbors (we still need them)
-  nn = neighbors.size();
   for( in=neighbors.begin(), en=neighbors.end(); in!=en; ++in )
     if( *in >= i )
       --*in;
@@ -1209,8 +1327,9 @@ bool VertexRemover::operator()( size_t i )
   vector<unsigned> vneighbors( neighbors.begin(), neighbors.end() );
   vector<AimsVector<uint, 3> > & mpoly = _mesh.polygon();
   list<AimsVector<uint, 3> >::const_iterator it, et = tri.end();
+  size_t count = mpoly.size();
 
-  for( it=tri.begin(); it!=et; ++it )
+  for( it=tri.begin(); it!=et; ++it, ++count )
   {
     const AimsVector<uint, 3> & tpoly = *it;
     // use real vertices indices, from delaunay sub-mesh
@@ -1218,9 +1337,9 @@ bool VertexRemover::operator()( size_t i )
                                vneighbors[tpoly[1]],
                                vneighbors[tpoly[2]] );
     mpoly.push_back( npoly );
-    // update neigbors of joined vertices
-    // FIXME TODO we mess up the neighbors ordering by appending at the end
-    // vertices should be reordered (how?) in each neighborhood
+    // update neighbors of joined vertices
+    // Note: we mess up the neighbors ordering by appending at the end
+    // so vertices need to be reordered in each neighborhood afterwards
     {
       GeometricProperties::Neighborhood & nbr = all_neigh[npoly[0]];
       if( std::find( nbr.begin(), nbr.end(), npoly[1] ) == nbr.end() )
@@ -1242,6 +1361,17 @@ bool VertexRemover::operator()( size_t i )
       if( std::find( nbr.begin(), nbr.end(), npoly[1] ) == nbr.end() )
         nbr.push_back( npoly[1] );
     }
+    // update triangle neighbors
+    polyNeigh[npoly[0]].push_back(count);
+    polyNeigh[npoly[1]].push_back(count);
+    polyNeigh[npoly[2]].push_back(count);
+  }
+
+  // reorder polyogns and vertices in modified neighborhood
+  for( in=neighbors.begin(), en=neighbors.end(); in!=en; ++in )
+  {
+    geometricProperties().sortPolygons( polyNeigh[*in] );
+    geometricProperties().buildSortVerticesNeighborhood( *in );
   }
 
   return true;

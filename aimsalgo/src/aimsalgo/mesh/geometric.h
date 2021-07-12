@@ -106,6 +106,8 @@ namespace aims
     void doDot();
     void doSurface();
     void doNeighbor();
+    void sortPolygons( Neighborhood &npoly );
+    void buildSortVerticesNeighborhood( size_t i );
 
   private:
     const AimsSurfaceTriangle & _mesh;
