@@ -606,7 +606,7 @@ void GeometricProperties::sortPolygons( Neighborhood & npoly )
   bool           stopLoop = false;
   const vector< AimsVector<uint,3> > & poly = _mesh.polygon();
   set<unsigned>::iterator inei, enei;
-  unsigned j;
+  unsigned j, n;
 
   npoly.clear();
 
@@ -621,6 +621,7 @@ void GeometricProperties::sortPolygons( Neighborhood & npoly )
   {
     enei = tmpNodes.end();
     stopLoop = false;
+    n = tmpNodes.size();
     for( inei=tmpNodes.begin(); inei!=enei && !stopLoop; ++inei )
     {
       nodes.clear();
@@ -656,6 +657,17 @@ void GeometricProperties::sortPolygons( Neighborhood & npoly )
           stopLoop = true;
         }
       }
+    }
+    if( tmpNodes.size() == n )
+    {
+      cerr << "could not order polygons:\n";
+      for( inei=tmpNodes.begin(); inei!=enei; ++inei )
+        cout << *inei << ": " << poly[*inei] << endl;
+      cout << "already sorted:\n";
+      Neighborhood::iterator in, en = npoly.end();
+      for( in=npoly.begin(); in!=en; ++in )
+        cout << *in << ": " << poly[*in] << endl;
+      break; // abort
     }
   }
 }
@@ -1237,13 +1249,14 @@ bool VertexRemover::operator()( size_t i )
   GeometricProperties::NeighborList & polyNeigh
     = geometricProperties().getTriangleNeighbor();
   GeometricProperties::Neighborhood & poly = polyNeigh[i];
+  set<uint> spoly( poly.begin(), poly.end() ); // set for perf and sorting
 
   // rewrite (partially) poly list with removed elements, and shift numbers,
   // once
   vector<AimsVector<uint, 3> >::iterator ip, jp, ep = _mesh.polygon().end();
-  GeometricProperties::Neighborhood::const_iterator
-    ipv = poly.begin(), epv = poly.end();
-  size_t pp = 0;
+  set<uint>::const_iterator ipv = spoly.begin(), epv = spoly.end();
+  size_t pp = 0, rpp = 0;
+  vector<uint> rpoly( _mesh.polygon().size() );  // replacement table
   ip = _mesh.polygon().begin(); // write iterator
   jp = ip; // read iter
   while( jp != ep ) // until all have been read
@@ -1252,6 +1265,7 @@ bool VertexRemover::operator()( size_t i )
     {
       // skip this
       ++jp;
+      rpoly[pp] = rpp;
       ++ipv;
       ++pp;
     }
@@ -1269,6 +1283,8 @@ bool VertexRemover::operator()( size_t i )
 
     ++ip;  // increment both pointers
     ++jp;
+    rpoly[pp] = rpp;
+    ++rpp;
     ++pp;
   }
   // erase the last ones
@@ -1276,7 +1292,6 @@ bool VertexRemover::operator()( size_t i )
 
   // remove polygons from list poly for neighbors of i
   GeometricProperties::Neighborhood::iterator in, en = neighbors.end();
-  set<uint> spoly( poly.begin(), poly.end() ); // set for perf
   for( in=neighbors.begin(); in!=en; ++in )
   {
     GeometricProperties::Neighborhood & np = polyNeigh[*in];
@@ -1295,6 +1310,17 @@ bool VertexRemover::operator()( size_t i )
   }
   // and erase poly from list
   polyNeigh.erase( polyNeigh.begin() + i );
+  // shift all polygons in polyNeigh
+  size_t count;
+  for( count=0; count<polyNeigh.size(); ++count )
+  {
+    GeometricProperties::Neighborhood & np = polyNeigh[count];
+    GeometricProperties::Neighborhood::iterator ip, ep = np.end();
+    for( ip=np.begin(); ip!=ep; ++ip )
+    {
+      *ip = rpoly[*ip];  // translate (shift)
+    }
+  }
 
   // remove i from neighbors
   for( in=neighbors.begin(); in!=en; ++in )
@@ -1327,7 +1353,7 @@ bool VertexRemover::operator()( size_t i )
   vector<unsigned> vneighbors( neighbors.begin(), neighbors.end() );
   vector<AimsVector<uint, 3> > & mpoly = _mesh.polygon();
   list<AimsVector<uint, 3> >::const_iterator it, et = tri.end();
-  size_t count = mpoly.size();
+  count = mpoly.size();
 
   for( it=tri.begin(); it!=et; ++it, ++count )
   {
@@ -1401,7 +1427,7 @@ VertexRemover::simple_neighborhood_flattening(
     const Point3df & p2 = vert[*n2];
     norms.push_back( double( (p - point).norm() ) );
     angles.push_back(std::acos( (p2 - point).dot(p - point)
-      / double( (p2 - point).norm() ) * double( (p - point).norm() ) ) );
+      / ( double( (p2 - point).norm() ) * double( (p - point).norm() ) ) ) );
   }
 
   std::partial_sum(angles.begin(), angles.end(), angles.begin());
