@@ -38,6 +38,7 @@
 
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
+#include <aims/mesh/mesh_graph.h>
 #include <cartobase/smart/rcptr.h>
 #include <list>
 
@@ -80,8 +81,12 @@ namespace aims
     typedef std::vector< Neighborhood > NeighborList;
     typedef std::vector< std::list<float> > WeightNeighborList;
     typedef std::vector<float> WeightList;
+    typedef typename
+      meshgraph::MeshVertexNode<uint>::VertexIndexCollection::value_type
+      VertexPointer;
 
-    GeometricProperties(const AimsSurfaceTriangle & mesh);
+    GeometricProperties( const AimsSurfaceTriangle & mesh );
+    GeometricProperties( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~GeometricProperties();
 
     const WeightNeighborList & getPhi() const ;
@@ -96,8 +101,15 @@ namespace aims
     NeighborList & getNeighbor();
     const NeighborList & getTriangleNeighbor() const;
     NeighborList & getTriangleNeighbor();
+    meshgraph::MeshGraphVertices & getVertices()
+    { return _graphvertices; }
+    const meshgraph::MeshGraphVertices & getVertices() const
+    { return _graphvertices; }
+    meshgraph::MeshGraphFaces & getFaces() { return _graphfaces; }
+    const meshgraph::MeshGraphFaces & getFaces() const
+    { return _graphfaces; }
 
-  protected:
+//   protected:
     void doPhi();
     void doTheta();
     void doAlpha();
@@ -108,9 +120,12 @@ namespace aims
     void doNeighbor();
     void sortPolygons( Neighborhood &npoly );
     void buildSortVerticesNeighborhood( size_t i );
+    void doGraph();
+    void graphToMesh();
 
   private:
     const AimsSurfaceTriangle & _mesh;
+    carto::rc_ptr<AimsSurfaceTriangle> _pmesh;
     NeighborList  _neighbourso ;
     NeighborList  _triangleNeighbourso ;
     WeightNeighborList  _phi ;
@@ -121,6 +136,9 @@ namespace aims
     WeightNeighborList		_dot;
     WeightNeighborList		_surface; 
     NeighborList doTriangleNeighbor() ;
+    // using meshgraph
+    meshgraph::MeshGraphVertices _graphvertices;
+    meshgraph::MeshGraphFaces _graphfaces;
 
     friend class VertexRemover;
     
@@ -130,6 +148,7 @@ namespace aims
   {
   public:
     Curvature(const AimsSurfaceTriangle & mesh);
+    Curvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~Curvature();
     virtual Texture<float> doIt() = 0; //car defini dnas les classes derivees -> classe abstraite non instantiable
     static void regularize(Texture<float> & tex, float ratio); // pas lie a une instance de la classe
@@ -185,10 +204,18 @@ namespace aims
   class GaussianCurvature : public Curvature
   {
   public:
-    GaussianCurvature(const AimsSurfaceTriangle & mesh);
+    GaussianCurvature( const AimsSurfaceTriangle & mesh );
+    GaussianCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~GaussianCurvature();
     virtual Texture<float> doIt();
     void localProcess( size_t i_vert, float & gaussianCurvature,
+                       float & meanCurvature,
+                       std::pair<float, float> & principalCurvatures,
+                       float & orientedMeanCurvature,
+                       float & orientedGaussianCurvature,
+                       Point3df & normal, float & voronoiArea );
+    void localProcess( const VertexPointer & i,
+                       float & gaussianCurvature,
                        float & meanCurvature,
                        std::pair<float, float> & principalCurvatures,
                        float & orientedMeanCurvature,
@@ -217,12 +244,13 @@ namespace aims
 #if 0
     typedef SimpleOrientedGraphNode<typename std::list<TVertexNode>::iterator> NeighborGraphNode;
     typedef std::list<NeighborGraphNode> NeighborGraph;
-    typedef typename TVertexNode::VertexIndexCollection::value_type VertexPointer;
 #endif
+    typedef typename meshgraph::MeshVertexNode<uint>::VertexIndexCollection::value_type
+      VertexPointer;
 
     // constructors
 
-    VertexRemover( AimsSurfaceTriangle & mesh,
+    VertexRemover( carto::rc_ptr<AimsSurfaceTriangle> mesh,
                    carto::rc_ptr<GeometricProperties> geom
                      = carto::rc_ptr<GeometricProperties>( 0 ) );
 
@@ -245,7 +273,8 @@ namespace aims
 
     /// Checks if a vertex is removable, and if so, removes it.
     /// Returns true if the operation is successful.
-    bool operator()( size_t i );
+//     bool operator()( size_t i );
+    bool operator()( VertexPointer & i );
 
   private: // functions
 
@@ -255,6 +284,11 @@ namespace aims
   simple_neighborhood_flattening(
     const Point3df & point,
     const GeometricProperties::Neighborhood & neighbors );
+
+  std::vector<Point2df>
+  simple_neighborhood_flattening(
+    const Point3df & point,
+    const std::vector<VertexPointer> & neighbors );
 
 #if 0
     /// Triangularize the neighbors of i.
@@ -278,7 +312,7 @@ namespace aims
 #endif
 
     // data, input
-    AimsSurfaceTriangle & _mesh;
+    carto::rc_ptr<AimsSurfaceTriangle> _mesh;
     carto::rc_ptr<GeometricProperties> _geom;
 
 //     std::list<TFaceNode> &    m_graph_faces;

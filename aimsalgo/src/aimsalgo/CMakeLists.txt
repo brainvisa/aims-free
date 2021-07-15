@@ -127,6 +127,8 @@ set( _headers
     mesh/meshinterpoler_d.h
     mesh/meshinterpoler_p.h
     mesh/meshwatershed.h
+    mesh/mesh_graph.h
+    mesh/mesh_graph_d.h
     moment/geomMoment.h
     moment/momBase.h
     moment/momFactory.h
@@ -493,6 +495,7 @@ set( _sources
     mesh/mesher.cc
     mesh/meshinterpoler.cc
     mesh/meshwatershed.cc
+    mesh/mesh_graph.cc
     mesh/normals.cc
     mesh/reducedNeigh.cc
     mesh/smoothing.cc

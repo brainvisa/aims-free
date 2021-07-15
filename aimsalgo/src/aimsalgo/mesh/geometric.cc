@@ -45,11 +45,20 @@
 using namespace std;
 using namespace carto;
 using namespace aims;
+using namespace aims::meshgraph;
 
 
-GeometricProperties::GeometricProperties(const AimsSurfaceTriangle & mesh) : _mesh(mesh)
+GeometricProperties::GeometricProperties( const AimsSurfaceTriangle & mesh)
+  : _mesh( mesh ), _pmesh( 0 )
 {
 }
+
+
+GeometricProperties::GeometricProperties( rc_ptr<AimsSurfaceTriangle> mesh )
+  : _mesh( *mesh ), _pmesh( mesh )
+{
+}
+
 
 GeometricProperties::~GeometricProperties()
 {
@@ -673,6 +682,29 @@ void GeometricProperties::sortPolygons( Neighborhood & npoly )
 }
 
 
+void GeometricProperties::doGraph()
+{
+  if( _graphvertices.empty() && _graphfaces.empty() )
+    list2graph_mesh_conversion( _mesh.vertex(), _mesh.polygon(),
+                                _graphvertices, _graphfaces );
+}
+
+
+void GeometricProperties::graphToMesh()
+{
+  Graph2ListMeshConvertor<AimsSurfaceTriangle> g2l( _pmesh );
+  g2l( _graphvertices, _graphfaces );
+  if( _pmesh )
+    cout << "use pmesh\n";
+  cout << "graphToMesh: " << g2l.mesh()->vertex().size() << " vertices\n";
+  if( !_pmesh )
+  {
+    cout << "set pmesh (useless)\n";
+    _pmesh = g2l.mesh();
+  }
+}
+
+
 const GeometricProperties::WeightNeighborList & GeometricProperties::getPhi() const
 {
   return(_phi);
@@ -736,6 +768,10 @@ GeometricProperties::NeighborList & GeometricProperties::getTriangleNeighbor()
 }
 
 Curvature::Curvature(const AimsSurfaceTriangle & mesh) : GeometricProperties(mesh)
+{
+}
+
+Curvature::Curvature( rc_ptr<AimsSurfaceTriangle> mesh ) : GeometricProperties(mesh)
 {
 }
 
@@ -1024,6 +1060,12 @@ GaussianCurvature::GaussianCurvature( const AimsSurfaceTriangle & mesh )
 }
 
 
+GaussianCurvature::GaussianCurvature( rc_ptr<AimsSurfaceTriangle> mesh )
+  : Curvature( mesh )
+{
+}
+
+
 GaussianCurvature::~GaussianCurvature()
 {
 }
@@ -1172,39 +1214,143 @@ void GaussianCurvature::localProcess(
 }
 
 
+void GaussianCurvature::localProcess(
+  const VertexPointer & i_vert, float & gaussianCurvature,
+  float & meanCurvature,
+  std::pair<float, float> & principalCurvatures,
+  float & orientedMeanCurvature,
+  float & orientedGaussianCurvature,
+  Point3df & normal, float & voronoiArea )
+{
+
+  const MeshGraphVertex::VertexIndexCollection & nh = i_vert->neighbors();
+  // Curvature cannot be computed if vertex has not at least three neighbors
+  assert( nh.size() >= 2 );
+  const Point3df & p = i_vert->pos();
+  normal = Point3df( 0., 0., 0. );
+
+  // initializations
+  voronoiArea = 0.;
+  // mean curvature vector
+  Point4df m;
+  // Gaussian curvature
+  gaussianCurvature = 0;
+
+  Point3df e1, e2, e3;
+  // Loop through all neighboring triangles
+  MeshGraphVertex::VertexIndexCollection::const_iterator iNh1 = nh.begin();
+  const_cyclic_iterator<MeshGraphVertex::VertexIndexCollection>
+    iNh2 (nh, nh.begin()); ++iNh2;
+
+  for (; iNh1 != nh.end(); ++iNh1, ++iNh2)
+  {
+    // compute the edges, their squared length and their length
+    e1 = p - (*iNh1)->pos();
+    float n21 = e1.norm2();
+    float n1 = std::sqrt(n21);
+
+    e2 = p - (*iNh2)->pos();
+    float n22 = e2.norm2();
+    float n2 = std::sqrt(n22);
+
+    e3 = (*iNh2)->pos() - (*iNh1)->pos();
+    float n23 = e3.norm2();
+    //float n3 = std::sqrt(n23);
+    //e3 *= 1/norm<float>(e3);
+
+    float d1 = e1.dot(e3);
+    float d2 = e2.dot(e3);
+
+    float biarea = std::sqrt(n21*n23 - d1*d1);
+
+    // Subtracting the angle between the two side edges to the gaussian curvature
+    gaussianCurvature -= std::acos( max(float(-1),
+                                    min(float(1), e1.dot(e2) / (n1*n2))));
+
+    //cot1 =  d1 / norm<float>(e1 - d1 * e3);
+    //cot2 = -d2 / norm<float>(e2 - d2 * e3);
+
+    //cot1 =  d1 / dist<float>(e1, d1 * e3);
+    //cot2 = -d2 / dist<float>(e2, d2 * e3);
+
+    // NB: aren't the denominator all proportional to area? In that case
+    // needed only once?
+    /*
+    float cot1 = d1 / biarea;
+    float cot2 = -d2 / biarea;
+    m += cot1 * e2 + cot2 * e1;
+    */
+    normal += (d1 * e2 - d2 * e1) * (float(1)/biarea);
+
+    if( e1.dot(e2) <= 0 )
+    {
+      //n3 = dist<float>(m_vertices[*iNh1], m_vertices[*iNh2]);
+      //area += heronsFormula(n1, n2, n3) / 2;
+      voronoiArea += biarea / 4;
+    }
+    else
+    {
+      if (d1 <= 0 || d2 >= 0)
+      {
+        //n3 = dist<float>(m_vertices[*iNh1], m_vertices[*iNh2]);
+        //area += heronsFormula(n1, n2, n3) / 4;
+        voronoiArea += biarea / 8;
+      }
+      else
+      {
+        voronoiArea += 1.0/8.0 * (n22 * d1 -  n21 * d2 ) / biarea;
+      }
+    }
+  }
+
+  // finishing computation of gaussian curvature
+  gaussianCurvature += 2*M_PI;
+  gaussianCurvature /= voronoiArea;
+  // finishing computation of mean curvature
+  // NB: [Meyer et al.] the mean curvature is half the norm of K, hence the factor 4.
+  meanCurvature = normal.norm() / (4 * voronoiArea);
+  // computes the principal curvatures from the unsigned mean and Gaussian curvatures
+  float delta = std::sqrt(max(float(0),
+                              square(meanCurvature) - gaussianCurvature));
+  principalCurvatures.first = meanCurvature + delta;
+  principalCurvatures.second = meanCurvature - delta;
+
+  // takes into account the sign
+  if( normal.dot( cross(e1, e2) ) < 0)
+  {
+    orientedMeanCurvature =  -meanCurvature;
+    orientedGaussianCurvature = -gaussianCurvature;
+    principalCurvatures.first = -principalCurvatures.first;
+    principalCurvatures.second = -principalCurvatures.second;
+    normal *= -1 / normal.norm();
+  }
+  else
+  {
+    orientedMeanCurvature =  meanCurvature;
+    orientedGaussianCurvature = gaussianCurvature;
+    normal *= 1 / normal.norm();
+  }
+
+}
+
+
 // ---
 
 
-VertexRemover::VertexRemover( AimsSurfaceTriangle & mesh,
+VertexRemover::VertexRemover( rc_ptr<AimsSurfaceTriangle> mesh,
                               rc_ptr<GeometricProperties> geom )
   : _mesh( mesh ), _geom( geom )
 {
   if( geom.isNull() )
   {
     _geom.reset( new GeometricProperties( mesh ) );
-    _geom->doNeighbor();
+//     _geom->doNeighbor();
   }
+  _geom->doGraph();
 }
 
 
-// #if 0
-namespace
-{
-
-  //---------------------------------------------------------------------------
-
-  //NB: SIMPLE because edges are encoded in nodes. This is more efficient, on the other hand less general, since
-  // edges cannot have properties of their own (e.g. such as a cost) as there have no label to name them.
-  template < typename T >
-  struct SimpleOrientedGraphNode
-  {
-    explicit SimpleOrientedGraphNode(const T & v) : value(v) {}
-    std::list<typename std::list<SimpleOrientedGraphNode<T> >::iterator> from;
-    std::list<typename std::list<SimpleOrientedGraphNode<T> >::iterator> to;
-    T value;
-  };
-
-}
+#if 0
 
 bool VertexRemover::operator()( size_t i )
 {
@@ -1402,6 +1548,312 @@ bool VertexRemover::operator()( size_t i )
 
   return true;
 }
+#else
+
+namespace
+{
+
+  //NB: SIMPLE because edges are encoded in nodes. This is more efficient, on the other hand less general, since
+  // edges cannot have properties of their own (e.g. such as a cost) as there have no label to name them.
+  template < typename T >
+  struct SimpleOrientedGraphNode
+  {
+    explicit SimpleOrientedGraphNode(const T & v) : value(v) {}
+    std::list<typename std::list<SimpleOrientedGraphNode<T> >::iterator> from;
+    std::list<typename std::list<SimpleOrientedGraphNode<T> >::iterator> to;
+    T value;
+  };
+
+
+  /// operator< on the address in memory of the pointed object
+  template < typename TIterator >
+  struct Lesser_PointeeAddress
+  {
+    bool operator()(TIterator i, TIterator j) const
+    { return &*i < &*j; }
+  };
+
+
+  template < typename T >
+  struct ValueFinder
+  {
+    ValueFinder(T value) : m_value(value) {}
+    bool operator()(const SimpleOrientedGraphNode<T> & i) { return i.value == m_value; }
+    T m_value;
+  };
+
+  template < typename T >
+  ValueFinder<T> valueFinder(T value) { return ValueFinder<T>(value); }
+
+
+  template < typename T >
+  struct GroComp
+  {
+    //typedef std::list<MeshVertexNode><uint> ::iterator T;
+
+    GroComp(T a, T b, T c)
+      : m_a(a)
+      , m_b(b)
+      , m_c(c)
+    {}
+
+    template < typename TFace >
+    bool operator()(const TFace & f)
+    {
+      return
+        f->face == AimsVector<T, 3>(m_a, m_b, m_c) ||
+        f->face == AimsVector<T, 3>(m_c, m_a, m_b) ||
+        f->face == AimsVector<T, 3>(m_b, m_c, m_a) ||
+        f->face == AimsVector<T, 3>(m_b, m_a, m_c) ||
+        f->face == AimsVector<T, 3>(m_c, m_b, m_a) ||
+        f->face == AimsVector<T, 3>(m_a, m_c, m_b)
+        ;
+    }
+
+    T m_a;
+    T m_b;
+    T m_c;
+  };
+
+
+  /// Remove a vertex from a mesh.
+  /// Does all the bookkeeping crap: removing the vertex means removing associated faces, and warning neghbors
+  /// about the missing of their fellow.
+  /// The function does *not* remesh the surface, i.e. if nothing else is done, the surface will present a whole
+  /// where the vertex were lying.
+  template < typename TVertexNode, typename TFaceNode >
+  typename std::list<TVertexNode>::iterator
+  remove_vertex
+  (
+   typename std::list<TVertexNode>::iterator    i,
+   std::list<TVertexNode> &                     graph_vertices,
+   std::list<TFaceNode> &                       graph_faces
+  )
+  {
+    // remove faces point belongs to
+    for (typename TVertexNode::FaceIndexCollection::iterator j = i->faces().begin(); j != i->faces().end(); ++j)
+    {
+      // Remove index to this face
+      for (std::size_t k = 0; k < 3; ++k)
+      {
+        // don't remove face from facelist of point i itself -- because j is iterating on this very list,
+        // plus, it will be deleted with i anyway.
+        if ((*j)->face[k] == i) continue;
+  #ifndef NDEBUG
+        std::size_t tmp = (*j)->face[k]->faces().size();
+  #endif
+        (*j)->face[k]->faces().remove(*j);
+        assert((*j)->face[k]->faces().size() == tmp-1);
+      }
+      // remove face itself
+  #ifndef NDEBUG
+      std::size_t tmp = graph_faces.size();
+  #endif
+      graph_faces.erase(*j);
+      assert(graph_faces.size() == tmp-1);
+    }
+
+    // remove point in neighbor's list
+    for (typename TVertexNode::VertexIndexCollection::iterator j = i->neighbors().begin(); j != i->neighbors().end(); ++j)
+    {
+      (*j)->neighbors().remove(i);
+    }
+    // remove point
+    return graph_vertices.erase(i);
+  }
+
+
+}
+
+bool VertexRemover::operator()( VertexPointer & i )
+{
+  //std::cout << "." << std::flush;
+  typedef SimpleOrientedGraphNode<typename std::list<MeshVertexNode<uint> >::iterator>
+    NeighborGraphNode;
+  typedef std::list<NeighborGraphNode> NeighborGraph;
+
+  GeometricProperties & gp = geometricProperties();
+
+  // save list of neighbors
+  std::vector<VertexPointer> m_neighbors( i->neighbors().begin(),
+                                          i->neighbors().end() );
+
+  // Add new faces
+
+  list<AimsVector<uint ,3> > m_tri;
+  // get delaunay faces for more than 4 neighbors
+  if (m_neighbors.size() >= 4)
+  {
+    m_tri = simple_delaunay_triangulation(simple_neighborhood_flattening(
+      i->pos(), m_neighbors));
+  }
+  // For three neighbors, simply add the only triangle possible
+  else if (m_neighbors.size() == 3)
+  {
+    m_tri.push_back( AimsVector<uint, 3>( 0, 1, 2 ) );
+  }
+  // For two points or less, do not add any face. Note that if this happens, it means that the mesh
+  // is in really bad shape -- actually the following might crash.
+  else std::cout << "w2!";
+
+  // Check consistency between number of points and number of faces
+  if (m_tri.size() != m_neighbors.size() - 2)
+  {
+    std::cout << "wK!" << m_tri.size() << "-" << m_neighbors.size() - 2;
+  }
+
+  //initialize oriented edges
+  std::vector<NeighborGraph> m_neighborGraph;
+
+  m_neighborGraph.resize(i->neighbors().size());
+
+  vector<map<VertexPointer, typename list<NeighborGraphNode>::iterator,
+    Lesser_PointeeAddress<VertexPointer> > > m_convmap;
+
+  m_convmap.resize(i->neighbors().size());
+
+  for (std::size_t j = 0; j < i->neighbors().size(); ++j)
+  {
+    // first pass: vertices
+    {
+      for (typename MeshVertexNode<uint>::VertexIndexCollection::const_iterator k = m_neighbors[j]->neighbors().begin(); k != m_neighbors[j]->neighbors().end(); ++k)
+      {
+        if (*k == i) continue;
+        NeighborGraphNode node(*k);
+        m_convmap[j][*k] = m_neighborGraph[j].insert(m_neighborGraph[j].end(), node);
+      }
+    }
+    // second pass: edges
+    {
+      typename MeshVertexNode<uint>::VertexIndexCollection::const_iterator k = m_neighbors[j]->neighbors().begin();
+      const_cyclic_iterator<typename MeshVertexNode<uint>::VertexIndexCollection> k2(m_neighbors[j]->neighbors(), m_neighbors[j]->neighbors().begin());
+      ++k2;
+      const_cyclic_iterator<typename MeshVertexNode<uint>::VertexIndexCollection> k3(m_neighbors[j]->neighbors(), m_neighbors[j]->neighbors().begin());
+      ++k3;
+      ++k3;
+      for (; k != m_neighbors[j]->neighbors().end(); ++k, ++k2, ++k3)
+      {
+        if (*k2 == i) continue;
+        if (*k != i)  m_convmap[j][*k2]->from.push_back(m_convmap[j][*k]);
+        if (*k3 != i) m_convmap[j][*k2]->to.push_back(m_convmap[j][*k3]);
+      }
+    }
+  }
+
+  // Updating neighbor graphs
+  {
+    for (std::list<AimsVector<uint, 3> >::iterator newf = m_tri.begin();
+         newf != m_tri.end(); ++newf)
+    {
+      for (std::size_t n = 0; n < 3; ++n)
+      {
+        typename NeighborGraph::iterator p2, p3;
+
+        p2 = std::find_if(m_neighborGraph[(*newf)[n]].begin(), m_neighborGraph[(*newf)[n]].end(), valueFinder(m_neighbors[(*newf)[(n+1)%3]]));
+        p3 = std::find_if(m_neighborGraph[(*newf)[n]].begin(), m_neighborGraph[(*newf)[n]].end(), valueFinder(m_neighbors[(*newf)[(n+2)%3]]));
+        if (p2 == m_neighborGraph[(*newf)[n]].end()) p2 = m_neighborGraph[(*newf)[n]].insert(p2, NeighborGraphNode(m_neighbors[(*newf)[(n+1)%3]]));
+        if (p3 == m_neighborGraph[(*newf)[n]].end()) p3 = m_neighborGraph[(*newf)[n]].insert(p3, NeighborGraphNode(m_neighbors[(*newf)[(n+2)%3]]));
+
+        p2->to.push_back(p3);
+        p3->from.push_back(p2);
+      }
+    }
+  }
+
+  // Checking that neighbors have at least 3 neighbors
+  for (std::size_t k = 0; k < m_neighborGraph.size(); ++k)
+  {
+    if (m_neighborGraph[k].size() < 3)
+    {
+      //std::cout << "WREJECT!(small-neighborhood)";
+      return false;
+    }
+  }
+
+  // Checking that neighbors have correct neighborhood
+  // Incorrect neighborhood may appear when a neighbor was already sharing an edge with another neighbor of
+  // i that is not on its side, i.e that is not n-1 or n+1.
+  for (std::size_t k = 0; k < m_neighborGraph.size(); ++k)
+  {
+    typename NeighborGraph::iterator p = m_neighborGraph[k].begin();
+    typename NeighborGraph::iterator p0 = p;
+    bool flag = false;
+    for (;;)
+    {
+      if (flag) { if (p == p0) break; }
+      else flag = true;
+      if (p->to.size() != 1 || p->from.size() != 1)
+      {
+        //std::cout << "WREJECT!(incorrect-neighborhood)";
+        return false;
+      }
+      p = p->to.front();
+    }
+  }
+
+
+  // adding faces
+  {
+    for( std::list<AimsVector<uint, 3> >::iterator newf = m_tri.begin();
+         newf != m_tri.end(); ++newf )
+    {
+      // convert into graph faces
+      MeshGraphFace f;
+      for (std::size_t n = 0; n < 3; ++n)
+      {
+        f.face[n] = m_neighbors[(*newf)[n]];
+      }
+      // add face to graph
+      MeshGraphFaces::iterator
+        gf = gp.getFaces().insert( gp.getFaces().end(), f );
+      // add face index to face points
+      for (std::size_t n = 0; n < 3; ++n)
+      {
+        GroComp<VertexPointer> grocomp(f.face[0], f.face[1], f.face[2]);
+        typename MeshGraphVertex::FaceIndexCollection::iterator p = find_if(f.face[n]->faces().begin(), f.face[n]->faces().end(), grocomp);
+        if (p != f.face[n]->faces().end())
+        {
+          std::cout << "FATAL: face already there: " << std::endl;
+          std::cout << &*f.face[0] << " " << &*f.face[1] << " " << &*f.face[2] << std::endl;
+          std::cout << &*(*p)->face[0] << " " << &*(*p)->face[1] << " " << &*(*p)->face[2] << std::endl;
+          std::cout << "I'll continue as if nothing happened, but this is a bug and your algorithm is likely to go bananas :)" << std::endl;
+        }
+        f.face[n]->faces().push_back(gf);
+      }
+    }
+  }
+
+  // Adding neighbors
+  for (std::size_t j = 0; j < i->neighbors().size(); ++j)
+  {
+    typename MeshVertexNode<uint>::VertexIndexCollection ntmp = m_neighbors[j]->neighbors();
+
+    // remove all neighbors
+    m_neighbors[j]->neighbors().clear();
+
+    typename NeighborGraph::iterator p = m_neighborGraph[j].begin();
+    typename NeighborGraph::iterator p0 = p;
+    bool flag = false;
+    for (;;)
+    {
+      if (flag) { if (p == p0) break; }
+      else flag = true;
+      m_neighbors[j]->neighbors().push_back(p->value);
+      if (p->to.size() != 1)
+      {
+        std::cout << "wW!";
+      }
+      if (p->to.size() == 0) break;
+      p = p->to.front();
+    }
+  }
+
+  // remove point
+  i = remove_vertex( i, gp.getVertices(), gp.getFaces() );
+  return true;
+}
+
+#endif
 
 
 std::vector<Point2df>
@@ -1414,7 +1866,7 @@ VertexRemover::simple_neighborhood_flattening(
   std::vector<double> norms;
   angles.reserve(neighbors.size());
   norms.reserve(neighbors.size());
-  const vector<Point3df> & vert = _mesh.vertex();
+  const vector<Point3df> & vert = _mesh->vertex();
 
   typename GeometricProperties::Neighborhood::const_iterator n
     = neighbors.begin();
@@ -1445,7 +1897,48 @@ VertexRemover::simple_neighborhood_flattening(
 
   return res;
 }
-// #endif
+
+
+std::vector<Point2df>
+VertexRemover::simple_neighborhood_flattening(
+  const Point3df & point,
+  const std::vector<VertexPointer> & neighbors )
+{
+
+  std::vector<double> angles;
+  std::vector<double> norms;
+  angles.reserve(neighbors.size());
+  norms.reserve(neighbors.size());
+
+  typename vector<VertexPointer>::const_iterator n
+    = neighbors.begin();
+  const_cyclic_iterator<vector<VertexPointer>>
+    n2(neighbors, ++neighbors.begin());
+  //std::cout << "point: " << point << std::endl;
+  for (; n != neighbors.end(); ++n, ++n2)
+  {
+    const Point3df & p = (*n)->pos();
+    const Point3df & p2 = (*n2)->pos();
+    norms.push_back( double( (p - point).norm() ) );
+    angles.push_back(std::acos( (p2 - point).dot(p - point)
+      / ( double( (p2 - point).norm() ) * double( (p - point).norm() ) ) ) );
+  }
+
+  std::partial_sum(angles.begin(), angles.end(), angles.begin());
+
+  std::transform(angles.begin(), angles.end(), angles.begin(),
+                 std::bind2nd(std::multiplies<double>(),
+                              2*M_PI/angles.back()));
+
+  std::vector<Point2df> res(neighbors.size());
+  for (std::size_t i = 0; i < res.size(); ++i)
+  {
+    res[i][0] = std::cos(angles[i]) * norms[i];
+    res[i][1] = std::sin(angles[i]) * norms[i];
+  }
+
+  return res;
+}
 
 
 // ---
