@@ -85,7 +85,9 @@ namespace aims
       meshgraph::MeshVertexNode<uint>::VertexIndexCollection::value_type
       VertexPointer;
 
+    /// constructor working on a const mesh
     GeometricProperties( const AimsSurfaceTriangle & mesh );
+    /// constructor working on a non-const mesh
     GeometricProperties( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~GeometricProperties();
 
@@ -97,6 +99,7 @@ namespace aims
     const WeightList & getSimpleAlpha() const ;
     const WeightList & getBeta() const ;
     const AimsSurfaceTriangle & getMesh() const;
+    carto::rc_ptr<AimsSurfaceTriangle> getRcMesh();
     const NeighborList & getNeighbor() const;
     NeighborList & getNeighbor();
     const NeighborList & getTriangleNeighbor() const;
@@ -147,7 +150,7 @@ namespace aims
   class Curvature : public GeometricProperties
   {
   public:
-    Curvature(const AimsSurfaceTriangle & mesh);
+    Curvature( const AimsSurfaceTriangle & mesh );
     Curvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~Curvature();
     virtual Texture<float> doIt() = 0; //car defini dnas les classes derivees -> classe abstraite non instantiable
@@ -158,14 +161,18 @@ namespace aims
   class CurvatureFactory
   {
   public:
-    Curvature * createCurvature(const AimsSurfaceTriangle & mesh, const std::string & method );
-      
+    Curvature * createCurvature( const AimsSurfaceTriangle & mesh,
+                                 const std::string & method );
+    Curvature * createCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh,
+                                 const std::string & method );
+
   };
 
   class FiniteElementCurvature : public Curvature
   {
   public:
-    FiniteElementCurvature(const AimsSurfaceTriangle & mesh);
+    FiniteElementCurvature( const AimsSurfaceTriangle & mesh );
+    FiniteElementCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~FiniteElementCurvature();
     virtual Texture<float> doIt();  
   };
@@ -176,7 +183,8 @@ namespace aims
   class BoixCurvature : public Curvature
   {
   public:
-    BoixCurvature(const AimsSurfaceTriangle & mesh);
+    BoixCurvature( const AimsSurfaceTriangle & mesh );
+    BoixCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~BoixCurvature();
     virtual Texture<float> doIt();  
   };
@@ -184,7 +192,8 @@ namespace aims
   class BarycenterCurvature : public Curvature
   {
   public:
-    BarycenterCurvature(const AimsSurfaceTriangle & mesh);
+    BarycenterCurvature( const AimsSurfaceTriangle & mesh );
+    BarycenterCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~BarycenterCurvature();
     virtual Texture<float> doIt();  
   };
@@ -194,7 +203,8 @@ namespace aims
   class BoixGaussianCurvature : public Curvature
   {
   public:
-    BoixGaussianCurvature(const AimsSurfaceTriangle & mesh);
+    BoixGaussianCurvature( const AimsSurfaceTriangle & mesh );
+    BoixGaussianCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~BoixGaussianCurvature();
     virtual Texture<float> doIt();  
   };
@@ -233,46 +243,24 @@ namespace aims
   */
   class VertexRemover
   {
-  public: // enum
+  public: // typedefs
 
-    enum Error {
-      none = 0,
-      invalid_neighborhood,
-      triangulation_failure,
-    };
-
-#if 0
-    typedef SimpleOrientedGraphNode<typename std::list<TVertexNode>::iterator> NeighborGraphNode;
-    typedef std::list<NeighborGraphNode> NeighborGraph;
-#endif
     typedef typename meshgraph::MeshVertexNode<uint>::VertexIndexCollection::value_type
       VertexPointer;
 
     // constructors
 
-    VertexRemover( carto::rc_ptr<AimsSurfaceTriangle> mesh,
-                   carto::rc_ptr<GeometricProperties> geom
-                     = carto::rc_ptr<GeometricProperties>( 0 ) );
+    VertexRemover( carto::rc_ptr<GeometricProperties> geom );
+    VertexRemover( carto::rc_ptr<AimsSurfaceTriangle> mesh );
 
     // set & get
 
-    Error error() const { return _error; }
-    const GeometricProperties & geometricProperties() const { return *_geom; }
+    const GeometricProperties & geometricProperties() const
+    { return *_geom; }
     GeometricProperties & geometricProperties() { return *_geom; }
 
     // functions
 
-#if 0
-    /// Check that vertex i can be removed from the mesh
-    bool isRemovable( size_t i );
-
-    /// Remove a vertex that has already been nodded as removable by the 'isRemovable' method.
-    /// Return a pointer to the vertex 'after' the vertex that has been removed, in the list sense.
-    VertexPointer remove( size_t i );
-#endif
-
-    /// Checks if a vertex is removable, and if so, removes it.
-    /// Returns true if the operation is successful.
 //     bool operator()( size_t i );
     bool operator()( VertexPointer & i );
 
@@ -290,45 +278,9 @@ namespace aims
     const Point3df & point,
     const std::vector<VertexPointer> & neighbors );
 
-#if 0
-    /// Triangularize the neighbors of i.
-    /// Return true if successful.
-    bool neighborTriangulation(VertexPointer i);
-
-    /// Initialize the oriented graph of the neighbors of the neighbors of i, as they were
-    /// before triangulation.
-    void initializeOrientedEdges(VertexPointer i);
-
-    /// Complete the neighborhood graph of i's neighbors by taking into account the triangulation
-    /// of the whole left by removing i.
-    void updateNeighborGraph();
-
-    /// Check that neighbors have at least three neighbors.
-    bool checkNeighborsHaveThreeNeighbors();
-    /// Check that neighbors have an adequate circular neighborhood.
-    bool checkCorrectNeighborhood();
-    void addFaces(VertexPointer i);
-    void addNeighbors(VertexPointer i);
-#endif
-
     // data, input
-    carto::rc_ptr<AimsSurfaceTriangle> _mesh;
     carto::rc_ptr<GeometricProperties> _geom;
 
-//     std::list<TFaceNode> &    m_graph_faces;
-
-    // data, output
-
-    Error _error;
-
-#if 0
-    // data, internal
-
-    std::vector<VertexPointer> m_neighbors;
-    std::vector<NeighborGraph> m_neighborGraph;
-    std::vector<std::map<VertexPointer, typename std::list<NeighborGraphNode>::iterator, Lesser_PointeeAddress<VertexPointer> > > m_convmap;
-    std::list<boost::array<std::size_t,3> > m_tri;
-#endif
   };
 
 

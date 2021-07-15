@@ -694,14 +694,14 @@ void GeometricProperties::graphToMesh()
 {
   Graph2ListMeshConvertor<AimsSurfaceTriangle> g2l( _pmesh );
   g2l( _graphvertices, _graphfaces );
-  if( _pmesh )
-    cout << "use pmesh\n";
-  cout << "graphToMesh: " << g2l.mesh()->vertex().size() << " vertices\n";
   if( !_pmesh )
   {
-    cout << "set pmesh (useless)\n";
     _pmesh = g2l.mesh();
   }
+  if( _pmesh->header().hasProperty( "vertex_number" ) )
+    _pmesh->header().removeProperty( "vertex_number" );
+  if( _pmesh->header().hasProperty( "polygon_number" ) )
+    _pmesh->header().removeProperty( "polygon_number" );
 }
 
 
@@ -728,10 +728,16 @@ const GeometricProperties::WeightNeighborList & GeometricProperties::getSurface(
 const AimsSurfaceTriangle & GeometricProperties::getMesh() const
 {
   return(_mesh);
-}    
+}
 
 
-const GeometricProperties::WeightList & GeometricProperties::getAlpha() const 
+rc_ptr<AimsSurfaceTriangle> GeometricProperties::getRcMesh()
+{
+  return _pmesh;
+}
+
+
+const GeometricProperties::WeightList & GeometricProperties::getAlpha() const
 {
   return(_alpha);
 }
@@ -849,6 +855,13 @@ FiniteElementCurvature::FiniteElementCurvature(const AimsSurfaceTriangle & mesh)
 {
 }
 
+
+FiniteElementCurvature::FiniteElementCurvature(
+  rc_ptr<AimsSurfaceTriangle> mesh ) : Curvature(mesh)
+{
+}
+
+
 FiniteElementCurvature::~FiniteElementCurvature()
 {
 }
@@ -918,9 +931,17 @@ BoixCurvature::BoixCurvature(const AimsSurfaceTriangle & mesh) : Curvature(mesh)
 {
 }
 
+
+BoixCurvature::BoixCurvature( rc_ptr<AimsSurfaceTriangle> mesh )
+  : Curvature(mesh)
+{
+}
+
+
 BoixCurvature::~BoixCurvature()
 {
 }
+
 
 Texture<float> BoixCurvature::doIt()
 {
@@ -957,6 +978,13 @@ Texture<float> BoixCurvature::doIt()
 BarycenterCurvature::BarycenterCurvature(const AimsSurfaceTriangle & mesh) : Curvature(mesh) //recursif montant
 {
 }
+
+
+BarycenterCurvature::BarycenterCurvature( rc_ptr<AimsSurfaceTriangle> mesh )
+  : Curvature(mesh)
+{
+}
+
 
 BarycenterCurvature::~BarycenterCurvature()
 {
@@ -1015,6 +1043,13 @@ Texture<float> BarycenterCurvature::doIt()
 BoixGaussianCurvature::BoixGaussianCurvature(const AimsSurfaceTriangle & mesh) : Curvature(mesh) //recursif montant
 {
 }
+
+
+BoixGaussianCurvature::BoixGaussianCurvature(
+  rc_ptr<AimsSurfaceTriangle> mesh ) : Curvature(mesh)
+{
+}
+
 
 BoixGaussianCurvature::~BoixGaussianCurvature()
 {
@@ -1223,6 +1258,9 @@ void GaussianCurvature::localProcess(
   Point3df & normal, float & voronoiArea )
 {
 
+  // we need the graph structures for the mesh.
+  doGraph();
+
   const MeshGraphVertex::VertexIndexCollection & nh = i_vert->neighbors();
   // Curvature cannot be computed if vertex has not at least three neighbors
   assert( nh.size() >= 2 );
@@ -1337,218 +1375,19 @@ void GaussianCurvature::localProcess(
 // ---
 
 
-VertexRemover::VertexRemover( rc_ptr<AimsSurfaceTriangle> mesh,
-                              rc_ptr<GeometricProperties> geom )
-  : _mesh( mesh ), _geom( geom )
+VertexRemover::VertexRemover( rc_ptr<GeometricProperties> geom )
+  : _geom( geom )
 {
-  if( geom.isNull() )
-  {
-    _geom.reset( new GeometricProperties( mesh ) );
-//     _geom->doNeighbor();
-  }
   _geom->doGraph();
 }
 
 
-#if 0
-
-bool VertexRemover::operator()( size_t i )
+VertexRemover::VertexRemover( rc_ptr<AimsSurfaceTriangle> mesh )
+  : _geom( new GeometricProperties( mesh ) )
 {
-  //std::cout << "." << std::flush;
-
-  // list of neighbors
-  GeometricProperties::NeighborList & all_neigh
-    = geometricProperties().getNeighbor();
-  GeometricProperties::Neighborhood neighbors = all_neigh[i]; // COPY it.
-  Point3df i_pos = _mesh.vertex()[i];
-
-  // Add new faces
-  list<AimsVector<uint, 3> > tri;
-  // get delaunay faces for more than 4 neighbors
-  if( neighbors.size() >= 4 )
-  {
-    tri = simple_delaunay_triangulation( simple_neighborhood_flattening(
-      i_pos, neighbors ) );
-  }
-  // For three neighbors, simply add the only triangle possible
-  else if( neighbors.size() == 3 )
-  {
-    AimsVector<uint, 3> tmp( 0, 1, 2 );
-    tri.push_back(tmp);
-  }
-  // For two points or less, do not add any face. Note that if this happens, it means that the mesh
-  // is in really bad shape -- actually the following might crash.
-  else
-  {
-    std::cout << "w2!";
-    return false;
-  }
-
-  // Check consistency between number of points and number of faces
-  if( tri.size() != neighbors.size() - 2 )
-  {
-    std::cout << "wK!" << tri.size() << "-" << neighbors.size() - 2;
-  }
-
-  // remove triangles involving i
-
-  GeometricProperties::NeighborList & polyNeigh
-    = geometricProperties().getTriangleNeighbor();
-  GeometricProperties::Neighborhood & poly = polyNeigh[i];
-  set<uint> spoly( poly.begin(), poly.end() ); // set for perf and sorting
-
-  // rewrite (partially) poly list with removed elements, and shift numbers,
-  // once
-  vector<AimsVector<uint, 3> >::iterator ip, jp, ep = _mesh.polygon().end();
-  set<uint>::const_iterator ipv = spoly.begin(), epv = spoly.end();
-  size_t pp = 0, rpp = 0;
-  vector<uint> rpoly( _mesh.polygon().size() );  // replacement table
-  ip = _mesh.polygon().begin(); // write iterator
-  jp = ip; // read iter
-  while( jp != ep ) // until all have been read
-  {
-    while( ipv != epv && pp == *ipv )
-    {
-      // skip this
-      ++jp;
-      rpoly[pp] = rpp;
-      ++ipv;
-      ++pp;
-    }
-    if( jp == ep )
-      break;
-
-    if( ip != jp )
-      *ip = *jp; // copy polygon
-    if( (*ip)[0] >= i ) // shift vertices numbers
-      --(*ip)[0];
-    if( (*ip)[1] >= i )
-      --(*ip)[1];
-    if( (*ip)[2] >= i )
-      --(*ip)[2];
-
-    ++ip;  // increment both pointers
-    ++jp;
-    rpoly[pp] = rpp;
-    ++rpp;
-    ++pp;
-  }
-  // erase the last ones
-  _mesh.polygon().resize( _mesh.polygon().size() - poly.size() );
-
-  // remove polygons from list poly for neighbors of i
-  GeometricProperties::Neighborhood::iterator in, en = neighbors.end();
-  for( in=neighbors.begin(); in!=en; ++in )
-  {
-    GeometricProperties::Neighborhood & np = polyNeigh[*in];
-    for( GeometricProperties::Neighborhood::iterator ipn=np.begin();
-         ipn!=np.end(); )
-    {
-      if( spoly.find( *ipn ) != spoly.end() )
-      {
-        GeometricProperties::Neighborhood::iterator jpn = ipn;
-        ++ipn;
-        np.erase( jpn );
-      }
-      else
-        ++ipn;
-    }
-  }
-  // and erase poly from list
-  polyNeigh.erase( polyNeigh.begin() + i );
-  // shift all polygons in polyNeigh
-  size_t count;
-  for( count=0; count<polyNeigh.size(); ++count )
-  {
-    GeometricProperties::Neighborhood & np = polyNeigh[count];
-    GeometricProperties::Neighborhood::iterator ip, ep = np.end();
-    for( ip=np.begin(); ip!=ep; ++ip )
-    {
-      *ip = rpoly[*ip];  // translate (shift)
-    }
-  }
-
-  // remove i from neighbors
-  for( in=neighbors.begin(); in!=en; ++in )
-  {
-    GeometricProperties::Neighborhood & nbr = all_neigh[*in];
-    nbr.erase( std::find( nbr.begin(), nbr.end(), i ) );
-  }
-  // and remove the neighborhood of i
-  all_neigh.erase( all_neigh.begin() + i );
-  // remove vertex i in mesh
-  _mesh.vertex().erase( _mesh.vertex().begin() + i );
-  if( _mesh.normal().size() > i )
-    _mesh.normal().erase( _mesh.normal().begin() + i );
-
-  // shift vertices nums in neighbors (we still need them)
-  for( in=neighbors.begin(), en=neighbors.end(); in!=en; ++in )
-    if( *in >= i )
-      --*in;
-  // shift vertices nums in all_neigh
-  GeometricProperties::NeighborList::iterator ian, ean = all_neigh.end();
-  for( ian=all_neigh.begin(); ian!=ean; ++ian )
-  {
-    for( in=ian->begin(), en=ian->end(); in!=en; ++in )
-      if( *in >= i )
-        --*in;
-  }
-
-  // add new delaunay polygons
-  // (we need an indexed access in neighbors, soon...)
-  vector<unsigned> vneighbors( neighbors.begin(), neighbors.end() );
-  vector<AimsVector<uint, 3> > & mpoly = _mesh.polygon();
-  list<AimsVector<uint, 3> >::const_iterator it, et = tri.end();
-  count = mpoly.size();
-
-  for( it=tri.begin(); it!=et; ++it, ++count )
-  {
-    const AimsVector<uint, 3> & tpoly = *it;
-    // use real vertices indices, from delaunay sub-mesh
-    AimsVector<uint, 3> npoly( vneighbors[tpoly[0]],
-                               vneighbors[tpoly[1]],
-                               vneighbors[tpoly[2]] );
-    mpoly.push_back( npoly );
-    // update neighbors of joined vertices
-    // Note: we mess up the neighbors ordering by appending at the end
-    // so vertices need to be reordered in each neighborhood afterwards
-    {
-      GeometricProperties::Neighborhood & nbr = all_neigh[npoly[0]];
-      if( std::find( nbr.begin(), nbr.end(), npoly[1] ) == nbr.end() )
-        nbr.push_back( npoly[1] );
-      if( std::find( nbr.begin(), nbr.end(), npoly[2] ) == nbr.end() )
-        nbr.push_back( npoly[2] );
-    }
-    {
-      GeometricProperties::Neighborhood & nbr = all_neigh[npoly[1]];
-      if( std::find( nbr.begin(), nbr.end(), npoly[2] ) == nbr.end() )
-        nbr.push_back( npoly[2] );
-      if( std::find( nbr.begin(), nbr.end(), npoly[0] ) == nbr.end() )
-        nbr.push_back( npoly[0] );
-    }
-    {
-      GeometricProperties::Neighborhood & nbr = all_neigh[npoly[2]];
-      if( std::find( nbr.begin(), nbr.end(), npoly[0] ) == nbr.end() )
-        nbr.push_back( npoly[0] );
-      if( std::find( nbr.begin(), nbr.end(), npoly[1] ) == nbr.end() )
-        nbr.push_back( npoly[1] );
-    }
-    // update triangle neighbors
-    polyNeigh[npoly[0]].push_back(count);
-    polyNeigh[npoly[1]].push_back(count);
-    polyNeigh[npoly[2]].push_back(count);
-  }
-
-  // reorder polyogns and vertices in modified neighborhood
-  for( in=neighbors.begin(), en=neighbors.end(); in!=en; ++in )
-  {
-    geometricProperties().sortPolygons( polyNeigh[*in] );
-    geometricProperties().buildSortVerticesNeighborhood( *in );
-  }
-
-  return true;
+  _geom->doGraph();
 }
-#else
+
 
 namespace
 {
@@ -1639,16 +1478,16 @@ namespace
         // don't remove face from facelist of point i itself -- because j is iterating on this very list,
         // plus, it will be deleted with i anyway.
         if ((*j)->face[k] == i) continue;
-  #ifndef NDEBUG
+#ifndef NDEBUG
         std::size_t tmp = (*j)->face[k]->faces().size();
-  #endif
+#endif
         (*j)->face[k]->faces().remove(*j);
         assert((*j)->face[k]->faces().size() == tmp-1);
       }
       // remove face itself
-  #ifndef NDEBUG
+#ifndef NDEBUG
       std::size_t tmp = graph_faces.size();
-  #endif
+#endif
       graph_faces.erase(*j);
       assert(graph_faces.size() == tmp-1);
     }
@@ -1853,8 +1692,6 @@ bool VertexRemover::operator()( VertexPointer & i )
   return true;
 }
 
-#endif
-
 
 std::vector<Point2df>
 VertexRemover::simple_neighborhood_flattening(
@@ -1866,7 +1703,7 @@ VertexRemover::simple_neighborhood_flattening(
   std::vector<double> norms;
   angles.reserve(neighbors.size());
   norms.reserve(neighbors.size());
-  const vector<Point3df> & vert = _mesh->vertex();
+  const vector<Point3df> & vert = geometricProperties().getRcMesh()->vertex();
 
   typename GeometricProperties::Neighborhood::const_iterator n
     = neighbors.begin();
@@ -2364,7 +2201,8 @@ aims::simple_delaunay_triangulation( const std::vector<Point2df> & in_points )
 
 // ---
 
-Curvature * CurvatureFactory::createCurvature(const AimsSurfaceTriangle & mesh, const string & method)
+Curvature * CurvatureFactory::createCurvature(
+  const AimsSurfaceTriangle & mesh, const string & method )
 {
   if ( method == "fem")
     return(new FiniteElementCurvature(mesh) );
@@ -2380,3 +2218,23 @@ Curvature * CurvatureFactory::createCurvature(const AimsSurfaceTriangle & mesh, 
        << "or gaussian\n";
   throw invalid_argument(string("Unknown Curvature method ") + method);
 }
+
+
+Curvature * CurvatureFactory::createCurvature(
+  rc_ptr<AimsSurfaceTriangle> mesh, const string & method )
+{
+  if ( method == "fem")
+    return(new FiniteElementCurvature(mesh) );
+  if ( method == "boix")
+    return(new BoixCurvature(mesh) );
+  if ( method == "barycenter")
+    return(new BarycenterCurvature(mesh) );
+  if ( method =="boixgaussian")
+    return(new BoixGaussianCurvature(mesh) );
+  if ( method =="gaussian")
+    return(new GaussianCurvature(mesh) );
+  cout << "Method must be either fem, boix, barycenter, boixgaussian, "
+       << "or gaussian\n";
+  throw invalid_argument(string("Unknown Curvature method ") + method);
+}
+
