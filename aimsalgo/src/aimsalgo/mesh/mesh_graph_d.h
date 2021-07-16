@@ -68,7 +68,6 @@ namespace aims
       // for brain meshes. Plus, during the last pass, nothing should change, i.e. we'll do an extra pass for
       // nothing!
 
-      // TODO: actually we could insert front and back to be hopefully twice as fast...
       while (!allFinished)
       {
         allFinished = true;
@@ -85,51 +84,105 @@ namespace aims
           // ensure that all circular neighbors are turning in the same order, if the triangles do so.
           for (;iFi1 != iFic->end(); ++iFi1, ++iFi2)
           {
-            //std::size_t i = getVertexNumber(mesh, *iFi2);
             std::size_t i = *iFi2;
 
             // Skip voxel if its neighborhood is already done
-            if (isFinished[i])
+            if( !isFinished[i] )
             {
-              continue;
-            }
 
-            // Check size of the neighborhood
-            if (res[i].size() == 0)
-            {
-              // This is the first neighbor added: no need to check anything
-              res[i].push_back(*iFi1);
-              allFinished = false;
-            }
-            else
-            {
-              // We add the neighbor only if it is the "next" neighbor of the chain. That means
-              // that the last point of the neighbor chain has to be in the current face as well.
-              // Note also that we have to end as well: if this next neighbor also happens to be
-              // the first of the chain, we mark this voxel neighborhood as done.
-
-              // Loop through all face vertices
-              VertexIndex lastPoint = res[i].back();
-              typename TFaceCollection::value_type::const_iterator iFaceVertex = iFic->begin();
-              for (; iFaceVertex != iFic->end(); ++iFaceVertex)
+              // Check size of the neighborhood
+              if (res[i].size() == 0)
               {
-                if (*iFaceVertex == lastPoint)
+                // This is the first neighbor added: no need to check anything
+                res[i].push_back(*iFi1);
+                allFinished = false;
+              }
+              else
+              {
+                // We add the neighbor only if it is the "next" neighbor of the chain. That means
+                // that the last point of the neighbor chain has to be in the current face as well.
+                // Note also that we have to end as well: if this next neighbor also happens to be
+                // the first of the chain, we mark this voxel neighborhood as done.
+
+                // Loop through all face vertices
+                VertexIndex lastPoint = res[i].back();
+                if( *iFi1 != lastPoint ) // otherwise already done this one
                 {
-                  // Check that the point we are about to add is not actually the first point
-                  // of the circular neighborhood.
-                  if (*iFi1 == res[i].front())
+
+                  typename TFaceCollection::value_type::const_iterator
+                    iFaceVertex = iFic->begin();
+                  for( ; iFaceVertex != iFic->end(); ++iFaceVertex )
                   {
-                    isFinished[i] = 1;
+                    if (*iFaceVertex == lastPoint)
+                    {
+                      // Check that the point we are about to add is not
+                      // actually the first point of the circular neighborhood.
+                      if (*iFi1 == res[i].front())
+                      {
+                        isFinished[i] = 1;
+                      }
+                      else if( *iFi1 != lastPoint )
+                      {
+                        res[i].push_back(*iFi1);
+                        allFinished = false;
+                      }
+                      break;
+                    }
                   }
-                  else
-                  {
-                    res[i].push_back(*iFi1);
-                    allFinished = false;
-                  }
-                  break;
                 }
               }
             }
+
+            // and the other way
+            i = *iFi1;
+
+            // Skip voxel if its neighborhood is already done
+            if( !isFinished[i] )
+            {
+
+              // Check size of the neighborhood
+              if (res[i].size() == 0)
+              {
+                // This is the first neighbor added: no need to check anything
+                res[i].insert( res[i].begin(), *iFi2 );
+                allFinished = false;
+              }
+              else
+              {
+                // We add the neighbor only if it is the "first" neighbor of the chain. That means
+                // that the first point of the neighbor chain has to be in the current face as well.
+                // Note also that we have to end as well: if this first neighbor also happens to be
+                // the last of the chain, we mark this voxel neighborhood as done.
+
+                // Loop through all face vertices
+                VertexIndex firstPoint = res[i].front();
+                if( *iFi2 != firstPoint ) // otherwise already done this one
+                {
+
+                  typename TFaceCollection::value_type::const_iterator
+                    iFaceVertex = iFic->begin();
+                  for( ; iFaceVertex != iFic->end(); ++iFaceVertex )
+                  {
+                    if (*iFaceVertex == firstPoint)
+                    {
+                      // Check that the point we are about to add is not
+                      // actually the last point of the circular neighborhood.
+                      if (*iFi2 == res[i].back())
+                      {
+                        isFinished[i] = 1;
+                      }
+                      else if( *iFi2 != firstPoint )
+                      {
+                        res[i].insert( res[i].begin(), *iFi2 );
+                        allFinished = false;
+                      }
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+
           }
         }
       }
