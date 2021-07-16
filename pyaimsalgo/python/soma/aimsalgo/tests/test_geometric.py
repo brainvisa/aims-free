@@ -78,18 +78,22 @@ class GeometricTestCase(unittest.TestCase):
         mesh.polygon().assign(d)
         vr = aims.VertexRemover(mesh)
         gp = vr.geometricProperties()
+        gp.doNeighbor()
         self.assertEqual(gp.getNeighbor(),
                          [[1, 5], [2, 5, 0], [3, 5, 1], [4, 5, 2], [5, 3],
                           [0, 1, 2, 3, 4]])
         self.assertEqual(gp.getTriangleNeighbor(),
                          [[0], [0, 1], [1, 2], [2, 3], [3],
                           [0, 1, 2, 3]])
-        vr(5)
-        self.assertEqual(gp.getNeighbor(),
-                         [[1, 3, 4], [2, 3, 0], [3, 1], [4, 0, 1, 2], [0, 3]])
-        self.assertEqual(gp.getTriangleNeighbor(),
-                         [[0, 2], [0, 1], [1], [2, 0, 1], [2]])
-        # now test reveral removals in a grid mesh
+        # VertexRemover.__call__ has no more python bindings since the data
+        # structures (iterators on complex C++ things) are not bound
+        #vr(5)
+        #self.assertEqual(gp.getNeighbor(),
+                         #[[1, 3, 4], [2, 3, 0], [3, 1], [4, 0, 1, 2], [0, 3]])
+        #self.assertEqual(gp.getTriangleNeighbor(),
+                         #[[0, 2], [0, 1], [1], [2, 0, 1], [2]])
+
+        # now test several removals in a grid mesh
         grid = np.mgrid[0:10, 0:10:].T
         n = 10
         m = 9
@@ -107,20 +111,20 @@ class GeometricTestCase(unittest.TestCase):
         mesh.vertex().assign(grid_v)
         mesh.polygon().assign(grid_s)
         vr = aims.VertexRemover(mesh)
-        #print('REMOVING PT 57')
-        vr(57)
-        #print('REMOVING PT 36')
-        vr(36)
-        # pt 46 has changed (was 47 formerly)
-        self.assertEqual(mesh.vertex()[46], (7, 4, 0))
-        #print('REMOVING PT 46')
-        vr(46)
-        #aims.write(mesh, '/tmp/vr2.gii')
-        # vertex 48 has "moved" again
-        self.assertEqual(mesh.vertex()[46], (8, 4, 0))
-        # 100 - 3 vertices
-        self.assertEqual(len(mesh.vertex()), 97)
-        self.assertEqual(len(mesh.polygon()), 156)
+        ##print('REMOVING PT 57')
+        #vr(57)
+        ##print('REMOVING PT 36')
+        #vr(36)
+        ## pt 46 has changed (was 47 formerly)
+        #self.assertEqual(mesh.vertex()[46], (7, 4, 0))
+        ##print('REMOVING PT 46')
+        #vr(46)
+        ##aims.write(mesh, '/tmp/vr2.gii')
+        ## vertex 48 has "moved" again
+        #self.assertEqual(mesh.vertex()[46], (8, 4, 0))
+        ## 100 - 3 vertices
+        #self.assertEqual(len(mesh.vertex()), 97)
+        #self.assertEqual(len(mesh.polygon()), 156)
 
 
 
