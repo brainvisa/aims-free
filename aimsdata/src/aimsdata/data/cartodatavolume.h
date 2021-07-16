@@ -46,10 +46,25 @@
 #include <algorithm>
 
 
+/** 4D Volume class template
+
+  AimsData classes are deprecated, they are based on \class carto::Volume (more precisely on reference counters on Volume classes) for many years, and are now declared obsolete.
+
+  New codes should use \class carto::VolumeRef classes instead.
+
+  Using them will produce compiler warnings.
+
+  To avoid the warnings (if you really need to compile code using AimsData without warnings), you may define in your code, before importing <aims/data/data.h>, the macro: AIMSDATA_CLASS_NO_DEPREC_WARNING.
+*/
 template<typename T>
-class AimsData : public carto::RCObject, public aims::Border
+class
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+    __attribute__((__deprecated__("use carto::VolumeRef() instead")))
+#endif
+  AimsData : public carto::RCObject, public aims::Border
 {
- public:
+
+public:
   typedef T value_type;
   /// basic pointer
   typedef T* pointer;
