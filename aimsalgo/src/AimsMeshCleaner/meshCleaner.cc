@@ -18,10 +18,14 @@ void removingPointsWithHighCurvature(int argc, const char * argv[])
   float maxCurv;
   {
     Reader<AimsSurfaceTriangle> r;
-    AimsApplication app( argc, argv, "removingPointsWithHighCurvature");
+    AimsApplication app( argc, argv,
+                         "Remove points with high positive curvature\n"
+                         "Points with negative curvature are left untouched.");
     app.addOption(r, "-i", "input mesh" );
     app.addOption(w, "-o", "output mesh" );
-    app.addOption(maxCurv, "-maxCurv", "maximum unoriented Gaussian curvature allowed in the mesh");
+    app.addOption(maxCurv, "-maxCurv",
+                  "maximum unoriented (but signed) Gaussian curvature allowed "
+                  "in the mesh");
     app.initialize();
 
     s.reset( r.read() );
@@ -38,34 +42,33 @@ void removingPointsWithHighCurvature(int argc, const char * argv[])
 
   unsigned int count = 0;
 
-    aims::VertexRemover vertexRemover( gp );
-    bool flagFinished;
-    unsigned int iter = 0;
-    do
+  aims::VertexRemover vertexRemover( gp );
+  bool flagFinished;
+  unsigned int iter = 0;
+  do
+  {
+    flagFinished = true;
+    std::cout << "pass " << ++iter << "... " << std::flush;
+    for( list<MeshGraphVertex>::iterator
+          i = vertexRemover.geometricProperties().getVertices().begin();
+          i != vertexRemover.geometricProperties().getVertices().end(); )
     {
-      flagFinished = true;
-      std::cout << "pass " << ++iter << "... " << std::flush;
-      size_t i;
-      for( list<MeshGraphVertex>::iterator
-           i = vertexRemover.geometricProperties().getVertices().begin();
-           i != vertexRemover.geometricProperties().getVertices().end(); )
+      mc_aims.localProcess(i, gaussianCurvature, meanCurvature,
+                      principalCurvatures, orientedMeanCurvature,
+                      orientedGaussianCurvature, normal, voronoiArea );
+      if( gaussianCurvature >= maxCurv )
       {
-        mc_aims.localProcess(i, gaussianCurvature, meanCurvature,
-                        principalCurvatures, orientedMeanCurvature,
-                        orientedGaussianCurvature, normal, voronoiArea );
-        if( fabs( gaussianCurvature ) >= maxCurv )
+        if (vertexRemover(i))
         {
-          if (vertexRemover(i))
-          {
-            flagFinished = false;
-            ++count;
-            continue;
-          }
+          flagFinished = false;
+          ++count;
+          continue;
         }
-        ++i;
       }
-      std::cout << " Removed " << count << " vertices" << std::endl;
-    } while (!flagFinished);
+      ++i;
+    }
+    std::cout << " Removed " << count << " vertices" << std::endl;
+  } while (!flagFinished);
 
   std::cout << "Remove " << count << " points" << std::endl;
 
