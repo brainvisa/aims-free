@@ -75,33 +75,95 @@ FileFormatDictionary<TimeTexture<Point2df> >::registerBaseFormats()
   registerFormat( "TEX", fm, ext );
 }
 
-template<> void 
-FileFormatDictionary<TimeTexture<short> >::registerBaseFormats()
+template<> void
+FileFormatDictionary<TimeTexture<int8_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
   ext.push_back( "tex" );
-  TexFormat<short>	*fm = new TexFormat<short>;
+  TexFormat<int8_t>	*fm = new TexFormat<int8_t>;
   registerFormat( "TEX", fm, ext );
 }
 
-template<> void 
-FileFormatDictionary<TimeTexture<unsigned> >::registerBaseFormats()
+template<> void
+FileFormatDictionary<TimeTexture<uint8_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
   ext.push_back( "tex" );
-  TexFormat<unsigned>	*fm = new TexFormat<unsigned>;
+  TexFormat<uint8_t>	*fm = new TexFormat<uint8_t>;
   registerFormat( "TEX", fm, ext );
 }
 
-
-template<> void 
-FileFormatDictionary<TimeTexture<int> >::registerBaseFormats()
+template<> void
+FileFormatDictionary<TimeTexture<int16_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
   ext.push_back( "tex" );
-  TexFormat<int>	*fm = new TexFormat<int>;
+  TexFormat<int16_t>	*fm = new TexFormat<int16_t>;
   registerFormat( "TEX", fm, ext );
 }
+
+template<> void
+FileFormatDictionary<TimeTexture<uint16_t> >::registerBaseFormats()
+{
+  std::vector<std::string>	ext;
+  ext.push_back( "tex" );
+  TexFormat<uint16_t>	*fm = new TexFormat<uint16_t>;
+  registerFormat( "TEX", fm, ext );
+}
+
+template<> void
+FileFormatDictionary<TimeTexture<int32_t> >::registerBaseFormats()
+{
+  std::vector<std::string>	ext;
+  ext.push_back( "tex" );
+  TexFormat<int32_t>	*fm = new TexFormat<int32_t>;
+  registerFormat( "TEX", fm, ext );
+}
+
+template<> void
+FileFormatDictionary<TimeTexture<uint32_t> >::registerBaseFormats()
+{
+  std::vector<std::string>	ext;
+  ext.push_back( "tex" );
+  TexFormat<uint32_t>	*fm = new TexFormat<uint32_t>;
+  registerFormat( "TEX", fm, ext );
+}
+
+template<> void
+FileFormatDictionary<TimeTexture<int64_t> >::registerBaseFormats()
+{
+  std::vector<std::string>	ext;
+  ext.push_back( "tex" );
+  TexFormat<int64_t>	*fm = new TexFormat<int64_t>;
+  registerFormat( "TEX", fm, ext );
+}
+
+template<> void
+FileFormatDictionary<TimeTexture<uint64_t> >::registerBaseFormats()
+{
+  std::vector<std::string>	ext;
+  ext.push_back( "tex" );
+  TexFormat<uint64_t>	*fm = new TexFormat<uint64_t>;
+  registerFormat( "TEX", fm, ext );
+}
+
+// template<> void
+// FileFormatDictionary<TimeTexture<long> >::registerBaseFormats()
+// {
+//   std::vector<std::string>	ext;
+//   ext.push_back( "tex" );
+//   TexFormat<long>	*fm = new TexFormat<long>;
+//   registerFormat( "TEX", fm, ext );
+// }
+//
+// template<> void
+// FileFormatDictionary<TimeTexture<unsigned long> >::registerBaseFormats()
+// {
+//   std::vector<std::string>	ext;
+//   ext.push_back( "tex" );
+//   TexFormat<unsigned long>	*fm = new TexFormat<unsigned long>;
+//   registerFormat( "TEX", fm, ext );
+// }
 
 
 template<> void 
@@ -116,17 +178,27 @@ FileFormatDictionary<TimeTexture<Point2d> >::registerBaseFormats()
 template class FileFormatDictionary<TimeTexture<float> >;
 template class FileFormatDictionary<TimeTexture<double> >;
 template class FileFormatDictionary<TimeTexture<Point2df> >;
+template class FileFormatDictionary<TimeTexture<int8_t> >;
+template class FileFormatDictionary<TimeTexture<uint8_t> >;
 template class FileFormatDictionary<TimeTexture<int16_t> >;
-template class FileFormatDictionary<TimeTexture<uint32_t> >;
+template class FileFormatDictionary<TimeTexture<uint16_t> >;
 template class FileFormatDictionary<TimeTexture<int32_t> >;
+template class FileFormatDictionary<TimeTexture<uint32_t> >;
+template class FileFormatDictionary<TimeTexture<int64_t> >;
+template class FileFormatDictionary<TimeTexture<uint64_t> >;
 template class FileFormatDictionary<TimeTexture<Point2d> >;
 
 template class FileFormat<TimeTexture<float> >;
 template class FileFormat<TimeTexture<double> >;
 template class FileFormat<TimeTexture<Point2df> >;
+template class FileFormat<TimeTexture<int8_t> >;
+template class FileFormat<TimeTexture<uint8_t> >;
 template class FileFormat<TimeTexture<int16_t> >;
-template class FileFormat<TimeTexture<uint32_t> >;
+template class FileFormat<TimeTexture<uint16_t> >;
 template class FileFormat<TimeTexture<int32_t> >;
+template class FileFormat<TimeTexture<uint32_t> >;
+template class FileFormat<TimeTexture<int64_t> >;
+template class FileFormat<TimeTexture<uint64_t> >;
 template class FileFormat<TimeTexture<Point2d> >;
 
 } // namespace aims

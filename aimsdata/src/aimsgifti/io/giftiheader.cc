@@ -695,14 +695,29 @@ void GiftiHeader::giftiAddExternalTextures( gifti_image *gim, int & hdrtexda,
         == carto::DataTypeCode<TimeTexture<Point2df> >::name() )
         giftiAddTextureObject<Point2df>( gim, texture );
       else if( ttype
+        == carto::DataTypeCode<TimeTexture<int8_t> >::name() )
+        giftiAddTextureObject<int8_t>( gim, texture );
+      else if( ttype
+        == carto::DataTypeCode<TimeTexture<uint8_t> >::name() )
+        giftiAddTextureObject<uint8_t>( gim, texture );
+      else if( ttype
         == carto::DataTypeCode<TimeTexture<int16_t> >::name() )
         giftiAddTextureObject<int16_t>( gim, texture );
+      else if( ttype
+        == carto::DataTypeCode<TimeTexture<uint16_t> >::name() )
+        giftiAddTextureObject<uint16_t>( gim, texture );
       else if( ttype
         == carto::DataTypeCode<TimeTexture<int32_t> >::name() )
         giftiAddTextureObject<int32_t>( gim, texture );
       else if( ttype
         == carto::DataTypeCode<TimeTexture<uint32_t> >::name() )
         giftiAddTextureObject<uint32_t>( gim, texture );
+      else if( ttype
+        == carto::DataTypeCode<TimeTexture<int64_t> >::name() )
+        giftiAddTextureObject<int64_t>( gim, texture );
+      else if( ttype
+        == carto::DataTypeCode<TimeTexture<uint64_t> >::name() )
+        giftiAddTextureObject<uint64_t>( gim, texture );
       else if( ttype
         == carto::DataTypeCode<TimeTexture<Point2d> >::name() )
         giftiAddTextureObject<Point2d>( gim, texture );
