@@ -36,8 +36,8 @@ namespace aims
     const AimsSurfaceTriangle & getMesh() const;
     rc_ptr_AimsTimeSurface_3_VOID getRcMesh();
 
-    GeometricProperties::NeighborList & getNeighbor();
-    GeometricProperties::NeighborList & getTriangleNeighbor();
+    aims::GeometricProperties::NeighborList & getNeighbor();
+    aims::GeometricProperties::NeighborList & getTriangleNeighbor();
 
     void doPhi();
     void doTheta();
@@ -68,11 +68,11 @@ namespace aims
   class CurvatureFactory
   {
   public:
-    Curvature * createCurvature( const AimsSurfaceTriangle & mesh,
-                                 const std::string & method );
+    aims::Curvature * createCurvature( const AimsSurfaceTriangle & mesh,
+                                       const std::string & method );
 
-    Curvature * createCurvature( rc_ptr_AimsTimeSurface_3_VOID mesh,
-                                 const std::string & method );
+    aims::Curvature * createCurvature( rc_ptr_AimsTimeSurface_3_VOID mesh,
+                                       const std::string & method );
   };
 
   class FiniteElementCurvature : public aims::Curvature
