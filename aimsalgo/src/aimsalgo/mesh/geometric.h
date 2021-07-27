@@ -38,6 +38,8 @@
 
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
+#include <aims/mesh/mesh_graph.h>
+#include <cartobase/smart/rcptr.h>
 #include <list>
 
 template <class T>
@@ -53,29 +55,64 @@ inline float sign(T x)
  
 
 // Cross product between two 3D points
-inline Point3df cross(Point3df a, Point3df b)
+inline Point3df cross( const Point3df & a, const Point3df & b )
 {
   
   Point3df n;
   n[0] = a[1]*b[2] - a[2]*b[1];
   n[1] = a[2]*b[0] - a[0]*b[2];
   n[2] = a[0]*b[1] - a[1]*b[0];
-  return (n);
+  return n;
+}
+
+// Cross product between two 2D points
+inline float cross( const Point2df & a, const Point2df & b )
+{
+  (a[0] * b[1]) - (a[1] * b[0]);
 }
 
 namespace aims
 {
+
   class GeometricProperties 
   {
   public:
-    typedef std::vector< std::list<unsigned> > NeighborList;
+    typedef std::list<unsigned> Neighborhood;
+    typedef std::vector< Neighborhood > NeighborList;
     typedef std::vector< std::list<float> > WeightNeighborList;
     typedef std::vector<float> WeightList;
+    typedef typename
+      meshgraph::MeshVertexNode<uint>::VertexIndexCollection::value_type
+      VertexPointer;
 
-  protected:
-    GeometricProperties(const AimsSurfaceTriangle & mesh);
-    virtual ~GeometricProperties(); //car class derivee
+    /// constructor working on a const mesh
+    GeometricProperties( const AimsSurfaceTriangle & mesh );
+    /// constructor working on a non-const mesh
+    GeometricProperties( carto::rc_ptr<AimsSurfaceTriangle> mesh );
+    virtual ~GeometricProperties();
 
+    const WeightNeighborList & getPhi() const ;
+    const WeightNeighborList & getTheta() const ;
+    const WeightNeighborList & getDot() const ;
+    const WeightNeighborList & getSurface() const ;
+    const WeightList & getAlpha() const ;
+    const WeightList & getSimpleAlpha() const ;
+    const WeightList & getBeta() const ;
+    const AimsSurfaceTriangle & getMesh() const;
+    carto::rc_ptr<AimsSurfaceTriangle> getRcMesh();
+    const NeighborList & getNeighbor() const;
+    NeighborList & getNeighbor();
+    const NeighborList & getTriangleNeighbor() const;
+    NeighborList & getTriangleNeighbor();
+    meshgraph::MeshGraphVertices & getVertices()
+    { return _graphvertices; }
+    const meshgraph::MeshGraphVertices & getVertices() const
+    { return _graphvertices; }
+    meshgraph::MeshGraphFaces & getFaces() { return _graphfaces; }
+    const meshgraph::MeshGraphFaces & getFaces() const
+    { return _graphfaces; }
+
+//   protected:
     void doPhi();
     void doTheta();
     void doAlpha();
@@ -84,19 +121,14 @@ namespace aims
     void doDot();
     void doSurface();
     void doNeighbor();
-    
-    const WeightNeighborList & getPhi() const ;
-    const WeightNeighborList & getTheta() const ;
-    const WeightNeighborList & getDot() const ;
-    const WeightNeighborList & getSurface() const ;
-    const WeightList & getAlpha() const ;
-    const WeightList & getSimpleAlpha() const ;
-    const WeightList & getBeta() const ;
-    const NeighborList & getNeighbor() const;
-    const AimsSurfaceTriangle & getMesh() const;
+    void sortPolygons( Neighborhood &npoly );
+    void buildSortVerticesNeighborhood( size_t i );
+    void doGraph();
+    void graphToMesh();
 
   private:
     const AimsSurfaceTriangle & _mesh;
+    carto::rc_ptr<AimsSurfaceTriangle> _pmesh;
     NeighborList  _neighbourso ;
     NeighborList  _triangleNeighbourso ;
     WeightNeighborList  _phi ;
@@ -107,13 +139,19 @@ namespace aims
     WeightNeighborList		_dot;
     WeightNeighborList		_surface; 
     NeighborList doTriangleNeighbor() ;
+    // using meshgraph
+    meshgraph::MeshGraphVertices _graphvertices;
+    meshgraph::MeshGraphFaces _graphfaces;
+
+    friend class VertexRemover;
     
   };
   
   class Curvature : public GeometricProperties
   {
   public:
-    Curvature(const AimsSurfaceTriangle & mesh);
+    Curvature( const AimsSurfaceTriangle & mesh );
+    Curvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~Curvature();
     virtual Texture<float> doIt() = 0; //car defini dnas les classes derivees -> classe abstraite non instantiable
     static void regularize(Texture<float> & tex, float ratio); // pas lie a une instance de la classe
@@ -123,14 +161,18 @@ namespace aims
   class CurvatureFactory
   {
   public:
-    Curvature * createCurvature(const AimsSurfaceTriangle & mesh, const std::string & method );
-      
+    Curvature * createCurvature( const AimsSurfaceTriangle & mesh,
+                                 const std::string & method );
+    Curvature * createCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh,
+                                 const std::string & method );
+
   };
 
   class FiniteElementCurvature : public Curvature
   {
   public:
-    FiniteElementCurvature(const AimsSurfaceTriangle & mesh);
+    FiniteElementCurvature( const AimsSurfaceTriangle & mesh );
+    FiniteElementCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~FiniteElementCurvature();
     virtual Texture<float> doIt();  
   };
@@ -141,7 +183,8 @@ namespace aims
   class BoixCurvature : public Curvature
   {
   public:
-    BoixCurvature(const AimsSurfaceTriangle & mesh);
+    BoixCurvature( const AimsSurfaceTriangle & mesh );
+    BoixCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~BoixCurvature();
     virtual Texture<float> doIt();  
   };
@@ -149,7 +192,8 @@ namespace aims
   class BarycenterCurvature : public Curvature
   {
   public:
-    BarycenterCurvature(const AimsSurfaceTriangle & mesh);
+    BarycenterCurvature( const AimsSurfaceTriangle & mesh );
+    BarycenterCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~BarycenterCurvature();
     virtual Texture<float> doIt();  
   };
@@ -159,12 +203,97 @@ namespace aims
   class BoixGaussianCurvature : public Curvature
   {
   public:
-    BoixGaussianCurvature(const AimsSurfaceTriangle & mesh);
+    BoixGaussianCurvature( const AimsSurfaceTriangle & mesh );
+    BoixGaussianCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
     virtual ~BoixGaussianCurvature();
     virtual Texture<float> doIt();  
   };
 
-  
+  // This is another Gaussian Curvature estimate (from aims-til/Cathier)
+
+  class GaussianCurvature : public Curvature
+  {
+  public:
+    GaussianCurvature( const AimsSurfaceTriangle & mesh );
+    GaussianCurvature( carto::rc_ptr<AimsSurfaceTriangle> mesh );
+    virtual ~GaussianCurvature();
+    virtual Texture<float> doIt();
+    void localProcess( size_t i_vert, float & gaussianCurvature,
+                       float & meanCurvature,
+                       std::pair<float, float> & principalCurvatures,
+                       float & orientedMeanCurvature,
+                       float & orientedGaussianCurvature,
+                       Point3df & normal, float & voronoiArea );
+    void localProcess( const VertexPointer & i,
+                       float & gaussianCurvature,
+                       float & meanCurvature,
+                       std::pair<float, float> & principalCurvatures,
+                       float & orientedMeanCurvature,
+                       float & orientedGaussianCurvature,
+                       Point3df & normal, float & voronoiArea );
+  };
+
+
+  /** A class to remove a vertex from a mesh, and remeshing the hole.
+
+      NB: remeshing is not always possible, therefore removing a given point in
+      a mesh is not always possible.
+      Therefore, it may be important to check the return value of operator() to
+      check if the point has actually been removed.
+  */
+  class VertexRemover
+  {
+  public: // typedefs
+
+    typedef typename meshgraph::MeshVertexNode<uint>::VertexIndexCollection::value_type
+      VertexPointer;
+
+    // constructors
+
+    VertexRemover( carto::rc_ptr<GeometricProperties> geom );
+    VertexRemover( carto::rc_ptr<AimsSurfaceTriangle> mesh );
+
+    // set & get
+
+    const GeometricProperties & geometricProperties() const
+    { return *_geom; }
+    GeometricProperties & geometricProperties() { return *_geom; }
+
+    // functions
+
+//     bool operator()( size_t i );
+    bool operator()( VertexPointer & i );
+
+  private: // functions
+
+  // NB: neighbors should be a std::vector so far
+  //   template < typename Neighborhood >
+  std::vector<Point2df>
+  simple_neighborhood_flattening(
+    const Point3df & point,
+    const GeometricProperties::Neighborhood & neighbors );
+
+  std::vector<Point2df>
+  simple_neighborhood_flattening(
+    const Point3df & point,
+    const std::vector<VertexPointer> & neighbors );
+
+    // data, input
+    carto::rc_ptr<GeometricProperties> _geom;
+
+  };
+
+
+  /** SimpleDelaunayTriangulation
+
+      Get a Delaunay triangulation for a polygon. Poins in the polygon should
+      be ordered in a clockwise or counterclockwise order.
+
+      Note that it is different from a classical Delaunay algorithm wich meshes
+      a cloud point (and its convex hull), not a polygon as here.
+  */
+  std::list<AimsVector<uint, 3> >
+  simple_delaunay_triangulation( const std::vector<Point2df> & points );
 
 }
 

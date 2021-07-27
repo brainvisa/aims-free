@@ -49,7 +49,6 @@ void Border::_setBorder(int dimx,int dimy,int dimz,int width)
   _oLineBetweenSlice = 2 * width * (dimx + 2 * width);
   _oVolume     = (dimz + 2 * width) * (dimy + 2 * width) * (dimx + 2 * width);
   _oSliceBetweenVolume = 2 * width * _oSlice;
-  _oLastPoint  = _oVolume - _oFirstPoint - 1;
 }
 
 void Border::_setBorder(int dimx,int dimy,int dimz,
@@ -96,7 +95,6 @@ void Border::_setBorder(int dimx,int dimy,int dimz,
                  * (dimy + _borders[2] + _borders[3]) 
                  * (dimx + _borders[0] + _borders[1]);
   _oSliceBetweenVolume = (_borders[4] + _borders[5]) * _oSlice;
-  _oLastPoint  = _oVolume - _oFirstPoint - 1;
 }
 
 

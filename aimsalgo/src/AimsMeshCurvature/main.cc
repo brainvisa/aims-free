@@ -67,7 +67,7 @@ int main( int argc, const char** argv )
       app.alias( "--output", "-o" );
       app.addOption( method, "-m", "method: \"fem\" -> finite elements, "
           "\"boix\" -> Boix, \"barycenter\" -> barycenter, "
-          "\"boixgaussian\" -> Boix Gaussian" );
+          "\"boixgaussian\" -> Boix Gaussian, \"gaussian\" -> Gaussian" );
       app.alias( "--method", "-m" );
       app.addOption( ratio, "-r", "proportion (%) of point to be thresholded ", true );
       app.alias( "--ratio", "-r" );

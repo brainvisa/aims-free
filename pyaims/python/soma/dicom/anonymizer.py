@@ -18,7 +18,10 @@ import hashlib
 try:
     import dicom
 except ImportError as e:
-    raise Exception("DICOM anonymiser requires pydicom.")
+    try:
+        import pydicom as dicom
+    except ImportError:
+        raise Exception("DICOM anonymiser requires pydicom.")
 
 def anonymize(dicom_in, dicom_out,
               tags_to_keep=None, forced_values=None):
@@ -39,7 +42,7 @@ def anonymize(dicom_in, dicom_out,
     if is_dicom_out_archive:
         wip_dicom_out = mkdtemp()
     else:
-        wip_dicom_out = os.path.abspath(dicom_out)    
+        wip_dicom_out = os.path.abspath(dicom_out)
     
     if os.path.isfile(wip_dicom_in):
         if os.path.exists(wip_dicom_out) and os.path.isdir(wip_dicom_out):
@@ -163,7 +166,7 @@ class Anonymizer(object):
     def _get_cleaned_value(self, data_element):
         """
         Gets a cleaned value of data_element value according to its representation.
-        """    
+        """
         if data_element.VR == 'UI':
             return self._generate_uuid(data_element.value)
         if data_element.VR == 'DT' or data_element.VR == 'TM':

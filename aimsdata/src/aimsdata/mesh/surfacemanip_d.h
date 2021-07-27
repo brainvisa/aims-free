@@ -50,9 +50,9 @@ namespace aims
 
     for ( uint i=0; i<n; ++i )
       for ( uint j=0; j<D; ++j )
-	for ( uint k=0; k<D; ++k )
-	  if ( j != k )
-	    neigh[poly[i][j]].insert( poly[i][k] );
+        for ( uint k=0; k<D; ++k )
+          if ( j != k )
+            neigh[poly[i][j]].insert( poly[i][k] );
 
     return neigh;
   }
@@ -66,9 +66,9 @@ namespace aims
 
     for ( uint i=0; i<n; ++i )
       for ( uint j=0; j<D; ++j )
-	for ( uint k=0; k<D; ++k )
-	  if ( j != k )
-	    neigh[poly[i][j]].insert( poly[i][k] );
+        for ( uint k=0; k<D; ++k )
+          if ( j != k )
+            neigh[poly[i][j]].insert( poly[i][k] );
 
     return neigh;
   }
@@ -83,24 +83,24 @@ namespace aims
 
     for ( uint i=0; i<n; ++i )
       for ( uint j=0; j<D; ++j )
-	for ( uint k=0; k<D; ++k )
-	  if ( j != k )
-	    neigh[poly[i][j]].insert( poly[i][k] );
+        for ( uint k=0; k<D; ++k )
+          if ( j != k )
+            neigh[poly[i][j]].insert( poly[i][k] );
 
     for ( uint i=0; i<neigh.size() ; ++i)
     {
         std::set<uint> voisin=neigh[i];
-	std::set<uint> voisin_final=neigh[i];
-	std::set<uint>::iterator voisin_pt=voisin.begin();
-	for ( ; voisin_pt!=voisin.end(); ++voisin_pt)
-	{
-		uint j=*voisin_pt;
-		std::set<uint> vois2=neigh[j];
-		std::set<uint>::iterator v_pt=vois2.begin();
-		for ( ; v_pt!=vois2.end(); ++v_pt)
-			voisin_final.insert(*v_pt);
-	}
-	neigh_final[i]=voisin_final;
+        std::set<uint> voisin_final=neigh[i];
+        std::set<uint>::iterator voisin_pt=voisin.begin();
+        for ( ; voisin_pt!=voisin.end(); ++voisin_pt)
+        {
+            uint j=*voisin_pt;
+            std::set<uint> vois2=neigh[j];
+            std::set<uint>::iterator v_pt=vois2.begin();
+            for ( ; v_pt!=vois2.end(); ++v_pt)
+                voisin_final.insert(*v_pt);
+        }
+        neigh_final[i]=voisin_final;
     }	
 
     return neigh_final;

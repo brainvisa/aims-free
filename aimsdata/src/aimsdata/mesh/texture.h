@@ -68,6 +68,8 @@ public:
   virtual ~Texture() { }
 
   size_t nItem() const { return _data.size(); }
+  /// alias for nItem()
+  size_t size() const { return _data.size(); }
 
   const T& item( int n ) const { return _data[ n ]; }
   const T & operator [] ( int n ) const { return _data[ n ]; }
@@ -235,11 +237,14 @@ typedef AIMSDATA_API TimeTexture< Point2df > Texture2d;
 
 namespace carto {
 
+DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< int8_t > )
+DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< uint8_t > )
 DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< int16_t > )
-DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< uint32_t > )
+DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< uint16_t > )
 DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< int32_t > )
-DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< uint64_t > )
+DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< uint32_t > )
 DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< int64_t > )
+DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< uint64_t > )
 DECLARE_GENERIC_OBJECT_TYPE( TimeTexture< double > )
 DECLARE_GENERIC_OBJECT_TYPE( Texture1d )
 DECLARE_GENERIC_OBJECT_TYPE( Texture2d )
@@ -247,11 +252,14 @@ DECLARE_GENERIC_OBJECT_TYPE( Texture2d )
 DECLARE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
 
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< int8_t > > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< uint8_t > > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< int16_t > > )
-DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< uint32_t > > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< uint16_t > > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< int32_t > > )
-DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< uint64_t > > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< uint32_t > > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< int64_t > > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< uint64_t > > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< TimeTexture< double > > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< Texture1d > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< Texture2d > )

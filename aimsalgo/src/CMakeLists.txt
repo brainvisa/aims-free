@@ -21,6 +21,7 @@ foreach( _command ${_commands} )
 endforeach()
 
 add_subdirectory( AimsBundleSelectCenter )
+# add_subdirectory( AimsMeshCleaner )
 
 
 # Targets linking with aimsecat

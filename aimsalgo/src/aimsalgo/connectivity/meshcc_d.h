@@ -364,61 +364,75 @@ Texture<T> AimsMeshLabelConnectedComponent2Texture( const AimsSurface<3,Void> & 
 }
 
 template<class T>
-Texture<T> AimsMeshFilterConnectedComponent( const AimsSurface<3,Void> & mesh,
-                              const Texture<T> & inittex,  T threshold )
+Texture<T> AimsMeshFilterConnectedComponent(
+  const AimsSurface<3,Void> & mesh, const Texture<T> & inittex, T cc_label,
+  const T & background, unsigned long ncomp, unsigned long min_npts,
+  float min_surf )
 {
-  Texture<T>                  tex;
-  const std::vector<Point3df>      & vert = mesh.vertex();
+  Texture<long>                   tex;
+  Texture<T>                      out_tex;
+  const std::vector<Point3df>     & vert = mesh.vertex();
   const std::vector< AimsVector<uint,3> >    & poly = mesh.polygon();
   unsigned                    i, n = vert.size();
 
-  std::map<T,std::set<unsigned> >  labels;
-  std::map<unsigned,T>        nbLabels;
+  std::map<long, std::set<unsigned> >  labels;
+  std::multimap<unsigned, long>        nbLabels;
+  std::map<long, float>                areaLabels;
 
   ASSERT( inittex.nItem() == n );
   tex.reserve( n );
+  out_tex.reserve( n );
 
   // neighbours map
 
   std::map<unsigned, std::set<unsigned> >    neighbours;
   unsigned               v1, v2, v3;
+  std::vector<float> areas( inittex.nItem(), 0. );
+  float surf;
 
 
   // init texture
   for( i=0; i<n; ++i )
-    {
-      if(inittex.item(i) != threshold)
-     tex.push_back( FORBIDDEN );
-      else
-     tex.push_back( 0 );
-    }
+  {
+    if( inittex.item(i) != cc_label )
+      tex.push_back( FORBIDDEN );
+    else
+      tex.push_back( 0 );
+  }
 
-  //Detect connectivity
+  // Detect connectivity
   for( i=0; i<poly.size(); ++i )
-    {
-      v1 = poly[i][0];
-      v2 = poly[i][1];
-      v3 = poly[i][2];
-      if(tex.item(v1)!=FORBIDDEN
-      && tex.item(v2)!=FORBIDDEN )
+  {
+    v1 = poly[i][0];
+    v2 = poly[i][1];
+    v3 = poly[i][2];
 
-     {
-       neighbours[v1].insert( v2 );
-       neighbours[v2].insert( v1 );
-     }
-      if(tex.item(v1)!=FORBIDDEN
-      && tex.item(v3)!=FORBIDDEN )
-     {
-       neighbours[v1].insert( v3 );
-       neighbours[v3].insert( v1 );
-     }
-      if(tex.item(v2)!=FORBIDDEN
-      && tex.item(v3)!=FORBIDDEN )
-     {
-       neighbours[v2].insert( v3 );
-       neighbours[v3].insert( v2 );
-     }
+    // triangle area / 3 (1/3 assigned to each vertex)
+    surf = ( vert[v2] - vert[v1] ).dot( vert[v3] - vert[v1] ) / 6;
+    areas[v1] += surf;
+    areas[v2] += surf;
+    areas[v3] += surf;
+
+    if( tex.item(v1)!=FORBIDDEN
+        && tex.item(v2)!=FORBIDDEN )
+
+    {
+      neighbours[v1].insert( v2 );
+      neighbours[v2].insert( v1 );
     }
+    if(tex.item(v1)!=FORBIDDEN
+    && tex.item(v3)!=FORBIDDEN )
+    {
+      neighbours[v1].insert( v3 );
+      neighbours[v3].insert( v1 );
+    }
+    if(tex.item(v2)!=FORBIDDEN
+    && tex.item(v3)!=FORBIDDEN )
+    {
+      neighbours[v2].insert( v3 );
+      neighbours[v3].insert( v2 );
+    }
+  }
 
   T label = 0;
   unsigned point;
@@ -427,45 +441,62 @@ Texture<T> AimsMeshFilterConnectedComponent( const AimsSurface<3,Void> & mesh,
 
 
   for( i=0; i<n; ++i )
-      if(tex.item(i) == 0)
+    if(tex.item(i) == 0)
+    {
+      label++;
+      current.push(i);
+      while(!current.empty())
       {
-       label++;
-       current.push(i);
-       while(!current.empty())
-         {
-           point = current.top();
-           current.pop();
-           tex.item(point)=label;
-           labels[label].insert(point);
-           for( in=neighbours[point].begin(), fn=neighbours[point].end(); in!=fn; ++in )
-          {
-            if(tex.item(*in)==0)
-                current.push(*in);
-          }
-         }
-       nbLabels[ labels[label].size() ] = label;
-       std::cout << "The " << label << " th cc (" << threshold << ")has " << labels[label].size() << " points " << std::endl;
-     }
+        point = current.top();
+        current.pop();
+        tex.item(point)=label;
+        labels[label].insert(point);
+        areaLabels[label] += areas[point];
+        for( in=neighbours[point].begin(), fn=neighbours[point].end(); in!=fn;
+             ++in )
+        {
+          if(tex.item(*in)==0)
+            current.push(*in);
+        }
+      }
+      nbLabels.insert( std::make_pair( labels[label].size(), label) );
+      std::cout << "The " << label << " th cc (" << cc_label << ") has "
+        << labels[label].size() << " points, area: " << areaLabels[label]
+        << " mm2" << std::endl;
+    }
 
   std::cout << "Nb of cc : "<< label << std::endl;
 
+  std::multimap<unsigned, long>::reverse_iterator il, el=nbLabels.rend();
+  std::set<long> allowed_labels;
+  unsigned long c;
 
-  T maxLab = nbLabels.rbegin()->first;
-  std::cout << "maxlab= " << maxLab << "-> " <<  nbLabels[maxLab] << std::endl;
+  // filter out labels
+  for( il=nbLabels.rbegin(), c=0; il!=el; ++il, ++c )
+  {
+    if( ncomp != 0 && c >= ncomp )
+      break;
+    if( min_npts != 0 && il->first < min_npts )
+      continue;
+    if( min_surf != 0. && areaLabels[il->second] < min_surf )
+      continue;
+    allowed_labels.insert( il->second );
+  }
+  std::cout << "keeping " << allowed_labels.size() << " components"
+    << std::endl;
 
+  for( i=0; i<n; ++i )
+  {
+    if( tex.item(i) == FORBIDDEN )
+      out_tex.push_back( inittex.item(i) );
+    else
+      if( allowed_labels.find( tex.item(i) ) != allowed_labels.end() )
+        out_tex.push_back( cc_label );
+      else
+        out_tex.push_back( background );
+  }
 
-  for (i=0;i<n;++i)
-      {
-     if (tex.item(i) == FORBIDDEN )
-       tex.item(i) = inittex.item(i);
-     else
-       if (tex.item(i) == nbLabels[maxLab])
-         tex.item(i) = threshold;
-         else
-       tex.item(i) = 0;
-      }
-
-  return tex;
+  return out_tex;
 }
 
 

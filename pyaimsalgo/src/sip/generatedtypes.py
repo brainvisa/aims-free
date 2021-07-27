@@ -50,5 +50,6 @@ todo = {
   'sampler' : [('float', '3')],
   'smoothing' : numtypes,
   'histogram' : numtypes,
-  'rcptr': ['aims::FfdTransformation', 'aims::SplineFfd', 'aims::TrilinearFfd'],
+  'rcptr': ['aims::FfdTransformation', 'aims::SplineFfd', 'aims::TrilinearFfd',
+            'aims::GeometricProperties', ],
 }

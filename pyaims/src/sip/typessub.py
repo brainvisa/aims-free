@@ -2082,7 +2082,7 @@ typessub = {'bool':
             },
 
             'Texture<float>':
-           {'typecode': 'Texture_FLOAT',
+            {'typecode': 'Texture_FLOAT',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2110,7 +2110,7 @@ typessub = {'bool':
                'testPyType': 'pyaimsTexture_FLOAT_Check',
             },
             'Texture<double>':
-           {'typecode': 'Texture_DOUBLE',
+            {'typecode': 'Texture_DOUBLE',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2134,8 +2134,64 @@ typessub = {'bool':
                'module': 'aims',
                'testPyType': 'pyaimsTexture_DOUBLE_Check',
             },
+            'Texture<int8_t>':
+            {'typecode': 'Texture_S8',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new Texture<int8_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'Texture_S8',
+               'sipClass': 'Texture_S8',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTexture_S8.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TEXTURE_S8_CHECK_DEFINED\n'
+               '#define PYAIMS_TEXTURE_S8_CHECK_DEFINED\n'
+               'inline int pyaimsTexture_S8_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Texture_S8" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTexture_S8_Check',
+            },
+            'Texture<uint8_t>':
+            {'typecode': 'Texture_U8',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new Texture<uint8_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'Texture_U8',
+               'sipClass': 'Texture_U8',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTexture_U8.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TEXTURE_U8_CHECK_DEFINED\n'
+               '#define PYAIMS_TEXTURE_U8_CHECK_DEFINED\n'
+               'inline int pyaimsTexture_U8_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Texture_U8" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTexture_U8_Check',
+            },
             'Texture<int16_t>':
-           {'typecode': 'Texture_S16',
+            {'typecode': 'Texture_S16',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2162,8 +2218,36 @@ typessub = {'bool':
                'module': 'aims',
                'testPyType': 'pyaimsTexture_S16_Check',
             },
+            'Texture<uint16_t>':
+            {'typecode': 'Texture_U16',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new Texture<uint16_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'Texture_U16',
+               'sipClass': 'Texture_U16',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTexture_U16.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TEXTURE_U16_CHECK_DEFINED\n'
+               '#define PYAIMS_TEXTURE_U16_CHECK_DEFINED\n'
+               'inline int pyaimsTexture_U16_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Texture_U16" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTexture_U16_Check',
+            },
             'Texture<int32_t>':
-           {'typecode': 'Texture_S32',
+            {'typecode': 'Texture_S32',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2191,7 +2275,7 @@ typessub = {'bool':
                'testPyType': 'pyaimsTexture_FLOAT_Check',
             },
             'Texture<uint32_t>':
-           {'typecode': 'Texture_U32',
+            {'typecode': 'Texture_U32',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2218,8 +2302,64 @@ typessub = {'bool':
                'module': 'aims',
                'testPyType': 'pyaimsTexture_FLOAT_Check',
             },
+            'Texture<int64_t>':
+            {'typecode': 'Texture_S64',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new Texture<int64_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'Texture_S64',
+               'sipClass': 'Texture_S64',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTexture_S64.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TEXTURE_S64_CHECK_DEFINED\n'
+               '#define PYAIMS_TEXTURE_S64_CHECK_DEFINED\n'
+               'inline int pyaimsTexture_S64_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Texture_S64" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTexture_S64_Check',
+            },
+            'Texture<uint64_t>':
+            {'typecode': 'Texture_U64',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new Texture<uint64_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'Texture_U64',
+               'sipClass': 'Texture_U64',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTexture_U64.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TEXTURE_U64_CHECK_DEFINED\n'
+               '#define PYAIMS_TEXTURE_U64_CHECK_DEFINED\n'
+               'inline int pyaimsTexture_U64_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Texture_U64" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTexture_U64_Check',
+            },
             'Texture<Point2df>':
-           {'typecode': 'Texture_POINT2DF',
+            {'typecode': 'Texture_POINT2DF',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2249,7 +2389,7 @@ typessub = {'bool':
             },
 
             'TimeTexture<float>':
-           {'typecode': 'TimeTexture_FLOAT',
+            {'typecode': 'TimeTexture_FLOAT',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2277,7 +2417,7 @@ typessub = {'bool':
                'testPyType': 'pyaimsTimeTexture_FLOAT_Check',
             },
             'TimeTexture<double>':
-           {'typecode': 'TimeTexture_DOUBLE',
+            {'typecode': 'TimeTexture_DOUBLE',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2301,8 +2441,64 @@ typessub = {'bool':
                'module': 'aims',
                'testPyType': 'pyaimsTimeTexture_DOUBLE_Check',
             },
+            'TimeTexture<int8_t>':
+            {'typecode': 'TimeTexture_S8',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new TimeTexture<int8_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'TimeTexture_S8',
+               'sipClass': 'TimeTexture_S8',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTimeTexture_S8.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TIMETEXTURE_S8_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMETEXTURE_S8_CHECK_DEFINED\n'
+               'inline int pyaimsTimeTexture_S8_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "TimeTexture_S8" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeTexture_S8_Check',
+            },
+            'TimeTexture<uint8_t>':
+            {'typecode': 'TimeTexture_U8',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new TimeTexture<uint8_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'TimeTexture_U8',
+               'sipClass': 'TimeTexture_U8',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTimeTexture_U8.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TIMETEXTURE_U8_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMETEXTURE_U8_CHECK_DEFINED\n'
+               'inline int pyaimsTimeTexture_U8_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "TimeTexture_U8" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeTexture_U8_Check',
+            },
             'TimeTexture<int16_t>':
-           {'typecode': 'TimeTexture_S16',
+            {'typecode': 'TimeTexture_S16',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2329,8 +2525,36 @@ typessub = {'bool':
                'module': 'aims',
                'testPyType': 'pyaimsTimeTexture_S16_Check',
             },
+            'TimeTexture<uint16_t>':
+            {'typecode': 'TimeTexture_U16',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new TimeTexture<uint16_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'TimeTexture_U16',
+               'sipClass': 'TimeTexture_U16',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTimeTexture_U16.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TIMETEXTURE_U16_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMETEXTURE_U16_CHECK_DEFINED\n'
+               'inline int pyaimsTimeTexture_U16_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "TimeTexture_U16" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeTexture_U16_Check',
+            },
             'TimeTexture<int32_t>':
-           {'typecode': 'TimeTexture_S32',
+            {'typecode': 'TimeTexture_S32',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2358,7 +2582,7 @@ typessub = {'bool':
                'testPyType': 'pyaimsTimeTexture_S32_Check',
             },
             'TimeTexture<uint32_t>':
-           {'typecode': 'TimeTexture_U32',
+            {'typecode': 'TimeTexture_U32',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2385,8 +2609,64 @@ typessub = {'bool':
                'module': 'aims',
                'testPyType': 'pyaimsTimeTexture_U32_Check',
             },
+            'TimeTexture<int64_t>':
+            {'typecode': 'TimeTexture_S64',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new TimeTexture<int64_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'TimeTexture_S64',
+               'sipClass': 'TimeTexture_S64',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTimeTexture_S64.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TIMETEXTURE_S64_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMETEXTURE_S64_CHECK_DEFINED\n'
+               'inline int pyaimsTimeTexture_S64_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "TimeTexture_S64" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeTexture_S64_Check',
+            },
+            'TimeTexture<uint64_t>':
+            {'typecode': 'TimeTexture_U64',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new TimeTexture<uint64_t>',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'TimeTexture_U64',
+               'sipClass': 'TimeTexture_U64',
+               'typeinclude':
+               '#include <aims/mesh/texture.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipTimeTexture_U64.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_TIMETEXTURE_U64_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMETEXTURE_U64_CHECK_DEFINED\n'
+               'inline int pyaimsTimeTexture_U64_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "TimeTexture_U64" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeTexture_U64_Check',
+            },
             'TimeTexture<Point2df>':
-           {'typecode': 'TimeTexture_POINT2DF',
+            {'typecode': 'TimeTexture_POINT2DF',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -2917,6 +3197,35 @@ typessub = {'bool':
                'module': 'aims',
                'testPyType': 'pyaimsCheck_vector<std::string>',
                'compareElement': '',
+            },
+
+            'std::list<uint32_t>':
+            {
+                'typecode': 'list_U32',
+                'pyFromC': 'pyaimsConvertFrom_list',
+                'CFromPy': 'pyaimsConvertTo_list<uint32_t>',
+                'castFromSip': '',
+                'deref': '*',
+                'pyderef': '*',
+                'address': '&',
+                'pyaddress': '&',
+                'defScalar': '',
+                'defNumpyBindings': '',
+                'new': 'new list_U32',
+                'NumType': 'NPY_OBJECT',
+                'PyType': 'list_U32',
+                'sipClass': 'list_U32',
+                'typeinclude': '#include <list>',
+                'sipinclude': '#include <pyaims/vector/sipstdvector.h>\n'
+                '#ifndef PYAIMS_WRAPPER_LIST_U32\n'
+                '#define PYAIMS_WRAPPER_LIST_U32\n'
+                'template <> inline const sipTypeDef*\n'
+                'sipType_list<uint32_t>()\n'
+                '{ return sipFindType( "list_U32" ); }\n'
+                '#endif',
+                'module': 'aims',
+                'testPyType': 'pyaimsCheck_list<uint32_t>',
+                'compareElement': '',
             },
 
             'carto::PluginLoader::PluginFile':

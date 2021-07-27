@@ -31,32 +31,30 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Data writer class
- */
 
-// this source is only here to force instanciation of some
-// of the most useful Writer templates
+#include <aims/mesh/mesh_graph_d.h>
 
-#include <aims/config/aimsdata_config.h>
-#include <soma-io/io/writer_d.h>
-#include <soma-io/io/formatdictionary_d.h>
-#include <aims/io/writer_d.h>
-#include <aims/mesh/texture.h>
-
-using namespace std;
-using namespace carto;
 using namespace aims;
+using namespace aims::meshgraph;
+using namespace carto;
+using namespace std;
 
-AIMS_INSTANTIATE_WRITER( Texture1d);
-AIMS_INSTANTIATE_WRITER( Texture2d);
-AIMS_INSTANTIATE_WRITER( TimeTexture<double> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<int8_t> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<uint8_t> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<int16_t> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<uint16_t> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<int32_t> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<uint32_t> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<int64_t> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<uint64_t> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<Point2d> );
+namespace aims
+{
+
+  namespace meshgraph
+  {
+
+    template
+    rc_ptr< vector< vector< uint > > >
+    circular_neighborhoods( vector<AimsVector<uint, 3> > const & faces,
+                            size_t nVertices );
+
+    template
+    class List2GraphMeshConvertor<
+      MeshVertexNode<uint>, MeshFaceNode<MeshVertexNode<uint> >,
+      vector<Point3df>, vector<AimsVector<uint, 3> >, vector< vector< uint > >
+      >;
+
+  }
+}

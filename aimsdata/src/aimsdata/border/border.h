@@ -96,8 +96,6 @@ class AIMSDATA_API Border
       int borderWidth() const;
       /// Offset from the start of the allocated memory to the first point
       int oFirstPoint() const;
-      /// Offset from the start of the allocated memory to the last point
-      int oLastPoint() const;
       /// Offset between 2 consecutive lines
       int oLine() const;
       /// Offset between the end of a line and the start of the consecutive line
@@ -122,8 +120,6 @@ class AIMSDATA_API Border
     std::vector<int> _borders;
     /// Offset up to first point
     int _oFirstPoint;
-    /// Offset up to last point
-    int _oLastPoint;
     /// Length of a line
     int _oLine;
     /// Offset between two consecutive lines
@@ -215,13 +211,6 @@ inline
 int Border::oFirstPoint() const
 {
     return _oFirstPoint;
-}
-
-
-inline
-int Border::oLastPoint() const
-{
-    return _oLastPoint;
 }
 
 

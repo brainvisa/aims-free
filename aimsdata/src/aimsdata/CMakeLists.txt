@@ -224,11 +224,13 @@ set( _headers
     utility/converter_texture.h
     utility/converter_volume.h
     utility/clock.h
+    utility/cyclic_iterator.h
     utility/flip.h
     utility/masscenter.h
     utility/merge.h
     utility/minmax.h
     utility/progress.h
+    utility/stl_conversion.h
     utility/threshold.h
     utility/utility_g.h
     vector/vector.h

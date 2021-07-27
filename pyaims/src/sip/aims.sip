@@ -90,6 +90,7 @@ typedef int int32_t;
 %Include vector_vector_STRING.sip
 %Include vector_vector_POINT3DF.sip
 %Include vector_rc_ptr_AimsTimeSurface_3_VOID.sip
+%Include vector_list_U32.sip
 //%Include vector_InfoPtr.sip
 %Include set_S16.sip
 %Include set_S32.sip
@@ -179,9 +180,14 @@ typedef int int32_t;
 %Include aimstimesurface_3_POINT2DF.sip
 %Include aimstimesurface_4_POINT2DF.sip
 
+// %Include timetexture_S8.sip
+%Include timetexture_U8.sip
 %Include timetexture_S16.sip
+%Include timetexture_U16.sip
 %Include timetexture_S32.sip
 %Include timetexture_U32.sip
+// %Include timetexture_S64.sip
+// %Include timetexture_U64.sip
 %Include timetexture_FLOAT.sip
 %Include timetexture_DOUBLE.sip
 %Include timetexture_POINT2DF.sip
@@ -195,9 +201,14 @@ typedef int int32_t;
 %Include rcptr_AimsTimeSurface_2_POINT2DF.sip
 %Include rcptr_AimsTimeSurface_3_POINT2DF.sip
 %Include rcptr_AimsTimeSurface_4_POINT2DF.sip
+// %Include rcptr_TimeTexture_S8.sip
+%Include rcptr_TimeTexture_U8.sip
 %Include rcptr_TimeTexture_S16.sip
+%Include rcptr_TimeTexture_U16.sip
 %Include rcptr_TimeTexture_S32.sip
 %Include rcptr_TimeTexture_U32.sip
+// %Include rcptr_TimeTexture_S64.sip
+// %Include rcptr_TimeTexture_U64.sip
 %Include rcptr_TimeTexture_FLOAT.sip
 %Include rcptr_TimeTexture_DOUBLE.sip
 %Include rcptr_TimeTexture_POINT2DF.sip
@@ -213,9 +224,14 @@ typedef int int32_t;
 %Include reader_AimsTimeSurface_2_POINT2DF.sip
 %Include reader_AimsTimeSurface_3_POINT2DF.sip
 %Include reader_AimsTimeSurface_4_POINT2DF.sip
+// %Include reader_TimeTexture_S8.sip
+%Include reader_TimeTexture_U8.sip
 %Include reader_TimeTexture_S16.sip
+%Include reader_TimeTexture_U16.sip
 %Include reader_TimeTexture_S32.sip
 %Include reader_TimeTexture_U32.sip
+// %Include reader_TimeTexture_S64.sip
+// %Include reader_TimeTexture_U64.sip
 %Include reader_TimeTexture_FLOAT.sip
 %Include reader_TimeTexture_DOUBLE.sip
 %Include reader_TimeTexture_POINT2DF.sip

@@ -445,6 +445,9 @@ typessub.update(
     'aims::TrilinearFfd':
         classInAimsNamespace(
                 'aims/registration/ffd.h', 'TrilinearFfd'),
+    'aims::GeometricProperties':
+        classInAimsNamespace(
+                'aims/mesh/geometric.h', 'GeometricProperties'),
   }
 )
 

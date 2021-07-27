@@ -1469,6 +1469,9 @@ namespace aims
   }
 
 
+  // --- template instanciations ---
+
+
   template void applyLaplacianMatrix( const vector<float> &inittex,
     vector<float> & outtex, const LaplacianWeights &lapl);
   template void applyLaplacianMatrix( const vector<double> &inittex,
