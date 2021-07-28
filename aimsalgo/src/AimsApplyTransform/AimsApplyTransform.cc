@@ -1216,11 +1216,13 @@ int main(int argc, const char **argv)
       "- '0', '1'... or any non-negative integer: use the transformation\n"
       "  in that position (0-based) in the AIMS metadata field\n"
       "  'transformations' (0 is a synonym of 'first').\n"
+      /* These options are not implemented yet. TODO(ylep)
       "- 'qform', 'ITK', or 'ANTS': use the target space of the qform stored\n"
       "  in a NIfTI file. This corresponds to the physical space used in\n"
       "  tools based on the ITK library, such as ANTS.\n"
       "- sform: use the target space of the sform stored in a NIfTI file.\n"
       // TODO: do some tools use sform?
+      */
       "- a referential name or UUID: use that referential from the\n"
       "  'referentials' field of the AIMS image header, which is read from\n"
       "  the image header or the sidecar .minf file (the .minf takes\n"
