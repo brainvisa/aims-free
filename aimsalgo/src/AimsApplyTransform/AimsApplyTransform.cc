@@ -12,6 +12,7 @@
 #include <aims/transform/transform_objects.h>
 #include <aims/resampling/linearresampler.h>                // LinearResampler
 #include <aims/resampling/cubicresampler.h>                  // CubicResampler
+#include <aims/resampling/standardreferentials.h>
 #include <aims/registration/ffd.h>                        // FfdTransformation
 //--- carto ------------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>                                   // rc_ptr
@@ -25,6 +26,10 @@
 #include <iostream>
 #include <exception>
 #include <sstream>
+//--- boost ------------------------------------------------------------------
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/lexical_cast.hpp>
 //----------------------------------------------------------------------------
 
 using namespace aims;
@@ -59,6 +64,7 @@ public:
   string  output;
   vector<string> direct_transform_list;
   vector<string> inverse_transform_list;
+  string  input_coords;
   bool    points_mode;
   string  interp_type;
   string  background_value;
@@ -78,6 +84,7 @@ public:
 
 ApplyTransformProc::ApplyTransformProc()
   : Process(),
+    input_coords("AIMS"),
     points_mode(false),
     interp_type("linear"),
     background_value("0"),
@@ -556,12 +563,151 @@ load_transformation(const string &filename_arg,
 
 // FatalError is thrown if the transformations cannot be loaded properly.
 std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
-load_transformations(const ApplyTransformProc& proc)
+load_transformations(const ApplyTransformProc& proc,
+                     const DictionaryInterface* input_header = nullptr)
 {
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > ret;
+  rc_ptr<AffineTransformation3d> aims_to_input_space_transform; // null
+
+  // boost::iequals is used for case-insensitive comparison
+  using boost::iequals;
+  string effective_input_coords = boost::trim_copy(proc.input_coords);
+  if(proc.points_mode) {
+    if(iequals(effective_input_coords, "auto"))
+      effective_input_coords = "AIMS";
+    else if(!iequals(effective_input_coords, "AIMS"))
+      throw FatalError("--input-coords cannot be used in points mode");
+  }
+
+  if(!iequals(effective_input_coords, "AIMS")) {
+    if(!input_header || !input_header->isDictionary()) {
+      throw FatalError("--input-coords cannot be used, because no header "
+                       "could be read for the input data");
+    }
+
+    carto::Object referentials;
+    carto::Object transformations;
+    try
+    {
+      referentials = input_header->getProperty( "referentials" );
+      transformations = input_header->getProperty( "transformations" );
+    }
+    catch( ... )
+    {
+      throw FatalError("--input-coords cannot be used, because no "
+                       "transformations could be read in the input header");
+    }
+    if(referentials.isNull() || transformations.isNull()) {
+      throw FatalError("--input-coords cannot be used, because no "
+                       "transformations could be read in the input header");
+    }
+
+    // Valid values are >= 0
+    int transform_position = -1;
+    // Detect special values
+    if(iequals(effective_input_coords, "first")) {
+      transform_position = 0;
+    } else if(iequals(effective_input_coords, "last")
+              || iequals(effective_input_coords, "auto")) {
+      transform_position = std::min(referentials->size(),
+                                    transformations->size()) - 1;
+    } else if(iequals(effective_input_coords, "qform")
+       || iequals(effective_input_coords, "ITK")
+       || iequals(effective_input_coords, "ANTS")) {
+      // TODO determine transform_position
+      throw FatalError("--input-coords qform not implemented yet");
+    } else if(iequals(effective_input_coords, "sform")) {
+      // TODO determine transform_position
+      throw FatalError("--input-coords sform not implemented yet");
+    } else {
+      try {
+        transform_position = boost::lexical_cast<int>(effective_input_coords);
+      } catch(const boost::bad_lexical_cast &) {}
+    }
+
+    if(transform_position < 0) {
+      string referential_name, referential_id;
+
+      if(iequals(effective_input_coords, "mni")
+         || iequals(effective_input_coords, "mni152")) {
+        referential_name = StandardReferentials::mniTemplateReferential();
+        referential_id = StandardReferentials::mniTemplateReferentialID();
+      } else if(iequals(effective_input_coords, "scanner")) {
+        referential_name = StandardReferentials::commonScannerBasedReferential();
+        referential_id = StandardReferentials::commonScannerBasedReferentialID();
+      } else if(iequals(effective_input_coords, "acpc")) {
+        referential_name = StandardReferentials::acPcReferential();
+        referential_id = StandardReferentials::acPcReferentialID();
+      } else if(iequals(effective_input_coords, "talairach")) {
+        referential_name = StandardReferentials::talairachReferential();
+      } else if(iequals(effective_input_coords, "aligned")) {
+        referential_name = "Coordinates aligned to another file or to anatomical truth";
+      } else {
+        referential_name = proc.input_coords;
+      }
+
+      // Look for the target referential or id in header['referentials']
+      size_t i = 0;
+      for( carto::Object it = referentials->objectIterator();
+           it->isValid();
+           it->next(), ++i ) {
+        const carto::Object referential_obj = it->currentValue();
+        if(!referential_obj.isNone() && referential_obj->isString()) {
+          const string current_ref_name = referential_obj->getString();
+          if(current_ref_name == referential_name
+             || (!referential_id.empty()
+                 && current_ref_name == referential_id)) {
+            transform_position = i;
+            if(carto::verbose)
+            break;
+          }
+        }
+      }
+    }
+
+    if(transform_position >= 0) {
+      carto::Object transformation_object;
+      if(!transformations->isArray())
+        throw FatalError("--input-coords cannot find a valid 'transformations'"
+                         "header field");
+      if(!(transform_position < transformations->size())) {
+        stringstream error_message;
+        error_message << "--input-coords cannot use transform in position "
+                      << transform_position
+                      << " (0-based), the header contains only "
+                      << transformations->size() << " transformations.";
+        throw FatalError(error_message.str());
+      }
+      transformation_object = transformations->getArrayItem(transform_position);
+      if(!transformation_object.isNull()) {
+        aims_to_input_space_transform.reset(
+          new AffineTransformation3d(transformation_object));
+        if(carto::verbose) {
+          std::cout << "--input-coords will use the referential in position "
+                    << transform_position
+                    << " (0-based) which is named '"
+                    << referentials->getArrayItem(transform_position)->getString()
+                    << "'\n";
+          std::cout << "--input-coords transformation:\n"
+                    << *aims_to_input_space_transform
+                    << "\n";
+        }
+      } else {
+        throw FatalError("Error in the input header, --input-coords failed");
+      }
+    } else if(iequals(effective_input_coords, "auto")) {
+      // Do nothing: fall back to AIMS coordinates
+      // (aims_to_input_space_transform is a null pointer)
+    } else {
+      throw FatalError("Cannot find the header transformation corresponding "
+                       "to --input-coords '" + proc.input_coords + "'");
+    }
+  }
 
   if(!proc.direct_transform_list.empty()) {
     TransformationChain3d direct_chain;
+    if(!aims_to_input_space_transform.isNull())
+      direct_chain.push_back(aims_to_input_space_transform);
 
     for(vector<string>::const_iterator filename_it = proc.direct_transform_list.begin();
         filename_it != proc.direct_transform_list.end();
@@ -585,13 +731,26 @@ load_transformations(const ApplyTransformProc& proc)
         = load_transformation(*filename_it, proc);
       inverse_chain.push_back(transform);
     }
+    if(!aims_to_input_space_transform.isNull()) {
+      if(!aims_to_input_space_transform->invertible()) {
+        throw FatalError("Error using --input-coords: the transformation "
+                         "is not invertible");
+      }
+      inverse_chain.push_back(aims_to_input_space_transform->getInverse());
+    }
     ret.second = inverse_chain.simplify();
   }
 
   if(ret.first.isNull() && ret.second.isNull()) {
-    clog << "No transformation provided, identity will be used." << endl;
-    ret.first = const_ref<Transformation3d>(new TransformationChain3d);
-    ret.second = const_ref<Transformation3d>(new TransformationChain3d);
+    if(aims_to_input_space_transform.isNull()) {
+      clog << "No transformation provided, identity will be used." << endl;
+      ret.first = const_ref<Transformation3d>(new TransformationChain3d);
+      ret.second = const_ref<Transformation3d>(new TransformationChain3d);
+    } else {
+      TransformationChain3d direct_chain;
+      direct_chain.push_back(aims_to_input_space_transform);
+      ret.first = direct_chain.simplify();
+    }
   }
 
   if(ret.first.isNull() && ret.second->invertible()) {
@@ -625,7 +784,7 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, &input_image.header());
     inverse_transform = transforms.second;
     if(inverse_transform.isNull()) {
       clog << "Error: no inverse transform provided" << endl;
@@ -695,7 +854,7 @@ bool doMesh(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, &mesh.header());
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -749,7 +908,7 @@ bool doBucket(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, &input_bucket.header());
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -805,7 +964,7 @@ bool doBundles(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, bundle_reader.readHeader().get());
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -870,7 +1029,7 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, graph.get());
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -1035,6 +1194,51 @@ int main(int argc, const char **argv)
       "  chain can be inverted. Otherwise, both transformation chains must\n"
       "  be specified completely.\n"
       "\n"
+      "The meaning of coordinates in the input image can be specified with \n"
+      "the --input-coords option. This option specifies how to interpret the\n"
+      "transformations contained in the image header. --input-coords can\n"
+      "take the following values:\n"
+      "- 'AIMS' (default): internal coordinate system of the AIMS library.\n"
+      "  For images, this is defined as 'physical' coordinates in\n"
+      "  millimetres, starting from zero at the centre of the rightmost,\n"
+      "  most anterior, most superior voxel in the image. Note that AIMS\n"
+      "  determines the anatomical orientation based on the header in a\n"
+      "  format-dependent manner. For NIfTI it uses first qform then sform\n"
+      "  if they point to a referential of known orientation, and falls back\n"
+      "  to assuming a RAS+ on-disk orientation.\n"
+      "- 'auto': use the last transformation defined in the AIMS metadata\n"
+      "  (i.e. the last or qform or sform to be defined) or fallback to\n"
+      "  AIMS coordinates if no transformation is found.\n"
+      "- 'first': use the first transformation defined in the AIMS metadata,\n"
+      "  i.e. the first or qform or sform to be defined.\n"
+      "- 'last': use the last transformation defined in the AIMS metadata,\n"
+      "  i.e. the last or qform or sform to be defined.\n"
+      "- '0', '1'... or any non-negative integer: use the transformation\n"
+      "  in that position (0-based) in the AIMS metadata field\n"
+      "  'transformations' (0 is a synonym of 'first').\n"
+      /* These options are not implemented yet. TODO(ylep)
+      "- 'qform', 'ITK', or 'ANTS': use the target space of the qform stored\n"
+      "  in a NIfTI file. This corresponds to the physical space used in\n"
+      "  tools based on the ITK library, such as ANTS.\n"
+      "- sform: use the target space of the sform stored in a NIfTI file.\n"
+      // TODO: do some tools use sform?
+      */
+      "- a referential name or UUID: use that referential from the\n"
+      "  'referentials' field of the AIMS image header, which is read from\n"
+      "  the image header or the sidecar .minf file (the .minf takes\n"
+      "  precedence). There are shortcuts for common cases:\n"
+      "  - 'mni', or 'mni152': use MNI coordinates, which correspond to the\n"
+      "    NIFTI_XFORM_MNI_152 intent, a.k.a. 'Talairach-MNI template-SPM',\n"
+      "    in AIMS.\n"
+      "  - 'scanner': use 'Scanner-based anatomical coordinates', which\n"
+      "    correspond to the NIFTI_XFORM_SCANNER_ANAT intent.\n"
+      "  - 'acpc': use the 'Talairach-AC/PC-Anatomist' referential.\n"
+      "  - 'aligned': use the referential that corresponds to\n"
+      "    the NIFTI_XFORM_ALIGNED_ANAT intent, a.k.a. 'Coordinates aligned\n"
+      "    to another file or to anatomical truth' in AIMS.\n"
+      "  - 'talairach': use the referential that corresponds to the\n"
+      "    NIFTI_XFORM_TALAIRACH intent.\n"
+      "\n"
       "The header transformations of the output are set according to the\n"
       "first rule that applies:\n"
       "1. If --keep-transforms is passed, or if the applied transformation\n"
@@ -1081,6 +1285,10 @@ int main(int argc, const char **argv)
                         "passed on the command-line. The file name may be "
                         "prefixed with 'inv:', in which case the inverse of "
                         "the transformation is used.");
+    app.addOption(proc.input_coords, "--input-coords",
+                  "How to interpret coordinates in the input image w.r.t. "
+                  "the transformations written in the image header. See above."
+                  " [default: AIMS]", true);
     app.addOption(proc.points_mode, "--points",
                   "Points mode: transform point coordinates (see above).", true);
     app.addOption(proc.interp_type, "--interp",
