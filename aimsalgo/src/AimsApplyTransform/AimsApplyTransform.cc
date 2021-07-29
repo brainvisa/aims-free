@@ -629,19 +629,25 @@ load_transformations(const ApplyTransformProc& proc,
       string referential_name, referential_id;
 
       if(iequals(effective_input_coords, "mni")
-         || iequals(effective_input_coords, "mni152")) {
+         || iequals(effective_input_coords, "mni152")
+         || iequals(effective_input_coords, "NIFTI_XFORM_MNI_152")) {
         referential_name = StandardReferentials::mniTemplateReferential();
         referential_id = StandardReferentials::mniTemplateReferentialID();
-      } else if(iequals(effective_input_coords, "scanner")) {
+      } else if(iequals(effective_input_coords, "scanner")
+                || iequals(effective_input_coords, "NIFTI_XFORM_SCANNER_ANAT")) {
         referential_name = StandardReferentials::commonScannerBasedReferential();
         referential_id = StandardReferentials::commonScannerBasedReferentialID();
       } else if(iequals(effective_input_coords, "acpc")) {
         referential_name = StandardReferentials::acPcReferential();
         referential_id = StandardReferentials::acPcReferentialID();
-      } else if(iequals(effective_input_coords, "talairach")) {
+      } else if(iequals(effective_input_coords, "talairach")
+                || iequals(effective_input_coords, "NIFTI_XFORM_TALAIRACH")) {
         referential_name = StandardReferentials::talairachReferential();
-      } else if(iequals(effective_input_coords, "aligned")) {
+      } else if(iequals(effective_input_coords, "aligned")
+                || iequals(effective_input_coords, "NIFTI_XFORM_ALIGNED_ANAT")) {
         referential_name = "Coordinates aligned to another file or to anatomical truth";
+      } else if(iequals(effective_input_coords, "NIFTI_XFORM_TEMPLATE_OTHER")) {
+        referential_name = "Other template";
       } else {
         referential_name = proc.input_coords;
       }
@@ -1238,6 +1244,8 @@ int main(int argc, const char **argv)
       "    to another file or to anatomical truth' in AIMS.\n"
       "  - 'talairach': use the referential that corresponds to the\n"
       "    NIFTI_XFORM_TALAIRACH intent.\n"
+      "  - 'NIFTI_XFORM_TEMPLATE_OTHER': use the referential that\n"
+      "    corresponds to this intent ('Other template' in AIMS).\n"
       "\n"
       "The header transformations of the output are set according to the\n"
       "first rule that applies:\n"
