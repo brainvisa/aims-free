@@ -836,8 +836,14 @@ bool doVolume(Process & process, const string & fileref, Finder &)
                           background_value, out, true);
   cout << endl;
 
-  // Write the resampled volume
-  Writer<Volume<T> > output_writer(proc.output);
+  // Write the resampled volume. The allow_orientation_change instructs the
+  // NIfTI writer to avoid writing dummy transformations to the header of the
+  // output image.
+  Writer<Volume<T> > output_writer(
+    proc.output,
+    carto::Object::value(std::map<std::string, bool>{
+      {"allow_orientation_change", true} })
+  );
   bool success = output_writer.write(out);
 
   return success;
