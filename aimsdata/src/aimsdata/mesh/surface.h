@@ -130,6 +130,12 @@ class AIMSDATA_API AimsSurface
     friend
     std::ostream& operator << <>( std::ostream& out,
 				  const AimsSurface<D,T>& thing );
+
+    inline bool operator == ( const AimsSurface<D, T> & s ) const
+    {
+      return _vertex == s._vertex && _normal == s._normal
+        && _polygon == s._polygon && _texture == s._texture;
+    }
 };
 
 
