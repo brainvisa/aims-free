@@ -1,8 +1,14 @@
 class Mesher
 {
 %TypeHeaderCode
-  #include <aims/mesh/mesher.h>
+#include <aims/mesh/mesher.h>
 %End
+%TypeCode
+#ifndef AIMS_MAP_SIZE_T_list_AimsTimeSurface_3_VOID_DEFINED
+typedef std::map<size_t, std::list<AimsTimeSurface<3,Void> > > map_SIZE_T_list_AimsTimeSurface_3_VOID;
+#endif
+%End
+
   public:
     enum SmoothingType
     {
@@ -50,6 +56,66 @@ When meshing a volume, the input volume should have a border of at least
         30
     smoothRate: float
       in [0.0;1.0] (instance : 0.4)
+%End
+
+/*
+    map_SIZE_T_list_AimsTimeSurface_3_VOID doit(
+      const rc_ptr_Volume_S16 & thing ) /Factory/;
+%Docstring
+  mesh_dict = mesher.doit(object_to_mesh)
+
+  Mesh every interface of objects in the input label volume or bucket.
+  The result is a map (dict-like) which keys are labels, and values are lists
+  of meshes.
+%End
+%MethodCode
+  std::map<size_t, std::list<AimsSurfaceTriangle> > *surf_map
+    = new std::map<size_t, std::list<AimsSurfaceTriangle> >;
+  sipCpp->doit( *a0, *surf_map );
+
+  sipRes = surf_map;
+%End
+*/
+
+    SIP_PYDICT doit(
+      const rc_ptr_Volume_S16 & thing );
+%MethodCode
+  std::map<size_t, std::list<AimsSurfaceTriangle> > surf_map;
+  sipCpp->doit( *a0, surf_map );
+
+  PyObject *res = PyDict_New();
+  std::map<size_t, std::list<AimsSurfaceTriangle> >::iterator i, e = surf_map.end();
+  std::list<AimsSurfaceTriangle>::iterator il, el;
+  size_t n;
+
+  for( i=surf_map.begin(); i!=e; ++i )
+  {
+    PyObject *p = PyList_New( i->second.size() );
+#if PY_VERSION_HEX >= 0x03000000
+    PyDict_SetItem( res, PyLong_FromLong( i->first ), p );
+#else
+    PyDict_SetItem( res, PyInt_FromLong( i->first ), p );
+#endif
+
+    for( il=i->second.begin(), el=i->second.end(), n=0; il!=el; ++il, ++n )
+    {
+      AimsSurfaceTriangle *mesh = new AimsSurfaceTriangle( *il );
+      PyObject *m = sipConvertFromType( mesh, sipFindType( "AimsTimeSurface_3_VOID" ), Py_None );
+      PyList_SetItem( p, n, m );
+    }
+  }
+
+  sipRes = res;
+%End
+
+    map_SIZE_T_list_AimsTimeSurface_3_VOID *doit(
+      const BucketMap_VOID & thing ) /Factory/;
+%MethodCode
+  std::map<size_t, std::list<AimsSurfaceTriangle> > *surf_map
+    = new std::map<size_t, std::list<AimsSurfaceTriangle> >;
+  sipCpp->doit( *a0, *surf_map );
+
+  sipRes = surf_map;
 %End
 
     void setSmoothingLaplacian( float featureAngle );

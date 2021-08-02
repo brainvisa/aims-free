@@ -1,7 +1,58 @@
 
-%#if '%Template2needs_typedef%' == '1'%
+%#if '%Template1needs_typedef%' == '1' %
+
+// 1. template1 == size_t
 
 /* This bidouille is needed because of a probable bug in sip 4.19.15, which 
+   doesn't allow size_t in a MappedType. So we use a typedef here.
+*/
+
+%#if '%Template2needs_typedef%' == '1' %
+
+// 1.1. tempalte1 == template1 == size_t
+
+%ModuleHeaderCode
+#ifndef AIMS_MAP_SIZE_T_SIZE_T_DEFINED
+#define AIMS_MAP_SIZE_T_SIZE_T_DEFINED
+#include <map>
+typedef std::map<%Template1%, %Template2% > map_SIZE_T_SIZE_T;
+#endif
+%End
+
+%MappedType map_SIZE_T_SIZE_T
+
+// end 1.1
+
+%#else%
+
+// 1.2. template1 == size_t
+
+%ModuleHeaderCode
+#ifndef AIMS_MAP_SIZE_T_%Template2typecode%_DEFINED
+#define AIMS_MAP_SIZE_T_%Template2typecode%_DEFINED
+#include <map>
+%Template2sipinclude%
+typedef std::map<%Template1%, %Template2% > map_SIZE_T_%Template2typecode%;
+#endif
+%End
+
+%MappedType map_SIZE_T_%Template2typecode%
+
+// end 1.2
+
+%#endif%
+
+// end 1.
+
+%#else%
+
+// 2. template1 != size_t
+
+%#if '%Template2needs_typedef%' == '1' %
+
+// 2.1. template2 == size_t
+
+/* This bidouille is needed because of a probable bug in sip 4.19.15, which
    doesn't allow size_t in a MappedType. So we use a typedef here.
 */
 
@@ -9,16 +60,24 @@
 #ifndef AIMS_MAP_%Template1typecode%_SIZE_T_DEFINED
 #define AIMS_MAP_%Template1typecode%_SIZE_T_DEFINED
 #include <map>
+%Template1sipinclude%
 typedef std::map<%Template1%, %Template2% > map_%Template1typecode%_SIZE_T;
 #endif
 %End
 
-typedef std::map<%Template1%, %Template2% > map_%Template1typecode%_SIZE_T;
-
 %MappedType map_%Template1typecode%_SIZE_T
+
+// end 2.1
+
 %#else%
+
+// 2.2. no size_t
+
 %MappedType std::map<%Template1%, %Template2% >
+
 %#endif%
+%#endif%
+
 {
 %TypeHeaderCode
 #include <map>

@@ -112,6 +112,7 @@ typedef int int32_t;
 %Include list_POINT3DF.sip
 %Include list_vector_STRING.sip
 %Include list_vector_POINT3DF.sip
+%Include list_AimsTimeSurface_3_VOID.sip
 %Include map_STRING_STRING.sip
 %Include map_S32_STRING.sip
 %Include map_STRING_S32.sip
@@ -140,6 +141,7 @@ typedef int int32_t;
 // %Include map_STRING_RGBA.sip
 // %Include map_STRING_HSV.sip
 %Include map_U32_set_U32.sip
+%Include map_SIZE_T_list_AimsTimeSurface_3_VOID.sip
 
 %Include rcobject.sip
 %Include sharedobject.sip

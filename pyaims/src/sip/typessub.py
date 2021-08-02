@@ -1880,9 +1880,9 @@ typessub = {'bool':
             },
             'AimsTimeSurface<3,Void>':
            {'typecode': 'AimsTimeSurface_3_VOID',
-               'pyFromC': '',
-               'CFromPy': '',
-               'castFromSip': '',
+               'pyFromC': 'pyaimsConvertFrom_TIMESURFACE_3_VOID',
+               'CFromPy': 'pyaimsConvertTo_TIMESURFACE_3_VOID',
+               'castFromSip': '(AimsTimeSurface<3, Void> *)',
                'deref': '*',
                'pyderef': '*',
                'address': '&',
@@ -1899,7 +1899,17 @@ typessub = {'bool':
                '#define PYAIMS_TIMESURFACE_3_VOID_CHECK_DEFINED\n'
                'inline int pyaimsTimeSurface_3_VOID_Check( PyObject* o )\n'
                '{ return sipCanConvertToType( o, sipFindType( "AimsTimeSurface_3_VOID" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
-               '#endif',
+               '#endif\n'
+               '#ifndef PYAIMS_TIMESURFACE_3_VOID_CONVERT_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_3_VOID_CONVERT_DEFINED\n'
+               'inline void* pyaimsConvertTo_TIMESURFACE_3_VOID( PyObject* o )\n'
+               '{ int iserr = 0;\n'
+               '  void *ptr = sipForceConvertToType( o, sipFindType( "TIMESURFACE_3_VOID" ), 0, 0, 0, &iserr );\n'
+               '  if( iserr ) return 0;\n'
+               '  return ptr;\n}\n'
+               'inline PyObject* pyaimsConvertFrom_TIMESURFACE_3_VOID( void * a )\n'
+               '{ return sipConvertFromType( a, sipFindType( "AimsTimeSurface_3_VOID" ), 0 ); }\n'
+               '#endif\n',
                'module': 'aims',
                'testPyType': 'pyaimsTimeSurface_3_VOID_Check',
             },
@@ -3225,6 +3235,36 @@ typessub = {'bool':
                 '#endif',
                 'module': 'aims',
                 'testPyType': 'pyaimsCheck_list<uint32_t>',
+                'compareElement': '',
+            },
+            'std::list<AimsTimeSurface<3,Void> >':
+            {
+                'typecode': 'list_AimsTimeSurface_3_VOID',
+                'pyFromC': 'pyaimsConvertFrom_list',
+                'CFromPy': 'pyaimsConvertTo_list<AimsTimeSurface<3,Void> >',
+                'castFromSip': '',
+                'deref': '*',
+                'pyderef': '*',
+                'address': '&',
+                'pyaddress': '&',
+                'defScalar': '',
+                'defNumpyBindings': '',
+                'new': 'new list_AimsTimeSurface_3_VOID',
+                'NumType': 'NPY_OBJECT',
+                'PyType': 'list_AimsTimeSurface_3_VOID',
+                'sipClass': 'list_AimsTimeSurface_3_VOID',
+                'typeinclude': '#include <list>\n'
+                    '#include <aims/mesh/surface.h>\n',
+                'sipinclude': '#include <pyaims/vector/sipstdvector.h>\n'
+                '#include <aims/mesh/surface.h>\n'
+                '#ifndef PYAIMS_WRAPPER_LIST_AIMSTIMESURFACE_3_VOID\n'
+                '#define PYAIMS_WRAPPER_LIST_AIMSTIMESURFACE_3_VOID\n'
+                'template <> inline const sipTypeDef*\n'
+                'sipType_list<AimsTimeSurface<3,Void> >()\n'
+                '{ return sipFindType( "list_AimsTimeSurface_3_VOID" ); }\n'
+                '#endif',
+                'module': 'aims',
+                'testPyType': 'pyaimsCheck_list<AimsTimeSurface<3,Void> >',
                 'compareElement': '',
             },
 
