@@ -65,13 +65,6 @@ When meshing a volume, the input volume should have a border of at least
 
     map_SIZE_T_list_AimsTimeSurface_3_VOID doit(
       const rc_ptr_Volume_S16 & thing ) /Factory/;
-%Docstring
-  mesh_dict = mesher.doit(object_to_mesh)
-
-  Mesh every interface of objects in the input label volume or bucket.
-  The result is a map (dict-like) which keys are labels, and values are lists
-  of meshes.
-%End
 %MethodCode
   std::map<size_t, std::list<AimsSurfaceTriangle> > *surf_map
     = new std::map<size_t, std::list<AimsSurfaceTriangle> >;
@@ -83,6 +76,13 @@ When meshing a volume, the input volume should have a border of at least
 
     SIP_PYDICT doit(
       const rc_ptr_Volume_S16 & thing );
+%Docstring
+mesh_dict = mesher.doit(object_to_mesh)
+
+Mesh every interface of objects in the input label volume or bucket.
+The result is a map (dict-like) which keys are voxel labels, and values are
+lists of meshes.
+%End
 %MethodCode
   std::map<size_t, std::list<AimsSurfaceTriangle> > surf_map;
   sipCpp->doit( *a0, surf_map );
