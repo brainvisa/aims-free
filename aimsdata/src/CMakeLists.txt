@@ -66,7 +66,6 @@ foreach( _command
           AimsGraphExtractTransformation
           AimsGraphMerge
           AimsInvertTransformation
-          AimsLabels2Tex
           AimsMassCenter
           AimsMerge2Rgb
           AimsMergeLabel
