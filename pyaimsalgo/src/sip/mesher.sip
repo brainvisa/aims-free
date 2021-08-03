@@ -59,6 +59,10 @@ When meshing a volume, the input volume should have a border of at least
 %End
 
 /*
+  // we can't return a MappedType because the returned C++ object is a
+  // temporary and will be destroyed. The MappedType object will point to
+  // deleted data. I don't know if there is a solution to that.
+
     map_SIZE_T_list_AimsTimeSurface_3_VOID doit(
       const rc_ptr_Volume_S16 & thing ) /Factory/;
 %Docstring
@@ -108,7 +112,8 @@ When meshing a volume, the input volume should have a border of at least
   sipRes = res;
 %End
 
-    map_SIZE_T_list_AimsTimeSurface_3_VOID *doit(
+/*
+    map_SIZE_T_list_AimsTimeSurface_3_VOID doit(
       const BucketMap_VOID & thing ) /Factory/;
 %MethodCode
   std::map<size_t, std::list<AimsSurfaceTriangle> > *surf_map
@@ -116,6 +121,38 @@ When meshing a volume, the input volume should have a border of at least
   sipCpp->doit( *a0, *surf_map );
 
   sipRes = surf_map;
+%End
+*/
+
+    SIP_PYDICT doit(
+      const BucketMap_VOID & thing );
+%MethodCode
+  std::map<size_t, std::list<AimsSurfaceTriangle> > surf_map;
+  sipCpp->doit( *a0, surf_map );
+
+  PyObject *res = PyDict_New();
+  std::map<size_t, std::list<AimsSurfaceTriangle> >::iterator i, e = surf_map.end();
+  std::list<AimsSurfaceTriangle>::iterator il, el;
+  size_t n;
+
+  for( i=surf_map.begin(); i!=e; ++i )
+  {
+    PyObject *p = PyList_New( i->second.size() );
+#if PY_VERSION_HEX >= 0x03000000
+    PyDict_SetItem( res, PyLong_FromLong( i->first ), p );
+#else
+    PyDict_SetItem( res, PyInt_FromLong( i->first ), p );
+#endif
+
+    for( il=i->second.begin(), el=i->second.end(), n=0; il!=el; ++il, ++n )
+    {
+      AimsSurfaceTriangle *mesh = new AimsSurfaceTriangle( *il );
+      PyObject *m = sipConvertFromType( mesh, sipFindType( "AimsTimeSurface_3_VOID" ), Py_None );
+      PyList_SetItem( p, n, m );
+    }
+  }
+
+  sipRes = res;
 %End
 
     void setSmoothingLaplacian( float featureAngle );
