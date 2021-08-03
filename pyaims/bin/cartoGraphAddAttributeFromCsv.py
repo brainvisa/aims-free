@@ -38,27 +38,38 @@ from __future__ import print_function
 from __future__ import absolute_import
 def graphAddAttributeFromCsv(input_graph, output_graph, input_csv, table_key_col, graph_key_attr, graph_val_attr, table_val_col, verbose):
     from soma import aims
-    from datamind.core import DF
+    import pandas as pd
     import numpy as np
     #
     r = aims.Reader()
     w = aims.Writer()
     g = r.read(input_graph)
-    d = DF.read(input_csv)
-    #
-    for v in g.vertices().list():
-        mask_idx = d[:, table_key_col] == DF.code(v[graph_key_attr])
-        if np.sum(mask_idx) == 0:
+    delims = ',;\t '
+    for i, delim in enumerate(delims):
+        try:
+            d = pd.read_csv(input_csv, sep='\s*%s\s*' % delim, engine='python')
+            break
+        except:
+            if i == len(delims) - 1:
+                raise
+            pass
+
+    for v in g.vertices():
+        label = v.get(graph_key_attr)
+        if not label:
+            continue
+        mask_idx = np.where(d[d.columns[table_key_col]] == label)[0]
+        if len(mask_idx) == 0:
             if verbose:
                 print(v[graph_key_attr], "\thas no correspondance in the table",
                       input_csv)
             continue
-        if np.sum(mask_idx) > 1:
+        if len(mask_idx) > 1:
             if verbose:
                 print(v[graph_key_attr],
                       "\thas multiple correspondances in the table", input_csv)
             continue
-        val = d[mask_idx, table_val_col].item()
+        val = d.loc[mask_idx, d.columns[table_val_col]].item()
         v[graph_val_attr] = val
     w.write(g, output_graph)
 
