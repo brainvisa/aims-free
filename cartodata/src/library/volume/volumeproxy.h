@@ -66,6 +66,8 @@ namespace carto
     /** get the voxel size from the header,
        with 4 values defaulting to 1.mm if not present */
     std::vector<float> getVoxelSize() const;
+    void setVoxelSize( float vx, float vy = 1., float vz = 1., float vt = 1. );
+    void setVoxelSize( const std::vector<float> & vs );
 
     VolumeProxy< T >& operator=( const VolumeProxy< T >& other );
 

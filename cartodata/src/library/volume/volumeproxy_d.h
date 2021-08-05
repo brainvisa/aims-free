@@ -167,6 +167,25 @@ namespace carto
   }
 
 
+  template < typename T>
+  void VolumeProxy<T>::setVoxelSize( float vx, float vy, float vz, float vt )
+  {
+    std::vector<float> vs( 4 );
+    vs[0] = vx;
+    vs[1] = vy;
+    vs[2] = vz;
+    vs[3] = vt;
+    setVoxelSize( vs );
+  }
+
+
+  template < typename T>
+  void VolumeProxy<T>::setVoxelSize( const std::vector<float> & vs )
+  {
+    header().setProperty( "voxel_size", vs );
+  }
+
+
   template < typename T >
   void VolumeProxy< T >::copyHeaderFrom( const Object & other )
   {
