@@ -32,11 +32,17 @@
  */
 
 
+// we don't want to issue a warning
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <aims/bucket/bucket.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <aims/getopt/getopt2.h>
+#include <aims/data/data.h>
 
 using namespace aims;
 using namespace carto;
