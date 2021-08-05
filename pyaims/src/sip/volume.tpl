@@ -149,6 +149,16 @@ Number of voxels in each dimension (list of 4 ints)
 Voxel sizes in mm (list of 4 floats)
 %End
 
+    void setVoxelSize( const vector_FLOAT & );
+%Docstring
+setVoxelSize(vs_list)
+setVoxelSize(vx, vy=1., vz=1., vt=1.)
+
+Set voxel sizes in mm (list of at least 4 floats)
+%End
+
+    void setVoxelSize( float vx, float vy=1., float vz=1., float vt=1. );
+
     virtual void copyHeaderFrom( const carto::PropertySet & other );
     virtual void copyHeaderFrom( const carto::Object & other );
 
