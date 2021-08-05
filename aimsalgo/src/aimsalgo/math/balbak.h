@@ -37,7 +37,10 @@
 
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 
 /** @name Back-balancing of a matrix */
@@ -65,8 +68,10 @@ public:
       @param sc contains information determining the permutations and
       scaling factors used by Balancing.
    */
-  AimsData< T > doit( AimsData< T >&, AimsData< T >& , AimsData< T >&, 
-		      AimsData< T > *sc = NULL );
+  carto::VolumeRef< T > doit( carto::VolumeRef< T >,
+                              const carto::VolumeRef< T > &,
+                              const carto::VolumeRef< T > &,
+                              const carto::VolumeRef< T > *sc = NULL );
 };
 
 #endif

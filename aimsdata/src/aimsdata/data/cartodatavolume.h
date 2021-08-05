@@ -98,10 +98,10 @@ public:
   virtual ~AimsData();
 
   // conversions with carto::Volume
-  AimsData( const carto::rc_ptr<carto::Volume<T> > vol );
-  AimsData( const carto::VolumeRef<T> vol );
+  AimsData( const carto::rc_ptr<carto::Volume<T> > & vol );
+  AimsData( const carto::VolumeRef<T> & vol );
   AimsData<T> & operator = (
-    const carto::rc_ptr<carto::Volume<T> > vol );
+    const carto::rc_ptr<carto::Volume<T> > & vol );
 
   AimsData<T> & operator = ( const AimsData<T> & );
   AimsData<T> & operator = ( const T & );
@@ -437,7 +437,7 @@ AimsData<T>::~AimsData()
 
 template < typename T >
 inline 
-AimsData<T>::AimsData( const carto::rc_ptr<carto::Volume<T> > vol )
+AimsData<T>::AimsData( const carto::rc_ptr<carto::Volume<T> > & vol )
   : carto::RCObject(), 
     aims::Border( vol->getSizeX(),
                   vol->getSizeY(),
@@ -452,7 +452,7 @@ AimsData<T>::AimsData( const carto::rc_ptr<carto::Volume<T> > vol )
 
 template < typename T >
 inline
-AimsData<T>::AimsData( const carto::VolumeRef<T> vol )
+AimsData<T>::AimsData( const carto::VolumeRef<T> & vol )
   : carto::RCObject(),
     aims::Border( vol->getSizeX(),
                   vol->getSizeY(),
@@ -469,7 +469,7 @@ AimsData<T>::AimsData( const carto::VolumeRef<T> vol )
 template < typename T >
 inline 
 AimsData<T> & AimsData<T>::operator = (
-  const carto::rc_ptr<carto::Volume<T> > vol )
+  const carto::rc_ptr<carto::Volume<T> > & vol )
 {
   if( _volume.get() == vol.get() )
     return *this;

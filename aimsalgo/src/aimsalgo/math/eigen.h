@@ -37,7 +37,10 @@
 
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 
 /** @name Eigen system resolution. */
@@ -73,11 +76,13 @@ public:
       @param wi return the diagonal matrix of the imaginary parts of the
       eigenvalues if *wi exists.
   */
-  AimsData< T > doit( AimsData< T >&, AimsData< T > *wi = NULL );
+  carto::VolumeRef< T > doit( carto::VolumeRef< T >,
+                              carto::VolumeRef< T > *wi = NULL );
 
   /// Sort the eigenvectors and eigenvalues in decreasing order.
-  void sort( AimsData< T >& eigenvectors, AimsData< T >& eigenvalues,
-             AimsData< T > *wi = NULL );
+  void sort( carto::VolumeRef< T > eigenvectors,
+             carto::VolumeRef< T > eigenvalues,
+             carto::VolumeRef< T > *wi = NULL );
 
 private:
 

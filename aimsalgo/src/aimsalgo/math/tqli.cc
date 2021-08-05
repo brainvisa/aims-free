@@ -35,23 +35,25 @@
 #include <cstdlib>
 #include <aims/math/mathelem.h>
 #include <aims/math/tqli.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
+
+using namespace carto;
 
 template < class T >
-void DecompositionTQLI< T >::doit( AimsData< T >& d,
-				   AimsData< T >& e,
-				   AimsData< T >& z )
+void DecompositionTQLI< T >::doit( VolumeRef< T > d,
+                                   VolumeRef< T > e,
+                                   VolumeRef< T > z )
 {
-  ASSERT( z.dimZ() == 1 && z.dimT() == 1 );
-  ASSERT( d.dimY() == 1 && d.dimZ() == 1 && d.dimT() == 1 );
-  ASSERT( e.dimY() == 1 && e.dimZ() == 1 && e.dimT() == 1 );
+  ASSERT( z.getSizeZ() == 1 && z.getSizeT() == 1 );
+  ASSERT( d.getSizeY() == 1 && d.getSizeZ() == 1 && d.getSizeT() == 1 );
+  ASSERT( e.getSizeY() == 1 && e.getSizeZ() == 1 && e.getSizeT() == 1 );
 
   int m,l,iter,i,k,n;
   T s,r,p,g,f,dd,c,b;
 
-  n = z.dimX();
+  n = z.getSizeX();
 
-  ASSERT( n == z.dimY() );
+  ASSERT( n == z.getSizeY() );
 
   for ( i = 1; i < n; i++ )
     e( i - 1 ) = e( i );
@@ -112,12 +114,12 @@ void DecompositionTQLI< T >::doit( AimsData< T >& d,
 
 
 template void 
-DecompositionTQLI< float >::doit( AimsData< float >& d,
-				  AimsData< float >& e,
-				  AimsData< float >& z );
+DecompositionTQLI< float >::doit( VolumeRef< float > d,
+                                  VolumeRef< float > e,
+                                  VolumeRef< float > z );
 
 
 template void 
-DecompositionTQLI< double >::doit( AimsData< double >& d,
-				   AimsData< double >& e,
-				   AimsData< double >& z );
+DecompositionTQLI< double >::doit( VolumeRef< double > d,
+                                   VolumeRef< double > e,
+                                   VolumeRef< double > z );

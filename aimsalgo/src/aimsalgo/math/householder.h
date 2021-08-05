@@ -38,7 +38,10 @@
 #include <aims/config/aimsalgo_config.h>
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 
 /** @name Householder tridiagonalization */
@@ -63,7 +66,8 @@ public:
       of the tridiagonal matrix. \\
       The last parameter is output as a vector of the off-diagonal elements.
   */
-  void doit( AimsData< T >&, AimsData< T >&, AimsData< T >& );
+  void doit( carto::VolumeRef< T >, carto::VolumeRef< T >,
+             carto::VolumeRef< T > );
 };
 
 #endif

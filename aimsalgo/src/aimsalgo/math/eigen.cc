@@ -32,7 +32,7 @@
  */
 
 
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/mathelem.h>
 #include <aims/math/eigen.h>
 #include <aims/math/householder.h>
@@ -42,23 +42,29 @@
 #include <aims/math/eltran.h>
 #include <aims/math/hqr.h>
 #include <aims/math/balbak.h>
+#include <aims/data/volumemanip.h>
 #include <math.h>
 #include <complex>
 
 using namespace std;
+using namespace carto;
 using namespace aims;
 
 template < class T >
-AimsData< T > AimsEigen< T >::doit( AimsData< T >& mat, AimsData< T > *wwi )
+VolumeRef< T > AimsEigen< T >::doit( VolumeRef< T > mat, VolumeRef< T > *wwi )
 {
-  ASSERT( mat.dimZ() == 1 && mat.dimT() == 1 );
-  ASSERT( mat.dimX() == mat.dimY() );
-  AimsFastAllocationData< T > res;
+  ASSERT( mat.getSizeZ() == 1 && mat.getSizeT() == 1 );
+  ASSERT( mat.getSizeX() == mat.getSizeY() );
+  VolumeRef< T > res;
 
-  int n = mat.dimX();
+  int n = mat.getSizeX();
 
-  AimsFastAllocationData< T > wr( n );
-  AimsFastAllocationData< T > wi( n );
+  VolumeRef< T > wr( n, 1, 1, 1,
+                     AllocatorContext(
+                        &carto::MemoryAllocator::singleton() ) );
+  VolumeRef< T > wi( n, 1, 1, 1,
+                     AllocatorContext(
+                      &carto::MemoryAllocator::singleton() ) );
 
   bool isSymmetric = true;
   int i, j;
@@ -69,7 +75,9 @@ AimsData< T > AimsEigen< T >::doit( AimsData< T >& mat, AimsData< T > *wwi )
 
   if ( isSymmetric ) // Symmetric matrix
     {
-      AimsFastAllocationData< T > e( n );
+      VolumeRef< T > e( n, 1, 1, 1,
+                        AllocatorContext(
+                          &carto::MemoryAllocator::singleton() ) );
 
       HouseholderTridiag< T > tred;
       DecompositionTQLI< T > tqli;
@@ -79,8 +87,12 @@ AimsData< T > AimsEigen< T >::doit( AimsData< T >& mat, AimsData< T > *wwi )
     }
   else // Non-symmetric matrix
     {
-      AimsFastAllocationData< T > scale( n );
-      AimsFastAllocationData< short > iscale( n );
+      VolumeRef< T > scale( n, 1, 1, 1,
+                            AllocatorContext(
+                              &carto::MemoryAllocator::singleton() ) );
+      VolumeRef< short > iscale( n, 1, 1, 1,
+                                 AllocatorContext(
+                                  &carto::MemoryAllocator::singleton() ) );
 
       Balancing< T > balanc;
       HessenbergReduction< T > elmhes;
@@ -90,7 +102,7 @@ AimsData< T > AimsEigen< T >::doit( AimsData< T >& mat, AimsData< T > *wwi )
 
       mat = balanc.doit( mat, &scale );
       mat = elmhes.doit( mat, &iscale );
-      AimsData< T > zz = eltran.doit( mat, &iscale );
+      VolumeRef< T > zz = eltran.doit( mat, &iscale );
       wr = hqr.doit( mat, wi, &zz );
 	
       mat = balbak.doit( zz, wr, wi, &scale );
@@ -111,25 +123,25 @@ AimsData< T > AimsEigen< T >::doit( AimsData< T >& mat, AimsData< T > *wwi )
 }
 
 
-template AimsData< float > 
-AimsEigen< float >::doit( AimsData< float >& mat, AimsData< float > *wwi );
+template VolumeRef< float >
+AimsEigen< float >::doit( VolumeRef< float > mat, VolumeRef< float > *wwi );
 
-template AimsData< double > 
-AimsEigen< double >::doit( AimsData< double >& mat, AimsData< double > *wwi );
+template VolumeRef< double >
+AimsEigen< double >::doit( VolumeRef< double > mat, VolumeRef< double > *wwi );
 
 
 template < class T >
-void AimsEigen< T >::sort( AimsData< T >& evec, AimsData< T >& wr,
-			   AimsData< T > *wi)
+void AimsEigen< T >::sort( VolumeRef< T > evec, VolumeRef< T > wr,
+                           VolumeRef< T > *wi)
 {
   int i, j, k;
   T p, sum=(T)0;
-  AimsFastAllocationData< T > wwr, wwi;
+  VolumeRef< T > wwr, wwi;
 
-  ASSERT( evec.dimZ() == 1 && evec.dimT() == 1 );
-  ASSERT( wr.dimZ() == 1 && wr.dimT() == 1 );
+  ASSERT( evec.getSizeZ() == 1 && evec.getSizeT() == 1 );
+  ASSERT( wr.getSizeZ() == 1 && wr.getSizeT() == 1 );
 
-  if ( wr.dimY() > 1 )
+  if ( wr.getSizeY() > 1 )
     {
       wwr = undiag( wr );
       if ( wi )  wwi = undiag( *wi );
@@ -140,7 +152,7 @@ void AimsEigen< T >::sort( AimsData< T >& evec, AimsData< T >& wr,
       if ( wi )  wwi = *wi;
     }
 
-  int n = wr.dimX();
+  int n = wr.getSizeX();
 
   if ( wi )
     {
@@ -191,9 +203,9 @@ void AimsEigen< T >::sort( AimsData< T >& evec, AimsData< T >& wr,
 
 
 template void
-AimsEigen< float >::sort( AimsData< float >& evec, AimsData< float >& wr,
-			  AimsData< float > *wi );
+AimsEigen< float >::sort( VolumeRef< float > evec, VolumeRef< float > wr,
+                          VolumeRef< float > *wi );
 
 template void
-AimsEigen< double >::sort( AimsData< double >& evec, AimsData< double >& wr,
-			   AimsData< double > *wi );
+AimsEigen< double >::sort( VolumeRef< double > evec, VolumeRef< double > wr,
+                           VolumeRef< double > *wi );

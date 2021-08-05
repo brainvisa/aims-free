@@ -33,24 +33,26 @@
 
 
 #include <cstdlib>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/elmhes.h>
 
-using namespace aims;
+using namespace carto;
 
 template < class T >
-AimsData< T > HessenbergReduction< T >::doit( AimsData< T >& a, 
-					      AimsData< short > *isc )
+VolumeRef< T > HessenbergReduction< T >::doit( VolumeRef< T > a,
+                                               VolumeRef< short > *isc )
 {
-  ASSERT( a.dimZ() == 1 && a.dimT() == 1 );
-  ASSERT( a.dimX() == a.dimY() );
+  ASSERT( a.getSizeZ() == 1 && a.getSizeT() == 1 );
+  ASSERT( a.getSizeX() == a.getSizeY() );
 
   int i, j, m;
   T x, y, dum;
 
-  int n = a.dimX();
+  int n = a.getSizeX();
 
-  AimsFastAllocationData< short > iscale( n );
+  VolumeRef< short > iscale( n, 1, 1, 1,
+                             AllocatorContext(
+                                &carto::MemoryAllocator::singleton() ) );
 
   for ( m=1; m<n-1; m++ )
     {
@@ -110,11 +112,11 @@ AimsData< T > HessenbergReduction< T >::doit( AimsData< T >& a,
 }
 
 
-template AimsData< float >
-HessenbergReduction< float >::doit( AimsData< float >& a, 
-				    AimsData< short > *isc );
+template VolumeRef< float >
+HessenbergReduction< float >::doit( VolumeRef< float > a,
+				    VolumeRef< short > *isc );
 
 
-template AimsData< double >
-HessenbergReduction< double >::doit( AimsData< double >& a,
-				     AimsData< short > *isc );
+template VolumeRef< double >
+HessenbergReduction< double >::doit( VolumeRef< double > a,
+				     VolumeRef< short > *isc );

@@ -33,10 +33,11 @@
 
 
 #include <cstdlib>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/balanc.h>
 
 using namespace aims;
+using namespace carto;
 
 template < class T >
 Balancing< T >::Balancing() : radix( (T)16.0 )
@@ -44,17 +45,19 @@ Balancing< T >::Balancing() : radix( (T)16.0 )
 }
 
 template < class T >
-AimsData< T > Balancing< T >::doit( AimsData< T >& mat, AimsData< T > *sc )
+VolumeRef< T > Balancing< T >::doit( VolumeRef< T > mat, VolumeRef< T > *sc )
 {
-  ASSERT( mat.dimZ() == 1 && mat.dimT() == 1 );
-  ASSERT( mat.dimX() == mat.dimY() );
+  ASSERT( mat.getSizeZ() == 1 && mat.getSizeT() == 1 );
+  ASSERT( mat.getSizeX() == mat.getSizeY() );
 
   int i, j, last;
   T s, r, g, f, c, sqrdx;
 
-  int n = mat.dimX();
+  int n = mat.getSizeX();
 
-  AimsFastAllocationData< T > scale( n );
+  VolumeRef< T > scale( n, 1, 1, 1,
+                        AllocatorContext(
+                          &carto::MemoryAllocator::singleton() ) );
 
   sqrdx = radix * radix;
   last = 0;
@@ -121,12 +124,12 @@ AimsData< T > Balancing< T >::doit( AimsData< T >& mat, AimsData< T > *sc )
 template
 Balancing< float >::Balancing();
 
-template AimsData< float > 
-Balancing< float >::doit( AimsData< float >& mat, AimsData< float > *sc );
+template VolumeRef< float >
+Balancing< float >::doit( VolumeRef< float > mat, VolumeRef< float > *sc );
 
 
 template
 Balancing< double >::Balancing();
 
-template AimsData< double >
-Balancing< double >::doit( AimsData< double >& mat, AimsData< double > *sc );
+template VolumeRef< double >
+Balancing< double >::doit( VolumeRef< double > mat, VolumeRef< double > *sc );

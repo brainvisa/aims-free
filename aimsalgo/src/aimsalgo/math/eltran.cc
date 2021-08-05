@@ -32,30 +32,34 @@
  */
 
 
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/eltran.h>
 
-using namespace aims;
+using namespace carto;
 
 template < class T >
-AimsData< T > HessenbergAccumulation< T >::doit( AimsData< T >& a, 
-						 AimsData< short > *isc )
+VolumeRef< T > HessenbergAccumulation< T >::doit(
+  const VolumeRef< T > & a, const VolumeRef< short > *isc )
 {
-  ASSERT( a.dimZ() == 1 && a.dimT() == 1 );
-  ASSERT( a.dimX() == a.dimY() );
+  ASSERT( a.getSizeZ() == 1 && a.getSizeT() == 1 );
+  ASSERT( a.getSizeX() == a.getSizeY() );
 
   int i, j, mp, mp1;
 
-  int n = a.dimX();
+  int n = a.getSizeX();
 
-  AimsFastAllocationData< T > zev( n, n );
-  AimsFastAllocationData< short > iscale( n );
+  VolumeRef< T > zev( n, n, 1, 1,
+                      AllocatorContext(
+                        &carto::MemoryAllocator::singleton() ) );
+  VolumeRef< short > iscale( n, 1, 1, 1,
+                             AllocatorContext(
+                                &carto::MemoryAllocator::singleton() ) );
 
   if ( isc )  iscale = *isc;
   else
     for ( i=0; i<n; i++ )  iscale( i ) = i;
 
-  ASSERT( iscale.dimX() == n );
+  ASSERT( iscale.getSizeX() == n );
 
   for ( i=0; i<n; i++ )
     for ( j=0; j<n; j++ )
@@ -88,11 +92,11 @@ AimsData< T > HessenbergAccumulation< T >::doit( AimsData< T >& a,
 }
 
 
-template AimsData< float >
-HessenbergAccumulation< float >::doit( AimsData< float >& a, 
-				       AimsData< short > *isc );
+template VolumeRef< float >
+HessenbergAccumulation< float >::doit( const VolumeRef< float > & a,
+                                       const VolumeRef< short > *isc );
 
 
-template AimsData< double >
-HessenbergAccumulation< double >::doit( AimsData< double >& a,
-					AimsData< short > *isc );
+template VolumeRef< double >
+HessenbergAccumulation< double >::doit( const VolumeRef< double > & a,
+                                        const VolumeRef< short > *isc );

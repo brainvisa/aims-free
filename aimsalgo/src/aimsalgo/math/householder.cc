@@ -35,22 +35,23 @@
 #include <cstdlib>
 #include <aims/math/mathelem.h>
 #include <aims/math/householder.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
+using namespace carto;
 
 template < class T >
-void HouseholderTridiag< T >::doit( AimsData< T >& a,
-				    AimsData< T >& d,
-				    AimsData< T >& e )
+void HouseholderTridiag< T >::doit( VolumeRef< T > a,
+                                    VolumeRef< T > d,
+                                    VolumeRef< T > e )
 {
-  ASSERT( a.dimZ() == 1 && a.dimT() == 1);
-  ASSERT( d.dimY() == 1 && d.dimZ() == 1 && d.dimT() == 1 );
-  ASSERT( e.dimY() == 1 && e.dimZ() == 1 && e.dimT() == 1 );
+  ASSERT( a.getSizeZ() == 1 && a.getSizeT() == 1);
+  ASSERT( d.getSizeY() == 1 && d.getSizeZ() == 1 && d.getSizeT() == 1 );
+  ASSERT( e.getSizeY() == 1 && e.getSizeZ() == 1 && e.getSizeT() == 1 );
 
   int l,k,j,i,n;
   T scale,hh,h,g,f;
 
-  n = a.dimX();
+  n = a.getSizeX();
 
   for ( i = n - 1; i >= 1; i-- )
   {
@@ -125,12 +126,12 @@ void HouseholderTridiag< T >::doit( AimsData< T >& a,
 
 
 template void 
-HouseholderTridiag< float >::doit( AimsData< float >& a,
-				   AimsData< float >& d,
-				   AimsData< float >& e );
+HouseholderTridiag< float >::doit( VolumeRef< float > a,
+                                   VolumeRef< float > d,
+                                   VolumeRef< float > e );
 
 
 template void 
-HouseholderTridiag< double >::doit( AimsData< double >& a,
-				    AimsData< double >& d,
-				    AimsData< double >& e );
+HouseholderTridiag< double >::doit( VolumeRef< double > a,
+                                    VolumeRef< double > d,
+                                    VolumeRef< double > e );

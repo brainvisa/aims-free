@@ -35,29 +35,34 @@
 #include <cstdlib>
 #include <aims/math/mathelem.h>
 #include <aims/math/hqr.h>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 #include <math.h>
 #include <complex>
 
 using namespace std;
+using namespace carto;
 using namespace aims;
 
 template < class T >
-AimsData< T > HessenbergQR< T >::doit( AimsData< T >& a, AimsData< T >& imag,
-				       AimsData< T > *zz )
+VolumeRef< T > HessenbergQR< T >::doit( VolumeRef< T > a, VolumeRef< T > imag,
+                                        VolumeRef< T > *zz )
 {
-  ASSERT( a.dimZ() == 1 && a.dimT() == 1 );
-  ASSERT( a.dimX() == a.dimY() );
+  ASSERT( a.getSizeZ() == 1 && a.getSizeT() == 1 );
+  ASSERT( a.getSizeX() == a.getSizeY() );
 
   bool eigenVal = false;
   int nn, m, l, k, j, its, i, mmin;
   T z = 0, y, x, w, v, u, t, s = 0, r = 0, q = 0, p = 0, anorm, snorm, ra, 
     sa, vr, vi;
 
-  int n = a.dimX();
+  int n = a.getSizeX();
 
-  AimsFastAllocationData< T > wr( n );
-  AimsFastAllocationData< T > wi( n );
+  VolumeRef< T > wr( n, 1, 1, 1,
+                     AllocatorContext(
+                        &carto::MemoryAllocator::singleton() ) );
+  VolumeRef< T > wi( n, 1, 1, 1,
+                     AllocatorContext(
+                        &carto::MemoryAllocator::singleton() ) );
 
   if ( zz )  eigenVal = true;
 
@@ -468,12 +473,12 @@ AimsData< T > HessenbergQR< T >::doit( AimsData< T >& a, AimsData< T >& imag,
 }
 
 
-template AimsData< float >
-HessenbergQR< float >::doit( AimsData< float >& a, AimsData< float >& imag,
-			     AimsData< float > *zz );
+template VolumeRef< float >
+HessenbergQR< float >::doit( VolumeRef< float > a, VolumeRef< float > imag,
+                             VolumeRef< float > *zz );
 
 
-template AimsData< double >
-HessenbergQR< double >::doit( AimsData< double >& a, 
-			      AimsData< double >& imag,
-			      AimsData< double > *zz );
+template VolumeRef< double >
+HessenbergQR< double >::doit( VolumeRef< double > a,
+                              VolumeRef< double > imag,
+                              VolumeRef< double > *zz );

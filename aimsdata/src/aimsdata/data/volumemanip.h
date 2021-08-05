@@ -41,15 +41,18 @@ namespace aims
 
   template < typename T >
   inline 
-  AimsData<T> diag( const AimsData<T>& thing )
+  carto::rc_ptr<carto::Volume<T> > diag(
+    const carto::rc_ptr<carto::Volume<T> > & thing )
   {
-    ASSERT( thing.dimT() == 1 && thing.dimZ() == 1 && thing.dimY() == 1 );
+    ASSERT( thing->getSizeT() == 1 && thing->getSizeZ() == 1
+            && thing->getSizeY() == 1 );
 
     // allocate the new thing
-    AimsData<T> m( thing.dimX(), thing.dimX() );
+    carto::rc_ptr<carto::Volume<T> > m(
+      new carto::Volume<T>( thing->getSizeX(), thing->getSizeX() ) );
     // do the operations
-    for ( int x = 0; x < thing.dimX(); x++ )
-      m( x, x ) = thing( x );
+    for ( int x = 0; x < thing->getSizeX(); x++ )
+      m->at( x, x ) = thing->at( x );
 
     return m;
   }
@@ -57,15 +60,19 @@ namespace aims
 
   template < typename T >
   inline 
-  AimsData<T> undiag( const AimsData<T>& thing )
+  carto::rc_ptr<carto::Volume<T> > undiag(
+    const carto::rc_ptr<carto::Volume<T> > & thing )
   {
-    ASSERT( thing.dimT() == 1 && thing.dimZ() == 1 );
+    ASSERT( thing->getSizeT() == 1 && thing->getSizeZ() == 1 );
 
     // allocate the new thing
-    AimsData<T> m( std::min( thing.dimX(), thing.dimY() ) , 1 );
+    carto::rc_ptr<carto::Volume<T> > m(
+      new carto::Volume<T>( std::min( thing->getSizeX(),
+                                      thing->getSizeY() ), 1 ) );
     // do the operations
-    for ( int x = 0; x < std::min( thing.dimX(), thing.dimY() ); x++ )
-      m( x, 0 ) = thing( x, x );
+    for ( int x = 0; x < std::min( thing->getSizeX(), thing->getSizeY() );
+          x++ )
+      m->at( x, 0 ) = thing->at( x, x );
 
     return m;
   }

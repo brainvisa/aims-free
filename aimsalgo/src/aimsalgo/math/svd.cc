@@ -349,8 +349,10 @@ AimsData< T > AimsSVD< T >::doit( AimsData< T >& u, AimsData< T > *v )
 
   if ( v )  *v = vv;
 
-  if ( retType == MatrixOfSingularValues )  res = diag( w );
-  else  res = w;
+  if ( retType == MatrixOfSingularValues )
+    res = diag( w.volume() );
+  else
+    res = w;
 
   return res;
 }
@@ -377,7 +379,7 @@ void AimsSVD< T >::sort( AimsData< T >& u, AimsData< T >& w, AimsData< T > *v )
   if ( v )
     ASSERT( v->dimZ() == 1 && v->dimT() == 1 );
 
-  if ( w.dimY() > 1 )  ww = undiag( w );
+  if ( w.dimY() > 1 )  ww = undiag( w.volume() );
   else ww = w;
 
   int n = w.dimX();
@@ -419,8 +421,10 @@ void AimsSVD< T >::sort( AimsData< T >& u, AimsData< T >& w, AimsData< T > *v )
 	}
     }
 
-  if ( retType == MatrixOfSingularValues )  w = diag( ww );
-  else w = ww;
+  if ( retType == MatrixOfSingularValues )
+    w = diag( ww.volume() );
+  else
+    w = ww;
 }
 
 template void

@@ -33,80 +33,86 @@
 
 
 #include <aims/math/balbak.h>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 
-using namespace aims;
+using namespace carto;
 
 template < class T >
-AimsData< T > BackBalancing< T >::doit( AimsData< T >& mat, AimsData< T >& wr, 
-					AimsData< T >& wi, AimsData< T > *sc )
+VolumeRef< T > BackBalancing< T >::doit( VolumeRef< T > mat,
+                                        const VolumeRef< T >& wr,
+                                        const VolumeRef< T >& wi,
+                                        const VolumeRef< T > *sc )
 {
-  ASSERT( mat.dimZ() == 1 && mat.dimT() == 1 );
-  ASSERT( mat.dimX() == mat.dimY() );
-  ASSERT( wr.dimY() == 1 && wr.dimZ() == 1 && wr.dimT() == 1 );
-  ASSERT( wi.dimY() == 1 && wi.dimZ() == 1 && wi.dimT() == 1 );
-  ASSERT( wr.dimX() == wi.dimX() && wr.dimX() == mat.dimX() );
+  ASSERT( mat.getSizeZ() == 1 && mat.getSizeT() == 1 );
+  ASSERT( mat.getSizeX() == mat.getSizeY() );
+  ASSERT( wr.getSizeY() == 1 && wr.getSizeZ() == 1 && wr.getSizeT() == 1 );
+  ASSERT( wi.getSizeY() == 1 && wi.getSizeZ() == 1 && wi.getSizeT() == 1 );
+  ASSERT( wr.getSizeX() == wi.getSizeX() && wr.getSizeX() == mat.getSizeX() );
 
   int i, j;
   T s, norm;
 
-  int n = mat.dimX();
+  int n = mat.getSizeX();
 
-  AimsFastAllocationData< T > scale( n );
+  VolumeRef< T > scale( n, 1, 1, 1,
+                        AllocatorContext(
+                          &carto::MemoryAllocator::singleton() ) );
 
   if ( sc ) scale = *sc;
   else
     for ( i=0; i<n; i++ )  scale( i ) = (T)1;
 
-  ASSERT( scale.dimX() == n );
+  ASSERT( scale.getSizeX() == n );
 
   for ( i=0; i<n; i++ )
     {
       s = scale( i );
 
       for ( j=0; j<n; j++ )
-	mat( i, j ) *= s;
+        mat( i, j ) *= s;
     }
 
   for ( j=0; j<n; j++ )
+  {
+    norm = (T)0;
+
+    if ( wi( j ) == (T)0 )
     {
-      norm = (T)0;
+      for ( i=0; i<n; i++ )
+        norm += mat( i, j ) * mat( i, j );
 
-      if ( wi( j ) == (T)0 )
-	{
-	  for ( i=0; i<n; i++ )
-	    norm += mat( i, j ) * mat( i, j );
+      norm = (T)sqrt( norm );
 
-	  norm = (T)sqrt( norm );
-
-	  for ( i=0; i<n; i++ )
-	    mat( i, j ) /= norm;
-	}
-      else if ( wi( j ) > (T)0 )
-	{
-	  for ( i=0; i<n; i++ )
-	    norm += mat( i, j ) * mat( i, j ) + mat( i, j+1 ) * mat( i, j+1 );
-
-	  norm = (T)sqrt( norm );
-
-	  for ( i=0; i<n; i++ )
-	    {
-	      mat( i, j ) /= norm;
-	      mat( i, j + 1 ) /= norm;
-	    }
-	}
+      for ( i=0; i<n; i++ )
+        mat( i, j ) /= norm;
     }
+      else if ( wi( j ) > (T)0 )
+    {
+      for ( i=0; i<n; i++ )
+        norm += mat( i, j ) * mat( i, j ) + mat( i, j+1 ) * mat( i, j+1 );
+
+      norm = (T)sqrt( norm );
+
+      for ( i=0; i<n; i++ )
+        {
+          mat( i, j ) /= norm;
+          mat( i, j + 1 ) /= norm;
+        }
+    }
+  }
 
   return mat;
 }
 
 
-template AimsData< float > 
-BackBalancing< float >::doit( AimsData< float >& mat, AimsData< float >& wr,
-			      AimsData< float >& wi, AimsData< float > *sc );
+template VolumeRef< float >
+BackBalancing< float >::doit( VolumeRef< float > mat,
+                              const VolumeRef< float >& wr,
+                              const VolumeRef< float >& wi,
+                              const VolumeRef< float > *sc );
 
-template AimsData< double >
-BackBalancing< double >::doit( AimsData< double >& mat, 
-			       AimsData< double >& wr,
-			       AimsData< double >& wi, 
-			       AimsData< double > *sc );
+template VolumeRef< double >
+BackBalancing< double >::doit( VolumeRef< double > mat,
+                               const VolumeRef< double >& wr,
+                               const VolumeRef< double >& wi,
+                               const VolumeRef< double > *sc );

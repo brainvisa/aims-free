@@ -37,7 +37,10 @@
 
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 
 /** @name Hessenberg accumulation */
@@ -63,7 +66,8 @@ public:
       @param isc contains information on the rows and columns
       interchanged in the reduction by HessenbergReduction.
   */
-  AimsData< T > doit( AimsData< T >&, AimsData< short > *isc = NULL );
+  carto::VolumeRef< T > doit( const carto::VolumeRef< T > &,
+                              const carto::VolumeRef< short > *isc = NULL );
 };
 
 #endif

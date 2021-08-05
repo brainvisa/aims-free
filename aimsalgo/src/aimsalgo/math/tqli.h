@@ -37,7 +37,10 @@
 
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 
 /** @name TQLI decompposition of a tridiagonal matrix */
@@ -69,7 +72,8 @@ public:
       output, it is replaced by the normalized eigenvectors. The k-th
       column of this matrix corresponds to the k-th eigenvector.
    */
-  void doit( AimsData< T >&, AimsData< T >&, AimsData< T >& );
+  void doit( carto::VolumeRef< T >, carto::VolumeRef< T >,
+             carto::VolumeRef< T > );
 };
 
 #endif

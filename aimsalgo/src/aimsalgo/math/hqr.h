@@ -38,7 +38,10 @@
 #include <aims/config/aimsalgo_config.h>
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 
 /** @name QR transformation for real Hessenberg matrices */
@@ -68,8 +71,8 @@ public:
       the real and imaginary parts of its eigenvector, and an other 
       eigenvector is formed by its complex conjugate.
    */
-  AimsData< T > doit( AimsData< T >&, AimsData< T >& , 
-		      AimsData< T > *zz = NULL );
+  carto::VolumeRef< T > doit( carto::VolumeRef< T >, carto::VolumeRef< T > ,
+                              carto::VolumeRef< T > *zz = NULL );
 };
 
 #endif

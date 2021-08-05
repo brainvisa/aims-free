@@ -37,7 +37,10 @@
 
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 
 /** @name Hessenberg reduction of a matrix. */
@@ -61,7 +64,8 @@ public:
       @param isc keeps track of interchanges and is a vector used to
       backtrack eigenvectors.
   */
-  AimsData< T > doit( AimsData< T >&, AimsData< short > *isc = NULL );
+  carto::VolumeRef< T > doit( carto::VolumeRef< T >,
+                              carto::VolumeRef< short > *isc = NULL );
 };
 
 #endif

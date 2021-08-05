@@ -37,7 +37,10 @@
 
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 
 /** @name Balancing of a matrix */
@@ -60,7 +63,7 @@ public:
       matrix with identical eigenvalues. A symmetric matrix is
       already balanced and is unaffected by this procedure.
   */
-  AimsData< T > doit( AimsData< T >&, AimsData< T > *sc = NULL );
+  carto::VolumeRef< T > doit( carto::VolumeRef< T >, carto::VolumeRef< T > *sc = NULL );
 
   /** Floating-point precision. \\
       @param r should be the machine's floating-point radix.
