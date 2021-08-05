@@ -31,6 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 /*
  *  IO classes
  */
@@ -40,6 +45,7 @@
 #include <aims/io/graphBundlesFormat.h>
 #include <aims/io/baseFormats_syntax.h>
 #include <aims/io/argR.h>
+#include <cartodata/volume/volume.h>
 #include <graph/graph/graph.h>
 
 
@@ -60,7 +66,7 @@ namespace aims
     init();
     map<string, list<string> > & ext = _extensions();
     const map<string, list<string> >
-      & volext = FileFormatDictionary<AimsData<short> >::extensions();
+      & volext = FileFormatDictionary<Volume<short> >::extensions();
     map<string, list<string> >::const_iterator	ive, eve = volext.end();
     list<string>::const_iterator                ie, ee;
 

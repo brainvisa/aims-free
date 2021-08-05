@@ -32,6 +32,10 @@
  */
 
 
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/bucket/bucketgen.h>
 #include <aims/vector/vector.h>
 #include <cmath>

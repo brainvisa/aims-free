@@ -31,6 +31,10 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/data/sliceformatheader.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/directory.h>

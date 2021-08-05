@@ -37,7 +37,6 @@
 // these include should be removed afterwards
 #include <aims/bucket/bucket.h>
 #include <aims/vector/vector.h>
-#include <aims/data/data.h>
 #include <aims/mesh/surface.h>
 #include <aims/rgb/rgb.h>
 #include <aims/math/dtitensor.h>

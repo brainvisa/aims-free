@@ -1,4 +1,8 @@
 
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/bucket/bucketutil_d.h>
 
 using namespace aims;

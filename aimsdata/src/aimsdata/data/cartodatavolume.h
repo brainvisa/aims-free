@@ -45,6 +45,16 @@
 
 #include <algorithm>
 
+/* Warn about obsolete header/class
+
+   The warning as a class attribute is too aggressive, it warns _each_ use of
+   the AimsData classes, and this happens at many many many places, which
+   results in typically dozens of thousands of stderr output from the compiler
+   for a single include.
+*/
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#warning "<aims/data/data.h> and the AimsData<T> classes are obsolete, use carto::VolumeRef() instead"
+#endif
 
 /** 4D Volume class template
 
@@ -58,9 +68,9 @@
 */
 template<typename T>
 class
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-    __attribute__((__deprecated__("use carto::VolumeRef() instead")))
-#endif
+// #ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+//     __attribute__((__deprecated__("use carto::VolumeRef() instead")))
+// #endif
   AimsData : public carto::RCObject, public aims::Border
 {
 

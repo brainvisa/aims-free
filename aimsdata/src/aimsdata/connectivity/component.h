@@ -37,7 +37,7 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/connectivity/connectivity.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 template <typename T> class AimsBucket;
 class Void;

@@ -32,6 +32,11 @@
  */
 
 
+// we don't want to issue a warning
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <limits>
 #include <algorithm>
 #include <cartobase/type/string_conversion.h>

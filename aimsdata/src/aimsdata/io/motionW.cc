@@ -33,6 +33,7 @@
 
 
 #include <aims/io/motionW.h>
+#include <aims/data/pheader.h>
 
 using namespace std;
 using namespace aims ;

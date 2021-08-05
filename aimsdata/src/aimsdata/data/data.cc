@@ -31,8 +31,14 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
- #include <cartobase/object/object_d.h>
- #include <aims/data/data.h>
+// we don't want to issue a warning while compiling the obsolete classes
+// themselves...
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
+#include <cartobase/object/object_d.h>
+#include <aims/data/data.h>
  
 namespace carto {
 

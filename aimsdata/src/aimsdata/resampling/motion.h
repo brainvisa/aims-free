@@ -39,7 +39,6 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/transformation/affinetransformation3d.h>
-#include <aims/data/data.h>
 
 namespace aims
 {

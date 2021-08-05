@@ -40,6 +40,7 @@
 #include <aims/mesh/surface.h>
 #include <aims/io/writer.h>
 #include <aims/io/datatypecode.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/stream/fileutil.h>
 
