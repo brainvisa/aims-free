@@ -204,6 +204,20 @@ namespace carto {
     return (*this)->getVoxelSize();
   }
 
+  template <typename T>
+  inline
+  void VolumeRef<T>::setVoxelSize( const std::vector<float> & vs )
+  {
+    (*this)->setVoxelSize( vs );
+  }
+
+  template <typename T>
+  inline
+  void VolumeRef<T>::setVoxelSize( float vx, float vy, float vz, float vt )
+  {
+    (*this)->setVoxelSize( vx, vy, vz, vt );
+  }
+
   //==========================================================================
   //   ITERATORS
   //==========================================================================

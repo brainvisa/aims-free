@@ -110,6 +110,13 @@ namespace carto {
 
   template <typename T>
   inline
+  void VolumeRef<T>::fillBorder( const T & value )
+  {
+    (*this)->fillBorder(value);
+  }
+
+  template <typename T>
+  inline
   VolumeRef<T> & VolumeRef<T>::operator= ( const T & value )
   {
     (**this) = value;

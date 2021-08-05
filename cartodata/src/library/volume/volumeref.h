@@ -149,6 +149,8 @@ namespace carto {
     PropertySet& getPropertySet()
       __attribute__((__deprecated__("use header() instead")));
     std::vector<float> getVoxelSize() const;
+    void setVoxelSize( float vx, float vy = 1., float vz = 1., float vt = 1. );
+    void setVoxelSize( const std::vector<float> & vs );
 
     virtual void copyHeaderFrom( const PropertySet & other );
     virtual void copyHeaderFrom( const Object & other );
@@ -247,6 +249,12 @@ namespace carto {
     //========================================================================
     /// Fills the volume with a given value.
     void fill( const T & value );
+    /** Fill border with a constant value
+
+        More precisely, fill the surrounding of the volume view in the
+        reference volume (if any) using the given value.
+    */
+    void fillBorder( const T & value );
     VolumeRef<T> & operator= ( const T & value );
 
 #endif // CARTO_VOLUME_AUTO_DEREFERENCE
