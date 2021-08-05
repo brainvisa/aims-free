@@ -40,8 +40,8 @@
 #include <aims/config/aimsdata_config.h>
 #include <map>
 
-#include <aims/data/data_g.h>
-#include <aims/bucket/bucket_g.h>
+#include <cartodata/volume/volume.h>
+#include <aims/bucket/bucket.h>
 #include <graph/graph/graph.h>
 #include <aims/roi/hie.h>
 
@@ -56,7 +56,7 @@ public:
   AimsRoi( Hierarchy *hierarchy=NULL );
   virtual ~AimsRoi() { }
 
-  void setLabel( AimsData< short> &label);
+  void setLabel( const carto::VolumeRef< short> & label);
 
   void setHierarchy( Hierarchy *hie ) { hRoi = hie; }
   Hierarchy* getHierarchy() { return hRoi;};

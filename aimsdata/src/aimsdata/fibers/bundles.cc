@@ -33,7 +33,12 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
-/* datatypecode.h must be included before any Parameterizable object can 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
+/* datatypecode.h must be included before any Parameterizable object can
    be instantiated on Aims objects (here, Point3df).
    I didn't get deep into the code and I'm not sure it is better here than in 
    bundles.h. What I am sure of is that without this include, 
@@ -55,7 +60,7 @@
 #include <cartobase/object/pythonwriter.h>
 #include <cartobase/object/pythonreader.h>
 #include <aims/graph/graphmanip.h>
-#include <aims/io/io_g.h>
+#include <aims/io/writer.h>
 #include <sstream>
 #include <stdexcept>
 #include <math.h>

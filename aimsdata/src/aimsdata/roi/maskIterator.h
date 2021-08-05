@@ -35,13 +35,12 @@
 #ifndef AIMS_ROI_MASKITERATOR_H
 #define AIMS_ROI_MASKITERATOR_H
 
-#include <aims/data/data.h>
 #include <aims/io/reader.h>
 #include <aims/roi/roi.h>
 #include <aims/roi/voxelSampling.h>
-#include <cartobase/smart/rcptr.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/type/string_conversion.h>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <memory>
 #include <string>
 
@@ -90,7 +89,7 @@ namespace aims
   {
   public:
     MotionedMaskIterator( const carto::rc_ptr< MaskIterator > &,
-                          const Motion & );
+                          const AffineTransformation3d & );
     virtual ~MotionedMaskIterator();
 
     virtual const Point3d &value() const;
@@ -108,8 +107,8 @@ namespace aims
 
   protected:
     carto::rc_ptr< MaskIterator > _maskIterator;
-    Motion _motion;
-    Motion _inverseMotion;
+    AffineTransformation3d _motion;
+    AffineTransformation3d _inverseMotion;
   };
 
   //---------------------------------------------------------------------------
@@ -629,15 +628,6 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  carto::rc_ptr< MaskIterator > getMaskIterator(
-    const AimsData< T > &data )
-  {
-    return carto::rc_ptr< MaskIterator >
-      ( new MaskIteratorOf< carto::VolumeRef<T> >( data ) );
-  }
-
-  //---------------------------------------------------------------------------
-  template <class T>
   carto::rc_ptr< MaskIterator >
   getMaskIterator( const carto::VolumeRef< T > &data,
                    carto::rc_ptr< VoxelSampler > voxelSampler )
@@ -650,16 +640,6 @@ namespace aims
   template <class T>
   carto::rc_ptr< MaskIterator >
   getMaskIterator( const carto::rc_ptr<carto::Volume< T > > &data,
-                   carto::rc_ptr< VoxelSampler > voxelSampler )
-  {
-    return carto::rc_ptr< MaskIterator >
-      ( new MaskIteratorOf< carto::VolumeRef<T> >( data, voxelSampler ) );
-  }
-
-  //---------------------------------------------------------------------------
-  template <class T>
-  carto::rc_ptr< MaskIterator >
-  getMaskIterator( const AimsData< T > &data,
                    carto::rc_ptr< VoxelSampler > voxelSampler )
   {
     return carto::rc_ptr< MaskIterator >
@@ -697,15 +677,6 @@ namespace aims
 
   //---------------------------------------------------------------------------
   template <class T>
-  carto::rc_ptr< MaskIterator > getMaskIterator(
-    const AimsData< T > &data, const AffineTransformation3d &motion )
-  {
-    return carto::rc_ptr< MaskIterator >
-      ( new MotionedMaskIterator( getMaskIterator( data ), motion ) );
-  }
-
-  //---------------------------------------------------------------------------
-  template <class T>
   carto::rc_ptr< MaskIterator >
   getMaskIterator( const carto::VolumeRef< T > &data,
                    carto::rc_ptr< VoxelSampler > voxelSampler,
@@ -720,18 +691,6 @@ namespace aims
   template <class T>
   carto::rc_ptr< MaskIterator >
   getMaskIterator( const carto::rc_ptr<carto::Volume< T > > &data,
-                   carto::rc_ptr< VoxelSampler > voxelSampler,
-                   const AffineTransformation3d &motion )
-  {
-    return carto::rc_ptr< MaskIterator >
-      ( new MotionedMaskIterator( getMaskIterator( data, voxelSampler ),
-                                  motion ) );
-  }
-
-  //---------------------------------------------------------------------------
-  template <class T>
-  carto::rc_ptr< MaskIterator >
-  getMaskIterator( const AimsData< T > &data,
                    carto::rc_ptr< VoxelSampler > voxelSampler,
                    const AffineTransformation3d &motion )
   {

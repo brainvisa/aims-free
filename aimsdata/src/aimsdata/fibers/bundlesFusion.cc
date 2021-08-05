@@ -33,6 +33,11 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/fibers/bundlesFusion.h>
 
 using namespace aims;

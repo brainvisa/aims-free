@@ -31,6 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/roi/maskIterator.h>
 #include <aims/io/process.h>
 #include <aims/io/reader.h>
@@ -48,7 +53,7 @@ using namespace aims;
 //----------------------------------------------------------------------------
 MotionedMaskIterator::
 MotionedMaskIterator( const carto::rc_ptr< MaskIterator > &maskIterator,
-                      const Motion &motion ) :
+                      const AffineTransformation3d &motion ) :
   _maskIterator( maskIterator ),
   _motion( motion )
 {
@@ -666,7 +671,7 @@ aims::getMaskIterator( const string &fileName,
 
 //----------------------------------------------------------------------------
 rc_ptr< MaskIterator > aims::getMaskIterator( const string &fileName,
-                                              const Motion &motion )
+                                              const AffineTransformation3d &motion )
 {
   return rc_ptr< MaskIterator >
     ( new MotionedMaskIterator( getMaskIterator( fileName ), motion ) );
@@ -677,7 +682,7 @@ rc_ptr< MaskIterator > aims::getMaskIterator( const string &fileName,
 rc_ptr< MaskIterator >
 aims::getMaskIterator( const string &fileName,
                        carto::rc_ptr< VoxelSampler > voxelSampler,
-                       const Motion &motion )
+                       const AffineTransformation3d &motion )
 {
   return rc_ptr< MaskIterator >
     ( new MotionedMaskIterator( getMaskIterator( fileName, voxelSampler ),

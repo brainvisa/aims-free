@@ -32,8 +32,14 @@
  */
 
 
+// we don't want to issue a warning
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/talairach/talACPCNorm.h>
 #include <aims/talairach/cramer.h>
+#include <aims/data/data.h>
 
 
 TalairachACPCNorm::TalairachACPCNorm() :

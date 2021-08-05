@@ -31,6 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/roi/roiIterator.h>
 #include <aims/io/process.h>
 #include <exception>
@@ -75,7 +80,7 @@ int32_t VolumeROILabelMap::at( const Point3df &point ) const
 
 //----------------------------------------------------------------------------
 MotionedVolumeROILabelMap::MotionedVolumeROILabelMap(
-  carto::VolumeRef< int32_t > &v, const Motion &m ) :
+  carto::VolumeRef< int32_t > &v, const AffineTransformation3d &m ) :
   VolumeROILabelMap( v ),
   _motion( m )
 {
@@ -128,7 +133,7 @@ rc_ptr< ROILabelMap > RoiIterator::createLabelMap()
 //----------------------------------------------------------------------------
 MotionedRoiIterator::
 MotionedRoiIterator( const carto::rc_ptr< RoiIterator > &roiIterator,
-                     const Motion &motion ) :
+                     const AffineTransformation3d &motion ) :
   _roiIterator( roiIterator ),
   _motion( motion )
 {
@@ -483,7 +488,7 @@ getRoiIterator( const Graph &data,
 
 //----------------------------------------------------------------------------
 rc_ptr< RoiIterator > getRoiIterator( const string &fileName,
-                                      const Motion &motion )
+                                      const AffineTransformation3d &motion )
 {
     return rc_ptr< RoiIterator >
       ( new MotionedRoiIterator( getRoiIterator( fileName ), motion ) );
@@ -491,7 +496,7 @@ rc_ptr< RoiIterator > getRoiIterator( const string &fileName,
 
 //---------------------------------------------------------------------------
 carto::rc_ptr< RoiIterator > getRoiIterator( const Graph &data,
-                                             const Motion &motion )
+                                             const AffineTransformation3d &motion )
 {
   return carto::
     rc_ptr< RoiIterator >( new MotionedRoiIterator( getRoiIterator( data ),
@@ -502,7 +507,7 @@ carto::rc_ptr< RoiIterator > getRoiIterator( const Graph &data,
 rc_ptr< RoiIterator >
 getRoiIterator( const string &fileName,
                 carto::rc_ptr< VoxelSampler > voxelSampler,
-                const Motion &motion )
+                const AffineTransformation3d &motion )
 {
     return rc_ptr< RoiIterator >
       ( new MotionedRoiIterator( getRoiIterator( fileName, voxelSampler ),
@@ -513,7 +518,7 @@ getRoiIterator( const string &fileName,
 carto::rc_ptr< RoiIterator >
 getRoiIterator( const Graph &data,
                 carto::rc_ptr< VoxelSampler > voxelSampler,
-                 const Motion &motion )
+                 const AffineTransformation3d &motion )
 {
   return carto::
     rc_ptr< RoiIterator >

@@ -34,6 +34,11 @@
  */
 
 
+// we don't want to issue a warning
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/fibers/bundles_features.h>
 #include <cartobase/object/pythonwriter.h>
 

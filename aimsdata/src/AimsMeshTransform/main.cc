@@ -31,11 +31,15 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
-#include <aims/io/motionR.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/mesh/surface.h>
 #include <aims/mesh/surfaceOperation.h>
@@ -74,7 +78,7 @@ int main( int argc, const char **argv )
       app.initialize();
 
       if( wmesh.fileName().empty() )
-	wmesh.setFileName( rmesh.fileName() );
+        wmesh.setFileName( rmesh.fileName() );
 
       // read triangulation
       cout << "reading triangulation   : " << flush;
@@ -82,13 +86,13 @@ int main( int argc, const char **argv )
       rmesh >> surface;
 
       // loading transformation
-      Motion	motion;
+      AffineTransformation3d	motion;
       if( !fileTransf.empty() )
-	{
-	  MotionReader	mr( fileTransf );
-	  mr.read( motion );
-	}
-      AimsData<float> r = motion.rotation();
+      {
+        Reader<AffineTransformation3d>	mr( fileTransf );
+        mr.read( motion );
+      }
+      VolumeRef<float> r = motion.affine();
       r(0,0) *= scaling[0];
       r(1,0) *= scaling[0];
       r(2,0) *= scaling[0];

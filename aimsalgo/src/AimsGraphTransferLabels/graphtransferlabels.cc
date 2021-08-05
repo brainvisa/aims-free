@@ -32,6 +32,11 @@
  */
 
 
+// we don't want to issue a warning
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <aims/getopt/getopt2.h>
 #include <aims/io/reader.h>
@@ -39,6 +44,7 @@
 #include <aims/graph/graphmanip.h>
 #include <aims/distancemap/voronoi.h>
 #include <aims/resampling/motion.h>
+#include <aims/data/data.h>
 #include <graph/graph/graph.h>
 
 using namespace aims;

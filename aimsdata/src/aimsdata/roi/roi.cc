@@ -31,6 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 /*
  *  Region Of Interest
  */
@@ -41,6 +46,7 @@
 #include <aims/graph/graphmanip.h>
 #include <aims/io/datatypecode.h>
 #include <cartobase/stream/fileutil.h>
+#include <cartobase/containers/nditerator.h>
 #include <vector>
 
 using namespace aims;
@@ -302,26 +308,21 @@ void AimsRoi::bucket2data( int borderWidth )
 }
 
 
-void AimsRoi::setLabel( AimsData<int16_t> &label)
+void AimsRoi::setLabel( const VolumeRef<int16_t> &label)
 {
   vector<int> bmax(3), bmin(3, 0) ;
-  bmax[0] = label.dimX() - 1 ;
-  bmax[1] = label.dimY() - 1 ;
-  bmax[2] = label.dimZ() - 1 ;
+  bmax[0] = label.getSizeX() - 1 ;
+  bmax[1] = label.getSizeY() - 1 ;
+  bmax[2] = label.getSizeZ() - 1 ;
   
-  vector<float> voxSize(3) ;
-  voxSize[0] = label.sizeX() ;
-  voxSize[1] = label.sizeY() ;
-  voxSize[2] = label.sizeZ() ;
+  vector<float> voxSize = label.getVoxelSize();
   
   setProperty( "boundingbox_max", bmax) ;
   setProperty( "boundingbox_min", bmin) ;
   setProperty( "voxel_size", voxSize) ;
   GraphManip::buckets2Volume( *this );
-  VolumeRef<int16_t>	vol( new Volume<int16_t>( label.volume() ) );
+  VolumeRef<int16_t>	vol = label.deepcopy();
   
-  vol->copyHeaderFrom( dynamic_cast<PythonHeader *>(
-    label.header() )->getValue() );
   setProperty( "aims_roi", vol );
 
   // check nodes and add new ones
@@ -337,28 +338,36 @@ void AimsRoi::setLabel( AimsData<int16_t> &label)
       nodes[ l ] = *iv;
 
   // look for new labels
-  ForEach3d( label, x, y, z )
+  line_NDIterator<int16_t> lit( &label->at( 0 ), label->getSize(),
+                                label->getStrides() );
+  int16_t	*pp, *p;
+  for( ; !lit.ended(); ++lit )
+  {
+    p = &*lit;
+    for( pp=p + lit.line_length(); p!=pp; lit.inc_line_ptr( p ) )
     {
-      l = label( x, y, z );
+      l = *p;
       if( l != 0 )
-	{
-	  Vertex	*& v = nodes[ l ];
-	  if( !v )
-	    {
-	      v = addVertex( "roi" );
-	      v->setProperty( "name", string( "unknown" ) );
-	      v->setProperty( "roi_label", l );
-	    }
-	    ++counts[ l ];
-	}
+      {
+        Vertex	*& v = nodes[ l ];
+        if( !v )
+          {
+            v = addVertex( "roi" );
+            v->setProperty( "name", string( "unknown" ) );
+            v->setProperty( "roi_label", l );
+          }
+          ++counts[ l ];
+      }
     }
-  
-  for( map<int, int>::iterator it = counts.begin() ; it != counts.end() ; ++it )
+  }
+
+
+  for( map<int, int>::iterator it = counts.begin(); it != counts.end(); ++it )
   	cout << "Counts " << it->first << " : " << it->second << endl ;
   cout << "Ndes sise : " << nodes.size() << endl ; 
 //  map<int, Vertex *>::const_iterator	in, en = nodes.end();
   iterator	in, en = end();
-  float	vs = label.sizeX() * label.sizeY() * label.sizeZ();
+  float	vs = voxSize[0] * voxSize[1] * voxSize[2];
   int	c;
 
   for( in=begin(); in!=en; ++in )

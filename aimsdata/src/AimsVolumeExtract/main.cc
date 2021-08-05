@@ -31,12 +31,18 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 //--- aims -------------------------------------------------------------------
 #include <aims/io/finder.h>
 #include <aims/io/process.h>
 #include <aims/io/fileFormat.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
+#include <aims/hsv/hsv.h>
 //--- cartodata --------------------------------------------------------------
 #include <cartodata/volume/volume.h>
 //--- soma-io ----------------------------------------------------------------
