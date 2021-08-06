@@ -392,8 +392,8 @@ namespace carto
 
   // matrix product
   template <typename T>
-  VolumeRef<T> matrix_product( const VolumeRef<T> & v1,
-                               const VolumeRef<T> & v2 )
+  VolumeRef<T> matrix_product( const rc_ptr<Volume<T> > & v1,
+                               const rc_ptr<Volume<T> > & v2 )
   {
     return matrix_product( *v1, *v2 );
   }
@@ -436,18 +436,18 @@ namespace carto
 
   // transpose
   template <typename T>
-  VolumeRef<T> transpose( const VolumeRef<T> & v, bool copy )
+  VolumeRef<T> transpose( const rc_ptr<Volume<T> > & v, bool copy )
   {
     if( copy )
       return transpose( *v );
     else
     {
-      std::vector<int> size1 = v.getSize();
+      std::vector<int> size1 = v->getSize();
       int s0 = size1[0];
       size1[0] = size1[1];
       size1[1] = s0;
 
-      std::vector<size_t> strides = v.getStrides();
+      std::vector<size_t> strides = v->getStrides();
       size_t st0 = strides[0];
       strides[0] = strides[1];
       strides[1] = st0;

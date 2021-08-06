@@ -291,8 +291,8 @@ namespace carto
   VolumeRef<T> matrix_product( const Volume<T> & v1, const Volume<T> & v2 );
   /// matrix product
   template <typename T>
-  VolumeRef<T> matrix_product( const VolumeRef<T> & v1,
-                               const VolumeRef<T> & v2 );
+  VolumeRef<T> matrix_product( const rc_ptr<Volume<T> > & v1,
+                               const rc_ptr<Volume<T> > & v2 );
   /// transpose
   template <typename T>
   VolumeRef<T> transpose( const Volume<T> & v );
@@ -301,7 +301,7 @@ namespace carto
   strides.
   */
   template <typename T>
-  VolumeRef<T> transpose( const VolumeRef<T> & v, bool copy=false );
+  VolumeRef<T> transpose( const rc_ptr<Volume<T> > & v, bool copy=false );
 
   //==========================================================================
   // Borders

@@ -134,15 +134,15 @@ template VolumeRef< Point3dd > transpose<Point3dd>( const Volume< Point3dd > & )
 template VolumeRef< Point2d > transpose<Point2d>( const Volume< Point2d > & );
 template VolumeRef< vectorf6 > transpose<vectorf6>( const Volume< vectorf6 > & );
 
-template VolumeRef< std::map<int, float> > transpose<std::map<int, float> >( const VolumeRef< std::map<int, float> > &, bool );
-template VolumeRef< VoxelRGB > transpose<VoxelRGB>( const VolumeRef< VoxelRGB > &, bool );
-template VolumeRef< VoxelRGBA > transpose<VoxelRGBA>( const VolumeRef< VoxelRGBA > &, bool );
-template VolumeRef< VoxelHSV > transpose<VoxelHSV>( const VolumeRef< VoxelHSV > &, bool );
-template VolumeRef< Point3df > transpose<Point3df>( const VolumeRef< Point3df > &, bool );
-template VolumeRef< Point3d > transpose<Point3d>( const VolumeRef< Point3d > &, bool );
-template VolumeRef< Point3dd > transpose<Point3dd>( const VolumeRef< Point3dd > &, bool );
-template VolumeRef< Point2d > transpose<Point2d>( const VolumeRef< Point2d > &, bool );
-template VolumeRef< vectorf6 > transpose<vectorf6>( const VolumeRef< vectorf6 > &, bool );
+template VolumeRef< std::map<int, float> > transpose<std::map<int, float> >( const rc_ptr<Volume< std::map<int, float> > > &, bool );
+template VolumeRef< VoxelRGB > transpose<VoxelRGB>( const rc_ptr<Volume< VoxelRGB > > &, bool );
+template VolumeRef< VoxelRGBA > transpose<VoxelRGBA>( const rc_ptr<Volume< VoxelRGBA > > &, bool );
+template VolumeRef< VoxelHSV > transpose<VoxelHSV>( const rc_ptr<Volume< VoxelHSV > > &, bool );
+template VolumeRef< Point3df > transpose<Point3df>( const rc_ptr<Volume< Point3df > > &, bool );
+template VolumeRef< Point3d > transpose<Point3d>( const rc_ptr<Volume< Point3d > > &, bool );
+template VolumeRef< Point3dd > transpose<Point3dd>( const rc_ptr<Volume< Point3dd > > &, bool );
+template VolumeRef< Point2d > transpose<Point2d>( const rc_ptr<Volume< Point2d > >&, bool );
+template VolumeRef< vectorf6 > transpose<vectorf6>( const rc_ptr<Volume< vectorf6 > > &, bool );
 
 } // namespace carto
 
