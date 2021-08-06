@@ -31,6 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 /*
  *  Apply threshold
  */
@@ -120,17 +125,17 @@ doit( Process & p, const string & fname, Finder & f )
   if( tc.bin )
     {
       Writer<VolumeRef<short> > writer( tc.fout );
-      return( writer.write( thresh.bin( data ).volume() ) );
+      return( writer.write( thresh.bin( data ) ) );
     }
   else if( tc.clip )
     {
       Writer<VolumeRef<T> > writer( tc.fout );
-      return( writer.write( thresh.clip( data ).volume() ) );
+      return( writer.write( thresh.clip( data ) ) );
     }
   else
     {
       Writer<VolumeRef<T> > writer( tc.fout );
-      return( writer.write( thresh( data ).volume() ) );
+      return( writer.write( thresh( data ) ) );
     }
 }
 

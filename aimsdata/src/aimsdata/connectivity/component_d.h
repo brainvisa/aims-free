@@ -38,7 +38,6 @@
 #define AIMS_CONNECTIVITY_COMPONENT_D_H
 
 #include <aims/connectivity/component.h>
-#include <aims/utility/threshold.h>
 #include <aims/bucket/bucket.h>
 #include <cartobase/containers/nditerator.h>
 #include <map>

@@ -42,7 +42,7 @@
 #include <functional>
 
 #include <aims/config/aimsdata_config.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/data/pheader.h>
 #include <aims/mesh/texture.h>
 
@@ -109,12 +109,12 @@ public:
   virtual ~AimsThreshold() {}
 
   /// Return the multi-level thresholded image
-  inline AimsData<T> operator () (const AimsData<T> &sqv);
+  inline carto::VolumeRef<T> operator () (const carto::VolumeRef<T> &sqv);
   /// Return the multi-level thresholded image with clipped values (backgd
   /// ignored)
-  inline AimsData<T> clip(const AimsData<T> &sqv);
+  inline carto::VolumeRef<T> clip(const carto::VolumeRef<T> &sqv);
   /// Return the binary thresholded image
-  inline AimsData<U> bin(const AimsData<T> &sqv);
+  inline carto::VolumeRef<U> bin(const carto::VolumeRef<T> &sqv);
 
 protected:
   /// Threshold type
@@ -293,114 +293,103 @@ namespace internal
 }
 
 template <class T,class U> inline
-AimsData<T> AimsThreshold<T,U>::operator () (const AimsData<T> &sqv)
+carto::VolumeRef<T> AimsThreshold<T,U>::operator () (const carto::VolumeRef<T> &sqv)
 {
-  AimsData<T> res(sqv.dimX(),sqv.dimY(),sqv.dimZ(),sqv.dimT(),
-                    sqv.borderWidth());
-  res.setSizeX(sqv.sizeX());
-  res.setSizeY(sqv.sizeY());
-  res.setSizeZ(sqv.sizeZ());
-  res.setSizeT(sqv.sizeT());
+  carto::VolumeRef<T> res( sqv.getSize(), sqv.getBorders() );
+  res.setVoxelSize( sqv.getVoxelSize() );
 
   res = T( 0 );
 
-  typename AimsData<T>::iterator       it1;
-  typename AimsData<T>::const_iterator it2;
+  typename carto::VolumeRef<T>::iterator       it1;
+  typename carto::VolumeRef<T>::const_iterator it2;
 
   switch (_type)
   { case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1<T, carto::volumeutil::less<T> >( _level, _backgd ) );
       break;
     case AIMS_LOWER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1<T, carto::volumeutil::less_equal<T> >( _level,
                                                                  _backgd ) );
       break;
     case AIMS_GREATER_THAN :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1<T, carto::volumeutil::greater<T> >( _level,
                                                               _backgd ) );
       break;
     case AIMS_GREATER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1<T, carto::volumeutil::greater_equal<T> >(
           _level, _backgd ) );
       break;
     case AIMS_EQUAL_TO :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1<T, carto::volumeutil::equal_to<T> >(
           _level, _backgd ) );
       break;
     case AIMS_DIFFER :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1<T, carto::volumeutil::not_equal_to<T> >(
           _level, _backgd ) );
       break;
     case AIMS_BETWEEN :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2<T, ::internal::between_with_bounds<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2<T, ::internal::between_with_upper_bound<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2<T, ::internal::between_with_lower_bound<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2<T, ::internal::between_without_bounds<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2<T, ::internal::outside_without_bounds<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2<T, ::internal::outside_with_lower_bound<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2<T, ::internal::outside_with_upper_bound<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2<T, ::internal::outside_with_bounds<T> >(
           _level, _level2, _backgd ) );
       break;
   }
 
-  if( sqv.header() )
-    {
-      res.setHeader( sqv.header()->cloneHeader() );
-      aims::PythonHeader	*ph 
-        = dynamic_cast<aims::PythonHeader *>( res.header() );
-      if( ph && ph->hasProperty( "data_type" ) )
-        ph->removeProperty( "data_type" );
-    }
+  res.copyHeaderFrom( sqv.header() );
   return(res);
 }
 
@@ -502,62 +491,58 @@ namespace internal
 }
 
 template <class T,class U> inline
-AimsData<T> AimsThreshold<T,U>::clip (const AimsData<T> &sqv)
+carto::VolumeRef<T> AimsThreshold<T,U>::clip (const carto::VolumeRef<T> &sqv)
 {
-  AimsData<T> res(sqv.dimX(),sqv.dimY(),sqv.dimZ(),sqv.dimT(),
-                    sqv.borderWidth());
-  res.setSizeX(sqv.sizeX());
-  res.setSizeY(sqv.sizeY());
-  res.setSizeZ(sqv.sizeZ());
-  res.setSizeT(sqv.sizeT());
+  carto::VolumeRef<T> res( sqv.getSize(), sqv.getBorders() );
+  res.setVoxelSize( sqv.getVoxelSize() );
 
   res = T( 0 );
 
-  typename AimsData<T>::iterator       it1;
-  typename AimsData<T>::const_iterator it2;
+  typename carto::VolumeRef<T>::iterator       it1;
+  typename carto::VolumeRef<T>::const_iterator it2;
 
   switch (_type)
   { case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::clip1<T, carto::volumeutil::less<T> >( _level ) );
       break;
     case AIMS_LOWER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::clip1<T, carto::volumeutil::less_equal<T> >( _level ) );
       break;
     case AIMS_GREATER_THAN :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::clip1<T, carto::volumeutil::greater<T> >( _level ) );
       break;
     case AIMS_GREATER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::clip1<T, carto::volumeutil::greater_equal<T> >( _level ) );
       break;
     case AIMS_BETWEEN :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::clip2<T, ::internal::rel_between_with_bounds<T> >(
           _level, _level2 ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::clip2<T, ::internal::rel_between_with_upper_bound<T> >(
           _level, _level2 ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::clip2<T, ::internal::rel_between_with_lower_bound<T> >(
           _level, _level2 ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::clip2<T, ::internal::rel_between_without_bounds<T> >(
           _level, _level2 ) );
       break;
@@ -574,14 +559,7 @@ AimsData<T> AimsThreshold<T,U>::clip (const AimsData<T> &sqv)
       return (*this)(sqv);
   }
 
-  if( sqv.header() )
-    {
-      res.setHeader( sqv.header()->cloneHeader() );
-      aims::PythonHeader	*ph 
-        = dynamic_cast<aims::PythonHeader *>( res.header() );
-      if( ph && ph->hasProperty( "data_type" ) )
-        ph->removeProperty( "data_type" );
-    }
+  res.copyHeaderFrom( sqv.header() );
   return(res);
 }
 
@@ -680,16 +658,6 @@ TimeTexture<T> AimsTexThreshold<T,U>::operator () (const TimeTexture<T> &sqv)
     }
 
   //No header for the texture yet...
-  /*
-    if( sqv.header() )
-    {
-    res.setHeader( sqv.header()->cloneHeader() );
-    aims::PythonHeader	*ph 
-    = dynamic_cast<aims::PythonHeader *>( res.header() );
-    if( ph && ph->hasProperty( "data_type" ) )
-    ph->removeProperty( "data_type" );
-    }
-  */
   return(res);
 }
 
@@ -737,117 +705,106 @@ namespace internal
 }
 
 template <class T,class U> inline
-AimsData<U> AimsThreshold<T,U>::bin(const AimsData<T> &sqv)
+carto::VolumeRef<U> AimsThreshold<T,U>::bin(const carto::VolumeRef<T> &sqv)
 {
-  AimsData<U> res(sqv.dimX(),sqv.dimY(),sqv.dimZ(),sqv.dimT(),
-                    sqv.borderWidth());
-  res.setSizeX(sqv.sizeX());
-  res.setSizeY(sqv.sizeY());
-  res.setSizeZ(sqv.sizeZ());
-  res.setSizeT(sqv.sizeT());
+  carto::VolumeRef<U> res( sqv.getSize(), sqv.getBorders() );
+  res.setVoxelSize( sqv.getVoxelSize() );
 
   res = U( 0 );
 
-  typename AimsData<U>::iterator       it1;
-  typename AimsData<T>::const_iterator it2;
+  typename carto::VolumeRef<U>::iterator       it1;
+  typename carto::VolumeRef<T>::const_iterator it2;
 
   switch (_type)
   {
 
     case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1_bin<T, U, carto::volumeutil::less<T> >(
           _level, _foregd ) );
       break;
     case AIMS_LOWER_OR_EQUAL_TO : 
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1_bin<T, U, carto::volumeutil::less_equal<T> >(
           _level, _foregd ) );
       break;
     case AIMS_GREATER_THAN : 
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1_bin<T, U, carto::volumeutil::greater<T> >(
           _level, _foregd ) );
       break;
     case AIMS_GREATER_OR_EQUAL_TO : 
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1_bin<T, U, carto::volumeutil::greater_equal<T> >(
           _level, _foregd ) );
       break;
     case AIMS_EQUAL_TO :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1_bin<T, U, carto::volumeutil::equal_to<T> >(
           _level, _foregd ) );
       break;
     case AIMS_DIFFER :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh1_bin<T, U, carto::volumeutil::not_equal_to<T> >(
           _level, _foregd ) );
       break;
     case AIMS_BETWEEN :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2_bin<T, U, ::internal::between_with_bounds<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2_bin<T, U, ::internal::between_with_upper_bound<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2_bin<T, U, ::internal::between_with_lower_bound<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2_bin<T, U, ::internal::between_without_bounds<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2_bin<T, U, ::internal::outside_without_bounds<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND : 
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2_bin<T, U, ::internal::outside_with_lower_bound<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND : 
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2_bin<T, U, ::internal::outside_with_upper_bound<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
-        *sqv.volume(), *res.volume(),
+        *sqv, *res,
         ::internal::thresh2_bin<T, U, ::internal::outside_with_bounds<T> >(
           _level, _level2, _foregd ) );
       break;
   }
 
-  if( sqv.header() )
-    {
-      res.setHeader( sqv.header()->cloneHeader() );
-      aims::PythonHeader	*ph 
-        = dynamic_cast<aims::PythonHeader *>( res.header() );
-      if( ph && ph->hasProperty( "data_type" ) )
-        ph->removeProperty( "data_type" );
-    }
+  res.copyHeaderFrom( sqv.header() );
   return(res);
 }
 
@@ -983,16 +940,6 @@ TimeTexture<U> AimsTexThreshold<T,U>::bin(const TimeTexture<T> &sqv)
     }
 
   //No header for the texture yet...
-  /*
-    if( sqv.header() )
-    {
-    res.setHeader( sqv.header()->cloneHeader() );
-    aims::PythonHeader	*ph 
-    = dynamic_cast<aims::PythonHeader *>( res.header() );
-    if( ph && ph->hasProperty( "data_type" ) )
-    ph->removeProperty( "data_type" );
-    }
-  */
   return(res);
 }
 
