@@ -31,9 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Finder class
- */
+// we don't want to issue a warning
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/io/labelImage.h>
 #include <aims/io/finder.h>
 #include <aims/utility/converter_volume.h>

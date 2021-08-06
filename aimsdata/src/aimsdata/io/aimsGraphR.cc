@@ -31,13 +31,17 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/io/aimsGraphR_d.h>
 #include <aims/bucket/bucket.h>
 #include <aims/io/finder.h>
 #include <aims/mesh/surface.h>
 #include <aims/mesh/texture.h>
 #include <graph/graph/graph.h>
-#include <aims/data/data.h>
 #include <cartobase/stream/sstream.h>
 #include <cartobase/stream/fileutil.h>
 #include <vector>
@@ -92,7 +96,7 @@ AimsGraphReader::AimsGraphReader( const string & fname )
   string	msh = DataTypeCode<AimsSurfaceTriangle>().objectType();
   string	vol = DataTypeCode<Volume<short> >().objectType();
   string        vol32 = DataTypeCode<Volume<int32_t> >().objectType();
-  string	avol = DataTypeCode<AimsData<short> >().objectType();
+  string	avol = "Volume";
   string	tex = DataTypeCode<Texture1d>().objectType();
   string	p2f = DataTypeCode<Point2df>::name();
   string	vod = DataTypeCode<Void>::name();

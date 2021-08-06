@@ -33,9 +33,11 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
-/*
- *  Trieder item reader class
- */
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/sparsematrix/sparseMatrixItemR.h>
 
 

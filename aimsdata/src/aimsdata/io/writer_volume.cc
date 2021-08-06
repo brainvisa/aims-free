@@ -31,16 +31,13 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Data writer class
- */
-
-// this source is only here to force instanciation of some
-// of the most useful Writer templates
+// we don't want to issue a warning
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
 
 #include <aims/config/aimsdata_config.h>
 #include <soma-io/io/writer_d.h>
-// #include <soma-io/io/formatdictionary_d.h>
 #include <aims/io/writer_d.h>
 #include <aims/data/data.h>
 #include <aims/rgb/rgb.h>

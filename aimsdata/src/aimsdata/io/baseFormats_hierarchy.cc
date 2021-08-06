@@ -31,9 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Data reader class
- */
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/io/baseFormats_hierarchy.h>
 #include <aims/roi/hie.h>
 #include <aims/io/hieR.h>

@@ -31,11 +31,15 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/io/aimsGraphW_d.h>
 #include <aims/bucket/bucket.h>
 #include <aims/mesh/surface.h>
 #include <aims/mesh/texture.h>
-#include <aims/data/data.h>
 #include <aims/io/finder.h>
 #include <aims/io/aimsGraphR.h>
 #include <graph/graph/graph.h>

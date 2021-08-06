@@ -31,11 +31,10 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Data reader class
- */
-// this source is only here to force instanciation of some
-// of the most useful Reader templates
+// we don't want to issue a warning
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
 
 #include <aims/config/aimsdata_config.h>
 #include <soma-io/io/reader_d.h>

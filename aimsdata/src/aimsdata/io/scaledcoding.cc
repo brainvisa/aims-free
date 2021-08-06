@@ -31,11 +31,16 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// we don't want to issue a warning
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <limits>
 #include <aims/io/scaledcoding.h>
 #include <cartodata/volume/volume.h>
-#include <aims/utility/converter_volume.h>
+#include <aims/data/data.h>
 
 using namespace aims;
 using namespace carto;

@@ -31,15 +31,14 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Data reader class
- */
-// this source is only here to force instanciation of some
-// of the most useful Reader templates
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/io/reader_d.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/rgb/rgb.h>
 #include <aims/hsv/hsv.h>
 

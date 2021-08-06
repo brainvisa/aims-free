@@ -32,6 +32,11 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/io/motionR.h>
 #include <aims/data/pheader.h>
 #include <soma-io/utilities/asciidatasourcetraits.h>

@@ -39,7 +39,6 @@
 #include <aims/io/writer.h>
 #include <aims/io/datatypecode.h>
 #include <aims/io/finder.h>
-#include <aims/data/data.h>
 #include <graph/graph/graph.h>
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/stream/fileutil.h>

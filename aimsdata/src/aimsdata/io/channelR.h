@@ -37,7 +37,6 @@
 #ifndef AIMSDATA_IO_CHANNELR_H
 #define AIMSDATA_IO_CHANNELR_H
 
-#include <aims/data/data.h>
 #include <aims/io/process.h>
 #include <aims/utility/converter_rgb.h>
 #include <aims/utility/converter_hsv.h>
