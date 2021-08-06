@@ -66,7 +66,7 @@ void SplineInterpolator::doit( const AimsData<short>& orig,
     for ( j = 0; j < dimY; j++ )
       column( j ) = 6.0 * orig( i, j );
 
-    AimsToeplitz( r, column, filtered );
+    AimsToeplitz( r, column, (carto::VolumeRef<float> &) filtered );
 
     for ( j = 0; j < dimY; j++ )
     {

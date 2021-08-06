@@ -31,9 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Texture class
- */
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/mesh/tex2graph_d.h>
 #include <aims/graph/graphmanip.h>
 #include <aims/io/datatypecode.h>

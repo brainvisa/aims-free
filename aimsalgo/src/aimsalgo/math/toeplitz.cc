@@ -37,17 +37,18 @@
 #include <aims/def/assert.h>
 
 using namespace aims;
+using namespace carto;
 
 
-void AimsToeplitz( const AimsData<float>& r,
-                   const AimsData<float>& y,
-                   AimsData<float>& x )
+void AimsToeplitz( const VolumeRef<float>& r,
+                   const VolumeRef<float>& y,
+                   VolumeRef<float>& x )
 {
-  ASSERT( y.dimX() == x.dimX() &&
-          2 * y.dimX() - 1 == r.dimX() );
+  ASSERT( y.getSizeX() == x.getSizeX() &&
+          2 * y.getSizeX() - 1 == r.getSizeX() );
 
   int j, k, m, m1, m2;
-  int dim = y.dimX();
+  int dim = y.getSizeX();
   float sxn, sd, sgn, shn, sgd, pp, qq, pt1, pt2, qt1, qt2;
   AimsFastAllocationData<float> g( dim ), h( dim );
 

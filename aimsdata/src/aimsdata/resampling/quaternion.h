@@ -37,7 +37,6 @@
 
 
 #include <aims/vector/vector.h>
-#include <aims/data/data.h>
 
 namespace aims
 {

@@ -31,9 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Surface class
- */
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <aims/mesh/surfacemanip_d.h>
 #include <aims/mesh/cutmesh.h>

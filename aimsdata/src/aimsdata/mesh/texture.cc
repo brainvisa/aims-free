@@ -31,10 +31,16 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/mesh/texture.h>
 #include <cartobase/object/object_d.h>
 
-namespace carto {
+namespace carto
+{
 
 INSTANTIATE_GENERIC_OBJECT_TYPE( TimeTexture< int8_t > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( TimeTexture< uint8_t > )

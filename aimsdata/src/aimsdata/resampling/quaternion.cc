@@ -32,10 +32,16 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/resampling/quaternion.h>
 #include <aims/resampling/motion.h>
 
 using namespace aims;
+using namespace carto;
 
 
 Quaternion::Quaternion() : _vector( 1, 0, 0, 0 )
@@ -329,7 +335,7 @@ void Quaternion::buildFromMotion( const Motion & m )
   Point4df      vec;
   float tr, s;
 
-  const AimsData<float> & rotation = m.rotation();
+  const VolumeRef<float> & rotation = m.rotation();
 
   tr = rotation(0,0) + rotation(1,1) + rotation(2,2);
   int       i = 0, j, k;

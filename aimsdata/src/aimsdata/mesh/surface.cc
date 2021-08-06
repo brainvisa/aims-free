@@ -31,10 +31,16 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cartobase/object/object_d.h>
 #include <aims/mesh/surface.h>
 
-namespace carto {
+namespace carto
+{
 
 INSTANTIATE_GENERIC_OBJECT_TYPE( AimsSegments )
 INSTANTIATE_GENERIC_OBJECT_TYPE( AimsSurfaceTriangle )

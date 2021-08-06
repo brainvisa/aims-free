@@ -98,11 +98,16 @@ computes (1) consistently with all attributes i.e. this methods do
 	_shift <- _center - _linear x _center + _translation;
 
 */
+
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <aims/resampling/motion.h>
 #include <aims/resampling/quaternion.h>
 #include <aims/vector/vector.h>
-#include <aims/data/data.h>
 #include <stdexcept>
 
 using namespace aims;

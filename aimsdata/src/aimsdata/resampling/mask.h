@@ -34,8 +34,8 @@
 #ifndef AIMS_RESAMPLING_MASK_H
 #define AIMS_RESAMPLING_MASK_H
 
-#include <aims/data/data.h>
 #include <aims/bucket/bucket.h>
+#include <cartodata/volume/volume.h>
 
 namespace aims {
 
