@@ -108,15 +108,15 @@ namespace aims
     in soma now.
 
   - The AffineTransformation3d has been split in two parts,
-    soma::AffineTransformation3dBase which allready does pretty much
+    soma::AffineTransformation3dBase which already does pretty much
     everything, which is in soma-io and used this way there, and
     AffineTransformation3d which is still here in aims, and merely adds
     compatibility methods converting with aims types (AimsData, Volume,
     Quaternion).
 
   - AffineTransformation3d::rotation does not return a reference any longer.
-    Code using it as a reference should be modified. As the returned AimsData
-    object is itself a reference to the transformation array, changging this
+    Code using it as a reference should be modified. As the returned VolumeRef
+    object is itself a reference to the transformation array, changing this
     is normally merely a matter of removing the "&", the object will still be
     usable to modify the transformation.
 
