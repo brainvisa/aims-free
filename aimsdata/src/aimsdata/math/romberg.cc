@@ -31,14 +31,21 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 /*
  *  Romberg's numerical integration.
  */
 #include <cstdlib>
 #include <aims/math/romberg.h>
-#include <aims/data/data.h>
 #include <aims/math/lagrange.h>
 #include <math.h>
+
+using namespace aims;
+using namespace std;
 
 void AimsTrapezeIntegration(float (*func)(float),
                             float a,float b,int n,float *s)
@@ -62,24 +69,26 @@ void AimsTrapezeIntegration(float (*func)(float),
 float AimsRombergIntegration(float (*func)(float),float a,float b,
                              float eps,int jmax,int k)
 { float ss,dss;
-  AimsData<float> s(jmax),h(jmax);
+  vector<float> s(jmax), h(jmax);
 
   if (a==b) return 0.0;
   
-  h(0) = 1.0;
+  h[0] = 1.0;
   for (int j=0;j<jmax;j++)
-  { AimsTrapezeIntegration(func,a,b,j+1,&(s(j)));
+  { AimsTrapezeIntegration(func,a,b,j+1,&(s[j]));
     if (j+1>=k)
-    { AimsData<float> tmph(k),tmps(k);
+    {
+      vector<float> tmph(k), tmps(k);
       for (int kk=0;kk<k;kk++)
-      { tmph(kk) = h(j-k+kk+1);
-        tmps(kk) = s(j-k+kk+1);
+      {
+        tmph[kk] = h[j-k+kk+1];
+        tmps[kk] = s[j-k+kk+1];
       }
-      ss = AimsLagrangeInterpolation(tmph,tmps,0.0,&dss);
+      ss = AimsLagrangeInterpolation( tmph, tmps, 0.0f, &dss );
       if (fabs(dss) <= eps * fabs(ss)) return(ss);
     }
-    s(j+1) = s(j);
-    h(j+1) = 0.25 * h(j);
+    s[j+1] = s[j];
+    h[j+1] = 0.25 * h[j];
   }
   return 0.0;
 }

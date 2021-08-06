@@ -40,7 +40,6 @@
 
 #include <cstdlib>
 #include <aims/math/trapezeitg.h>
-#include <aims/data/data.h>
 #include <aims/math/lagrange.h>
 #include <math.h>
 
@@ -72,29 +71,29 @@ REAL RombergIntegratorOf<REAL>::eval( const Integrable& func,
                                        REAL a, REAL b ) const
 {
   REAL ss, dss;
-  AimsData< REAL > s( _jmax ), h( _jmax + 1 );
+  std::vector< REAL > s( _jmax ), h( _jmax + 1 );
 
-  if ( a == b )
+  if( a == b )
     return 0.0;
   
-  h( 0 ) = 1.0;
-  for ( int j = 0; j < _jmax; j++ )
+  h[ 0 ] = 1.0;
+  for( int j = 0; j < _jmax; j++ )
   {
     TrapezeIntegratorOf<REAL> integrator;
-    s( j ) = integrator.stage( func, a, b, j + 1 );
-    if ( j + 1 >= _k )
+    s[ j ] = integrator.stage( func, a, b, j + 1 );
+    if( j + 1 >= _k )
     {
-      AimsData< REAL > tmph( _k ), tmps( _k );
-      for ( int kk = 0; kk < _k; kk++ )
+      std::vector< REAL > tmph( _k ), tmps( _k );
+      for( int kk = 0; kk < _k; kk++ )
       {
-        tmph( kk ) = h( j - _k + kk + 1 );
-        tmps( kk ) = s( j - _k + kk + 1 );
+        tmph[ kk ] = h[ j - _k + kk + 1 ];
+        tmps[ kk ] = s[ j - _k + kk + 1 ];
       }
-      ss = AimsLagrangeInterpolationOf<REAL>( tmph, tmps, 0.0, &dss );
-      if ( fabs( dss ) <= _eps * fabs( ss ) )
+      ss = AimsLagrangeInterpolation( tmph, tmps, REAL(0.0), &dss );
+      if( fabs( dss ) <= _eps * fabs( ss ) )
         return ss;
     }
-    h( j + 1 ) = 0.25 * h( j );
+    h[ j + 1 ] = 0.25 * h[ j ];
   }
   return 0.0;
 }
