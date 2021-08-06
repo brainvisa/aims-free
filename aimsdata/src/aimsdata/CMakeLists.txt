@@ -51,7 +51,6 @@ set( _headers
     fibers/trackvisbundlereader.h
     getopt/getopt2.h
     getopt/getoptProcess.h
-    graph/graphiterator.h
     graph/graphmanip.h
     graph/graphmanip_d.h
     hsv/hsv.h
@@ -282,7 +281,6 @@ set(_aimsdata_sources
     fibers/mrtrixbundlereader.cc
     fibers/trackvisbundlereader.cc
     getopt/getopt2.cc
-    graph/graphiterator.cc
     graph/graphmanip.cc
     io/aimsGraphR.cc
     io/aimsGraphW.cc

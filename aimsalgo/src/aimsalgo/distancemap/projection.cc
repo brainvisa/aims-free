@@ -691,7 +691,13 @@ void aims::meshdistance::AffinePointProjection ( Texture<short> &tex,
   if (size > 4)
     {     
       // Inversion of X
-      Xinv = AimsInversionLU( transpose(X).cross(X) ).cross(transpose(X));
+      Xinv = matrix_product(
+        AimsInversionLU( transpose(X).cross(X).volume() ),
+        transpose( X.volume() ) );
+      Xinv = matrix_product(
+        AimsInversionLU( matrix_product( transpose( X.volume() ),
+                                         X.volume() ) ),
+        transpose( X.volume() ) );
 
       // Definition of affine matrix A =[Bx|By|Bz]T=Xinv.[Yx|Yy|Yz] <=> Bi=Xinv.Yi
       Bx = Xinv.cross(Yx);
@@ -766,7 +772,9 @@ void aims::meshdistance::AffinePointProjection ( Texture<short> &tex,
 	    }
 
 	  // Inversion of X
-	  Xinv_reg = AimsInversionLU( transpose(X_reg).cross(X_reg) ).cross(transpose(X_reg));
+	  Xinv_reg = matrix_product(
+        AimsInversionLU( transpose(X_reg).cross(X_reg) ),
+        transpose(X_reg).volume() );
 
 	  // Definition of affine matrix A =[Bx|By|Bz]T=Xinv.[Yx|Yy|Yz] <=> Bi=Xinv.Yi
 	  Bx_reg = Xinv_reg.cross(Yx_reg);

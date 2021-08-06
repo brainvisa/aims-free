@@ -31,32 +31,38 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 /*
  *  Inversion, determinant of a matrix.
  */
 #include <cstdlib>
 #include <aims/math/gausslu.h>
 #include <aims/math/mathelem.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <math.h>
 #include <complex>
 
 using namespace std;
+using namespace carto;
 
-AIMSDATA_API float 
-AimsDecompositionLU(AimsData<float> &a,
-                    AimsData<int32_t>  &indx)
+float
+AimsDecompositionLU( VolumeRef<float> &a,
+                     VolumeRef<int32_t>  &indx)
 {
-  ASSERT(a.dimZ()==1 && a.dimT()==1);
-  ASSERT(indx.dimY()==1 && indx.dimZ()==1 && indx.dimT()==1);
+  ASSERT(a.getSizeZ()==1 && a.getSizeT()==1);
+  ASSERT(indx.getSizeY()==1 && indx.getSizeZ()==1 && indx.getSizeT()==1);
 
   int   i,imax=0,j,k,n;
   float big,dum,sum,temp,TINY=1.0e-20,d;
 
-  n = a.dimX();
-  ASSERT(n == a.dimY());
+  n = a.getSizeX();
+  ASSERT(n == a.getSizeY());
 
-  AimsData<float> vv(n);
+  VolumeRef<float> vv(n);
 
   d = 1.0;
 
@@ -105,18 +111,19 @@ AimsDecompositionLU(AimsData<float> &a,
 }
 
 
-AIMSDATA_API void AimsBackSubstitutionLU(AimsData<float> &a,
-					 AimsData<int32_t> &indx,
-					 AimsData<float> &b)
-{ ASSERT(a.dimZ()==1 && a.dimT()==1);
-  ASSERT(indx.dimY()==1 && indx.dimZ()==1 && indx.dimT()==1);
-  ASSERT(b.dimY()==1 && b.dimZ()==1 && b.dimT()==1);
+void AimsBackSubstitutionLU( const VolumeRef<float> &a,
+                             const VolumeRef<int32_t> &indx,
+                             VolumeRef<float> &b)
+{
+  ASSERT(a.getSizeZ()==1 && a.getSizeT()==1);
+  ASSERT(indx.getSizeY()==1 && indx.getSizeZ()==1 && indx.getSizeT()==1);
+  ASSERT(b.getSizeY()==1 && b.getSizeZ()==1 && b.getSizeT()==1);
 
   int   i,ii=-1,ip,j,n;
   float sum;
 
-  n = a.dimX();
-  ASSERT(n == a.dimY());
+  n = a.getSizeX();
+  ASSERT(n == a.getSizeY());
 
   for (i=0;i<n;i++)
   { ip = indx(i);
@@ -136,25 +143,26 @@ AIMSDATA_API void AimsBackSubstitutionLU(AimsData<float> &a,
 }
 
 
-AIMSDATA_API AimsData<float> 
-AimsInversionLU(const AimsData<float> &matrix)
-{ ASSERT(matrix.dimZ()==1 && matrix.dimT()==1);
+VolumeRef<float>
+AimsInversionLU( const VolumeRef<float> &matrix )
+{
+  ASSERT(matrix.getSizeZ()==1 && matrix.getSizeT()==1);
 
   int                 n,i,j;
   //float d;
 
-  n = matrix.dimX();
-  ASSERT(n == matrix.dimY());
+  n = matrix.getSizeX();
+  ASSERT(n == matrix.getSizeY());
 
-  AimsData<float> inverse(n,n);
-  AimsData<float> stockage(n,n);
+  VolumeRef<float> inverse(n,n);
+  VolumeRef<float> stockage(n,n);
 
   for (j=n;j--;)
     for (i=n;i--;)  stockage(i,j) = matrix(i,j);
 
-  AimsData<float> column(n);
+  VolumeRef<float> column(n);
 
-  AimsData<int32_t>  indx(n);
+  VolumeRef<int32_t>  indx(n);
 
   /*d =*/ AimsDecompositionLU(stockage,indx);
 
@@ -168,26 +176,27 @@ AimsInversionLU(const AimsData<float> &matrix)
 }
 
 
-AIMSDATA_API AimsData<float> 
-AimsLinearResolutionLU(const AimsData<float> &matrix,
-                       const AimsData<float> &b)
-{ ASSERT(matrix.dimZ()==1 && matrix.dimT()==1);
-  ASSERT(b.dimY()==1 && b.dimZ()==1 && b.dimT()==1);
+VolumeRef<float>
+AimsLinearResolutionLU( const VolumeRef<float> &matrix,
+                        const VolumeRef<float> &b )
+{
+  ASSERT(matrix.getSizeZ()==1 && matrix.getSizeT()==1);
+  ASSERT(b.getSizeY()==1 && b.getSizeZ()==1 && b.getSizeT()==1);
 
   int   n,i,j;
   //float d;
 
-  n = matrix.dimX();
-  ASSERT(n == matrix.dimY());
+  n = matrix.getSizeX();
+  ASSERT(n == matrix.getSizeY());
 
-  AimsData<float> stockage(n,n);
+  VolumeRef<float> stockage(n,n);
 
   for (j=n;j--;)
     for (i=n;i--;)  stockage(i,j) = matrix(i,j);
 
-  AimsData<float> column(n);
+  VolumeRef<float> column(n);
 
-  AimsData<int32_t> indx(n);
+  VolumeRef<int32_t> indx(n);
 
   /*d =*/ AimsDecompositionLU(stockage,indx);
 
@@ -198,22 +207,23 @@ AimsLinearResolutionLU(const AimsData<float> &matrix,
 }
 
 
-AIMSDATA_API float 
-AimsDeterminantLU(const AimsData<float> &matrix)
-{ ASSERT(matrix.dimZ()==1 && matrix.dimT()==1);
+float
+AimsDeterminantLU( const VolumeRef<float> &matrix )
+{
+  ASSERT(matrix.getSizeZ()==1 && matrix.getSizeT()==1);
 
   float determinant;
   int   j,i,n;  
 
-  n = matrix.dimX();
-  ASSERT(n == matrix.dimY());
+  n = matrix.getSizeX();
+  ASSERT(n == matrix.getSizeY());
 
-  AimsData<float> stockage(n,n);
+  VolumeRef<float> stockage(n,n);
 
   for (j=n;j--;)
     for (i=n;i--;)  stockage(i,j) = matrix(i,j);
 
-  AimsData<int32_t> indx(n);
+  VolumeRef<int32_t> indx(n);
   determinant = AimsDecompositionLU(stockage,indx);
   for (j=0;j<n;j++)  determinant *= stockage(j,j);
 
@@ -221,19 +231,20 @@ AimsDeterminantLU(const AimsData<float> &matrix)
 }
 
 
-AIMSDATA_API AimsData< cfloat > 
-AimsInversionLU(const AimsData< cfloat > &matrix)
-{ ASSERT(matrix.dimZ()==1 && matrix.dimT()==1);
+VolumeRef< cfloat >
+AimsInversionLU( const VolumeRef< cfloat > &matrix )
+{
+  ASSERT(matrix.getSizeZ()==1 && matrix.getSizeT()==1);
 
   int   n,i,j;
   //float d;
   int	x, y;
 
-  n = matrix.dimX();
-  ASSERT(n == matrix.dimY());
+  n = matrix.getSizeX();
+  ASSERT(n == matrix.getSizeY());
 
-  AimsData<float> inverse(2*n,2*n);
-  AimsData<float> stockage(2*n,2*n);
+  VolumeRef<float> inverse(2*n,2*n);
+  VolumeRef<float> stockage(2*n,2*n);
 
   for (y=0;y<n;y++)
     for (x=0;x<n;x++)
@@ -251,9 +262,9 @@ AimsInversionLU(const AimsData< cfloat > &matrix)
     for (x=0;x<n;x++)
       stockage(x,y+n) = imag(matrix(x,y));
 
-  AimsData<float> column(2*n);
+  VolumeRef<float> column(2*n);
 
-  AimsData<int32_t> indx(2*n);
+  VolumeRef<int32_t> indx(2*n);
 
   /*d =*/ AimsDecompositionLU(stockage,indx);
 
@@ -264,7 +275,7 @@ AimsInversionLU(const AimsData< cfloat > &matrix)
     for (i=0;i<2*n;i++)  inverse(i,j) = column(i);
   }
 
-  AimsData< cfloat > cplxinverse(n,n);
+  VolumeRef< cfloat > cplxinverse(n,n);
 
   for (y=0;y<n;y++)
     for (x=0;x<n;x++)
@@ -274,20 +285,21 @@ AimsInversionLU(const AimsData< cfloat > &matrix)
 }
 
 
-AIMSDATA_API AimsData< cfloat >
-AimsLinearResolutionLU(const AimsData< cfloat > &matrix,
-                       const AimsData< cfloat > &b)
-{ ASSERT(matrix.dimZ()==1 && matrix.dimT()==1);
-  ASSERT(b.dimY()==1 && b.dimZ()==1 && b.dimT()==1);
+VolumeRef< cfloat >
+AimsLinearResolutionLU( const VolumeRef< cfloat > &matrix,
+                        const VolumeRef< cfloat > &b)
+{
+  ASSERT(matrix.getSizeZ()==1 && matrix.getSizeT()==1);
+  ASSERT(b.getSizeY()==1 && b.getSizeZ()==1 && b.getSizeT()==1);
 
   int   n;
   //float d;
   int	x, y;
 
-  n = matrix.dimX();
-  ASSERT(n == matrix.dimY());
+  n = matrix.getSizeX();
+  ASSERT(n == matrix.getSizeY());
 
-  AimsData<float> stockage(2*n,2*n);
+  VolumeRef<float> stockage(2*n,2*n);
 
   for (y=0;y<n;y++)
     for (int x=0;x<n;x++)
@@ -305,7 +317,7 @@ AimsLinearResolutionLU(const AimsData< cfloat > &matrix,
     for (x=0;x<n;x++)
       stockage(x,y+n) = imag(matrix(x,y));
 
-  AimsData<float> column(2*n);
+  VolumeRef<float> column(2*n);
 
   for (x=0;x<n;x++)
     column(x) = real(b(x));
@@ -313,13 +325,13 @@ AimsLinearResolutionLU(const AimsData< cfloat > &matrix,
   for (x=0;x<n;x++)
     column(x+n) = imag(b(x));
 
-  AimsData<int32_t>  indx(2*n);
+  VolumeRef<int32_t>  indx(2*n);
 
   /*d =*/ AimsDecompositionLU(stockage,indx);
 
   AimsBackSubstitutionLU(stockage,indx,column);
 
-  AimsData< cfloat > result(n);
+  VolumeRef< cfloat > result(n);
 
   for (x=0;x<n;x++)
   { result(x) = cfloat(column(x),column(x+n));

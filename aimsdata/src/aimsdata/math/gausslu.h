@@ -40,7 +40,10 @@
 #include <aims/config/aimsdata_config.h>
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 
 /**@name Resolution of linear systems.*/
@@ -54,9 +57,9 @@ template <class T> class AimsData;
 */
 //@{
 ///
-AIMSDATA_API float
-AimsDecompositionLU(AimsData<float> &a,
-                    AimsData<int32_t>  &indx);
+float
+AimsDecompositionLU( carto::VolumeRef<float> &a,
+                     carto::VolumeRef<int32_t>  &indx );
 //@}
 
 /**@name LU forward and backward substitution.
@@ -67,9 +70,9 @@ AimsDecompositionLU(AimsData<float> &a,
 */
 //@{
 ///
-AIMSDATA_API void AimsBackSubstitutionLU(AimsData<float> &a,
-					 AimsData<int32_t>  &indx,
-					 AimsData<float> &b);
+void AimsBackSubstitutionLU( const carto::VolumeRef<float> &a,
+                             const carto::VolumeRef<int32_t>  &indx,
+                             carto::VolumeRef<float> &b );
 //@}
 
 
@@ -77,11 +80,11 @@ AIMSDATA_API void AimsBackSubstitutionLU(AimsData<float> &a,
 */
 //@{
 /// Inverse of a float matrix
-AIMSDATA_API AimsData<float> 
-AimsInversionLU(const AimsData<float> &matrix);
+carto::VolumeRef<float>
+AimsInversionLU( const carto::VolumeRef<float> &matrix );
 /// Inverse of a complex float matrix
-AIMSDATA_API AimsData< cfloat > 
-AimsInversionLU(const AimsData< cfloat > &matrix);
+carto::VolumeRef< cfloat >
+AimsInversionLU( const carto::VolumeRef< cfloat > &matrix );
 //@}
 
 
@@ -89,13 +92,13 @@ AimsInversionLU(const AimsData< cfloat > &matrix);
 */
 //@{
 /// Resolution in float 
-AIMSDATA_API AimsData<float> 
-AimsLinearResolutionLU(const AimsData<float> &matrix,
-                       const AimsData<float> &b);
+carto::VolumeRef<float>
+AimsLinearResolutionLU( const carto::VolumeRef<float> &matrix,
+                        const carto::VolumeRef<float> &b );
 /// Resolution in complex float
-AIMSDATA_API AimsData< cfloat >
-AimsLinearResolutionLU(const AimsData< cfloat > &matrix,
-                       const AimsData< cfloat > &b);
+carto::VolumeRef< cfloat >
+AimsLinearResolutionLU( const carto::VolumeRef< cfloat > &matrix,
+                        const carto::VolumeRef< cfloat > &b );
 //@}
 
 
@@ -103,8 +106,8 @@ AimsLinearResolutionLU(const AimsData< cfloat > &matrix,
 */
 //@{
 ///
-AIMSDATA_API float
-AimsDeterminantLU(const AimsData<float> &matrix);
+float
+AimsDeterminantLU( const carto::VolumeRef<float> &matrix );
 //@}
 
 /**@name Linear resolution of Toeplitz like system.
@@ -114,10 +117,10 @@ AimsDeterminantLU(const AimsData<float> &matrix);
     in r=[r(-(N-1)), ...., r(-1), r(0), r(1), ..., r(N-1)]. The result is 
     given in x
 */
-AIMSDATA_API void
-AimsToeplitz( const AimsData<float>& r,
-              const AimsData<float>& y,
-              AimsData<float>& x );
+void
+AimsToeplitz( const carto::VolumeRef<float>& r,
+              const carto::VolumeRef<float>& y,
+              carto::VolumeRef<float>& x );
 //@}
 
 //@}
