@@ -36,9 +36,13 @@
 
 #include <map>
 #include <cartobase/smart/rcptr.h>
-#include <aims/data/data_g.h>
 #include <aims/roi/roiIterator.h>
 #include <aims/resampling/linearInterpolator.h>
+
+namespace carto
+{
+  template <typename T> class VolumeRef;
+}
 
 template <class T>
 class MassCenters {
@@ -48,9 +52,9 @@ class MassCenters {
     typedef std::map<int, MassCenterInfo> TimedMassCenterInfo;
     typedef std::map<std::string, TimedMassCenterInfo> RoiMassCenterInfo;
     
-    MassCenters(const AimsData<T> & data, 
+    MassCenters(const carto::VolumeRef<T> & data,
                 bool bin = false);
-    MassCenters(const AimsData<T> & data, 
+    MassCenters(const carto::VolumeRef<T> & data,
                 const carto::rc_ptr<aims::RoiIterator> & roiIterator, 
                 bool bin = false);
     void doit(bool force = false);
@@ -59,7 +63,7 @@ class MassCenters {
   
   private:
     bool _init;
-    const AimsData<T> _data;
+    const carto::VolumeRef<T> _data;
     bool _bin;
     carto::rc_ptr<aims::Interpolator> _interpolator;
     carto::rc_ptr<aims::RoiIterator> _roiIterator;

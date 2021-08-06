@@ -39,12 +39,14 @@
 #include <iostream>
 #include <cartobase/config/verbose.h>
 #include <aims/utility/masscenter.h>
+#include <cartodata/volume/volume.h>
 
+using namespace aims;
 using namespace carto;
 
 
 template <class T>
-MassCenters<T>::MassCenters(const AimsData<T> & data, 
+MassCenters<T>::MassCenters(const VolumeRef<T> & data,
                             bool bin)
 : _init(false), 
   _data(data), 
@@ -53,7 +55,7 @@ MassCenters<T>::MassCenters(const AimsData<T> & data,
 }
 
 template <class T>
-MassCenters<T>::MassCenters(const AimsData<T> & data, 
+MassCenters<T>::MassCenters(const VolumeRef<T> & data,
                             const carto::rc_ptr<aims::RoiIterator> & roiIterator, 
                             bool bin)
 : _init(false), 
@@ -102,9 +104,10 @@ template <class T>
 typename MassCenters<T>::TimedMassCenterInfo
 MassCenters<T>::maskedmasscenter( aims::MaskIterator & maskIterator ){
   TimedMassCenterInfo tm;
-  int s = _data.dimT();
+  int s = _data.getSizeT();
   double  totsum = 0, totnp = 0;
-  double  vol = _data.sizeX() * _data.sizeY() * _data.sizeZ();
+  double  vol = _data.getVoxelSize()[0] * _data.getVoxelSize()[1]
+    * _data.getVoxelSize()[2];
   Point3df  pos, totpos = Point3df( 0, 0, 0 );
   
   std::vector<Point3df> masscenters;
