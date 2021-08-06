@@ -124,6 +124,26 @@ template class VolumeUtil< Point3dd >;
 template class VolumeUtil< Point2d >;
 template class VolumeUtil< vectorf6 >;
 
+template VolumeRef< std::map<int, float> > transpose<std::map<int, float> >( const Volume< std::map<int, float> > & );
+template VolumeRef< VoxelRGB > transpose<VoxelRGB>( const Volume< VoxelRGB > & );
+template VolumeRef< VoxelRGBA > transpose<VoxelRGBA>( const Volume< VoxelRGBA > & );
+template VolumeRef< VoxelHSV > transpose<VoxelHSV>( const Volume< VoxelHSV > & );
+template VolumeRef< Point3df > transpose<Point3df>( const Volume< Point3df > & );
+template VolumeRef< Point3d > transpose<Point3d>( const Volume< Point3d > & );
+template VolumeRef< Point3dd > transpose<Point3dd>( const Volume< Point3dd > & );
+template VolumeRef< Point2d > transpose<Point2d>( const Volume< Point2d > & );
+template VolumeRef< vectorf6 > transpose<vectorf6>( const Volume< vectorf6 > & );
+
+template VolumeRef< std::map<int, float> > transpose<std::map<int, float> >( const VolumeRef< std::map<int, float> > &, bool );
+template VolumeRef< VoxelRGB > transpose<VoxelRGB>( const VolumeRef< VoxelRGB > &, bool );
+template VolumeRef< VoxelRGBA > transpose<VoxelRGBA>( const VolumeRef< VoxelRGBA > &, bool );
+template VolumeRef< VoxelHSV > transpose<VoxelHSV>( const VolumeRef< VoxelHSV > &, bool );
+template VolumeRef< Point3df > transpose<Point3df>( const VolumeRef< Point3df > &, bool );
+template VolumeRef< Point3d > transpose<Point3d>( const VolumeRef< Point3d > &, bool );
+template VolumeRef< Point3dd > transpose<Point3dd>( const VolumeRef< Point3dd > &, bool );
+template VolumeRef< Point2d > transpose<Point2d>( const VolumeRef< Point2d > &, bool );
+template VolumeRef< vectorf6 > transpose<vectorf6>( const VolumeRef< vectorf6 > &, bool );
+
 } // namespace carto
 
 // utilities

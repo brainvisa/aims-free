@@ -89,6 +89,18 @@ test ( const container<T> & vol, const U & value )
   return typename result<T,U>::result_type();
 }
 
+template <typename T>
+T diff( const T & t1, const T & t2 )
+{
+  return std::abs( t2 - t1 );
+}
+
+template <typename T>
+bool equal( const T & t1, const T & t2 )
+{
+  return diff( t1, t2 ) < 1e-5;
+}
+
 #if 0
 template <typename T>
 inline
@@ -452,13 +464,112 @@ int main( int /*argc*/, const char** /*argv*/ )
        << ") : " << (*vol5)( 5, 5, 5 )
        << endl << endl;
   if( (*vol5)( 5, 5, 5 ) != vol1->at( 5, 5, 5 ) * 2 )
-    {
-      cerr << "*** error ***" << endl;
-      result = EXIT_FAILURE;
-    }
-    vol5 += 5.;
+  {
+    cerr << "*** error ***" << endl;
+    result = EXIT_FAILURE;
+  }
+  vol5 += 5.;
   cout << "vol5 += 5." << endl << vol5 << endl;
 
+
+  cout << "-- Test " << ntest++ << ": volume transpose -- " << endl;
+  {
+    VolumeRef<float> vol10( 3, 4, 2 );
+    // fill volume
+    line_NDIterator<float> it( &vol10->at( 0 ), vol10->getSize(),
+                               vol10->getStrides() );
+    float *p, *pp;
+    float value = 0.;
+
+    for( ; !it.ended(); ++it )
+    {
+      p = &*it;
+      for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+      {
+        *p = value;
+        value += 1.1;
+      }
+    }
+    if( !equal( vol10->at( 1, 2 ), 7.7f ) )
+    {
+      cerr << "*** error in volume fill ***" << endl;
+      cerr << vol10->at( 1, 2 ) << " != 7.7\n";
+      result = EXIT_FAILURE;
+    }
+
+    VolumeRef<float> trans = transpose( *vol10 );
+    if( trans->getSize()[0] != 4 || trans->getSize()[1] != 3
+        || trans->getSize()[2] != 2 )
+    {
+      cerr << "*** error in transpose (copy) size ***" << endl;
+      result = EXIT_FAILURE;
+    }
+    if( !equal( trans->at( 2, 1 ), 7.7f )
+        || !equal( trans->at( 2, 1, 1 ), 20.9f )
+        || !equal( trans->at( 1, 2, 1 ), 18.7f ) )
+    {
+      cerr << "*** error in transpose (copy) values ***" << endl;
+      result = EXIT_FAILURE;
+      /*
+      cerr << trans->at( 2, 1 ) << ", " << trans->at( 2, 1, 1 ) << ", " << trans->at( 1, 2, 1 ) << endl;
+      cerr << vol10->at( 1, 2 ) << ", " << vol10->at( 1, 2, 1 ) << ", " << vol10->at( 2, 1, 1 ) << endl;
+      */
+    }
+
+    // transpose with copy (same as above)
+    trans = transpose( vol10, true );
+    if( trans->getSize()[0] != 4 || trans->getSize()[1] != 3
+        || trans->getSize()[2] != 2 )
+    {
+      cerr << "*** error in transpose (ref/copy) size ***" << endl;
+      result = EXIT_FAILURE;
+    }
+    if( !equal( trans->at( 2, 1 ), 7.7f )
+        || !equal( trans->at( 2, 1, 1 ), 20.9f )
+        || !equal( trans->at( 1, 2, 1 ), 18.7f ) )
+    {
+      cerr << "*** error in transpose (ref/copy) values ***" << endl;
+      result = EXIT_FAILURE;
+      /*
+      cerr << trans->at( 2, 1 ) << ", " << trans->at( 2, 1, 1 ) << ", " << trans->at( 1, 2, 1 ) << endl;
+      cerr << vol10->at( 1, 2 ) << ", " << vol10->at( 1, 2, 1 ) << ", " << vol10->at( 2, 1, 1 ) << endl;
+      */
+    }
+    vol10->at( 1, 2 ) = 15.8;
+    if( !equal( trans->at( 2, 1 ), 7.7f ) )
+    {
+      cerr << "*** error in transpose (ref/copy) copy ***" << endl;
+      result = EXIT_FAILURE;
+    }
+    vol10->at( 1, 2 ) = 7.7;
+
+    // transpose shared
+    trans = transpose( vol10 );
+    if( trans->getSize()[0] != 4 || trans->getSize()[1] != 3
+        || trans->getSize()[2] != 2 )
+    {
+      cerr << "*** error in transpose (shared) size ***" << endl;
+      result = EXIT_FAILURE;
+    }
+    if( !equal( trans->at( 2, 1 ), 7.7f )
+        || !equal( trans->at( 2, 1, 1 ), 20.9f )
+        || !equal( trans->at( 1, 2, 1 ), 18.7f ) )
+    {
+      cerr << "*** error in transpose (shared) values ***" << endl;
+      result = EXIT_FAILURE;
+      /*
+      cerr << trans->at( 2, 1 ) << ", " << trans->at( 2, 1, 1 ) << ", " << trans->at( 1, 2, 1 ) << endl;
+      cerr << vol10->at( 1, 2 ) << ", " << vol10->at( 1, 2, 1 ) << ", " << vol10->at( 2, 1, 1 ) << endl;
+      */
+    }
+    vol10->at( 1, 2 ) = 15.8;
+    if( !equal( trans->at( 2, 1 ), 15.8f ) )
+    {
+      cerr << "*** error in transpose (shared) sharing ***" << endl;
+      result = EXIT_FAILURE;
+    }
+    vol10->at( 1, 2 ) = 7.7;
+  }
 
   cout << "-- Test " << ntest++ << ": N-D iterators test --" << endl;
   vector<int> dims( 8, 1 );

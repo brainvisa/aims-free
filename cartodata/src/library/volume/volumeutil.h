@@ -293,6 +293,15 @@ namespace carto
   template <typename T>
   VolumeRef<T> matrix_product( const VolumeRef<T> & v1,
                                const VolumeRef<T> & v2 );
+  /// transpose
+  template <typename T>
+  VolumeRef<T> transpose( const Volume<T> & v );
+  /** transpose.
+  If copy is false (the default), we can return a shared volume with adapted
+  strides.
+  */
+  template <typename T>
+  VolumeRef<T> transpose( const VolumeRef<T> & v, bool copy=false );
 
   //==========================================================================
   // Borders

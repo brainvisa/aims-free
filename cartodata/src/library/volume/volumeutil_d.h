@@ -399,6 +399,67 @@ namespace carto
   }
 
 
+  // transpose
+  template <typename T>
+  VolumeRef<T> transpose( const Volume<T> & v )
+  {
+    std::vector<int> size1 = v.getSize();
+    int s0 = size1[0];
+    size1[0] = size1[1];
+    size1[1] = s0;
+
+    VolumeRef<T> trans( size1,
+                        std::max( v.getBorders()[1], v.getBorders()[0] ) );
+
+    const_line_NDIterator<T> it( &v.at( 0 ), v.getSize(), v.getStrides() );
+    const T *op, *pp;
+    T *rp;
+    long inc = &trans->at(0, 1) - &trans->at(0);
+
+    for( ; !it.ended(); ++it )
+    {
+      op = &*it;
+      std::vector<int> pos = it.position();
+      int p0 = pos[0];
+      pos[0] = pos[1];
+      pos[1] = p0;
+      rp = &trans->at( pos );
+
+      for( pp=op + it.line_length(); op!=pp;
+           it.inc_line_ptr( op ), rp += inc )
+        *rp = *op;
+    }
+
+    return trans;
+  }
+
+
+  // transpose
+  template <typename T>
+  VolumeRef<T> transpose( const VolumeRef<T> & v, bool copy )
+  {
+    if( copy )
+      return transpose( *v );
+    else
+    {
+      std::vector<int> size1 = v.getSize();
+      int s0 = size1[0];
+      size1[0] = size1[1];
+      size1[1] = s0;
+
+      std::vector<size_t> strides = v.getStrides();
+      size_t st0 = strides[0];
+      strides[0] = strides[1];
+      strides[1] = st0;
+
+      VolumeRef<T> trans( new Volume<T>( v,
+                                         std::vector<int>( size1.size(), 0 ),
+                                         size1, &v->at(0),
+                                         strides ) );
+      return trans;
+    }
+  }
+
 
 #if 0
   // VolumeUtil declarations (needed on Mac)

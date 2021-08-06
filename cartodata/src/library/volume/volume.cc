@@ -273,6 +273,47 @@ template VolumeRef< unsigned long > matrix_product(
   const VolumeRef< unsigned long > &, const VolumeRef< unsigned long > & );
 #endif
 
+template VolumeRef< bool > transpose<bool>( const Volume< bool > & );
+template VolumeRef< int8_t > transpose<int8_t>( const Volume< int8_t > & );
+template VolumeRef< uint8_t > transpose<uint8_t>( const Volume< uint8_t > & );
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template VolumeRef< char > transpose<char>( const Volume< char > & );
+#endif
+template VolumeRef< int16_t > transpose<int16_t>( const Volume< int16_t > & );
+template VolumeRef< uint16_t > transpose<uint16_t>( const Volume< uint16_t > & );
+template VolumeRef< int32_t > transpose<int32_t>( const Volume< int32_t > & );
+template VolumeRef< uint32_t > transpose<uint32_t>( const Volume< uint32_t > & );
+template VolumeRef< int64_t > transpose<int64_t>( const Volume< int64_t > & );
+template VolumeRef< uint64_t > transpose<uint64_t>( const Volume< uint64_t > & );
+template VolumeRef< float > transpose<float>( const Volume< float > & );
+template VolumeRef< double > transpose<double>( const Volume< double > & );
+#ifdef CARTO_LONG_IS_DISTINCT
+template VolumeRef< long > transpose<long>( const Volume< long > & );
+template VolumeRef< unsigned long > transpose<unsigned long>( const Volume< unsigned long > & );
+#endif
+
+template VolumeRef< bool > transpose<bool>( const VolumeRef< bool > &, bool );
+template VolumeRef< int8_t > transpose<int8_t>( const VolumeRef< int8_t > &, bool );
+template VolumeRef< uint8_t > transpose<uint8_t>( const VolumeRef< uint8_t > &, bool );
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template VolumeRef< char > transpose<char>( const VolumeRef< char > &, bool );
+#endif
+template VolumeRef< int16_t > transpose<int16_t>( const VolumeRef< int16_t > &, bool );
+template VolumeRef< uint16_t > transpose<uint16_t>( const VolumeRef< uint16_t > &, bool );
+template VolumeRef< int32_t > transpose<int32_t>( const VolumeRef< int32_t > &, bool );
+template VolumeRef< uint32_t > transpose<uint32_t>( const VolumeRef< uint32_t > &, bool );
+template VolumeRef< int64_t > transpose<int64_t>( const VolumeRef< int64_t > &, bool );
+template VolumeRef< uint64_t > transpose<uint64_t>( const VolumeRef< uint64_t > &, bool );
+template VolumeRef< float > transpose<float>( const VolumeRef< float > &, bool );
+template VolumeRef< double > transpose<double>( const VolumeRef< double > &, bool );
+#ifdef CARTO_LONG_IS_DISTINCT
+template VolumeRef< long > transpose<long>( const VolumeRef< long > &, bool );
+template VolumeRef< unsigned long > transpose<unsigned long>( const VolumeRef< unsigned long > &, bool );
+#endif
+
+
 } // namespace carto
 
 // utilities
