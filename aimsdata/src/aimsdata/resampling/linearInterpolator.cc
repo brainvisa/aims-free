@@ -31,9 +31,9 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-// we don't want to issue a warning
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
 #endif
 
 /*
@@ -121,40 +121,6 @@ rc_ptr< Interpolator > getLinearInterpolator( const string &fileName )
 
 
 //-----------------------------------------------------------------------------
-template carto::rc_ptr< Interpolator > 
- getLinearInterpolator( const AimsData<uint8_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<int8_t> & );
-template carto::rc_ptr< Interpolator > 
- getLinearInterpolator( const AimsData<uint16_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<int16_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<uint32_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<int32_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<float> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<double> & );
-
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const VolumeRef<uint8_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const VolumeRef<int8_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const VolumeRef<uint16_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const VolumeRef<int16_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const VolumeRef<uint32_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const VolumeRef<int32_t> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const VolumeRef<float> & );
-template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const VolumeRef<double> & );
-
 template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const rc_ptr<Volume<uint8_t> > & );
 template carto::rc_ptr< Interpolator >

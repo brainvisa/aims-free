@@ -40,7 +40,7 @@
 
 #include <cassert>
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/smart/rcptr.h>
 #include <vector>
 
@@ -145,11 +145,6 @@ private:
 //-----------------------------------------------------------------------------
 carto::rc_ptr< Interpolator > getLinearInterpolator( const std::string & );
 template <typename T>
-carto::rc_ptr< Interpolator > getLinearInterpolator( const AimsData<T> & );
-template <typename T>
-carto::rc_ptr< Interpolator > getLinearInterpolator(
-  const carto::VolumeRef<T> & );
-template <typename T>
 carto::rc_ptr< Interpolator > getLinearInterpolator(
   const carto::rc_ptr<carto::Volume<T> > & );
 
@@ -214,70 +209,12 @@ extern template class LinearInterpolator<double>;
 //-----------------------------------------------------------------------------
 template <typename T>
 inline
-carto::rc_ptr< Interpolator > getLinearInterpolator( const AimsData<T> &image )
-{
-  return carto::rc_ptr< Interpolator >( new LinearInterpolator<T>( image ) );
-}
-
-
-//-----------------------------------------------------------------------------
-template <typename T>
-inline
-carto::rc_ptr< Interpolator > getLinearInterpolator(
-  const carto::VolumeRef<T> &image )
-{
-  return carto::rc_ptr< Interpolator >( new LinearInterpolator<T>( image ) );
-}
-
-
-//-----------------------------------------------------------------------------
-template <typename T>
-inline
 carto::rc_ptr< Interpolator > getLinearInterpolator(
   const carto::rc_ptr<carto::Volume<T> > &image )
 {
   return carto::rc_ptr< Interpolator >( new LinearInterpolator<T>( image ) );
 }
 
-
-//-----------------------------------------------------------------------------
-extern template carto::rc_ptr< Interpolator > 
- getLinearInterpolator( const AimsData<uint8_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<int8_t> & );
-extern template carto::rc_ptr< Interpolator > 
- getLinearInterpolator( const AimsData<uint16_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<int16_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<short> & );
-extern template carto::rc_ptr< Interpolator > 
- getLinearInterpolator( const AimsData<uint32_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<int32_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<float> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const AimsData<double> & );
-
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const carto::VolumeRef<uint8_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const carto::VolumeRef<int8_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const carto::VolumeRef<uint16_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const carto::VolumeRef<int16_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const carto::VolumeRef<short> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const carto::VolumeRef<uint32_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const carto::VolumeRef<int32_t> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const carto::VolumeRef<float> & );
-extern template carto::rc_ptr< Interpolator >
- getLinearInterpolator( const carto::VolumeRef<double> & );
 
 //-----------------------------------------------------------------------------
 extern template carto::rc_ptr< Interpolator >

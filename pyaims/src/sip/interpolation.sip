@@ -50,13 +50,13 @@ namespace aims
 {
 
 rc_ptr_Interpolator getLinearInterpolator( const std::string & );
-rc_ptr_Interpolator getLinearInterpolator( const AimsData_U8 & );
-rc_ptr_Interpolator getLinearInterpolator( const AimsData_U16 & );
-rc_ptr_Interpolator getLinearInterpolator( const AimsData_S16 & );
-rc_ptr_Interpolator getLinearInterpolator( const AimsData_U32 & );
-rc_ptr_Interpolator getLinearInterpolator( const AimsData_S32 & );
-rc_ptr_Interpolator getLinearInterpolator( const AimsData_FLOAT & );
-rc_ptr_Interpolator getLinearInterpolator( const AimsData_DOUBLE & );
+rc_ptr_Interpolator getLinearInterpolator( const rc_ptr_Volume_U8 & );
+rc_ptr_Interpolator getLinearInterpolator( const rc_ptr_Volume_U16 & );
+rc_ptr_Interpolator getLinearInterpolator( const rc_ptr_Volume_S16 & );
+rc_ptr_Interpolator getLinearInterpolator( const rc_ptr_Volume_U32 & );
+rc_ptr_Interpolator getLinearInterpolator( const rc_ptr_Volume_S32 & );
+rc_ptr_Interpolator getLinearInterpolator( const rc_ptr_Volume_FLOAT & );
+rc_ptr_Interpolator getLinearInterpolator( const rc_ptr_Volume_DOUBLE & );
 
 };
 
