@@ -31,9 +31,9 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-// we don't want to issue a warning
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
 #endif
 
 #include <cartobase/object/object_d.h>
@@ -46,7 +46,7 @@
 #include <aims/mesh/surfaceOperation.h>
 #include <aims/mesh/texture.h>
 #include <graph/graph/graph.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/containers/nditerator.h>
@@ -159,10 +159,10 @@ namespace aims
     }
 
     template<> 
-    void adjustVoxelSize( AimsData<short> & x, const AimsData<short> & y )
+    void adjustVoxelSize( rc_ptr<Volume<short> > & x,
+                          const rc_ptr<Volume<short> > & y )
     {
-      rc_ptr<Volume<short> > xx = x.volume();
-      adjustVoxelSize( *xx, *y.volume() );
+      adjustVoxelSize( *x, *y );
     }
 
     template<>
@@ -180,11 +180,10 @@ namespace aims
     }
 
     template<>
-    void adjustVoxelSize( AimsData<int32_t> & x,
-                          const AimsData<int32_t> & y )
+    void adjustVoxelSize( rc_ptr<Volume<int32_t> > & x,
+                          const rc_ptr<Volume<int32_t> > & y )
     {
-      rc_ptr<Volume<int32_t> > xx = x.volume();
-      adjustVoxelSize( *xx, *y.volume() );
+      adjustVoxelSize( *x, *y );
     }
 
 
@@ -229,12 +228,10 @@ namespace aims
 
 
     template<> void
-    insertElement( AimsData<short> & dest, int index,
-                   const AimsData<short> & src )
+    insertElement( rc_ptr<Volume<short> > & dest, int index,
+                   const rc_ptr<Volume<short> > & src )
     {
-      VolumeRef<short> vol = dest.volume();
-      const VolumeRef<short> svol = src.volume();
-      insertElement( vol, index, svol );
+      insertElement( *dest, index, *src );
     }
 
     template<> void
@@ -268,12 +265,10 @@ namespace aims
     }
 
     template<> void
-    insertElement( AimsData<int32_t> & dest, int index,
-                   const AimsData<int32_t> & src )
+    insertElement( rc_ptr<Volume<int32_t> > & dest, int index,
+                   const rc_ptr<Volume<int32_t> > & src )
     {
-      VolumeRef<int32_t> vol = dest.volume();
-      const VolumeRef<int32_t> svol = src.volume();
-      insertElement( vol, index, svol );
+      insertElement( *dest, index, *src );
     }
 
 
@@ -289,15 +284,16 @@ namespace aims
     }
 
 
-    template <> inline PropertySet & getHeader( AimsData<short> & obj )
+    template <> inline PropertySet & getHeader( rc_ptr<Volume<short> > & obj )
     {
-      return obj.volume()->header();
+      return obj->header();
     }
 
 
-    template <> inline PropertySet & getHeader( AimsData<int32_t> & obj )
+    template <> inline PropertySet & getHeader(
+      rc_ptr<Volume<int32_t> > & obj )
     {
-      return obj.volume()->header();
+      return obj->header();
     }
 
 
@@ -379,8 +375,8 @@ namespace aims
 
     template PropertySet & getHeader( Volume<short> & );
     template PropertySet & getHeader( Volume<int32_t> & );
-    template PropertySet & getHeader( AimsData<short> & );
-    template PropertySet & getHeader( AimsData<int32_t> & );
+    template PropertySet & getHeader( rc_ptr<Volume<short> > & );
+    template PropertySet & getHeader( rc_ptr<Volume<int32_t> > & );
     template PropertySet & getHeader( BucketMap<Void> & );
     template PropertySet & getHeader( AimsSurfaceTriangle & );
     template PropertySet & getHeader( AimsTimeSurface<2, Void> & );
@@ -1727,8 +1723,6 @@ string GraphManip::defaultExtensionForObjectType( const string & otype,
 
 
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
-                                     rc_ptr<AimsData<short> > );
-template void GraphManip::storeAims( Graph &, GraphObject*, const string &,
                                      rc_ptr<Volume<short> > );
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &,
                                      rc_ptr<AimsSurfaceTriangle> );
