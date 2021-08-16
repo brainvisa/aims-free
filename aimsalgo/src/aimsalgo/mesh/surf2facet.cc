@@ -57,9 +57,9 @@ void Mesher::getFacet( const AimsSurfaceTriangle& surface,
     ASSERT( triangle[ n ][ 0 ] != triangle[ n ][ 1 ] &&
             triangle[ n ][ 0 ] != triangle[ n ][ 2 ] &&
             triangle[ n ][ 1 ] != triangle[ n ][ 2 ] &&
-            triangle[ n ][ 0 ] < triangle.size() &&
-            triangle[ n ][ 1 ] < triangle.size() &&
-            triangle[ n ][ 2 ] < triangle.size()  );
+            triangle[ n ][ 0 ] < vertex.size() &&
+            triangle[ n ][ 1 ] < vertex.size() &&
+            triangle[ n ][ 2 ] < vertex.size()  );
   }
 
 
