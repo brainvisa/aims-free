@@ -302,7 +302,8 @@ namespace aims
     // buckets
 
     std::cout << "converting to buckets...\n";
-    carto::RawConverter<AimsData<short>, BucketMap<Void> >	conv( true );
+    carto::RawConverter<carto::VolumeRef<short>, BucketMap<Void> >
+      conv( true );
     BucketMap<Void>				bck;
     conv.convert( datac, bck );
     std::cout << "done, " << bck.size() << " buckets\n";

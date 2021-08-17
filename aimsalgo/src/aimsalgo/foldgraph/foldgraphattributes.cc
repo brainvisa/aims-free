@@ -386,15 +386,13 @@ namespace
     float	vz = bks.front()->sizeZ();
 
     // fill in volume with all buckets
-    AimsData<int16_t>	vol( (int) rint( dmax[0] / vx + 1 ), 
+    VolumeRef<int16_t>	vol( (int) rint( dmax[0] / vx + 1 ),
                              (int) rint( dmax[1] / vy + 1 ), 
                              (int) rint( dmax[2] / vz + 1 ), 1, 1 );
-    vol.setSizeX( vx );
-    vol.setSizeY( vy );
-    vol.setSizeZ( vz );
-    vol = 0;
-    vol.fillBorder( -1 );
-    RawConverter<BucketMap<Void>, AimsData<int16_t> >	conv;
+    vol->setVoxelSize( vx, vy, vz );
+    vol->fill( 0 );
+    vol->fillBorder( -1 );
+    RawConverter<BucketMap<Void>, VolumeRef<int16_t> >	conv;
     for( i=bks.begin(); i!=e; ++i )
       conv.printToVolume( **i, vol );
 
@@ -405,7 +403,7 @@ namespace
     // cout << "after AimsConnectedComponent, thread " << pthread_self() << endl;
 
     // mesh
-    vol.fillBorder( -1 );
+    vol->fillBorder( -1 );
     rc_ptr<AimsSurfaceTriangle> surface( new AimsSurfaceTriangle );
     mesher.getBrain( vol, *surface );
 

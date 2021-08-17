@@ -624,7 +624,7 @@ FastMarching<T>::midInterfaceVol (int16_t label1, int16_t label2) const
   VolumeRef<float> mid_interface_vol( sz[0], sz[1], sz[2] );
   mid_interface_vol->fill( -1 );
   const BucketMap<float> & mid_interface_buck = midInterface(label1, label2);
-  Converter<BucketMap<float>, VolumeRef<float> > conv;
+  Converter<BucketMap<float>, rc_ptr<Volume<float> > > conv;
   conv.convert(mid_interface_buck, mid_interface_vol);
   vector<float> voxel_size = d->voronoi.voxelSize();
   mid_interface_vol->header().setProperty("voxel_size",voxel_size );

@@ -64,12 +64,22 @@ public:
   ShallowConverter_%Template1typecode%_%Template2typecode%( bool = false );
   ~ShallowConverter_%Template1typecode%_%Template2typecode%();
 
+%%Template2defIsRcptr%%
+%#ifdef IS_RCPTR%
+
+  %Template2typecode% *operator ()
+    ( const %Template1typecode% & ) const /Factory/;
+
+%#else%
+
   rc_ptr_%Template2typecode% operator ()
     ( const %Template1typecode% & ) const;
 %MethodCode
   sipRes = new carto::rc_ptr< %Template2% >( sipCpp->operator()
     ( %Template1deref%( a0 ) ) );
 %End
+
+%#endif%
 
   void convert( const %Template1typecode% &, %Template2typecode% & ) const;
 };

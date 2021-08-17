@@ -59,7 +59,8 @@ namespace aims
     vol->header().setProperty( "voxel_size", vs );
     vol->fill( 0 );
     vol->fillBorder( -1 );
-    carto::RawConverter<BucketMap<T>, carto::VolumeRef<U> >	conv;
+    carto::RawConverter<BucketMap<T>, carto::rc_ptr<carto::Volume<U> > >
+      conv;
     conv.printToVolume( bucket, vol, -bbmin );
 
     return vol;

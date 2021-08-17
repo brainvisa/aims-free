@@ -103,12 +103,12 @@ bool meshIt( carto::AttributedObject* ao, const vector<string> & meshatt,
     return( false );
 
   syntaxes.insert( ao->getSyntax() );
-  AimsData<short>	vol( bmax[0] + 1, bmax[1] + 1, bmax[2] + 1, 1, 1 );
+  VolumeRef<short>	vol( bmax[0] + 1, bmax[1] + 1, bmax[2] + 1, 1, 1 );
   vol.fillBorder( -1 );
-  vol = 0;
-  RawConverter<BucketMap<Void>, AimsData<short> >	conv;
-  vol.setSizeXYZT( bcks[0].second->sizeX(), bcks[0].second->sizeY(), 
-		   bcks[0].second->sizeZ(), 1 );
+  vol.fill( 0 );
+  RawConverter<BucketMap<Void>, VolumeRef<short> >	conv;
+  vol.setVoxelSize( bcks[0].second->sizeX(), bcks[0].second->sizeY(),
+                    bcks[0].second->sizeZ(), 1 );
 
   for( ib2=bcks.begin(), eb2=bcks.end(); ib2!=eb2; ++ib2 )
     conv.printToVolume( *ib2->second, vol );

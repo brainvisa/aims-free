@@ -146,6 +146,55 @@ def classOutsideNamespace(include, cls, cppclass=None, typecode=None):
             'compareElement': '&',
             }
 
+def rc_ptr_class(cls, typesub):
+    cldef = typesub[cls]
+    if cls.endswith('>'):
+        spc = ' '
+    else:
+        spc = ''
+    key = 'carto::rc_ptr<%s%s>' % (cls, spc)
+    tcode = cldef['typecode']
+    value = {
+        'typecode': 'rc_ptr_%s' % tcode,
+        'pyFromC': 'pyaimsConvertFrom_rc_ptr_%s' % tcode,
+        'CFromPy': 'pyaimsConvertTo_rc_ptr_%s' % tcode,
+        'castFromSip': '',
+        'deref': '*',
+        'pyderef': '*',
+        'address': '&',
+        'pyaddress': '&',
+        'defScalar': '',
+        'defNumpyBindings': '',
+        'new': 'new carto::rc_ptr<%s > >' % cls,
+        'NumType': 'PyArray_OBJECT',
+        'PyType': 'rc_ptr_%s' % tcode,
+        'sipClass': 'rc_ptr_%s' % tcode,
+        'typeinclude': '%s\n'
+        '#include <cartobase/smart/rcptr.h>' % cldef['typeinclude'],
+        'sipinclude': '%s\n'
+        '#ifndef PYAIMS_RC_PTR_%s_CHECK_DEFINED\n'
+        '#define PYAIMS_RC_PTR_%s_CHECK_DEFINED\n'
+        'inline int pyaimsRcptr_%s_Check( PyObject* o )\n'
+        '{ return sipCanConvertToType( o, sipFindType( "rc_ptr_%s" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '#endif\n'
+        '#ifndef PYAIMS_RC_PTR_%s_CONVERT_DEFINED\n'
+        '#define PYAIMS_RC_PTR_%s_CONVERT_DEFINED\n'
+        'inline carto::rc_ptr<%s >* pyaimsConvertTo_rc_ptr_%s( PyObject* o )\n'
+        '{ int iserr = 0;\n'
+        '  void *ptr = sipForceConvertToType( o, sipFindType( "rc_ptr_%s" ), 0, 0, 0, &iserr );\n'
+        '  if( iserr ) return 0;\n'
+        '  return reinterpret_cast<carto::rc_ptr<%s > *>( ptr );\n}\n'
+        'inline PyObject* pyaimsConvertFrom_rc_ptr_%s( void * a )\n'
+        '{ return sipConvertFromType( a, sipFindType( "rc_ptr_%s" ), 0 ); }\n'
+        '#endif\n'
+        % (cldef['sipinclude'], tcode.upper(), tcode.upper(), tcode, tcode,
+           tcode.upper(), tcode.upper(), cls, tcode, tcode, cls, tcode, tcode),
+        'module': 'aims',
+        'testPyType': 'pyaimsRcptr_%s_Check' % tcode,
+        'defIsRcptr': '#define IS_RCPTR 1',
+    }
+    return (key, value)
+
 
 def completeTypesSub(typessub):
     for x, y in typessub.items():
@@ -158,8 +207,9 @@ def completeTypesSub(typessub):
             y['NumDims'] = 'std::vector<int>()'
         if 'NumType_Descr' not in y:
             y['NumType_Descr'] = '0'
-        if 'defNumpyIsSubArray' not in y:
-            y['defNumpyIsSubArray'] = ''
+        for key in ('defNumpyIsSubArray', 'defIsRcptr'):
+            if key not in y:
+                y[key] = ''
 
 
 if 'options' in globals() and hasattr(options, 'target_platform'):
@@ -1375,7 +1425,7 @@ typessub = {'bool':
             },
 
             'carto::Volume<bool>':
-           {'typecode': 'Volume_BOOL',
+            {'typecode': 'Volume_BOOL',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -1402,7 +1452,7 @@ typessub = {'bool':
                'testPyType': 'pyaimsVolume_BOOL_Check',
             },
             'carto::Volume<int8_t>':
-           {'typecode': 'Volume_S8',
+            {'typecode': 'Volume_S8',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -3331,6 +3381,15 @@ typessub = {'bool':
 
 
             }
+
+# add rc_ptr<Volume<T> >
+for voltype in ('bool', 'int8_t', 'uint8_t', 'int16_t', 'uint16_t', 'int32_t',
+                'uint32_t', 'float', 'double', 'AimsRGB', 'AimsRGBA',
+                'AimsHSV', 'cfloat', 'cdouble', 'Point3df'):
+    k, v = rc_ptr_class('carto::Volume<%s>' % voltype, typessub)
+    typessub[k] = v
+
+
 if target_platform == 'windows-64':
     if sip.SIP_VERSION < 0x04130d:
         typessub['size_t'] = typessub['unsigned long long']

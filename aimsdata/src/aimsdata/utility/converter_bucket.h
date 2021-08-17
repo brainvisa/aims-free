@@ -58,13 +58,15 @@ namespace carto
   /** Partial specialization of Converter between buckets and volumes.
   */
   template <class INP,class OUTP>
-  class RawConverter<aims::BucketMap<INP>, AimsData<OUTP> >
+  class RawConverter<aims::BucketMap<INP>, rc_ptr<Volume<OUTP> > >
   {
   public :
-    void convert( const aims::BucketMap<INP> &in, AimsData<OUTP> & out ) const;
+    void convert( const aims::BucketMap<INP> &in,
+      rc_ptr<Volume<OUTP> > & out ) const;
     /// writes bucket in an already allocated data
-    void printToVolume( const aims::BucketMap<INP> &in, AimsData<OUTP> & out, 
-			const Point3d & offset = Point3d( 0, 0, 0 ) ) const;
+    void printToVolume( const aims::BucketMap<INP> &in,
+                        rc_ptr<Volume<OUTP> > & out,
+                        const Point3d & offset = Point3d( 0, 0, 0 ) ) const;
   };
 
 
@@ -72,20 +74,30 @@ namespace carto
   */
   template <class INP,class OUTP>
   class RawConverter<aims::BucketMap<INP>, VolumeRef<OUTP> >
+    : public RawConverter<aims::BucketMap<INP>, rc_ptr<Volume<OUTP> > >
   {
   public :
     void convert( const aims::BucketMap<INP> &in,
-      VolumeRef<OUTP> & out ) const;
+      VolumeRef<OUTP> & out ) const
+    {
+      RawConverter<aims::BucketMap<INP>, rc_ptr<Volume<OUTP> > >::convert(
+        in, out );
+    }
     /// writes bucket in an already allocated data
-    void printToVolume( const aims::BucketMap<INP> &in, VolumeRef<OUTP> & out,
-                        const Point3d & offset = Point3d( 0, 0, 0 ) ) const;
+    void printToVolume( const aims::BucketMap<INP> &in,
+                        VolumeRef<OUTP> & out,
+                        const Point3d & offset = Point3d( 0, 0, 0 ) ) const
+    {
+      RawConverter<aims::BucketMap<INP>, rc_ptr<Volume<OUTP> > >
+        ::printToVolume( in, out, offset );
+    }
   };
 
 
   /** Partial specialization of Converter between void buckets and volumes.
   */
   template <class OUTP>
-  class RawConverter<aims::BucketMap<Void>, AimsData<OUTP> >
+  class RawConverter<aims::BucketMap<Void>, rc_ptr<Volume<OUTP> > >
   {
   public :
     RawConverter( bool timeislabel = false, bool withConstantValue = false,
@@ -93,14 +105,15 @@ namespace carto
       : _timeIsLabel( timeislabel ), _hasValue( withConstantValue ),
         _value( value ) {}
     void convert( const aims::BucketMap<Void> &in,
-                  AimsData<OUTP> & out ) const;
-    void printToVolume( const aims::BucketMap<Void> &in, AimsData<OUTP> & out, 
+                  rc_ptr<Volume<OUTP> > & out ) const;
+    void printToVolume( const aims::BucketMap<Void> &in,
+                        rc_ptr<Volume<OUTP> > & out,
                         const Point3d & offset = Point3d( 0, 0, 0 ) ) const;
     void setTimeIsLabel( bool x ) { _timeIsLabel = x; }
     bool timeIsLabel() const { return( _timeIsLabel ); }
 
   private:
-    bool        _timeIsLabel;
+    bool	_timeIsLabel;
     bool        _hasValue;
     OUTP        _value;
   };
@@ -110,29 +123,33 @@ namespace carto
   */
   template <class OUTP>
   class RawConverter<aims::BucketMap<Void>, VolumeRef<OUTP> >
+    : public RawConverter<aims::BucketMap<Void>, rc_ptr<Volume<OUTP> > >
   {
   public :
-    RawConverter( bool timeislabel = false ) 
-      : _timeIsLabel( timeislabel ) {}
     void convert( const aims::BucketMap<Void> &in,
-                  VolumeRef<OUTP> & out ) const;
-    void printToVolume( const aims::BucketMap<Void> &in, VolumeRef<OUTP> & out,
-                        const Point3d & offset = Point3d( 0, 0, 0 ) ) const;
-    void setTimeIsLabel( bool x ) { _timeIsLabel = x; }
-    bool timeIsLabel() const { return( _timeIsLabel ); }
-
-  private:
-    bool	_timeIsLabel;
+                  VolumeRef<OUTP> & out ) const
+    {
+      RawConverter<aims::BucketMap<Void>, rc_ptr<Volume<OUTP> > >::convert(
+        in, out );
+    }
+    void printToVolume( const aims::BucketMap<Void> &in,
+                        VolumeRef<OUTP> & out,
+                        const Point3d & offset = Point3d( 0, 0, 0 ) ) const
+    {
+      RawConverter<aims::BucketMap<Void>, rc_ptr<Volume<OUTP> > >
+        ::printToVolume( in, out, offset );
+    }
   };
 
 
   /** Partial specialization of Converter between volumes and buckets.
   */
   template <class INP,class OUTP>
-  class RawConverter<AimsData<INP>, aims::BucketMap<OUTP> >
+  class RawConverter<rc_ptr<Volume<INP> >, aims::BucketMap<OUTP> >
   {
   public:
-    void convert( const AimsData<INP> &in, aims::BucketMap<OUTP> & out ) const;
+    void convert( const rc_ptr<Volume<INP> > &in,
+                  aims::BucketMap<OUTP> & out ) const;
   };
 
 
@@ -140,23 +157,25 @@ namespace carto
   */
   template <class INP,class OUTP>
   class RawConverter<VolumeRef<INP>, aims::BucketMap<OUTP> >
+    : public RawConverter<rc_ptr<Volume<INP> >, aims::BucketMap<OUTP> >
   {
   public:
-    void convert( const VolumeRef<INP> &in,
-                  aims::BucketMap<OUTP> & out ) const;
+//     void convert( const VolumeRef<INP> &in,
+//                   aims::BucketMap<OUTP> & out ) const;
   };
 
 
   /** Partial specialization of Converter between volumes and void buckets.
   */
   template <class INP>
-  class RawConverter<AimsData<INP>, aims::BucketMap<Void> >
+  class RawConverter<rc_ptr<Volume<INP> >, aims::BucketMap<Void> >
   {
   public:
     RawConverter( bool timeislabel = false ) 
       : _timeIsLabel( timeislabel ) {}
 
-    void convert( const AimsData<INP> &in, aims::BucketMap<Void> & out ) const;
+    void convert( const rc_ptr<Volume<INP> > &in,
+                  aims::BucketMap<Void> & out ) const;
 
     void setTimeIsLabel( bool x ) { _timeIsLabel = x; }
     bool timeIsLabel() const { return( _timeIsLabel ); }
@@ -170,19 +189,13 @@ namespace carto
   */
   template <class INP>
   class RawConverter<VolumeRef<INP>, aims::BucketMap<Void> >
+    : public RawConverter<rc_ptr<Volume<INP> >, aims::BucketMap<Void> >
   {
   public:
-    RawConverter( bool timeislabel = false ) 
-      : _timeIsLabel( timeislabel ) {}
-
-    void convert( const VolumeRef<INP> &in,
-                  aims::BucketMap<Void> & out ) const;
-
-    void setTimeIsLabel( bool x ) { _timeIsLabel = x; }
-    bool timeIsLabel() const { return( _timeIsLabel ); }
-
-  private:
-    bool	_timeIsLabel;
+    RawConverter( bool timeislabel = false )
+      : RawConverter<rc_ptr<Volume<INP> >, aims::BucketMap<Void> >(
+          timeislabel )
+    {}
   };
 
 
@@ -195,18 +208,24 @@ namespace carto
 
 
   template <typename INP,typename OUTP>
-  class ConverterAllocator<aims::BucketMap<INP>,AimsData<OUTP> >
+  class ConverterAllocator<aims::BucketMap<INP>, rc_ptr<Volume<OUTP> > >
   {
   public:
-    static AimsData<OUTP>* alloc( const aims::BucketMap<INP> &in );
+    static rc_ptr<Volume<OUTP> >* alloc( const aims::BucketMap<INP> &in );
   };
 
 
   template <typename INP,typename OUTP>
   class ConverterAllocator<aims::BucketMap<INP>, VolumeRef<OUTP> >
+    : public ConverterAllocator<aims::BucketMap<INP>, rc_ptr<Volume<OUTP> > >
   {
   public:
-    static VolumeRef<OUTP>* alloc( const aims::BucketMap<INP> &in );
+    static VolumeRef<OUTP>* alloc( const aims::BucketMap<INP> &in )
+    {
+      return static_cast<VolumeRef<OUTP>*>(
+        ConverterAllocator<aims::BucketMap<INP>,
+                           rc_ptr<Volume<OUTP> > >::alloc( in ) );
+    }
   };
 
 
@@ -237,17 +256,9 @@ namespace carto
 
 
   template <class INP,class OUTP> inline
-  void RawConverter<aims::BucketMap<INP>,AimsData<OUTP> >::convert
-  ( const aims::BucketMap<INP> &in, AimsData<OUTP> &out ) const
-  {
-    out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
-    printToVolume( in, out, Point3d( 0, 0, 0 ) );
-  }
-
-
-  template <class INP,class OUTP> inline
-  void RawConverter<aims::BucketMap<INP>,AimsData<OUTP> >::printToVolume
-  ( const aims::BucketMap<INP> & in, AimsData<OUTP> & out, 
+  void RawConverter<aims::BucketMap<INP>,
+                    carto::rc_ptr<Volume<OUTP> > >::printToVolume
+  ( const aims::BucketMap<INP> & in, carto::rc_ptr<Volume<OUTP> > & out,
     const Point3d & offset ) const
   {
     typename aims::BucketMap<INP>::const_iterator	 it, et = in.end();
@@ -257,24 +268,15 @@ namespace carto
     RawConverter<INP, OUTP>	itemconv;
 
     for( it=in.begin(); it!=et; ++it, ++i )
+    {
+      for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
       {
-        for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
-          {
-            const Point3d	& pos = ib->first;
-            itemconv.convert( ib->second,
-                              out( pos[0] + offset[0], pos[1] + offset[1],
-                                  pos[2] + offset[2], i ) );
-          }
+        const Point3d	& pos = ib->first;
+        itemconv.convert( ib->second,
+                          out->at( pos[0] + offset[0], pos[1] + offset[1],
+                                   pos[2] + offset[2], i ) );
       }
-  }
-
-
-  template <class OUTP> inline
-  void RawConverter<aims::BucketMap<Void>,AimsData<OUTP> >::convert
-  ( const aims::BucketMap<Void> &in, AimsData<OUTP> &out ) const
-  {
-    out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
-    printToVolume( in, out, Point3d( 0, 0, 0 ) );
+    }
   }
 
 
@@ -285,50 +287,50 @@ namespace carto
     {
       static
       void printToVolume( const aims::BucketMap<Void> & in, 
-                          AimsData<OUTP> & out,
+                          carto::rc_ptr<Volume<OUTP> > & out,
                           const Point3d & offset, bool timelabel );
     };
 
     template <typename OUTP>
-    struct VolumePrinter<OUTP,true>
+    struct VolumePrinter<OUTP, true>
     {
       template <typename INP>
       static
       void printToVolume( const aims::BucketMap<INP> & in, 
-                          AimsData<OUTP> & out, const Point3d & offset, 
+                          carto::rc_ptr<Volume<OUTP> > & out, const Point3d & offset,
                           bool timelabel )
       {
         if( !timelabel )
-          {
-            VolumePrinter<OUTP,false>::printToVolume( in, out, offset, false );
-            return;
-          }
+        {
+          VolumePrinter<OUTP, false>::printToVolume( in, out, offset, false );
+          return;
+        }
 
         aims::BucketMap<Void>::const_iterator		it, et = in.end();
         aims::BucketMap<Void>::Bucket::const_iterator	ib, eb;
         unsigned						i = 0;
 
         for( it=in.begin(); it!=et; ++it, ++i )
+        {
+          for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
           {
-            for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
-              {
-                const Point3d	& pos = ib->first;
-                out( pos[0] + offset[0], pos[1] + offset[1], pos[2] 
-                     + offset[2] )
-                  = (OUTP) it->first;
-              }
+            const Point3d	& pos = ib->first;
+            out->at( pos[0] + offset[0], pos[1] + offset[1],
+                     pos[2] + offset[2] )
+              = (OUTP) it->first;
           }
+        }
       }
     };
 
 
     template <typename OUTP>
-    struct VolumePrinter<OUTP,false>
+    struct VolumePrinter<OUTP, false>
     {
       template <typename INP>
       static
       void printToVolume( const aims::BucketMap<INP> & in, 
-                          AimsData<OUTP> & out, 
+                          carto::rc_ptr<Volume<OUTP> > & out,
                           const Point3d & offset, bool )
       {
         typename aims::BucketMap<INP>::const_iterator	it, et = in.end();
@@ -338,21 +340,21 @@ namespace carto
         RawConverter<INP,OUTP>	itemconv;
 
         for( it=in.begin(); it!=et; ++it, ++i )
+        {
+          for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
           {
-            for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
-              {
-                const Point3d	& pos = ib->first;
-                itemconv.convert( ib->second, 
-                                  out( pos[0] + offset[0], pos[1] + offset[1], 
+            const Point3d	& pos = ib->first;
+            itemconv.convert( ib->second,
+                              out->at( pos[0] + offset[0], pos[1] + offset[1],
                                        pos[2] + offset[2], i ) );
-              }
           }
+        }
       }
     };
 
     template <typename OUTP> inline
     void printToVolume_smart( const aims::BucketMap<Void> & in, 
-                              AimsData<OUTP> & out,
+                              carto::rc_ptr<Volume<OUTP> > & out,
                               const Point3d & offset, bool timelabel )
     {
       VolumePrinter<OUTP, std::numeric_limits<OUTP>::is_integer>::printToVolume
@@ -363,8 +365,9 @@ namespace carto
 
 
   template <typename OUTP> inline
-  void RawConverter<aims::BucketMap<Void>,AimsData<OUTP> >::printToVolume
-  ( const aims::BucketMap<Void> & in, AimsData<OUTP> & out, 
+  void RawConverter<aims::BucketMap<Void>,
+                    carto::rc_ptr<Volume<OUTP> > >::printToVolume
+  ( const aims::BucketMap<Void> & in, carto::rc_ptr<Volume<OUTP> > & out,
     const Point3d & offset ) const
   {
     if( _hasValue )
@@ -373,98 +376,106 @@ namespace carto
       typename aims::BucketMap<Void>::Bucket::const_iterator   ib, eb;
       unsigned                                        i = 0;
       for( it=in.begin(); it!=et; ++it, ++i )
+      {
+        for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
         {
-          for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
-            {
-              const Point3d     & pos = ib->first;
-              out( pos[0] + offset[0], pos[1] + offset[1],
-                pos[2] + offset[2], i ) = _value;
-            }
+          const Point3d     & pos = ib->first;
+          out->at( pos[0] + offset[0], pos[1] + offset[1],
+                   pos[2] + offset[2], i ) = _value;
         }
       }
+    }
     else
       internal::printToVolume_smart( in, out, offset, timeIsLabel() );
   }
 
 
   template <class INP,class OUTP> inline
-  void RawConverter<AimsData<INP>,aims::BucketMap<OUTP> >::convert
-  ( const AimsData<INP> &in, aims::BucketMap<OUTP> &out ) const
+  void RawConverter<carto::rc_ptr<Volume<INP> >,
+                    aims::BucketMap<OUTP> >::convert
+  ( const carto::rc_ptr<Volume<INP> > &in, aims::BucketMap<OUTP> &out ) const
   {
-    short		x, y, z;
-    unsigned		t, nt = in.dimT();
+    unsigned		t, nt = in->getSizeT();
+    int x, y, z, nx = in->getSizeX(), ny = in->getSizeY(), nz = in->getSizeZ();
     INP			val;
+    OUTP	outval;
     RawConverter<INP,OUTP>	itemconv;
 
-    out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
-    OUTP	outval;
+    std::vector<float> vs = in->getVoxelSize();
+    out.setSizeXYZT( vs[0], vs[1], vs[2], vs[3] );
     for( t=0; t<nt; ++t )
-      {
-	//cout << "time : " << t << endl;
-	typename aims::BucketMap<OUTP>::Bucket	& bck = out[t];
-	ForEach3d( in, x, y, z )
-	  {
-	    /*if( y == 0 && x == 0 )
-	      cout << "slice : " << z << endl;*/
-	    val = in( x, y, z, t );
-	    if( val != (INP)0 )
-              {
-                itemconv.convert( val, outval );
-                bck.insert( std::pair<Point3d, OUTP>
-                            ( Point3d( x, y, z ), outval ) );
-              }
-	  }
-	if( bck.empty() )
-	  out.erase( t );
-      }
-    out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
+    {
+      //cout << "time : " << t << endl;
+      typename aims::BucketMap<OUTP>::Bucket	& bck = out[t];
+      for( z=0; z<nz; ++z )
+        for( y=0; y<ny; ++y )
+          for( x=0; x<nx; ++x )
+          {
+            /*if( y == 0 && x == 0 )
+              cout << "slice : " << z << endl;*/
+            val = in->at( x, y, z, t );
+            if( val != (INP)0 )
+            {
+              itemconv.convert( val, outval );
+              bck.insert( std::pair<Point3d, OUTP>
+                          ( Point3d( x, y, z ), outval ) );
+            }
+          }
+      if( bck.empty() )
+        out.erase( t );
+    }
   }
 
 
   template <class INP> inline
-  void RawConverter<AimsData<INP>,aims::BucketMap<Void> >::convert
-  ( const AimsData<INP> &in, aims::BucketMap<Void> &out ) const
+  void RawConverter<carto::rc_ptr<Volume<INP> >,
+                    aims::BucketMap<Void> >::convert
+  ( const carto::rc_ptr<Volume<INP> > &in, aims::BucketMap<Void> &out ) const
   {
-    short		x, y, z;
-    unsigned		t, nt = in.dimT();
+    unsigned		t, nt = in->getSizeT();
+    int x, y, z, nx = in->getSizeX(), ny = in->getSizeY(), nz = in->getSizeZ();
     INP			val;
 
-    out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
+    std::vector<float> vs = in->getVoxelSize();
+    out.setSizeXYZT( vs[0], vs[1], vs[2], vs[3] );
     if( nt == 1 && timeIsLabel() )
-      {
-        size_t		t;
-        RawConverter<INP,size_t>	rc;
-        ForEach3d( in, x, y, z )
+    {
+      size_t		t;
+      RawConverter<INP,size_t>	rc;
+      for( z=0; z<nz; ++z )
+        for( y=0; y<ny; ++y )
+          for( x=0; x<nx; ++x )
           {
-            val = in( x, y, z );
+            val = in->at( x, y, z );
             if( val != INP(0) )
-              {
-                rc.convert( val, t );
-                out[ t ].insert( std::pair<Point3d, Void>
-                                 ( Point3d( x, y, z ), Void() ) );
-              }
-          }
-      }
+            {
+              rc.convert( val, t );
+              out[ t ].insert( std::pair<Point3d, Void>
+                                ( Point3d( x, y, z ), Void() ) );
+            }
+        }
+    }
     else
       for( t=0; t<nt; ++t )
-	{
-	  //cout << "time : " << t << endl;
-	  aims::BucketMap<Void>::Bucket	& bck = out[t];
-	  ForEach3d( in, x, y, z )
-	    {
-	      val = in( x, y, z, t );
-	      if( val != INP(0) )
-		bck.insert( std::pair<Point3d, Void>( Point3d( x, y, z ), 
-						 Void() ) );
-	    }
-	  if( bck.empty() )
-	    out.erase( t );
-	}
-    out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
+      {
+        //cout << "time : " << t << endl;
+        aims::BucketMap<Void>::Bucket	& bck = out[t];
+        for( z=0; z<nz; ++z )
+          for( y=0; y<ny; ++y )
+            for( x=0; x<nx; ++x )
+            {
+              val = in->at( x, y, z, t );
+              if( val != INP(0) )
+                bck.insert( std::pair<Point3d, Void>( Point3d( x, y, z ),
+                            Void() ) );
+            }
+        if( bck.empty() )
+          out.erase( t );
+      }
   }
 
 
-  template <class INP,class OUTP> 
+  template <class INP,class OUTP>
   inline aims::BucketMap<OUTP>* 
   ConverterAllocator<aims::BucketMap<INP>,aims::BucketMap<OUTP> >::alloc
   ( const aims::BucketMap<INP> &in )
@@ -476,24 +487,11 @@ namespace carto
   }
 
 
-  template <class INP,class OUTP> 
-  inline AimsData<OUTP>* 
-  ConverterAllocator<aims::BucketMap<INP>,AimsData<OUTP> >::alloc
-  ( const aims::BucketMap<INP> &in )
-  {
-    VolumeRef<OUTP> *vol
-      = ConverterAllocator<aims::BucketMap<INP>, VolumeRef<OUTP> >::alloc( in );
-    AimsData<OUTP> *out = new AimsData<OUTP>( *vol );
-    delete vol;
-    return out;
-  }
-
-
   // VolumeRef implementation
 
   template <class INP,class OUTP>
-  inline VolumeRef<OUTP>*
-  ConverterAllocator<aims::BucketMap<INP>, VolumeRef<OUTP> >::alloc
+  inline rc_ptr<Volume<OUTP> >*
+  ConverterAllocator<aims::BucketMap<INP>, rc_ptr<Volume<OUTP> > >::alloc
   ( const aims::BucketMap<INP> &in )
   {
     typename aims::BucketMap<INP>::const_iterator	it, et = in.end();
@@ -536,7 +534,7 @@ namespace carto
     if( bmin[0] >= 0 && bmin[1] >= 0 && bmin[2] >= 0 )
       bmin = Point3d( 0, 0, 0 );
 
-    VolumeRef<OUTP>
+    rc_ptr<Volume<OUTP> >
       *out( new VolumeRef<OUTP>( bmax[0] - bmin[0] + 1, bmax[1] - bmin[1] + 1,
                                  bmax[2] - bmin[2] + 1, in.size() ) );
     std::vector<float> vs( 4 );
@@ -544,80 +542,38 @@ namespace carto
     vs[1] = in.sizeY();
     vs[2] = in.sizeZ();
     vs[3] = in.sizeT();
-    out->header().setProperty( "voxel_size", vs );
+    (*out)->header().setProperty( "voxel_size", vs );
 
-    out->fill( 0 );
+    (*out)->fill( 0 );
     return out;
   }
 
 
   template <class INP,class OUTP> inline
-  void RawConverter<aims::BucketMap<INP>, VolumeRef<OUTP> >::convert
-  ( const aims::BucketMap<INP> &in, VolumeRef<OUTP> &out ) const
+  void RawConverter<aims::BucketMap<INP>, rc_ptr<Volume<OUTP> > >::convert
+  ( const aims::BucketMap<INP> &in, rc_ptr<Volume<OUTP> > &out ) const
   {
     std::vector<float> vs(4);
     vs[0] = in.sizeX();
     vs[1] = in.sizeY();
     vs[2] = in.sizeZ();
     vs[3] = in.sizeT();
-    out.header().setProperty( "voxel_size", vs );
+    out->header().setProperty( "voxel_size", vs );
     printToVolume( in, out, Point3d( 0, 0, 0 ) );
-  }
-
-
-  template <class INP,class OUTP> inline
-  void RawConverter<aims::BucketMap<INP>, VolumeRef<OUTP> >::printToVolume
-  ( const aims::BucketMap<INP> & in, VolumeRef<OUTP> & out,
-    const Point3d & offset ) const
-  {
-    AimsData<OUTP> data( out );
-    RawConverter<aims::BucketMap<INP>, AimsData<OUTP> > c;
-    c.printToVolume( in, data, offset );
   }
 
 
   template <class OUTP> inline
-  void RawConverter<aims::BucketMap<Void>, VolumeRef<OUTP> >::convert
-  ( const aims::BucketMap<Void> &in, VolumeRef<OUTP> &out ) const
+  void RawConverter<aims::BucketMap<Void>, rc_ptr<Volume<OUTP> > >::convert
+  ( const aims::BucketMap<Void> &in, rc_ptr<Volume<OUTP> > &out ) const
   {
     std::vector<float> vs(4);
     vs[0] = in.sizeX();
     vs[1] = in.sizeY();
     vs[2] = in.sizeZ();
     vs[3] = in.sizeT();
-    out.header().setProperty( "voxel_size", vs );
+    out->header().setProperty( "voxel_size", vs );
     printToVolume( in, out, Point3d( 0, 0, 0 ) );
-  }
-
-
-  template <typename OUTP> inline
-  void RawConverter<aims::BucketMap<Void>, VolumeRef<OUTP> >::printToVolume
-  ( const aims::BucketMap<Void> & in, VolumeRef<OUTP> & out,
-    const Point3d & offset ) const
-  {
-    AimsData<OUTP> data( out );
-    RawConverter<aims::BucketMap<Void>, AimsData<OUTP> > c( _timeIsLabel );
-    c.printToVolume( in, data, offset );
-  }
-
-
-  template <class INP,class OUTP> inline
-  void RawConverter<VolumeRef<INP>,aims::BucketMap<OUTP> >::convert
-  ( const VolumeRef<INP> &in, aims::BucketMap<OUTP> &out ) const
-  {
-    RawConverter<AimsData<INP>, aims::BucketMap<OUTP> > c;
-    AimsData<INP> data( in );
-    c.convert( data, out );
-  }
-
-
-  template <class INP> inline
-  void RawConverter<VolumeRef<INP>,aims::BucketMap<Void> >::convert
-  ( const VolumeRef<INP> &in, aims::BucketMap<Void> &out ) const
-  {
-    RawConverter<AimsData<INP>, aims::BucketMap<Void> > c( _timeIsLabel );
-    AimsData<INP> data( in );
-    c.convert( data, out );
   }
 
 }

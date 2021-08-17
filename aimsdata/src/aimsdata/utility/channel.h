@@ -39,10 +39,10 @@
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/type/datatypetraits.h>
 #include <cartobase/type/datatypeinfo.h>
-#include <aims/data/data_g.h>
+#include <aims/data/data.h>
 #include <aims/rgb/rgb.h>
 #include <aims/hsv/hsv.h>
-#include <aims/utility/converter_g.h>
+#include <cartobase/type/converter.h>
 
 enum AimsRGBAChannel
 {

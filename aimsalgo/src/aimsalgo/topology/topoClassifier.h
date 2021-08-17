@@ -129,8 +129,8 @@ TopologicalClassifier< aims::BucketMap<T> >::doit(
   aims::BucketMap<int16_t> *res = new aims::BucketMap<int16_t>;
   res->setSizeXYZT( d.sizeX(), d.sizeY(), d.sizeZ(), d.sizeT() );
 
-  AimsData<int16_t> *dc;
-  carto::Converter< aims::BucketMap<T>, AimsData<T> > conv;
+  carto::VolumeRef<int16_t> *dc;
+  carto::Converter< aims::BucketMap<T>, carto::VolumeRef<T> > conv;
   dc = conv( d );
   TopologicalClassification< T > topo( *dc );
   TopologicalClassificationMeaning topoMean;
@@ -162,8 +162,8 @@ TopologicalClassifier< aims::BucketMap<Void> >::doit(
   aims::BucketMap<int16_t> *res = new aims::BucketMap<int16_t>;
   res->setSizeXYZT( d.sizeX(), d.sizeY(), d.sizeZ(), d.sizeT() );
 
-  AimsData<int16_t> *dc;
-  carto::Converter< aims::BucketMap<Void>, AimsData<int16_t> > conv;
+  carto::VolumeRef<int16_t> *dc;
+  carto::Converter< aims::BucketMap<Void>, carto::VolumeRef<int16_t> > conv;
   dc = conv( d );
   TopologicalClassification<int16_t> topo( *dc );
   TopologicalClassificationMeaning topoMean;

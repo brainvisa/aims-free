@@ -37,9 +37,8 @@ import sys
 from soma import aimsalgo, aims
 from soma.wip.aimsalgo import *
 
-from soma.aims import AimsData_S16, BucketMap_VOID, Converter_AimsData_S16_BucketMap_VOID, Converter_BucketMap_VOID_AimsData_S16, Motion, Reader, ResamplerFactory_S16, Writer, Volume_S16
-from soma.aimsalgo import MomentBase, GeometricMoment_S16, MomentInvariant_S16
-from soma.wip.aimsalgo.moment import Moment
+from soma.aims import ResamplerFactory_S16
+from soma.aimsalgo import GeometricMoment_S16
 from six.moves import range
 
 
@@ -191,7 +190,7 @@ class AimsDataAdjuster( object ) :
 		transformationArray = numpy.array(transformation.flatten())
 		transformationArray = transformationArray.reshape((transformationArray.shape[0] * transformationArray.shape[1]))
 		
-		return Motion(transformationArray)
+		return aims.AffineTransformation3d(transformationArray)
 
 	def getGravityTranslationMatrix( self, geometricMoment, direction = 1 ) :
 		

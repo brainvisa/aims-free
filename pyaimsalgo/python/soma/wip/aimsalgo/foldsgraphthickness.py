@@ -33,7 +33,6 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 from  __future__  import print_function
-
 from __future__ import absolute_import
 from soma import aims
 from soma import aimsalgo
@@ -56,8 +55,9 @@ class FoldsGraphThickness(object):
     voxel_size = self.lgw_vol.header()["voxel_size"]
 
     def printbucket( bck, vol, value ):
-      c = aims.RawConverter_BucketMap_VOID_AimsData_S16( False, True, value )
-      c.printToVolume( bck._get(), vol )
+      c = aims.RawConverter_BucketMap_VOID_rc_ptr_Volume_S16(False, True,
+                                                             value)
+      c.printToVolume(bck, vol)
 
     if self.voronoi_vol is None:
       seed = - self.lgw_vol
