@@ -38,13 +38,14 @@
 #include <aims/utility/converter_volume.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 aims::HarmonicCageMeshResampler::HarmonicCageMeshResampler(
 const AimsSurfaceTriangle &cage, float spacing)
 {
 	//const std::vector<AimsVector<float, 3> > &vertices = cage.vertex();
-	MeshToVoxelsResampler<AimsData<unsigned int> >	sampler;
+	MeshToVoxelsResampler<rc_ptr<Volume<unsigned int> > >	sampler;
 	_cage = sampler.doit(cage, spacing, 26);
 
 	_controls = cage.vertex();

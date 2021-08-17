@@ -68,28 +68,31 @@ private:
 	O init_data(const AimsVector<float,3> &offset, float spacing,
 		unsigned int dimx, unsigned int dimy, unsigned int dimz) const;
 	void set(O &output, uint x2, uint y2, uint z2, uint ind) const;
-	void fill_header(PythonHeader &hdr, O &output,
+	void fill_header(carto::PropertySet &hdr, O &output,
 		const AimsVector<float,3> & offset, float spacing) const;
+    void setVoxelSize( O & output, float vx, float vy, float vz,
+                       float vt ) const;
 };
 
 
 template<> inline
-AimsData<unsigned int> MeshToVoxelsResampler<AimsData<unsigned int> >::
+carto::rc_ptr<carto::Volume<unsigned int> >
+MeshToVoxelsResampler<carto::rc_ptr<carto::Volume<unsigned int> > >::
 init_data(const AimsVector<float,3> &offset, float spacing,
 	unsigned int dimx, unsigned int dimy, unsigned int dimz) const
 {
-	AimsData<unsigned int>	ima(dimx, dimy, dimz);
+	carto::VolumeRef<unsigned int>	ima(dimx, dimy, dimz);
 	ima = 0; //value of background
-	PythonHeader *hdr = dynamic_cast<aims::PythonHeader *>(ima.header());
-	MeshToVoxelsResampler<AimsData<unsigned int> >::fill_header(*hdr,
-						ima, offset, spacing);
+	carto::PropertySet &hdr = ima.header();
+	fill_header( hdr, ima, offset, spacing );
 	return ima;
 }
 
-template<> inline void  MeshToVoxelsResampler<AimsData<unsigned int> >::
-set(AimsData<unsigned int> &output, uint x2, uint y2, uint z2, uint ind) const
+template<> inline void  MeshToVoxelsResampler<carto::rc_ptr<carto::Volume<unsigned int> > >::
+set( carto::rc_ptr<carto::Volume<unsigned int> > &output, uint x2, uint y2,
+     uint z2, uint ind ) const
 {
-	output(x2, y2, z2) = ind;
+  output->at(x2, y2, z2) = ind;
 }
 
 template<> inline
@@ -99,7 +102,8 @@ init_data(const AimsVector<float,3> &offset, float spacing,
 {
 	aims::BucketMap<Void>	bucketmap;
 	MeshToVoxelsResampler<aims::BucketMap<Void> >::fill_header(
-			bucketmap.header(), bucketmap, offset, spacing);
+      bucketmap.header().value<carto::PropertySet>(), bucketmap, offset,
+      spacing);
 	
 	return bucketmap;
 }
@@ -111,6 +115,24 @@ set(aims::BucketMap<Void> &output, uint x2, uint y2, uint z2, uint) const
 	output.insert(Point3d(x2, y2, z2), Void());
 }
 
-};
+template<> inline
+void
+MeshToVoxelsResampler<carto::rc_ptr<carto::Volume<unsigned int> > >::
+setVoxelSize( carto::rc_ptr<carto::Volume<unsigned int> > & output, float vx,
+              float vy, float vz, float vt) const
+{
+  output->setVoxelSize( vx, vy, vz, vt );
+}
+
+template<> inline
+void
+MeshToVoxelsResampler<aims::BucketMap<Void> >::
+setVoxelSize( aims::BucketMap<Void> & output, float vx,
+              float vy, float vz, float vt) const
+{
+  output.setSizeXYZT( vx, vy, vz, vt );
+}
+
+}
  
 #endif

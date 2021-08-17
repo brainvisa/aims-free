@@ -35,7 +35,7 @@
 
 namespace aims {
 
-template class MeshToVoxelsResampler<AimsData<unsigned int> >;
+template class MeshToVoxelsResampler<carto::rc_ptr<carto::Volume<unsigned int> > >;
 template class MeshToVoxelsResampler<BucketMap<Void> >;
 
 } // namespace aims

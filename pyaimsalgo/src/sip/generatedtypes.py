@@ -41,7 +41,7 @@ todo = {
   'distancemap' : ['short', 'float'],
   'diffusionsmoother' : ['short', 'float'],
   'gradient' : ['float'],
-  'meshresampler' : ['AimsData<uint32_t>',
+  'meshresampler' : ['carto::rc_ptr<carto::Volume<uint32_t> >',
           'aims::BucketMap<Void>'],
   'moment' : numtypes,
   'morphomath' : numtypes,

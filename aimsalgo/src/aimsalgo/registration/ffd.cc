@@ -810,7 +810,7 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
                                               const std::string* format,
                                               int frame )
   {
-    Reader<AimsData<Point3df> > _reader( fileName() );
+    Reader<Volume<Point3df> > _reader( fileName() );
     _reader.setOptions( options() );
     _reader.setMode( _mode );
     _reader.setAllocatorContext( allocatorContext() );
@@ -819,7 +819,8 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
 
     try
     {
-      res = _reader.read(obj, border, format, frame);
+      res = _reader.read( *(rc_ptr<Volume<Point3df> > ) obj, border, format,
+                          frame );
     }
     catch( ... )
     {
@@ -836,7 +837,7 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
       vector<int> ffdims( dims.size() - 1 );
       for( int i=0; i<ffdims.size(); ++i )
         ffdims[i] = dims[i];
-      VolumeRef<Point3df> rvol = AimsData<Point3df>( obj ).volume();
+      VolumeRef<Point3df> rvol( (rc_ptr<Volume<Point3df> > ) obj );
       rvol->reallocate( ffdims );
       rvol->copyHeaderFrom( fvol->header() );
 
@@ -911,7 +912,7 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
   {
     if( ( format && *format == "GIS" )
         || fileName().substr( fileName().length() - 4, 4 ) == ".ima" )
-      return base::write( obj, ascii, format );
+      return base::write( *(rc_ptr<Volume<Point3df> >) obj, ascii, format );
 
     // write as a (N+1)D volume
 

@@ -973,21 +973,23 @@ void convert_old_mode_deformation(rc_ptr<FfdTransformation> deformation,
   }
 
   // The grid can be updated in-place
-  AimsData<Point3df>& grid = static_cast<AimsData<Point3df>&>(*deformation);
+  rc_ptr<Volume<Point3df> > grid
+    = static_cast<rc_ptr<Volume<Point3df> > >(*deformation);
 
-  grid.setSizeXYZT(
-    double(in_size[0] - 1) / double(grid.dimX() - 1) * in_voxel_size[0],
-    double(in_size[1] - 1) / double(grid.dimY() - 1) * in_voxel_size[1],
-    double(in_size[2] - 1) / double(grid.dimZ() - 1) * in_voxel_size[2] );
-  int dx = grid.dimX(), dy = grid.dimY(), dz = grid.dimZ();
-  float sx = grid.sizeX(), sy = grid.sizeY(), sz = grid.sizeZ();
+  grid->setVoxelSize(
+    double(in_size[0] - 1) / double(grid->getSizeX() - 1) * in_voxel_size[0],
+    double(in_size[1] - 1) / double(grid->getSizeY() - 1) * in_voxel_size[1],
+    double(in_size[2] - 1) / double(grid->getSizeZ() - 1) * in_voxel_size[2] );
+  int dx = grid->getSizeX(), dy = grid->getSizeY(), dz = grid->getSizeZ();
+  float sx = grid->getVoxelSize()[0], sy = grid->getVoxelSize()[1],
+    sz = grid->getVoxelSize()[2];
   for( int z = 0; z < dz; ++z )
     for( int y = 0; y < dy; ++y )
       for( int x = 0; x < dx; ++x )
       {
-        grid(x, y, z)[0] *= sx;
-        grid(x, y, z)[1] *= sy;
-        grid(x, y, z)[2] *= sz;
+        grid->at(x, y, z)[0] *= sx;
+        grid->at(x, y, z)[1] *= sy;
+        grid->at(x, y, z)[2] *= sz;
       }
 }
 

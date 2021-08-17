@@ -60,8 +60,12 @@ namespace aims {
     FfdTransformation( const AimsData<Point3df> & other );
     FfdTransformation & operator=( const FfdTransformation & other );
 
-    operator const AimsData<Point3df>&() const { return _ctrlPointDelta; }
-    operator AimsData<Point3df>&() { return _ctrlPointDelta; }
+//     operator const AimsData<Point3df>&() const { return _ctrlPointDelta; }
+//     operator AimsData<Point3df>&() { return _ctrlPointDelta; }
+    operator const carto::rc_ptr<carto::Volume<Point3df> >() const
+    { return _ctrlPointDelta.volume(); }
+    operator carto::rc_ptr<carto::Volume<Point3df> >()
+    { return _ctrlPointDelta.volume(); }
 
     /// Always false, because testing for identity is expensive
     bool isIdentity() const CARTO_OVERRIDE { return false; }
@@ -327,9 +331,10 @@ namespace aims {
       Point3df.
   */
   template<>
-  class Writer<aims::FfdTransformation> : public Writer<AimsData<Point3df> >
+  class Writer<aims::FfdTransformation>
+    : public Writer<carto::Volume<Point3df> >
   {
-    typedef Writer<AimsData<Point3df> > base;
+    typedef Writer<carto::Volume<Point3df> > base;
   public:
     inline Writer(): base() {}
     inline Writer( const std::string& filename,

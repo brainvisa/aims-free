@@ -5,9 +5,6 @@ class MeshToVoxelsResampler_%Template1typecode%
   #include <aims/data/data.h>
   %Template1typeinclude%
   %Template1sipinclude%
-  #if SIP_VERSION < 0x040700
-  #include "sipaimsalgosipMeshToVoxelsResampler_%Template1typecode%.h"
-  #endif
 
   #ifndef PYAIMSSIP_MESHTOIMARESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSSIP_MESHTOIMARESAMPLER_%Template1typecode%_DEFINED

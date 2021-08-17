@@ -42,7 +42,7 @@ namespace aims
 {
 
 template<typename O> void MeshToVoxelsResampler<O>::fill_header(
-PythonHeader &hdr, O &output, const AimsVector<float,3> & offset, float spacing)
+carto::PropertySet &hdr, O &output, const AimsVector<float,3> & offset, float spacing)
 const
 {
   std::vector<float>		voxel_size(3, spacing);
@@ -56,7 +56,7 @@ const
   hdr.setProperty("voxel_size", voxel_size);
   hdr.setProperty("referentials", refs);
   hdr.setProperty("transformations", trans);
-  output.setSizeXYZT(spacing, spacing, spacing, 1.);
+  setVoxelSize( output, spacing, spacing, spacing, 1. );
 }
 
 /** Ad-hoc covering of voxels, then test if there own to the resulting mesh

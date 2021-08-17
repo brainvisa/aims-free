@@ -14,6 +14,7 @@ namespace aims
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
 #include <pyaims/data/data.h>
+typedef carto::rc_ptr<carto::Volume<Point3df> > rc_ptr_Volume_POINT3DF;
 %End
 
 %Docstring
@@ -56,7 +57,7 @@ Vector fields are stored in volumes AimsData_POINT3DF.
     FfdTransformation( const aims::FfdTransformation & other );
     FfdTransformation( const AimsData_POINT3DF & other );
 
-    operator AimsData_POINT3DF &();
+    operator rc_ptr_Volume_POINT3DF ();
 
     bool isIdentity() const;
 
@@ -136,14 +137,14 @@ Point3df.
         /Factory/;
   };
 
-  class Writer_FfdTransformation : Writer_AimsData_POINT3DF
+  class Writer_FfdTransformation : Writer_Volume_POINT3DF
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
 #ifndef PYAIMS_WRITER_FFDTRANSFORMATION_DEFINED
 #define PYAIMS_WRITER_FFDTRANSFORMATION_DEFINED
 typedef aims::Writer<aims::FfdTransformation> Writer_FfdTransformation;
-typedef aims::Writer<AimsData<Point3df> > Writer_AimsData_POINT3DF;
+typedef aims::Writer<carto::Volume<Point3df> > Writer_Volume_POINT3DF;
 #endif
 %End
 
