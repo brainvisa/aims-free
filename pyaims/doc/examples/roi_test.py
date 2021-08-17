@@ -41,8 +41,7 @@ roiIterator = aims.getRoiIterator(sys.argv[1])
 
 
 # Read image from sys.argv[ 2 ]
-reader = aims.Reader({'Volume': 'AimsData'})
-image = reader.read(sys.argv[2])
+image = aims.read(sys.argv[2])
 interpolator = aims.getLinearInterpolator(image)
 
 
