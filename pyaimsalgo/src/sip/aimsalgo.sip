@@ -19,7 +19,7 @@
 %Include morphomath_FLOAT.sip
 %Include morphomath_DOUBLE.sip
 %Include meshresampler.sip
-%Include meshresampler_AimsData_U32.sip
+%Include meshresampler_rc_ptr_Volume_U32.sip
 %Include meshresampler_BucketMap_VOID.sip
 %Include meshinterpoler.sip
 %Include resampler_U8.sip

@@ -63,13 +63,15 @@ Main classes
     :py:func:`write` functions. :py:class:`Finder` is
     also part of the IO system to identify files and get information about
     them.
-  - Volume_<type> and AimsData_<type>: volumes (the cartodata newer Volume
-    and the older aimsdata version). An important feature of Volumes is
+  - Volume_<type>: volumes. An important feature of Volumes is
     the link with the numpy_ arrays, so all the power of numpy_ can be
     used to work on volumes. See for instance :py:class:`Volume_FLOAT`.
     Volumes of various types can be build using the convenience factory
-    functions :py:func:`Volume` and :py:func:`AimsData`.
-  - :py:class:`carto.GenericObject`: the dynamic C++ generic object which behaves
+    function :py:func:`Volume`. Note that the older classes ̀``AimsData`` are
+    deprecated in the C++ library and have been removed from the python
+    bindings in Aims 5.1.
+  - :py:class:`carto.GenericObject`: the dynamic C++ generic object which
+    behaves
     much like a python object, and its proxy :py:class:`Object` which should
     always be used to access a :py:class:`GenericObject`
   - AimsVector_<type>_<size> for fixed-size vectors, and their aliases
@@ -271,7 +273,7 @@ class Reader(object):
 
         The map has 2 modes:
 
-        * object_type : object_type (ex: ``{'Volume' : 'AimsData'}`` )
+        * object_type : object_type (ex: ``{'Volume' : 'Volume'}`` )
         * object_type : dict( data_type : full_type )
           (ex: ``'Mesh' : { 'VOID' : 'AimsSurfaceTriangle' }`` )
 
@@ -296,7 +298,7 @@ class Reader(object):
             allocation specification.
         '''
         if typemap is None:
-            self._typemap = {  # 'Volume' : 'AimsData',
+            self._typemap = {
                 'Segments':
                 {
                     'VOID': 'AimsTimeSurface_2_VOID',
@@ -907,17 +909,6 @@ def _vol_setstate(self, state):
     numpy.asarray(self)[:] = state[1][:]
 
 
-def _aimsdata_getstate(self):
-    return self.volume().__getstate__()
-
-
-def _aimsdata_setstate(self, state):
-    vol = Volume(state[1].shape)
-    vol.copyHeaderFrom(state[0])
-    numpy.asarray(vol)[:] = state[1][:]
-    self.__init__(vol)
-
-
 # scan classes and modify some of them
 def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
@@ -1045,17 +1036,6 @@ def __fixsipclasses__(classes):
                             y.Bucket.items \
                                 = lambda self: self.__iteritemclass__(self)
 
-            if name.startswith('AimsData_'):
-                # volume item access
-                y.__getitem__ = lambda self, *args, **kwargs: \
-                    numpy.asarray(self.volume()).__getitem__(*args, **kwargs)
-                y.__setitem__ = lambda self, *args, **kwargs: \
-                    numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
-                y.__getstate__ = __fixsipclasses__._aimsdata_getstate
-                y.__setstate__ = __fixsipclasses__._aimsdata_setstate
-                y.__array__ = lambda self, dtype=None: \
-                    self.volume().__array__(dtype=dtype)
-
             if (hasattr(y, 'next')
                     and hasattr(y, '__iter__')
                     and not hasattr(y, '__next__')):
@@ -1136,8 +1116,6 @@ __fixsipclasses__.__Volume_astype__ = __Volume_astype__
 __fixsipclasses__.proxyget = proxyget
 __fixsipclasses__._vol_getstate = _vol_getstate
 __fixsipclasses__._vol_setstate = _vol_setstate
-__fixsipclasses__._aimsdata_getstate = _aimsdata_getstate
-__fixsipclasses__._aimsdata_setstate = _aimsdata_setstate
 __fixsipclasses__.__vol_pow__ = __vol_pow__
 __fixsipclasses__.__vol_ipow__ = __vol_ipow__
 __fixsipclasses__.__vol_floordiv__ = __vol_floordiv__
@@ -1147,7 +1125,7 @@ del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
 del __getitem_vec__, __setitem_vec__, __operator_overload__, __Volume_astype__
 del proxyget
-del _vol_getstate, _vol_setstate, _aimsdata_getstate, _aimsdata_setstate
+del _vol_getstate, _vol_setstate
 del __vol_pow__, __vol_ipow__, __vol_floordiv__, __vol_ifloordiv__
 
 __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
@@ -1346,7 +1324,7 @@ def getPython(self):
     if t.find('volume') >= 0:
         dt = t.split()[-1]
         try:
-            res = eval('AimsData_' + dt).fromObject(gen)
+            res = eval('Volume_' + dt).fromObject(gen)
             res.__genericobject__ = gen
             return res
         except:
@@ -1631,7 +1609,7 @@ def voxelTypeCode(data):
     name = tdata.__name__
     if name.startswith('rc_ptr_'):
         name = name[7:]
-    container_types = ['Volume_', 'AimsData_', 'BucketMap_', 'vector_', 'set_',
+    container_types = ['Volume_', 'BucketMap_', 'vector_', 'set_',
                        'list_', 'TimeTexture_', 'Texture_',
                        'ResamplerFactory_', 'RegularBinnedHistogram_',
                        'Gaussian2DSmoothing_',
@@ -1733,12 +1711,11 @@ def Volume(*args, **kwargs):
     arguments if one is identitied as a type.
     The default type is 'FLOAT'.
     Type definitions should match those accepted by typeCode().
-    Volume may also use a numpy array, or another Volume or AimsData_* as unique
+    Volume may also use a numpy array, or another Volume as unique
     argument.
 
-    Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a
-    copy of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* )
-    share the input data.
+    Note that Volume( Volume_* ) actually performs a
+    copy of the data, whereas Volume( rc_ptr_Volume_* ) share the input data.
     '''
     if len(args) == 1 and len(kwargs) == 0:
         arg = args[0]
@@ -1746,8 +1723,6 @@ def Volume(*args, **kwargs):
             return _createObject('Volume', arg, dtype=arg.dtype.type)
         elif type(arg).__name__.startswith('Volume_'):
             return type(arg)(arg)
-        elif type(arg).__name__.startswith('AimsData_'):
-            return type(arg)(arg.volume())
     return _createObject('Volume', default_dtype='FLOAT', *args, **kwargs)
 
 
@@ -1758,9 +1733,6 @@ def VolumeView(volume, position, size):
     volclass = type(volume)
     if volclass.__name__.startswith('Volume_'):
         vol = volume
-    elif volclass.__name__.startswith('AimsData_'):
-        vol = volume.volume()
-        volclass = type(volume.volume())
     elif volclass.__name__.startswith('rc_ptr_'):
         volclass = type(volume.get())
         vol = volume
@@ -1774,32 +1746,6 @@ def VolumeView(volume, position, size):
             if size[i] == 0:
                 size[i] = 1
     return volclass(vol, position, size)
-
-
-def AimsData(*args, **kwargs):
-    '''Create an instance of the older Aims volumes (AimsData_<type>) from a
-    type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
-
-    The default type is 'FLOAT'.
-
-    Type definitions should match those accepted by typeCode().
-    AimsData may also use a numpy array, or another Volume or AimsData_* as
-    unique argument.
-
-    Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a
-    copy of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* )
-    share the input data.
-    '''
-    if len(args) == 1 and len(kwargs) == 0:
-        arg = args[0]
-        if isinstance(arg, numpy.ndarray):
-            vol = _createObject('Volume', arg, dtype=arg.dtype.type)
-            return AimsData(vol)
-        elif type(arg).__name__.startswith('Volume_'):
-            return getattr(aimssip, 'AimsData_' + type(arg).__name__[7:])(arg)
-        elif type(arg).__name__.startswith('AimsData_'):
-            return type(arg)(arg.volume())
-    return _createObject('AimsData', default_dtype='FLOAT', *args, **kwargs)
 
 
 def TimeTexture(*args, **kwargs):
@@ -2012,12 +1958,8 @@ def AimsThreshold(*args, **kwargs):
     intype, outtype, args, kwargs = _parse2TypesInArgs(*args, **kwargs)
     if intype.startswith('Volume_'):
         intype = intype[7:]
-    elif intype.startswith('AimsData_'):
-        intype = intype[9:]
     if outtype.startswith('Volume_'):
         outtype = outtype[7:]
-    elif outtype.startswith('AimsData_'):
-        outtype = outtype[9:]
     return getattr(aimssip, 'AimsThreshold_' + intype + '_' + outtype)(*args)
 
 
@@ -2626,29 +2568,12 @@ used with non-contiguous X axis volumes.
 
 '''
 
-_aimsdatadoc = '''
-``AimsData_<type>`` classes correspond to the python bindings of C++
-template classes :aimsdox:`AimsData <classAimsData.html>`. They are planned to be obsolete, and
-replaced with the Volume_<type> classes. Try avoiding using them unless
-using functions that work on ``AimsData_<type>``.
-
-``AimsData`` actually contains a ``Volume``: you can retreive it using the
-``volume()`` method.
-
-Inversely, you can also build a ``Volume`` from a ``AimsData`` by passing it
-to the ``Volume`` constructor.
-
-In all cases the voxels memory block is shared.
-'''
-
 for x, y in list(locals().items()):
     if x.startswith('Volume_'):
         y.__doc__ = _volumedoc
-    elif x.startswith('AimsData_'):
-        y.__doc__ = _aimsdatadoc
 del x, y
 
-del _volumedoc, _aimsdatadoc
+del _volumedoc
 
 
 carto.AllocatorStrategy.DataAccess.__doc__ = '''

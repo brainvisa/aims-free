@@ -9,14 +9,6 @@ Download source: `volume_test.py <../examples/volume_test.py>`_
 .. literalinclude:: ../examples/volume_test.py
 
 
-Older Volumes (AimsData) manipulation and tests
------------------------------------------------
-
-Download source: `volume_test.py <../examples/aimsdata_test.py>`_
-
-.. literalinclude:: ../examples/aimsdata_test.py
-
-
 Mesh manipulation and tests
 ---------------------------
 

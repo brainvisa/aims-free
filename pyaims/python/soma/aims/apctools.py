@@ -174,8 +174,7 @@ def apcTransform(apcdict, transform, outimagevoxelsize):
     - outimagevoxelsize:
 
       - as *string*: filename for the image whose voxel size should be used
-      - as :py:class:`Volume <soma.aims.Volume_FLOAT>`,
-        :py:class:`AimsData <soma.aims.AimsData_FLOAT>` or any other object
+      - as :py:class:`Volume <soma.aims.Volume_FLOAT>` or any other object
         with a ``header()`` method: voxel_size is taken from its header
       - as *dict* or *header object*: voxel size is takes as the
         ``voxel_size`` entry of the dictionary

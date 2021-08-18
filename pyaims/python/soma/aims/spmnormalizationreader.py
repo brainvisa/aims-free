@@ -62,8 +62,7 @@ def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
       file name of the \*_sn.mat normalization file to reading
 
     - source: *filename* (*string*), or *Volume*
-      :py:class:`Volume <soma.aims.Volume_FLOAT>` or
-      :py:class:`AimsData <soma.aims.AimsData_FLOAT>`),
+      :py:class:`Volume <soma.aims.Volume_FLOAT>`,
       or *volume header* (*MappingType*)
 
       file name of the \*_sn.mat normalization file to reading

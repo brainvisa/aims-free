@@ -26,10 +26,6 @@ Neuroimaging data structures
 
   Volume classes bindings are instantiated on a number of types: U8, S16, U16, S32, U32, FLOAT, DOUBLE, RGB, RGBA. For an example of the volumes API, see the :py:class:`soma.aims.Volume_FLOAT` class.
 
-.. autofunction:: soma.aims.AimsData
-
-  AimsData classes bindings are instantiated on a number of types: U8, S16, U16, S32, U32, FLOAT, DOUBLE, RGB, RGBA. For an example of the AimsData API, see the :py:class:`soma.aims.AimsData_FLOAT` class.
-
 .. autofunction:: soma.aims.AimsTimeSurface
 
   For an example of mesh surface classes, see the :py:class:`soma.aims.AimsTimeSurface_3_VOID` class.

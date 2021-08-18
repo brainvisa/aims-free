@@ -1043,13 +1043,13 @@ typessub = {'bool':
                'PyType': 'AimsData_BOOL',
                'sipClass': 'AimsData_BOOL',
                'typeinclude': '#include <aims/data/data.h>',
-               'sipinclude': '#ifndef PYAIMS_AIMSDATA_BOOL_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_BOOL_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_BOOL_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_BOOL" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_BOOL_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_BOOL" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_BOOL_Check',
+               'testPyType': '',
             },
             'AimsData<int8_t>':
            {'typecode': 'AimsData_S8',
@@ -1067,16 +1067,13 @@ typessub = {'bool':
                'PyType': 'AimsData_S8',
                'sipClass': 'AimsData_S8',
                'typeinclude': '#include <aims/data/data.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_S8.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_S8_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_S8_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_S8_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_S8" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_S8_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_S8_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_S8_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_S8" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_S8_Check',
+               'testPyType': '',
             },
             'AimsData<uint8_t>':
            {'typecode': 'AimsData_U8',
@@ -1094,16 +1091,13 @@ typessub = {'bool':
                'PyType': 'AimsData_U8',
                'sipClass': 'AimsData_U8',
                'typeinclude': '#include <aims/data/data.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_U8.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_U8_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_U8_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_U8_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_U8" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_U8_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_U8_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_U8_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_U8" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_U8_Check',
+               'testPyType': '',
             },
             'AimsData<int16_t>':
            {'typecode': 'AimsData_S16',
@@ -1121,16 +1115,13 @@ typessub = {'bool':
                'PyType': 'AimsData_S16',
                'sipClass': 'AimsData_S16',
                'typeinclude': '#include <aims/data/data.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_S16.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_S16_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_S16_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_S16_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_S16" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_S16_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_S16_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_S16_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_S16" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_S16_Check',
+               'testPyType': '',
             },
             'AimsData<uint16_t>':
            {'typecode': 'AimsData_U16',
@@ -1148,16 +1139,13 @@ typessub = {'bool':
                'PyType': 'AimsData_U16',
                'sipClass': 'AimsData_U16',
                'typeinclude': '#include <aims/data/data.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_U16.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_U16_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_U16_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_U16_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_U16" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_U16_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_U16_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_U16_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_U16" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_U16_Check',
+               'testPyType': '',
             },
             'AimsData<int32_t>':
            {'typecode': 'AimsData_S32',
@@ -1175,16 +1163,13 @@ typessub = {'bool':
                'PyType': 'AimsData_S32',
                'sipClass': 'AimsData_S32',
                'typeinclude': '#include <aims/data/data.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_S32.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_S32_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_S32_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_S32_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_S32" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_S32_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_S32_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_S32_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_S32" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_S32_Check',
+               'testPyType': '',
             },
             'AimsData<uint32_t>':
            {'typecode': 'AimsData_U32',
@@ -1202,16 +1187,13 @@ typessub = {'bool':
                'PyType': 'AimsData_U32',
                'sipClass': 'AimsData_U32',
                'typeinclude': '#include <aims/data/data.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_U32.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_U32_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_U32_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_U32_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_U32" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_U32_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_U32_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_U32_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_U32" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_U32_Check',
+               'testPyType': '',
             },
             'AimsData<float>':
            {'typecode': 'AimsData_FLOAT',
@@ -1229,16 +1211,13 @@ typessub = {'bool':
                'PyType': 'AimsData_FLOAT',
                'sipClass': 'AimsData_FLOAT',
                'typeinclude': '#include <aims/data/data.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_FLOAT.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_FLOAT_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_FLOAT_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_FLOAT_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_FLOAT" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_FLOAT_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_FLOAT_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_FLOAT_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_FLOAT" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_FLOAT_Check',
+               'testPyType': '',
             },
             'AimsData<double>':
            {'typecode': 'AimsData_DOUBLE',
@@ -1256,16 +1235,13 @@ typessub = {'bool':
                'PyType': 'AimsData_DOUBLE',
                'sipClass': 'AimsData_DOUBLE',
                'typeinclude': '#include <aims/data/data.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_DOUBLE.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_DOUBLE_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_DOUBLE_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_DOUBLE_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_DOUBLE" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_DOUBLE_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_DOUBLE_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_DOUBLE_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_DOUBLE" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_DOUBLE_Check',
+               'testPyType': '',
             },
             'AimsData<AimsRGB>':
            {'typecode': 'AimsData_RGB',
@@ -1284,16 +1260,13 @@ typessub = {'bool':
                'sipClass': 'AimsData_RGB',
                'typeinclude':
                '#include <aims/data/data.h>\n#include <aims/rgb/rgb.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_RGB.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_RGB_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_RGB_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_RGB_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_RGB" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_RGB_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_RGB_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_RGB_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_RGB" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_RGB_Check',
+               'testPyType': '',
             },
             'AimsData<AimsRGBA>':
            {'typecode': 'AimsData_RGBA',
@@ -1312,16 +1285,13 @@ typessub = {'bool':
                'sipClass': 'AimsData_RGBA',
                'typeinclude':
                '#include <aims/data/data.h>\n#include <aims/rgb/rgb.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsData_RGBA.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_AIMSDATA_RGBA_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_RGBA_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_RGBA_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_RGBA" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_RGBA_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_RGBA_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_RGBA_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_RGBA" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_RGBA_Check',
+               'testPyType': '',
             },
             'AimsData<AimsHSV>':
            {'typecode': 'AimsData_HSV',
@@ -1340,13 +1310,13 @@ typessub = {'bool':
                'sipClass': 'AimsData_HSV',
                'typeinclude':
                '#include <aims/data/data.h>\n#include <aims/hsv/hsv.h>',
-               'sipinclude': '#ifndef PYAIMS_AIMSDATA_HSV_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_HSV_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_HSV_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_HSV" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_HSV_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_HSV_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_HSV_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_HSV" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_HSV_Check',
+               'testPyType': '',
             },
             'AimsData<cfloat>':
            {'typecode': 'AimsData_CFLOAT',
@@ -1365,13 +1335,13 @@ typessub = {'bool':
                'sipClass': 'AimsData_CFLOAT',
                'typeinclude':
                '#include <aims/data/data.h>\n#include <cartobase/type/types.h>',
-               'sipinclude': '#ifndef PYAIMS_AIMSDATA_CFLOAT_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_CFLOAT_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_CFLOAT_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_CFLOAT" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_CFLOAT_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_CFLOAT_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_CFLOAT_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_CFLOAT" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_CFLOAT_Check',
+               'testPyType': '',
             },
             'AimsData<cdouble>':
            {'typecode': 'AimsData_CDOUBLE',
@@ -1390,13 +1360,13 @@ typessub = {'bool':
                'sipClass': 'AimsData_CDOUBLE',
                'typeinclude':
                '#include <aims/data/data.h>\n#include <cartobase/type/types.h>',
-               'sipinclude': '#ifndef PYAIMS_AIMSDATA_CDOUBLE_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_CDOUBLE_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_CDOUBLE_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_CDOUBLE" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_CDOUBLE_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_CDOUBLE_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_CDOUBLE_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_CDOUBLE" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_CDOUBLE_Check',
+               'testPyType': '',
             },
             'AimsData<Point3df>':
            {'typecode': 'AimsData_POINT3DF',
@@ -1415,13 +1385,13 @@ typessub = {'bool':
                'sipClass': 'AimsData_POINT3DF',
                'typeinclude':
                '#include <aims/data/data.h>\n#include <cartobase/type/types.h>',
-               'sipinclude': '#ifndef PYAIMS_AIMSDATA_POINT3DF_CHECK_DEFINED\n'
-               '#define PYAIMS_AIMSDATA_POINT3DF_CHECK_DEFINED\n'
-               'inline int pyaimsAimsData_POINT3DF_Check( PyObject* o )\n'
-               '{ return sipCanConvertToType( o, sipFindType( "AimsData_POINT3DF" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_POINT3DF_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_POINT3DF_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_POINT3DF_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Volume_POINT3DF" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsAimsData_POINT3DF_Check',
+               'testPyType': '',
             },
 
             'carto::Volume<bool>':
@@ -1467,10 +1437,7 @@ typessub = {'bool':
                'PyType': 'Volume_S8',
                'sipClass': 'Volume_S8',
                'typeinclude': '#include <cartodata/volume/volume.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipVolume_S8.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_VOLUME_S8_CHECK_DEFINED\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_S8_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_S8_CHECK_DEFINED\n'
                'inline int pyaimsVolume_S8_Check( PyObject* o )\n'
                '{ return sipCanConvertToType( o, sipFindType( "Volume_S8" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
