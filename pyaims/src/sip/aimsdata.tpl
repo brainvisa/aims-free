@@ -34,12 +34,15 @@ inline int pyaimsVolume_%Template1typecode%_Check( PyObject* o )
 %End
 
 %ConvertToTypeCode
-  // Convert a Volume of %Template1%
+  // Convert a Volume or rc_ptr<Volume> of %Template1%
   // to a AimsData<%Template1% > on the heap.
 
   if (sipIsErr == NULL)
   {
-    return pyaimsVolume_%Template1typecode%_Check( sipPy );
+    return pyaimsVolume_%Template1typecode%_Check( sipPy )
+      || sipCanConvertToType(
+        sipPy, sipFindType( "rc_ptr_Volume_%Template1typecode%" ),
+        SIP_NOT_NONE | SIP_NO_CONVERTORS );
   }
 
   if (sipPy == Py_None)
@@ -52,10 +55,23 @@ inline int pyaimsVolume_%Template1typecode%_Check( PyObject* o )
   PyErr_Clear();
 
   int iserr = 0;
-  const sipTypeDef *td = sipFindType( "Volume_%Template1typecode%" );
-  carto::Volume<%Template1% >* vol
-    = reinterpret_cast< carto::Volume<%Template1% >* >(
-      sipConvertToType( sipPy, td, NULL, SIP_NOT_NONE, 0, &iserr ) );
+  const sipTypeDef *td = 0;
+  carto::Volume<%Template1% >* vol = 0;
+
+  if( pyaimsVolume_%Template1typecode%_Check( sipPy ) )
+  {
+    td = sipFindType( "Volume_%Template1typecode%" );
+    vol = reinterpret_cast< carto::Volume<%Template1% >* >(
+        sipConvertToType( sipPy, td, NULL, SIP_NOT_NONE, 0, &iserr ) );
+  }
+  else
+  {
+    td = sipFindType( "rc_ptr_Volume_%Template1typecode%" );
+    carto::rc_ptr<carto::Volume<%Template1% > >* rvol
+      = reinterpret_cast< carto::rc_ptr<carto::Volume<%Template1% > >* >(
+        sipConvertToType( sipPy, td, NULL, SIP_NOT_NONE, 0, &iserr ) );
+    vol = rvol->get();
+  }
 
   if( iserr )
   {
@@ -110,12 +126,15 @@ inline int pyaimsVolume_%Template1typecode%_Check( PyObject* o )
 %End
 
 %ConvertToTypeCode
-  // Convert a Volume of %Template1%
+  // Convert a Volume or rc_ptr<Volume> of %Template1%
   // to a AimsData<%Template1% > on the heap.
 
   if (sipIsErr == NULL)
   {
-    return pyaimsVolume_%Template1typecode%_Check( sipPy );
+    return pyaimsVolume_%Template1typecode%_Check( sipPy )
+      || sipCanConvertToType(
+        sipPy, sipFindType( "rc_ptr_Volume_%Template1typecode%" ),
+        SIP_NOT_NONE | SIP_NO_CONVERTORS );
   }
 
   if (sipPy == Py_None)
@@ -128,10 +147,23 @@ inline int pyaimsVolume_%Template1typecode%_Check( PyObject* o )
   PyErr_Clear();
 
   int iserr = 0;
-  const sipTypeDef *td = sipFindType( "Volume_%Template1typecode%" );
-  carto::Volume<%Template1% >* vol
-    = reinterpret_cast< carto::Volume<%Template1% >* >(
-      sipConvertToType( sipPy, td, NULL, SIP_NOT_NONE, 0, &iserr ) );
+  const sipTypeDef *td = 0;
+  carto::Volume<%Template1% >* vol = 0;
+
+  if( pyaimsVolume_%Template1typecode%_Check( sipPy ) )
+  {
+    td = sipFindType( "Volume_%Template1typecode%" );
+    vol = reinterpret_cast< carto::Volume<%Template1% >* >(
+        sipConvertToType( sipPy, td, NULL, SIP_NOT_NONE, 0, &iserr ) );
+  }
+  else
+  {
+    td = sipFindType( "rc_ptr_Volume_%Template1typecode%" );
+    carto::rc_ptr<carto::Volume<%Template1% > >* rvol
+      = reinterpret_cast< carto::rc_ptr<carto::Volume<%Template1% > >* >(
+        sipConvertToType( sipPy, td, NULL, SIP_NOT_NONE, 0, &iserr ) );
+    vol = rvol->get();
+  }
 
   if( iserr )
   {
