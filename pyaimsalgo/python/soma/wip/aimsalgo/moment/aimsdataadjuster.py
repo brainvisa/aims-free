@@ -72,7 +72,7 @@ class AimsDataAdjuster(object):
                                 sizes[1],
                                 sizes[2],
                                 aims.Point3df(1))
-        return aims.AimsData(result)
+        return result
 
     def getMaximumSize(self, volumes, factors=[]):
 

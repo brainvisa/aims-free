@@ -21,48 +21,6 @@ typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
 %End
 
 %ConvertToTypeCode
-  // check conversion from AimsData first, otherwise standardConvertToTypeCode
-  // will be fooled
-  if( sipCanConvertToInstance( sipPy, sipClass_AimsData_%Template1typecode%,
-                               SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
-  {
-    if( !sipIsErr )
-      return 1;
-    else
-    {
-      // conversion from AimsData
-      int state = 0;
-
-      AimsData<%Template1% > * obj
-        = (AimsData<%Template1% > *)
-          sipConvertToInstance( sipPy,
-            sipClass_AimsData_%Template1typecode%,
-            sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
-      if( *sipIsErr && obj )
-      {
-        sipReleaseInstance( obj, sipClass_AimsData_%Template1typecode%,
-                            state );
-        obj = 0;
-      }
-      if( !obj )
-      {
-        *sipIsErr = 0;
-        obj
-          = (AimsData<%Template1% > *)
-            sipForceConvertToInstance( sipPy,
-              sipClass_AimsData_%Template1typecode%,
-              sipTransferObj, 0, &state, sipIsErr );
-      }
-      if( obj )
-      {
-        *sipCppPtr = new carto::Volume< %Template1% >( obj->volume() );
-        sipReleaseInstance( obj, sipClass_AimsData_%Template1typecode%,
-                            state );
-        return sipGetState( sipTransferObj );
-      }
-    }
-  }
-
   return pyaims::standardConvertToTypeCode( sipPy,
     sipClass_Volume_%Template1typecode%,
     sipTransferObj, sipIsErr, sipCppPtr );

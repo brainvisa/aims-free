@@ -64,19 +64,6 @@ Volumes
 .. autoclass:: soma.aims.Volume_FLOAT
   :members:
 
-.. class:: soma.aims.AimsData_U8
-.. class:: soma.aims.AimsData_S16
-.. class:: soma.aims.AimsData_U16
-.. class:: soma.aims.AimsData_S32
-.. class:: soma.aims.AimsData_U32
-.. class:: soma.aims.AimsData_RGB
-.. class:: soma.aims.AimsData_RGBA
-.. class:: soma.aims.AimsData_DOUBLE
-.. class:: soma.aims.AimsData_CDOUBLE
-.. class:: soma.aims.AimsData_CFLOAT
-.. autoclass:: soma.aims.AimsData_FLOAT
-  :members:
-
   .. method:: clone()
 
   .. method:: dimT()

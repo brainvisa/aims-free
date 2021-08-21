@@ -410,80 +410,6 @@ others are optional and default to 0, but up to 4 coordinates may be used. In th
 Similarly, 1D or 2D volumes may be used exactly the same way.
 
 
-The older AimsData classes
-++++++++++++++++++++++++++
-
-For historical reasons, another set of classes may also represent volumes. These classes are the older API in AIMS, and tend to be obsolete. 
-But as they were used in many many routines and programs, they have still not been eradicated. 
-Many C++ routines build volumes and actually return those older classes, so we could not really hide them, and they also have python bindings. 
-These classes are `aims.AimsData_<type>`, for example :py:class:`soma.aims.AimsData_FLOAT`. 
-Converting from and to :py:class:`soma.aims.Volume_FLOAT` classes is rather simple since the newer `Volume` classes are used internally in the `AimsData` API.
-
->>> from soma import aims
->>> # create a 4D volume of signed 16-bit ints, of size 30x30x30x4
->>> vol = aims.Volume(30, 30, 30, 4, 'S16')
->>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
->>> advol = aims.AimsData(vol)
->>> # vol and advol share the same header and voxel data
->>> vol.setValue(12, 10, 10, 20, 2)
->>> print('advol.value(10, 10, 20, 2):', advol.value(10, 10, 20, 2))
-advol.value(10, 10, 20, 2): 12
->>> advol.setValue(44, 12, 12, 24, 1)
->>> print('vol.value(12, 12, 24, 1):', vol.value(12, 12, 24, 1))
-vol.value(12, 12, 24, 1): 44
-
-And, in the other direction:
-
->>> # create a 4D volume of signed 16-bit ints, of size 30x30x30x4
->>> advol = aims.AimsData(30, 30, 30, 4, 'S16')
->>> advol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
->>> vol = advol.volume()
->>> # vol and advol share the same header and voxel data
->>> vol.setValue(12, 10, 10, 20, 2)
->>> print('advol.value(10, 10, 20, 2):', advol.value(10, 10, 20, 2))
-advol.value(10, 10, 20, 2): 12
->>> advol.setValue(44, 12, 12, 24, 1)
->>> print('vol.value(12, 12, 24, 1):', vol.value(12, 12, 24, 1))
-vol.value(12, 12, 24, 1): 44
-
-`AimsData` has a bit richer API, since it includes minor processing functions that have been removed from the newer `Volume` for the sake of API simplicity and minimalism.
-
->>> # minimum / maximum
->>> print('min:', advol.minimum(), 'at', advol.minIndex())
-min: 0 at ((0, 0, 0, 0), 0)
->>> print('max:', advol.maximum(), 'at', advol.maxIndex())
-max: 44 at ((12, 12, 24, 1), 44)
-
->>> # clone copy
->>> advol2 = advol.clone()
->>> advol2.setValue(12, 4, 8, 11, 3)
->>> # now advol and advol2 have different values
->>> print('advol.value(4, 8, 11, 3):', advol.value(4, 8, 11, 3))
-advol.value(4, 8, 11, 3): 0
->>> print('advol2.value(4, 8, 11, 3):', advol2.value(4, 8, 11, 3))
-advol2.value(4, 8, 11, 3): 12
-
->>> # Border handling
->>> # Border width is th 5th parameter of AimsData constructor
->>> advol = aims.AimsData(192, 256, 128, 1, 2, 'S16')
->>> advol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
->>> advol.fill(0)
->>> advol.setValue(15, 100, 100, 60)
->>> vol = advol.volume()
->>> refvol = vol.refVolume()
->>> # the underlying refvol is 4 voxels wider in each direction, and shifted:
->>> print('refvol.value(100, 100, 60):', refvol.value(100, 100, 60))
-refvol.value(100, 100, 60): 0
->>> # ... it is 0, not 15...
->>> print('refvol.value(102, 102, 62):', refvol.value(102, 102, 62))
-refvol.value(102, 102, 62): 15
->>> # here we get 15
->>> # some algorithms require this border to exist, otherwise fail or crash...
->>> from soma import aimsalgo
->>> aimsalgo.AimsDistanceFrontPropagation(advol, 0, -1, 3, 3, 3, 10, 10)
->>> aims.write(advol, 'distance3.nii')
-
-
 Meshes
 ------
 
@@ -923,7 +849,7 @@ Interpolators help to get values in millimeters coordinates in a discrete space 
 >>> # load a functional volume
 >>> vol = aims.read('data_for_anatomist/subject01/Audio-Video_T_map.nii')
 >>> # get the position of the maximum
->>> pmax, maxval = aims.AimsData_DOUBLE(vol).maxIndex()
+>>> pmax, maxval = aims.Volume_DOUBLE(vol).maxIndex()
 >>> # set pmax in mm
 >>> vs = vol.header()['voxel_size']
 >>> pmax = [x * y for x,y in zip(pmax, vs)]

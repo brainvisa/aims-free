@@ -22,7 +22,8 @@ output data: Volume_%Template2typecode%
 #include <pyaims/data/data.h>
 #include <aims/utility/converter_rgb.h>
 #include <aims/utility/converter_hsv.h>
-typedef carto::Converter<AimsData<%Template1%>, AimsData<%Template2%> > 
+typedef carto::Converter<carto::VolumeRef<%Template1%>,
+                         carto::VolumeRef<%Template2%> >
   Converter_Volume_%Template1typecode%_Volume_%Template2typecode%;
 %End
 
@@ -83,17 +84,13 @@ public:
 
   Volume_%Template2typecode% * operator () ( const Volume_%Template1typecode% & )  const /Factory/;
 %MethodCode
-  carto::rc_ptr<Volume_%Template1typecode%>	r( const_cast<Volume_%Template1typecode% *>( a0 ) );
-  carto::rc_ptr<Volume_%Template2typecode%>	resvol;
-  {
-    AimsData_%Template1typecode% dat( r );
-    AimsData_%Template2typecode% *d = (*sipCpp)( r );
-    resvol = d->volume(); // refcount should be 2 now.
-    delete d; // refcount should be 1 now
-  }
+  carto::VolumeRef<%Template1% > r(
+    const_cast<carto::Volume<%Template1% > *>( a0 ) );
+  carto::VolumeRef<%Template2% > *res = sipCpp->operator ()( r );
   r.release();
-  sipRes = resvol.get();
-  resvol.release(); // refcount back to 0
+  sipRes = res->get();
+  res->release();
+  delete res;
 %End
 
   void convert( const Volume_%Template1typecode% &, Volume_%Template2typecode% & ) const;
@@ -114,21 +111,16 @@ Returns
 None
 %End
 %MethodCode
-  carto::rc_ptr<Volume_%Template1typecode%> r1( const_cast<Volume_%Template1typecode% *>( a0 ) );
-  carto::rc_ptr<Volume_%Template2typecode%> r2( a1 );
-  AimsData_%Template1typecode%  dat1( r1 );
-  AimsData_%Template2typecode%  dat2( r2 );
-  sipCpp->convert( dat1, dat2 );
-  r2.release();
-  r1.release();
+  carto::VolumeRef<%Template1% > r(
+    const_cast<Volume_%Template1typecode% *>( a0 ) );
+  carto::VolumeRef<%Template2% > res( a1 );
+  sipCpp->convert( r, res );
+  r.release();
+  res.release();
 %End
 
 %End
 
-  AimsData_%Template2typecode%* operator ()
-    ( const AimsData_%Template1typecode% & ) const /Factory/;
-  void convert( const AimsData_%Template1typecode% &,
-    AimsData_%Template2typecode% & ) const;
 };
 
 
@@ -139,7 +131,7 @@ class ShallowConverter_Volume_%Template1typecode%_Volume_%Template2typecode%
 #include <pyaims/data/data.h>
 #include <aims/utility/converter_rgb.h>
 #include <aims/utility/converter_hsv.h>
-typedef carto::ShallowConverter<AimsData<%Template1%>, AimsData<%Template2%> > 
+typedef carto::ShallowConverter<carto::VolumeRef<%Template1%>, carto::VolumeRef<%Template2%> >
   ShallowConverter_Volume_%Template1typecode%_Volume_%Template2typecode%;
 %End
 
@@ -151,36 +143,31 @@ public:
 
   rc_ptr_Volume_%Template2typecode% operator () ( const Volume_%Template1typecode% & ) const;
 %MethodCode
-  carto::rc_ptr<Volume_%Template1typecode%>	r( const_cast<Volume_%Template1typecode% *>( a0 ) );
-  carto::rc_ptr<Volume_%Template2typecode%>	resvol;
+  carto::VolumeRef<%Template1% >	r(
+    const_cast<carto::Volume<%Template1% > *>( a0 ) );
+  carto::VolumeRef<%Template2% >	resvol;
   {
-    AimsData_%Template1typecode% dat( r );
-    AimsData_%Template2typecode% *d = (*sipCpp)( dat );
+    carto::VolumeRef<%Template2% > *d = (*sipCpp)( r );
     /* we build a rc_ptr here to handle cases where the result is
        actually the input data */
-    sipRes = new carto::rc_ptr<Volume_%Template2typecode%>( d->volume() );
-    // refcount should be 2 now.
-    delete d; // refcount should be 1 now
+    sipRes = new carto::rc_ptr<Volume_%Template2typecode%>( *d );
+    delete d;
+    // refcount should be 1 now.
   }
   r.release();
 %End
 
   void convert( const Volume_%Template1typecode% &, Volume_%Template2typecode% & ) const;
 %MethodCode
-  carto::rc_ptr<Volume_%Template1typecode%> r1( const_cast<Volume_%Template1typecode% *>( a0 ) );
-  carto::rc_ptr<Volume_%Template2typecode%> r2( a1 );
-  AimsData_%Template1typecode%  dat1( r1 );
-  AimsData_%Template2typecode%  dat2( r2 );
-  sipCpp->convert( dat1, dat2 );
-  r2.release();
-  r1.release();
+  carto::VolumeRef<%Template1% > r(
+    const_cast<carto::Volume<%Template1% > *>( a0 ) );
+  carto::VolumeRef<%Template2% > res( a1 );
+  sipCpp->convert( r, res );
+  r.release();
+  res.release();
 %End
 
 %End
 
-  AimsData_%Template2typecode%* operator ()
-    ( const AimsData_%Template1typecode% & ) const /Factory/;
-  void convert( const AimsData_%Template1typecode% &,
-    AimsData_%Template2typecode% & ) const;
 };
 

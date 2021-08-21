@@ -88,6 +88,6 @@ Here are listed members (classes, functions) of the ``soma.aims`` module. Note t
 .. .. autoclass:: soma.aims.Quaternion
 ..     :members:
 ..
-.. .. autoclass:: soma.aims.RawConverter_BucketMap_VOID_AimsData_S16
+.. .. autoclass:: soma.aims.RawConverter_BucketMap_VOID_rc_ptr_Volume_S16
 ..     :members:
 ..

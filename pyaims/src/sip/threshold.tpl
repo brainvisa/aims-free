@@ -7,10 +7,6 @@ class AimsThreshold_%Template1typecode%_%Template2typecode%
 {
 %TypeHeaderCode
 #include <aims/utility/threshold.h>
-#if SIP_VERSION < 0x040700
-#include "sipaimssipAimsData_%Template1typecode%.h"
-#include "sipaimssipAimsData_%Template2typecode%.h"
-#endif
 
 #ifndef PYAIMSSIP_AimsThreshold_%Template1typecode%_%Template2typecode%_DEFINED
 #define PYAIMSSIP_AimsThreshold_%Template1typecode%_%Template2typecode%_DEFINED
@@ -71,18 +67,18 @@ public:
 
   Parameters
   ----------
-  volume: AimsData_%Template2typecode%
+  volume: Volume_%Template2typecode%
       input volume to be thresholded
 
   Returns
   -------
-  thresholded_vol: AimsData_%Template1typecode%
+  thresholded_vol: rc_ptr_Volume_%Template1typecode%
       thresholded volume
 %End
 
   virtual ~AimsThreshold_%Template1typecode%_%Template2typecode%();
 
-  AimsData_%Template1typecode% operator ()(const AimsData_%Template1typecode% &) /Factory/;
+  rc_ptr_Volume_%Template1typecode% operator ()(const rc_ptr_Volume_%Template1typecode% &) /Factory/;
 %Docstring
   thresholded_vol = threshold(volume)
 
@@ -91,16 +87,16 @@ public:
 
   Parameters
   ----------
-  volume: AimsData_%Template2typecode%
+  volume: Volume_%Template2typecode%
       input volume to be thresholded
 
   Returns
   -------
-  thresholded_vol: AimsData_%Template1typecode%
+  thresholded_vol: rc_ptr_Volume_%Template1typecode%
       thresholded volume
 %End
 
-  AimsData_%Template2typecode% bin(const AimsData_%Template1typecode% &) /Factory/;
+  rc_ptr_Volume_%Template2typecode% bin(const rc_ptr_Volume_%Template1typecode% &) /Factory/;
 %Docstring
   thresholded_vol = threshold.bin(volume)
 
@@ -109,12 +105,12 @@ public:
 
   Parameters
   ----------
-  volume: AimsData_%Template1typecode%
+  volume: Volume_%Template1typecode%
       input volume to be thresholded
 
   Returns
   -------
-  thresholded_vol: AimsData_%Template2typecode%
+  thresholded_vol: rc_ptr_Volume_%Template2typecode%
       thresholded volume
 %End
 };

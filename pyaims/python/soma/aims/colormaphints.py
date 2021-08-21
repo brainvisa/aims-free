@@ -90,9 +90,6 @@ def checkVolume(vol):
     tname = vol.__class__.__name__
     if tname.startswith('Volume_'):
         dtype = tname[7:]
-    elif tname.startswith('AimsData_'):
-        dtype = tname[9:]
-        vol = vol.volume()
     else:
         raise ValueError('input parameter should be a volume')
     hints['data_type'] = dtype
