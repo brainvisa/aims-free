@@ -157,7 +157,7 @@ if resample_order >= 0:
         )().getResampler(resample_order)
 resampler.setRef(B1map_volume)
 B1map = resampler.doit(transform, GRE_5deg.getSizeX(), GRE_5deg.getSizeY(),
-    GRE_5deg.getSizeZ(), GRE_vs).volume()
+    GRE_5deg.getSizeZ(), GRE_vs)
 B1map_ar = np.asarray(B1map)
 B1map_ar[B1map_ar<0] = 0
 

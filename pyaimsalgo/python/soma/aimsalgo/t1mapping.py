@@ -281,8 +281,7 @@ class BAFIData(object):
             median = getattr(aimsalgo, 'MedianSmoothing_' + data_type)
             # apply the filter on the larger image since the filter
             # actually only applies to the interior limited by the mask size
-            B1map_volume_med_border \
-                = median().doit(vol_border.refVolume()).volume()
+            B1map_volume_med_border = median().doit(vol_border.refVolume())
             # get a smaller view in the result
             B1map_volume_med = volume_type(B1map_volume_med_border,
                 volume_type.Position4Di(1, 1, 1, 0),
@@ -301,7 +300,7 @@ class BAFIData(object):
         if gaussian != 0:
             gsmooth = getattr(aimsalgo, 'Gaussian3DSmoothing_' + data_type)
             B1map_volume = gsmooth(gaussian, gaussian,
-                gaussian).doit(B1map_volume).volume()
+                                   gaussian).doit(B1map_volume)
 
         B1map_volume.copyHeaderFrom(b1map.header())
         if output_median and smooth_type == 'median':
