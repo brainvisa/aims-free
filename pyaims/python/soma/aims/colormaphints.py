@@ -61,7 +61,7 @@ def checkVolume(vol):
             hg = histo(bins)
             hg.doit(vol)
         d = hg.data()
-        h = numpy.array(d.volume(), copy=False).reshape(d.dimX())
+        h = d.np.reshape(d.shape[0])
         if dtype in ('U8', 'S8'):
             step = float(ord(hg.maxDataValue()) - ord(hg.minDataValue())) / hg.bins()
             his = (h, numpy.arange(ord(hg.minDataValue()), ord(hg.maxDataValue()) + step,

@@ -84,8 +84,10 @@ class AimsDataAdjuster(object):
                 factor = 1
 
             volume = volumes[index]
-            sizes[index] = [volume.dimX() * factor, volume.dimY() * factor,
-                            volume.dimZ() * factor, volume.dimT() * factor]
+            sizes[index] = [volume.getSizeX() * factor,
+                            volume.getSizeY() * factor,
+                            volume.getSizeZ() * factor,
+                            volume.getSizeT() * factor]
 
         maxima = sizes.max(0)
         result = 0
@@ -97,7 +99,7 @@ class AimsDataAdjuster(object):
     def getResamplingSizes(self, volume, geometricMomentSource, geometricMomentTarget):
         matrix = self.getAdjustMatrix(
             geometricMomentSource, geometricMomentTarget)
-        result = numpy.array([volume.dimX(), volume.dimY(), volume.dimZ(), 1])
+        result = numpy.array(volume.getSize()[:3] + [1])
 
         result = result * matrix
         result /= result.take((3,))[0]
