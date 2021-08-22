@@ -278,6 +278,8 @@ Accessing numpy arrays to AIMS volume voxels is supported:
 >>> import numpy
 >>> vol.fill(0)
 >>> arr = numpy.asarray(vol)
+>>> # or:
+>>> arr = vol.np
 >>> # set value 100 in a whole sub-volume
 >>> arr[60:120, 60:120, 40:80] = 100
 >>> # note that arr is a shared view to the volume contents,
@@ -298,7 +300,7 @@ Now we can re-write the thresholding example using numpy:
 
 >>> from soma import aims
 >>> vol = aims.read('data_for_anatomist/subject01/Audio-Video_T_map.nii')
->>> arr = numpy.asarray(vol)
+>>> arr = vol.np
 >>> arr[numpy.where(arr < 3.)] = 0.
 >>> vol.value(20, 20, 20)
 0.0
@@ -315,7 +317,6 @@ The distance example, using numpy, would like the following:
 >>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
 >>> vs = vol.header()['voxel_size']
 >>> pos0 = (100 * vs[0], 100 * vs[1], 60 * vs[2]) # in millimeters
->>> arr = numpy.asarray(vol)
 >>> # build arrays of coordinates for x, y, z
 >>> x, y, z = numpy.ogrid[0.:vol.getSizeX(), 0.:vol.getSizeY(), 0.:vol.getSizeZ()]
 >>> # get coords in millimeters
@@ -327,7 +328,7 @@ The distance example, using numpy, would like the following:
 >>> y -= pos0[1]
 >>> z -= pos0[2]
 >>> # get norm, using numpy arrays broadcasting
->>> arr[:, :, :, 0] = numpy.sqrt(x**2 + y**2 + z**2)
+>>> vol[:, :, :, 0] = numpy.sqrt(x**2 + y**2 + z**2)
 
 >>> vol.value(100, 100, 60)
 0
@@ -345,7 +346,7 @@ Copying volumes or volumes structure, or building from an array
 To make a deep-copy of a volume, use the copy constructor:
 
 >>> vol2 = aims.Volume(vol)
->>> vol2.setValue(12, 100, 100, 60)
+>>> vol2[100, 100, 60, 0] = 12
 >>> # now vol and vol2 have different values
 >>> print('vol.value(100, 100, 60):', vol.value(100, 100, 60))
 vol.value(100, 100, 60): 0
@@ -355,8 +356,8 @@ vol2.value(100, 100, 60): 12
 
 If you need to build another, different volume, with the same structure and size, don't forget to copy the header part:
 
->>> vol2 = aims.Volume(vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), vol.getSizeT(), 'FLOAT')
->>> vol2.header().update(vol.header())
+>>> vol2 = aims.Volume(vol.getSize(), 'FLOAT')
+>>> vol2.copyHeaderFrom(vol.header())
 >>> vol2.header()
 { 'volume_dimension' : [ 192, 256, 128, 1 ], 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
@@ -527,7 +528,7 @@ number of time steps: 2
 >>> mesh = aims.read('data_for_anatomist/subject01/subject01_Lwhite.mesh')
 >>> vert = mesh.vertex()
 >>> varr = numpy.array(vert)
->>> norm = numpy.array(mesh.normal())
+>>> norm = numpy.asarray(mesh.normal())
 >>> for i in range(1, 10):
 ...     mesh.normal(i).assign(mesh.normal())
 ...     mesh.polygon(i).assign(mesh.polygon())
@@ -593,7 +594,7 @@ But in this case we may have a spatial transformation to apply between anatomica
 (which may have been normalized, or acquired in a different referential).
 
 >>> from soma import aims
->>> import numpy
+>>> import numpy as np
 >>> mesh = aims.read('subject01_Lwhite_semiinflated_time.mesh')
 >>> vol = aims.read('data_for_anatomist/subject01/Audio-Video_T_map.nii')
 >>> # get header info from anatomical volume
@@ -614,11 +615,15 @@ True
 >>> # now go as in the previous program
 >>> tex = aims.TimeTexture('FLOAT')
 >>> for i in range(mesh.size()):
-...     t = tex[i]
-...     vert = mesh.vertex(i)
-...     t.reserve(len(vert))
-...     for p in vert:
-...         t.append(vol.value(*[int(round(x)) for x in anat2func.transform(p)]))
+...     vert = np.asarray(mesh.vertex(i))
+...     tex[i].assign(np.zeros((len(vert),), dtype=np.float32))
+...     t = np.asarray(tex[i])
+...     coords = np.ones((len(vert), len(vol.shape)), dtype=np.float32)
+...     coords[:, :3] = vert
+...     # apply matrix anat2func to coordinates array
+...     coords = np.round(coords.dot(anat2func.toMatrix().T)).astype(int)
+...     coords[:, 3] = 0
+...     t[:] = vol[tuple(coords.T)]
 >>> aims.write(tex, 'subject01_Lwhite_semiinflated_audio_video.tex')
 
 See how the functional data on the mesh changes across the depth of the cortex. 
@@ -846,10 +851,12 @@ Interpolation
 Interpolators help to get values in millimeters coordinates in a discrete space (volume grid), and may allow voxels values mixing (linear interpolation, typically).
 
 >>> from soma import aims
+>>> import numpy as np
 >>> # load a functional volume
 >>> vol = aims.read('data_for_anatomist/subject01/Audio-Video_T_map.nii')
 >>> # get the position of the maximum
->>> pmax, maxval = aims.Volume_DOUBLE(vol).maxIndex()
+>>> maxval = vol.max()
+>>> pmax = [p[0] for p in np.where(vol.np == maxval)]
 >>> # set pmax in mm
 >>> vs = vol.header()['voxel_size']
 >>> pmax = [x * y for x,y in zip(pmax, vs)]
