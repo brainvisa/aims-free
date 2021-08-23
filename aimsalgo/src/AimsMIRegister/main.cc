@@ -35,8 +35,10 @@
 #include "miProbe.h"
 #include "mutualfunc.h"
 #include "corratiofunc.h"
-#include <aims/data/data_g.h>
-#include <aims/io/io_g.h>
+#include <aims/data/data.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+#include <aims/io/finder.h>
 #include <aims/io/motionW.h>
 #include <aims/io/channelR.h>
 #include <aims/math/math_g.h>

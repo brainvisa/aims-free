@@ -37,7 +37,10 @@
 
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 /** @name Singular Value Decomposition. \\
 \\
@@ -81,15 +84,17 @@ public:
       replaced by the (m*n) matrix U. \\
       @param v is output as the (n*n) matrix V (and not its transpose!).
    */
-  AimsData< T > doit( AimsData< T >&, AimsData< T > *v = NULL );
+  carto::VolumeRef< T > doit( carto::VolumeRef< T >&,
+                              carto::VolumeRef< T > *v = NULL );
 
   /// sort the U and V matrices and the W vector in decreasing order
-  void sort( AimsData< T >&, AimsData< T >&, AimsData< T > *v = NULL );
+  void sort( carto::VolumeRef< T >&, carto::VolumeRef< T >&,
+             carto::VolumeRef< T > *v = NULL );
 
-  AimsData< T > backwardSubstitution( const AimsData< T >& U, 
-                                      const AimsData< T >& W, 
-                                      const AimsData< T >& V, 
-                                      const AimsData< T >& S );
+  carto::VolumeRef< T > backwardSubstitution( const carto::VolumeRef< T >& U,
+                                              const carto::VolumeRef< T >& W,
+                                              const carto::VolumeRef< T >& V,
+                                              const carto::VolumeRef< T >& S );
 
 private:
 

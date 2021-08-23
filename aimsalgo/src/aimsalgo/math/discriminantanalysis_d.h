@@ -120,10 +120,10 @@ DiscriminantAnalysisElement::doIt( const AimsData<T>& individuals )
   aims::AimsFastAllocationData< double > v( matVarCov.dimY(), matVarCov.dimY() );
   
   AimsSVD< double > svd2;
-  aims::AimsFastAllocationData< double > w = svd2.doit( u, &v );
+  carto::VolumeRef< double > w = svd2.doit( u.volume(), &v.volume() );
   //svd2.sort(u, w, &v) ;
 
-  AimsData<double> invW( w.dimX(), w.dimY() ) ;
+  AimsData<double> invW( w.getSizeX(), w.getSizeY() ) ;
   
   // JUST FOR SOCIETY FOR MOLECULAR IMAGING
 //   int indMax = 0 ;
@@ -131,16 +131,16 @@ DiscriminantAnalysisElement::doIt( const AimsData<T>& individuals )
 //   for( int i = 1 ; i < w.dimX() ; ++i )
 //     if( w(i, i) > w(indMax, indMax) )
 //       indMax = i ;
-  for( int i = _significantEV ; i < w.dimX() ; ++i ){
+  for( int i = _significantEV ; i < w.getSizeX() ; ++i ){
     sig2 +=  w(i, i) ;
   }
-  sig2 /= w.dimX() - _significantEV ;
+  sig2 /= w.getSizeX() - _significantEV ;
   
   std::cout << "signif EV = " << _significantEV << " sig2 = " << sig2 << std::endl ;
   
   double lnSig2 = log(sig2) ;
   double sqrtSig2 = sqrt(sig2) ;
-  int i, n = w.dimX();
+  int i, n = w.getSizeX();
   double lnDetVarCov = 0 ;
   _detVarCov = 1. ;
   for ( i = 0; i < _significantEV ; i++ )

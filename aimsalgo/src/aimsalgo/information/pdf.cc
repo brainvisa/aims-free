@@ -852,5 +852,8 @@ void  AimsKnnPdf(aims::knn::Database &db,
 
 #include <cartodata/volume/volume_d.h>
 
-template class carto::Volume< PVItem >;
+template class carto::Volume<PVItem>;
+template class carto::VolumeProxy<PVItem>;
+template class carto::VolumeRef<PVItem>;
+template class carto::Creator<carto::Volume< PVItem> >;
 

@@ -10,7 +10,7 @@
 
 
 #include "ppdf.h"
-#include <aims/data/data_g.h>
+#include <aims/data/data.h>
 #include <aims/math/mathelem.h>                              // aims::MathUtil
 #include <cmath>                                                   // std::log
 
@@ -334,3 +334,13 @@ void ParzenProbDensFunction::writeDebugJPdf( const std::string & filename ) cons
   Writer<AimsData<double> > w( filename );
   w << _jpdf;
 }
+
+// instantiate a fancy Volume class
+
+#include <cartodata/volume/volume_d.h>
+
+template class carto::Volume< AimsData<Point3dd> >;
+template class carto::VolumeProxy< AimsData<Point3dd> >;
+template class carto::VolumeRef< AimsData<Point3dd> >;
+template class carto::Creator<carto::Volume< AimsData<Point3dd> > >;
+

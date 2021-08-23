@@ -241,7 +241,7 @@ namespace aims
     AimsFastAllocationData< double > v( Ci.dimY(), Ci.dimY() );
 
     AimsSVD< double > svd2;
-    AimsFastAllocationData< double > w = svd2.doit( u, &v );
+    AimsFastAllocationData< double > w = svd2.doit( u, &v.volume() );
   
     // Set the singular values lower than threshold to zero
     double ts = s * w.maximum();

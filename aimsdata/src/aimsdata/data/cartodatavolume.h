@@ -116,13 +116,13 @@ public:
   AimsData<T> & operator = ( const AimsData<T> & );
   AimsData<T> & operator = ( const T & );
 
-  carto::rc_ptr<carto::Volume<T> > volume();
-  carto::rc_ptr<carto::Volume<T> > volume() const;
+  carto::VolumeRef<T> & volume();
+  const carto::VolumeRef<T> & volume() const;
   /// cast to Volume
-  operator carto::rc_ptr<carto::Volume<T> >();
-  operator const carto::rc_ptr<carto::Volume<T> >() const;
-  operator carto::VolumeRef<T>();
-  operator const carto::VolumeRef<T>() const;
+  operator carto::rc_ptr<carto::Volume<T> > & ();
+  operator const carto::rc_ptr<carto::Volume<T> > & () const;
+  operator carto::VolumeRef<T> & ();
+  operator const carto::VolumeRef<T> & () const;
 
   const carto::AllocatorContext & allocator() const;
   int dimX() const;
@@ -175,7 +175,7 @@ public:
   void initBorder();
   struct Private;
 
-  carto::rc_ptr<carto::Volume<T> >  _volume;
+  carto::VolumeRef<T>  _volume;
   Private *d;
 };
 
@@ -271,30 +271,30 @@ int AimsData<T>::Private::borderWidth( carto::rc_ptr<carto::Volume<T> > vol )
 // AimsData methods
 
 template <typename T>
-AimsData<T>::operator const carto::rc_ptr<carto::Volume<T> >() const
+AimsData<T>::operator const carto::rc_ptr<carto::Volume<T> > & () const
 {
-  return volume();
+  return _volume;
 }
 
 
 template <typename T>
-AimsData<T>::operator carto::rc_ptr<carto::Volume<T> >()
+AimsData<T>::operator carto::rc_ptr<carto::Volume<T> > & ()
 {
-  return volume();
+  return _volume;
 }
 
 
 template <typename T>
-AimsData<T>::operator const carto::VolumeRef<T>() const
+AimsData<T>::operator const carto::VolumeRef<T> & () const
 {
-  return carto::VolumeRef<T>( volume() );
+  return _volume;
 }
 
 
 template <typename T>
-AimsData<T>::operator carto::VolumeRef<T>()
+AimsData<T>::operator carto::VolumeRef<T> & ()
 {
-  return carto::VolumeRef<T>( volume() );
+  return _volume;
 }
 
 
@@ -540,7 +540,7 @@ AimsData<T>& AimsData<T>::operator = ( const T& val )
 
 template<typename T>
 inline
-carto::rc_ptr<carto::Volume<T> > AimsData<T>::volume()
+carto::VolumeRef<T> & AimsData<T>::volume()
 {
   return _volume;
 }
@@ -548,7 +548,7 @@ carto::rc_ptr<carto::Volume<T> > AimsData<T>::volume()
 
 template<typename T>
 inline
-carto::rc_ptr<carto::Volume<T> > AimsData<T>::volume() const
+const carto::VolumeRef<T> & AimsData<T>::volume() const
 {
   return _volume;
 }

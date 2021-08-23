@@ -46,7 +46,7 @@ AimsData< float > PerfusionSVDTruncated::doit( AimsData< float >& h, float s )
   AimsData< float > v( h.dimY(), h.dimY() );
 
   AimsSVD< float > svd;
-  AimsData< float > w = svd.doit( u, &v );
+  AimsData< float > w = svd.doit( u, &v.volume() );
 
   // Set the singular values lower than threshold to zero
   float ts = s * w.maximum();

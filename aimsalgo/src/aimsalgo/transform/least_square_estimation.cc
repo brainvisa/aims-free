@@ -117,7 +117,7 @@ AffineLeastSquareEstimation::computeMotion()
   AimsData< float > v( xx.dimY(), xx.dimY() );
 
   AimsSVD< float > svd2;
-  AimsData< float > w = svd2.doit( u, &v );
+  AimsData< float > w = svd2.doit( u, &v.volume() );
   
 
   // Set the singular values lower than threshold to zero

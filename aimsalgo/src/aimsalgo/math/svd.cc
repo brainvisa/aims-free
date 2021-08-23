@@ -36,15 +36,17 @@
 #include <aims/data/fastAllocationData.h>
 #include <aims/math/mathelem.h>
 #include <aims/math/svd.h>
+#include <cartodata/volume/volume.h>
 
 using namespace std;
+using namespace carto;
 using namespace aims;
 
 template< class T >
-AimsData< T > AimsSVD< T >::doit( AimsData< T >& u, AimsData< T > *v )
+VolumeRef< T > AimsSVD< T >::doit( VolumeRef< T >& u, VolumeRef< T > *v )
 {
-  ASSERT( u.dimZ() == 1 && u.dimT() == 1 );
-  AimsFastAllocationData< T > res;
+  ASSERT( u.getSizeZ() == 1 && u.getSizeT() == 1 );
+  VolumeRef< T > res;
 
   int i, j, k, l=0, its, jj, nm=0, flag;
   T c, f, h, s, x, y, z, maxarg, ftemp;
@@ -53,13 +55,13 @@ AimsData< T > AimsSVD< T >::doit( AimsData< T >& u, AimsData< T > *v )
   T scale = (T)0;
   T anorm = (T)0;
 
-  int n = u.dimY();
-  int m = u.dimX();
+  int n = u.getSizeY();
+  int m = u.getSizeX();
 
-  AimsFastAllocationData< T > w( n );
-  AimsFastAllocationData< T > vv( n, n );
+  VolumeRef< T > w( n, 1, 1, 1, AllocatorContext::fast() );
+  VolumeRef< T > vv( n, n, 1, 1, AllocatorContext::fast() );
 
-  AimsFastAllocationData< T > rv1( n );
+  VolumeRef< T > rv1( n, 1, 1, 1, AllocatorContext::fast() );
 
   for ( i=0; i<n; i++ )
     {
@@ -350,7 +352,7 @@ AimsData< T > AimsSVD< T >::doit( AimsData< T >& u, AimsData< T > *v )
   if ( v )  *v = vv;
 
   if ( retType == MatrixOfSingularValues )
-    res = diag( w.volume() );
+    res = diag( w );
   else
     res = w;
 
@@ -358,32 +360,33 @@ AimsData< T > AimsSVD< T >::doit( AimsData< T >& u, AimsData< T > *v )
 }
 
 
-template AimsData< float > 
-AimsSVD< float >::doit( AimsData< float >& u, AimsData< float > *v );
+template VolumeRef< float >
+AimsSVD< float >::doit( VolumeRef< float >& u, VolumeRef< float > *v );
 
 
-template AimsData< double > 
-AimsSVD< double >::doit( AimsData< double >& u, AimsData< double > *v );
+template VolumeRef< double >
+AimsSVD< double >::doit( VolumeRef< double >& u, VolumeRef< double > *v );
 
 
 template< class T >
-void AimsSVD< T >::sort( AimsData< T >& u, AimsData< T >& w, AimsData< T > *v )
+void AimsSVD< T >::sort( VolumeRef< T >& u, VolumeRef< T >& w,
+                         VolumeRef< T > *v )
 {
   int i, j, k;
   T p;
-  AimsFastAllocationData< T > ww;
+  VolumeRef< T > ww;
 
-  ASSERT( u.dimZ() == 1 && u.dimT() == 1 );
-  ASSERT( w.dimZ() == 1 && w.dimT() == 1 );
+  ASSERT( u.getSizeZ() == 1 && u.getSizeT() == 1 );
+  ASSERT( w.getSizeZ() == 1 && w.getSizeT() == 1 );
 
   if ( v )
-    ASSERT( v->dimZ() == 1 && v->dimT() == 1 );
+    ASSERT( v->getSizeZ() == 1 && v->getSizeT() == 1 );
 
-  if ( w.dimY() > 1 )  ww = undiag( w.volume() );
+  if ( w.getSizeY() > 1 )  ww = undiag( w );
   else ww = w;
 
-  int n = w.dimX();
-  int m = u.dimX();
+  int n = w.getSizeX();
+  int m = u.getSizeX();
 
   for ( i=0; i<n-1; i++ )
     {
@@ -422,35 +425,35 @@ void AimsSVD< T >::sort( AimsData< T >& u, AimsData< T >& w, AimsData< T > *v )
     }
 
   if ( retType == MatrixOfSingularValues )
-    w = diag( ww.volume() );
+    w = diag( ww );
   else
     w = ww;
 }
 
 template void
-AimsSVD< float >::sort( AimsData< float >& u, AimsData< float >&w,
-			AimsData< float > *v );
+AimsSVD< float >::sort( VolumeRef< float >& u, VolumeRef< float >&w,
+                        VolumeRef< float > *v );
 template void
-AimsSVD< double >::sort( AimsData< double >& u, AimsData< double >&w,
-			 AimsData< double > *v );
+AimsSVD< double >::sort( VolumeRef< double >& u, VolumeRef< double >&w,
+                         VolumeRef< double > *v );
 
 template< class T >
-AimsData< T > AimsSVD< T >::backwardSubstitution( const AimsData< T >& u, 
-                                                  const AimsData< T >& w, 
-                                                  const AimsData< T >& v, 
-                                                  const AimsData< T >& y )
+VolumeRef< T > AimsSVD< T >::backwardSubstitution( const VolumeRef< T >& u,
+                                                   const VolumeRef< T >& w,
+                                                   const VolumeRef< T >& v,
+                                                   const VolumeRef< T >& y )
 {
 
-  int m = u.dimX();
-  int n = u.dimY();
+  int m = u.getSizeX();
+  int n = u.getSizeY();
 
-  ASSERT( y.dimX() == m );
+  ASSERT( y.getSizeX() == m );
 
-  AimsFastAllocationData< T > x( n );
+  VolumeRef< T > x( n, 1, 1, 1, AllocatorContext::fast() );
   int i, j, jj;
   T s;
 
-  AimsFastAllocationData< T > tmp( n );
+  VolumeRef< T > tmp( n, 1, 1, 1, AllocatorContext::fast() );
 
   if ( retType == MatrixOfSingularValues ) 
     for ( j = 0; j < n; j++ )
@@ -500,15 +503,15 @@ AimsData< T > AimsSVD< T >::backwardSubstitution( const AimsData< T >& u,
 }
 
 
-template AimsData< float > 
-AimsSVD< float >::backwardSubstitution( const AimsData< float >& u, 
-                                        const AimsData< float >& w, 
-                                        const AimsData< float >& v, 
-                                        const AimsData< float >& y );
+template VolumeRef< float >
+AimsSVD< float >::backwardSubstitution( const VolumeRef< float >& u,
+                                        const VolumeRef< float >& w,
+                                        const VolumeRef< float >& v,
+                                        const VolumeRef< float >& y );
 
 
-template AimsData< double > 
-AimsSVD< double >::backwardSubstitution( const AimsData< double >& u, 
-                                         const AimsData< double >& w, 
-                                         const AimsData< double >& v, 
-                                         const AimsData< double >& y );
+template VolumeRef< double >
+AimsSVD< double >::backwardSubstitution( const VolumeRef< double >& u,
+                                         const VolumeRef< double >& w,
+                                         const VolumeRef< double >& v,
+                                         const VolumeRef< double >& y );

@@ -235,7 +235,7 @@ int main( int argc, const char *argv[] )
         u( n, m ) = coefs[ m ] * bcoef( n )[ m ];
       }
     }
-    w = svd.doit( u, &v );
+    w = svd.doit( u, &v.volume() );
     if ( verbose ) {
       cout << "SVD result" << endl
            << "u: " << u.dimX() << "x" << u.dimY() << endl

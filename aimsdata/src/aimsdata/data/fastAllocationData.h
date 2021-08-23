@@ -57,8 +57,12 @@ namespace aims {
     inline AimsFastAllocationData( const AimsData<T> &other ) :
       AimsData<T>( other ) {}
 
+    inline AimsFastAllocationData(
+      const carto::rc_ptr<carto::Volume<T> > &other ) :
+      AimsData<T>( other ) {}
+
     inline AimsFastAllocationData<T> &operator =
-      ( const AimsFastAllocationData<T> &other ) 
+      ( const AimsFastAllocationData<T> &other )
     {
       if ( &other != this ) {
         static_cast<AimsData<T> &>( *this ) = other;
@@ -75,6 +79,13 @@ namespace aims {
       return *this;
     }
 
+    inline AimsFastAllocationData<T> &operator =
+      ( const carto::rc_ptr<carto::Volume<T> > &other )
+    {
+      this->operator = ( other );
+      return *this;
+    }
+
     AimsFastAllocationData<T> & operator = ( const T &v )
     {
       AimsData<T>::operator =( v );
@@ -82,6 +93,16 @@ namespace aims {
     }
 
     inline virtual ~AimsFastAllocationData() {};
+
+    /// cast to Volume
+    operator carto::rc_ptr<carto::Volume<T> > & ()
+    { return this->AimsData<T>::operator carto::rc_ptr<carto::Volume<T> > & (); }
+    operator const carto::rc_ptr<carto::Volume<T> > & () const
+    { return this->AimsData<T>::operator const carto::rc_ptr<carto::Volume<T> > & (); }
+    operator carto::VolumeRef<T> & ()
+    { return this->AimsData<T>::operator carto::VolumeRef<T> & (); }
+    operator const carto::VolumeRef<T> & () const
+    { return this->AimsData<T>::operator const carto::VolumeRef<T> & (); }
   };
 
 

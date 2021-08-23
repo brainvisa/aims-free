@@ -47,7 +47,7 @@ AimsData< float > PerfusionSVDTikhonovGradient::doit( AimsData< float >& h,
   AimsData< float > v( h.dimY(), h.dimY() );
 
   AimsSVD< float > svd;
-  AimsData< float > w = svd.doit( u, &v );
+  AimsData< float > w = svd.doit( u, &v.volume() );
   
   float min = w.minimum();
   float max = w.maximum();
@@ -72,7 +72,7 @@ AimsData< float > PerfusionSVDTikhonovGradient::doit( AimsData< float >& h,
 
   // svd( T ) = UU.WW.VV'
   AimsData< float > vv( n, n );
-  AimsData< float > ww = svd.doit( uu, &vv );
+  AimsData< float > ww = svd.doit( uu, &vv.volume() );
 
   // T-1 = VV.WW-1.UU'
   for ( i=0; i<n; i++ ) 

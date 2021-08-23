@@ -46,7 +46,7 @@ AimsData< float > PerfusionSVDTikhonov::doit( AimsData< float >& h, float s )
   AimsData< float > v( h.dimY(), h.dimY() );
 
   AimsSVD< float > svd;
-  AimsData< float > w = svd.doit( u, &v );
+  AimsData< float > w = svd.doit( u, &v.volume() );
   
   float min = w.minimum();
   float max = w.maximum();
