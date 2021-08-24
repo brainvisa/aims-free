@@ -216,7 +216,6 @@ set( _headers
     utility/bininverse.h
     utility/boundingbox.h
     utility/channel.h
-    utility/converter_aimsdata.h
     utility/converter_g.h
     utility/converter_bucket.h
     utility/converter_hsv.h
