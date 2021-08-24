@@ -39,9 +39,9 @@
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/type/datatypetraits.h>
 #include <cartobase/type/datatypeinfo.h>
-#include <aims/data/data.h>
 #include <aims/rgb/rgb.h>
 #include <aims/hsv/hsv.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/type/converter.h>
 
 enum AimsRGBAChannel
@@ -115,19 +115,6 @@ class ChannelSelector < carto::VolumeRef<T>, carto::VolumeRef<U> >
 
       carto::VolumeRef<U> select( const carto::VolumeRef<T>& input, const uint8_t channel );
       void set( carto::VolumeRef<T>& input, const uint8_t channel, const carto::VolumeRef<U>& value );
-};
-
-
-// partial specialzation for AimsData
-template <class T, class U>
-class ChannelSelector < AimsData<T>, AimsData<U> >
-{
-    public:
-      ChannelSelector() {}
-      virtual ~ChannelSelector() {}
-
-      AimsData<U> select( const AimsData<T>& input, const uint8_t channel );
-      void set( AimsData<T>& input, const uint8_t channel, const AimsData<U>& value );
 };
 
 
@@ -341,24 +328,6 @@ ChannelSelector< carto::VolumeRef<T>,
   return output;
 }
 
-template<class T, class U> inline
-AimsData< U > ChannelSelector< AimsData< T >,
-                               AimsData< U > >::select( const AimsData< T >& input,
-                                                        const uint8_t channel )
-{
-  ChannelSelector< carto::VolumeRef<T>, carto::VolumeRef<U> > selector;
-
-  // Call volume channel selector
-  carto::VolumeRef<U> outputvolume = selector.select(input.volume(), channel);
-  AimsData<U> output = AimsData< U >( outputvolume );
-  output.setSizeXYZT( input.sizeX(),
-                      input.sizeY(),
-                      input.sizeZ(),
-                      input.sizeT() );
-
-  return output;
-}
-
 
 template<class T, class U> inline
 void ChannelSelector< carto::VolumeRef<T>,
@@ -387,23 +356,6 @@ void ChannelSelector< carto::VolumeRef<T>,
             }
         }
     }
-}
-
-template<class T, class U> inline
-void ChannelSelector< AimsData<T>,
-                      AimsData<U> >::set( AimsData<T>& input,
-                                          const uint8_t channel,
-                                          const AimsData<U>& value )
-{
-  ChannelSelector< carto::VolumeRef<T>,
-                   carto::VolumeRef<U> > selector;
-
-  carto::VolumeRef<T> volumeref(input.volume());
-  const carto::VolumeRef<U> valueref(value.volume());
-  selector.set( volumeref,
-                channel,
-                valueref );
-
 }
 
 

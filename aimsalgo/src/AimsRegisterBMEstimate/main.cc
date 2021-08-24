@@ -207,8 +207,8 @@ bool doit( Process & process, const string & fileinr, Finder & )
   if(rank==ROOT) {
 #endif
     // Chargement de l'image de reference et de l'image flottante appelee test
-    ChannelReader< AimsData<T> > rdref(fileinr);
-    ChannelReader< AimsData<T> > rdtest(abm.fileint);
+    ChannelReader< VolumeRef<T> > rdref(fileinr);
+    ChannelReader< VolumeRef<T> > rdtest(abm.fileint);
     cout << "Reading channel " << carto::toString(abm.channelref) << " of reference image" << endl << flush;
     rdref.read(ref, abm.channelref);
     cout << "Reading channel " << carto::toString(abm.channeltest) << " of test image" << endl << flush;

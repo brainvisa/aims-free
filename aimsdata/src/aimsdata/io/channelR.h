@@ -65,7 +65,7 @@ namespace {
 
 namespace aims
 {
-  /// Reads a AimsData or carto::VolumeRef, with conversion if needed
+  /// Reads a carto::VolumeRef, with conversion if needed
   template<class OUTP>
   class ChannelReader
   {

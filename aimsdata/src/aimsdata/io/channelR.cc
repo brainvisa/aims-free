@@ -31,9 +31,9 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-// we don't want to issue a warning
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
 #endif
 
 #include <aims/io/finder.h>
@@ -104,43 +104,6 @@ namespace aims
     return( true );
   }
   
-  // 
-  // Partial specialization for AimsData
-  //
-  template<class INP, class OUTP>
-  class VolumeConverter<AimsData<INP>, AimsData<OUTP> >
-  {
-  public:
-      static bool convert(Process & p, const string & fname, Finder & f);
-  };
-  
-  template<class INP, class OUTP >
-   bool VolumeConverter<AimsData<INP>, 
-                        AimsData<OUTP> >::convert(
-                                   Process & p, 
-                                   const string & fname, 
-                                   Finder & f)
-  {
-    string fmt = f.format();
-    Reader<AimsData<INP> > r( fname );
-    InternalConverter<AimsData<OUTP> > & ic
-        = (InternalConverter<AimsData<OUTP> > &) p;
-    AimsData<INP> input;
-    
-    r.read( input, ic.border, &fmt, ic.frame );
-
-    ic.data = AimsData<OUTP>(input.dimX(), 
-                             input.dimY(),
-                             input.dimZ(), 
-                             input.dimT());
-    ic.data.volume()->copyHeaderFrom(input.volume()->header());
-
-    ChannelSelector<AimsData<INP>, AimsData<OUTP> > selector;
-    ic.data = selector.select(input, ic.channel);
-
-    return( true );
-  }
-
   //
   // ChangeVoxelTypeTrait allows to keep container type while changing
   // voxel type
@@ -154,13 +117,6 @@ namespace aims
   {
   public:
       typedef VolumeRef<V> ContainerType;
-  };
-  
-  template<class T, class V>
-  class ChangeVoxelTypeTrait<AimsData<T>, V>
-  {
-  public:
-      typedef AimsData<V> ContainerType;
   };
 
   //
@@ -299,25 +255,8 @@ namespace aims
   // Instanciates classes
   #define INSTANCIATE_INTERNAL_CONVERT( INP, OUTP )    \
   template class VolumeConverter<carto::VolumeRef<INP >, \
-                                 carto::VolumeRef<OUTP > >; \
-  template class VolumeConverter<AimsData<INP >, \
-                                 AimsData<OUTP > >;
+                                 carto::VolumeRef<OUTP > >;
       
-/*
-
-  #define INSTANCIATE_EXTENDED_READER( OUTP )    \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<int8_t>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<uint8_t>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<int16_t>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<uint16_t>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<int32_t>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<uint32_t>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<float>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<double>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<AimsRGB>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<AimsRGBA>, AimsData<OUTP> ) \
-  INSTANCIATE_INTERNAL_CONVERT( AimsData<AimsHSV>, AimsData<OUTP> ) \*/
-
 
   INSTANCIATE_INTERNAL_CONVERT( int8_t, int8_t )
   INSTANCIATE_INTERNAL_CONVERT( uint8_t, int8_t )
@@ -414,16 +353,6 @@ namespace aims
   INSTANCIATE_INTERNAL_CONVERT( AimsRGB, double )
   INSTANCIATE_INTERNAL_CONVERT( AimsRGBA, double )
   INSTANCIATE_INTERNAL_CONVERT( AimsHSV, double )
-
-
-  template class ChannelReader< AimsData<int8_t> >;
-  template class ChannelReader< AimsData<uint8_t> >;
-  template class ChannelReader< AimsData<int16_t> >;
-  template class ChannelReader< AimsData<uint16_t> >;
-  template class ChannelReader< AimsData<int32_t> >;
-  template class ChannelReader< AimsData<uint32_t> >;
-  template class ChannelReader< AimsData<float> >;
-  template class ChannelReader< AimsData<double> >;
 
   template class ChannelReader< VolumeRef<int8_t> >;
   template class ChannelReader< VolumeRef<uint8_t> >;

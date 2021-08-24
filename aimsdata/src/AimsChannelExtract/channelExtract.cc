@@ -139,7 +139,7 @@ bool doit( Process & p, const string & /*filename*/, Finder & /*f*/ )
   ChannelExtractInput &t = ce.t;
   
   Reader<AimsData<INP> > reader(t.filein);
-  ChannelSelector<AimsData<INP>, AimsData<OUTP> > selector;
+  ChannelSelector<VolumeRef<INP>, VolumeRef<OUTP> > selector;
   AimsData<INP> in;
   AimsData<OUTP> out;
   Writer<AimsData< OUTP > > writer;

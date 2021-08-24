@@ -406,8 +406,8 @@ int main( int argc, const char** argv )
     AimsData<short>    test;
     AimsData<short>    ref;
     
-    ChannelReader< AimsData<short> > rdref(fileRef);
-    ChannelReader< AimsData<short> > rdtest(fileTest);
+    ChannelReader< VolumeRef<short> > rdref(fileRef);
+    ChannelReader< VolumeRef<short> > rdtest(fileTest);
     cout << "Reading channel " << carto::toString(refchannel) << " of reference image" << endl << flush;
     map<std::string, set<string> > allowedtypes;
     set<string> & voltypes = allowedtypes[ "Volume" ];
