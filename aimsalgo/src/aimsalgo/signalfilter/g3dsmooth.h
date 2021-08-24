@@ -78,7 +78,7 @@ AimsData< T > Gaussian3DSmoothing< T >::doit( const AimsData< T >& data )
   float sy = sigy / data.sizeY();
   float sz = sigz / data.sizeZ();
 
-  carto::Converter< AimsData<T>, AimsData<float> > conv;
+  carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
   AimsData< float >
     dataF( data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
   dataF.setSizeX(data.sizeX());
@@ -95,7 +95,7 @@ AimsData< T > Gaussian3DSmoothing< T >::doit( const AimsData< T >& data )
   GaussianColumns gcol;
   gcol.doit( dataF, GCoef( sy ) );
 
-  carto::Converter< AimsData<float>, AimsData<T> > conv2;
+  carto::Converter< carto::VolumeRef<float>, carto::VolumeRef<T> > conv2;
   AimsData<T>	data3( data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
   conv2.convert( dataF, data3 );
 

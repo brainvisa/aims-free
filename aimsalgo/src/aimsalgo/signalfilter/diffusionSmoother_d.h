@@ -107,7 +107,7 @@ AimsData<T> DiffusionSmoother<T>::doSmoothing(const AimsData<T> & ima,
   AimsData<float> *tmp1, *tmp2, *swap;
   AimsConvolution<float> convolution;
 
-  carto::Converter< AimsData<T>, AimsData<float> > conv;
+  carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
   AimsData< float > imaF(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT()),
       ima2(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT());
   conv.convert(ima, imaF);
@@ -144,7 +144,8 @@ AimsData<T> DiffusionSmoother<T>::doSmoothing(const AimsData<T> & ima,
   }
 
   if (verbose) std::cout << "Finished" << std::endl;
-  carto::ShallowConverter< AimsData<float>, AimsData<T> > conv2;
+  carto::ShallowConverter< carto::VolumeRef<float>, carto::VolumeRef<T> >
+    conv2;
   AimsData<T>  ima3( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
   conv2.convert( (*tmp1), ima3);
 
@@ -196,7 +197,7 @@ doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
   AimsMaskedConvolution<float> convolution(*(this->_mask),
     this->_background, this->_safe);
 
-  carto::Converter< AimsData<T>, AimsData<float> > conv;
+  carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
   AimsData< float > imaF(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT()),
       ima2(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT());
   conv.convert(ima, imaF);
@@ -214,7 +215,8 @@ doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
   }
 
   if (verbose) std::cout << "Finished" << std::endl;
-  carto::ShallowConverter< AimsData<float>, AimsData<T> > conv2;
+  carto::ShallowConverter< carto::VolumeRef<float>, carto::VolumeRef<T> >
+    conv2;
   AimsData<T>  ima3( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
   conv2.convert( (*tmp1), ima3);
 
@@ -268,7 +270,7 @@ doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
 
   AimsData<float> *tmp1, *tmp2, *swap;
 
-  carto::Converter< AimsData<T>, AimsData<float> > conv;
+  carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
   AimsData< float > imaF(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT()),
       ima2(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT());
   conv.convert(ima, imaF);
@@ -284,7 +286,8 @@ doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
   }
 
   if (verbose) std::cout << "Finished" << std::endl;
-  carto::ShallowConverter< AimsData<float>, AimsData<T> > conv2;
+  carto::ShallowConverter< carto::VolumeRef<float>, carto::VolumeRef<T> >
+    conv2;
   AimsData<T>  ima3( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
   conv2.convert( (*tmp1), ima3);
 

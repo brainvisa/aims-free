@@ -217,7 +217,8 @@ namespace aims
 
     AimsData<short> 
       datac( datat.dimX(), datat.dimY(), datat.dimZ(), datat.dimT(), 1 );
-    carto::Converter<AimsData<T>, AimsData<short> >	conv2( true );
+    carto::Converter<carto::VolumeRef<T>, carto::VolumeRef<short> >
+      conv2( true );
     conv2.convert( datat, datac );
     datac.fillBorder( -1 );
     /*

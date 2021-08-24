@@ -97,7 +97,7 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>,
         std::vector<std::pair<int, int> > vcont1, vcont2;
         std::vector<std::pair<int, int> >::iterator pt1, pt2;
 
-        carto::Converter< AimsData<T>, AimsData<float> > conv;
+        carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
         AimsData< float > imaF1( sx, sy ),imaF2( sx, sy ),
                           imaB1( sx, sy ),imaB2( sx, sy ),
                           grad1_x( sx, sy ), grad1_y( sx, sy ),
@@ -328,7 +328,7 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>,
         }
 
         std::cout << "Finished" << std::endl;
-        carto::Converter< AimsData<float>, AimsData<T> > conv2;
+        carto::Converter< carto::VolumeRef<float>, carto::VolumeRef<T> > conv2;
         AimsData<T>  out1( sx, sy), out2(sx,sy);
         conv2.convert( (*tmp1_1),out1);
         conv2.convert( (*tmp2_1),out2);

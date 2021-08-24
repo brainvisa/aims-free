@@ -76,7 +76,7 @@ GaussianJacobian< T >::doit( const AimsData< T >& data )
   float sy = sigy / data.sizeY();
   float sz = sigz / data.sizeZ();
 
-  carto::Converter< AimsData<T>, AimsData<float> > conv;
+  carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
   AimsVector< AimsData< float >, 3 > res;
 
   AimsData< float> imaF;

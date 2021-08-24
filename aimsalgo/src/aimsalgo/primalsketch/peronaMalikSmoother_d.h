@@ -61,7 +61,8 @@ namespace aims
       GaussianJacobian<float> gaussJac(_sigma, _sigma, _sigma);
       AimsVector< AimsData< float >, 3 > jaco;
 
-          carto::Converter< AimsData<T>, AimsData<float> > conv;
+          carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> >
+            conv;
           AimsData< float > imaF( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() ),
                                     ima2( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
           conv.convert( ima, imaF );
@@ -169,7 +170,8 @@ namespace aims
           tmp2=swap;
       }
           std::cout << "Finished" << std::endl;
-          carto::Converter< AimsData<float>, AimsData<T> > conv2;
+          carto::Converter< carto::VolumeRef<float>, carto::VolumeRef<T> >
+            conv2;
           AimsData<T>  ima3( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
           conv2.convert( (*tmp1), ima3);
 

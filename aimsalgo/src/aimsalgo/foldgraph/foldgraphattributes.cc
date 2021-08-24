@@ -663,7 +663,7 @@ void FoldGraphAttributes::prepareDilatedDepthMap
   _dilated_depthmap.setSizeX(th.sizeX());
   _dilated_depthmap.setSizeY(th.sizeY());
   _dilated_depthmap.setSizeZ(th.sizeZ());
-  carto::Converter< AimsData<int16_t>, AimsData<float> > conv;
+  carto::Converter< VolumeRef<int16_t>, VolumeRef<float> > conv;
   conv.convert( th, _dilated_depthmap );
   int x, y, z, t;
   for (t = 0; t < thb.dimT(); t++)
@@ -755,7 +755,7 @@ void FoldGraphAttributes::prepareDepthMap()
 
 void FoldGraphAttributes::prepareBrainDepthMap()
 {
-  carto::Converter< AimsData<int16_t>, AimsData<float> > conv;
+  carto::Converter< VolumeRef<int16_t>, VolumeRef<float> > conv;
   AimsData<int16_t> th;
   int16_t				forbidden = -111;
 

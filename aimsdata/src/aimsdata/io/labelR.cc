@@ -65,10 +65,10 @@ bool LabelReader::read( AimsData<int16_t> & vol, int border,
     {
       Reader<AimsData<byte> >		reader( _filename );
       AimsData< byte >			tmp;
-      Converter< AimsData<byte>, AimsData<int16_t> >	conv;
+      Converter< carto::VolumeRef<byte>, carto::VolumeRef<int16_t> >	conv;
       if( reader.read( tmp, border, format ) )
 	{
-	  AimsData<int16_t>	*v = conv( tmp );
+	  carto::VolumeRef<int16_t>	*v = conv( tmp );
 	  vol = *v;
 	  delete v;
 	  return true;

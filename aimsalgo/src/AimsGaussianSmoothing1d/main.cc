@@ -156,7 +156,7 @@ bool GaussFilt1d::gauss_m( AimsData<T> & data, const string & filename,
                              data.dimZ(),
                              data.dimT() );
 
-    Converter< AimsData<T>, AimsData<float> > conv;
+    Converter< VolumeRef<T>, VolumeRef<float> > conv;
     conv.convert( data, dataF );
 
     if( data.dimX() != 1 )
@@ -167,7 +167,7 @@ bool GaussFilt1d::gauss_m( AimsData<T> & data, const string & filename,
 
     }
 
-    Converter< AimsData<float>, AimsData<T> > conv2;
+    Converter< VolumeRef<float>, VolumeRef<T> > conv2;
     out = AimsData<T>( data.dimX(),
                        data.dimY(),
                        data.dimZ(),
@@ -186,7 +186,7 @@ bool GaussFilt1d::gauss_m( AimsData<T> & data, const string & filename,
                              data.dimZ(),
                              data.dimT() );
 
-    Converter< AimsData<T>, AimsData<float> > conv;
+    Converter< VolumeRef<T>, VolumeRef<float> > conv;
     conv.convert( data, dataF );
 
     if( data.dimY() != 1 )
@@ -197,7 +197,7 @@ bool GaussFilt1d::gauss_m( AimsData<T> & data, const string & filename,
 
     }
 
-    Converter< AimsData<float>, AimsData<T> > conv2;
+    Converter< VolumeRef<float>, VolumeRef<T> > conv2;
     out = AimsData<T>( data.dimX(),
                        data.dimY(),
                        data.dimZ(),
@@ -216,7 +216,7 @@ bool GaussFilt1d::gauss_m( AimsData<T> & data, const string & filename,
                              data.dimZ(),
                              data.dimT() );
 
-    Converter< AimsData<T>, AimsData<float> > conv;
+    Converter< VolumeRef<T>, VolumeRef<float> > conv;
     conv.convert( data, dataF );
 
     if( data.dimZ() != 1 )
@@ -227,7 +227,7 @@ bool GaussFilt1d::gauss_m( AimsData<T> & data, const string & filename,
 
     }
 
-    Converter< AimsData<float>, AimsData<T> > conv2;
+    Converter< VolumeRef<float>, VolumeRef<T> > conv2;
     out = AimsData<T>( data.dimX(),
                        data.dimY(),
                        data.dimZ(),

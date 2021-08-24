@@ -37,7 +37,7 @@
 #ifndef AIMS_IO_COARSER_H
 #define AIMS_IO_COARSER_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <string>
 
 namespace aims
@@ -49,8 +49,8 @@ namespace aims
   public:
     CoarseReader( const std::string & f );
     virtual ~CoarseReader();
-    virtual void read( AimsData<int16_t> & data, int border = 0, 
-		       const std::string* format = 0, int frame = -1 );
+    virtual void read( carto::VolumeRef<int16_t> & data, int border = 0,
+                       const std::string* format = 0, int frame = -1 );
 
   private:
     std::string	_filename;

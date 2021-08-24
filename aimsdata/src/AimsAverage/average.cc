@@ -295,11 +295,11 @@ template<class T>
 bool saver( Process & p, const string & filename, Finder & )
 {
   Saver				& sp = (Saver &) p;
-  ShallowConverter<AimsData<float>, AimsData<T> >	conv;
-  AimsData<T>			*d2 = conv( sp.data );
-  Writer<AimsData<T> >		w( filename );
+  ShallowConverter<VolumeRef<float>, VolumeRef<T> >	conv;
+  VolumeRef<T>			*d2 = conv( sp.data );
+  Writer<Volume<T> >		w( filename );
 
-  bool	res = w.write( *d2 );
+  bool	res = w.write( **d2 );
   delete d2;
   return( res );
 }

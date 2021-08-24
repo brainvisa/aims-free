@@ -97,9 +97,10 @@ bool doit( Process & p, const string & fname, Finder & f )
   if( !r.read( inT, 0, &format ) )
     return false;
 
-  Converter<AimsData<T>, AimsData<float> >	conv;
-  AimsData<float>		*in = conv( inT );
-  bool				res = sp.snr( *in );
+  Converter<VolumeRef<T>, VolumeRef<float> >	conv;
+  VolumeRef<float>		*in = conv( inT );
+  AimsData<float> ind( *in );
+  bool				res = sp.snr( ind );
   delete in;
   return res;
 }
