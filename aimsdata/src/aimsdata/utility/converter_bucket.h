@@ -39,7 +39,7 @@
 
 #include <cartobase/type/converter.h>
 #include <aims/bucket/bucket.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 namespace carto
 {
