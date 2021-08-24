@@ -688,6 +688,48 @@ int main( int /*argc*/, const char** /*argv*/ )
   }
 
 
+  cout << "-- Test " << ntest++ << ": fast allocation test --" << endl;
+  {
+    int    testtime = 2;
+    float  ck2;
+    long   nn = 0;
+    clock_t ck = clock();
+    float t1;
+
+    do
+    {
+      VolumeRef<int16_t> vol( 10, 10, 1, 1 );
+      ++nn;
+    }
+    while( clock() - ck < testtime * CLOCKS_PER_SEC );
+    ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
+    cout << nn << " regular allocations in " << ck2
+         << "s : " << nn / ck2 << " alloc/s" << endl;
+    t1 = nn / ck2;
+
+    nn = 0;
+    ck = clock();
+
+    do
+    {
+      VolumeRef<int16_t> vol( 10, 10, 1, 1, AllocatorContext::fast() );
+      ++nn;
+    }
+    while( clock() - ck < testtime * CLOCKS_PER_SEC );
+    ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
+    cout << nn << " fast allocations in " << ck2
+         << "s : " << nn / ck2 << " alloc/s" << endl;
+    t1 = nn / ck2 / t1;
+    cout << "speed factor gain: " << t1 << endl;
+    // t1 should be about 10, thus being under 3 means there is a problem
+    if( t1 < 3. )
+    {
+      cerr << "Fast allocation should be faster than that.\n";
+      result = EXIT_FAILURE;
+    }
+  }
+
+
   cout << "-- Test " << ntest++ << ": speed test --" << endl;
   // allocate a 16 MB volume
   VolumeRef<int16_t>	vol6( 256, 256, 128 );
