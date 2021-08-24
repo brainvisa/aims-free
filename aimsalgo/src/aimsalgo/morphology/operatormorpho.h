@@ -60,20 +60,17 @@ enum AimsMorphoMode
 /**@name Erosion*/
 //@{
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoErosion(
-  const AimsData<T> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
+carto::VolumeRef<T> AimsMorphoErosion(
+  const carto::rc_ptr<carto::Volume<T> > &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoConnectivityChamferHomotopicErosion(
-  AimsData<T> &initvol, float size, Connectivity::Type connectivity );
+carto::VolumeRef<T> AimsMorphoConnectivityChamferHomotopicErosion(
+  carto::rc_ptr<carto::Volume<T> > &initvol, float size, Connectivity::Type connectivity );
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoChamferErosion(
-  const AimsData<T> &vol,
+carto::VolumeRef<T> AimsMorphoChamferErosion(
+  const carto::rc_ptr<carto::Volume<T> > &vol,
   float size,
   int xmask=3,
   int ymask=3,
@@ -81,15 +78,13 @@ AimsData<T> AimsMorphoChamferErosion(
   float mult_fact=50 );
 
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoConnectivityChamferErosion(
-  const AimsData<T> &vol, float size, Connectivity::Type type );
+carto::VolumeRef<T> AimsMorphoConnectivityChamferErosion(
+  const carto::rc_ptr<carto::Volume<T> > &vol, float size, Connectivity::Type type );
 
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoConnectivityChamferHomotopicErosion(
-  const AimsData<T> &initvol, float size, Connectivity::Type connectivity );
+carto::VolumeRef<T> AimsMorphoConnectivityChamferHomotopicErosion(
+  const carto::rc_ptr<carto::Volume<T> > &initvol, float size, Connectivity::Type connectivity );
 
 //@}
 
@@ -97,18 +92,16 @@ AimsData<T> AimsMorphoConnectivityChamferHomotopicErosion(
 /**@name Dilation*/
 //@{
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoDilation(
-  const AimsData<T> &vol,
+carto::VolumeRef<T> AimsMorphoDilation(
+  const carto::rc_ptr<carto::Volume<T> > &vol,
   float size,
   AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoChamferDilation(
-  const AimsData<T> &vol,
+carto::VolumeRef<T> AimsMorphoChamferDilation(
+  const carto::rc_ptr<carto::Volume<T> > &vol,
   float size,
   int xmask=3,
   int ymask=3,
@@ -116,50 +109,44 @@ AimsData<T> AimsMorphoChamferDilation(
   float mult_fact=50 );
 
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoConnectivityChamferDilation(
-  const AimsData<T> &vol, float size, Connectivity::Type type);
+carto::VolumeRef<T> AimsMorphoConnectivityChamferDilation(
+  const carto::rc_ptr<carto::Volume<T> > &vol, float size, Connectivity::Type type);
 //@}
 
 
 /**@name Closing*/
 //@{
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoClosing(
-  const AimsData<T> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
+carto::VolumeRef<T> AimsMorphoClosing(
+  const carto::rc_ptr<carto::Volume<T> > &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoChamferClosing(
-  const AimsData<T> &vol,
+carto::VolumeRef<T> AimsMorphoChamferClosing(
+  const carto::rc_ptr<carto::Volume<T> > &vol,
   float size,
   int xmask=3,
   int ymask=3,
   int zmask=3,
   float mult_fact=50 );
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoConnectivityChamferClosing(
-  const AimsData<T> &vol, float size, Connectivity::Type type );
+carto::VolumeRef<T> AimsMorphoConnectivityChamferClosing(
+  const carto::rc_ptr<carto::Volume<T> > &vol, float size, Connectivity::Type type );
 //@}
 
 
 /**@name Opening*/
 //@{
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoOpening(
-  const AimsData<T> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
+carto::VolumeRef<T> AimsMorphoOpening(
+  const carto::rc_ptr<carto::Volume<T> > &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoChamferOpening(
-  const AimsData<T> &vol,
+carto::VolumeRef<T> AimsMorphoChamferOpening(
+  const carto::rc_ptr<carto::Volume<T> > &vol,
   float size,
   int xmask=3,
   int ymask=3,
@@ -167,10 +154,9 @@ AimsData<T> AimsMorphoChamferOpening(
   float mult_fact=50 );
 
 ///
-AIMSALGO_API
 template <typename T>
-AimsData<T> AimsMorphoConnectivityChamferOpening(
-  const AimsData<T> &vol, float size, Connectivity::Type type );
+carto::VolumeRef<T> AimsMorphoConnectivityChamferOpening(
+  const carto::rc_ptr<carto::Volume<T> > &vol, float size, Connectivity::Type type );
 //@}
 
 namespace aims

@@ -38,14 +38,16 @@
 
 using namespace aims;
 using namespace aims::meshdistance;
+using namespace carto;
 using namespace std;
 
 
 
 
-Texture<float> aims::meshdistance::GeodesicDepth ( const AimsSurface<3,Void> & mesh, 
-						   const AimsData <short> & vol ,
-						       float radius_close, float radius_erode)
+Texture<float> aims::meshdistance::GeodesicDepth(
+  const AimsSurface<3,Void> & mesh,
+  const AimsData <short> & vol,
+  float radius_close, float radius_erode )
 {
   
   const vector<Point3df>		& vert = mesh.vertex();
@@ -55,7 +57,7 @@ Texture<float> aims::meshdistance::GeodesicDepth ( const AimsSurface<3,Void> & m
   long    				x,y,z;
   Point3df				pos;
   float 				sizex,sizey,sizez;
-  AimsData <short>			envelop = vol.clone();
+  VolumeRef<short>		envelop = vol.clone();
       
   cout << "Closing of the mask (size: " << radius_close << ")" << endl;
   envelop = AimsMorphoClosing( envelop, radius_close );
@@ -63,24 +65,24 @@ Texture<float> aims::meshdistance::GeodesicDepth ( const AimsSurface<3,Void> & m
   cout << "Erosion of the mask (size: " << radius_erode << ")" << endl;
   envelop = AimsMorphoErosion( envelop , radius_erode );
 
-  sizex = envelop.sizeX();
-  sizey = envelop.sizeY();
-  sizez = envelop.sizeZ();
+  sizex = envelop.getVoxelSize()[0];
+  sizey = envelop.getVoxelSize()[1];
+  sizez = envelop.getVoxelSize()[2];
     
   for (i=0;i<n;++i)
-    {
-     
-      pos = vert[i];
-      x = (long) rint(pos[0] / sizex );
-      y = (long) rint(pos[1] / sizey );
-      z = (long) rint(pos[2] / sizez );
-      
-      if (envelop(x,y,z) == 0)
-	inittex.item(i) = 1;
-      else
-	inittex.item(i) = 0;
+  {
 
-    }
+    pos = vert[i];
+    x = (long) rint(pos[0] / sizex );
+    y = (long) rint(pos[1] / sizey );
+    z = (long) rint(pos[2] / sizez );
+
+    if (envelop(x,y,z) == 0)
+      inittex.item(i) = 1;
+    else
+      inittex.item(i) = 0;
+
+  }
   cout << "Compute the geodesic distance\n";
   dist = MeshDistance( mesh, inittex, true );
   

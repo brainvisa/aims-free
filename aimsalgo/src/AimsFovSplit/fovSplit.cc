@@ -564,7 +564,7 @@ int main(int argc, const char **argv)
 		  ForEach3d(data1, i, j, k)
 		    data1(i, j, k) = /*data*/imageSeuil(i, j, k );
 		  if( radius > 1. )
-		  	erode = AimsMorphoChamferErosion( data1, radius, 3,3,3,50 );
+		  	erode = AimsMorphoChamferErosion<short>( data1, radius, 3,3,3,50 );
 		  else
 		  	erode = data1 ;
 // 		  Writer<AimsData< short > > erodeWri( "/volatile/temp/Erode_" + toString(radius) 

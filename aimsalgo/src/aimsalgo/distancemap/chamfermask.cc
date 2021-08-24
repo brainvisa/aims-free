@@ -31,26 +31,35 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <cstdlib>
 #include <aims/distancemap/chamfer.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
+
+using namespace carto;
+using namespace std;
+
 
 static void AimsSplitMask (const AimsDistmapMask& in,
                            AimsDistmapMask& forward,AimsDistmapMask& backward);
-static AimsDistmapMask AimsCreateSquareMask(const AimsData<short>& vol,
+static AimsDistmapMask AimsCreateSquareMask(const rc_ptr<Volume<int16_t> >& vol,
                                             int xsize,int ysize,int zsize,
                                             float mult_factor);
-static AimsDistmapMask AimsCreateConnectivityMask(const AimsData<short>& in,
+static AimsDistmapMask AimsCreateConnectivityMask(const rc_ptr<Volume<int16_t> >& in,
 						  Connectivity::Type c);
 
 static AimsDistmapMask AimsDestroyMultiple(const AimsDistmapMask& m);
 static void AimsFillMaskEuclideanDistance(AimsDistmapMask& mask,
-                                          const AimsData<short>& vol,
+                                          const rc_ptr<Volume<int16_t> >& vol,
                                           float mult_factor);
 static void AimsChangeMaskLength(AimsDistmapMask& m,int newl);
 static void AimsFillMaskOffset(AimsDistmapMask& mask,
-                               const AimsData<short>& vol);
+                               const rc_ptr<Volume<int16_t> >& vol);
 
 
 
@@ -140,13 +149,13 @@ AimsDistmapMask& AimsDistmapMask::operator = (const AimsDistmapMask& mask)
 
 
 
-void AimsCreateAndSplitConnectivityMask ( const AimsData<short> &vol,
+void AimsCreateAndSplitConnectivityMask ( const rc_ptr<Volume<int16_t> > &vol,
 				      Connectivity::Type connectivity,
 				      AimsDistmapMask &forward,
 				      AimsDistmapMask &backward
 				      )
 {
-  ASSERT(vol.dimT()==1);
+  ASSERT( vol->getSizeT() == 1 );
   AimsDistmapMask fullmask;
 
   fullmask = AimsCreateConnectivityMask(vol, connectivity);
@@ -154,13 +163,13 @@ void AimsCreateAndSplitConnectivityMask ( const AimsData<short> &vol,
   AimsSplitMask(fullmask,forward,backward);
 }
 
-void AimsCreateAndSplitCubicMask (const AimsData<short>& vol,
+void AimsCreateAndSplitCubicMask (const rc_ptr<Volume<int16_t> >& vol,
                                   int xsize,int ysize,int zsize,
                                   AimsDistmapMask& forward,
                                   AimsDistmapMask& backward,
                                   float mult_factor)
 {
-  ASSERT(vol.dimT()==1);
+  ASSERT( vol->getSizeT() == 1 );
 
   AimsDistmapMask fullmask;
 
@@ -169,16 +178,17 @@ void AimsCreateAndSplitCubicMask (const AimsData<short>& vol,
 }
 
 /*-------------------Static---- Mask functions ------------------------------*/
-static AimsDistmapMask AimsCreateConnectivityMask(const AimsData<short>& in,
-						  Connectivity::Type c)
+static AimsDistmapMask AimsCreateConnectivityMask(
+    const rc_ptr<Volume<int16_t> >& in, Connectivity::Type c)
 {
   int                  sx=0, sy=0, sz=0, i;
   AimsDistmapMaskPoint *mpptr;
   
   
-  Connectivity vc(in.oLine(), in.oSlice(), c); 
+  Connectivity vc(in->getStrides()[1], in->getStrides()[2], c);
   // Parcours pour la détermination de la largeur du masque
-  for ( i=vc.nbNeighbors(); i--; ) {
+  for ( i=vc.nbNeighbors(); i--; )
+  {
       if (abs((int)vc.xyzOffset(i).item(0))>sx) 
 	sx = abs((int)vc.xyzOffset(i).item(0));
       if (abs((int)vc.xyzOffset(i).item(1))>sy) 
@@ -260,11 +270,12 @@ static void AimsSplitMask (const AimsDistmapMask& in,
 }
 
 
-static AimsDistmapMask AimsCreateSquareMask(const AimsData<short>& vol,
-                                            int xsize,int ysize,int zsize,
-                                            float mult_factor)
+static AimsDistmapMask AimsCreateSquareMask(
+  const rc_ptr<Volume<int16_t> >& vol,
+  int xsize,int ysize,int zsize,
+  float mult_factor)
 {
-  ASSERT(vol.dimT()==1);
+  ASSERT( vol->getSizeT() == 1 );
 
   AimsDistmapMaskPoint *mpptr, *fptr;
   int                 newl,sym[24],lsym;
@@ -410,21 +421,22 @@ static AimsDistmapMask AimsDestroyMultiple(const AimsDistmapMask& m)
 
 
 static void AimsFillMaskEuclideanDistance(AimsDistmapMask& mask,
-                                          const AimsData<short>& vol,
+                                          const rc_ptr<Volume<int16_t> >& vol,
                                           float mult_factor)
 {
-  ASSERT(vol.dimT()==1);
+  ASSERT( vol->getSizeT() == 1 );
 
   AimsDistmapMaskPoint *ptr;
   float                euclid,x,y,z;
 
   ptr = mask.FirstPoint;
+  vector<float> vs = vol->getVoxelSize();
 
   for (int l=mask.Length;l>0;l--)
   {
-    x = (float)ptr->x * vol.sizeX();
-    y = (float)ptr->y * vol.sizeY();
-    z = (float)ptr->z * vol.sizeZ();
+    x = (float)ptr->x * vs[0];
+    y = (float)ptr->y * vs[1];
+    z = (float)ptr->z * vs[2];
     euclid = (float)sqrt((double)(x*x + y*y + z*z));
     ptr->Dist = (int)((double)(mult_factor * euclid) + 0.5);
     ptr++;
@@ -453,15 +465,18 @@ static void AimsChangeMaskLength(AimsDistmapMask& m,int newl)
 
 
 static void AimsFillMaskOffset(AimsDistmapMask& mask,
-                               const AimsData<short>& vol)
+                               const rc_ptr<Volume<int16_t> >& vol)
 {
-  ASSERT(vol.dimT()==1);
+  ASSERT( vol->getSizeT() == 1 );
 
   AimsDistmapMaskPoint *ptr;
+  vector<size_t> strides = vol->getStrides();
 
   ptr = mask.FirstPoint;
   for (int l=mask.Length;l>0;l--)
-  { ptr->Offset = ptr->x + vol.oLine() * ptr->y + vol.oSlice() * ptr->z;
+  {
+    ptr->Offset = strides[0] * ptr->x + strides[1] * ptr->y
+      + strides[2] * ptr->z;
     ptr++;
   }
 }

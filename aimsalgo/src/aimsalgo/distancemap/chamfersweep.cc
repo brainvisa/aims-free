@@ -32,23 +32,29 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/distancemap/chamfer.h>
 #include <aims/connectivity/connectivity.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <iomanip>
 #include <iostream>
 
+using namespace carto;
 using namespace std;
 
-void AimsForwardSweepingWithBorder(AimsData<int16_t>& vol,
-                                   const AimsDistmapMask& mask,
-                                   int borderlevel)
+void AimsForwardSweepingWithBorder( rc_ptr<Volume<int16_t> >& vol,
+                                    const AimsDistmapMask& mask,
+                                    int borderlevel )
 {
-  ASSERT(vol.dimT()==1);
+  ASSERT( vol->getSizeT() == 1 );
 
   bool correctBorderWidth = false;
 
-  AimsData<int16_t>::iterator it;
+  int16_t *it;
   AimsDistmapMaskPoint        *mask_first_point,*maskptr;
   int                         mask_length;
   int                         xcubesize, ycubesize, zcubesize;
@@ -56,7 +62,7 @@ void AimsForwardSweepingWithBorder(AimsData<int16_t>& vol,
   int                         xmaxtest,ymaxtest,zmaxtest;
   int                         maxval,newval;
   int                         neighbor;
-  int dx = vol.dimX(), dy = vol.dimY(), dz = vol.dimZ();
+  int dx = vol->getSizeX(), dy = vol->getSizeY(), dz = vol->getSizeZ();
 
   mask_first_point = mask.FirstPoint;
   mask_length      = mask.Length;
@@ -70,38 +76,38 @@ void AimsForwardSweepingWithBorder(AimsData<int16_t>& vol,
   ycourant = 1;
   zcourant = 1;
 
-  if ((vol.borderWidth() >= mask.xCubeSize)  &&
-      (vol.borderWidth() >= mask.yCubeSize)  &&
-      (vol.borderWidth() >= mask.zCubeSize)    )
+  if ((vol->getBorders()[0] >= mask.xCubeSize)  &&
+      (vol->getBorders()[1] >= mask.yCubeSize)  &&
+      (vol->getBorders()[2] >= mask.zCubeSize) )
     correctBorderWidth = true;
 
   for (zcourant=1;zcourant<=dz;zcourant++)
   {
     for (ycourant=1;ycourant<=dy;ycourant++)
     {
-      it = &vol( 0, ycourant - 1, zcourant - 1 );
+      it = &vol->at( 0, ycourant - 1, zcourant - 1 );
 
       if (correctBorderWidth==false)
         for (xcourant=1;xcourant<=dx;xcourant++)
         {
-	  maxval =  *it;	
+          maxval =  *it;
           if (maxval!=AIMS_CHAMFER_OUTSIDE_DOMAIN) 
           {
-	    if ((xcourant<=xcubesize) || (xcourant>=xmaxtest) ||
+            if ((xcourant<=xcubesize) || (xcourant>=xmaxtest) ||
                 (ycourant<=ycubesize) || (ycourant>=ymaxtest) ||
                 (zcourant<=zcubesize) || (zcourant>=zmaxtest)  )
             {
-	      maskptr = mask_first_point;
+              maskptr = mask_first_point;
               for (int l=mask_length;l--;)
               {
-	        if (((xcourant-1) >= -maskptr->x)         &&
+                if (((xcourant-1) >= -maskptr->x)         &&
                     ((dx-xcourant) >= maskptr->x) &&
                     ((ycourant-1) >= -maskptr->y)         &&
                     ((dy-ycourant) >= maskptr->y) &&
                     ((zcourant-1) >= -maskptr->z )        &&
                     ((dz-zcourant) >= maskptr->z)   )
                 {
-		  newval = *(it + maskptr->Offset) + (maskptr->Dist);
+                  newval = *(it + maskptr->Offset) + (maskptr->Dist);
                   if (newval<maxval) maxval = newval;
                 }
                 maskptr++;
@@ -109,10 +115,10 @@ void AimsForwardSweepingWithBorder(AimsData<int16_t>& vol,
             }
             else
             {
-	      maskptr = mask_first_point;
+              maskptr = mask_first_point;
               for (int l=mask_length;l--;)
               {
-	        newval = *(it + maskptr->Offset) + (maskptr->Dist);
+                newval = *(it + maskptr->Offset) + (maskptr->Dist);
                 if (newval<maxval) maxval = newval;
                 maskptr++;
               }
@@ -124,16 +130,16 @@ void AimsForwardSweepingWithBorder(AimsData<int16_t>& vol,
       else
         for (xcourant=1;xcourant<=dx;xcourant++)
         {
-	  maxval =  *it;	
+          maxval =  *it;
           if (maxval!=AIMS_CHAMFER_OUTSIDE_DOMAIN) 
           {
-	    maskptr = mask_first_point;
+            maskptr = mask_first_point;
             for (int l=mask_length;l--;)
             {
-	      neighbor = *(it + maskptr->Offset);
+              neighbor = *(it + maskptr->Offset);
               if (neighbor!=borderlevel)
               {
-	        newval = neighbor + (maskptr->Dist);
+                newval = neighbor + (maskptr->Dist);
                 if (newval<maxval) maxval = newval;
               }
               maskptr++;
@@ -147,15 +153,15 @@ void AimsForwardSweepingWithBorder(AimsData<int16_t>& vol,
 }
 
 
-void AimsBackwardSweepingWithBorder(AimsData<int16_t>& vol,
-                                    const AimsDistmapMask &mask,
-                                    int borderlevel)
+void AimsBackwardSweepingWithBorder( rc_ptr<Volume<int16_t> >& vol,
+                                     const AimsDistmapMask &mask,
+                                     int borderlevel )
 {
-  ASSERT(vol.dimT()==1);
+  ASSERT( vol->getSizeT() == 1 );
 
   bool correctBorderWidth = false;
 
-  AimsData<int16_t>::iterator it;
+  int16_t *it;
   AimsDistmapMaskPoint        *mask_first_point,*maskptr;
   int                         mask_length;
   int                         xcubesize, ycubesize, zcubesize;
@@ -163,7 +169,7 @@ void AimsBackwardSweepingWithBorder(AimsData<int16_t>& vol,
   int                         xmaxtest,ymaxtest,zmaxtest;
   int                         maxval,newval;
   int                         neighbor;
-  int dx = vol.dimX(), dy = vol.dimY(), dz = vol.dimZ();
+  int dx = vol->getSizeX(), dy = vol->getSizeY(), dz = vol->getSizeZ();
 
   mask_first_point = mask.FirstPoint;
   mask_length      = mask.Length;
@@ -177,37 +183,37 @@ void AimsBackwardSweepingWithBorder(AimsData<int16_t>& vol,
   ycourant = 1;
   zcourant = dz;
 
-  if ((vol.borderWidth() >= mask.xCubeSize)  &&
-      (vol.borderWidth() >= mask.yCubeSize)  &&
-      (vol.borderWidth() >= mask.zCubeSize)    )
+  if ((vol->getBorders()[0] >= mask.xCubeSize)  &&
+      (vol->getBorders()[1] >= mask.yCubeSize)  &&
+      (vol->getBorders()[2] >= mask.zCubeSize) )
     correctBorderWidth = true;
 
   for (zcourant=dz;zcourant>0;zcourant--)
   {
     for (ycourant=dy;ycourant>0;ycourant--)
     {
-      it = &vol( dx - 1, ycourant - 1, zcourant - 1 );
+      it = &vol->at( dx - 1, ycourant - 1, zcourant - 1 );
       if (correctBorderWidth==false)
         for (xcourant=dx;xcourant--;)
         {
-	  maxval =  *it;	
+          maxval =  *it;
           if (maxval!=AIMS_CHAMFER_OUTSIDE_DOMAIN) 
           {
-	    if ((xcourant<=xcubesize) || (xcourant>=xmaxtest) ||
+            if ((xcourant<=xcubesize) || (xcourant>=xmaxtest) ||
                 (ycourant<=ycubesize) || (ycourant>=ymaxtest) ||
                 (zcourant<=zcubesize) || (zcourant>=zmaxtest)  )
             {
-	      maskptr = mask_first_point;
+              maskptr = mask_first_point;
               for (int l=mask_length;l--;)
               {
-	        if (((xcourant-1) >= -maskptr->x)         &&
+                if (((xcourant-1) >= -maskptr->x)         &&
                     ((dx-xcourant) >= maskptr->x) &&
                     ((ycourant-1) >= -maskptr->y)         &&
                     ((dy-ycourant) >= maskptr->y) &&
                     ((zcourant-1) >= -maskptr->z )        &&
                     ((dz-zcourant) >= maskptr->z)   )
                 {
-		  newval = *(it + maskptr->Offset) + (maskptr->Dist);
+                  newval = *(it + maskptr->Offset) + (maskptr->Dist);
                   if (newval<maxval) maxval = newval;
                 }
                 maskptr++;
@@ -215,10 +221,10 @@ void AimsBackwardSweepingWithBorder(AimsData<int16_t>& vol,
             }
             else
             {
-	      maskptr = mask_first_point;
+              maskptr = mask_first_point;
               for (int l=mask_length;l--;)
               {
-	        newval = *(it + maskptr->Offset) + (maskptr->Dist);
+                newval = *(it + maskptr->Offset) + (maskptr->Dist);
                 if (newval<maxval) maxval = newval;
                 maskptr++;
               }
@@ -231,16 +237,16 @@ void AimsBackwardSweepingWithBorder(AimsData<int16_t>& vol,
       {
         for (xcourant=dx;xcourant--;)
         {
-	  maxval = *it;	
+          maxval = *it;
           if (maxval!=AIMS_CHAMFER_OUTSIDE_DOMAIN) 
           {
-	    maskptr = mask_first_point;
+            maskptr = mask_first_point;
             for (int l=mask_length;l--;)
             {
-	      neighbor = *(it + maskptr->Offset);
+              neighbor = *(it + maskptr->Offset);
               if (neighbor!=borderlevel)
               {
-	        newval = neighbor + (maskptr->Dist);
+                newval = neighbor + (maskptr->Dist);
                 if (newval<maxval) maxval = newval;
               }
               maskptr++;

@@ -127,7 +127,7 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
 	else
 	  tempvol(x,y,z) = 0;
 	
-      tempvol = AimsMorphoClosing(tempvol,radius_close);
+      tempvol = AimsMorphoClosing<short>(tempvol,radius_close);
       ForEach3d(tempvol,x,y,z)
 	if (tempvol(x,y,z) != 0 )
 	  ccvol(x,y,z) = *ilab;
@@ -146,7 +146,7 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
 	else
 	  tempvol(x,y,z) = 0;
 	
-      tempvol = AimsMorphoClosing(tempvol,radius_close);
+      tempvol = AimsMorphoClosing<short>(tempvol,radius_close);
       ForEach3d(tempvol,x,y,z)
 	if (tempvol(x,y,z) != 0 )
 	  ccvol(x,y,z) = *ilab;

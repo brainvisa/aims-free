@@ -329,10 +329,9 @@ namespace aims
     {
       carto::VolumeRef<int16_t> dataIn2 = checkBorderWidth( dataIn );
       return AimsMorphoChamferErosion(
-        AimsData<int16_t>(
-          const_cast<carto::VolumeRef<int16_t> &>( dataIn2 ) ),
+        dataIn2,
         radius, _chamfer_mask_size[0], _chamfer_mask_size[0],
-        _chamfer_mask_size[0], _chamfer_factor ).volume();
+        _chamfer_mask_size[0], _chamfer_factor );
     }
     return 0;
   }
@@ -346,10 +345,9 @@ namespace aims
     {
       carto::VolumeRef<int16_t> dataIn2 = checkBorderWidth( dataIn );
       return AimsMorphoChamferDilation(
-        AimsData<int16_t>(
-          const_cast<carto::VolumeRef<int16_t> &>( dataIn2 ) ),
+        dataIn2,
         radius, _chamfer_mask_size[0], _chamfer_mask_size[0],
-        _chamfer_mask_size[0], _chamfer_factor ).volume();
+        _chamfer_mask_size[0], _chamfer_factor );
     }
     return 0;
   }
@@ -363,10 +361,9 @@ namespace aims
     {
       carto::VolumeRef<int16_t> dataIn2 = checkBorderWidth( dataIn );
       return AimsMorphoChamferClosing(
-        AimsData<int16_t>(
-          const_cast<carto::VolumeRef<int16_t> &>( dataIn2 ) ),
+        dataIn2,
         radius, _chamfer_mask_size[0], _chamfer_mask_size[0],
-        _chamfer_mask_size[0], _chamfer_factor ).volume();
+        _chamfer_mask_size[0], _chamfer_factor );
     }
     return 0;
   }
@@ -382,9 +379,8 @@ namespace aims
                                                                  radius );
       int size_diff = ( dataIn2->getSizeX() - dataIn->getSizeX() ) / 2;
       carto::VolumeRef<int16_t> dataOut = AimsMorphoChamferOpening(
-        AimsData<int16_t>(
-          const_cast<carto::VolumeRef<int16_t> &>( dataIn2 ) ),
-        radius, 3, 3, 3, _chamfer_factor ).volume();
+        dataIn2,
+        radius, 3, 3, 3, _chamfer_factor );
       if( size_diff != 0 )
         dataOut = reallocateVolume( dataOut, -size_diff, 1 ); // FIXME border
       return dataOut;

@@ -35,7 +35,11 @@
 #ifndef AIMS_DISTANCEMAP_CHAMFER_H
 #define AIMS_DISTANCEMAP_CHAMFER_H
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <typename T> class Volume;
+  template <typename T> class VolumeRef;
+}
 
 #include <aims/config/aimsalgo_config.h>
 #include <aims/connectivity/connectivity_g.h>
@@ -50,7 +54,7 @@ using aims::Connectivity;
 #define AIMS_CHAMFER_OUTSIDE_DOMAIN 32501
 
 
-class AIMSALGO_API AimsDistmapMaskPoint
+class AimsDistmapMaskPoint
 {
   public :
     int x;
@@ -65,7 +69,7 @@ class AIMSALGO_API AimsDistmapMaskPoint
 };
 
 
-class AIMSALGO_API AimsDistmapMask
+class AimsDistmapMask
 {
   public : 
     int xCubeSize;
@@ -85,28 +89,27 @@ class AIMSALGO_API AimsDistmapMask
 
 
 
-AIMSALGO_API 
-void AimsCreateAndSplitCubicMask (const AimsData<int16_t> &vol,
-                                  int xsize,int ysize,int zsize,
-                                  AimsDistmapMask &forward,
-                                  AimsDistmapMask &backward,
-                                  float mult_factor);
+void AimsCreateAndSplitCubicMask(
+  const carto::rc_ptr<carto::Volume<int16_t> > &vol,
+  int xsize,int ysize,int zsize,
+  AimsDistmapMask &forward,
+  AimsDistmapMask &backward,
+  float mult_factor);
 
-AIMSALGO_API 
-void AimsCreateAndSplitConnectivityMask ( const AimsData<int16_t> &vol,
-				      Connectivity::Type connectivity,
-				      AimsDistmapMask &forward,
-				      AimsDistmapMask &backward );
+void AimsCreateAndSplitConnectivityMask(
+  const carto::rc_ptr<carto::Volume<int16_t> > &vol,
+  Connectivity::Type connectivity,
+  AimsDistmapMask &forward,
+  AimsDistmapMask &backward );
 
-AIMSALGO_API 
-void AimsForwardSweepingWithBorder(AimsData<int16_t> &vol,
+void AimsForwardSweepingWithBorder(carto::rc_ptr<carto::Volume<int16_t> > &vol,
                                    const AimsDistmapMask &mask,
                                    int borderlevel);
 
-AIMSALGO_API 
-void AimsBackwardSweepingWithBorder(AimsData<int16_t> &vol,
-                                    const AimsDistmapMask &mask,
-                                    int borderlevel);
+void AimsBackwardSweepingWithBorder(
+  carto::rc_ptr<carto::Volume<int16_t> > &vol,
+  const AimsDistmapMask &mask,
+  int borderlevel);
 
 
 /**@name Chamfer distance map.
@@ -116,25 +119,27 @@ void AimsBackwardSweepingWithBorder(AimsData<int16_t> &vol,
 */
 //@{
 /// Return customized short distance map 
-AIMSALGO_API AimsData<int16_t> 
-AimsChamferDistanceMap(const AimsData<int16_t> &vol,
-				    int xmask=3,int ymask=3,int zmask=3,
-				    float mult_factor=50);
+carto::VolumeRef<int16_t>
+AimsChamferDistanceMap( const carto::rc_ptr<carto::Volume<int16_t> > &vol,
+                        int xmask=3,int ymask=3,int zmask=3,
+                        float mult_factor=50);
 /// Return Connectivity Chamfer Distance
-AIMSALGO_API AimsData<int16_t> 
-AimsConnectivityChamferDistanceMap(const AimsData<int16_t> &vol,
-				   Connectivity::Type type);
+carto::VolumeRef<int16_t>
+AimsConnectivityChamferDistanceMap(
+  const carto::rc_ptr<carto::Volume<int16_t> > &vol,
+  Connectivity::Type type);
 /// Return float Chamfer distance map
-AIMSALGO_API AimsData<float>
-AimsFloatChamferDistanceMap(const AimsData<int16_t> &vol,
-			    int side=AIMS_CHAMFER_OUTSIDE,
-			    int xsize=3,int ysize=3,int zsize=3,
-			    float mult_factor=50);
+carto::VolumeRef<float>
+AimsFloatChamferDistanceMap( const carto::rc_ptr<carto::Volume<int16_t> > &vol,
+                             int side=AIMS_CHAMFER_OUTSIDE,
+                             int xsize=3,int ysize=3,int zsize=3,
+                             float mult_factor=50);
 /// Return float distance map (minus outside object, plus inside object)
-AIMSALGO_API AimsData<float>
-AimsFloatSignedChamferDistanceMap(const AimsData<int16_t> &vol,
-				  int xsize=3,int ysize=3,int zsize=3,
-				  float mult_factor=50);
+carto::VolumeRef<float>
+AimsFloatSignedChamferDistanceMap(
+  const carto::rc_ptr<carto::Volume<int16_t> > &vol,
+  int xsize=3,int ysize=3,int zsize=3,
+  float mult_factor=50);
 //@}
 
 

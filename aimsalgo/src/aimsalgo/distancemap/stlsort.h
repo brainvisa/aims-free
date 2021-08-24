@@ -37,7 +37,6 @@
 
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
-#include <aims/data/data.h>
 #include <aims/connectivity/connectivity.h>
 #include <set>
 #include <map>

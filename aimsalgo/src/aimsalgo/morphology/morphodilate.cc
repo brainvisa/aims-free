@@ -32,25 +32,31 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/morphology/operatormorpho.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/distancemap/chamfer.h>
 #include <aims/utility/threshold.h>
 #include <aims/utility/bininverse.h>
 #include <aims/math/mathelem.h>
 
+using namespace carto;
 
 template <>
-AimsData<short> AimsMorphoConnectivityChamferDilation(
-  const AimsData<short> &vol,
+VolumeRef<short> AimsMorphoConnectivityChamferDilation(
+  const rc_ptr<Volume<short> > &vol,
   float size,
   Connectivity::Type type)
 {
-  ASSERT(vol.dimT()==1);
-  ASSERT( size>0 && size<(float)square(vol.dimX()) && 
-                    size<(float)square(vol.dimY()) );
+  ASSERT( vol->getSizeT() == 1 );
+  ASSERT( size>0 && size<(float) square(vol->getSizeX()) &&
+                    size<(float) square(vol->getSizeY()) );
 
-  AimsData<short> dilated;
+  VolumeRef<short> dilated;
   AimsBinaryInverse inversion;
   dilated = AimsConnectivityChamferDistanceMap(vol, type);
 
@@ -62,16 +68,16 @@ AimsData<short> AimsMorphoConnectivityChamferDilation(
 
 
 template <>
-AimsData<short> AimsMorphoChamferDilation( const AimsData<short> &vol,
-                                           float size,
-                                           int xmask,int ymask,int zmask,
-                                           float mult_fact)
+VolumeRef<short> AimsMorphoChamferDilation( const rc_ptr<Volume<short> > &vol,
+                                            float size,
+                                            int xmask,int ymask,int zmask,
+                                            float mult_fact)
 {
-  ASSERT(vol.dimT()==1);
-  ASSERT( size>0 && size<(float)square(vol.dimX()) && 
-                    size<(float)square(vol.dimY()) );
+  ASSERT( vol->getSizeT() == 1 );
+  ASSERT( size>0 && size<(float) square(vol->getSizeX()) &&
+                    size<(float) square(vol->getSizeY()) );
 
-  AimsData<short> dilated;
+  VolumeRef<short> dilated;
   dilated = AimsChamferDistanceMap(vol,xmask,ymask,zmask,mult_fact);
 
   AimsThreshold<short,short> thresh(AIMS_LOWER_OR_EQUAL_TO,
@@ -81,11 +87,11 @@ AimsData<short> AimsMorphoChamferDilation( const AimsData<short> &vol,
 
 
 template <>
-AimsData<short> AimsMorphoDilation( const AimsData<short> &vol,
-                                    float size, AimsMorphoMode mode)
+VolumeRef<short> AimsMorphoDilation( const rc_ptr<Volume<short> > &vol,
+                                     float size, AimsMorphoMode mode)
 {
-  ASSERT(vol.dimT()==1);
-  AimsData<short> dilate;
+  ASSERT( vol->getSizeT() == 1 );
+  VolumeRef<short> dilate;
 
   switch (mode)
   {

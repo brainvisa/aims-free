@@ -269,7 +269,7 @@ int main(int argc, const char **argv)
       {
 	AimsData<short> masqueCl(masque.dimX(),masque.dimY(),masque.dimZ(),1,1 );
 	float           radius= 5;	
-	masqueCl= AimsMorphoChamferClosing( masque, radius );	
+	masqueCl= AimsMorphoChamferClosing<short>( masque, radius );
      	
 	ForEach3d( masqueCl,x,y,z )
 	  masque(x,y,z)= masqueCl(x,y,z); 

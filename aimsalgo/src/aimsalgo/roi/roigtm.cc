@@ -359,7 +359,7 @@ AimsRoi* RoiGtm::doit( AimsRoi &roi, RoiGtm::MaskType m, AimsData<float>* smo )
 		       ibk!=ebk; ++ibk )
 		    imaTmpS( ibk->first ) = 1;
 		AimsData<short> clo;
-		clo = AimsMorphoChamferClosing( imaTmpS, _trans, 3,3,3,50 );
+		clo = AimsMorphoChamferClosing<short>( imaTmpS, _trans, 3,3,3,50 );
 		ForEach3d(clo, x, y, z)
 		  if (clo(x,y,z))
 		    mask(x, y, z, indice) = 32767 - indice;//Make label vary

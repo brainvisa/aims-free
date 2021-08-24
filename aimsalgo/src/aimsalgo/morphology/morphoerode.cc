@@ -32,28 +32,35 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/morphology/operatormorpho.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/distancemap/chamfer.h>
 #include <aims/distancemap/stlsort.h>
 #include <aims/utility/threshold.h>
 #include <aims/utility/bininverse.h>
 #include <aims/math/mathelem.h>
 #include <aims/topology/topoClassif.h>
+#include <cartobase/containers/nditerator.h>
 
+using namespace carto;
 using namespace std;
 
 template <>
-AimsData<short> AimsMorphoConnectivityChamferErosion(
-  const AimsData<short> &vol,
+VolumeRef<short> AimsMorphoConnectivityChamferErosion(
+  const rc_ptr<Volume<short> > &vol,
   float size,
   Connectivity::Type type )
 {
-  ASSERT(vol.dimT()==1);
-  ASSERT( size>0 && size<(float)square(vol.dimX()) && 
-                    size<(float)square(vol.dimY()) );
+  ASSERT( vol->getSizeT() == 1 );
+  ASSERT( size>0 && size<(float) square(vol->getSizeX()) &&
+                    size<(float) square(vol->getSizeY()) );
 
-  AimsData<short> eroded;
+  VolumeRef<short> eroded;
   AimsBinaryInverse inversion;
   eroded = AimsConnectivityChamferDistanceMap(inversion(vol), type);
 
@@ -65,16 +72,16 @@ AimsData<short> AimsMorphoConnectivityChamferErosion(
 
 
 template <>
-AimsData<short> AimsMorphoChamferErosion( const AimsData<short> &vol,
-                                          float size,
-                                          int xmask,int ymask,int zmask,
-                                          float mult_fact )
+VolumeRef<short> AimsMorphoChamferErosion( const rc_ptr<Volume<short> > &vol,
+                                           float size,
+                                           int xmask,int ymask,int zmask,
+                                           float mult_fact )
 {
-  ASSERT(vol.dimT()==1);
-  ASSERT( size>0 && size<(float)square(vol.dimX()) && 
-                    size<(float)square(vol.dimY()) );
+  ASSERT( vol->getSizeT() == 1 );
+  ASSERT( size>0 && size<(float) square(vol->getSizeX()) &&
+                    size<(float) square(vol->getSizeY()) );
 
-  AimsData<short> eroded;
+  VolumeRef<short> eroded;
   AimsBinaryInverse inversion;
   eroded = AimsChamferDistanceMap(inversion(vol),
                                   xmask,ymask,zmask,mult_fact);
@@ -86,8 +93,8 @@ AimsData<short> AimsMorphoChamferErosion( const AimsData<short> &vol,
 
 
 template <>
-AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
-  const AimsData<short> &initvol,float size,
+VolumeRef<short> AimsMorphoConnectivityChamferHomotopicErosion(
+  const rc_ptr<Volume<short> > &initvol, float size,
   Connectivity::Type connectivity )
 {
   
@@ -96,18 +103,31 @@ AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
   multimap<short,Point3d>::reverse_iterator id,ed;
   Point3d		             pos,newpos;
   unsigned n;
-  int dimX = initvol.dimX(), dimY = initvol.dimY(), dimZ = initvol.dimZ();
-  AimsData<short>                     	distance(dimX,dimY,dimZ);
-  AimsData<short>                     	eroded = initvol.clone();
-  AimsData<short>                     	immortal(dimX,dimY,dimZ); //0 : still alive , 1: immortal
- Connectivity                       cd( eroded.oLine(), eroded.oSlice(), connectivity );
+  int dimX = initvol->getSizeX(), dimY = initvol->getSizeY(),
+    dimZ = initvol->getSizeZ();
+  VolumeRef<short> distance(dimX,dimY,dimZ);
+  VolumeRef<short> eroded( new Volume<short>( *initvol ) );
+  VolumeRef<short> immortal(dimX,dimY,dimZ); //0 : still alive , 1: immortal
+  Connectivity cd( eroded.getStrides()[1], eroded.getStrides()[2],
+                   connectivity );
   //Def initial immortal point map
-  ForEach3d(initvol,x,y,z)
-    if (initvol(x,y,z) > 0)
-      eroded(x,y,z) = 1;
-    else
-       eroded(x,y,z) = 0;
- 
+  short *p, *pp;
+  line_NDIterator<short> it( &initvol->at( 0 ), initvol->getSize(),
+                             initvol->getStrides() );
+  for( ; !it.ended(); ++it )
+  {
+    p = &*it;
+    y = it.position()[1];
+    z = it.position()[2];
+    for( pp=p + it.line_length(), x=0; p!=pp; it.inc_line_ptr( p ), ++x )
+    {
+      if( *p > 0 )
+        eroded(x,y,z) = 1;
+      else
+        eroded(x,y,z) = 0;
+    }
+  }
+
   TopologicalClassification<short> TC(eroded);
 
   //Distance map from the outside
@@ -116,26 +136,36 @@ AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
 
 
   // Front init
-  ForEach3d(eroded,x,y,z)
-    if (eroded(x,y,z) == 1)
+  line_NDIterator<short> ite( &eroded->at( 0 ), eroded->getSize(),
+                              eroded->getStrides() );
+  for( ; !ite.ended(); ++ite )
+  {
+    p = &*ite;
+    y = ite.position()[1];
+    z = ite.position()[2];
+    for( pp=p + ite.line_length(), x=0; p!=pp; ite.inc_line_ptr( p ), ++x )
+    {
+      if( *p == 1 )
       {
-	pos = Point3d(x,y,z);
-	for ( n = 0; n < (unsigned) cd.nbNeighbors(); n++ )
-	  {
-	    newpos = pos + cd.xyzOffset( n );
-	    if ( newpos[0] >= 0   &&
-		 newpos[0] < dimX &&
-		 newpos[1] >= 0   &&
-		 newpos[1] < dimY &&
-		 newpos[2] >= 0   &&
-		 newpos[2] < dimZ &&
-		 (eroded(newpos) == 0 ) )
-	      {
-		front.insert(pair<short,Point3d>(distance(pos), pos));
-		break;
-	      }
-	  }
+        pos = Point3d(x,y,z);
+        for ( n = 0; n < (unsigned) cd.nbNeighbors(); n++ )
+        {
+          newpos = pos + cd.xyzOffset( n );
+          if ( newpos[0] >= 0 &&
+               newpos[0] < dimX &&
+               newpos[1] >= 0   &&
+               newpos[1] < dimY &&
+               newpos[2] >= 0   &&
+               newpos[2] < dimZ &&
+               (eroded(newpos) == 0 ) )
+          {
+            front.insert(pair<short,Point3d>(distance(pos), pos));
+            break;
+          }
+        }
       }
+    }
+  }
 
   immortal = 0;
   for (id=front.rbegin(), ed=front.rend();id != ed; ++id)
@@ -148,69 +178,80 @@ AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
   {
      
     inc = front.size();
-    for (id=front.rbegin(), ed=front.rend();id != ed; ++id)
-	if ( immortal(id->second) == 0 )
-	  {
-	    pos = id->second;
-	    eroded(pos) = 0; 
-	    TopologicalClassification<short> TCt(eroded);
-	    if (!TCt.isSimplePoint(pos,1))
-	      {
-		//upgrade immortal map
-		immortal(pos) = 1;
-		for ( n = 0; n < (unsigned) cd.nbNeighbors(); n++ )
-		  {
-		    newpos = pos + cd.xyzOffset( n );
-		    if ( newpos[0] >= 0   &&
-			 newpos[0] < dimX &&
-			 newpos[1] >= 0   &&
-			 newpos[1] < dimY &&
-			 newpos[2] >= 0   &&
-			 newpos[2] < dimZ &&
-			 eroded(newpos) == 1 && !TCt.isSimplePoint(newpos,1) )
-		      {
-			immortal(newpos) = 1;
-			break;
-		      }
-		  }
-	      } 
-	  }
-      
-      //upgrade front 
-      front.clear();
-      ForEach3d(eroded,x,y,z)
-	if (eroded(x,y,z) == 1  && immortal(x,y,z) == 0 && distance(x,y,z) <= size)
-	  {
-	    pos = Point3d(x,y,z);
-	    for ( n = 0; n < (unsigned) cd.nbNeighbors(); n++ )
-	      {
-		newpos = pos + cd.xyzOffset( n );
-		if ( newpos[0] >= 0   &&
-		     newpos[0] < dimX &&
-		     newpos[1] >= 0   &&
-		     newpos[1] < dimY &&
-		     newpos[2] >= 0   &&
-		     newpos[2] < dimZ &&
-		     (eroded(newpos) == 0) )
-		  {
-		    front.insert(pair<short,Point3d>(distance(pos), pos));
-		    break;
-		  }
-	      }
-	  }
+    for( id=front.rbegin(), ed=front.rend();id != ed; ++id )
+    if( immortal(id->second) == 0 )
+    {
+      pos = id->second;
+      eroded(pos) = 0;
+      TopologicalClassification<short> TCt(eroded);
+      if (!TCt.isSimplePoint(pos,1))
+      {
+        //upgrade immortal map
+        immortal(pos) = 1;
+        for( n = 0; n < (unsigned) cd.nbNeighbors(); n++ )
+        {
+          newpos = pos + cd.xyzOffset( n );
+          if ( newpos[0] >= 0   &&
+               newpos[0] < dimX &&
+               newpos[1] >= 0   &&
+               newpos[1] < dimY &&
+               newpos[2] >= 0   &&
+               newpos[2] < dimZ &&
+               eroded(newpos) == 1 && !TCt.isSimplePoint(newpos,1) )
+          {
+            immortal(newpos) = 1;
+            break;
+          }
+        }
+      }
     }
+      
+    //upgrade front
+    front.clear();
+    line_NDIterator<short> ite( &eroded->at( 0 ), eroded->getSize(),
+                                eroded->getStrides() );
+    for( ; !ite.ended(); ++ite )
+    {
+      p = &*ite;
+      y = ite.position()[1];
+      z = ite.position()[2];
+      for( pp=p + ite.line_length(), x=0; p!=pp; ite.inc_line_ptr( p ), ++x )
+      {
+        if( *p == 1 && immortal(x,y,z) == 0 && distance(x,y,z) <= size )
+        {
+          pos = Point3d(x,y,z);
+          for( n = 0; n < (unsigned) cd.nbNeighbors(); n++ )
+          {
+            newpos = pos + cd.xyzOffset( n );
+            if ( newpos[0] >= 0   &&
+                 newpos[0] < dimX &&
+                 newpos[1] >= 0   &&
+                 newpos[1] < dimY &&
+                 newpos[2] >= 0   &&
+                 newpos[2] < dimZ &&
+                 (eroded(newpos) == 0) )
+            {
+              front.insert(pair<short,Point3d>(distance(pos), pos));
+              break;
+            }
+          }
+        }
+      }
+    }
+
+  }
   
   return(eroded);
-  
+
 }
 
 
 template <>
-AimsData<short> AimsMorphoErosion( const AimsData<short> &vol,
-                                   float size, AimsMorphoMode mode )
+VolumeRef<short> AimsMorphoErosion( const rc_ptr<Volume<short> > &vol,
+                                    float size, AimsMorphoMode mode )
 {
-  ASSERT(vol.dimT()==1);
-  AimsData<short> erosion;
+  ASSERT( vol->getSizeT() == 1 );
+  VolumeRef<short> erosion;
 
   switch (mode)
   {

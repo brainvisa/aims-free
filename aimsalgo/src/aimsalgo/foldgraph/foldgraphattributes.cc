@@ -657,7 +657,7 @@ void FoldGraphAttributes::prepareDilatedDepthMap
   thb = thr2(th);
   thb = AimsData<int16_t>(thb, 1);
   thb.fillBorder(-1);
-  thb = AimsMorphoDilation(thb, 1.);
+  thb = AimsMorphoDilation<short>(thb, 1.);
   _dilated_depthmap = AimsData<float>( th.dimX(), th.dimY(),
                                        th.dimZ(), th.dimT() );
   _dilated_depthmap.setSizeX(th.sizeX());

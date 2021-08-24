@@ -32,32 +32,37 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/morphology/operatormorpho.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/distancemap/chamfer.h>
 #include <aims/utility/threshold.h>
 #include <aims/utility/bininverse.h>
 #include <aims/math/mathelem.h>
 
-
+using namespace carto;
 
 template <>
-AimsData<short> AimsMorphoConnectivityChamferClosing(
-  const AimsData<short> &vol,
+VolumeRef<short> AimsMorphoConnectivityChamferClosing(
+  const rc_ptr<Volume<short> > &vol,
   float size,
   Connectivity::Type type )
 {
-  ASSERT(vol.dimT()==1);
-  ASSERT( size>0 && size<(float)square(vol.dimX()) && 
-                    size<(float)square(vol.dimY()) );
+  ASSERT( vol->getSizeT() == 1 );
+  ASSERT( size>0 && size<(float) square(vol->getSizeX()) &&
+                    size<(float) square(vol->getSizeY()) );
 
-  AimsData<short> dilated;
+  VolumeRef<short> dilated;
   dilated = AimsConnectivityChamferDistanceMap(vol,type);
 
   AimsThreshold<short,short> thresh1(AIMS_GREATER_THAN, (short)(size+0.01));
   dilated = thresh1.bin(dilated);
 
-  AimsData<short> eroded;
+  VolumeRef<short> eroded;
   eroded = AimsConnectivityChamferDistanceMap(dilated, type);
 
   AimsThreshold<short,short> thresh2(AIMS_GREATER_THAN, (short)(size+0.01));
@@ -66,23 +71,23 @@ AimsData<short> AimsMorphoConnectivityChamferClosing(
 
 
 template <>
-AimsData<short> AimsMorphoChamferClosing( const AimsData<short> &vol,
-                                          float size,
-                                          int xmask,int ymask,int zmask,
-                                          float mult_fact )
+VolumeRef<short> AimsMorphoChamferClosing( const rc_ptr<Volume<short> > &vol,
+                                           float size,
+                                           int xmask, int ymask, int zmask,
+                                           float mult_fact )
 {
-  ASSERT(vol.dimT()==1);
-  ASSERT( size>0 && size<(float)square(vol.dimX()) && 
-                    size<(float)square(vol.dimY()) );
+  ASSERT( vol->getSizeT() == 1 );
+  ASSERT( size>0 && size<(float) square(vol->getSizeX()) &&
+                    size<(float) square(vol->getSizeY()) );
 
-  AimsData<short> dilated;
+  VolumeRef<short> dilated;
   dilated = AimsChamferDistanceMap(vol,xmask,ymask,zmask,mult_fact);
 
   AimsThreshold<short,short> thresh1(AIMS_GREATER_THAN,
                                      (short)(size*mult_fact+0.5));
   dilated = thresh1.bin(dilated);
 
-  AimsData<short> eroded;
+  VolumeRef<short> eroded;
   eroded = AimsChamferDistanceMap(dilated,xmask,ymask,zmask,mult_fact);
 
   AimsThreshold<short,short> thresh2(AIMS_GREATER_THAN,
@@ -92,11 +97,11 @@ AimsData<short> AimsMorphoChamferClosing( const AimsData<short> &vol,
 
 
 template <>
-AimsData<short> AimsMorphoClosing( const AimsData<short> &vol,
-                                   float size, AimsMorphoMode mode )
+VolumeRef<short> AimsMorphoClosing( const rc_ptr<Volume<short> > &vol,
+                                    float size, AimsMorphoMode mode )
 {
-  ASSERT(vol.dimT()==1);
-  AimsData<short> close;
+  ASSERT( vol->getSizeT() == 1 );
+  VolumeRef<short> close;
 
   switch (mode)
   {

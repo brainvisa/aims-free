@@ -123,8 +123,8 @@ int main( int argc, const char **argv )
       //Perform closing with vertical line like structuring element
       AimsData<short> clo;
       if ( !radius) radius = 30 * arrayIn.sizeX();
-      clo = AimsMorphoChamferClosing( arrayTmp, radius, xmask, ymask, zmask, 
-                                      morphoFactor );
+      clo = AimsMorphoChamferClosing<int16_t>( arrayTmp, radius, xmask, ymask,
+                                               zmask, morphoFactor );
 
 
       //Output various profiles : vertical projection 
