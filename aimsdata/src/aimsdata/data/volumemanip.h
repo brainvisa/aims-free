@@ -41,45 +41,6 @@ namespace aims
 
   template < typename T >
   inline 
-  carto::rc_ptr<carto::Volume<T> > diag(
-    const carto::rc_ptr<carto::Volume<T> > & thing )
-  {
-    ASSERT( thing->getSizeT() == 1 && thing->getSizeZ() == 1
-            && thing->getSizeY() == 1 );
-
-    // allocate the new thing
-    carto::rc_ptr<carto::Volume<T> > m(
-      new carto::Volume<T>( thing->getSizeX(), thing->getSizeX() ) );
-    // do the operations
-    for ( int x = 0; x < thing->getSizeX(); x++ )
-      m->at( x, x ) = thing->at( x );
-
-    return m;
-  }
-
-
-  template < typename T >
-  inline 
-  carto::rc_ptr<carto::Volume<T> > undiag(
-    const carto::rc_ptr<carto::Volume<T> > & thing )
-  {
-    ASSERT( thing->getSizeT() == 1 && thing->getSizeZ() == 1 );
-
-    // allocate the new thing
-    carto::rc_ptr<carto::Volume<T> > m(
-      new carto::Volume<T>( std::min( thing->getSizeX(),
-                                      thing->getSizeY() ), 1 ) );
-    // do the operations
-    for ( int x = 0; x < std::min( thing->getSizeX(), thing->getSizeY() );
-          x++ )
-      m->at( x, 0 ) = thing->at( x, x );
-
-    return m;
-  }
-
-
-  template < typename T >
-  inline 
   AimsData<T> transpose( const AimsData<T>& thing )
   {
     ASSERT( thing.dimT() == 1 && thing.dimZ() == 1 );

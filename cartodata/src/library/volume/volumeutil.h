@@ -303,6 +303,46 @@ namespace carto
   template <typename T>
   VolumeRef<T> transpose( const rc_ptr<Volume<T> > & v, bool copy=false );
 
+
+  /** Build a diagonal matrix from a line (1D) vector */
+  template <typename T>
+  inline
+  rc_ptr<Volume<T> > diag( const rc_ptr<Volume<T> > & thing )
+  {
+    if( thing->getSizeT() != 1 || thing->getSizeZ() != 1
+        || thing->getSizeY() != 1 )
+      throw std::runtime_error("diag expects a 1D (Nx1x1x1) vector as input");
+
+    int n = thing->getSizeX();
+    // allocate the new thing
+    rc_ptr<Volume<T> > m( new Volume<T>( n, n ) );
+    // do the operations
+    for( int x = 0; x < n; x++ )
+      m->at( x, x ) = thing->at( x );
+
+    return m;
+  }
+
+
+  template <typename T>
+  inline
+  rc_ptr<Volume<T> > undiag( const rc_ptr<Volume<T> > & thing )
+  {
+    if( thing->getSizeT() != 1 || thing->getSizeZ() != 1 )
+      throw std::runtime_error(
+        "undiag expects a 2D (NxMx1x1) matrix as input");
+
+    int n = std::min( thing->getSizeX(), thing->getSizeY() );
+    // allocate the new thing
+    rc_ptr<Volume<T> > m( new Volume<T>( n, 1, 1, 1,
+                                         AllocatorContext::fast() ) );
+    // do the operations
+    for( int x = 0; x < n; x++ )
+      m->at( x, 0 ) = thing->at( x, x );
+
+    return m;
+  }
+
   //==========================================================================
   // Borders
   //==========================================================================
