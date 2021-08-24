@@ -82,7 +82,7 @@ namespace aims {
     inline AimsFastAllocationData<T> &operator =
       ( const carto::rc_ptr<carto::Volume<T> > &other )
     {
-      this->operator = ( other );
+      this->AimsData<T>::operator = ( other );
       return *this;
     }
 
