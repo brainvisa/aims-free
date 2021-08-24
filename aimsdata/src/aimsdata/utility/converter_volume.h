@@ -439,6 +439,276 @@ namespace carto
 }
 
 
+// RGB conversion
+#include <aims/rgb/rgb.h>
+
+namespace carto
+{
+
+  template <typename T, int D>
+  class Rescaler<VolumeRef<AimsVector<T,D> >, VolumeRef<AimsRGB> >
+  {
+  public:
+    Rescaler();
+    Rescaler( const RescalerInfo & info );
+
+    void convert( const VolumeRef<AimsVector<T,D> > &in, VolumeRef<AimsRGB> & out ) const;
+
+  private:
+    RescalerInfo _info;
+  };
+
+  template <typename T, int D>
+  inline
+  Rescaler<VolumeRef<AimsVector<T,D> >, VolumeRef<AimsRGB> >::Rescaler():
+    _info()
+  {}
+
+  template <typename T, int D>
+  inline
+  Rescaler<VolumeRef<AimsVector<T,D> >, VolumeRef<AimsRGB> >::Rescaler(
+    const RescalerInfo & info ):
+    _info(info)
+  {}
+
+  template <typename T, int D>
+  void
+  Rescaler<VolumeRef<AimsVector<T,D> >, VolumeRef<AimsRGB> >::convert(
+    const VolumeRef<AimsVector<T,D> > &in, VolumeRef<AimsRGB> &out ) const
+  {
+    if( out.getSizeX() == 0 )
+      out.reset( new Volume<AimsRGB>( in.getSize(), in.getBorders(),
+                                      out.allocatorContext() ) );
+
+    out.setVoxelSize( in.getVoxelSize() );
+    out.copyHeaderFrom( in.header() );
+
+    std::vector<int> isz = in.getSize();
+    std::vector<int> osz = out.getSize();
+    bool erased = false;
+
+    int i, n = isz.size(), m = osz.size();
+    for( i=0; i<std::min(n, m); ++i )
+      if( isz[i] < osz[i] && !erased )
+      {
+        out.fill( AimsRGB( 0 ) );
+        erased = true;
+      }
+      else if( isz[i] > osz[i] )
+        throw std::runtime_error(
+          "Converter output volume should be as large as input" );
+    if( !erased )
+      for( ; i<n; ++i )  // input is larger in more dimensions
+        if( isz[i] > 1 )
+        {
+          out.fill( AimsRGB( 0 ) );
+          break;
+        }
+    for( ; i<m; ++i )
+      if( osz[i] > 1 )  // output is larger in more dimensions
+        throw std::runtime_error(
+          "Converter output volume should be as large as input" );
+
+    carto::const_line_NDIterator<AimsVector<T,D> >
+      it( &in.at( 0 ), in.getSize(), in.getStrides() );
+    const AimsVector<T,D> *p, *pp;
+
+    RescalerInfo info( _info );
+    if( std::isnan( info.vmin ) )
+    {
+      if ( ! info.usevtypelimits )
+      {
+        info.vmin = std::numeric_limits<double>::max();
+        for( ; !it.ended(); ++it )
+        {
+          p = &*it;
+          for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+            {
+              for( int c = 0; c < D; ++c )
+              if( (double) (*p)[c] < info.vmin )
+                info.vmin = (double) (*p)[c];
+            }
+        }
+      }
+    }
+
+    if( std::isnan( info.vmax ) )
+    {
+      if ( ! info.usevtypelimits )
+      {
+        info.vmax = std::numeric_limits<double>::min();
+        for( it.reset(); !it.ended(); ++it )
+        {
+          p = &*it;
+          for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+            {
+              for( int c = 0; c < D; ++c )
+              if( (double) (*p)[c] > info.vmin )
+                info.vmax = (double) (*p)[c];
+            }
+        }
+      }
+    }
+
+    DefaultedRescalerInfo<T, uint8_t> defaultedinfo( info );
+
+    carto::line_NDIterator<AimsRGB> oit( &out.at( 0 ), out.getSize(),
+                                         out.getStrides() );
+    AimsRGB *op;
+
+    for( it.reset(); !it.ended(); ++it, ++oit )
+    {
+      p = &*it;
+      op = &out->at( it.position() );
+      for( pp=p + it.line_length(); p!=pp;
+           it.inc_line_ptr( p ), oit.inc_line_ptr( op ) )
+        for( int c=0; c < D && c<3; ++c )
+          (*op)[c] = defaultedinfo.getScaledValue( (*p)[c] );
+    }
+
+    float scf = 1.;
+    out.header().getProperty( "scale_factor", scf );
+    scf *= defaultedinfo.getScale();
+    out.header().setProperty( "scale_factor", scf );
+    out.header().setProperty( "data_type", DataTypeCode<AimsRGB>::name() );
+    if( out.header().hasProperty( "disk_data_type" ) )
+      out.header().removeProperty( "disk_data_type" );
+  }
+
+  template <typename T, int D>
+  class Rescaler<VolumeRef<AimsRGB>, VolumeRef<AimsVector<T,D> > >
+  {
+  public:
+    Rescaler();
+    Rescaler( const RescalerInfo & info );
+
+    void convert( const VolumeRef<AimsRGB> &in, VolumeRef<AimsVector<T,D> > & out ) const;
+
+  private:
+    RescalerInfo _info;
+  };
+
+  template <typename T, int D>
+  inline
+  Rescaler<VolumeRef<AimsRGB>, VolumeRef<AimsVector<T,D> > >::Rescaler():
+    _info()
+  {}
+
+  template <typename T, int D>
+  inline
+  Rescaler<VolumeRef<AimsRGB>, VolumeRef<AimsVector<T,D> > >::Rescaler(
+    const RescalerInfo & info ):
+    _info(info)
+  {}
+
+  template <typename T, int D>
+  void
+  Rescaler<VolumeRef<AimsRGB>, VolumeRef<AimsVector<T,D> > >::convert(
+    const VolumeRef<AimsRGB> &in, VolumeRef<AimsVector<T,D> > &out ) const
+  {
+    if( out.getSizeX() == 0 )
+      out.reset( new Volume<AimsVector<T,D> >(
+        in.getSize(), in.getBorders(), out.allocatorContext() ) );
+
+    out.setVoxelSize( in.getVoxelSize() );
+    out.copyHeaderFrom( in.header() );
+
+    std::vector<int> isz = in.getSize();
+    std::vector<int> osz = out.getSize();
+    bool erased = false;
+
+    int i, n = isz.size(), m = osz.size();
+    for( i=0; i<std::min(n, m); ++i )
+      if( isz[i] < osz[i] && !erased )
+      {
+        out.fill( AimsVector<T,D>( 0 ) );
+        erased = true;
+      }
+      else if( isz[i] > osz[i] )
+        throw std::runtime_error(
+          "Converter output volume should be as large as input" );
+    if( !erased )
+      for( ; i<n; ++i )  // input is larger in more dimensions
+        if( isz[i] > 1 )
+        {
+          out.fill( AimsVector<T,D>( 0 ) );
+          break;
+        }
+    for( ; i<m; ++i )
+      if( osz[i] > 1 )  // output is larger in more dimensions
+        throw std::runtime_error(
+          "Converter output volume should be as large as input" );
+
+    carto::const_line_NDIterator<AimsRGB>
+      it( &in.at( 0 ), in.getSize(), in.getStrides() );
+    const AimsRGB *p, *pp;
+
+    RescalerInfo info( _info );
+    if( std::isnan( info.vmin ) )
+    {
+      if ( ! info.usevtypelimits )
+      {
+        info.vmin = std::numeric_limits<double>::max();
+        for( ; !it.ended(); ++it )
+        {
+          p = &*it;
+          for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+            {
+              for( int c = 0; c < 3; ++c )
+              if( (double) (*p)[c] < info.vmin )
+                info.vmin = (double) (*p)[c];
+            }
+        }
+      }
+    }
+
+    if( std::isnan( info.vmax ) )
+    {
+      if ( ! info.usevtypelimits )
+      {
+        info.vmax = std::numeric_limits<double>::min();
+        for( it.reset(); !it.ended(); ++it )
+        {
+          p = &*it;
+          for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+            {
+              for( int c = 0; c < 3; ++c )
+              if( (double) (*p)[c] > info.vmin )
+                info.vmax = (double) (*p)[c];
+            }
+        }
+      }
+    }
+
+    DefaultedRescalerInfo<uint8_t, T> defaultedinfo( info );
+
+    carto::line_NDIterator<AimsVector<T,D> > oit( &out.at( 0 ), out.getSize(),
+                                                  out.getStrides() );
+    AimsVector<T,D> *op;
+
+    for( it.reset(); !it.ended(); ++it, ++oit )
+    {
+      p = &*it;
+      op = &out->at( it.position() );
+      for( pp=p + it.line_length(); p!=pp;
+           it.inc_line_ptr( p ), oit.inc_line_ptr( op ) )
+        for( int c=0; c < D && c<3; ++c )
+          (*op)[c] = defaultedinfo.getScaledValue( (*p)[c] );
+    }
+
+    float scf = 1.;
+    out.header().getProperty( "scale_factor", scf );
+    scf *= defaultedinfo.getScale();
+    out.header().setProperty( "scale_factor", scf );
+    out.header().setProperty( "data_type",
+                              DataTypeCode<AimsVector<T, D> >::name() );
+    if( out.header().hasProperty( "disk_data_type" ) )
+      out.header().removeProperty( "disk_data_type" );
+  }
+
+}
+
+
 // maintain header compatibility for now (temporary)
 #include <aims/utility/converter_aimsdata.h>
 
