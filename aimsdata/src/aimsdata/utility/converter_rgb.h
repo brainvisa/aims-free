@@ -124,7 +124,6 @@ namespace carto
 }
 
 //--- Vector/RGB conversion --------------------------------------------------
-#include <aims/data/data_g.h>
 #include <aims/vector/vector.h>
 #include <limits>
 
@@ -177,9 +176,14 @@ namespace carto {
     }
   };
 
+}
 
 //--- Vector/RGB rescaler ----------------------------------------------------
 
+#include <aims/data/data.h>
+
+namespace carto
+{
   template <typename T, int D>
   class Rescaler<AimsData<AimsVector<T,D> >, AimsData<AimsRGB> >
   {

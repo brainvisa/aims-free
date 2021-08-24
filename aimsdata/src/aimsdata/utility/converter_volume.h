@@ -37,19 +37,12 @@
 #ifndef AIMS_UTILITY_CONVERTER_VOLUME_H
 #define AIMS_UTILITY_CONVERTER_VOLUME_H
 
-#include <aims/data/data.h>
-#include <aims/data/pheader.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/type/converter.h>
+#include <cartobase/containers/nditerator.h>
 
 namespace std
 {
-
-  template<typename _Tp>
-  struct numeric_limits<AimsData<_Tp> > : public numeric_limits<_Tp>
-  {
-  public:
-  };
-
 
   template<typename _Tp>
   struct numeric_limits<carto::Volume<_Tp> > : public numeric_limits<_Tp>
@@ -70,34 +63,11 @@ namespace carto
 {
 
   template <typename INP,typename OUTP>
-  class RawConverter<AimsData<INP>, AimsData<OUTP> >
-  {
-  public:
-    void convert( const AimsData<INP> &in, AimsData<OUTP> & out ) const;
-  };
-
-
-  template <typename INP,typename OUTP>
   class RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >
   {
   public:
     void convert( const carto::VolumeRef<INP> &in,
                   carto::VolumeRef<OUTP> & out ) const;
-  };
-
-
-  /// Low-level rescaling converter partial specialization
-  template<typename INP, typename OUTP>
-  class Rescaler<AimsData<INP>, AimsData<OUTP> >
-  {
-  public:
-    Rescaler();
-    Rescaler( const RescalerInfo & info );
-
-    void convert( const AimsData<INP> &in, AimsData<OUTP> & out ) const;
-
-  private:
-    RescalerInfo _info;
   };
 
 
@@ -115,19 +85,8 @@ namespace carto
     RescalerInfo _info;
   };
 
+
   // special case of same input and output types
-
-  template <typename INP>
-  class RawConverter<AimsData<INP>, AimsData<INP> >
-  {
-  public:
-    RawConverter( bool shallowcopy = false ) : _shallowcopy( shallowcopy ) {}
-    void convert( const AimsData<INP> &in, AimsData<INP> & out ) const;
-
-  private:
-    bool _shallowcopy;
-  };
-
 
   template <typename INP>
   class RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
@@ -142,18 +101,6 @@ namespace carto
 
 
   template <typename INP>
-  class ShallowConverter<AimsData<INP>, AimsData<INP> >
-    : public Converter<AimsData<INP>, AimsData<INP> >
-  {
-  public:
-    ShallowConverter( bool rescale = false )
-      : Converter<AimsData<INP>, AimsData<INP> >( rescale ) {}
-    ShallowConverter( bool rescale, const RescalerInfo & info )
-      : Converter<AimsData<INP>, AimsData<INP> >( rescale, info ) {}
-    virtual void convert( const AimsData<INP> &in, AimsData<INP> & out ) const;
-  };
-
-  template <typename INP>
   class ShallowConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
     : public Converter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
   {
@@ -165,28 +112,12 @@ namespace carto
     virtual void convert( const carto::VolumeRef<INP> &in, carto::VolumeRef<INP> & out ) const;
   };
 
-  template <class INP,class OUTP>
-  class ConverterAllocator<AimsData<INP>,AimsData<OUTP> >
-  {
-  public:
-    static AimsData<OUTP>* alloc( const AimsData<INP> &in );
-  };
-
 
   template <class INP,class OUTP>
-  class ConverterAllocator<carto::VolumeRef<INP>,
-    carto::VolumeRef<OUTP> >
+  class ConverterAllocator<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >
   {
   public:
     static carto::VolumeRef<OUTP>* alloc( const carto::VolumeRef<INP> &in );
-  };
-
-
-  template <class INP>
-  class ConverterAllocator<AimsData<INP>,AimsData<INP> >
-  {
-  public:
-    static AimsData<INP>* alloc( const AimsData<INP> &in );
   };
 
 
@@ -198,317 +129,29 @@ namespace carto
   };
 
 
-  // implementation
-
-  template <class INP,class OUTP> inline
-  AimsData<OUTP>* ConverterAllocator<AimsData<INP>,AimsData<OUTP> >::alloc
-    ( const AimsData<INP> &in )
-  {
-    return new AimsData<OUTP>( in.dimX(), in.dimY(), in.dimZ(),
-                               in.dimT(), in.borderWidth() );
-  }
-
-
-  template <class INP> inline
-  AimsData<INP>* ConverterAllocator<AimsData<INP>,AimsData<INP> >::alloc
-    ( const AimsData<INP> & )
-  {
-    return new AimsData<INP>( 0 );
-  }
-
-
-  // inline is a bit abusive here...
-  template<class INP,class OUTP> inline
-  void RawConverter<AimsData<INP>,AimsData<OUTP> >::convert
-  ( const AimsData<INP> &in, AimsData<OUTP> &out ) const
-  {
-    out.setSizeX( in.sizeX() );
-    out.setSizeY( in.sizeY() );
-    out.setSizeZ( in.sizeZ() );
-    out.setSizeT( in.sizeT() );
-
-    if( in.header() )
-      out.setHeader( in.header()->cloneHeader( true ) );
-
-    int x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
-      dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
-    if( in.dimX() < dx )
-      dx = in.dimX();
-    if( in.dimY() < dy )
-      dy = in.dimY();
-    if( in.dimZ() < dz )
-      dz = in.dimZ();
-    if( in.dimT() < dt )
-      dt = in.dimT();
-
-    RawConverter<INP,OUTP> itemconv;
-
-    for( t=0; t<dt; ++t )
-      {
-        for( z=0; z<dz; ++z )
-          {
-            for( y=0; y<dy; ++y )
-              {
-                for( x=0; x<dx; ++x )
-                  itemconv.convert( in( x, y, z, t ), out( x, y, z, t ) );
-                for( ; x<ox; ++x )
-                  out( x, y, z, t ) = OUTP(0);
-              }
-            for( ; y<oy; ++y )
-              for( x=0; x<ox; ++x )
-                out( x, y, z, t ) = OUTP(0);
-          }
-        for( ; z<oz; ++z )
-          for( y=0; y<oy; ++y )
-            for( x=0; x<ox; ++x )
-              out( x, y, z, t ) = OUTP(0);
-      }
-
-    for( ; t<ot; ++t )
-      for( z=0; z<oz; ++z )
-        for( y=0; y<oy; ++y )
-          for( x=0; x<ox; ++x )
-            out( x, y, z, t ) = OUTP(0);
-
-    aims::PythonHeader  *ph
-        = dynamic_cast<aims::PythonHeader *>( out.header() );
-    if( ph )
-    {
-      ph->setProperty( "data_type", DataTypeCode<OUTP>::dataType() );
-      if( ph->hasProperty( "disk_data_type" ) )
-        ph->removeProperty( "disk_data_type" );
-    }
-  }
-
-
-  // inline is a bit abusive here...
-  template<class INP,class OUTP> inline
-  void Rescaler<AimsData<INP>,AimsData<OUTP> >::convert
-  ( const AimsData<INP> &in, AimsData<OUTP> &out ) const
-  {
-    // Accommodate the case where out is allocated with zero size by
-    // AllocatorConverter.  This happens when the INP and OUTP types are equal.
-    if( out.dimX() == 0 )
-      out = AimsData<OUTP>( in.dimX(), in.dimY(), in.dimZ(),
-                            in.dimT(), in.borderWidth() );
-
-    out.setSizeX( in.sizeX() );
-    out.setSizeY( in.sizeY() );
-    out.setSizeZ( in.sizeZ() );
-    out.setSizeT( in.sizeT() );
-
-    if( in.header() )
-      out.setHeader( in.header()->cloneHeader( true ) );
-
-    RescalerInfo info( _info );
-    if( std::isnan( info.vmin ) ) {
-      if ( ! info.usevtypelimits ) {
-        info.vmin = (double) in.minimum();
-      }
-    }
-
-    if( std::isnan( info.vmax ) ) {
-      if ( ! info.usevtypelimits ) {
-        info.vmax = (double) in.maximum();
-      }
-    }
-
-    DefaultedRescalerInfo<INP, OUTP> defaultedinfo( info );
-
-    int x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
-      dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
-    if( in.dimX() < dx )
-      dx = in.dimX();
-    if( in.dimY() < dy )
-      dy = in.dimY();
-    if( in.dimZ() < dz )
-      dz = in.dimZ();
-    if( in.dimT() < dt )
-      dt = in.dimT();
-
-    for( t=0; t<dt; ++t )
-      {
-        for( z=0; z<dz; ++z )
-          {
-            for( y=0; y<dy; ++y )
-              {
-                for( x=0; x<dx; ++x )
-                  out( x, y, z, t ) =
-                    defaultedinfo.getScaledValue( in( x, y, z, t ) );
-                for( ; x<ox; ++x )
-                  out( x, y, z, t ) = OUTP(0);
-              }
-            for( ; y<oy; ++y )
-              for( x=0; x<ox; ++x )
-                out( x, y, z, t ) = OUTP(0);
-          }
-        for( ; z<oz; ++z )
-          for( y=0; y<oy; ++y )
-            for( x=0; x<ox; ++x )
-              out( x, y, z, t ) = OUTP(0);
-      }
-
-    for( ; t<ot; ++t )
-      for( z=0; z<oz; ++z )
-        for( y=0; y<oy; ++y )
-          for( x=0; x<ox; ++x )
-            out( x, y, z, t ) = OUTP(0);
-
-    float scf = 1.;
-    aims::PythonHeader
-      *h = dynamic_cast<aims::PythonHeader *>( out.header() );
-    if( !h )
-      h = new aims::PythonHeader;
-    h->getProperty( "scale_factor", scf );
-    scf *= defaultedinfo.getScale();
-    h->setProperty( "scale_factor", scf );
-    h->setProperty( "data_type", DataTypeCode<OUTP>::dataType() );
-    if( h->hasProperty( "disk_data_type" ) )
-      h->removeProperty( "disk_data_type" );
-  }
-
-
-  template<class INP> inline
-  void RawConverter<AimsData<INP>,AimsData<INP> >::convert
-  ( const AimsData<INP> &in, AimsData<INP> &out ) const
-  {
-    if( out.dimX() == 0
-        || ( in.dimX() == out.dimX() && in.dimY() == out.dimY()
-             && in.dimZ() == out.dimZ() && in.dimT() == out.dimT()
-             && in.borders() == out.borders() ) )
-    {
-      if( this->_shallowcopy )
-        out = in;
-      else
-      {
-        // using deep-copy to be consistent with other cases
-        out = in.clone();
-        // keep the same UUID
-        out.volume()->copyUuid( *in.volume() );
-      }
-    }
-    else
-      {
-        if( in.header() )
-          out.setHeader( in.header()->cloneHeader( true ) );
-
-        out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
-        int     x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
-          dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
-        if( in.dimX() < dx )
-          dx = in.dimX();
-        if( in.dimY() < dy )
-          dy = in.dimY();
-        if( in.dimZ() < dz )
-          dz = in.dimZ();
-        if( in.dimT() < dt )
-          dt = in.dimT();
-
-        for( t=0; t<dt; ++t )
-          {
-            for( z=0; z<dz; ++z )
-              {
-                for( y=0; y<dy; ++y )
-                  {
-                    for( x=0; x<dx; ++x )
-                      out( x, y, z, t ) = in( x, y, z, t );
-                    for( ; x<ox; ++x )
-                      out( x, y, z, t ) = INP(0);
-                  }
-                for( ; y<oy; ++y )
-                  for( x=0; x<ox; ++x )
-                    out( x, y, z, t ) = INP(0);
-              }
-            for( ; z<oz; ++z )
-              for( y=0; y<oy; ++y )
-                for( x=0; x<ox; ++x )
-                  out( x, y, z, t ) = INP(0);
-          }
-
-        for( ; t<ot; ++t )
-          for( z=0; z<oz; ++z )
-            for( y=0; y<oy; ++y )
-              for( x=0; x<ox; ++x )
-                out( x, y, z, t ) = INP(0);
-      }
-  }
-
-  template<typename INP, typename OUTP>
-  inline
-  Rescaler<AimsData<INP>, AimsData<OUTP> >::Rescaler() : _info()
-  {
-  }
-
-  template<typename INP, typename OUTP>
-  inline
-  Rescaler<AimsData<INP>, AimsData<OUTP> >::Rescaler(const RescalerInfo & info)
-  : _info(info)
-  {
-  }
-
   template<typename INP>
-  class ConverterSwitch<AimsData<INP>,AimsData<INP>,false>
-    : public RawConverter<AimsData<INP>,AimsData<INP> >
+  class ConverterSwitch<carto::VolumeRef<INP>, carto::VolumeRef<INP>,false>
+    : public RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
   {
   public:
     ConverterSwitch( bool shallowcopy = false )
-      : RawConverter<AimsData<INP>,AimsData<INP> >( shallowcopy ) {}
+      : RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >(
+          shallowcopy ) {}
     ConverterSwitch( const RescalerInfo&,  bool shallowcopy = false )
-      : RawConverter<AimsData<INP>,AimsData<INP> >( shallowcopy ) {}
+      : RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >(
+          shallowcopy ) {}
   };
 
 
   template<typename INP>
-  class ConverterSwitch<carto::VolumeRef<INP>,carto::VolumeRef<INP>,false>
-    : public RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >
-  {
-  public:
-    ConverterSwitch( bool shallowcopy = false )
-      : RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >( shallowcopy ) {}
-    ConverterSwitch( const RescalerInfo&,  bool shallowcopy = false )
-      : RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >( shallowcopy ) {}
-  };
-
-
-  template<typename INP>
-  class ConverterSwitch<AimsData<INP>,AimsData<INP>,true>
-    : public Rescaler<AimsData<INP>,AimsData<INP> >
+  class ConverterSwitch<carto::VolumeRef<INP>, carto::VolumeRef<INP>,true>
+    : public Rescaler<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
   {
   public:
     ConverterSwitch( bool = false )
-      : Rescaler<AimsData<INP>,AimsData<INP> >() {}
+      : Rescaler<carto::VolumeRef<INP>, carto::VolumeRef<INP> >() {}
     ConverterSwitch( const RescalerInfo& info, bool )
-      : Rescaler<AimsData<INP>,AimsData<INP> >(info) {}
-  };
-
-
-  template<typename INP>
-  class ConverterSwitch<carto::VolumeRef<INP>,carto::VolumeRef<INP>,true>
-    : public Rescaler<carto::VolumeRef<INP>,carto::VolumeRef<INP> >
-  {
-  public:
-    ConverterSwitch( bool = false )
-      : Rescaler<carto::VolumeRef<INP>,carto::VolumeRef<INP> >() {}
-    ConverterSwitch( const RescalerInfo& info, bool )
-      : Rescaler<carto::VolumeRef<INP>,carto::VolumeRef<INP> >(info) {}
-  };
-
-
-  template<typename INP>
-  class SmartConverter<AimsData<INP>, AimsData<INP> >
-    : public ConverterSwitch<AimsData<INP>, AimsData<INP>,
-                             std::numeric_limits<INP>::is_specialized
-  && std::numeric_limits<INP>::is_bounded >
-  {
-  public:
-    SmartConverter( bool shallowcopy = false )
-      : ConverterSwitch<AimsData<INP>, AimsData<INP>,
-          std::numeric_limits<INP>::is_specialized
-          && std::numeric_limits<INP>::is_bounded >( shallowcopy ) {}
-    SmartConverter( const RescalerInfo& info, bool shallowcopy = false )
-      : ConverterSwitch<AimsData<INP>, AimsData<INP>,
-          std::numeric_limits<INP>::is_specialized
-          && std::numeric_limits<INP>::is_bounded >( info, shallowcopy ) {}
+      : Rescaler<carto::VolumeRef<INP>, carto::VolumeRef<INP> >(info) {}
   };
 
 
@@ -530,80 +173,7 @@ namespace carto
   };
 
 
-  template<class INP>
-  inline void
-  ShallowConverter<AimsData<INP>, AimsData<INP> >::convert
-  ( const AimsData<INP> &in, AimsData<INP> & out ) const
-  {
-    if( this->_rescale )
-      {
-        SmartConverter<AimsData<INP>,AimsData<INP> > sc( this->_info, true );
-        sc.convert( in, out  );
-      }
-    else
-      {
-        RawConverter<AimsData<INP>,AimsData<INP> > rc( true );
-        rc.convert( in, out );
-      }
-  }
-
-
-  // VolumeRef implementation
-
-  template<class INP>
-  inline void
-  ShallowConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >::convert
-  ( const carto::VolumeRef<INP> &in, carto::VolumeRef<INP> & out ) const
-  {
-    if( this->_rescale )
-    {
-      SmartConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >
-        sc( this->_info, true );
-      sc.convert( in, out );
-    }
-    else
-    {
-      RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> > rc( true );
-        rc.convert( in, out );
-    }
-  }
-
-
-  template <typename INP,typename OUTP>
-  void RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >::convert
-    ( const carto::VolumeRef<INP> &in, carto::VolumeRef<OUTP> & out ) const
-  {
-    AimsData<OUTP> data( out );
-    RawConverter<AimsData<INP>, AimsData<OUTP> > c;
-    c.convert( in, data );
-    out = data.volume(); // vol in data may have changed
-  }
-
-
-  template<typename INP, typename OUTP>
-  Rescaler<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >::Rescaler()
-  : _info()
-  {
-  }
-
-
-  template<typename INP, typename OUTP>
-  Rescaler<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >::Rescaler
-      ( const RescalerInfo & info )
-  : _info( info )
-  {
-  }
-
-
-  template<typename INP, typename OUTP>
-  void Rescaler<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >::convert
-      ( const carto::VolumeRef<INP> &in, carto::VolumeRef<OUTP> &out ) const
-  {
-    AimsData<OUTP> data( out );
-    Rescaler<AimsData<INP>,AimsData<OUTP> > c( _info );
-    c.convert( in, data );
-    out = data.volume(); // vol in data may have changed
-  }
+  // implementation
 
   template <class INP,class OUTP>
   carto::VolumeRef<OUTP>*
@@ -624,17 +194,252 @@ namespace carto
   }
 
 
+  // inline is a bit abusive here...
+  template <typename INP, typename OUTP>
+  void RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >::convert
+    ( const carto::VolumeRef<INP> &in, carto::VolumeRef<OUTP> & out ) const
+  {
+    out.setVoxelSize( in.getVoxelSize() );
+    out.copyHeaderFrom( in.header() );
+
+    std::vector<int> isz = in.getSize();
+    std::vector<int> osz = out.getSize();
+    bool erased = false;
+
+    int i, n = isz.size(), m = osz.size();
+    for( i=0; i<std::min(n, m); ++i )
+      if( isz[i] < osz[i] && !erased )
+      {
+        out.fill( OUTP( 0 ) );
+        erased = true;
+      }
+      else if( isz[i] > osz[i] )
+        throw std::runtime_error(
+          "Converter output volume should be as large as input" );
+    if( !erased )
+      for( ; i<n; ++i )  // input is larger in more dimensions
+        if( isz[i] > 1 )
+        {
+          out.fill( OUTP( 0 ) );
+          break;
+        }
+    for( ; i<m; ++i )
+      if( osz[i] > 1 )  // output is larger in more dimensions
+        throw std::runtime_error(
+          "Converter output volume should be as large as input" );
+
+    RawConverter<INP,OUTP> itemconv;
+
+    carto::const_line_NDIterator<INP> it( &in.at( 0 ), in.getSize(),
+                                          in.getStrides() );
+    carto::line_NDIterator<OUTP> oit( &out.at( 0 ), out.getSize(),
+                                      out.getStrides() );
+    const INP *p, *pp;
+    OUTP *op;
+
+    for( ; !it.ended(); ++it, ++oit )
+    {
+      p = &*it;
+      op = &out->at( it.position() );
+      for( pp=p + it.line_length(); p!=pp;
+           it.inc_line_ptr( p ), oit.inc_line_ptr( op ) )
+        itemconv.convert( *p, *op );
+    }
+
+    out.header().setProperty( "data_type", DataTypeCode<OUTP>::dataType() );
+    if( out.header().hasProperty( "disk_data_type" ) )
+        out.header().removeProperty( "disk_data_type" );
+  }
+
+
+  template<typename INP, typename OUTP>
+  Rescaler<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >::Rescaler()
+  : _info()
+  {
+  }
+
+
+  template<typename INP, typename OUTP>
+  Rescaler<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >::Rescaler
+      ( const RescalerInfo & info )
+  : _info( info )
+  {
+  }
+
+
+  // inline is a bit abusive here...
+  template<typename INP, typename OUTP>
+  void Rescaler<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >::convert
+      ( const carto::VolumeRef<INP> &in, carto::VolumeRef<OUTP> &out ) const
+  {
+    // Accommodate the case where out is allocated with zero size by
+    // AllocatorConverter.  This happens when the INP and OUTP types are equal.
+    if( out.getSizeX() == 0 )
+      out.reset( new Volume<OUTP>( in.getSize(), in.getBorders(),
+                                   out.allocatorContext() ) );
+
+    out.setVoxelSize( in.getVoxelSize() );
+    out.copyHeaderFrom( in.header() );
+
+    RescalerInfo info( _info );
+    if( std::isnan( info.vmin ) )
+    {
+      if ( ! info.usevtypelimits )
+      {
+        info.vmin = (double) in.min();
+      }
+    }
+
+    if( std::isnan( info.vmax ) )
+    {
+      if ( ! info.usevtypelimits )
+      {
+        info.vmax = (double) in.max();
+      }
+    }
+
+    std::vector<int> isz = in.getSize();
+    std::vector<int> osz = out.getSize();
+    bool erased = false;
+
+    int i, n = isz.size(), m = osz.size();
+    for( i=0; i<std::min(n, m); ++i )
+      if( isz[i] < osz[i] && !erased )
+      {
+        out.fill( OUTP( 0 ) );
+        erased = true;
+      }
+      else if( isz[i] > osz[i] )
+        throw std::runtime_error(
+          "Converter output volume should be as large as input" );
+    if( !erased )
+      for( ; i<n; ++i )  // input is larger in more dimensions
+        if( isz[i] > 1 )
+        {
+          out.fill( OUTP( 0 ) );
+          break;
+        }
+    for( ; i<m; ++i )
+      if( osz[i] > 1 )  // output is larger in more dimensions
+        throw std::runtime_error(
+          "Converter output volume should be as large as input" );
+
+    DefaultedRescalerInfo<INP, OUTP> defaultedinfo( info );
+
+    carto::const_line_NDIterator<INP> it( &in.at( 0 ), in.getSize(),
+                                          in.getStrides() );
+    carto::line_NDIterator<OUTP> oit( &out.at( 0 ), out.getSize(),
+                                      out.getStrides() );
+    const INP *p, *pp;
+    OUTP *op;
+
+    for( ; !it.ended(); ++it, ++oit )
+    {
+      p = &*it;
+      op = &out->at( it.position() );
+      for( pp=p + it.line_length(); p!=pp;
+           it.inc_line_ptr( p ), oit.inc_line_ptr( op ) )
+        *op = defaultedinfo.getScaledValue( *p );
+    }
+
+    float scf = 1.;
+    out.header().getProperty( "scale_factor", scf );
+    scf *= defaultedinfo.getScale();
+    out.header().setProperty( "scale_factor", scf );
+    out.header().setProperty( "data_type", DataTypeCode<OUTP>::dataType() );
+    if( out.header().hasProperty( "disk_data_type" ) )
+      out.header().removeProperty( "disk_data_type" );
+  }
+
   template<class INP> inline
-  void RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >::convert
+  void RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >::convert
   ( const carto::VolumeRef<INP> &in, carto::VolumeRef<INP> &out ) const
   {
-    AimsData<INP> datain( in );
-    AimsData<INP> dataout( out );
-    RawConverter<AimsData<INP>, AimsData<INP> > conv( _shallowcopy );
-    conv.convert( datain, dataout );
-    out = dataout.volume(); // vol in dataout may have changed
+    if( out.getSizeX() == 0
+        || ( in.getSize() == out.getSize()
+             && in.getBorders() == out.getBorders() ) )
+    {
+      if( this->_shallowcopy )
+        out = in;
+      else
+      {
+        // using deep-copy to be consistent with other cases
+        out = in.deepcopy();
+        // keep the same UUID
+        out->copyUuid( *in );
+      }
+    }
+    else
+    {
+      out.copyHeaderFrom( in.header() );
+      out.setVoxelSize( in.getVoxelSize() );
+
+      std::vector<int> isz = in.getSize();
+      std::vector<int> osz = out.getSize();
+      bool erased = false;
+
+      int i, n = isz.size(), m = osz.size();
+      for( i=0; i<std::min(n, m); ++i )
+        if( isz[i] < osz[i] && !erased )
+        {
+          out.fill( INP( 0 ) );
+          erased = true;
+        }
+        else if( isz[i] > osz[i] )
+          throw std::runtime_error(
+            "Converter output volume should be as large as input" );
+      if( !erased )
+        for( ; i<n; ++i )  // input is larger in more dimensions
+          if( isz[i] > 1 )
+          {
+            out.fill( INP( 0 ) );
+            break;
+          }
+      for( ; i<m; ++i )
+        if( osz[i] > 1 )  // output is larger in more dimensions
+          throw std::runtime_error(
+            "Converter output volume should be as large as input" );
+
+      carto::const_line_NDIterator<INP> it( &in.at( 0 ), in.getSize(),
+                                            in.getStrides() );
+      carto::line_NDIterator<INP> oit( &out.at( 0 ), out.getSize(),
+                                       out.getStrides() );
+      const INP *p, *pp;
+      INP *op;
+
+      for( ; !it.ended(); ++it, ++oit )
+      {
+        p = &*it;
+        op = &out->at( it.position() );
+        for( pp=p + it.line_length(); p!=pp;
+            it.inc_line_ptr( p ), oit.inc_line_ptr( op ) )
+          *op = *p;
+      }
+    }
+  }
+
+  template<class INP>
+  inline void
+  ShallowConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >::convert
+  ( const carto::VolumeRef<INP> &in, carto::VolumeRef<INP> & out ) const
+  {
+    if( this->_rescale )
+    {
+      SmartConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
+        sc( this->_info, true );
+      sc.convert( in, out );
+    }
+    else
+    {
+      RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> > rc( true );
+        rc.convert( in, out );
+    }
   }
 
 }
+
+
+// maintain header compatibility for now (temporary)
+#include <aims/utility/converter_aimsdata.h>
 
 #endif
