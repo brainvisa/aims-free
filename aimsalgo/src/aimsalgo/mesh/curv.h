@@ -38,7 +38,6 @@
 
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
-#include <aims/data/data.h>
 #include <list>
 
 inline float fsign(float x);

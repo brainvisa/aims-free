@@ -32,8 +32,12 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
-#include <aims/math/math_g.h>
 #include <aims/mesh/curv.h>
 #include <set>
 #include <algorithm>
