@@ -32,8 +32,12 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
-#include <aims/data/fastAllocationData.h>
 #include <aims/math/mathelem.h>
 #include <aims/math/svd.h>
 #include <cartodata/volume/volume.h>
