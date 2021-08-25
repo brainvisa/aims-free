@@ -41,8 +41,6 @@ namespace carto
   template <typename T> class Volume;
 }
 
-template <typename T> class AimsData;
-
 
 namespace aims
 {

@@ -106,8 +106,8 @@ namespace aims
           MyProcess()
           {
             // here are all types known by our process
-            registerProcessType( "Volume", "S16", &exec<AimsData<short> > );
-            registerProcessType( "Volume", "FLOAT", &exec<AimsData<float> > );
+            registerProcessType( "Volume", "S16", &exec<carto::VolumeRef<short> > );
+            registerProcessType( "Volume", "FLOAT", &exec<carto::VolumeRef<float> > );
             // use for instance another function for meshes and buckets
             registerProcessType( "Mesh", "VOID", &exec2<AimsSufaceTriangle> );
             registerProcessType( "Bucket", "VOID", &exec2<AimsBucket> );
@@ -189,14 +189,14 @@ namespace aims
         but so has the advantage to allow compilation of processes only on
         these types, and not on others which might cause problems. For instance
         you can use different process functions for volumes of scalars
-        (\c AimsData of \c float or \c int) and on volumes of complex, and use
-        specific operations for the former (ie ordering, comparisons
+        (\c carto::Volume of \c float or \c int) and on volumes of complex, and
+        use specific operations for the former (ie ordering, comparisons
         operations or casting to \c float or \c double) which would not work
         on the latter.
 
         \see Finder FileFormatDictionary Reader Writer
   */
-  class AIMSDATA_API Process
+  class Process
   {
   public:
     /**	Process function type. These functions are stored in a type-to-function

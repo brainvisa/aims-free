@@ -109,7 +109,7 @@
 
   - namespace: aims
   - Data structures for:
-    - volumes: AimsData (soon obsolete: see carto::Volume in cartodata)
+    - volumes: carto::Volume is in cartodata, the older AimsData is obsolete.
     - meshes: AimsTimeSurfrace
     - "buckets" (voxels lists): AimsBucket and 
       \link aims::BucketMap BucketMap\endlink
@@ -160,18 +160,18 @@
 
 New volumes: \ref cartovolumes (cartodata)
 
-\section AimsData template types and IO
+\section Volume template types and IO
 
 Most builtin C numeric types have variable sizes on different architectures 
 or systems: for instance \c long is 32 bits on 32 bit systems, but 64 bits 
 on 64 bit systems. It may even be dependent on some compilation flags.
 
 There are some fixed size types defined in compilers: \c in32_t, \c uint16_t, 
-etc. We now insist on using these types for AimsData:
+etc. We now insist on using these types for \c carto::Volume:
 
 \code
-AimsData<int16_t>		data;
-Reader<AimsData<int16_t> >	reader( "filename.ima" );
+carto::Volume<int16_t>		data;
+Reader<carto::Volume<int16_t> >	reader( "filename.ima" );
 reader.read( data );
 \endcode
 
@@ -184,58 +184,22 @@ Especially, <b>don't use \c long types anymore for any IO</b>.
 
 /*! \page aimsvolumes Volumes
 
-AimsData will soon be deprecated. Don't use it anymore. 
-carto::Volume will replace it. It is defined in a new library: cartodata.
+AimsData is deprecated. Don't use it anymore.
+carto::Volume and carto::VolumeRef replace it. They are defined in a separate library: cartodata.
 
-In the meantime, AimsData will only be a wrapper to carto::Volume. This 
-means carto::Volume is actually used behind the scene. AimsData wrapper is 
+AimsData is now only be a wrapper to carto::VolumeRef. This
+means carto::VolumeRef is actually used behind the scene. AimsData wrapper is
 still provided for compatibility (and because it would have been too much work 
 to eradicate it from our own codes), but should progressively disapear from 
 all codes.
 
-carto::Volume API will be accessible from a AimsData object so programs 
-working with AimsData can switch to carto::Volume whenever they want.
+A carto::VolumeRef is available through an AimsData object
+(\c AimsData::volume() method) so programs working with AimsData can switch to carto::Volume whenever they want.
 
 In the other way, making an AimsData from a carto::Volume is trivial: just 
 give it to AimsData constructor.
 
-This way, compatibility is provided in both ways: old code will continue to 
-work as is using AimsData, and new code using carto::Volume will be able to 
-use old processing routines written for AimsData.
-
-The native AimsData class (the old one, without a wrapper) has been replaced
-by the wrapper (\<aims/data/cartodatavolume.h\>) in Aims 3.0.
-
-In the future, other base classes (meshes, buckets, texture...) may move to a 
-cleaner and more modern version into cartodata library.
-
-<b>Things that must change soon (now!)</b>
-
-A complete 100% compatibility is difficult to achieve (not to say impossible), 
-so there will be a small number of behaviour change in AimsData. These affect 
-mainly IO and copy operations:
-
-- AimsData::setHeader() will now perform a copy of all attributes of the 
-  given header, not just grab the pointer. This is needed by the underlying 
-  carto::Volume header (which is builtin, not a changeable pointer). To keep 
-  most compatibility with the former behaviour, giving a Header* to setHeader()
-  will still transfer ownership of the header to the target AimsData. But 
-  as the input header will not be kept at all, it will just be deleted 
-  by setHeader(). This has two consequences:
-  - a header is no longer usable after it has been passed to setHeader, 
-    whereas it used to still live until the AimsData was deleted. So keep in 
-    mind that you must perform all operations on the header before passing 
-    it to the volume.
-  - working on a header after it is passed to setHeader() will be a double 
-    mistake: you will work on a deleted structure, and changes will not 
-    affect at all the AimsData owning it.
-
-- copying an AimsData will not copy its header anymore: the data block was 
-  and will still be ref-counted, but now the data block is not separable 
-  from its header anymore: they are tied in a single carto::Volume structure, 
-  so the header will be shared just like the data. Changes done to the header 
-  of a copied volume will also affect the original volume (unless a clone() 
-  is performed instead of a regular copy).
+Moreover automatic conversions between \c AimsData and \c VolumeRef have been defined: in most cases we can use \c carto::VolumeRef or \c carto::rc_ptr<carto::Volume> and call fuctions expecting an \c AimsData, and the contrary, in a transparent way. In template functions calls, you may need to specify manually the template type in order to allow the compiler to find the conversions.
 
 */
 
@@ -248,10 +212,10 @@ There are 3 different layers of IO in Aims for virtually all objects:
 
 - low-level readers / writers for each specific <b>file format</b>
 - mid-level IO encapsulate \e all formats supported by Aims <b>for a given 
-  object / data type</b> (\e ie read an AimsData<short> whatever the disk file 
-  format): aims::Reader and aims::Writer template classes
+  object / data type</b> (\e ie read a \c carto::Volume<short> whatever the
+  disk file format): \c aims::Reader and \c aims::Writer template classes
 - the highest level readers allow to switch to different pieces of code dealing
-  with each object and data type (ie read an AimsData<short> or a 
+  with each object and data type (ie read a carto::Volume<short> or a
   BucketMap<Void>): the aims::Process class
 
 Normal programs perform IO at mid or high level, <i>never</i> at low-level: 
@@ -269,16 +233,17 @@ Writer classes for their internal purpose
   \code
 #include <cstdlib>
   #include <aims/io/reader.h>
-  #include <aims/data/data.h>
+  #include <cartodata/volume/volume.h>
   #include <stdexcept>
 
   using namespace aims;
+  using namespace carto;
   using namespace std;
 
-  AimsData<short>			data;
+  Volume<int16_t>			data;
   try
   {
-    Reader<AimsData<short> >	r( "filename" );
+    Reader<Volume<int16_t> >	r( "filename" );
     r.read( data );
   }
   catch( exception & e )	// the file couldn't be read
@@ -300,7 +265,7 @@ what's in the file:
     {
       if( f.dataType() == "S16" )
       {
-        // ... (call previous function with Reader<AimsData<short> > )
+        // ... (call previous function with Reader<Volume<short> > )
       }
       else
         ...
@@ -318,17 +283,17 @@ testing all possible types by hand: Process does it for you.
   \code
   #include <aims/io/process.h>
   #include <aims/io/reader.h>
-  #include <aims/data/data.h>
+  #include <cartodata/volume/volume.h>
   #include <stdexcept>
 
   using namespace aims;
   using namespace std;
 
-  void myAimsData_short_function( Process &, const string &filename, Finder & )
+  void myVolume_short_function( Process &, const string &filename, Finder & )
   {
-    // here I'm sure the file filename contains an AimsData<short>
-    AimsData<short>			data;
-    Reader<AimsData<short> >	r( filename );
+    // here I'm sure the file filename contains a Volume<int16_t>
+    Volume<int16_t>			data;
+    Reader<Volume<int16_t> >	r( filename );
     r.read( data );
     // ...
   }
@@ -348,7 +313,7 @@ testing all possible types by hand: Process does it for you.
     Process	p;
     string	filename = argv[1];
 
-    p.registerProcessType( "Volume", "S16", &myAimsData_short_function );
+    p.registerProcessType( "Volume", "S16", &myVolume_short_function );
     p.registerProcessType( "Bucket", "VOID", &myBucket_void_function );
 
     if( p.execute( filename ) )
@@ -420,7 +385,7 @@ In the most general case these operations are:
 
 But:
 - if you're adding a new format for already supported objects (ie your own 
-  volume format to be read as AimsData), aims::Reader, aims::Writer and 
+  volume format to be read as carto::Volume), aims::Reader, aims::Writer and
   aims::FileFormatDictionary classes are already compiled on the needed types:
   - write a header class with read the file header
   - wrap it in a aims::FinderFormat inherited class
