@@ -80,10 +80,10 @@ namespace aims
       /** Get the slope, offset and maximum error to encode a volume of float or double 
           using an integer type.
       */
-      static soma::ScaledEncodingInfo info( const AimsData<INP> & thing );
+      static soma::ScaledEncodingInfo info( const carto::Volume<INP> & thing );
 
-      static soma::ScaledEncodingInfo rescale( const AimsData<INP> & in,
-                                               AimsData<OUTP> & out );
+      static soma::ScaledEncodingInfo rescale( const carto::Volume<INP> & in,
+                                               carto::Volume<OUTP> & out );
   };
 }
 

@@ -31,9 +31,9 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-// we don't want to issue a warning
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
 #endif
 
 #include <aims/io/labelImage.h>
@@ -45,35 +45,35 @@ using namespace carto;
 using namespace std;
 
 LabelReader::LabelReader( const string& filename ) 
-  : Reader<AimsData<int16_t> >( filename )
+  : Reader<VolumeRef<int16_t> >( filename )
 {
 }
 
 
-bool LabelReader::read( AimsData<int16_t> & vol, int border, 
-			const string* format )
+bool LabelReader::read( VolumeRef<int16_t> & vol, int border,
+                        const string* format )
 {
   Finder	f;
   if( ! f.check( _filename ) || f.objectType() != "Volume" )
     return false;
 
   if( f.dataType() == "S16" )
-    return Reader<AimsData<int16_t> >::read( vol, border, format );
+    return Reader<VolumeRef<int16_t> >::read( vol, border, format );
 
   // allow on-fly conversion of byte formats
   if( f.dataType() == "U8" )
+  {
+    Reader<VolumeRef<byte> >		reader( _filename );
+    VolumeRef< byte >			tmp;
+    Converter< carto::VolumeRef<byte>, carto::VolumeRef<int16_t> >	conv;
+    if( reader.read( tmp, border, format ) )
     {
-      Reader<AimsData<byte> >		reader( _filename );
-      AimsData< byte >			tmp;
-      Converter< carto::VolumeRef<byte>, carto::VolumeRef<int16_t> >	conv;
-      if( reader.read( tmp, border, format ) )
-	{
-	  carto::VolumeRef<int16_t>	*v = conv( tmp );
-	  vol = *v;
-	  delete v;
-	  return true;
-	}
+      carto::VolumeRef<int16_t>	*v = conv( tmp );
+      vol = *v;
+      delete v;
+      return true;
     }
+  }
 
   return false;
 }

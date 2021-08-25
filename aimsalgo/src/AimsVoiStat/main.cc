@@ -326,7 +326,7 @@ int main( int argc, const char **argv )
       {
         LabelReader lrd( filevoi);
         AimsData< short > label;
-        lrd >> label;
+        lrd.read( label );
         roi.setLabel( label );
         roi.data2bucket();
         AimsData< short > zero(1,1,1);

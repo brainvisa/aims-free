@@ -39,20 +39,20 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/io/reader.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 namespace aims
 {
 
-  class AIMSDATA_API LabelReader : public Reader<AimsData<int16_t> >
+  class LabelReader : public Reader<carto::VolumeRef<int16_t> >
   {
   public:
     LabelReader( const std::string& filename );
     virtual ~LabelReader() {}
 
-    using Reader<AimsData<int16_t> >::read;
-    virtual bool read( AimsData<int16_t> & vol, int border=0, 
-		       const std::string* format = 0 );
+    using Reader<carto::VolumeRef<int16_t> >::read;
+    virtual bool read( carto::VolumeRef<int16_t> & vol, int border=0,
+                       const std::string* format = 0 );
   };
 
 }

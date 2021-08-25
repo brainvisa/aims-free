@@ -31,13 +31,13 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-// we don't want to issue a warning
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
 #endif
 
 #include <aims/io/readerasobject.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/mesh/surface.h>
 #include <aims/mesh/texture.h>
 #include <aims/bucket/bucket.h>
@@ -53,36 +53,36 @@ ReaderAsObject::ReaderAsObject( const string & fname )
   : Process(), _filename( fname )
 {
   registerProcessType( "Volume", "S8", 
-                       &ReaderAsObject::readAsObject<AimsData<int8_t> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<int8_t> > );
   registerProcessType( "Volume", "U8", 
-                       &ReaderAsObject::readAsObject<AimsData<uint8_t> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<uint8_t> > );
   registerProcessType( "Volume", "S16", 
-                       &ReaderAsObject::readAsObject<AimsData<int16_t> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<int16_t> > );
   registerProcessType( "Volume", "U16", 
-                       &ReaderAsObject::readAsObject<AimsData<uint16_t> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<uint16_t> > );
   registerProcessType( "Volume", "S32", 
-                       &ReaderAsObject::readAsObject<AimsData<int32_t> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<int32_t> > );
   registerProcessType( "Volume", "U32", 
-                       &ReaderAsObject::readAsObject<AimsData<uint32_t> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<uint32_t> > );
   registerProcessType( "Volume", "FLOAT", 
-                       &ReaderAsObject::readAsObject<AimsData<float> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<float> > );
   registerProcessType( "Volume", "DOUBLE", 
-                       &ReaderAsObject::readAsObject<AimsData<double> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<double> > );
   registerProcessType( "Volume", "RGB", 
-                       &ReaderAsObject::readAsObject<AimsData<AimsRGB> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<AimsRGB> > );
   registerProcessType( "Volume", "RGBA", 
-                       &ReaderAsObject::readAsObject<AimsData<AimsRGBA> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<AimsRGBA> > );
   registerProcessType( "Volume", "CFLOAT", 
-                       &ReaderAsObject::readAsObject<AimsData<cfloat> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<cfloat> > );
   registerProcessType( "Volume", "CDOUBLE", 
-                       &ReaderAsObject::readAsObject<AimsData<cdouble> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<cdouble> > );
   registerProcessType( "Volume", "POINT3DF", 
-                       &ReaderAsObject::readAsObject<AimsData<Point3df> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<Point3df> > );
   registerProcessType( "Volume", DataTypeCode<Point3d>::name(), 
-                       &ReaderAsObject::readAsObject<AimsData<Point3d> > );
+                       &ReaderAsObject::readAsObject<VolumeRef<Point3d> > );
   registerProcessType( "Volume", DataTypeCode<AimsVector<float,6> >::name(), 
                        &ReaderAsObject::readAsObject
-                       <AimsData<AimsVector<float,6> > > );
+                       <VolumeRef<AimsVector<float,6> > > );
 
   registerProcessType( "Mesh", "VOID", 
                        &ReaderAsObject::readAsObject<AimsSurfaceTriangle> );

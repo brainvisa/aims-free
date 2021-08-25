@@ -31,16 +31,15 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-// we don't want to issue a warning
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
 #endif
 
 #include <cstdlib>
 #include <limits>
 #include <aims/io/scaledcoding.h>
 #include <cartodata/volume/volume.h>
-#include <aims/data/data.h>
 
 using namespace aims;
 using namespace carto;
@@ -81,7 +80,7 @@ namespace aims
 
   template <typename INP, typename OUTP> 
   soma::ScaledEncodingInfo ScaledEncoding<INP, OUTP>::info(
-    const AimsData<INP> & vol )
+    const carto::Volume<INP> & vol )
   {
     vector<long> strides(4);
     strides[0] = &vol(1) - &vol(0);
@@ -89,13 +88,13 @@ namespace aims
     strides[2] = &vol(0, 0, 1) - &vol(0);
     strides[3] = &vol(0, 0, 0, 1) - &vol(0);
     soma::ScaledEncoding<INP, OUTP> ssenc;
-    return ssenc.info( &vol(0), strides, vol.volume()->getSize() );
+    return ssenc.info( &vol(0), strides, vol.getSize() );
   }
 
 
   template <typename INP, typename OUTP> 
   soma::ScaledEncodingInfo ScaledEncoding<INP, OUTP>::rescale(
-    const AimsData<INP> & in, AimsData<OUTP> & out )
+    const carto::Volume<INP> & in, carto::Volume<OUTP> & out )
   {
     soma::ScaledEncoding<INP, OUTP> ssenc;
     vector<long> strides(4);
@@ -103,7 +102,7 @@ namespace aims
     strides[1] = &in(0, 1) - &in(0);
     strides[2] = &in(0, 0, 1) - &in(0);
     strides[3] = &in(0, 0, 0, 1) - &in(0);
-    return ssenc.rescale( &in(0), strides, in.volume()->getSize(), &out(0) );
+    return ssenc.rescale( &in(0), strides, in.getSize(), &out(0) );
   }
 
 
