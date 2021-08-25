@@ -32,9 +32,9 @@
  */
 
 
-// we don't want to issue a warning
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
 #endif
 
 #include <cstdlib>
@@ -42,7 +42,7 @@
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <aims/getopt/getopt2.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 using namespace aims;
 using namespace carto;
@@ -82,8 +82,7 @@ int main( int argc, const char **argv )
     cout << "done" << endl;
 
 
-
-    AimsData<byte>* mask = NULL;
+    VolumeRef<byte> mask;
     int dimX = 0, dimY = 0, dimZ = 0;
 
     if( !bucketRM.fileName().empty() )
@@ -101,13 +100,11 @@ int main( int argc, const char **argv )
         if ( it->location().item(2) > dimZ )
           dimZ = it->location().item(2);
       }
-      mask = new AimsData<byte>( ++dimX, ++dimY, ++dimZ );
-      *mask = false;
+      mask.reset( new Volume<byte>( ++dimX, ++dimY, ++dimZ ) );
+      mask = false;
       list< AimsBucketItem<Void> >::iterator vi;
       for ( vi = bucketM[0].begin(); vi != bucketM[0].end(); vi++ )
-        (*mask)( vi->location().item(0),
-                vi->location().item(1),
-                vi->location().item(2) ) = true;
+        mask( vi->location() ) = true;
 
       cout << "done" << endl;
     }
@@ -140,11 +137,10 @@ int main( int argc, const char **argv )
     {
       list< AimsBucketItem<DtiTensor> >::iterator it;
       for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
-        if ( (*mask)( it->location().item(0),
+        if ( mask( it->location().item(0),
                       it->location().item(1),
                       it->location().item(2) ) == true )
           subpart.push_back( *it );
-      delete mask;
     }
     cout << "done" << endl;
 
