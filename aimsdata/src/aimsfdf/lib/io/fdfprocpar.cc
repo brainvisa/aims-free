@@ -35,6 +35,11 @@
  *  lecture de fichiers FDF
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/io/fdfprocpar_g.h>
 
 using namespace aims;
