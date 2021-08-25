@@ -32,9 +32,9 @@
  */
 
 
-// we don't want to issue a warning
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
 #endif
 
 #include <cstdlib>
@@ -44,7 +44,7 @@
 #include <aims/graph/graphmanip.h>
 #include <aims/distancemap/voronoi.h>
 #include <aims/resampling/motion.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <graph/graph/graph.h>
 
 using namespace aims;
@@ -56,13 +56,13 @@ int main( int argc, const char** argv )
   try
     {
       AimsApplication	app( argc, argv, 
-			     "Transfers labelling from a buckets graph to " 
+                             "Transfers labelling from a buckets graph to "
                              "another graph.\n" 
                              "Graph structures don't need to match, transfer " 
                              "is based on a Voronoi diagram" );
       Reader<Graph>			rg1, rg2;
       Writer<Graph>			wg;
-      Writer<AimsData<int16_t> >	wv;
+      Writer<VolumeRef<int16_t> >	wv;
       string				labelsfile;
       bool                              forceSameSpace = false;
       string				labelatt = "name";
@@ -164,8 +164,8 @@ int main( int argc, const char** argv )
       // voronoi in h space
       cout << "volume dim: " << dims << endl;
 
-      AimsData<short>	voro( dims[0], dims[1], dims[2] );
-      voro.setSizeXYZT( vs[0], vs[1], vs[2] );
+      VolumeRef<short>	voro( dims[0], dims[1], dims[2] );
+      voro.setVoxelSize( vs[0], vs[1], vs[2] );
       voro = -10;
 
       Graph::iterator			ig, eg = g->end();

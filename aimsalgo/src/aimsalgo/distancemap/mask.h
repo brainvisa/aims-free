@@ -39,7 +39,7 @@
 #include <aims/vector/vector.h>
 
 
-class AIMSALGO_API ChamferMask
+class ChamferMask
 {
   public:
     ChamferMask() : _length( 0 ), _offset( 0 ), _distance( 0 ) {}
@@ -47,6 +47,10 @@ class AIMSALGO_API ChamferMask
 
     void set( int dimx, int dimy, int dimz,
               float sizex, float sizey, float sizez,
+              float mult_factor );
+    void set( const std::vector<int> & dims, const std::vector<float> & vsize,
+              float mult_factor );
+    void set( int dimx, int dimy, int dimz, const std::vector<float> & vsize,
               float mult_factor );
 
     int length() const { return _length; }

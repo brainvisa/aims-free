@@ -32,12 +32,19 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>
 #include <aims/distancemap/distancemap_g.h>
-#include <aims/data/data_g.h>
-#include <aims/io/io_g.h>
+#include <cartodata/volume/volume.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+#include <aims/io/finder.h>
 #include <iostream>
 
 using namespace aims;
@@ -184,8 +191,8 @@ template <class T>
 bool doit( Process & p, const string & filein, Finder & f ) {
 
   Voronoi & v = (Voronoi &)p;
-  AimsData<T> seed;
-  Reader<AimsData<T> > dataR( filein );
+  VolumeRef<T> seed;
+  Reader<VolumeRef<T> > dataR( filein );
   string format = f.format();
   cout << "reading seed " << filein << endl;
   if( !dataR.read( seed, 0, &format ) )
@@ -194,7 +201,7 @@ bool doit( Process & p, const string & filein, Finder & f ) {
     return( 1 );
   }
 
-  AimsData<T> label;
+  VolumeRef<T> label;
   /* use round() to convert _val_domain and _val_outside from double to T
      if T is an integer type, otherwise rounding may change the value.
   */
@@ -205,8 +212,8 @@ bool doit( Process & p, const string & filein, Finder & f ) {
                                        v._xmask, v._ymask, v._zmask,
                                        v._factor );
 
-  Writer<AimsData<T> > dataW( v._fileout );
-  dataW << label;
+  Writer<Volume<T> > dataW( v._fileout );
+  dataW.write( *label );
 
   return true;
 }

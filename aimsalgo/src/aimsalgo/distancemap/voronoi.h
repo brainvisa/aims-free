@@ -37,11 +37,16 @@
 
 #include <aims/config/aimsalgo_config.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <typename T> class Volume;
+  template <typename T> class VolumeRef;
+}
 
 template <class T>
-AIMSALGO_API AimsData<T>
-AimsVoronoiFrontPropagation( AimsData<T>& vol, T val_domain, T val_outside,
+carto::VolumeRef<T>
+AimsVoronoiFrontPropagation( carto::rc_ptr<carto::Volume<T> > & vol,
+                             T val_domain, T val_outside,
                              int xm, int ym, int zm, float mult_factor );
 
 #endif

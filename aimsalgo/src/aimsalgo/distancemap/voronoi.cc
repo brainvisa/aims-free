@@ -32,105 +32,127 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <iomanip>
 #include <limits>
 #include <cartobase/config/verbose.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/bucket/bucket.h>
 #include <aims/distancemap/mask.h>
 #include <aims/math/mathelem.h>
+#include <cartobase/containers/nditerator.h>
+
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 #define AIMS_OUTSIDE(T) std::numeric_limits<T>::max()
 #define AIMS_DOMAIN(T) std::numeric_limits<T>::max() - 1
 
 template <class T>
-void AimsVoronoiPreparation( AimsData<T>& vol,
+void AimsVoronoiPreparation( rc_ptr<Volume<T> > & vol,
                              T val_domain, T val_outside)
 {
-  int x, y, z;
-
-  ForEach3d( vol, x, y, z )
-    if ( vol( x, y, z ) == val_outside )
-      vol( x, y, z ) = AIMS_OUTSIDE(T);
-    else if ( vol( x, y, z ) == val_domain )
-      vol( x, y, z ) = AIMS_DOMAIN(T);
-    else
-      vol( x, y, z ) = 0;
+  T *p, *pp;
+  line_NDIterator<T> it( &vol->at( 0 ), vol->getSize(), vol->getStrides(),
+                         true );
+  for( ; !it.ended(); ++it )
+  {
+    p = &*it;
+    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+      if( *p == val_outside )
+        *p = AIMS_OUTSIDE(T);
+      else if( *p == val_domain )
+        *p = AIMS_DOMAIN(T);
+      else
+        *p = 0;
+  }
 }
 
 template <class T>
-void AimsRestoreVol( AimsData<T>& vol, T val_domain, T val_outside)
+void AimsRestoreVol( rc_ptr<Volume<T> > & vol, T val_domain, T val_outside)
 {
-  int x, y, z;
+  T *p, *pp;
+  line_NDIterator<T> it( &vol->at( 0 ), vol->getSize(), vol->getStrides(),
+                         true );
+  for( ; !it.ended(); ++it )
+  {
+    p = &*it;
+    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+      if( *p == AIMS_OUTSIDE(T) )
+        *p = val_outside;
+      else if( *p == AIMS_DOMAIN(T) )
+        *p = val_domain;
+      else
+        *p = 0;
+  }
 
-  ForEach3d( vol, x, y, z )
-    if ( vol( x, y, z ) == AIMS_OUTSIDE(T) )
-      vol( x, y, z ) = val_outside;
-    else if ( vol( x, y, z ) == AIMS_DOMAIN(T) )
-      vol( x, y, z ) = val_domain;
-    else
-      vol( x, y, z ) = 0;
 }
 
 
 inline
-bool inside( Point3d& pt, int dimX, int dimY, int dimZ )
+bool inside( Point3d& pt, const vector<int> & dims )
 {
-  if ( pt.item(0) < 0     ||
-       pt.item(0) >= dimX ||
-       pt.item(1) < 0     ||
-       pt.item(1) >= dimY ||
-       pt.item(2) < 0     ||
-       pt.item(2) >= dimZ   )
+  if ( pt.item(0) < 0        ||
+       pt.item(0) >= dims[0] ||
+       pt.item(1) < 0        ||
+       pt.item(1) >= dims[1] ||
+       pt.item(2) < 0        ||
+       pt.item(2) >= dims[2] )
     return false;
   return true;
 }
 
 template <class T>
 void
-FillVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
-                   AimsData<T>& label,
+FillVoronoiBucket( AimsBucket<Void>& bucket, rc_ptr<Volume<T> > & vol,
+                   rc_ptr<Volume<T> > & label,
                    const ChamferMask& mask )
 {
   int x=0, y=0, z=0, n=0;
-  int dimX = vol.dimX();
-  int dimY = vol.dimY();
-  int dimZ = vol.dimZ();
   Point3d neigh;
   AimsBucketItem<Void> item;
   T new_val;
+  vector<int> dims = vol->getSize();
 
-  for ( z = 0; z < dimZ; z++ )
-    for ( y = 0; y < dimY; y++ )
-      for ( x = 0; x < dimX; x++ )
+  T *p, *pp;
+  line_NDIterator<T> it( &vol->at( 0 ), dims, vol->getStrides() );
+  for( ; !it.ended(); ++it )
+  {
+    p = &*it;
+    vector<int> pos = it.position();
+    y = pos[1];
+    z = pos[2];
+    for( x=0, pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), ++x )
+      if( *p == 0 )
       {
-        if ( vol( x, y, z ) == 0 )
+        for ( n = 0; n < mask.length(); n++ )
         {
-          for ( n = 0; n < mask.length(); n++ )
+          neigh[0] = x + mask.offset( n ).item(0);
+          neigh[1] = y + mask.offset( n ).item(1);
+          neigh[2] = z + mask.offset( n ).item(2);
+          if ( inside( neigh, dims ) == true )
           {
-            neigh[0] = x + mask.offset( n ).item(0);
-            neigh[1] = y + mask.offset( n ).item(1);
-            neigh[2] = z + mask.offset( n ).item(2);
-            if ( inside( neigh, dimX, dimY, dimZ ) == true )
+            if ( vol->at( neigh ) && vol->at( neigh ) != AIMS_OUTSIDE(T) )
             {
-              if ( vol( neigh ) && vol( neigh ) != AIMS_OUTSIDE(T) )
+              new_val = mask.distance( n );
+              if ( new_val < vol->at( neigh ) )
               {
-                new_val = mask.distance( n );
-                if ( new_val < vol( neigh ) )
-                {
-                  item.location() = neigh;
-                  vol( neigh ) = new_val;
-                  label( neigh ) = label( x, y, z );
-                  bucket[ new_val ].push_back( item );
-                }
+                item.location() = neigh;
+                vol->at( neigh ) = new_val;
+                label->at( neigh ) = label->at( x, y, z );
+                bucket[ new_val ].push_back( item );
               }
             }
           }
         }
       }
+  }
 }
 
 // Make this warning non-fatal as it is probably harmless and the fix is not
@@ -139,22 +161,20 @@ FillVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
 #pragma GCC diagnostic warning "-Wsign-compare"
 template <class T>
 void
-EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
-                    AimsData<T>& label,
+EmptyVoronoiBucket( AimsBucket<Void>& bucket, rc_ptr<Volume<T> > & vol,
+                    rc_ptr<Volume<T> > & label,
                     const ChamferMask& mask, int limit, float mult_factor )
 {
   list< AimsBucketItem<Void> >::const_iterator it,ite;
   list< AimsBucketItem<Void> >* ptr=NULL;
   AimsBucketItem<Void> item;
-  int dimX = vol.dimX();
-  int dimY = vol.dimY();
-  int dimZ = vol.dimZ();
+  vector<int> dims = vol->getSize();
   int dist,n,d;
   Point3d center,neigh;
   T new_val;
   int last_dist=0;
 
-  AimsData< list< AimsBucketItem<Void> >* > lstPtr( limit );
+  Volume< list< AimsBucketItem<Void> >* > lstPtr( limit );
   lstPtr = NULL;
   for ( AimsBucket<Void>::iterator lst  = bucket.begin();
                                    lst != bucket.end(); lst++ )
@@ -176,21 +196,21 @@ EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
       {
         center = it->location();
 
-        if ( int( vol( center ) ) >= dist )
+        if ( int( vol->at( center ) ) >= dist )
           for ( n = 0; n < mask.length(); n++ )
           {
             neigh.item(0) = center.item(0) + mask.offset( n ).item(0);
             neigh.item(1) = center.item(1) + mask.offset( n ).item(1);
             neigh.item(2) = center.item(2) + mask.offset( n ).item(2);
-            if ( inside( neigh, dimX, dimY, dimZ ) &&
-                 int( vol( neigh ) ) > dist               &&
-                 vol( neigh ) != AIMS_OUTSIDE(T)         )
+            if ( inside( neigh, dims ) &&
+                 int( vol->at( neigh ) ) > dist               &&
+                 vol->at( neigh ) != AIMS_OUTSIDE(T)         )
             {
-              new_val = vol( center ) + mask.distance( n );
-              if ( new_val < vol( neigh ) )
+              new_val = vol->at( center ) + mask.distance( n );
+              if ( new_val < vol->at( neigh ) )
               {
-                vol( neigh ) = new_val;
-                label( neigh ) = label( center );
+                vol->at( neigh ) = new_val;
+                label->at( neigh ) = label->at( center );
                 item.location() = neigh;
                 bucket[ ( d = dist + mask.distance( n ) ) ].push_back( item );
                 if ( lstPtr( d ) == NULL )
@@ -209,8 +229,8 @@ EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
 
 
 template <class T>
-AimsData<T>
-AimsVoronoiFrontPropagation( AimsData<T>& vol,
+VolumeRef<T>
+AimsVoronoiFrontPropagation( rc_ptr<Volume<T> > & vol,
                              T val_domain, T val_outside,
                              int xm, int ym, int zm, float mult_factor )
 {
@@ -218,17 +238,23 @@ AimsVoronoiFrontPropagation( AimsData<T>& vol,
   AimsBucket<Void> bucket;
   int limit;
 
-  limit = int( mult_factor * sqrt( sqr( vol.dimX() * vol.sizeX() ) +
-                                   sqr( vol.dimY() * vol.sizeY() ) +
-                                   sqr( vol.dimZ() * vol.sizeZ() )  ) + 0.5 );
+  // WARNING: sqr( vol->getSizeX() * vol->getSizeX() ) is a double square ?
+
+//   limit = int( mult_factor * sqrt( sqr( vol->getSizeX() * vol->getSizeX() ) +
+//                                    sqr( vol->getSizeY() * vol->getSizeY() ) +
+//                                    sqr( vol->getSizeZ() * vol->getSizeZ() ) )
+//                + 0.5 );
+  limit = int( mult_factor * sqrt( sqr( vol->getSizeX() ) +
+                                   sqr( vol->getSizeY() ) +
+                                   sqr( vol->getSizeZ() ) ) + 0.5 );
 
   if (carto::verbose)
     std::cout << "limited distance to process voronoi is: "
               << carto::toString(limit) << std::endl;
 
-  mask.set( xm, ym, zm, vol.sizeX(), vol.sizeY(), vol.sizeZ(), mult_factor );
+  mask.set( xm, ym, zm, vol->getVoxelSize(), mult_factor );
 
-  AimsData<T> label = vol.clone();
+  VolumeRef<T> label = VolumeRef<T>( vol ).deepcopy();
 
   AimsVoronoiPreparation( vol, val_domain, val_outside );
 
@@ -245,35 +271,43 @@ AimsVoronoiFrontPropagation( AimsData<T>& vol,
 
 // Instanciations
 template
-AimsData<uint8_t>
-AimsVoronoiFrontPropagation<uint8_t>( AimsData<uint8_t>& vol,
+VolumeRef<uint8_t>
+AimsVoronoiFrontPropagation<uint8_t>( rc_ptr<Volume<uint8_t> > & vol,
                                       uint8_t val_domain, uint8_t val_outside,
-                                       int xm, int ym, int zm, float mult_factor );
+                                      int xm, int ym, int zm,
+                                      float mult_factor );
 template
-AimsData<int8_t>
-AimsVoronoiFrontPropagation<int8_t>( AimsData<int8_t>& vol,
+VolumeRef<int8_t>
+AimsVoronoiFrontPropagation<int8_t>( rc_ptr<Volume<int8_t> > & vol,
                                      int8_t val_domain, int8_t val_outside,
-                                     int xm, int ym, int zm, float mult_factor );
+                                     int xm, int ym, int zm,
+                                     float mult_factor );
 
 template
-AimsData<uint16_t>
-AimsVoronoiFrontPropagation<uint16_t>( AimsData<uint16_t>& vol,
-                                       uint16_t val_domain, uint16_t val_outside,
-                                       int xm, int ym, int zm, float mult_factor );
+VolumeRef<uint16_t>
+AimsVoronoiFrontPropagation<uint16_t>( rc_ptr<Volume<uint16_t> > & vol,
+                                       uint16_t val_domain,
+                                       uint16_t val_outside,
+                                       int xm, int ym, int zm,
+                                       float mult_factor );
 template
-AimsData<int16_t>
-AimsVoronoiFrontPropagation<int16_t>( AimsData<int16_t>& vol,
+VolumeRef<int16_t>
+AimsVoronoiFrontPropagation<int16_t>( rc_ptr<Volume<int16_t> > & vol,
                                       int16_t val_domain, int16_t val_outside,
-                                      int xm, int ym, int zm, float mult_factor );
+                                      int xm, int ym, int zm,
+                                      float mult_factor );
 
 template
-AimsData<uint32_t>
-AimsVoronoiFrontPropagation<uint32_t>( AimsData<uint32_t>& vol,
-                                       uint32_t val_domain, uint32_t val_outside,
-                                       int xm, int ym, int zm, float mult_factor );
+VolumeRef<uint32_t>
+AimsVoronoiFrontPropagation<uint32_t>( rc_ptr<Volume<uint32_t> > & vol,
+                                       uint32_t val_domain,
+                                       uint32_t val_outside,
+                                       int xm, int ym, int zm,
+                                       float mult_factor );
 
 template
-AimsData<int32_t>
-AimsVoronoiFrontPropagation<int32_t>( AimsData<int32_t>& vol,
+VolumeRef<int32_t>
+AimsVoronoiFrontPropagation<int32_t>( rc_ptr<Volume<int32_t> > & vol,
                                       int32_t val_domain, int32_t val_outside,
-                                      int xm, int ym, int zm, float mult_factor );
+                                      int xm, int ym, int zm,
+                                      float mult_factor );

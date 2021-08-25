@@ -32,15 +32,16 @@
  */
 
 
-// we don't want to issue a warning
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
 #endif
 
 #include <aims/talairach/talACPCNorm.h>
 #include <aims/talairach/cramer.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
+using namespace carto;
 
 TalairachACPCNorm::TalairachACPCNorm() :
   TalairachReferential(), _norm(1.)
@@ -51,7 +52,7 @@ TalairachACPCNorm::TalairachACPCNorm() :
 Motion TalairachACPCNorm::computeTransformation( const TalairachPoints& pt )
 {
   computeVectors( pt );
-  AimsData<float> rotation(3, 3) ;
+  VolumeRef<float> rotation(3, 3) ;
   Point3df translation = -pt.ACmm() ;
   
   rotation(0, 0) = _hemiVec[ 0 ];

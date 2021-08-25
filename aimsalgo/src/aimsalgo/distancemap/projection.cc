@@ -953,8 +953,8 @@ AimsData<short> aims::meshdistance::MeshParcellation2Volume(const AimsData<short
   cout << out << "/" << vert.size() <<" points cannot be projected onto the volume \n";
   int xmask = 3, ymask = 3, zmask = 3;
   float factor = 50;
-  vol = AimsVoronoiFrontPropagation( vol , val_domain, back ,
-  			     xmask, ymask, zmask, factor );
+  vol = AimsVoronoiFrontPropagation<short>( vol , val_domain, back ,
+                                            xmask, ymask, zmask, factor );
   
 
   //ForEach3d(vol,x,y,z)

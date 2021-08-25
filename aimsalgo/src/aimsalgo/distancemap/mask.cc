@@ -32,6 +32,11 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <aims/distancemap/mask.h>
 #include <aims/math/mathelem.h>
@@ -78,3 +83,18 @@ void ChamferMask::set( int dimx, int dimy, int dimz,
                                            sqr( z * sizez )  ) + 0.5 );
           }
 }
+
+
+void ChamferMask::set( const vector<int> & dims, const vector<float> & vsize,
+                       float mult_factor )
+{
+  set( dims[0], dims[1], dims[2], vsize[0], vsize[1], vsize[2], mult_factor );
+}
+
+
+void ChamferMask::set( int dimx, int dimy, int dimz,
+                       const vector<float> & vsize, float mult_factor )
+{
+  set( dimx, dimy, dimz, vsize[0], vsize[1], vsize[2], mult_factor );
+}
+

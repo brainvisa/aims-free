@@ -33,8 +33,8 @@ rc_ptr_Volume_S16 AimsMorphoChamferOpening( const rc_ptr_Volume_S16 &vol,
   float size, int xmask=3, int ymask=3, int zmask=3,
   float mult_fact=50 ) throw() /ReleaseGIL/;
 
-AimsData_S16
-AimsVoronoiFrontPropagation( AimsData_S16 & vol,
+rc_ptr_Volume_S16
+AimsVoronoiFrontPropagation( rc_ptr_Volume_S16 & vol,
                              short val_domain, short val_outside,
                              int xm, int ym, int zm, float mult_factor )
   throw() /ReleaseGIL/;
