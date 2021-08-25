@@ -35,7 +35,7 @@
 #ifndef AIMS_HISTOGRAM_HISTOGRAM_H
 #define AIMS_HISTOGRAM_HISTOGRAM_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <fstream>
 
 
@@ -63,26 +63,26 @@ class Histogram
     /** @name Data of histogram */
     //@{
     /// return a reference to the data field of the histogram class.
-    AimsData<int32_t>& data() { return _data; }
+    carto::VolumeRef<int32_t>& data() { return _data; }
     /// return a constant reference to the data field of the histogram class.
-    const AimsData<int32_t>& data() const { return _data; }
+    const carto::VolumeRef<int32_t>& data() const { return _data; }
     //@}
 
     /** @name Iterators */
     //@{
     /// return the iterator to the first valid value of the histogram
-    AimsData<int32_t>::iterator beginValid() 
-    { return _data.begin(); }
+    int32_t * beginValid()
+    { return &*_data.begin(); }
     /// return the iterator to the last valid value of the histogram
-    AimsData<int32_t>::iterator endValid()
-    { return _data.begin() + _maxValid - _minValid + 1; }
+    int32_t * endValid()
+    { return &_data.at( _maxValid - _minValid + 1 ); }
 
     /// return the constant iterator to the first valid value of the histogram
-    AimsData<int32_t>::const_iterator beginValid() const 
-    { return _data.begin(); }
+    int32_t * beginValid() const
+    { return &*_data.begin(); }
     /// return the constant iterator to the last valid value of the histogram
-    AimsData<int32_t>::const_iterator endValid() const 
-    { return _data.begin() + _maxValid - _minValid + 1; }
+    int32_t * endValid() const
+    { return &_data.at( _maxValid - _minValid + 1 ); }
     //@}
 
     /// return the minimum valid (used) value of the histogram
@@ -95,7 +95,7 @@ class Histogram
 
     /** the histogram computation function. \\
         This virtual function must be defined in the child classes. */
-    virtual void doit( const AimsData<T>& ) { }
+    virtual void doit( const carto::rc_ptr<carto::Volume<T> > & ) { }
 
     /** @name Output stream */
     //@{
@@ -114,7 +114,7 @@ class Histogram
     int _maxValid;
 
     /// histogram datas
-    AimsData<int32_t> _data;
+    carto::VolumeRef<int32_t> _data;
 };
 
 
@@ -130,7 +130,7 @@ Histogram<T>::Histogram( const Histogram<T>& other )
              : _nPoints( other._nPoints ), _minValid( other._minValid ), 
                _maxValid( other._maxValid )
 {
-  _data = other.data().clone();
+  _data = other.data().deepcopy();
 }
 
 

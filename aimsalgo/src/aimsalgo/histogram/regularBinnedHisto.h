@@ -40,7 +40,6 @@
 #include <vector>
 #include <map>
 
-// #include <time.h> // FIXME DEBUG
 
 namespace aims
 {
@@ -58,14 +57,15 @@ namespace aims
 
       /** classical histogram computation function.
       */
-      void doit( const AimsData<T>& thing );
+      void doit( const carto::rc_ptr<carto::Volume<T> > & thing );
       // same but specify min/max to avoid seaching extrema
-      void doit( const AimsData<T>& thing, T mindataval, T maxdataval );
+      void doit( const carto::rc_ptr<carto::Volume<T> > & thing,
+                 T mindataval, T maxdataval );
       unsigned bins() const { return _bins; }
       void setBins( unsigned bins );
       T minDataValue() const { return _minvalue; }
       T maxDataValue() const { return _maxvalue; }
-      std::vector<T> *unique( const AimsData<T>& thing,
+      std::vector<T> *unique( const carto::rc_ptr<carto::Volume<T> > & thing,
                               size_t abort_max = 0 ) const;
 
     private:
@@ -95,20 +95,21 @@ namespace aims
   void RegularBinnedHistogram<T>::setBins( unsigned bins )
   {
     _bins = bins;
-    this->_data = AimsData<int32_t>();
+    this->_data = carto::VolumeRef<int32_t>();
   }
 
 
   template< typename T > inline
-  void RegularBinnedHistogram<T>::doit( const AimsData<T>& thing )
+  void RegularBinnedHistogram<T>::doit(
+    const carto::rc_ptr<carto::Volume<T> > & thing )
   {
-    doit( thing, thing.minimum(), thing.maximum() );
+    doit( thing, thing->min(), thing->max() );
   }
 
 
   template< typename T > inline
-  void RegularBinnedHistogram<T>::doit( const AimsData<T>& thing, T mini,
-                                        T maxi )
+  void RegularBinnedHistogram<T>::doit(
+    const carto::rc_ptr<carto::Volume<T> > & thing, T mini, T maxi )
   {
     _minvalue = mini;
     _maxvalue = maxi;
@@ -118,59 +119,54 @@ namespace aims
       _bins = 256;
     }
 
-    this->_data = AimsData<int32_t>( _bins );
-    this->_data = 0;
-    typename AimsData<T>::const_iterator  iv, fv=thing.end();
+    this->_data = carto::VolumeRef<int32_t>( _bins );
+    this->_data.fill( 0 );
     double scl = (double) _bins / (double) ( maxi - mini );
     double x;
     int y;
-    long stride = &thing( 1 ) - &thing( 0 );
 
-    int iy, iz, it, nx = thing.dimX(), ny = thing.dimY(), nz = thing.dimZ(),
-      nt = thing.dimT();
-    for( it=0; it<nt; ++it )
-      for( iz=0; iz<nz; ++iz )
-        for( iy=0; iy<ny; ++iy )
-          for( iv=&thing( 0, iy, iz, it ), fv=iv+nx * stride; iv!=fv;
-               iv+=stride )
-          {
-//             std::cout << "iv: " << iv << ", nx: " << nx << ", ny: " << ny << ", nz: " << nz << ", nt: " << nt << ", iv+1: " << &thing( 1, iy, iz, it ) << std::endl;
-            x = (double) ( (double) (*iv) - mini ) * scl;
-            y = (int) x;
-            if( y < 0 )
-            {}
-            else if( y >= (int) _bins )
-            {
-              if( x == (int) _bins )
-                ++this->_data( _bins-1 );
-            }
-            else
-              ++this->_data( y );
-          }
+    const T *iv, *pp;
+
+    carto::const_line_NDIterator<T> it( &thing->at( 0 ), thing->getSize(),
+                                        thing->getStrides(), true );
+    for( ; !it.ended(); ++it )
+    {
+      iv = &*it;
+      for( pp=iv + it.line_length(); iv!=pp; it.inc_line_ptr( iv ) )
+      {
+        x = (double) ( (double) (*iv) - mini ) * scl;
+        y = (int) x;
+        if( y < 0 )
+        {}
+        else if( y >= (int) _bins )
+        {
+          if( x == (int) _bins )
+            ++this->_data( _bins-1 );
+        }
+        else
+          ++this->_data( y );
+      }
+    }
   }
 
 
   template< typename T > inline
   std::vector<T> *
-  RegularBinnedHistogram<T>::unique( const AimsData<T>& thing,
-                                     size_t abort_max ) const
+  RegularBinnedHistogram<T>::unique(
+    const carto::rc_ptr<carto::Volume<T> > & thing, size_t abort_max ) const
   {
     std::map<T, unsigned> vals;
     // std::cout << "unique...\n";
     // clock_t t0 = clock();
     size_t n = 0;
-    std::vector<size_t> sstrides = thing.volume()->getStrides();
-    std::vector<int> strides;
-    strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
     const T *iv, *pp;
-    long stride = sstrides[0];
 
-    carto::const_line_NDIterator<T> it( &thing( 0 ), thing.volume()->getSize(),
-                                        strides );
+    carto::const_line_NDIterator<T> it( &thing->at( 0 ), thing->getSize(),
+                                        thing->getStrides(), true );
     for( ; !it.ended(); ++it )
     {
       iv = &*it;
-      for( pp=iv + thing.volume()->getSizeX() * stride; iv!=pp; iv+=stride )
+      for( pp=iv + it.line_length(); iv!=pp; it.inc_line_ptr( iv ) )
       {
         ++vals[*iv];
         if( abort_max != 0 )
@@ -181,7 +177,7 @@ namespace aims
         }
       }
     }
-    // std::cout << "unique map done in " << float(clock() - t0) / CLOCKS_PER_SEC << "s: " << thing.dimX() * thing.dimY() * thing.dimZ() * thing.dimT() * CLOCKS_PER_SEC / float(clock() - t0) << " vox/s.\n";
+    // std::cout << "unique map done in " << float(clock() - t0) / CLOCKS_PER_SEC << "s: " << thing->getSizeX() * thing->getSizeY() * thing->getSizeZ.dimZ() * thing->getSizeT() * CLOCKS_PER_SEC / float(clock() - t0) << " vox/s.\n";
     std::vector<T> *res = new std::vector<T>( vals.size() );
     typename std::map<T, unsigned>::iterator im, e = vals.end();
     typename std::vector<T>::iterator i = res->begin();

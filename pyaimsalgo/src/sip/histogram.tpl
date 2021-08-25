@@ -15,9 +15,9 @@ typedef Histogram<%Template1% > Histogram_%Template1typecode%;
       & other );
     virtual ~Histogram_%Template1typecode%();
 
-    AimsData_S32 & data();
+    rc_ptr_Volume_S32 & data();
 
-    virtual void doit( const AimsData_%Template1typecode% & ) = 0;
+    virtual void doit( const rc_ptr_Volume_%Template1typecode% & ) = 0;
 };
 
 namespace aims
@@ -47,15 +47,15 @@ typedef Histogram<%Template1% > Histogram_%Template1typecode%;
       RegularBinnedHistogram_%Template1typecode%( const aims::RegularBinnedHistogram_%Template1typecode% & other );
       virtual ~RegularBinnedHistogram_%Template1typecode%();
 
-      void doit( const AimsData_%Template1typecode% & thing );
-      void doit( const AimsData_%Template1typecode% & thing, %Template1% mini,
-                 %Template1% maxi );
+      void doit( const rc_ptr_Volume_%Template1typecode% & thing );
+      void doit( const rc_ptr_Volume_%Template1typecode% & thing,
+                 %Template1% mini, %Template1% maxi );
       unsigned bins() const;
       void setBins( unsigned bins );
       %Template1% minDataValue() const;
       %Template1% maxDataValue() const;
-      vector_%Template1typecode% *unique( const AimsData_%Template1typecode%
-        & thing, size_t abort_max=0 ) const throw( std::runtime_error )
+      vector_%Template1typecode% *unique(
+        const rc_ptr_Volume_%Template1typecode% & thing, size_t abort_max=0 ) const throw( std::runtime_error )
         /Factory/;
   };
 

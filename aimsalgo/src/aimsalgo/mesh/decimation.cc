@@ -754,7 +754,7 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
           * exp( - ((float) step) / 5. );
         precthreshold = vol.minimum();
         precthreshold += float( histo.valueForPercentage( perc ) )
-          / histo.data().dimX() * ( vol.maximum() - vol.minimum() );
+          / histo.data().getSizeX() * ( vol.maximum() - vol.minimum() );
       }
       else
         precthreshold = thresholds[ std::min( (vector<float>::size_type) step,

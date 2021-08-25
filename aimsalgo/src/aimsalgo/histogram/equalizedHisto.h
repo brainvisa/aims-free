@@ -55,56 +55,62 @@ class Equalizer
   //
   /**@name Methods */
   //
-  // Histogram equalization from AimsData
+  // Histogram equalization from Volume
   // return the equalized image
-  AimsData<T> doit(const AimsData<T>& thing);
+  carto::VolumeRef<T> doit(const carto::rc_ptr<carto::Volume<T> > & thing);
 };
 
 
 template <class T> inline
-AimsData<T> Equalizer<T>::doit(const AimsData<T>& thing)
+carto::VolumeRef<T> Equalizer<T>::doit(
+  const carto::rc_ptr<carto::Volume<T> > & thing)
 {
 
   // 
   // Data 
   // 
-  int min = int(thing.minimum()), max = int(thing.maximum()), nb_tot = thing.dimX() * thing.dimY() * thing.dimZ(); 
+  int min = int(thing->min()), max = int(thing->max()),
+    nb_tot = thing->getSizeX() * thing->getSizeY() * thing->getSizeZ();
   float fraction;
   int tmp;
   
-  AimsData<T> res = thing.clone();
-  typename AimsData<T>::const_iterator it;
+  carto::VolumeRef<T> res = carto::VolumeRef<T>( thing ).deepcopy();
+  typename carto::Volume<T>::const_iterator it;
   
   //
   // Histogram computation
   // 
   max = max - min;
-  AimsData<int32_t> myHisto( max + 1 );      
+  carto::VolumeRef<int32_t> myHisto( max + 1, 1, 1, 1,
+                                     carto::AllocatorContext::fast() );
   
-  for(it = thing.begin(); it != thing.end(); ++it)
-    {
-      tmp = ( int32_t ) *it;
-      ++myHisto( tmp - min );
-    }  
+  for(it = thing->begin(); it != thing->end(); ++it)
+  {
+    tmp = ( int32_t ) *it;
+    ++myHisto( tmp - min );
+  }
   
-  AimsData<float> cumul( max + 1 );
+  carto::VolumeRef<float> cumul( max + 1, 1, 1, 1,
+                                 carto::AllocatorContext::fast() );
   cumul( 0 ) = myHisto( 0 ); 
   
-  AimsData<int32_t>::iterator it1;
-  AimsData<float>::iterator it2 = cumul.begin() + 1;
+  carto::Volume<int32_t>::iterator it1;
+  float * it2 = &*cumul.begin() + 1;
   
-  for ( it1 = myHisto.begin() + 1; it1 != myHisto.end(); ++it1, ++it2 )
+  for( it1 = myHisto.begin(), ++it1; it1 != myHisto.end(); ++it1, ++it2 )
       *it2 = *it1 + *( it2 - 1 );
   
-  for (it2 = cumul.begin(); it2 != cumul.end(); ++it2 )
-      *it2 /= (float) nb_tot;
+  carto::Volume<float>::iterator it4;
+  for (it4 = cumul.begin(); it4 != cumul.end(); ++it4 )
+      *it4 /= (float) nb_tot;
 
   //
   // Rounded cumulated histogram
   //
-  AimsData<int32_t> roundcumul( max + 1 );
+  carto::VolumeRef<int32_t> roundcumul( max + 1, 1, 1, 1,
+                                        carto::AllocatorContext::fast() );
 
-  it2  = cumul.begin();
+  it2  = &*cumul.begin();
   for (it1  = roundcumul.begin(); it1  != roundcumul.end(); ++it1 , ++it2)
     {
       fraction = *it2  * max;
@@ -114,7 +120,7 @@ AimsData<T> Equalizer<T>::doit(const AimsData<T>& thing)
   //
   // Equalized data computation
   // 
-  typename AimsData<T>::iterator it3;
+  typename carto::Volume<T>::iterator it3;
 
   for ( it3 = res.begin(); it3 != res.end(); ++it3, ++it)
       *it3 = static_cast<T> ( roundcumul( int32_t(*it3) ) - roundcumul(0) );

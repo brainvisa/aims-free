@@ -36,6 +36,7 @@
 #define AIMS_HISTOGRAM_SIMPLEHISTO_H
 
 #include <aims/histogram/histogram.h>
+#include <cartobase/containers/nditerator.h>
 
 /** Classical histogram container class.
  */
@@ -57,10 +58,10 @@ class SimpleHistogram : public Histogram<T>
 
     /** classical histogram computation function.\\
         Be careful that for float and double data types the histogram is
-        not set in a float or double 1D AimsData but in a 16 bits short
-        1D AimsData, i.e. a rebinning is performed.
+        not set in a float or double 1D Volume but in a 16 bits short
+        1D Volume, i.e. a rebinning is performed.
     */
-    void doit( const AimsData<T>& thing );
+    void doit( const carto::rc_ptr<carto::Volume<T> > & thing );
 
     /** @name Rebinning functions. */
     //@{
@@ -69,36 +70,35 @@ class SimpleHistogram : public Histogram<T>
     /** rebinning from the beginning iterator to the ending one.
         The result vector size is then defined by the number of bins
         included between the two iterators. */
-    void rebin( AimsData<int32_t>::iterator beg, AimsData<int32_t>::iterator end );
+    void rebin( carto::Volume<int32_t>::iterator beg, carto::Volume<int32_t>::iterator end );
     /** rebinning from iterator 'beg' to iterator 'end' to a result
         vector of size 'size' */
-    void rebin( int size, AimsData<int32_t>::iterator beg, 
-                AimsData<int32_t>::iterator end );
+    void rebin( int size, carto::Volume<int32_t>::iterator beg,
+                carto::Volume<int32_t>::iterator end );
     //@}
 };
 
 
 template< class T > inline
-void SimpleHistogram<T>::doit( const AimsData<T>& thing )
+void SimpleHistogram<T>::doit( const carto::rc_ptr<carto::Volume<T> > & thing )
 {
-  AimsData<int32_t> res( 1 << 8 * sizeof( T ) );
+  carto::VolumeRef<int32_t> res( 1 << 8 * sizeof( T ) );
 
-  typename AimsData<T>::const_iterator it;
-  AimsData<int32_t>::iterator dest = res.begin();
+  this->_minValid = (int)thing->min();
+  this->_maxValid = (int)thing->max();
 
-  this->_minValid = (int)thing.minimum();
-  this->_maxValid = (int)thing.maximum();
+  this->_nPoints = thing->getSizeX() * thing->getSizeY() * thing->getSizeZ()
+    * thing->getSizeT();
 
-  this->_nPoints = thing.dimX() * thing.dimY() * thing.dimZ() * thing.dimT();
-
-  it = thing.begin() + thing.oFirstPoint();
-
-  int x, y, z, t;
-  for ( t=thing.dimT(); t--; it += thing.oSliceBetweenVolume() )
-    for ( z=thing.dimZ(); z--; it += thing.oLineBetweenSlice() )
-      for ( y=thing.dimY(); y--; it += thing.oPointBetweenLine() )
-	for ( x=thing.dimX(); x--; it++ )
-	  dest[ (int)*it - this->_minValid ]++;
+  const T *p, *pp;
+  carto::const_line_NDIterator<T> it( &thing->at( 0 ), thing->getSize(),
+                                      thing->getStrides(), true );
+  for( ; !it.ended(); ++it )
+  {
+    p = &*it;
+    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+      res->at( (int)*p - this->_minValid )++;
+  }
 
   this->_data = res;
 }
@@ -112,27 +112,27 @@ void SimpleHistogram<T>::rebin( int size )
 
 
 template< class T > inline
-void SimpleHistogram<T>::rebin( typename AimsData<int32_t>::iterator beg, 
-                                typename AimsData<int32_t>::iterator end )
+void SimpleHistogram<T>::rebin( typename carto::Volume<int32_t>::iterator beg,
+                                typename carto::Volume<int32_t>::iterator end )
 {
-  rebin( end - beg, beg, end ); 
+  rebin( &*end - &*beg, beg, end );
 }
 
 
 template< class T > inline
-void SimpleHistogram<T>::rebin( int size, AimsData<int32_t>::iterator beg, 
-                                AimsData<int32_t>::iterator end )
+void SimpleHistogram<T>::rebin( int size, carto::Volume<int32_t>::iterator beg,
+                                carto::Volume<int32_t>::iterator end )
 {
-  int i, sum, length = end - beg;
+  int i, sum, length = &*end - &*beg;
 
   ASSERT( size <= length );
 
   int coef = (int)ceil( (double)length / (double)size );
-  AimsData<int32_t> res( size );
+  carto::VolumeRef<int32_t> res( size );
 
   this->_nPoints = 0;
 
-  AimsData<int32_t>::iterator it2, it = beg;
+  carto::Volume<int32_t>::iterator it2, it = beg;
   for ( it2=res.begin(); it2!=res.end(); )
   {
     sum = 0;
@@ -148,12 +148,12 @@ void SimpleHistogram<T>::rebin( int size, AimsData<int32_t>::iterator beg,
 
   this->_minValid = this->_maxValid = tmpMin /coef;
 
-  for ( it2 = res.begin(); *it2 == 0 && it2 != res.end(); it2++ )
-    this->_minValid = it2 - res.begin() + tmpMin / coef;
+  for ( it2 = res.begin(), i=0; *it2 == 0 && it2 != res.end(); it2++, ++i )
+    this->_minValid = i + tmpMin / coef;
 
-  for ( ; it2 != res.end(); it2++ )
+  for ( ; it2 != res.end(); it2++, ++i )
     if (*it2)
-      this->_maxValid = it2 - res.begin() + tmpMin / coef;
+      this->_maxValid = i + tmpMin / coef;
 
   this->_data = res;
 }
@@ -161,46 +161,47 @@ void SimpleHistogram<T>::rebin( int size, AimsData<int32_t>::iterator beg,
 
 template <>
 inline
-void SimpleHistogram<float>::doit( const AimsData<float>& thing )
+void SimpleHistogram<float>::doit(
+  const carto::rc_ptr<carto::Volume<float> > & thing )
 {
   int size = 65536;
-  AimsData<int32_t> res( size );
+  carto::VolumeRef<int32_t> res( size );
 
-  AimsData<float>::const_iterator it;
-
-  float minh = thing.minimum();
-  float maxh = thing.maximum();
+  float minh = thing->min();
+  float maxh = thing->max();
   float div = maxh - minh;
 
   if ( ( div < (float)size ) && ( div > 1.0f ) )  
-    {
-      div = (float)size;
-      this->_minValid = (int)minh;
-      this->_maxValid = (int)maxh;
-    }
+  {
+    div = (float)size;
+    this->_minValid = (int)minh;
+    this->_maxValid = (int)maxh;
+  }
   else
+  {
+    this->_minValid = 0;
+    this->_maxValid = size - 1;
+  }
+
+  this->_nPoints = thing->getSizeX() * thing->getSizeY() * thing->getSizeZ()
+    * thing->getSizeT();
+
+  const float *p, *pp;
+  carto::const_line_NDIterator<float> it( &thing->at( 0 ), thing->getSize(),
+                                          thing->getStrides(), true );
+  for( ; !it.ended(); ++it )
+  {
+    p = &*it;
+    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
     {
-      this->_minValid = 0;
-      this->_maxValid = size - 1;
+      int x = (int)( (float) size * ( *p - minh ) / div );
+      if( x < 0 )
+        x = 0;
+      else if( x >= size )
+        x = size - 1;
+      res.at( x )++;
     }
-
-  this->_nPoints = thing.dimX() * thing.dimY() * thing.dimZ() * thing.dimT();
-
-  it = thing.begin() + thing.oFirstPoint();
-
-  int x, y, z, t;
-  for ( t=thing.dimT(); t--; it += thing.oSliceBetweenVolume() )
-    for ( z=thing.dimZ(); z--; it += thing.oLineBetweenSlice() )
-      for ( y=thing.dimY(); y--; it += thing.oPointBetweenLine() )
-        for ( x=thing.dimX(); x--; it++ )
-        {
-          int p = (int)( (float) size * ( *it - minh ) / div );
-          if( p < 0 )
-            p = 0;
-          else if( p >= size )
-            p = size - 1;
-          res[ p ]++;
-        }
+  }
 
   this->_data = res;
 }
@@ -208,40 +209,40 @@ void SimpleHistogram<float>::doit( const AimsData<float>& thing )
 
 template <>
 inline
-void SimpleHistogram<double>::doit( const AimsData<double>& thing )
+void SimpleHistogram<double>::doit(
+  const carto::rc_ptr<carto::Volume<double> > & thing )
 {
   int size = 65536;
-  AimsData<int32_t> res( size );
+  carto::VolumeRef<int32_t> res( size );
 
-  AimsData<double>::const_iterator it;
-  AimsData<int32_t>::iterator dest = res.begin();
-
-  double minh = thing.minimum();
-  double maxh = thing.maximum();
+  double minh = thing->min();
+  double maxh = thing->max();
   double div = maxh - minh;
 
   if ( ( div < (float)size )  && ( div > 1.0f ) )
-    {
-      div = (double)size;
-      this->_minValid = (int)minh;
-      this->_maxValid = (int)maxh;
-    }
+  {
+    div = (double)size;
+    this->_minValid = (int)minh;
+    this->_maxValid = (int)maxh;
+  }
   else
-    {
-      this->_minValid = 0;
-      this->_maxValid = size - 1;
-    }
+  {
+    this->_minValid = 0;
+    this->_maxValid = size - 1;
+  }
 
-  this->_nPoints = thing.dimX() * thing.dimY() * thing.dimZ() * thing.dimT();
+  this->_nPoints = thing->getSizeX() * thing->getSizeY() * thing->getSizeZ()
+    * thing->getSizeT();
 
-  it = thing.begin() + thing.oFirstPoint();
-
-  int x, y, z, t;
-  for ( t=thing.dimT(); t--; it += thing.oSliceBetweenVolume() )
-    for ( z=thing.dimZ(); z--; it += thing.oLineBetweenSlice() )
-      for ( y=thing.dimY(); y--; it += thing.oPointBetweenLine() )
-	for ( x=thing.dimX(); x--; it++ )
-	  dest[ (int)( (double)size * ( *it - minh ) / div ) ]++;
+  const double *p, *pp;
+  carto::const_line_NDIterator<double> it( &thing->at( 0 ), thing->getSize(),
+                                           thing->getStrides(), true );
+  for( ; !it.ended(); ++it )
+  {
+    p = &*it;
+    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+      res.at( (int)( (double)size * ( *p - minh ) / div ) )++;
+  }
 
   this->_data = res;
 }

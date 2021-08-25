@@ -56,8 +56,8 @@ class CumulatedHistogram : public Histogram<T>
 
     /** @name Cumulated histogram computation */
     //@{
-    /// computation from an AimsData
-    void doit( const AimsData<T>& thing );
+    /// computation from a Volume
+    void doit( const carto::rc_ptr<carto::Volume<T> > & thing );
     /// computation from an already computed classical histogram
     void doit( const SimpleHistogram<T>& thing );
     //@}
@@ -69,7 +69,8 @@ class CumulatedHistogram : public Histogram<T>
 
 
 template< class T > inline
-void CumulatedHistogram<T>::doit( const AimsData<T>& thing )
+void CumulatedHistogram<T>::doit(
+  const carto::rc_ptr<carto::Volume<T> > & thing )
 {
   SimpleHistogram<T> histo;
   
@@ -81,7 +82,8 @@ void CumulatedHistogram<T>::doit( const AimsData<T>& thing )
 template< class T > inline
 void CumulatedHistogram<T>::doit( const SimpleHistogram<T>& thing )
 {
-  AimsData<int32_t> res( thing.data().dimX() );
+  carto::VolumeRef<int32_t> res( thing.data().getSizeX(), 1, 1, 1,
+                                 carto::AllocatorContext::fast() );
 
   this->_nPoints = thing.totalPoints();
   this->_minValid = thing.minValid();
@@ -89,9 +91,10 @@ void CumulatedHistogram<T>::doit( const SimpleHistogram<T>& thing )
 
   res( 0 ) = thing.data()( 0 );
 
-  AimsData<int32_t>::const_iterator in;
-  AimsData<int32_t>::iterator out = res.begin() + 1;
-  for ( in = thing.data().begin() + 1; in != thing.data().end(); ++in, ++out )
+  carto::Volume<int32_t>::const_iterator in;
+  int32_t * out = &*res.begin() + 1;
+  for ( in = thing.data().begin(), ++in; in != thing.data().end();
+        ++in, ++out )
     *out = *in + *( out - 1 );
 
   this->_data = res;
@@ -104,7 +107,7 @@ int CumulatedHistogram<T>::valueForPercentage( float percent )
   int index = 0;
   int realValue = (int) ( this->_nPoints * percent / 100. );
 
-  AimsData<int32_t>::iterator it = this->_data.begin();
+  carto::Volume<int32_t>::iterator it = this->_data.begin();
   while ( *it < realValue && it != this->_data.end() ) 
   {
     index++;
