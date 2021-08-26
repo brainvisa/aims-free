@@ -32,11 +32,17 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/distancemap/mask.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/bucket/bucket.h>
 #include <aims/math/mathelem.h>
 #include <cartobase/config/verbose.h>
+#include <cartobase/containers/nditerator.h>
 #include <iomanip>
 
 using namespace aims;
@@ -50,17 +56,23 @@ namespace
 {
 
   template <class T>
-  void AimsDistancePreparation( AimsData<T>& vol, T val_domain, T val_outside)
+  void AimsDistancePreparation( rc_ptr<Volume<T> > & vol, T val_domain,
+                                T val_outside)
   {
-    int x, y, z;
-
-    ForEach3d( vol, x, y, z )
-      if ( vol( x, y, z ) == val_outside )
-        vol( x, y, z ) = AIMS_OUTSIDE;
-      else if ( vol( x, y, z ) == val_domain )
-        vol( x, y, z ) = AIMS_DOMAIN;
-      else
-        vol( x, y, z ) = 0;
+    T *p, *pp;
+    line_NDIterator<T> it( &vol->at( 0 ), vol->getSize(), vol->getStrides(),
+                           true );
+    for( ; !it.ended(); ++it )
+    {
+      p = &*it;
+      for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+        if ( *p == val_outside )
+          *p = AIMS_OUTSIDE;
+        else if( *p == val_domain )
+          *p = AIMS_DOMAIN;
+        else
+          *p = 0;
+    }
   }
 
 
@@ -89,14 +101,14 @@ namespace
 
 
   inline
-  bool inside( Point3d& pt, int dimX, int dimY, int dimZ )
+  bool inside( Point3d& pt, const vector<int> & dims )
   {
-    if ( pt.item(0) < 0     ||
-         pt.item(0) >= dimX ||
-         pt.item(1) < 0     ||
-         pt.item(1) >= dimY ||
-         pt.item(2) < 0     ||
-         pt.item(2) >= dimZ   )
+    if ( pt.item(0) < 0        ||
+         pt.item(0) >= dims[0] ||
+         pt.item(1) < 0        ||
+         pt.item(1) >= dims[1] ||
+         pt.item(2) < 0        ||
+         pt.item(2) >= dims[2] )
       return false;
     return true;
   }
@@ -104,50 +116,53 @@ namespace
 
   template <class T>
   void 
-  FillDistanceBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
+  FillDistanceBucket( AimsBucket<Void>& bucket, rc_ptr<Volume<T> > & vol,
                       const ChamferMask& mask )
   {
     int x=0, y=0, z=0, n=0;
-    int dimX = vol.dimX();
-    int dimY = vol.dimY();
-    int dimZ = vol.dimZ();
+    vector<int> dims = vol->getSize();
     Point3d neigh;
     AimsBucketItem<Void> item;
     bool back6neigh=false;
     int	l = mask.length();
     if( l > 26 )
       l = 26; // 1 voxel away is always enough
+    list< AimsBucketItem<Void> > & bck0 = bucket[0];
 
-    for ( z = 0; z < dimZ; z++ )
-      for ( y = 0; y < dimY; y++ )
-        for ( x = 0; x < dimX; x++ )
-          {
-            if ( vol( x, y, z ) == 0 )
+    T *p, *pp;
+    line_NDIterator<T> it( &vol->at( 0 ), vol->getSize(), vol->getStrides(),
+                           true );
+    for( ; !it.ended(); ++it )
+    {
+      p = &*it;
+      vector<int> pos = it.position();
+      y = pos[1];
+      z = pos[2];
+      for( x=0, pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), ++x )
+        if( *p == 0 )
+        {
+          back6neigh = false;
+          for( n = 0; n < l; ++n )
+            {
+              neigh[0] = x + mask.offset( n ).item(0);
+              neigh[1] = y + mask.offset( n ).item(1);
+              neigh[2] = z + mask.offset( n ).item(2);
+              if( inside( neigh, dims ) == true )
               {
-                back6neigh = false;
-                for ( n = 0; n < l; ++n )
-                  {
-                    neigh[0] = x + mask.offset( n ).item(0);
-                    neigh[1] = y + mask.offset( n ).item(1);
-                    neigh[2] = z + mask.offset( n ).item(2);
-                    if ( inside( neigh, dimX, dimY, dimZ ) == true )
-                      {
-                        if ( vol( neigh ) && vol( neigh ) == AIMS_DOMAIN )
-                          {
-                            back6neigh = true;
-                            break;
-                          }
-                      }
-                  }
-                if ( back6neigh )
-                  {
-                    item.location().item(0) = x;
-                    item.location().item(1) = y;
-                    item.location().item(2) = z;
-                    bucket[ 0 ].push_back( item );
-                  }
+                if ( vol->at( neigh ) && vol->at( neigh ) == AIMS_DOMAIN )
+                {
+                  back6neigh = true;
+                  break;
+                }
               }
+            }
+          if( back6neigh )
+          {
+            item.location() = Point3d( x, y, z );
+            bck0.push_back( item );
           }
+        }
+    }
   }
 
 
@@ -191,72 +206,66 @@ namespace
 
   template <class T>
   void 
-  EmptyDistanceBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
+  EmptyDistanceBucket( AimsBucket<Void>& bucket, rc_ptr<Volume<T> > & vol,
                        const ChamferMask& mask, int limit, float mult_factor )
   {
 
     list< AimsBucketItem<Void> >::const_iterator it,ite;
     list< AimsBucketItem<Void> >* ptr=NULL;
     AimsBucketItem<Void> item;
-    int dimX = vol.dimX();
-    int dimY = vol.dimY();
-    int dimZ = vol.dimZ();
+    vector<int> dims = vol->getSize();
     int dist,n,d;
-    Point3d center,neigh;
+    Point3d neigh;
     T new_val;
     int last_dist=0;
 
-    AimsData< list< AimsBucketItem<Void> >* > lstPtr( limit );
+    Volume< list< AimsBucketItem<Void> >* > lstPtr( limit );
     lstPtr = NULL;
-    for ( AimsBucket<Void>::iterator lst  = bucket.begin();
-          lst != bucket.end(); lst++ )
+    for( AimsBucket<Void>::iterator lst  = bucket.begin();
+         lst != bucket.end(); lst++ )
       lstPtr( (*lst).first ) = &( (*lst).second );
   
 
     if( verbose )
       cout << "distance : " << setw(10) << setprecision(8) << 0 << flush;
-    for ( dist = 0; dist < limit; dist++ )
+    for( dist = 0; dist < limit; dist++ )
+    {
+      ptr = lstPtr( dist );
+      if ( ptr )
       {
-        ptr = lstPtr( dist );
-        if ( ptr )
-          {
-            last_dist = dist;
-            if( verbose && dist % 100 == 0 )
-              cout <<  "\b\b\b\b\b\b\b\b\b\b" << setw(10) << setprecision(8) 
-                   << float( dist ) / mult_factor << flush;
+        last_dist = dist;
+        if( verbose && dist % 100 == 0 )
+          cout <<  "\b\b\b\b\b\b\b\b\b\b" << setw(10) << setprecision(8)
+                << float( dist ) / mult_factor << flush;
 
-            for ( it  = ptr->begin(),
-                    ite = ptr->end(); it != ite; it++ )
+        for( it = ptr->begin(), ite = ptr->end(); it != ite; it++ )
+        {
+          const Point3d & center = it->location();
+          T & cvalue = vol->at( center );
+          if( cvalue >= T( dist )  )
+            for( n = 0; n < mask.length(); n++ )
+            {
+              neigh = center + mask.offset( n );
+              T & value = vol->at( neigh );
+              if( inside( neigh, dims ) &&
+                  value > dist &&
+                  value != AIMS_OUTSIDE )
               {
-                center = it->location();
-                if ( vol( center ) >= T( dist )  )
-                  for ( n = 0; n < mask.length(); n++ )
-                    {
-                      neigh.item(0) = center.item(0) 
-                        + mask.offset( n ).item(0);
-                      neigh.item(1) = center.item(1) 
-                        + mask.offset( n ).item(1);
-                      neigh.item(2) = center.item(2) 
-                        + mask.offset( n ).item(2);
-                      if ( inside( neigh, dimX, dimY, dimZ ) && 
-                           vol( neigh ) > dist               &&
-                           vol( neigh ) != AIMS_OUTSIDE        )
-                        {
-                          new_val = vol( center ) + mask.distance( n );
-                          if ( new_val < vol( neigh ) )
-                            {
-                              vol( neigh ) = new_val;
-                              item.location() = neigh;
-                              bucket[ ( d = dist + mask.distance( n ) ) ]
-                                .push_back( item );
-                              if ( lstPtr( d ) == NULL )
-                                lstPtr( d ) = &bucket[ d ];
-                            }
-                        }
-                    }
+                new_val = cvalue + mask.distance( n );
+                if( new_val < value )
+                {
+                  value = new_val;
+                  item.location() = neigh;
+                  bucket[ ( d = dist + mask.distance( n ) ) ]
+                    .push_back( item );
+                  if( lstPtr( d ) == NULL )
+                    lstPtr( d ) = &bucket[ d ];
+                }
               }
-          }
+            }
+        }
       }
+    }
     if( verbose )
       cout <<  "\b\b\b\b\b\b\b\b\b\b" << setw(10) << setprecision(8) 
            << float( last_dist ) / mult_factor << endl;
@@ -334,30 +343,29 @@ namespace
 
 template <typename T>
 void 
-AimsDistanceFrontPropagation( AimsData<T>& vol, T val_domain, T val_outside,
-                              int xm, int ym, int zm, float mult_factor,
-                              bool divide )
+AimsDistanceFrontPropagation( rc_ptr<Volume<T> > & vol, T val_domain,
+                              T val_outside, int xm, int ym, int zm,
+                              float mult_factor, bool divide )
 {
   ChamferMask mask;
   AimsBucket<Void> bucket;
   int limit;
 
-  limit = int( mult_factor * sqrt( sqr( vol.dimX() * vol.sizeX() ) +
-                                    sqr( vol.dimY() * vol.sizeY() ) +
-                                    sqr( vol.dimZ() * vol.sizeZ() )  ) + 0.5 );
-  mask.set( xm, ym, zm, vol.sizeX(), vol.sizeY(), vol.sizeZ(), mult_factor );
+  vector<int> size = vol->getSize();
+  vector<float> vs = vol->getVoxelSize();
+
+  limit = int( mult_factor * sqrt( sqr( size[0] * vs[0] ) +
+                                   sqr( size[1] * vs[1] ) +
+                                   sqr( size[2] * vs[2] )  ) + 0.5 );
+  mask.set( xm, ym, zm, vs, mult_factor );
 
   AimsDistancePreparation( vol, val_domain, val_outside );
 
   FillDistanceBucket( bucket, vol, mask );
   EmptyDistanceBucket( bucket, vol, mask, limit, mult_factor );
 
-  if ( divide == true )
-  {
-    int x, y, z;
-    ForEach3d( vol, x, y, z )
-      vol( x, y, z ) /= mult_factor;
-  }
+  if( divide == true )
+    *vol /= mult_factor;
 }
 
 
@@ -404,14 +412,14 @@ AimsDistanceFrontPropagation( BucketMap<T> & dist, T val_domain,
 
 template 
 void 
-AimsDistanceFrontPropagation( AimsData<short>& vol, short val_domain,
+AimsDistanceFrontPropagation( rc_ptr<Volume<short> > & vol, short val_domain,
                               short val_outside,
                               int xm, int ym, int zm, float mult_factor,
                               bool divide );
 
 template 
 void 
-AimsDistanceFrontPropagation( AimsData<float>& vol, float val_domain,
+AimsDistanceFrontPropagation( rc_ptr<Volume<float> > & vol, float val_domain,
                               float val_outside,
                               int xm, int ym, int zm, float mult_factor,
                               bool divide );

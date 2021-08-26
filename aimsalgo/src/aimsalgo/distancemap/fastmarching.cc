@@ -32,10 +32,15 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/distancemap/fastmarching.h>
 #include <aims/math/mathelem.h>
 #include <map>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/utility/converter_bucket.h>
 
 using namespace aims;

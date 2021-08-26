@@ -238,15 +238,12 @@ AimsVoronoiFrontPropagation( rc_ptr<Volume<T> > & vol,
   AimsBucket<Void> bucket;
   int limit;
 
-  // WARNING: sqr( vol->getSizeX() * vol->getSizeX() ) is a double square ?
+  vector<int> size = vol->getSize();
+  vector<float> vs = vol->getVoxelSize();
 
-//   limit = int( mult_factor * sqrt( sqr( vol->getSizeX() * vol->getSizeX() ) +
-//                                    sqr( vol->getSizeY() * vol->getSizeY() ) +
-//                                    sqr( vol->getSizeZ() * vol->getSizeZ() ) )
-//                + 0.5 );
-  limit = int( mult_factor * sqrt( sqr( vol->getSizeX() ) +
-                                   sqr( vol->getSizeY() ) +
-                                   sqr( vol->getSizeZ() ) ) + 0.5 );
+  limit = int( mult_factor * sqrt( sqr( size[0] * vs[0] ) +
+                                   sqr( size[1] * vs[1] ) +
+                                   sqr( size[2] * vs[2] )  ) + 0.5 );
 
   if (carto::verbose)
     std::cout << "limited distance to process voronoi is: "

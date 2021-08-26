@@ -36,8 +36,14 @@
 #define AIMS_DISTANCEMAP_DANIELSSON_H
 
 #include <aims/config/aimsalgo_config.h>
+#include <cartobase/smart/rcptr.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <typename T> class Volume;
+  template <typename T> class VolumeRef;
+}
+
 
 enum DanielssonSide
 {
@@ -52,12 +58,13 @@ enum DanielssonSide
 */
 //@{
 /// Return float euclidean Danielsson distance map
-AIMSALGO_API AimsData<float>
-AimsDanielssonDistanceMap(const AimsData<int16_t> &vol,
-			  DanielssonSide side=AIMS_DANIELSSON_OUTSIDE);
+carto::VolumeRef<float>
+AimsDanielssonDistanceMap( const carto::rc_ptr<carto::Volume<int16_t> > &vol,
+                           DanielssonSide side=AIMS_DANIELSSON_OUTSIDE );
 /// Return float euclidean signed distance map (minus out, plus in object)
-AIMSALGO_API AimsData<float> 
-AimsSignedDanielssonDistanceMap(const AimsData<int16_t> &vol);
+carto::VolumeRef<float>
+AimsSignedDanielssonDistanceMap(
+  const carto::rc_ptr<carto::Volume<int16_t> > &vol );
 //@}
 
 #endif

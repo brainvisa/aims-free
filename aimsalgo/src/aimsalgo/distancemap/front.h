@@ -36,8 +36,14 @@
 #define AIMS_DISTANCEMAP_FRONT_H
 
 #include <aims/config/aimsalgo_config.h>
+#include <cartobase/smart/rcptr.h>
 
-template <typename T> class AimsData;
+namespace carto
+{
+  template <typename T> class Volume;
+  template <typename T> class VolumeRef;
+}
+
 namespace aims
 {
   template <typename T> class BucketMap;
@@ -45,7 +51,8 @@ namespace aims
 
 
 template <typename T> void 
-AimsDistanceFrontPropagation( AimsData<T>& vol, T val_domain, T val_outside,
+AimsDistanceFrontPropagation( carto::rc_ptr<carto::Volume<T> > & vol,
+                              T val_domain, T val_outside,
                               int xm, int ym, int zm, float mult_factor,
                               bool divide );
 

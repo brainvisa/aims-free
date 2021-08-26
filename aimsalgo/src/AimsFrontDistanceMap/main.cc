@@ -91,9 +91,9 @@ bool makemapvol( Process & p, const string & filein, Finder & f )
   if( !reader.read( vol,1, &format ) )
     throw logic_error( "Internal error: read failed" );
  
-  AimsDistanceFrontPropagation( vol, (T) fp.val_domain, (T) fp.val_outside,
-                                fp.xmask, fp.ymask, fp.zmask, fp.factor, 
-				false );
+  AimsDistanceFrontPropagation<T>( vol, (T) fp.val_domain, (T) fp.val_outside,
+                                   fp.xmask, fp.ymask, fp.zmask, fp.factor,
+                                   false );
 
   PythonHeader	*h = dynamic_cast<PythonHeader *>( vol.header() );
   if ( h )
@@ -115,8 +115,8 @@ bool makemapbck( Process & p, const string & filein, Finder & f )
     throw logic_error( "Internal error: read failed" );
 
   AimsDistanceFrontPropagation( vol, (T) fp.val_domain, (T) fp.val_outside,
-                                fp.xmask, fp.ymask, fp.zmask, fp.factor, 
-				false );
+                                fp.xmask, fp.ymask, fp.zmask, fp.factor,
+                                false );
 
   Writer<BucketMap<T> > writer( fp.fileout );
   writer.write( vol );
