@@ -36,7 +36,6 @@
 #define AIMS_MORPHOLOGY_MORPHOGREYLEVEL_D_H
 
 #include <aims/morphology/operatormorpho.h>
-#include <aims/data/data.h>
 #include <cartodata/volume/volumeutil_d.h>
 #include <aims/math/mathelem.h>
 

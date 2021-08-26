@@ -64,12 +64,12 @@ private:
 
 Classifier::Classifier( const string& fileout ) : Process(), fout( fileout )
 {
-  registerProcessType( "Volume", "S8", &doit< AimsData<int8_t> > );
-  registerProcessType( "Volume", "U8", &doit< AimsData<uint8_t> > );
-  registerProcessType( "Volume", "S16", &doit< AimsData<int16_t> > );
-  registerProcessType( "Volume", "U16", &doit< AimsData<uint16_t> > );
-  registerProcessType( "Volume", "S32", &doit< AimsData<int32_t> > );
-  registerProcessType( "Volume", "U32", &doit< AimsData<uint32_t> > );
+  registerProcessType( "Volume", "S8", &doit< VolumeRef<int8_t> > );
+  registerProcessType( "Volume", "U8", &doit< VolumeRef<uint8_t> > );
+  registerProcessType( "Volume", "S16", &doit< VolumeRef<int16_t> > );
+  registerProcessType( "Volume", "U16", &doit< VolumeRef<uint16_t> > );
+  registerProcessType( "Volume", "S32", &doit< VolumeRef<int32_t> > );
+  registerProcessType( "Volume", "U32", &doit< VolumeRef<uint32_t> > );
   registerProcessType( "Bucket", "S16", &doit< BucketMap<int16_t> > );
   registerProcessType( "Bucket", "VOID", &doit< BucketMap<Void> > );
 }

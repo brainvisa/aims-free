@@ -35,7 +35,7 @@
 #ifndef AIMS_TOPOLOGY_TOPOCLASSIFIER_H
 #define AIMS_TOPOLOGY_TOPOCLASSIFIER_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/topology/topoClassif.h>
 #include <aims/topology/classifMeaning.h>
 #include <aims/bucket/bucketMap.h>
@@ -58,16 +58,16 @@ public:
 
 
 template< typename T >
-class TopologicalClassifier<AimsData<T> >
+class TopologicalClassifier<carto::VolumeRef<T> >
 {
 public:
-  typedef AimsData<int16_t> ResultRcType;
-  typedef AimsData<int16_t> ResultType;
+  typedef carto::VolumeRef<int16_t> ResultRcType;
+  typedef carto::VolumeRef<int16_t> ResultType;
 
   TopologicalClassifier() { }
   virtual ~TopologicalClassifier() { }
 
-  ResultRcType doit( const AimsData< T >& );
+  ResultRcType doit( const carto::VolumeRef< T >& );
   ResultType & takeResult( ResultRcType & d ) { return d; }
 };
 
@@ -88,17 +88,18 @@ public:
 
 
 template< typename T > inline
-AimsData< short > TopologicalClassifier< AimsData<T> >::doit( const AimsData< T >& d )
+carto::VolumeRef< short > TopologicalClassifier< carto::VolumeRef<T> >::doit(
+  const carto::VolumeRef< T >& d )
 {
   int x, y, z;
   T label;
 
-  int dx = d.dimX();
-  int dy = d.dimY();
-  int dz = d.dimZ();
+  int dx = d.getSizeX();
+  int dy = d.getSizeY();
+  int dz = d.getSizeZ();
 
-  AimsData< short > res( dx, dy, dz );
-  res.setSizeXYZT( d.sizeX(), d.sizeY(), d.sizeZ() );
+  carto::VolumeRef< short > res( d.getSize() );
+  res.setVoxelSize( d.getVoxelSize() );
 
   TopologicalClassification< T > topo( d );
   TopologicalClassificationMeaning topoMean;
@@ -106,13 +107,13 @@ AimsData< short > TopologicalClassifier< AimsData<T> >::doit( const AimsData< T 
   for ( z=0; z<dz; z++ )
     for ( y=0; y<dy; y++ )
       for ( x=0; x<dx; x++ )
-	if( ( label = d( x, y, z ) ) )
-	  {
-	    Point3d pt( x, y, z );
-	    topo.computeLocalCCNumbers( pt, (int)label );
-	    res( x, y, z ) = (short)topoMean.classification( topo.Cstar(),
-							     topo.Cbar() );
-	  }
+        if( ( label = d( x, y, z ) ) )
+        {
+          Point3d pt( x, y, z );
+          topo.computeLocalCCNumbers( pt, (int)label );
+          res( x, y, z ) = (short)topoMean.classification( topo.Cstar(),
+                                  topo.Cbar() );
+        }
 
   return res;
 }
