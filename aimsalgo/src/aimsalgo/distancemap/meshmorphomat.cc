@@ -252,5 +252,24 @@ namespace aims
                        const Texture<int16_t> & inittex,
                        int16_t label, int16_t Back,
                        const std::vector<std::list<unsigned> >  & neigho );
+
+    template
+    Texture<int16_t> CloseSulci(
+      const AimsSurface<3,Void> & mesh,
+      const Texture<int16_t> & sulctex,
+      float nbDilMax,bool connexity,
+      const int16_t & Back, const int16_t & For,
+      const std::vector<std::list<unsigned> >  & neigho );
+
+    template
+    Texture<int16_t> CloseSulci(
+      const AimsSurface<3,Void> & mesh,
+      const Texture<int16_t> & sulctex,
+      float nbDilMax,bool connexity,
+      const int16_t & Back, const int16_t & For,
+      const std::vector<std::list<unsigned> >  & neigho,
+      const std::set<int16_t> & label_forbidden );
+
+
   }
 }

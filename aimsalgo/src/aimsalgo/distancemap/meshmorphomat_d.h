@@ -284,7 +284,7 @@ Texture<T> SplitSulci( const AimsSurface<3,Void> & mesh,
 
 
 //closing and thinning of the sulci
-template<class T> inline
+template<class T>
 Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh,
                         const Texture<T> & sulctex,
                         float nbDilMax,bool connexity,
@@ -425,7 +425,7 @@ Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh,
 
 
 //id but no thinning for label in the set label_forbidden
-template<class T> inline
+template<class T>
 Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh,
                         const Texture<T> & sulctex,
                         float nbDilMax,bool connexity,

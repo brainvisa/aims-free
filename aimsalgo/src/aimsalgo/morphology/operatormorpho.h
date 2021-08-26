@@ -40,7 +40,6 @@
 
 using aims::Connectivity;
 
-template <typename T> class AimsData;
 namespace carto
 {
   template <typename T> class Volume;

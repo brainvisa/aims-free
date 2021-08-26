@@ -38,7 +38,7 @@
 #include <cstdlib>
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/connectivity/connectivity.h>
 #include <aims/distancemap/stlsort.h>
 #include <aims/math/gausslu.h>
@@ -64,8 +64,8 @@ namespace aims
     TimeTexture<short> 
     SulcusVolume2Texture( const AimsSurface<3,Void> & mesh, 
 			  const Texture<float> & curvtex,
-			  const AimsData <short> & bottom_vol,
-			  const AimsData <short> & surface_vol,
+			  const carto::rc_ptr<carto::Volume<short> > & bottom_vol,
+			  const carto::rc_ptr<carto::Volume<short> > & surface_vol,
 			  float alpha, float dmin, 
 			  int MINCC,
 			  const std::map <short,std::string> & trans,
@@ -76,8 +76,8 @@ namespace aims
     /// Use interpolation plane to project the sulcal line
     TimeTexture<short> 
     SulcusVolume2Texture( const AimsSurface<3,Void> & mesh, 
-			  const AimsData <short> & bottom_vol,
-			  const AimsData <short> & surface_vol,
+			  const carto::rc_ptr<carto::Volume<short> > & bottom_vol,
+			  const carto::rc_ptr<carto::Volume<short> > & surface_vol,
 			  const Point3df & CA,
 			  float demin,float dpmin, 
 			  int MINCC,
@@ -89,20 +89,22 @@ namespace aims
 
 
     Texture<short> 
-    FirstSulciProjectionWithCurvatureMap(const AimsData<short> &ccvol,
-					 const AimsData<short>    &sulcvol,
-					 const AimsSurface<3,Void> & mesh,
-					 std::set<short>  &cc_sulci_labels,
-					 std::map<short,short > &tri_sulci,
-					 std::map<unsigned, Point3dfSet > &cc_sulci_coord,
-					 std::map<Point3df, Point3df, 
-					 Point3dfCompare > &initend,
-					 const Texture<float> &curvtex,
-					 float alpha,float dmin);
+    FirstSulciProjectionWithCurvatureMap(
+      const carto::rc_ptr<carto::Volume<short> > &ccvol,
+      const carto::rc_ptr<carto::Volume<short> > &sulcvol,
+      const AimsSurface<3,Void> & mesh,
+      std::set<short>  &cc_sulci_labels,
+      std::map<short,short > &tri_sulci,
+      std::map<unsigned, Point3dfSet > &cc_sulci_coord,
+      std::map<Point3df, Point3df,
+      Point3dfCompare > &initend,
+      const Texture<float> &curvtex,
+      float alpha,float dmin);
 
     Texture<short> 
     FirstSulciProjectionWithInterpolationPlane
-    ( const AimsData<short> &ccvol, const AimsData<short> &sulcvol,
+    ( const carto::rc_ptr<carto::Volume<short> > &ccvol,
+      const carto::rc_ptr<carto::Volume<short> > &sulcvol,
       const AimsSurface<3,Void> & mesh,
       std::set<short> &cc_sulci_labels,
       std::map<short,short > &tri_sulci,
@@ -123,25 +125,28 @@ namespace aims
 			   short label,
 			   float dmin,float alpha_reg );
 
-    AimsData<short> MeshParcellation2Volume(const AimsData<short>    &initVol,
-					    const Texture<short> &tex,
-					    const AimsSurface<3,Void> & mesh,
-					    short val_domain, 
-					    short back);
+    carto::VolumeRef<short> MeshParcellation2Volume(
+      const carto::rc_ptr<carto::Volume<short> > &initVol,
+      const Texture<short> &tex,
+      const AimsSurface<3,Void> & mesh,
+      short val_domain,
+      short back);
 
     Texture<short> 
-    VolumeParcellation2MeshParcellation(const AimsData<short>    &initVol,
-                                        const AimsSurface<3,Void> & mesh,
-                                        short back);
+    VolumeParcellation2MeshParcellation(
+      const carto::rc_ptr<carto::Volume<short> > &initVol,
+      const AimsSurface<3,Void> & mesh,
+      short back);
 
     /** Give the neighbours of a point
 	The neighbours have the same label as the point */
     void 
-    NeighbourInCC(std::map<Point3df, Point3dfSet, Point3dfCompare > &neigh,
-		  const AimsData <short> & bvol,const AimsData <short> & svol, 
-		  Connectivity::Type connectivity,
-		  short label, const unsigned size_neigh, 
-                  unsigned max_points = 50);
+    NeighbourInCC( std::map<Point3df, Point3dfSet, Point3dfCompare > &neigh,
+                   const carto::rc_ptr<carto::Volume<short> > & bvol,
+                   const carto::rc_ptr<carto::Volume<short> > & svol,
+                   Connectivity::Type connectivity,
+                   short label, const unsigned size_neigh,
+                   unsigned max_points = 50);
 
     
     
@@ -156,29 +161,30 @@ namespace aims
       unsigned inc = 0, i=0,j=0,n = init_point.size();
       Point3df mean = Point3df(0,0,0),temp;
       Point3dfSet norm_point;
-      AimsData<float> cov(3,3),w(3) ;
+      carto::VolumeRef<float> cov( 3, 3, 1, 1,
+                                   carto::AllocatorContext::fast() );
       Point3dfSet::const_iterator is,es;
   
       for (is = init_point.begin(), es = init_point.end(); is != es; ++is)
-	mean += *is;
+        mean += *is;
 
       mean = mean / (float)n;
 
       for (is = init_point.begin(), es = init_point.end(); is != es; ++is, 
              ++inc)
-	norm_point.insert(*is - mean);
+        norm_point.insert(*is - mean);
   
       cov = 0;
       for (is = norm_point.begin(), es = norm_point.end(); is != es; ++is, 
              ++inc)
-	{
-	  temp = *is;
-	  for (i=0; i<3; ++i)
-	    for (j=0; j<3; ++j)
-	      cov(i,j) += temp[i] * temp[j];  
-	} 
+      {
+        temp = *is;
+        for (i=0; i<3; ++i)
+          for (j=0; j<3; ++j)
+            cov(i,j) += temp[i] * temp[j];
+      }
       AimsEigen< float > eigen;
-      AimsData< float > value = eigen.doit( cov );
+      carto::VolumeRef< float > value = eigen.doit( cov );
 
       eigen.sort(cov,value);
   
@@ -195,29 +201,30 @@ namespace aims
 
     //Point3df : normal vector to the plane passing through pt
     inline Point3df NormalFromPoints( const Point3df & pt,
-				      const Point3dfSet  & init_point )
+                                      const Point3dfSet  & init_point )
     {
       unsigned                 inc = 0, i=0,j=0;
       Point3df                 temp;
       Point3dfSet norm_point;
-      AimsData<float> cov(3,3),w(3) ;
+      carto::VolumeRef<float> cov( 3, 3, 1, 1,
+                                   carto::AllocatorContext::fast() );
       Point3dfSet::const_iterator is,es;
-  
-  
 
-      for (is = init_point.begin(), es = init_point.end(); is != es; ++is, ++inc)
-	norm_point.insert(*is - pt);
+      for( is = init_point.begin(), es = init_point.end(); is != es;
+           ++is, ++inc)
+        norm_point.insert(*is - pt);
   
       cov = 0;
-      for (is = norm_point.begin(), es = norm_point.end(); is != es; ++is, ++inc)
-	{
-	  temp = *is;
-	  for (i=0; i<3; ++i)
-	    for (j=0; j<3; ++j)
-	      cov(i,j) += temp[i] * temp[j];  
-	} 
+      for( is = norm_point.begin(), es = norm_point.end(); is != es;
+           ++is, ++inc)
+      {
+        temp = *is;
+        for (i=0; i<3; ++i)
+          for (j=0; j<3; ++j)
+            cov(i,j) += temp[i] * temp[j];
+      }
       AimsEigen< float > eigen;
-      AimsData< float > value = eigen.doit( cov );
+      carto::VolumeRef< float > value = eigen.doit( cov );
 
       eigen.sort(cov,value);
   
@@ -248,8 +255,9 @@ namespace aims
     //and a direction  'direction_line' )
     // and a plane
     //(defined by 3 points s1, s2, s3)
-    inline Point3df IntersectionPointOfPlanAndLine(const Point3df &s1,const Point3df &s2,const Point3df &s3,
-						   const Point3df & direction_line, const Point3df & pt)
+    inline Point3df IntersectionPointOfPlanAndLine(
+      const Point3df &s1,const Point3df &s2, const Point3df &s3,
+      const Point3df & direction_line, const Point3df & pt )
     {
       float a0, b0, c0;
       float xb,yb,zb;
