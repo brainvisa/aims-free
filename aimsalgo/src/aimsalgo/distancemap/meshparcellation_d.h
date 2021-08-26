@@ -41,6 +41,7 @@
 #include <aims/distancemap/stlsort.h>
 #include <aims/mesh/surfaceOperation.h>
 #include <aims/mesh/surface.h>
+#include <cartobase/containers/nditerator.h>
 #include <stack>
 #include <set>
 #include <float.h>
@@ -453,7 +454,7 @@ SurfaceParcel( const Texture<T> & tex, const AimsSurface<3,Void> & mesh )
 
 template<class T>
 std::map<T,float> 
-VolumeParcel( const AimsData<T> & vol )
+VolumeParcel( const carto::rc_ptr<carto::Volume<T> > & vol )
 {
   
   std::map<T,float>			stat;
@@ -461,17 +462,28 @@ VolumeParcel( const AimsData<T> & vol )
   typename std::set<T>::iterator	il,el;
   int    				x,y,z;
   //T					lab;
-  float		voxelVol = vol.sizeX() * vol.sizeY() * vol.sizeZ();
-  ForEach3d(vol,x,y,z)
-      labels.insert(vol(x,y,z));
+  std::vector<float> vs = vol->getVoxelSize();
+  float		voxelVol = vs[0] * vs[1] * vs[2];
 
-  for ( il = labels.begin(), el = labels.end(); il != el; ++il )
+  const T *p, *pp;
+  carto::const_line_NDIterator<T> it( &vol->at( 0 ), vol->getSize(),
+                                      vol->getStrides(), true );
+  for( ; !it.ended(); ++it )
+  {
+    p = &*it;
+    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+      labels.insert( *p );
+  }
+
+  for( il = labels.begin(), el = labels.end(); il != el; ++il )
     stat[*il] = 0;
  
-  ForEach3d(vol,x,y,z)
-    stat[vol(x,y,z)] += voxelVol;
-
-
+  for( it.reset(); !it.ended(); ++it )
+  {
+    p = &*it;
+    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+      stat[*p] += voxelVol;
+  }
 
   return(stat);
 }

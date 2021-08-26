@@ -32,6 +32,11 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/distancemap/meshdistance_d.h>
 #include <aims/distancemap/distancemap_g.h>
 #include <aims/morphology/morphology_g.h>
@@ -46,7 +51,7 @@ using namespace std;
 
 Texture<float> aims::meshdistance::GeodesicDepth(
   const AimsSurface<3,Void> & mesh,
-  const AimsData <short> & vol,
+  const rc_ptr<Volume<short> > & vol,
   float radius_close, float radius_erode )
 {
   
@@ -57,7 +62,7 @@ Texture<float> aims::meshdistance::GeodesicDepth(
   long    				x,y,z;
   Point3df				pos;
   float 				sizex,sizey,sizez;
-  VolumeRef<short>		envelop = vol.clone();
+  VolumeRef<short>		envelop = new Volume<short>( *vol );
       
   cout << "Closing of the mask (size: " << radius_close << ")" << endl;
   envelop = AimsMorphoClosing( envelop, radius_close );

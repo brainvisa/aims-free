@@ -39,7 +39,7 @@
 #include <aims/config/aimsalgo_config.h>
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <set>
 #include <map>
 #include <float.h>
@@ -55,7 +55,7 @@ namespace aims
         The vol define the object and the background
         The radius-* are morphological parameter */
     Texture<float> GeodesicDepth ( const AimsSurface<3,Void> & mesh,
-                    const AimsData <short> & vol ,
+                    const carto::rc_ptr<carto::Volume<short> > & vol ,
                     float radius_close, float radius_erode) ;
 
     /** Computes a distance texture over a mesh

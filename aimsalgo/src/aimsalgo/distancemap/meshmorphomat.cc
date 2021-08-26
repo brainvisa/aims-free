@@ -32,6 +32,11 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/distancemap/meshmorphomat_d.h>
 #include <aims/distancemap/distancemap_g.h>
 #include <aims/morphology/morphology_g.h>

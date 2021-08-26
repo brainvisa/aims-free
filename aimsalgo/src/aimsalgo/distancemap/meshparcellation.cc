@@ -32,9 +32,12 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/distancemap/meshparcellation_d.h>
-#include <aims/distancemap/distancemap_g.h>
-#include <aims/morphology/morphology_g.h>
 #include <graph/graph/graph.h>
 #include <fstream>
 
@@ -558,7 +561,7 @@ namespace aims
 					 const AimsSurface<3,Void> & mesh);
     
     template
-    std::map<short,float>  VolumeParcel(const AimsData<short > & vol);
+    std::map<short,float> VolumeParcel( const rc_ptr<Volume<short> > & vol );
 
     template
     Texture<set<short> > gyrusSeedDefinition<short>( const AimsSurface<3,Void> & mesh, 

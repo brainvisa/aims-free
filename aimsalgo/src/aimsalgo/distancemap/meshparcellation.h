@@ -38,7 +38,7 @@
 
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/distancemap/stlsort.h>
 #include <aims/distancemap/meshvoronoi.h>
 #include <set>
@@ -110,7 +110,8 @@ namespace aims
 
     /// Give the surface of labelled parcels defined from volume.
     template<class T>
-    std::map<T,float>  VolumeParcel(const AimsData<T> & vol);
+    std::map<T,float> VolumeParcel(
+      const carto::rc_ptr<carto::Volume<T> > & vol);
  
     
 
