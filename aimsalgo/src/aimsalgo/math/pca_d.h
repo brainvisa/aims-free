@@ -49,7 +49,7 @@ AimsPCA::doIt( const std::list< Point3d >& selectedPoints,
   while( iter != last )
   {
     for(int t = 0 ; t < data->getSizeT() ; ++t )
-      individuals( i, t ) = data( (*iter)[0], (*iter)[1], (*iter)[2], t ) ;
+      individuals( i, t ) = data->at( (*iter)[0], (*iter)[1], (*iter)[2], t ) ;
     ++i ; ++iter ;
   }
   doIt( individuals ) ;
