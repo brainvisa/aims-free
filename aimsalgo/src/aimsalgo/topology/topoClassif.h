@@ -45,14 +45,14 @@ class TopologicalClassification : public TopologicalClassificationBase
 {
 public:
 
-  TopologicalClassification( const AimsData< T > & );
+  TopologicalClassification( const carto::rc_ptr<carto::Volume< T > > & );
   virtual ~TopologicalClassification();
 };
 
 
 template< class T > inline
 TopologicalClassification< T >::TopologicalClassification( 
-				           const AimsData< T >& d )
+  const carto::rc_ptr<carto::Volume< T > > & d )
   : TopologicalClassificationBase()
 {
   _topo = new Topology< T >( d );

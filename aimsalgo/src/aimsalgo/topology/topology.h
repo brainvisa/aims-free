@@ -35,7 +35,7 @@
 #ifndef AIMS_TOPOLOGY_TOPOLOGY_H
 #define AIMS_TOPOLOGY_TOPOLOGY_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/topology/topoBase.h>
 
 
@@ -44,7 +44,7 @@ class Topology : public TopologyBase
 {
 public:
 
-  Topology( const AimsData< T >& );
+  Topology( const carto::rc_ptr<carto::Volume< T > >& );
 
   void fillNeighborhood( const Point3d&, int );
   void fillNeighborhood( const Point3d&, int, int );
@@ -52,35 +52,37 @@ public:
 
 private:
 
-  void init( const AimsData< T >& );
+  void init( const carto::rc_ptr<carto::Volume< T > >& );
 
-  AimsData< T > _data;
+  carto::VolumeRef< T > _data;
 };
 
 
 template< class T > inline
-Topology< T >::Topology( const AimsData< T >& d ) : TopologyBase()
+Topology< T >::Topology( const carto::rc_ptr<carto::Volume< T > > & d )
+  : TopologyBase()
 {
   init( d );
 }
 
 
 template< class T > inline
-void Topology< T >::init( const AimsData< T >& d )
+void Topology< T >::init( const carto::rc_ptr<carto::Volume< T > > & d )
 {
-  if ( d.borderWidth() == 0 )
-    {
-      int dx = d.dimX(), dy = d.dimY(), dz = d.dimZ();
-      int x, y, z;
-      
-      _data = AimsData< T >( dx, dy, dz, 1, 1 );
-      _data.setSizeXYZT( d.sizeX(), d.sizeY(), d.sizeZ() );
-      
-      for ( z=0; z<dz; z++ )
-        for ( y=0; y<dy; y++ )
-	  for ( x=0; x<dx; x++ )
-	    _data( x, y, z ) = d( x, y, z );
-    }
+  if ( d->getBorders()[0] == 0 || d->getBorders()[1] == 0
+       || d->getBorders()[2] == 0 )
+  {
+    int dx = d->getSizeX(), dy = d->getSizeY(), dz = d->getSizeZ();
+    int x, y, z;
+
+    _data = carto::VolumeRef< T >( dx, dy, dz, 1, 1 );
+    _data.setVoxelSize( d->getVoxelSize() );
+
+    for ( z=0; z<dz; z++ )
+      for ( y=0; y<dy; y++ )
+        for ( x=0; x<dx; x++ )
+          _data( x, y, z ) = d->at( x, y, z );
+  }
   else  _data = d;
   
   _data.fillBorder( (T)0 );
@@ -90,8 +92,8 @@ void Topology< T >::init( const AimsData< T >& d )
 template< class T > inline
 void Topology< T >::fillNeighborhood( const Point3d& pt, int label )
 {
-  if ( pt[0] > 0 && pt[1] > 0 && pt[2] > 0 && pt[0] < _data.dimX()-1 &&
-       pt[1] < _data.dimY()-1 && pt[2] < _data.dimZ()-1 )
+  if ( pt[0] > 0 && pt[1] > 0 && pt[2] > 0 && pt[0] < _data.getSizeX()-1 &&
+       pt[1] < _data.getSizeY()-1 && pt[2] < _data.getSizeZ()-1 )
     {
       Point3d dep;
 
@@ -111,8 +113,8 @@ void Topology< T >::fillNeighborhood( const Point3d& pt, int label )
 template< class T > inline
 void Topology< T >::fillNeighborhood( const Point3d& pt, int lb1, int lb2 )
 {
-  if ( pt[0] > 0 && pt[1] > 0 && pt[2] > 0 && pt[0] < _data.dimX()-1 &&
-       pt[1] < _data.dimY()-1 && pt[2] < _data.dimZ()-1 )
+  if ( pt[0] > 0 && pt[1] > 0 && pt[2] > 0 && pt[0] < _data.getSizeX()-1 &&
+       pt[1] < _data.getSizeY()-1 && pt[2] < _data.getSizeZ()-1 )
     {
       Point3d dep;
       T temp;
@@ -134,8 +136,8 @@ void Topology< T >::fillNeighborhood( const Point3d& pt, int lb1, int lb2 )
 template< class T > inline
 void Topology< T >::fillNeighborhoodComplement( const Point3d& pt, int label )
 {
-  if ( pt[0] > 0 && pt[1] > 0 && pt[2] > 0 && pt[0] < _data.dimX()-1 &&
-       pt[1] < _data.dimY()-1 && pt[2] < _data.dimZ()-1 )
+  if ( pt[0] > 0 && pt[1] > 0 && pt[2] > 0 && pt[0] < _data.getSizeX()-1 &&
+       pt[1] < _data.getSizeY()-1 && pt[2] < _data.getSizeZ()-1 )
     {
       Point3d dep;
 
