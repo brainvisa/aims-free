@@ -34,6 +34,7 @@
 
 #include <aims/math/ppca_d.h>
 
+using namespace carto ;
 using namespace std ;
 
 namespace aims {
@@ -55,64 +56,65 @@ ProbabilisticPcaElement::ProbabilisticPcaElement( int significantNumberOfEV,
 
 
 
-template void  ProbabilisticPcaElement::doIt<int8_t>(const AimsData<int8_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint8_t>(const AimsData<uint8_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<int16_t>(const AimsData<int16_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint16_t>(const AimsData<uint16_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<int32_t>(const AimsData<int32_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint32_t>(const AimsData<uint32_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<int64_t>(const AimsData<int64_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint64_t>(const AimsData<uint64_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<float>(const AimsData<float>&, double) ;
-template void  ProbabilisticPcaElement::doIt<double>(const AimsData<double>&, double) ;
+template void  ProbabilisticPcaElement::doIt<int8_t>(
+  const rc_ptr<Volume<int8_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<uint8_t>(const rc_ptr<Volume<uint8_t> >&, double) ;
+template void  ProbabilisticPcaElement::doIt<int16_t>(const rc_ptr<Volume<int16_t> >&, double) ;
+template void  ProbabilisticPcaElement::doIt<uint16_t>(const rc_ptr<Volume<uint16_t> >&, double) ;
+template void  ProbabilisticPcaElement::doIt<int32_t>(const rc_ptr<Volume<int32_t> >&, double) ;
+template void  ProbabilisticPcaElement::doIt<uint32_t>(const rc_ptr<Volume<uint32_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<int64_t>(const rc_ptr<Volume<int64_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<uint64_t>(const rc_ptr<Volume<uint64_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<float>(const rc_ptr<Volume<float> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<double>(const rc_ptr<Volume<double> > &, double) ;
 
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template void  ProbabilisticPcaElement::doIt<char>(const AimsData<char>&, double) ;
+template void  ProbabilisticPcaElement::doIt<char>(const rc_ptr<Volume<char> > &, double) ;
 #endif
 #ifdef CARTO_LONG_IS_DISTINCT
-template void  ProbabilisticPcaElement::doIt<long>(const AimsData<long>&, double) ;
-template void  ProbabilisticPcaElement::doIt<unsigned long>(const AimsData<unsigned long>&, double) ;
+template void  ProbabilisticPcaElement::doIt<long>(const rc_ptr<Volume<long> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<unsigned long>(const rc_ptr<Volume<unsigned long> > &, double) ;
 #endif
 
-template double  ProbabilisticPcaElement::noiseVariance<int8_t>(const AimsData<int8_t>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<uint8_t>(const AimsData<uint8_t>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<int16_t>(const AimsData<int16_t>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<uint16_t>(const AimsData<uint16_t>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<int32_t>(const AimsData<int32_t>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<uint32_t>(const AimsData<uint32_t>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<int64_t>(const AimsData<int64_t>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<uint64_t>(const AimsData<uint64_t>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<float>(const AimsData<float>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<double>(const AimsData<double>&, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<int8_t>(const rc_ptr<Volume<int8_t> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<uint8_t>(const rc_ptr<Volume<uint8_t> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<int16_t>(const rc_ptr<Volume<int16_t> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<uint16_t>(const rc_ptr<Volume<uint16_t> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<int32_t>(const rc_ptr<Volume<int32_t> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<uint32_t>(const rc_ptr<Volume<uint32_t> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<int64_t>(const rc_ptr<Volume<int64_t> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<uint64_t>(const rc_ptr<Volume<uint64_t> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<float>(const rc_ptr<Volume<float> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<double>(const rc_ptr<Volume<double> > &, double &) const ;
 
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template double  ProbabilisticPcaElement::noiseVariance<char>(const AimsData<char>&, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<char>(const rc_ptr<Volume<char> > &, double &) const ;
 #endif
 #ifdef CARTO_LONG_IS_DISTINCT
-template double  ProbabilisticPcaElement::noiseVariance<long>(const AimsData<long>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<unsigned long>(const AimsData<unsigned long>&, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<long>(const rc_ptr<Volume<long> > &, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<unsigned long>(const rc_ptr<Volume<unsigned long> > &, double &) const ;
 #endif
 
-template void  ProbabilisticPcaElement::doIt<int8_t>(const std::list< Point3d>&, const AimsData<int8_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint8_t>(const std::list< Point3d>&, const AimsData<uint8_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<int16_t>(const std::list< Point3d>&, const AimsData<int16_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint16_t>(const std::list< Point3d>&, const AimsData<uint16_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<int32_t>(const std::list< Point3d>&, const AimsData<int32_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint32_t>(const std::list< Point3d>&, const AimsData<uint32_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<int64_t>(const std::list< Point3d>&, const AimsData<int64_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint64_t>(const std::list< Point3d>&, const AimsData<uint64_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<float>(const std::list< Point3d>&, const AimsData<float>&, double) ;
-template void  ProbabilisticPcaElement::doIt<double>(const std::list< Point3d>&, const AimsData<double>&, double) ;
+template void  ProbabilisticPcaElement::doIt<int8_t>(const std::list< Point3d>&, const rc_ptr<Volume<int8_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<uint8_t>(const std::list< Point3d>&, const rc_ptr<Volume<uint8_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<int16_t>(const std::list< Point3d>&, const rc_ptr<Volume<int16_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<uint16_t>(const std::list< Point3d>&, const rc_ptr<Volume<uint16_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<int32_t>(const std::list< Point3d>&, const rc_ptr<Volume<int32_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<uint32_t>(const std::list< Point3d>&, const rc_ptr<Volume<uint32_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<int64_t>(const std::list< Point3d>&, const rc_ptr<Volume<int64_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<uint64_t>(const std::list< Point3d>&, const rc_ptr<Volume<uint64_t> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<float>(const std::list< Point3d>&, const rc_ptr<Volume<float> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<double>(const std::list< Point3d>&, const rc_ptr<Volume<double> > &, double) ;
 
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template void  ProbabilisticPcaElement::doIt<char>(const std::list< Point3d>&, const AimsData<char>&, double) ;
+template void  ProbabilisticPcaElement::doIt<char>(const std::list< Point3d>&, const rc_ptr<Volume<char> > &, double) ;
 #endif
 #ifdef CARTO_LONG_IS_DISTINCT
-template void  ProbabilisticPcaElement::doIt<long>(const std::list< Point3d>&, const AimsData<long>&, double) ;
-template void  ProbabilisticPcaElement::doIt<unsigned long>(const std::list< Point3d>&, const AimsData<unsigned long>&, double) ;
+template void  ProbabilisticPcaElement::doIt<long>(const std::list< Point3d>&, const rc_ptr<Volume<long> > &, double) ;
+template void  ProbabilisticPcaElement::doIt<unsigned long>(const std::list< Point3d>&, const rc_ptr<Volume<unsigned long> > &, double) ;
 #endif
 
 

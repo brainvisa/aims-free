@@ -32,7 +32,11 @@
  */
 
 
-//#include <aims/math/pca_d.h>
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/math/pca_d.h>
 
 using namespace std;
@@ -172,31 +176,38 @@ AimsPCA::unreconstructedVariance( )
 void 
 AimsPCA::computeErrorAndProjMatrices()
 {
-  int nbFrame = _eigenVectors.dimX() ;
+  int nbFrame = _eigenVectors->getSizeX() ;
   // Calcul des matrices d'erreurs et de projection
-  _projectionMatrix = AimsFastAllocationData< float >( nbFrame, nbFrame ) ;
-  _selectedEigenVectors = AimsFastAllocationData<float>(nbFrame, _significantNumberOfVp) ;
-  _selectedEigenVectorsTr = AimsFastAllocationData<float>(_significantNumberOfVp, nbFrame) ;
+  _projectionMatrix = VolumeRef< float >( nbFrame, nbFrame, 1, 1,
+                                          carto::AllocatorContext::fast() );
+  _selectedEigenVectors = VolumeRef<float>(
+      nbFrame, _significantNumberOfVp, 1, 1, carto::AllocatorContext::fast() );
+  _selectedEigenVectorsTr = VolumeRef<float>(
+      _significantNumberOfVp, nbFrame, 1, 1, carto::AllocatorContext::fast());
   
   for( int i = 0 ; i < _significantNumberOfVp ; ++i )
-    for( int t = 0 ; t < nbFrame ; ++t ){
+    for( int t = 0 ; t < nbFrame ; ++t )
+    {
       _selectedEigenVectors(t, i) = _eigenVectors( t, i ) ;
       _selectedEigenVectorsTr(i, t) = _eigenVectors( t, i ) ;
     }
   for(int ord = 0 ; ord < _significantNumberOfVp ; ++ord )
-    _projectionMatrix = _selectedEigenVectors.cross( _selectedEigenVectorsTr ) ;
+    _projectionMatrix = matrix_product( _selectedEigenVectors,
+                                        _selectedEigenVectorsTr );
 
-  _errorMatrix = AimsFastAllocationData<float>(nbFrame, nbFrame) ;
+  _errorMatrix = VolumeRef<float>( nbFrame, nbFrame, 1, 1,
+                                   carto::AllocatorContext::fast() );
   for( int t = 0 ; t < nbFrame ; ++t )
     _errorMatrix(t, t) = 1. ;
   
   for(int ord = 0 ; ord < _significantNumberOfVp ; ++ord )
-    _errorMatrix = _errorMatrix - _projectionMatrix.cross( _projectionMatrix.clone().transpose() ) ;
+    _errorMatrix = _errorMatrix
+      - matrix_product( _projectionMatrix, transpose( _projectionMatrix ) );
   
   _matricesComputed = true ;
 }
 
-const AimsData<float>& 
+const VolumeRef<float>&
 AimsPCA::projectionMatrix( ) 
 {
   if( ! _computed )
@@ -208,7 +219,7 @@ AimsPCA::projectionMatrix( )
   return _projectionMatrix ;
 }
 
-const AimsData<float>& 
+const VolumeRef<float>&
 AimsPCA::reconstructionErrorMatrix( )
 {
   if( ! _computed )
@@ -255,7 +266,7 @@ AimsPCA::eigenValues( ) const
   return  _eigenValues ;
 }
 
-const AimsData<float>&
+const VolumeRef<float>&
 AimsPCA::eigenVectors( ) const 
 {
   if( ! _computed )
@@ -264,23 +275,26 @@ AimsPCA::eigenVectors( ) const
   return _eigenVectors ;
 }
 
-AimsData<float>
+VolumeRef<float>
 AimsPCA::selectedEigenVectors( ) const 
 {
   if( ! _computed )
     throw runtime_error( "You must doIt first, parameter not yet computed !") ;
   
-  AimsFastAllocationData<float> selectedEigenVec( _eigenVectors.dimY(), _significantNumberOfVp ) ;  
+  VolumeRef<float> selectedEigenVec(
+    _eigenVectors->getSizeY(), _significantNumberOfVp, 1, 1,
+    carto::AllocatorContext::fast() );
+
   for( int i = 0 ; i < _significantNumberOfVp ; ++i )
-    for( int t = 0 ; t < _eigenVectors.dimY() ; ++t )
+    for( int t = 0 ; t < _eigenVectors->getSizeY(); ++t )
       selectedEigenVec(t, i) = _eigenVectors(t, i) ;
   
   return selectedEigenVec ;
 }
 
 
-AimsData<float> 
-AimsPCA::projection( const AimsData<float>& individual )
+VolumeRef<float>
+AimsPCA::projection( const rc_ptr<Volume<float> > & individual )
 {
   if( ! _computed )
     throw runtime_error( "You must doIt first, parameter not yet computed !") ;
@@ -288,17 +302,19 @@ AimsPCA::projection( const AimsData<float>& individual )
   if( !_matricesComputed ) 
     computeErrorAndProjMatrices() ;
   
-  return _selectedEigenVectorsTr.cross( _selectedEigenVectors.cross( individual ) ) ;
+  return matrix_product( _selectedEigenVectorsTr,
+                         matrix_product( _selectedEigenVectors, individual ) );
 }
 
 float 
-AimsPCA::reconstructionError2( const AimsData<float>& individual )
+AimsPCA::reconstructionError2( const rc_ptr<Volume<float> > & individual )
 {
-  AimsFastAllocationData<float> residual = individual - projection( individual ) ;
+  VolumeRef<float> residual
+    = VolumeRef<float>( individual ) - projection( individual ) ;
   cout << "After proj " << endl ;
   
   float err2 = 0. ;
-  for( int i = 0 ; i < residual.dimX() ; ++i )
+  for( int i = 0 ; i < residual->getSizeX() ; ++i )
     err2 += residual(i) * residual(i) ;
   return err2 ;
 }

@@ -32,7 +32,6 @@
  */
 
 
-#include <aims/data/fastAllocationData.h>
 #include <aims/math/svd.h>
 #include <aims/math/pca.h>
 #include <aims/io/writer.h>
@@ -40,69 +39,87 @@
 template <typename T>
 void
 AimsPCA::doIt( const std::list< Point3d >& selectedPoints, 
-	       const AimsData<T>& data )
+               const carto::rc_ptr<carto::Volume<T> > & data )
 {
-  aims::AimsFastAllocationData<T> individuals( std::max(int(selectedPoints.size()), 1), data.dimT() ) ;
+  carto::VolumeRef<T> individuals(
+    std::max(int(selectedPoints.size()), 1), data->getSizeT(), 1, 1,
+    carto::AllocatorContext::fast() );
   int i = 0 ;
   std::list< Point3d >::const_iterator iter( selectedPoints.begin() ), last( selectedPoints.end() ) ; 
   while( iter != last )
-    {
-      for(int t = 0 ; t < data.dimT() ; ++t )
-	individuals( i, t ) = data( (*iter)[0], (*iter)[1], (*iter)[2], t ) ;
-      ++i ; ++iter ;
-    }
+  {
+    for(int t = 0 ; t < data->getSizeT() ; ++t )
+      individuals( i, t ) = data( (*iter)[0], (*iter)[1], (*iter)[2], t ) ;
+    ++i ; ++iter ;
+  }
   doIt( individuals ) ;
 }
 
 template <typename T>
 void 
-AimsPCA::doIt( const AimsData<T>& individuals )
+AimsPCA::doIt( const carto::rc_ptr<carto::Volume<T> > & individuals )
 {
   _computed = true ;
   _validPca = true ;
   _matricesComputed = false ;
-  int nbFrame = individuals.dimY() ;
+  int nbFrame = individuals->getSizeY();
   
-  aims::AimsFastAllocationData<float> centeredIndivMatrix( individuals.dimX(), individuals.dimY() ) ;
-  if( _center || _normalize ){
-    _mean = std::vector<float>(individuals.dimY(), 0.) ;
-    _var = std::vector<float>(individuals.dimY(), 0.) ;
+  carto::VolumeRef<float> centeredIndivMatrix(
+    individuals->getSizeX(), individuals->getSizeY(), 1, 1,
+    carto::AllocatorContext::fast() );
+
+  if( _center || _normalize )
+  {
+    _mean = std::vector<float>(individuals->getSizeY(), 0.) ;
+    _var = std::vector<float>(individuals->getSizeY(), 0.) ;
     T val ;
-    for( int ind = 0 ; ind < individuals.dimX() ; ++ind )
-      for( int t = 0 ; t < individuals.dimY() ; ++t ){
-	val = individuals( ind, t ) ;
-	_mean[t] += val ;
-	_var[t] += val * val ;
+    for( int ind = 0 ; ind < individuals->getSizeX() ; ++ind )
+      for( int t = 0 ; t < individuals->getSizeY() ; ++t )
+      {
+        val = individuals->at( ind, t ) ;
+        _mean[t] += val ;
+        _var[t] += val * val ;
       }
     
     //double meanMean = 0. ;
         
-    for( int t = 0 ; t < nbFrame ; ++t ){
-      _mean[t] /= centeredIndivMatrix.dimX() ;
-      _var[t] = sqrt(_var[t] / ( centeredIndivMatrix.dimX() - 1 ) - _mean[t] * _mean[t]) ;
-      for( int ind = 0 ; ind < centeredIndivMatrix.dimX() ; ++ind ){
-	centeredIndivMatrix( ind, t ) = individuals( ind, t ) ;
-	if( _center ){
-	  centeredIndivMatrix( ind, t ) -= _mean[t] ;
-	  //meanMean += centeredIndivMatrix( ind, t ) ; 
-	}
-	if( _normalize )
-	  centeredIndivMatrix( ind, t ) /= _var[t] ;
+    for( int t = 0 ; t < nbFrame ; ++t )
+    {
+      _mean[t] /= centeredIndivMatrix->getSizeX() ;
+      _var[t] = sqrt( _var[t] / ( centeredIndivMatrix->getSizeX() - 1 )
+                      - _mean[t] * _mean[t] );
+      for( int ind = 0 ; ind < centeredIndivMatrix->getSizeX() ; ++ind )
+      {
+        centeredIndivMatrix( ind, t ) = individuals->at( ind, t ) ;
+        if( _center )
+        {
+          centeredIndivMatrix( ind, t ) -= _mean[t] ;
+          //meanMean += centeredIndivMatrix( ind, t ) ;
+        }
+        if( _normalize )
+          centeredIndivMatrix( ind, t ) /= _var[t] ;
       }
     }
-    //meanMean /= centeredIndivMatrix.dimX() * centeredIndivMatrix.dimY() ;
+    //meanMean /= centeredIndivMatrix.getSizeX() * centeredIndivMatrix.getSizeY() ;
     //std::cout << "Centered data mean (should be 0.) = " << meanMean << std::endl ;
   }
 
 
   // Matrice des correlations
-  aims::AimsFastAllocationData<float>matVarCov(centeredIndivMatrix.dimY(), centeredIndivMatrix.dimY() ) ;
+  carto::VolumeRef<float>matVarCov(
+    centeredIndivMatrix->getSizeY(), centeredIndivMatrix->getSizeY(), 1, 1,
+    carto::AllocatorContext::fast() );
+
   int                 x1, y1;
-  ForEach2d( matVarCov, x1, y1 )
+  int dx1 = matVarCov->getSizeX(), dy1 = matVarCov->getSizeY();
+
+  for( y1=0; y1<dy1; ++y1 )
+    for( x1=0; x1<dx1; ++x1 )
     {
-      for(int k=0;  k < centeredIndivMatrix.dimX()  ;++k)
-	matVarCov(x1, y1) += centeredIndivMatrix(k, x1) * centeredIndivMatrix(k, y1);	
-      matVarCov(x1, y1) /= centeredIndivMatrix.dimX() - 1 ;
+      for(int k=0;  k < centeredIndivMatrix->getSizeX()  ;++k)
+        matVarCov(x1, y1)
+          += centeredIndivMatrix(k, x1) * centeredIndivMatrix(k, y1);
+      matVarCov(x1, y1) /= centeredIndivMatrix->getSizeX() - 1;
     }
   std::cerr << "var cov filled" << std::endl ;
  
@@ -112,11 +129,12 @@ AimsPCA::doIt( const AimsData<T>& individuals )
 /*        << matVarCov << endl ; */
   
   // Decomposition SVD 
-  try{
+  try
+  {
     AimsSVD< float >  svd;
     svd.setReturnType( AimsSVD< float >::VectorOfSingularValues );
     std::cerr << "doing svd !" << std::endl ;
-    aims::AimsFastAllocationData< float > eigenVal  = svd.doit( matVarCov );
+    carto::VolumeRef< float > eigenVal  = svd.doit( matVarCov );
     std::cerr << "svd done !" << std::endl ;
     
     /*   cout << "Mat Var Cov Before sort = " << endl  */
@@ -132,27 +150,24 @@ AimsPCA::doIt( const AimsData<T>& individuals )
     
     // Temporaire
     _eigenValues.clear() ;
-    _eigenValues.reserve(matVarCov.dimX()) ;
-    for( int t = 0 ; t < matVarCov.dimX() ; ++t ){
+    _eigenValues.reserve(matVarCov->getSizeX());
+    for( int t = 0 ; t < matVarCov->getSizeX() ; ++t )
+    {
       _eigenValues.push_back( eigenVal(t) ) ;
     }
   } // catch (user_interruption& e){
 //     _validPca = false ;
 //   }
-  catch( std::exception &e ){
+  catch( std::exception &e )
+  {
     _validPca = false ;
-    if( individuals.dimX() > 0 && individuals.dimY() > 0 && individuals.dimZ() > 0 ){
+    if( individuals->getSizeX() > 0 && individuals->getSizeY() > 0
+        && individuals->getSizeZ() > 0 )
+    {
       std::cerr << "invalid pca" << std::endl ;
-//       aims::Writer< AimsData<T> > wriIM( "indivMatrix.ima") ;
-//       wriIM.write(individuals) ;
-//       aims::Writer< AimsData<float> > wriCIM( "centeredIndivMatrix.ima") ;
-//       wriCIM.write(centeredIndivMatrix) ;
-//       aims::Writer< AimsData<float> > wriVarCov( "matVarCov.ima") ;
-//       wriVarCov.write(matVarCov) ;
-//       char c ;
-//       std::cin >> c ;
       
-    } else
+    }
+    else
       std::cout << "empty indiv matrix" << std::endl ;
   }
 }

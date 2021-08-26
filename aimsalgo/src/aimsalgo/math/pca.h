@@ -36,7 +36,7 @@
 #define AIMS_MATH_PCA_H
 
 #include <aims/def/general.h>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 #include <vector>
 
 
@@ -47,10 +47,10 @@ public:
   ~AimsPCA() {}
   
   template <class T>
-    void doIt( const AimsData<T>& individuals ) ;
+    void doIt( const carto::rc_ptr<carto::Volume<T> > & individuals ) ;
   
   template <class T>
-    void doIt( const std::list< Point3d>& selectedPoints, const AimsData<T>& data ) ;
+    void doIt( const std::list< Point3d>& selectedPoints, const carto::rc_ptr<carto::Volume<T> > & data ) ;
   
   
   float noiseVariance( float& meanNorm ) ;
@@ -67,15 +67,17 @@ public:
   float noiseInertia() ;
   float unreconstructedVariance( ) ;
   float relativeUnreconstructedVariance( ) ;
-  AimsData<float> projection( const AimsData<float>& individual ) ;
-  float reconstructionError2( const AimsData<float>& individual ) ;
+  carto::VolumeRef<float> projection(
+    const carto::rc_ptr<carto::Volume<float> > & individual ) ;
+  float reconstructionError2(
+    const carto::rc_ptr<carto::Volume<float> > & individual ) ;
   
-  const AimsData<float>& projectionMatrix() ;
-  const AimsData<float>& reconstructionErrorMatrix() ;
+  const carto::VolumeRef<float>& projectionMatrix() ;
+  const carto::VolumeRef<float>& reconstructionErrorMatrix() ;
   
   const std::vector<float>& eigenValues() const ;
-  const AimsData<float>& eigenVectors() const ;
-  AimsData<float> selectedEigenVectors() const ;
+  const carto::VolumeRef<float>& eigenVectors() const ;
+  carto::VolumeRef<float> selectedEigenVectors() const ;
   
   const std::vector<float>& mean() const ;
   const std::vector<float>& var() const ;
@@ -93,12 +95,12 @@ protected:
   std::vector<float> _var ;
   
   std::vector<float> _projectionVector ;
-  aims::AimsFastAllocationData<float> _projectionMatrix ;
-  aims::AimsFastAllocationData<float> _errorMatrix ;
+  carto::VolumeRef<float> _projectionMatrix ;
+  carto::VolumeRef<float> _errorMatrix ;
   std::vector<float> _eigenValues ;
-  aims::AimsFastAllocationData<float> _eigenVectors ;
-  aims::AimsFastAllocationData<float> _selectedEigenVectors ;
-  aims::AimsFastAllocationData<float> _selectedEigenVectorsTr ;
+  carto::VolumeRef<float> _eigenVectors ;
+  carto::VolumeRef<float> _selectedEigenVectors ;
+  carto::VolumeRef<float> _selectedEigenVectorsTr ;
   
   int _significantNumberOfVp ;
   float _minimalInertia ;

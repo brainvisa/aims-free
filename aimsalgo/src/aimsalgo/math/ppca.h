@@ -36,7 +36,7 @@
 #define AIMS_MATH_PPCA_H
 
 #include <aims/def/general.h>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 
 namespace aims
 {
@@ -48,11 +48,13 @@ namespace aims
     virtual ~ProbabilisticPcaElement( ) {}
       
     template <class T>
-    void doIt( const AimsData<T>& individuals, double distanceRef = 0. ) ;
+    void doIt( const carto::rc_ptr<carto::Volume<T> > & individuals,
+               double distanceRef = 0. );
       
     template <class T>
     void doIt( const std::list< Point3d>& selectedPoints, 
-               const AimsData<T>& data, double distanceRef = 0. ) ;
+               const carto::rc_ptr<carto::Volume<T> > & data,
+               double distanceRef = 0. );
       
     // set a priori class probability
     void setPIj( double PIj ) 
@@ -62,30 +64,32 @@ namespace aims
         _lnAddFactor = log( _detCi / ( _PIj * _PIj ) ) ;
     }
       
-    inline double distance( const AimsData<double>& individual ) ;
+    inline double distance(
+      const carto::rc_ptr<carto::Volume<double> > & individual );
 
-    inline double posteriorProbability( const AimsData<double>& individual, 
-					double pX ) ;
+    inline double posteriorProbability(
+      const carto::rc_ptr<carto::Volume<double> > & individual, double pX );
 
-//     double normalizedPosteriorProbability( const AimsData<double>& individual, 
+//     double normalizedPosteriorProbability( const carto::rc_ptr<carto::Volume<double> > & individual,
 // 						  double pX, double normX ) ;
 
     /* for comparison purposes only, because x prior probability is not taken 
        into account */
-    inline double lnPosteriorProbability( const AimsData<double>& individual ) ;
+    inline double lnPosteriorProbability(
+      const carto::rc_ptr<carto::Volume<double> > & individual );
       
-    const AimsData<double>& mean() const { return _mean ; }
+    const carto::VolumeRef<double>& mean() const { return _mean ; }
     double noiseVariance() const
     { return _Sigma2 ; }
       
     template <class T>
-    double noiseVariance( const AimsData<T>& individuals, 
+    double noiseVariance( const carto::rc_ptr<carto::Volume<T> > & individuals,
                           double& normMean ) const ;
       
     double meanNorm() { return _meanNorm ; }
 
-    const AimsData<double>& eigenValues() { return _EValues ; }
-    const AimsData<double>& selectedEigenVectors() { return _EVect ; }
+    const carto::VolumeRef<double>& eigenValues() { return _EValues ; }
+    const carto::VolumeRef<double>& selectedEigenVectors() { return _EVect ; }
 
     double normFactor() const { return _normFactor ; }
 
@@ -105,16 +109,16 @@ namespace aims
     int _nbOfSignificantEV ;
     double _PIj ;
       
-    AimsFastAllocationData<double> _mean ;
+    carto::VolumeRef<double> _mean ;
     double _meanMean ;
     double _meanNorm ;
-    AimsFastAllocationData<double> _x ;
-    AimsFastAllocationData<double> _xT ;
+    carto::VolumeRef<double> _x ;
+    carto::VolumeRef<double> _xT ;
     
-    AimsFastAllocationData<double> _Wi ;
-    AimsFastAllocationData<double> _invCi ;
-    AimsFastAllocationData<double> _EValues ;
-    AimsFastAllocationData<double> _EVect ;
+    carto::VolumeRef<double> _Wi ;
+    carto::VolumeRef<double> _invCi ;
+    carto::VolumeRef<double> _EValues ;
+    carto::VolumeRef<double> _EVect ;
     double _Sigma2 ;
       
     double _detCi ;
@@ -127,42 +131,46 @@ namespace aims
   class ProbabilisticPca
   {
   public:
-    ProbabilisticPca( const AimsData<T>& data, 
+    ProbabilisticPca( const carto::rc_ptr<carto::Volume<T> > & data,
                       const std::vector< std::list <Point3d> >& classes, 
-		      int nbOfSignificantEigenValues, 
+                      int nbOfSignificantEigenValues,
                       const std::vector<double>& PIj 
                       = std::vector<double>() ) ;
     ~ProbabilisticPca( ) {}
     
     std::vector<double> 
-    posteriorProbabilities( const AimsData<double>& x, double px, 
+    posteriorProbabilities( const carto::rc_ptr<carto::Volume<double> >& x,
+                            double px,
                             std::vector<double>& maxProbaByClass ) ;
     std::vector<double> 
-    andersonScores( const AimsData<double>& x, double px, 
+    andersonScores( const carto::rc_ptr<carto::Volume<double> > & x, double px,
                     std::vector<double>& maxProbaByClass ) ;
-    int affectedTo( const AimsData<double>& x ) ;
+    int affectedTo( const carto::rc_ptr<carto::Volume<double> > & x ) ;
     
-    bool classification( const AimsData<T>& dynamicImage, 
-			 const AimsData<byte>& mask,
-			 AimsData<short>& segmented ) ;
-    bool fuzzyClassification( const AimsData<T>& dynamicImage, 
-			      const AimsData<byte>& mask,
-			      AimsData<float>& fuzzySegmented,
-			      double thresholdOnMaxPercentage = 0., 
-			      double andersonScoreThreshold = 0.2,
-			      const AimsData<double>& indivPriorProbabilities 
-                              = aims::AimsFastAllocationData<double>() ) ;
+    bool classification( const carto::rc_ptr<carto::Volume<T> > & dynamicImage,
+                         const carto::rc_ptr<carto::Volume<byte> >& mask,
+                         carto::rc_ptr<carto::Volume<short> >& segmented );
+    bool fuzzyClassification(
+      const carto::rc_ptr<carto::Volume<T> > & dynamicImage,
+      const carto::rc_ptr<carto::Volume<byte> > & mask,
+      carto::rc_ptr<carto::Volume<float> > & fuzzySegmented,
+      double thresholdOnMaxPercentage = 0.,
+      double andersonScoreThreshold = 0.2,
+      const carto::rc_ptr<carto::Volume<double> > & indivPriorProbabilities
+                  = carto::VolumeRef<double>() ) ;
 
     
-    float posteriorProbability( const AimsData<double>& x, float pX, unsigned int classNb )
+    float posteriorProbability(
+      const carto::rc_ptr<carto::Volume<double> > & x, float pX,
+      unsigned int classNb )
     { 
       if( classNb >= _discrElements.size() )
-	throw std::runtime_error("Class number exceeds number of classes") ;
+        throw std::runtime_error("Class number exceeds number of classes") ;
       else
-	return _discrElements[classNb].posteriorProbability(x, pX) ;
+        return _discrElements[classNb].posteriorProbability(x, pX) ;
     }
     
-    double pX(const AimsData<double>& x ) ;
+    double pX(const carto::rc_ptr<carto::Volume<double> >& x ) ;
 
     short nbOfClasses() const { return _discrElements.size() ; }
     
@@ -170,7 +178,7 @@ namespace aims
     double weight( double norm2, int classe, float tolerance ) ;
     double wienerFilter( double sigma2, double norm2, double factor ) ;
     const std::vector< std::list< Point3d > >& _classes ;
-    const AimsData<T>& _data ;
+    const carto::VolumeRef<T> _data;
     double _distanceRef ;
     std::vector<double> _PIj ;
     int _nbOfSignificantEigenValues ;
@@ -179,7 +187,8 @@ namespace aims
 }
 
 double 
-aims::ProbabilisticPcaElement::distance( const AimsData<double>& x )
+aims::ProbabilisticPcaElement::distance(
+  const carto::rc_ptr<carto::Volume<double> > & x )
 {
   if( ! _computed )
     {
@@ -193,17 +202,18 @@ aims::ProbabilisticPcaElement::distance( const AimsData<double>& x )
     return 10000000. ;
   }
   
-//   for( int t = 0 ; t < indiv.dimX() ; ++t ){
+//   for( int t = 0 ; t < indiv->getSizeX() ; ++t ){
 //     _xT(1, t) = indiv(t) - _mean(t) ;
 //     _x(t) = indiv(t) - _mean(t) ;
 //   }
   
   double distance = 0. ;
-  for(int i = 0 ; i < x.dimX() ; ++i ){
+  for(int i = 0 ; i < x->getSizeX() ; ++i )
+  {
     double sum = 0. ;
-    for( int j = 0 ; j < x.dimX() ; ++j )
-      sum += _invCi(i, j) * ( x(j) - _mean(j) ) ;
-    distance += ( x(i) - _mean(i) ) * sum ;
+    for( int j = 0 ; j < x->getSizeX() ; ++j )
+      sum += _invCi(i, j) * ( x->at(j) - _mean(j) ) ;
+    distance += ( x->at(i) - _mean(i) ) * sum ;
   }
 //   double distance = _xT.cross( _invCi.cross( _x ) )(0, 0) ;
 
@@ -215,8 +225,8 @@ aims::ProbabilisticPcaElement::distance( const AimsData<double>& x )
 
 
 double 
-aims::ProbabilisticPcaElement::posteriorProbability( const AimsData<double>& x, 
-					       double pX )
+aims::ProbabilisticPcaElement::posteriorProbability(
+  const carto::rc_ptr<carto::Volume<double> > & x, double pX )
 {    
   if( ! _computed )
     {
@@ -231,11 +241,11 @@ aims::ProbabilisticPcaElement::posteriorProbability( const AimsData<double>& x,
   
   
   double distance = 0. ;
-  for(int i = 0 ; i < x.dimX() ; ++i ){
+  for(int i = 0 ; i < x->getSizeX() ; ++i ){
     double sum = 0. ;
-    for( int j = 0 ; j < x.dimX() ; ++j )
-      sum += _invCi(i, j) * ( x(j) - _mean(j) ) ;
-    distance += ( x(i) - _mean(i) ) * sum ;
+    for( int j = 0 ; j < x->getSizeX() ; ++j )
+      sum += _invCi(i, j) * ( x->at(j) - _mean(j) ) ;
+    distance += ( x->at(i) - _mean(i) ) * sum ;
   }
   
   if( distance < 0. )
@@ -255,9 +265,11 @@ aims::ProbabilisticPcaElement::posteriorProbability( const AimsData<double>& x,
 }
 
 double 
-aims::ProbabilisticPcaElement::lnPosteriorProbability( const AimsData<double>& x )
+aims::ProbabilisticPcaElement::lnPosteriorProbability(
+  const carto::rc_ptr<carto::Volume<double> > & x )
 {
-  if( ! _computed ){
+  if( ! _computed )
+  {
     std::cerr << "ProbabilisticPcaElement::lnPosteriorProbability : " 
 	      << std::endl ;
     throw std::runtime_error( "You must doIt first, parameter not yet " 
@@ -269,11 +281,12 @@ aims::ProbabilisticPcaElement::lnPosteriorProbability( const AimsData<double>& x
 
 
   double distance = 0. ;
-  for(int i = 0 ; i < x.dimX() ; ++i ){
+  for(int i = 0 ; i < x->getSizeX() ; ++i )
+  {
     double sum = 0. ;
-    for( int j = 0 ; j < x.dimX() ; ++j )
-      sum += _invCi(i, j) * ( x(j) - _mean(j) ) ;
-    distance += ( x(i) - _mean(i) ) * sum ;
+    for( int j = 0 ; j < x->getSizeX() ; ++j )
+      sum += _invCi(i, j) * ( x->at(j) - _mean(j) ) ;
+    distance += ( x->at(i) - _mean(i) ) * sum ;
   }
 //   double distance = _xT.cross( _invCi.cross( _x ) )(0, 0) ;
 
@@ -284,7 +297,7 @@ aims::ProbabilisticPcaElement::lnPosteriorProbability( const AimsData<double>& x
 //     ( _invCi.cross( xCentered ) )(0, 0) ;
   //std::cout << "distance = " << distance << "\tNormFactor = " 
   // << _lnAddFactor << std::endl ;
-  return (  _distanceRef - distance  /*/ (x.dimX() - _nbOfSignificantEV )*/ + _lnAddFactor ) ;
+  return (  _distanceRef - distance  /*/ (x->getSizeX() - _nbOfSignificantEV )*/ + _lnAddFactor ) ;
 }
 
 #endif
