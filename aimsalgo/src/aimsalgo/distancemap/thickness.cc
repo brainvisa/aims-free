@@ -32,6 +32,11 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/distancemap/thickness.h>
 #include <aims/distancemap/distancemap_g.h>
 #include <aims/distancemap/projection.h>
@@ -47,6 +52,7 @@
  
 using namespace aims::meshdistance;
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
@@ -210,12 +216,13 @@ void aims::meshdistance::CCOperture(const vector<Point3df>    &cc,
 
 
 
-void  aims::meshdistance::SulcusOperture( const AimsSurface<3,Void> & mesh, 
-					  map<Point3df, pair<float,float> , Point3dfCompare > &sulci2mesh,
-					  const AimsData <short> & surface_vol,
-					  const float demin, const float dpmin, const unsigned MINCC,
-					  const map <short,string> & trans,
-					  const set<string>	& labels)
+void  aims::meshdistance::SulcusOperture(
+  const AimsSurface<3,Void> & mesh,
+  map<Point3df, pair<float,float> , Point3dfCompare > &sulci2mesh,
+  const rc_ptr<Volume<short> > & surface_vol,
+  const float demin, const float dpmin, const unsigned MINCC,
+  const map <short,string> & trans,
+  const set<string>	& labels)
 {
 
   long    				x,y,z;
@@ -224,94 +231,104 @@ void  aims::meshdistance::SulcusOperture( const AimsSurface<3,Void> & mesh,
   map<short,vector<Point3df> >				cc_labels;//short labels of the sulci/connex components
   map<short,vector<Point3df> >::iterator			ilab,elab;
   map <short,string>::const_iterator	flab,glab = trans.end();
-  AimsData<short>			svol = surface_vol.clone() ;
+  VolumeRef<short>			svol = VolumeRef<short>( surface_vol ).deepcopy() ;
   set<string>::const_iterator		iclab,eclab;
-  float sx = surface_vol.sizeX(),sy = surface_vol.sizeY(),sz = surface_vol.sizeZ() ;
+  float sx = surface_vol->getVoxelSize()[0],
+    sy = surface_vol->getVoxelSize()[1], sz = surface_vol->getVoxelSize()[2];
+  vector<int> dim = svol.getSize();
 
   // Label filtering
   cout << "Selecting the sulci to be studied\n";
   eclab = labels.end();
 
-  ForEach3d(svol,x,y,z)
-    if (svol(x,y,z) != 0)
-      {  
-	flab = trans.find( svol(x,y,z) );
-	if (flab != glab)
-	  {
-	    iclab = labels.find( flab->second );
-	    if ( iclab == eclab || *iclab == "unknown"  )
-	      svol( x , y , z ) = 0;
-	  }	  
-	else
-	  cout << "the label " << svol(x,y,z) << "cannot be translated\n";
-      }
-
+  for( z=0; z<dim[2]; ++z )
+    for( y=0; y<dim[1]; ++y )
+      for( x=0; x<dim[0]; ++x )
+        if (svol(x,y,z) != 0)
+        {
+          flab = trans.find( svol(x,y,z) );
+          if (flab != glab)
+            {
+              iclab = labels.find( flab->second );
+              if ( iclab == eclab || *iclab == "unknown"  )
+                svol( x , y , z ) = 0;
+            }
+          else
+            cout << "the label " << svol(x,y,z) << "cannot be translated\n";
+        }
   
   // Extract Connected Components
-  AimsData<short>     ccvol = svol.clone() ;
+  VolumeRef<short>     ccvol = svol;
   cout << "Extracting connex components (with at least " << MINCC << " points in each components)" << endl;
   AimsConnectedComponent<short>( ccvol,
                                  aims::Connectivity::CONNECTIVITY_26_XYZ,
                                  short(0), short(0), false, MINCC );
   cc_labels.clear();
-  ForEach3d(ccvol,x,y,z)
-      if (ccvol(x,y,z) != 0)
-	cc_labels[ccvol(x,y,z)].push_back(Point3df(x*sx,y*sy,z*sz));
- int ncc = cc_labels.size(),nc = 1;
+  for( z=0; z<dim[2]; ++z )
+    for( y=0; y<dim[1]; ++y )
+      for( x=0; x<dim[0]; ++x )
+        if (ccvol(x,y,z) != 0)
+          cc_labels[ccvol(x,y,z)].push_back(Point3df(x*sx,y*sy,z*sz));
+
+  int ncc = cc_labels.size(),nc = 1;
 
   //Neighbourhood
   cout << "Find the neighbourhood of each point in the cc sulci"<< endl;
    Point3dfNeigh neigh;
   for (ilab=cc_labels.begin(),elab=cc_labels.end();ilab != elab; ++ilab)
-      NeighbourInCC(neigh ,ccvol,ccvol,aims::Connectivity::CONNECTIVITY_26_XYZ,ilab->first,3);
+      NeighbourInCC( neigh , ccvol, ccvol,
+                     aims::Connectivity::CONNECTIVITY_26_XYZ,ilab->first, 3 );
 
 
   //Operture for the cc 
   nc = 1;
   for (ilab=cc_labels.begin(),elab=cc_labels.end();ilab != elab; ++ilab)
-    {
-      cout << nc << " / " << ncc << endl;
-      ++nc;
-      CCOperture(ilab->second,mesh, neigh, sulci2mesh,demin,dpmin);
-    }
+  {
+    cout << nc << " / " << ncc << endl;
+    ++nc;
+    CCOperture(ilab->second,mesh, neigh, sulci2mesh,demin,dpmin);
+  }
 }
 
 
 
-AimsData<float> aims::meshdistance::OpertureParameters(const AimsSurface<3,Void> & /* mesh */, 
-					    const map<Point3df, pair<float,float> , Point3dfCompare > &sulci2mesh,
-					    const AimsData<short> & vol)
+VolumeRef<float> aims::meshdistance::OpertureParameters(
+  const AimsSurface<3,Void> & /* mesh */,
+  const map<Point3df, pair<float,float> , Point3dfCompare > &sulci2mesh,
+  const rc_ptr<Volume<short> > & vol)
 {
 
   Point3d Pt;
   Point3df PtR;
   map<Point3df, pair<float,float> , Point3dfCompare >::const_iterator ig,eg =sulci2mesh.end() ;
-  float sx = vol.sizeX(),   sy = vol.sizeY(), sz = vol.sizeZ();  
+  float sx = vol->getVoxelSize()[0], sy = vol->getVoxelSize()[1],
+    sz = vol->getVoxelSize()[2];
   float de;
   map<short,set<float> >::iterator io,eo;
-  AimsData<float> ovol(vol.dimX(),vol.dimY(),vol.dimZ(),1);
+  VolumeRef<float> ovol( VolumeRef<float>::Position4Di( vol->getSize() ), 1 );
   map<short,set<float> > operture;
+  ovol->setVoxelSize( vol->getVoxelSize() );
 
   for (ig = sulci2mesh.begin(); ig != eg; ++ig)
-    {
-      PtR = ig->first; //sulci pt
-      Pt = Point3d((short)(PtR[0]/sx),(short)(PtR[1]/sy),(short)(PtR[2]/sz));
-      de = (ig->second).first + (ig->second).second; //white operture
-      operture[vol(Pt)].insert(de);
-      ovol(Pt) = de ;
-    }
+  {
+    PtR = ig->first; //sulci pt
+    Pt = Point3d((short)(PtR[0]/sx),(short)(PtR[1]/sy),(short)(PtR[2]/sz));
+    de = (ig->second).first + (ig->second).second; //white operture
+    operture[vol->at(Pt)].insert(de);
+    ovol(Pt) = de ;
+  }
   
   set<float>::iterator iv,ev;
 
   for (io = operture.begin(), eo = operture.end(); io != eo; ++io)
-    {
-      cout << "Mean operture of the label " << io->first << endl;
-      for (iv = (io->second).begin(), ev = (io->second).end(); iv != ev; ++iv )
-	cout << *iv  << " " ;
-      cout << endl;
-    }
+  {
+    cout << "Mean operture of the label " << io->first << endl;
+    for (iv = (io->second).begin(), ev = (io->second).end(); iv != ev; ++iv )
+      cout << *iv  << " " ;
+    cout << endl;
+  }
 
-  return (ovol);
+  return ovol;
 }
 
 

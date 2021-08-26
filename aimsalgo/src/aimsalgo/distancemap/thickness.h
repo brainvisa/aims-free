@@ -37,7 +37,7 @@
 
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/connectivity/connectivity.h>
 #include <aims/distancemap/stlsort.h>
 #include <set>
@@ -52,7 +52,7 @@ namespace aims
     void  SulcusOperture( const AimsSurface<3,Void> & mesh, 
 			  std::map<Point3df, std::pair<float,float>, 
                           Point3dfCompare > &sulci2mesh,
-			  const AimsData <short> & surface_vol,
+			  const carto::rc_ptr<carto::Volume<short> > & surface_vol,
 			  const float demin, const float dpmin, 
                           const unsigned MINCC,
 			  const std::map <short,std::string> & trans,
@@ -75,11 +75,12 @@ namespace aims
                                          const AimsSurface<3,Void> & mesh );
    
     
-    AimsData<float> OpertureParameters(const AimsSurface<3,Void> & mesh, 
-				       const std::map<Point3df, 
-                                       std::pair<float,float>, 
-                                       Point3dfCompare > &sulci2mesh,
-				       const AimsData<short> & vol);
+    carto::VolumeRef<float> OpertureParameters(
+        const AimsSurface<3,Void> & mesh,
+        const std::map<Point3df,
+                        std::pair<float,float>,
+                        Point3dfCompare > &sulci2mesh,
+        const carto::rc_ptr<carto::Volume<short> > & vol);
     
     
     
