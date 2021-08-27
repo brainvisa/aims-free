@@ -121,6 +121,7 @@ public:
   inline float  sizeZ()     const;
   /// returns the T resolution in mm
   inline float  sizeT()     const;
+  inline std::vector<float> getVoxelSize() const;
 
   /// sets the X resolution of the data in mm
   inline void setSizeX(float sizex);
@@ -132,6 +133,12 @@ public:
   inline void setSizeT(float sizet);
   /// sets X,Y,Z and T resolutions of the data in mm
   inline void setSizeXYZT(float sizex,float sizey,float sizez,float sizet);
+  inline void setSizeXYZT( const std::vector<float> & vsize );
+  inline void setVoxelSize( float sizex, float sizey, float sizez,
+                            float sizet )
+  { setSizeXYZT( sizex, sizey, sizez, sizet ); }
+  inline void setVoxelSize( const std::vector<float> & vsize )
+  { setSizeXYZT( vsize ); }
 
   /// Empty the whole map
   inline void erase();
@@ -194,6 +201,17 @@ void AimsBucket<T>::pop_front()
 template <class T> inline
 void AimsBucket<T>::pop_back()
 { (*this)[0].pop_back();
+}
+
+
+template <class T> inline std::vector<float>
+AimsBucket<T>::getVoxelSize() const
+{
+  std::vector<float> vs;
+  _header.getProperty( "voxel_size", vs );
+  while( vs.size() < 4 )
+    vs.push_back( 1. );
+  return vs;
 }
 
 
@@ -298,6 +316,16 @@ void AimsBucket<T>::setSizeXYZT( float sizex, float sizey, float sizez,
   vs[1] = sizey;
   vs[2] = sizez;
   vs[3] = sizet;
+  _header.setProperty( "voxel_size", vs );
+}
+
+
+template <class T> inline
+void AimsBucket<T>::setSizeXYZT( const std::vector<float> & vsize )
+{
+  std::vector<float> vs = vsize;
+  while( vs.size() < 4 )
+    vs.push_back( 1. );
   _header.setProperty( "voxel_size", vs );
 }
 

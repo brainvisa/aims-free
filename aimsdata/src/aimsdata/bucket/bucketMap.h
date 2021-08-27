@@ -133,6 +133,7 @@ namespace aims
     inline float  sizeZ()     const;
     /// returns the T resolution in s
     inline float  sizeT()     const;
+    inline std::vector<float> getVoxelSize() const;
 
     /// sets the X resolution of the data in mm
     inline void setSizeX(float sizex);
@@ -143,7 +144,13 @@ namespace aims
     /// sets the T resolution of the data in s
     inline void setSizeT(float sizet);
     /// sets X,Y,Z and T resolutions of the data
-    inline void setSizeXYZT(float sizex,float sizey,float sizez,float sizet);
+    inline void setSizeXYZT( float sizex,float sizey,float sizez,float sizet );
+    inline void setSizeXYZT( const std::vector<float> & vsize );
+    inline void setVoxelSize( float sizex, float sizey, float sizez,
+                              float sizet )
+    { setSizeXYZT( sizex, sizey, sizez, sizet ); }
+    inline void setVoxelSize( const std::vector<float> & vsize )
+    { setSizeXYZT( vsize ); }
 
     inline const aims::PythonHeader &header() const { return _header; }
     inline aims::PythonHeader &header() { return _header; }
@@ -210,6 +217,17 @@ namespace aims
     typename BucketMap<T>::const_iterator  i, e = bck.end();
     for( i=bck.begin(); i!=e; ++i )
       (*this)[ i->first ].insert( i->second.begin(), i->second.end() );
+  }
+
+
+  template <class T> inline std::vector<float>
+  BucketMap<T>::getVoxelSize() const
+  {
+    std::vector<float> vs;
+    _header.getProperty( "voxel_size", vs );
+    while( vs.size() < 4 )
+      vs.push_back( 1. );
+    return vs;
   }
 
 
@@ -314,6 +332,16 @@ namespace aims
     vs[1] = sizey;
     vs[2] = sizez;
     vs[3] = sizet;
+    _header.setProperty( "voxel_size", vs );
+  }
+
+
+  template <class T> inline
+  void BucketMap<T>::setSizeXYZT( const std::vector<float> & vsize )
+  {
+    std::vector<float> vs = vsize;
+    while( vs.size() < 4 )
+      vs.push_back( 1. );
     _header.setProperty( "voxel_size", vs );
   }
 
