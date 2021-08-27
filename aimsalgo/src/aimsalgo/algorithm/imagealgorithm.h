@@ -35,7 +35,6 @@
 #define AIMSALGO_ALGORITHM_IMAGEALGORITHM_H
 
 //--- aims -------------------------------------------------------------------
-#include <aims/data/data.h>
 #include <aims/utility/channel.h>
 #include <aims/vector/vector.h>
 //--- cartodata --------------------------------------------------------------
