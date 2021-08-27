@@ -32,10 +32,14 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/mesh/mesher.h>
 #include <aims/math/mathelem.h>
 #include <aims/mesh/texture.h>
-#include <aims/data/data.h>
 #include <aims/histogram/cumulated.h>
 #include <algorithm>
 #include <iomanip>
@@ -739,8 +743,8 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
         // calculate threshold from histogram of texture values
         CumulatedHistogram<float> histo;
         // (using a volume built on the same memory block)
-        AimsData<float> vol( precisiontex->nItem(), 1, 1, 1, 0,
-                            AllocatorContext( AllocatorStrategy::NotOwner,
+        VolumeRef<float> vol( precisiontex->nItem(), 1, 1, 1, 0,
+                              AllocatorContext( AllocatorStrategy::NotOwner,
                                 rc_ptr<DataSource>(
                                   new BufferDataSource(
                                     (char *) &((*precisiontex)[0]),
@@ -752,9 +756,9 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
         histo.doit( vol );
         float perc = 100. - ( 100. - reductionRatePercent )
           * exp( - ((float) step) / 5. );
-        precthreshold = vol.minimum();
+        precthreshold = vol.min();
         precthreshold += float( histo.valueForPercentage( perc ) )
-          / histo.data().getSizeX() * ( vol.maximum() - vol.minimum() );
+          / histo.data().getSizeX() * ( vol.max() - vol.min() );
       }
       else
         precthreshold = thresholds[ std::min( (vector<float>::size_type) step,
