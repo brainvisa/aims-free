@@ -32,28 +32,34 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/gaussj.h>
 
 
-using namespace aims;
+using namespace carto;
 
 
 template < class T >
-bool GaussJordan< T >::doit( AimsData< T >& a, AimsData< T >& b, int mUtil )
+bool GaussJordan< T >::doit( rc_ptr<Volume< T > > & a,
+                             rc_ptr<Volume< T > > & b, int mUtil )
 {
-  ASSERT( a.dimZ() == 1 && a.dimT() == 1 );
-  ASSERT( a.dimX() == a.dimY() );
-  ASSERT( b.dimZ() == 1 && b.dimT() == 1 );
+  ASSERT( a->getSizeZ() == 1 && a->getSizeT() == 1 );
+  ASSERT( a->getSizeX() == a->getSizeY() );
+  ASSERT( b->getSizeZ() == 1 && b->getSizeT() == 1 );
 
-  int n = a.dimX();
-  int m = b.dimY();
+  int n = a->getSizeX();
+  int m = b->getSizeY();
 
-  if ( mUtil == -1 ) ASSERT( a.dimY() == b.dimX() );
+  if ( mUtil == -1 ) ASSERT( a->getSizeY() == b->getSizeX() );
   else 
     {
-      ASSERT( mUtil <= n && b.dimX() == mUtil );
+      ASSERT( mUtil <= n && b->getSizeX() == mUtil );
       n = mUtil;
     }
 
@@ -61,9 +67,9 @@ bool GaussJordan< T >::doit( AimsData< T >& a, AimsData< T >& b, int mUtil )
 
   T big, dum, pivinv;
 
-  AimsFastAllocationData< int > indxc( n );
-  AimsFastAllocationData< int > indxr( n );
-  AimsFastAllocationData< int > ipiv( n );
+  VolumeRef< int > indxc( n, 1, 1, 1, AllocatorContext::fast() );
+  VolumeRef< int > indxr( n, 1, 1, 1, AllocatorContext::fast() );
+  VolumeRef< int > ipiv( n, 1, 1, 1, AllocatorContext::fast() );
 
   for ( j=0; j<n; j++ )  ipiv( j ) = 0;
 
@@ -77,9 +83,9 @@ bool GaussJordan< T >::doit( AimsData< T >& a, AimsData< T >& b, int mUtil )
 	    {
 	      if ( ipiv( k ) == 0 )
 		{
-		  if ( (T)fabs( a( j, k ) ) >= big )
+		  if ( (T)fabs( a->at( j, k ) ) >= big )
 		    {
-		      big = (T)fabs( a( j, k ) );
+		      big = (T)fabs( a->at( j, k ) );
 		      irow = j;
 		      icol = k;
 		    }
@@ -93,38 +99,38 @@ bool GaussJordan< T >::doit( AimsData< T >& a, AimsData< T >& b, int mUtil )
 	{
 	  for ( l=0; l<n; l++ )
 	    {
-	      dum = a( irow, l );
-	      a( irow, l ) = a( icol, l );
-	      a( icol, l ) = dum;
+	      dum = a->at( irow, l );
+	      a->at( irow, l ) = a->at( icol, l );
+	      a->at( icol, l ) = dum;
 	    }
 
 	  for ( l=0; l<m; l++ )
 	    {
-	      dum = b( irow, l );
-	      b( irow, l ) = b( icol, l );
-	      b( icol, l ) = dum;
+	      dum = b->at( irow, l );
+	      b->at( irow, l ) = b->at( icol, l );
+	      b->at( icol, l ) = dum;
 	    }
 	}
 
       indxr( i ) = irow;
       indxc( i ) = icol;
 
-      if ( a( icol, icol ) == (T)0 )  return false;
+      if ( a->at( icol, icol ) == (T)0 )  return false;
 
-      pivinv = (T)1 / a( icol, icol );
-      a( icol, icol ) = (T)1;
+      pivinv = (T)1 / a->at( icol, icol );
+      a->at( icol, icol ) = (T)1;
 
-      for ( l=0; l<n; l++ )  a( icol, l ) *= pivinv;
-      for ( l=0; l<m; l++ )  b( icol, l ) *= pivinv;
+      for ( l=0; l<n; l++ )  a->at( icol, l ) *= pivinv;
+      for ( l=0; l<m; l++ )  b->at( icol, l ) *= pivinv;
 
       for ( ll=0; ll<n; ll++ )
 	if ( ll != icol )
 	  {
-	    dum = a( ll, icol );
-	    a( ll, icol ) = (T)0;
+	    dum = a->at( ll, icol );
+	    a->at( ll, icol ) = (T)0;
 
-	    for ( l=0; l<n; l++ )  a( ll, l ) -= a( icol, l ) * dum;
-	    for ( l=0; l<m; l++ )  b( ll, l ) -= b( icol, l ) * dum;
+	    for ( l=0; l<n; l++ )  a->at( ll, l ) -= a->at( icol, l ) * dum;
+	    for ( l=0; l<m; l++ )  b->at( ll, l ) -= b->at( icol, l ) * dum;
 	  }
     }
 
@@ -132,9 +138,9 @@ bool GaussJordan< T >::doit( AimsData< T >& a, AimsData< T >& b, int mUtil )
     if ( indxr( l ) != indxc( l ) )
       for ( k=0; k<n; k++ )
 	{
-	  dum = a( k, indxr( l ) );
-	  a( k, indxr( l ) ) = a( k, indxc( l ) );
-	  a( k, indxc( l ) ) = dum;
+	  dum = a->at( k, indxr( l ) );
+	  a->at( k, indxr( l ) ) = a->at( k, indxc( l ) );
+	  a->at( k, indxc( l ) ) = dum;
 	}
 
   return true;
@@ -142,10 +148,11 @@ bool GaussJordan< T >::doit( AimsData< T >& a, AimsData< T >& b, int mUtil )
 
 
 template bool
-GaussJordan< float >::doit( AimsData< float >& a, AimsData< float >& b,
-			    int mUtil );
+GaussJordan< float >::doit( rc_ptr<Volume< float > > & a,
+                            rc_ptr<Volume< float > > & b, int mUtil );
 
 
 template bool
-GaussJordan< double >::doit( AimsData< double >& a, AimsData< double >& b,
-			     int mUtil );
+GaussJordan< double >::doit( rc_ptr<Volume< double > > & a,
+                             rc_ptr<Volume< double > > & b, int mUtil );
+

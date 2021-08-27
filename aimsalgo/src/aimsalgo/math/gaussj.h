@@ -36,8 +36,12 @@
 #define AIMS_MATH_GAUSSJ_H
 
 #include <aims/def/general.h>
+#include <cartobase/smart/rcptr.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <typename T> class Volume;
+}
 
 
 /** @name Gauss-Jordan elimination */
@@ -69,7 +73,8 @@ public:
       the input matrix where mUtils represents the number of columns of the
       input matrix used for the computation.
   */
-  bool doit( AimsData< T >&, AimsData< T >&, int mUtil=-1 );
+  bool doit( carto::rc_ptr<carto::Volume< T > > &,
+             carto::rc_ptr<carto::Volume< T > > &, int mUtil=-1 );
 };
 
 #endif
