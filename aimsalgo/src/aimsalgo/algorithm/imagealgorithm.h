@@ -159,12 +159,6 @@ namespace aims
         return out;
       }
 
-      /// \sa execute( const carto::AimsData<T> & )
-      virtual AimsData<T> execute( const AimsData<T> & in ) const
-      {
-        return AimsData<T>( execute( carto::VolumeRef<T>( in.volume() ) ) );
-      }
-
       //----------------------------------------------------------------------
       // verbose
       //----------------------------------------------------------------------
@@ -245,18 +239,6 @@ namespace aims
       {
         ImageAlgorithmInterface<T>::setVerbose( level );
         _algo->setVerbose( level );
-      }
-
-      //----------------------------------------------------------------------
-      // member method (backward compability)
-      //----------------------------------------------------------------------
-      /// Convenience method that execute the algorithm on the input image.
-      /// Please prefer the execute() method
-      /// \param in Input image to process
-      /// \return Processed image
-      virtual AimsData< T > doit( const AimsData<T>& in )
-      {
-        return ImageAlgorithmInterface<T>::execute( in );
       }
 
       //----------------------------------------------------------------------
