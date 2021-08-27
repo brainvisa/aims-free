@@ -100,38 +100,36 @@ void selectAll (const AimsRoi& roi, RoiSelector& sel )
   int nonameNumber = 1 ;
   int roiNumber = 1 ;
   string name ;
-  char  temp[64] ;
+  stringstream  temp;
   while( iter != last )
-    {
-      if( ! (*iter)->getProperty( "name", name ) )
-	AimsError( "There hould be a region name for each roi node") ;
+  {
+    if( ! (*iter)->getProperty( "name", name ) )
+      AimsError( "There hould be a region name for each roi node") ;
       
-      if ( name == "Unknown" )
-	{
-	  snprintf(temp, 10, "%d", nonameNumber) ;
-	  name += string( temp ) ;
-	  ++nonameNumber ;
-	}
-      else if ( name == "roi" )
-	{
-	  snprintf(temp, 10, "%d", roiNumber) ;
-	  name += string( temp ) ;
-	  ++roiNumber ;
-	}
-
-      Tree * node = new RoiSelector() ;
-      node->setProperty( "surname", name ) ;
-      Tree * subNode = new RoiSelector() ;
-      subNode->setProperty( "nomenName", name ) ;
-    
-    
-      node->insert(subNode) ;
-      sel.insert( node ) ;
-      (*iter)->setProperty( "name", name ) ;
-      ++iter ;
+    if ( name == "Unknown" )
+    {
+      temp << nonameNumber;
+      name += temp.str();
+      ++nonameNumber ;
+    }
+    else if ( name == "roi" )
+    {
+      temp << roiNumber;
+      name += temp.str();
+      ++roiNumber ;
     }
 
+    Tree * node = new RoiSelector() ;
+    node->setProperty( "surname", name ) ;
+    Tree * subNode = new RoiSelector() ;
+    subNode->setProperty( "nomenName", name ) ;
 
+
+    node->insert(subNode) ;
+    sel.insert( node ) ;
+    (*iter)->setProperty( "name", name ) ;
+    ++iter ;
+  }
 
   return ;
 }
