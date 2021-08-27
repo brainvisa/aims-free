@@ -36,8 +36,6 @@
 #ifndef AIMS_MATH_PPCA_D_H
 #define AIMS_MATH_PPCA_D_H
 
-#include <aims/data/fastAllocationData.h>
-#include <aims/data/data.h>
 #include <aims/math/svd.h>
 #include <aims/math/ppca.h>
 #include <aims/math/mathelem.h>

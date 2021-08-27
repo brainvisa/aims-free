@@ -32,8 +32,12 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/math/distspheric.h>
-#include <aims/data/data.h>
 #include <aims/vector/vector.h>
 #include <map>
 #include <math.h>

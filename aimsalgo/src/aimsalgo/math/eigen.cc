@@ -32,6 +32,11 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cartodata/volume/volume.h>
 #include <aims/math/mathelem.h>
 #include <aims/math/eigen.h>
@@ -42,7 +47,6 @@
 #include <aims/math/eltran.h>
 #include <aims/math/hqr.h>
 #include <aims/math/balbak.h>
-#include <aims/data/volumemanip.h>
 #include <math.h>
 #include <complex>
 

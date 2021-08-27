@@ -37,7 +37,7 @@
 
 #include <aims/def/general.h>
 #include <vector>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 
 namespace aims
 {

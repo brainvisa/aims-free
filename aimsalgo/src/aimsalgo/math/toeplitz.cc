@@ -32,9 +32,14 @@
  */
 
 
-#include <aims/data/fastAllocationData.h>
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/math/mathelem.h>
 #include <aims/def/assert.h>
+#include <cartodata/volume/volume.h>
 
 using namespace aims;
 using namespace carto;
@@ -50,7 +55,8 @@ void AimsToeplitz( const VolumeRef<float>& r,
   int j, k, m, m1, m2;
   int dim = y.getSizeX();
   float sxn, sd, sgn, shn, sgd, pp, qq, pt1, pt2, qt1, qt2;
-  AimsFastAllocationData<float> g( dim ), h( dim );
+  VolumeRef<float> g( dim, 1, 1, 1, AllocatorContext::fast() ),
+    h( dim, 1, 1, 1, AllocatorContext::fast() );
 
   x( 0 ) = y( 0 ) / r( dim - 1 );
   g( 0 ) = r( dim - 2 ) / r( dim - 1 );
