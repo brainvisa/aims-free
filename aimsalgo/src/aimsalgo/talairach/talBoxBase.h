@@ -35,7 +35,6 @@
 #ifndef AIMS_TALAIRACH_TALBOXBASE_H
 #define AIMS_TALAIRACH_TALBOXBASE_H
 
-#include <aims/data/data.h>
 #include <aims/talairach/talairach.h>
 
 

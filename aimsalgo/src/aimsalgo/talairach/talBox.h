@@ -36,7 +36,7 @@
 #define AIMS_TALAIRACH_TALBOX_H
 
 #include <cstdlib>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/talairach/talBoxBase.h>
 
 
@@ -46,9 +46,9 @@ class TalairachBox : public TalairachBoxBase
 public:
   TalairachBox() : TalairachBoxBase() {}
   inline virtual ~TalairachBox() {}
-  void computeBox( const AimsData< T >& );
-  Motion computeTransformationAndBox( const TalairachPoints&,
-                                    const AimsData< T >& );
+  void computeBox( const carto::rc_ptr<carto::Volume< T > > & );
+  aims::AffineTransformation3d computeTransformationAndBox(
+    const TalairachPoints&, const carto::rc_ptr<carto::Volume< T >  > & );
 
   // Returns a motion from current subject to a normalized template, where
   // AC (0, 0, 0) PC (0, 1, 0) and IHP (0, 1, cout0)
@@ -56,10 +56,11 @@ public:
 
 
 template< class T > inline
-void TalairachBox< T >::computeBox( const AimsData< T >& d )
+void TalairachBox< T >::computeBox(
+  const carto::rc_ptr<carto::Volume< T > > & d )
 {
-  int x, y, z, dx = d.dimX(), dy = d.dimY(), dz = d.dimZ();
-  Point3df dsize( d.sizeX(), d.sizeY(), d.sizeZ() );
+  int x, y, z, dx = d->getSizeX(), dy = d->getSizeY(), dz = d->getSizeZ();
+  Point3df dsize( d->getVoxelSize() );
   Point3df boxmax( -10000.0f, -10000.0f, -10000.0f );
   Point3df boxmin( 10000.0f, 10000.0f, 10000.0f );
   Point3df pt, npt;
@@ -67,21 +68,21 @@ void TalairachBox< T >::computeBox( const AimsData< T >& d )
   for ( z=0; z<dz; z++ )
     for ( y=0; y<dy; y++ )
       for ( x=0; x<dx; x++ )
-        if ( d( x, y, z ) )
-          {
-	    pt = Point3df( float( x ), float( y ), float( z ) );
-	    pt[ 0 ] *= dsize[ 0 ];
-	    pt[ 1 ] *= dsize[ 1 ];
-	    pt[ 2 ] *= dsize[ 2 ];
-	    npt = TalairachReferential::toTalairach( pt );
+        if ( d->at( x, y, z ) )
+        {
+          pt = Point3df( float( x ), float( y ), float( z ) );
+          pt[ 0 ] *= dsize[ 0 ];
+          pt[ 1 ] *= dsize[ 1 ];
+          pt[ 2 ] *= dsize[ 2 ];
+          npt = TalairachReferential::toTalairach( pt );
 
-	    if ( npt[ 0 ] < boxmin[ 0 ] )  boxmin[ 0 ] = npt[ 0 ];
-	    if ( npt[ 1 ] < boxmin[ 1 ] )  boxmin[ 1 ] = npt[ 1 ];
-	    if ( npt[ 2 ] < boxmin[ 2 ] )  boxmin[ 2 ] = npt[ 2 ];
-	    if ( npt[ 0 ] > boxmax[ 0 ] )  boxmax[ 0 ] = npt[ 0 ];
-	    if ( npt[ 1 ] > boxmax[ 1 ] )  boxmax[ 1 ] = npt[ 1 ];
-	    if ( npt[ 2 ] > boxmax[ 2 ] )  boxmax[ 2 ] = npt[ 2 ];
-	  }
+          if ( npt[ 0 ] < boxmin[ 0 ] )  boxmin[ 0 ] = npt[ 0 ];
+          if ( npt[ 1 ] < boxmin[ 1 ] )  boxmin[ 1 ] = npt[ 1 ];
+          if ( npt[ 2 ] < boxmin[ 2 ] )  boxmin[ 2 ] = npt[ 2 ];
+          if ( npt[ 0 ] > boxmax[ 0 ] )  boxmax[ 0 ] = npt[ 0 ];
+          if ( npt[ 1 ] > boxmax[ 1 ] )  boxmax[ 1 ] = npt[ 1 ];
+          if ( npt[ 2 ] > boxmax[ 2 ] )  boxmax[ 2 ] = npt[ 2 ];
+        }
 
   if ( fabs( boxmin[ 0 ] ) > fabs( boxmax[ 0 ] ) )
     _scale[ 0 ] = 1.0f / fabs( boxmin[ 0 ] );
@@ -96,13 +97,13 @@ void TalairachBox< T >::computeBox( const AimsData< T >& d )
 
 
 template< class T > inline 
-Motion TalairachBox< T >::computeTransformationAndBox( const TalairachPoints& pt,
-						     const AimsData< T >& d )
+aims::AffineTransformation3d TalairachBox< T >::computeTransformationAndBox(
+  const TalairachPoints& pt, const carto::rc_ptr<carto::Volume< T > > & d )
 {
   computeTransformation( pt );
   computeBox( d );
   
-  AimsData<float> rotation(3, 3) ;
+  carto::VolumeRef<float> rotation(3, 3) ;
   Point3df translation = -pt.ACmm() ;
 
   rotation(0, 0) = -_crossVec[ 0 ];

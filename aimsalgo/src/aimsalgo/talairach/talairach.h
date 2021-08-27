@@ -36,7 +36,7 @@
 #define AIMS_TALAIRACH_TALAIRACH_H
 
 #include <aims/talairach/talPoints.h>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 
 
 class TalairachReferential
@@ -46,7 +46,8 @@ public:
   TalairachReferential();
   virtual ~TalairachReferential() { }
 
-  virtual Motion computeTransformation( const TalairachPoints& );
+  virtual aims::AffineTransformation3d computeTransformation(
+    const TalairachPoints& );
   
   Point3df toTalairach( const Point3df& );
   Point3df fromTalairach( const Point3df& );
@@ -59,10 +60,7 @@ protected:
   Point3df _hemiVec;
   Point3df _crossVec;
 
-/*   Point3df _translation ; */
-/*   AimsData<float> _rotation ; */
-
-  Motion _transformation ;
+  aims::AffineTransformation3d _transformation ;
 };
 
 #endif

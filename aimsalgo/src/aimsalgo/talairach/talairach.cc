@@ -41,6 +41,7 @@
 #include <aims/talairach/cramer.h>
 #include <cartodata/volume/volume.h>
 
+using namespace aims;
 using namespace carto;
 using namespace std;
 
@@ -51,7 +52,8 @@ TalairachReferential::TalairachReferential()
 }
 
 
-Motion TalairachReferential::computeTransformation( const TalairachPoints& pt )
+AffineTransformation3d TalairachReferential::computeTransformation(
+  const TalairachPoints& pt )
 {
   computeVectors( pt );
   VolumeRef<float> rotation(3, 3) ;

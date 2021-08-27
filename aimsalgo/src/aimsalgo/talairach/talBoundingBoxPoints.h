@@ -36,7 +36,6 @@
 #define AIMS_TALAIRACH_TALBOUNDINGBOX_POINTS_H
 
 #include <cstdlib>
-#include <aims/data/data.h>
 #include <cartobase/smart/rcptr.h>
 #include <aims/talairach/talBoxBase.h>
 #include <aims/roi/roiIterator.h>
@@ -114,7 +113,7 @@ Motion TalairachBoundingBoxPoints::computeTransformationAndBox( const TalairachP
   computeTransformation( pt );
   computeBox( roiIt );
   
-  AimsData<float> rotation(3, 3) ;
+  carto::VolumeRef<float> rotation(3, 3) ;
   Point3df translation = -pt.ACmm() ;
 
   rotation(0, 0) = -_crossVec[ 0 ];

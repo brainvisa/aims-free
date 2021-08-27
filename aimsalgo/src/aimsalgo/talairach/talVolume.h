@@ -35,7 +35,7 @@
 #ifndef AIMS_TALAIRACH_TALVOLUME_H
 #define AIMS_TALAIRACH_TALVOLUME_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/talairach/talBoxBase.h>
 
 
@@ -48,19 +48,20 @@ public:
 		   int dz=85 );
   virtual ~Talairach() { }
 
-  AimsData< T >& volume() { return m_d; }
+  carto::VolumeRef< T >& volume() { return m_d; }
 
   Point3df toVolume( const TalairachBoxBase&, const Point3df& );
   Point3df fromVolume( const TalairachBoxBase&, const Point3df& );
 
-  AimsData< T >& create( const TalairachBoxBase&, const AimsData< T >& );
+  carto::VolumeRef< T >& create( const TalairachBoxBase&,
+                                 const carto::rc_ptr<carto::Volume< T > > & );
 
 private:
 
   Point3df _scale;
   Point3df _translation;
 
-  AimsData< T > m_d;
+  carto::VolumeRef< T > m_d;
 };
 
 
@@ -68,8 +69,8 @@ template< class T > inline
 void TalairachVolume< T >::TalairachVolume( int dx, int dy, int dz, 
 					    int cx, int cy, int cz )
 {
-  m_d = AimsData< T >( dx, dy, dz );
-  m_d.setXYZT( 1.0f, 1.0f, 1.0f );
+  m_d = carto::VolumeRef< T >( dx, dy, dz );
+  m_d.setVoxelSize( 1.0f, 1.0f, 1.0f );
 
   _translation = Point3df( (float)cx, -(float)cy, -(float)cz );
 
@@ -105,13 +106,13 @@ Point3df TalairachVolume< T >::fromVolume( const TalairachBoxBase& tb,
 
 
 template< class T > inline
-AimsData< T >& TalairachVolume< T >::create( const TalairachBoxBase& tb,
-					     AimsData< T >& d )
+carto::VolumeRef< T >& TalairachVolume< T >::create(
+  const TalairachBoxBase& tb, carto::rc_ptr<carto::Volume< T > > & d )
 {
   int i, j, k;
-  int dx = m_d.dimX();
-  int dy = m_d.dimY();
-  int dz = m_d.dimZ();
+  int dx = m_d.getSizeX();
+  int dy = m_d.getSizeY();
+  int dz = m_d.getSizeZ();
 
   Point3df pt, npt;
   Point3df r( 0.5f, 0.5f, 0.5f );
@@ -122,7 +123,7 @@ AimsData< T >& TalairachVolume< T >::create( const TalairachBoxBase& tb,
 	{
 	  pt = Point3df( (float)i, (float)j, (float)k );
 	  npt = fromVolume( pt ) + r;
-	  m_d( i, j, k ) = d( (int)npt[ 0 ], (int)npt[ 1 ], (int)npt[ 2 ] );
+	  m_d( i, j, k ) = d->at( (int)npt[ 0 ], (int)npt[ 1 ], (int)npt[ 2 ] );
 	}
 }
 

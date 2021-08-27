@@ -33,7 +33,6 @@
 
 
 #include <cstdlib>
-#include <aims/data/data_g.h>
 #include <aims/io/process.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
@@ -44,8 +43,6 @@
 #include <aims/talairach/talBoxBase.h>
 #include <aims/talairach/talACPCNorm.h>
 #include <aims/talairach/talBoundingBoxPoints.h>
-#include <aims/resampling/motion.h>
-#include <aims/io/motionW.h>
 #include <aims/io/apcreader.h>
 
 using namespace aims;
@@ -62,7 +59,7 @@ public:
 		const Point3df& pc, const Point3df& ihp );
 
   template<class T> 
-  bool tal_m( AimsData<T> & data, const string & filename, Finder & f );
+  bool tal_m( VolumeRef<T> & data, const string & filename, Finder & f );
 
 public:
   string       _fileout;
@@ -87,16 +84,16 @@ bool tal( Process & p, const string & filename, Finder & f )
 {
   TalTransform	& dp = (TalTransform &) p;
   
-  AimsData<T>		data;
+  VolumeRef<T>		data;
   return( dp.tal_m( data, filename, f ) );
 }
 
 
 template<class T> 
-bool TalTransform::tal_m( AimsData<T> & data, const string & filename, Finder & f )
+bool TalTransform::tal_m( VolumeRef<T> & data, const string & filename, Finder & f )
 {
   cout << "With mask" << endl ;
-  Reader< AimsData< T > >	reader( filename );
+  Reader< VolumeRef< T > >	reader( filename );
   string	format = f.format();
   if( !reader.read( data, 1, &format ) )
     return( false );
@@ -104,16 +101,17 @@ bool TalTransform::tal_m( AimsData<T> & data, const string & filename, Finder & 
   TalairachPoints talPoints( _ac, _pc, _ihp ) ;
   
   TalairachBox<T> talBox ;
-  Motion transf = talBox.computeTransformationAndBox( talPoints, data ) ;
+  AffineTransformation3d transf = talBox.computeTransformationAndBox(
+    talPoints, data ) ;
   
-  Motion invTransf = transf.inverse() ;
+  AffineTransformation3d invTransf = transf.inverse() ;
   cout << "AC transformed : " << transf.transform( _ac ) << "\tPC transformed : " << transf.transform( _pc ) 
        << "\tIPH transformed : " << transf.transform( _ihp ) << endl ;
   cout << "ACInv transformed : " << invTransf.transform( Point3df(0., 0., 0.) ) 
        << "\tPCInv transformed : " << invTransf.transform( Point3df(0., 1., 0.) ) 
        << "\tIPHInv transformed : " << invTransf.transform( Point3df(0., 0., 1.) )
        << "\tXInv transformed : " << invTransf.transform( Point3df(1., 0., 0.) ) << endl ;
-  MotionWriter	writer( _fileout );
+  Writer<AffineTransformation3d> writer( _fileout );
   writer.write( transf ) ;
   return( 1 );
 }
@@ -201,19 +199,19 @@ int main( int argc, const char **argv )
       cout << acp << endl << pcp << endl << ihpp << endl ;
     
       TalairachPoints talPoints( acp, pcp, ihpp ) ;
-      Motion		transf;
+      AffineTransformation3d		transf;
       if( noScale ){
         TalairachReferential talairach ;
         transf = talairach.computeTransformation(talPoints) ;
-        Motion transl ;
+        AffineTransformation3d transl ;
         transl.setTranslation( acp );
         transf = transl * transf ;
         cout << "AC transformed : " << transf.transform( acp ) << "\tPC transformed : " << transf.transform( pcp ) 
              << "\tIPH transformed : " << transf.transform( ihpp ) << endl ;
 
-        MotionWriter	writer( fileout );
+        Writer<AffineTransformation3d> writer( fileout );
         writer.write( transf ) ;
-        cout << "Rigid motion saved"  << endl ;
+        cout << "Rigid transformation saved"  << endl ;
         return( EXIT_SUCCESS );    
       } 
       else if( filein == "" ){
@@ -224,9 +222,9 @@ int main( int argc, const char **argv )
           cout << "AC transformed : " << transf.transform( acp ) << "\tPC transformed : " << transf.transform( pcp ) 
                << "\tIPH transformed : " << transf.transform( ihpp ) << endl ;
     
-          MotionWriter	writer( fileout );
+          Writer<AffineTransformation3d>	writer( fileout );
           writer.write( transf ) ;
-          cout << "Motion with single scale factor saved"  << endl ;  	
+          cout << "Transformation with single scale factor saved"  << endl ;
           return( EXIT_SUCCESS );    
         } else{
 	  TalairachBoundingBoxPoints talairach ;
@@ -234,9 +232,9 @@ int main( int argc, const char **argv )
           cout << "AC transformed : " << transf.transform( acp ) << "\tPC transformed : " << transf.transform( pcp ) 
                << "\tIPH transformed : " << transf.transform( ihpp ) << endl ;
     
-          MotionWriter	writer( fileout );
+          Writer<AffineTransformation3d>	writer( fileout );
           writer.write( transf ) ;
-          cout << "Motion with scale factors computed with bounding box points saved"  << endl ;  	
+          cout << "Transformation with scale factors computed with bounding box points saved"  << endl ;
 	  return( EXIT_SUCCESS ); 	  
 	}
       }
