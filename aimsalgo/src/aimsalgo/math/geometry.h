@@ -37,7 +37,6 @@
 
 #include <stdlib.h>
 
-template <class T> class AimsData;
 template <class T,int D> class AimsVector;
 class Trieder;
 

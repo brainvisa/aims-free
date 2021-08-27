@@ -32,10 +32,15 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <aims/math/geometry.h>
 #include <aims/vector/vector.h>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/mathelem.h>
 #include <aims/math/random.h>
 #include <aims/math/gausslu.h>
@@ -44,6 +49,7 @@
 #include <math.h>
 
 using namespace std;
+using namespace carto;
 using namespace aims;
 
 float Aims2LinesAngle( const Point3df& v1, const Point3df& v2 )
@@ -183,8 +189,8 @@ bool AimsIsInParallelepipede(const AimsVector<float,3>& p,
                              const AimsVector<float,3>& v2,
                              float L1,float L2,float L3)
 { AimsVector<float,3> V1,V2,V3;
-  AimsFastAllocationData<float> mat(3,3);
-  AimsFastAllocationData<float> op(3),lambda;
+  VolumeRef<float> mat( 3, 3, 1, 1, AllocatorContext::fast() );
+  VolumeRef<float> op( 3, 1, 1, 1, AllocatorContext::fast() ), lambda;
 
   op(0) = p.item(0) - p0.item(0);
   op(1) = p.item(1) - p0.item(1);
