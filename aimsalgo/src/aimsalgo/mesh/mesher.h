@@ -38,7 +38,7 @@
 #include <aims/config/aimsalgo_config.h>
 #include <aims/mesh/facet.h>
 #include <aims/mesh/surface.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/bucket/bucket.h>
 #include <map>
 #include <list>
@@ -82,35 +82,36 @@ class Mesher
 
     // GETTING INTERFACE / MESH
     // =========================
-    void getInterface( std::map<size_t, std::list< MapOfFacet > >& interface,
-                       const AimsData<short>& thing );
-    void doit( const AimsData<short>& thing, const std::string& name,
-               const std::string& mode = "binar" );
+    void getInterface( std::map<size_t, std::list< MapOfFacet > > & interface,
+                       const carto::rc_ptr<carto::Volume<short> > & thing );
+    void doit( const carto::rc_ptr<carto::Volume<short> > & thing,
+               const std::string& name, const std::string& mode = "binar" );
     void doit( const aims::BucketMap<Void>& thing, const std::string& name,
                const std::string& mode = "binar" );
-    void doit( const AimsData<short>& thing,
+    void doit( const carto::rc_ptr<carto::Volume<short> > & thing,
                std::map<size_t, std::list<AimsSurfaceTriangle> >& surface );
     void doit( const aims::BucketMap<Void>& thing,
                std::map<size_t, std::list<AimsSurfaceTriangle> >& surface );
-    void getBrain( const AimsData<short>& thing,
+    void getBrain( const carto::rc_ptr<carto::Volume<short> > & thing,
                    AimsSurfaceTriangle& surface, bool insideinterface=false );
     void getBrain( const aims::BucketMap<Void>& thing,
                    AimsSurfaceTriangle& surface, bool insideinterface=false );
     // like getBrain but dedicated to gray/white interface in 6 connectivity,
     // which solves hole problems. JFM
-    void getWhite( const AimsData<short>& thing, 
+    void getWhite( const carto::rc_ptr<carto::Volume<short> > & thing,
                    AimsSurfaceTriangle& surface );
     void getWhite( const aims::BucketMap<Void>& thing,
                    AimsSurfaceTriangle& surface );
 
     // create one mesh for all components of each label
-    void getSingleLabel( const AimsData<short>& thing,
-                       AimsSurfaceTriangle& surface );
+    void getSingleLabel( const carto::rc_ptr<carto::Volume<short> > & thing,
+                         AimsSurfaceTriangle& surface );
 
     // create one smoothed and decimated mesh from a map of facets
     // (used by getBrain and getSingleLabel)
-    void getMeshFromMapOfFacet(const AimsData<short>& thing,
-             AimsSurfaceTriangle& surface, MapOfFacet &mof);
+    void getMeshFromMapOfFacet(
+      const carto::rc_ptr<carto::Volume<short> > & thing,
+      AimsSurfaceTriangle& surface, MapOfFacet &mof);
 
     /** Smoothing
 
@@ -154,7 +155,7 @@ class Mesher
 
     // SPLITTING SURFACE OF CONNECTED COMP.
     // ====================================
-    void doit( const AimsData<short>& thing,
+    void doit( const carto::rc_ptr<carto::Volume<short> > & thing,
                std::map< size_t, std::list< std::map<short,
                   std::list<AimsSurfaceTriangle > > > >& surface );
     void doit( const aims::BucketMap<Void>& thing,
@@ -271,7 +272,7 @@ class Mesher
     void getTriangles( const std::vector< Facet* >& vfac,
                        std::vector< AimsVector< uint, 3 > >& triangle );
 
-    void splitting( const AimsData< short >& thing,
+    void splitting( const carto::rc_ptr<carto::Volume< short > > & thing,
                     const std::vector< Facet* >& vfac,
                     const AimsSurfaceTriangle& surface,
                     std::map<short,std::list< AimsSurfaceTriangle> >&

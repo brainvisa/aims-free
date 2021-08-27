@@ -32,10 +32,16 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/mesh/mesher.h>
 using aims::Connectivity;
 #include <iomanip>
 
+using namespace carto;
 using namespace std;
 
 //
@@ -129,27 +135,24 @@ using namespace std;
 //
 //
 void Mesher::getInterface( map< size_t, list< MapOfFacet > >& interface,
-                           const AimsData<short>& in_thing )
+                           const rc_ptr<Volume<short> > & in_thing )
 {
   int x, y, z, f, v;
 
-  cout << "getInterface in_thing.dimZ: " << in_thing.dimZ() << endl;
+  cout << "getInterface in_thing.dimZ: " << in_thing->getSizeZ() << endl;
 
-  AimsData<short> thing = reshapedVolume( in_thing.volume() );
-  cout << "getInterface thing.dimZ: " << thing.dimZ() << endl;
+  VolumeRef<short> thing = reshapedVolume( in_thing );
+  cout << "getInterface thing.dimZ: " << thing.getSizeZ() << endl;
 
-  int dimX = thing.dimX();
-  int dimY = thing.dimY();
-  int dimZ = thing.dimZ();
-
-  AimsData<short>::const_iterator it;
-  it = thing.begin() + thing.oFirstPoint();
+  int dimX = thing.getSizeX();
+  int dimY = thing.getSizeY();
+  int dimZ = thing.getSizeZ();
 
   Facet* facet = NULL;
   map< size_t, MapOfFacet > mvec;
 
-  Connectivity connect( thing.oLine(), thing.oSlice(),
-                            Connectivity::CONNECTIVITY_6_XYZ );
+  Connectivity connect( thing.getStrides()[1], thing.getStrides()[2],
+                        Connectivity::CONNECTIVITY_6_XYZ );
 
   if( _verbose )
     cout << "reading slice      : " << setw( 3 ) << 0 << flush;
@@ -161,25 +164,23 @@ void Mesher::getInterface( map< size_t, list< MapOfFacet > >& interface,
     {
       for ( x = 0; x < dimX; x++ )
       {
+        const short* it = &thing.at( x, y ,z );
         if ( *it )
-	  {
-	    MapOfFacet	& mf = mvec[ *it ];
-	    for ( f = 0; f < connect.nbNeighbors(); f++ )
-	      if ( *( it + connect.offset( f ) ) != *it )
-		{
-		  facet = new Facet;
-		  facet->offset() = (short *)it; // ### mais qu'est-ce que c'est que ca ? ca marche vraiment ? code a revoir !
-		  facet->type() = (byte)f;
-		  facet->location() = Point3d( x, y, z );
-		  facet->id() = facet->key();
-		  mf[ facet->id() ] = facet;
-		}
-	  }
-        it++;
+        {
+          MapOfFacet	& mf = mvec[ *it ];
+          for ( f = 0; f < connect.nbNeighbors(); f++ )
+            if ( *( it + connect.offset( f ) ) != *it )
+            {
+              facet = new Facet;
+              facet->offset() = (short *)it; // ### mais qu'est-ce que c'est que ca ? ca marche vraiment ? code a revoir !
+              facet->type() = (byte)f;
+              facet->location() = Point3d( x, y, z );
+              facet->id() = facet->key();
+              mf[ facet->id() ] = facet;
+            }
+        }
       }
-      it += thing.oPointBetweenLine();
     }
-    it += thing.oLineBetweenSlice();
   }
   if( _verbose )
     cout << endl;

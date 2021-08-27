@@ -32,6 +32,11 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/mesh/mesher.h>
 #include <aims/mesh/surfaceOperation.h> // surfacemanip
 #include <aims/io/writer.h>
@@ -153,7 +158,8 @@ VolumeRef<int16_t> Mesher::reshapedVolume( const VolumeRef<int16_t> in_vol )
 }
 
 
-void Mesher::setSmoothing( SmoothingType smoothType, int smoothIt, float smoothRate )
+void Mesher::setSmoothing( SmoothingType smoothType, int smoothIt,
+                           float smoothRate )
 {
   _smoothFlag = true;
   _smoothType = smoothType;
@@ -220,7 +226,7 @@ void Mesher::doit( const BucketMap<Void>& thing,
 }
 
 
-void Mesher::doit( const AimsData<short>& thing,
+void Mesher::doit( const rc_ptr<Volume<short> > & thing,
                    const string& name, const string& mode )
 {
   map<size_t, list< MapOfFacet > > interface;
@@ -282,7 +288,8 @@ void Mesher::doit( const AimsData<short>& thing,
         if( _verbose )
           cout << "vertices             " << flush;
         getVertices( vfac, surface.vertex(), 
-                     thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
+                     thing->getVoxelSize()[0], thing->getVoxelSize()[1],
+                     thing->getVoxelSize()[2] );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -463,7 +470,7 @@ void Mesher::doit( const BucketMap<Void>& thing,
 }
 
 
-void Mesher::doit( const AimsData<short>& thing,
+void Mesher::doit( const rc_ptr<Volume<short> > & thing,
                    map< size_t, list< AimsSurfaceTriangle > >& surface )
 {
   map< size_t, list< MapOfFacet > > interface;
@@ -516,7 +523,8 @@ void Mesher::doit( const AimsData<short>& thing,
         if( _verbose )
           cout << "vertices             " << flush;
         getVertices( vfac, current.vertex(), 
-                     thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
+                     thing->getVoxelSize()[0], thing->getVoxelSize()[1],
+                     thing->getVoxelSize()[2] );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -573,7 +581,7 @@ void Mesher::doit( const BucketMap<Void>& thing,
 }
 
 
-void Mesher::doit( const AimsData<short>& thing,
+void Mesher::doit( const rc_ptr<Volume<short> > & thing,
                    map< size_t, list< map< short, 
 		   list < AimsSurfaceTriangle > > > >& surface )
 {
@@ -625,7 +633,8 @@ void Mesher::doit( const AimsData<short>& thing,
         if( _verbose )
           cout << "vertices             " << flush;
         getVertices( vfac, theSurface.vertex(), 
-                     thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
+                     thing->getVoxelSize()[0], thing->getVoxelSize()[1],
+                     thing->getVoxelSize()[2] );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -679,7 +688,7 @@ void Mesher::doit( const AimsData<short>& thing,
   clear( interface );
 }
 
-void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
+void	Mesher::getMeshFromMapOfFacet(const rc_ptr<Volume<short> > & thing,
 		AimsSurfaceTriangle& surface, MapOfFacet &mof)
 {
       if( _verbose )
@@ -712,7 +721,8 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
       if( _verbose )
         cout << "vertices             " << flush;
       getVertices( vfac, surface.vertex(), 
-                   thing.sizeX(), thing.sizeY(), thing.sizeZ() );
+                   thing->getVoxelSize()[0], thing->getVoxelSize()[1],
+                   thing->getVoxelSize()[2] );
       if( _verbose )
         cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
 
@@ -762,8 +772,8 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
 
 
 
-void	Mesher::getSingleLabel( const AimsData<short>& thing,
-			AimsSurfaceTriangle &mesh)
+void	Mesher::getSingleLabel( const rc_ptr<Volume<short> > & thing,
+                                AimsSurfaceTriangle &mesh)
 {
   map< size_t, list< MapOfFacet > > interface;
   map< size_t, list< MapOfFacet > >::iterator	ii, ei = interface.end();

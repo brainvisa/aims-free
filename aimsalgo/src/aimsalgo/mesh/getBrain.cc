@@ -32,6 +32,11 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/mesh/mesher.h>
 #include <aims/mesh/surfaceOperation.h>
 #include <aims/bucket/bucketutil.h>
@@ -73,7 +78,7 @@ void Mesher::getBrain( const BucketMap<Void>& thing,
 }
 
 
-void Mesher::getBrain( const AimsData<short>& thing,
+void Mesher::getBrain( const rc_ptr<Volume<short> > & thing,
                        AimsSurfaceTriangle& surface, bool insideinterface )
 {
   map< size_t, list< MapOfFacet > > interface;
@@ -131,7 +136,7 @@ void Mesher::getWhite( const BucketMap<Void>& thing,
 }
 
 
-void Mesher::getWhite( const AimsData<short>& thing,
+void Mesher::getWhite( const rc_ptr<Volume<short> > & thing,
                        AimsSurfaceTriangle& surface )
 {
   map< size_t, list< MapOfFacet > > interface;
@@ -187,7 +192,8 @@ void Mesher::getWhite( const AimsData<short>& thing,
   // gets the coordinates of the center of each facet
   cout << "vertices             " << flush;
   getVertices( vfac, surface.vertex(), 
-                     thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
+               thing->getVoxelSize()[0], thing->getVoxelSize()[1],
+               thing->getVoxelSize()[2] );
   cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
 
   // smoothes the vertex coordinates

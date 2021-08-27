@@ -32,13 +32,19 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/mesh/mesher.h>
 using aims::Connectivity;
 
+using namespace carto;
 using namespace std;
 
 
-void Mesher::splitting( const AimsData< short >& thing,
+void Mesher::splitting( const rc_ptr<Volume< short > > & thing,
                         const vector< Facet* >& vfac,
                         const AimsSurfaceTriangle& surface,
                         map< short, list< AimsSurfaceTriangle > >& splitted )
@@ -47,8 +53,8 @@ void Mesher::splitting( const AimsData< short >& thing,
 
   vector< bool > taken( size );
 
-  Connectivity connect( thing.oLine(), thing.oSlice(),
-                            Connectivity::CONNECTIVITY_6_XYZ );
+  Connectivity connect( thing->getStrides()[1], thing->getStrides()[2],
+                        Connectivity::CONNECTIVITY_6_XYZ );
 
   MapOfFacet all;
   MapOfFacet::iterator it_find;
