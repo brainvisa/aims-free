@@ -36,7 +36,7 @@
 #define AIMS_MATH_CURV3DISO_H
 
 #include <aims/math/mathelem.h>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 
 /** The different 3D curvature types
 */
@@ -50,29 +50,32 @@ enum AimsCurvatureType
 /** 3D curvature functions on an intensity image f(x,y,z) = I
 */
 template <class T> inline
-AimsData<float> 
-AimsIsoIntensityCurvature3D(const AimsData<T> &vol,
-                            AimsCurvatureType type = AIMS_MEAN_CURVATURE);
+carto::VolumeRef<float>
+AimsIsoIntensityCurvature3D( const carto::rc_ptr<carto::Volume<T> > &vol,
+                             AimsCurvatureType type = AIMS_MEAN_CURVATURE );
 
 
 template <class T>
-AimsData<float> 
-AimsIsoIntensityCurvature3D(const AimsData<T> &vol,AimsCurvatureType type)
-{ ASSERT(vol.dimT()==1);
-  aims::AimsFastAllocationData<float> curv(vol.dimX(),vol.dimY(),vol.dimZ(),1,vol.borderWidth());
+carto::VolumeRef<float>
+AimsIsoIntensityCurvature3D( const carto::rc_ptr<carto::Volume<T> > &rvol,
+                             AimsCurvatureType type )
+{
+  carto::VolumeRef<T> vol( rvol ); // convenience API
+  ASSERT(vol->getSizeT()==1);
+  carto::VolumeRef<float> curv( vol->getSizeX(), vol->getSizeY(),
+                                vol->getSizeZ(), 1, vol->getBorders() );
   curv.fillBorder(0);
   curv = 0.0;
-  curv.setSizeX(vol.sizeX());
-  curv.setSizeY(vol.sizeY());
-  curv.setSizeZ(vol.sizeZ());
+  curv.setVoxelSize( vol->getVoxelSize() );
   float fx,fy,fz,fxx,fyy,fzz,fxy,fxz,fyz;
+  std::vector<int> dim = vol->getSize();
 
   switch (type)
   {
     case AIMS_GAUSSIAN_CURVATURE:
-         for (int z=2;z<vol.dimZ()-2;z++)
-           for (int y=2;y<vol.dimY()-2;y++)
-             for (int x=2;x<vol.dimX()-2;x++)
+         for (int z=2;z<dim[2]-2;z++)
+           for (int y=2;y<dim[1]-2;y++)
+             for (int x=2;x<dim[0]-2;x++)
              { if (vol(x-1,y,z)!=vol(x+1,y,z) || 
                    vol(x,y-1,z)!=vol(x,y+1,z) || 
                    vol(x,y,z-1)!=vol(x,y,z+1)   )
@@ -109,9 +112,9 @@ AimsIsoIntensityCurvature3D(const AimsData<T> &vol,AimsCurvatureType type)
              }
          break;
     case AIMS_MEAN_CURVATURE:
-         for (int z=2;z<vol.dimZ()-2;z++)
-           for (int y=2;y<vol.dimY()-2;y++)
-             for (int x=2;x<vol.dimX()-2;x++)
+         for (int z=2;z<dim[2]-2;z++)
+           for (int y=2;y<dim[1]-2;y++)
+             for (int x=2;x<dim[0]-2;x++)
              { if (vol(x-1,y,z)!=vol(x+1,y,z) || 
                    vol(x,y-1,z)!=vol(x,y+1,z) || 
                    vol(x,y,z-1)!=vol(x,y,z+1)   )
