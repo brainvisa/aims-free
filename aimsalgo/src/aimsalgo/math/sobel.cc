@@ -31,33 +31,44 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <math.h>
 #include <aims/math/sobel.h>
+
+using namespace carto;
+using namespace std;
+
 
 /**
 * Sobel gradient 2D specialization
 */
 template <class T>
-SobelGradient<T, 2>::SobelGradient(const AimsData<T> & image,
+SobelGradient<T, 2>::SobelGradient(const rc_ptr<Volume<T> > & image,
                                    const T levels)
   : _levels(levels),
-    _image(image) {
+    _image(image)
+{
   // gradient values: Gx,Gy
-  _gradX = AimsData<double>(_image.dimX(), 
-                            _image.dimY(), 
-                            _image.dimZ(), 
-                            _image.dimT());
-  _gradY = AimsData<double>(_image.dimX(), 
-                            _image.dimY(), 
-                            _image.dimZ(), 
-                            _image.dimT());
+  _gradX = VolumeRef<double>( _image->getSizeX(),
+                              _image->getSizeY(),
+                              _image->getSizeZ(),
+                              _image->getSizeT() );
+  _gradY = VolumeRef<double>( _image->getSizeX(),
+                              _image->getSizeY(),
+                              _image->getSizeZ(),
+                              _image->getSizeT() );
 }
 
 template <class T>
 Point3df SobelGradient<T, 2>::compute(const int x, 
                                       const int y, 
                                       const int z, 
-                                      const int t) {
+                                      const int t)
+{
   int v00 = 0, v01 = 0, v02 = 0, 
       v10 = 0,          v12 = 0, 
       v20 = 0, v21 = 0, v22 = 0;
@@ -66,8 +77,8 @@ Point3df SobelGradient<T, 2>::compute(const int x,
   int y0 = y - 1, y1 = y, y2 = y + 1;
   if (x0 < 0) x0 = 0;
   if (y0 < 0) y0 = 0;
-  if (x2 >= _image.dimX()) x2 = _image.dimX() - 1;
-  if (y2 >= _image.dimY()) y2 = _image.dimY() - 1;
+  if (x2 >= _image->getSizeX()) x2 = _image->getSizeX() - 1;
+  if (y2 >= _image->getSizeY()) y2 = _image->getSizeY() - 1;
 
   v00 = _image(x0, y0, z, t); v10 = _image(x1, y0, z, t); v20 = _image(x2, y0, z, t);
   v01 = _image(x0, y1, z, t);                             v21 = _image(x2, y1, z, t);
@@ -80,12 +91,15 @@ Point3df SobelGradient<T, 2>::compute(const int x,
 }
 
 template <class T>
-void SobelGradient<T, 2>::compute(){
+void SobelGradient<T, 2>::compute()
+{
+  vector<int> dim = _image->getSize();
   Point3df s;
-  for (int t = 0; t < _image.dimT(); t++)
-    for (int z = 0; z < _image.dimZ(); z++)
-      for (int y = 0; y < _image.dimY(); y++)
-        for (int x = 0; x < _image.dimX(); x++){
+  for (int t = 0; t < dim[3]; t++)
+    for (int z = 0; z < dim[2]; z++)
+      for (int y = 0; y < dim[1]; y++)
+        for (int x = 0; x < dim[0]; x++)
+        {
           s = compute(x, y, z, t);
           _gradX(x, y, z, t) = (double)(s[0]);
           _gradY(x, y, z, t) = (double)(s[1]);
@@ -93,12 +107,12 @@ void SobelGradient<T, 2>::compute(){
 }
 
 template <class T>
-AimsData<double> & SobelGradient<T, 2>::gradX(){
+VolumeRef<double> & SobelGradient<T, 2>::gradX(){
   return _gradX;
 }
 
 template <class T>
-AimsData<double> & SobelGradient<T, 2>::gradY(){
+VolumeRef<double> & SobelGradient<T, 2>::gradY(){
   return _gradY;
 }
 

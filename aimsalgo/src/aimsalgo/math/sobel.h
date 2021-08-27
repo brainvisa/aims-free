@@ -35,13 +35,14 @@
 #define AIMS_MATH_SOBEL_H
 
 #include <iostream>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 /**
 * Sobel gradient
 */
 template <class T, int D>
-class SobelGradient  {
+class SobelGradient
+{
  
   public :
     void compute();
@@ -55,13 +56,14 @@ class SobelGradient  {
 * Sobel gradient 2D specialization
 */
 template <class T>
-class SobelGradient<T, 2>  {
+class SobelGradient<T, 2>
+{
 
   public :
     /**
     *  Constructor
     */
-    SobelGradient(const AimsData<T> & image,
+    SobelGradient(const carto::rc_ptr<carto::Volume<T> > & image,
                   const T levels = (T)255);
 
     Point3df compute(const int x, 
@@ -71,18 +73,18 @@ class SobelGradient<T, 2>  {
                      
     void compute();
     
-    AimsData<double> & gradX();
-    AimsData<double> & gradY();
+    carto::VolumeRef<double> & gradX();
+    carto::VolumeRef<double> & gradY();
     
   private :
     // Parameters
     T _levels;
     
     // Image
-    AimsData<T> _image;
+    carto::VolumeRef<T> _image;
     
-    AimsData<double> _gradX;
-    AimsData<double> _gradY;
+    carto::VolumeRef<double> _gradX;
+    carto::VolumeRef<double> _gradY;
 };
 
 #endif
