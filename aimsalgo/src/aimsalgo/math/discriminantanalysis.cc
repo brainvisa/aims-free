@@ -36,38 +36,38 @@
 
 namespace aims {
 
-template void DiscriminantAnalysisElement::doIt<int8_t>(const AimsData<int8_t>&) ;
-template void DiscriminantAnalysisElement::doIt<uint8_t>(const AimsData<uint8_t>&) ;
-template void DiscriminantAnalysisElement::doIt<int16_t>(const AimsData<int16_t>&) ;
-template void DiscriminantAnalysisElement::doIt<uint16_t>(const AimsData<uint16_t>&) ;
-template void DiscriminantAnalysisElement::doIt<int32_t>(const AimsData<int32_t>&) ;
-template void DiscriminantAnalysisElement::doIt<uint32_t>(const AimsData<uint32_t>&) ;
-template void DiscriminantAnalysisElement::doIt<float>(const AimsData<float>&) ;
-template void DiscriminantAnalysisElement::doIt<double>(const AimsData<double>&) ;
+template void DiscriminantAnalysisElement::doIt<int8_t>(const carto::rc_ptr<carto::Volume<int8_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<uint8_t>(const carto::rc_ptr<carto::Volume<uint8_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<int16_t>(const carto::rc_ptr<carto::Volume<int16_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<uint16_t>(const carto::rc_ptr<carto::Volume<uint16_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<int32_t>(const carto::rc_ptr<carto::Volume<int32_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<uint32_t>(const carto::rc_ptr<carto::Volume<uint32_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<float>(const carto::rc_ptr<carto::Volume<float> >&) ;
+template void DiscriminantAnalysisElement::doIt<double>(const carto::rc_ptr<carto::Volume<double> >&) ;
 
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template void DiscriminantAnalysisElement::doIt<char>(const AimsData<char>&) ;
+template void DiscriminantAnalysisElement::doIt<char>(const carto::rc_ptr<carto::Volume<char> >&) ;
 #endif
-template void DiscriminantAnalysisElement::doIt<int64_t>(const AimsData<int64_t>&) ;
-template void DiscriminantAnalysisElement::doIt<uint64_t>(const AimsData<uint64_t>&) ;
+template void DiscriminantAnalysisElement::doIt<int64_t>(const carto::rc_ptr<carto::Volume<int64_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<uint64_t>(const carto::rc_ptr<carto::Volume<uint64_t> >&) ;
 
 
-template void DiscriminantAnalysisElement::doIt<int8_t>(const std::list< Point3d>&, const AimsData<int8_t>&) ;
-template void DiscriminantAnalysisElement::doIt<uint8_t>(const std::list< Point3d>&, const AimsData<uint8_t>&) ;
-template void DiscriminantAnalysisElement::doIt<int16_t>(const std::list< Point3d>&, const AimsData<int16_t>&) ;
-template void DiscriminantAnalysisElement::doIt<uint16_t>(const std::list< Point3d>&, const AimsData<uint16_t>&) ;
-template void DiscriminantAnalysisElement::doIt<int32_t>(const std::list< Point3d>&, const AimsData<int32_t>&) ;
-template void DiscriminantAnalysisElement::doIt<uint32_t>(const std::list< Point3d>&, const AimsData<uint32_t>&) ;
-template void DiscriminantAnalysisElement::doIt<float>(const std::list< Point3d>&, const AimsData<float>&) ;
-template void DiscriminantAnalysisElement::doIt<double>(const std::list< Point3d>&, const AimsData<double>&) ;
+template void DiscriminantAnalysisElement::doIt<int8_t>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<int8_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<uint8_t>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<uint8_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<int16_t>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<int16_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<uint16_t>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<uint16_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<int32_t>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<int32_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<uint32_t>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<uint32_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<float>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<float> >&) ;
+template void DiscriminantAnalysisElement::doIt<double>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<double> >&) ;
 
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template void DiscriminantAnalysisElement::doIt<char>(const std::list< Point3d>&, const AimsData<char>&) ;
+template void DiscriminantAnalysisElement::doIt<char>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<char> >&) ;
 #endif
-template void DiscriminantAnalysisElement::doIt<int64_t>(const std::list< Point3d>&, const AimsData<int64_t>&) ;
-template void DiscriminantAnalysisElement::doIt<uint64_t>(const std::list< Point3d>&, const AimsData<uint64_t>&) ;
+template void DiscriminantAnalysisElement::doIt<int64_t>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<int64_t> >&) ;
+template void DiscriminantAnalysisElement::doIt<uint64_t>(const std::list< Point3d>&, const carto::rc_ptr<carto::Volume<uint64_t> >&) ;
 
 
 template class DiscriminantAnalysis<int8_t> ;

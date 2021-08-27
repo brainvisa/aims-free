@@ -49,11 +49,11 @@ namespace aims
     ~DiscriminantAnalysisElement( ) {}
       
     template <class T>
-    void doIt( const AimsData<T>& individuals ) ;
+    void doIt( const carto::rc_ptr<carto::Volume<T> > & individuals ) ;
       
     template <class T>
     void doIt( const std::list< Point3d>& selectedPoints, 
-               const AimsData<T>& data ) ;
+               const carto::rc_ptr<carto::Volume<T> >& data ) ;
       
     // set a priori class probability
     void setPIj( double PIj )
@@ -63,15 +63,15 @@ namespace aims
         _lnAddFactor = -log( _detVarCov / ( _PIj * _PIj ) ) ; 
     }
       
-    double posteriorProbability( const AimsData<double>& individual, 
+    double posteriorProbability( const carto::rc_ptr<carto::Volume<double> >& individual,
                                  double pX ) const ;
 
     /* for comparison purposes only, because x prior probability is not taken 
        into account */
-    double lnPosteriorProbability( const AimsData<double>& individual ) const ;
-    double distance( const AimsData<double>& x ) const ;
+    double lnPosteriorProbability( const carto::rc_ptr<carto::Volume<double> >& individual ) const ;
+    double distance( const carto::rc_ptr<carto::Volume<double> >& x ) const ;
   
-    const AimsData<double>& mean() const ;
+    const carto::VolumeRef<double>& mean() const ;
     bool computed() const {return _computed ; }
        
   protected:  
@@ -81,9 +81,9 @@ namespace aims
     double _probaScaleFactor ;
     double _PIj ;
       
-    AimsFastAllocationData<double> _mean ;
+    carto::VolumeRef<double> _mean ;
       
-    AimsFastAllocationData<double> _invVarCov ;
+    carto::VolumeRef<double> _invVarCov ;
 
     double _detVarCov ;
     double _normFactor ;
@@ -92,16 +92,6 @@ namespace aims
     // Temporary
     std::vector<Point3d> _indivPosition ;
 
-    /*   vector<float> _projectionVector ; */
-    /*   AimsData<float> _projectionMatrix ; */
-    /*   AimsData<float> _errorMatrix ; */
-    /*   vector<float> _eigenValues ; */
-    /*   AimsData<float> _eigenVectors ; */
-    /*   AimsData<float> _selectedEigenVectors ; */
-    /*   AimsData<float> _selectedEigenVectorsTr ; */
-      
-    /*   int _significantNumberOfVp ; */
-    /*   float _minimalInertia ; */
   };
 
   
@@ -109,32 +99,33 @@ namespace aims
   class DiscriminantAnalysis
   {
   public:
-    DiscriminantAnalysis( const AimsData<T>& data, 
+    DiscriminantAnalysis( const carto::rc_ptr<carto::Volume<T> >& data,
                           const std::vector< std::list <Point3d> >& classes, 
 			  int significantEV = -1, 
 			  const std::vector<double>& PIj 
                           = std::vector<double>() ) ;
     ~DiscriminantAnalysis( ) {}
     
-    std::vector<double> posteriorProbabilities( const AimsData<double>& x, 
+    std::vector<double> posteriorProbabilities( const carto::rc_ptr<carto::Volume<double> >& x,
                                                 double px ) ;
-    std::vector<double> andersonScores( const AimsData<double>& x ) ;
+    std::vector<double> andersonScores(
+      const carto::rc_ptr<carto::Volume<double> >& x ) ;
     
-    int affectedTo( const AimsData<double>& x ) ;
+    int affectedTo( const carto::rc_ptr<carto::Volume<double> >& x ) ;
     
-    bool classification( const AimsData<T>& dynamicImage,
-                         const AimsData<byte>& mask,
-                         AimsData<short>& segmented ) ;
-    bool fuzzyClassification( const AimsData<T>& dynamicImage, 
-                              const AimsData<byte>& mask,
-                              AimsData<float>& fuzzySegmented, 
-                              const AimsData<double> &indivPriorProbabilities =
-                              AimsData<double>() ) ;
+    bool classification( const carto::rc_ptr<carto::Volume<T> >& dynamicImage,
+                         const carto::rc_ptr<carto::Volume<byte> >& mask,
+                         carto::rc_ptr<carto::Volume<short> >& segmented ) ;
+    bool fuzzyClassification( const carto::rc_ptr<carto::Volume<T> >& dynamicImage,
+                              const carto::rc_ptr<carto::Volume<byte> >& mask,
+                              carto::rc_ptr<carto::Volume<float> >& fuzzySegmented,
+                              const carto::rc_ptr<carto::Volume<double> > &indivPriorProbabilities =
+                              carto::rc_ptr<carto::Volume<double> >() ) ;
     
   private:
     int _significantEV ;
     const std::vector< std::list< Point3d > >& _classes ;
-    const AimsData<T>& _data ;
+    const carto::VolumeRef<T> _data ;
     std::vector<double> _PIj ;
     
     std::vector<DiscriminantAnalysisElement> _discrElements ;
