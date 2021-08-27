@@ -35,8 +35,8 @@
 #ifndef AIMS_MATH_RANDOM_H
 #define AIMS_MATH_RANDOM_H
 
-#include <cstdlib>
 #include <aims/config/aimsalgo_config.h>
+#include <cstdlib>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
@@ -78,12 +78,15 @@ std::complex<double> GaussianRandom(const std::complex<double> &mean,
 //@}
 
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 /**@name Random functions*/
 //@{
 /// generate a random list of int between 0 and (size-1)
-AimsData<int> AimsRandomList( int size );
+carto::VolumeRef<int> AimsRandomList( int size );
 //@}
 
 template <class T> inline

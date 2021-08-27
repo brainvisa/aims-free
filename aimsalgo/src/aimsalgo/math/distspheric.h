@@ -39,7 +39,6 @@
 #include <vector>
 
 template <class T,int D> class AimsVector;
-template <class T> class AimsData;
 
 /**@name Spheric distribution of points.*/
 //@{

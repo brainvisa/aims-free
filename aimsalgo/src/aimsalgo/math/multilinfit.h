@@ -36,9 +36,13 @@
 #define AIMS_MATH_MULTILINFIT_H
 
 #include <aims/config/aimsalgo_config.h>
+#include <cartobase/smart/rcptr.h>
 
-template <class T> class AimsData;
-
+namespace carto
+{
+  template <typename T> class Volume;
+  template <typename T> class VolumeRef;
+}
 
 /**@name Multilinear least square data fit
     The model of the fit is : \\
@@ -47,11 +51,9 @@ template <class T> class AimsData;
     the Y vector containing the result of the model for each sample, the
     function returns the vector of coefficients [b0 b1 ....... bM-1].
 */
-//@{
-///
-AimsData<float> AimsMultilinearLeastSquareFit(const AimsData<float> &X,
-                                              const AimsData<float> &Y);
-//@}
+carto::VolumeRef<float> AimsMultilinearLeastSquareFit(
+  const carto::rc_ptr<carto::Volume<float> > &X,
+  const carto::rc_ptr<carto::Volume<float> > &Y );
 
 
 #endif
