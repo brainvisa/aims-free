@@ -36,7 +36,7 @@
 #define AIMS_MATH_GRADIENT_H
 
 
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 
 /** Gradient methods.
    There are 3 possible numerical estimations of the gradient :
@@ -270,181 +270,181 @@ class AimsGradient
   /**@name First order*/
   //@{
   /// d(data)/dx = AimsGradientX(data)
-  AimsData<C> X(const AimsData<C> &data);
+  carto::VolumeRef<C> X(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d(data)/dy = AimsGradientY(data)
-  AimsData<C> Y(const AimsData<C> &data);
+  carto::VolumeRef<C> Y(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d(data)/dz = AimsGradientZ(data)
-  AimsData<C> Z(const AimsData<C> &data);
+  carto::VolumeRef<C> Z(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d(data)/dt = AimsGradientT(data)
-  AimsData<C> T(const AimsData<C> &data);
+  carto::VolumeRef<C> T(const carto::rc_ptr<carto::Volume<C> > &data);
   //@}
 
   /**@name Second order*/
   //@{
   /// d2(data)/dx2 = XX(data)
-  AimsData<C> XX(const AimsData<C> &data);
+  carto::VolumeRef<C> XX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dxdy = XY(data)
-  AimsData<C> XY(const AimsData<C> &data);
+  carto::VolumeRef<C> XY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dxdz = XZ(data)
-  AimsData<C> XZ(const AimsData<C> &data);
+  carto::VolumeRef<C> XZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dxdt = XT(data)
-  AimsData<C> XT(const AimsData<C> &data);
+  carto::VolumeRef<C> XT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dydx = YX(data)
-  AimsData<C> YX(const AimsData<C> &data);
+  carto::VolumeRef<C> YX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dy2 = YY(data)
-  AimsData<C> YY(const AimsData<C> &data);
+  carto::VolumeRef<C> YY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dydz = YZ(data)
-  AimsData<C> YZ(const AimsData<C> &data);
+  carto::VolumeRef<C> YZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dydt = YT(data)
-  AimsData<C> YT(const AimsData<C> &data);
+  carto::VolumeRef<C> YT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dzdx = ZX(data)
-  AimsData<C> ZX(const AimsData<C> &data);
+  carto::VolumeRef<C> ZX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dzdy = ZY(data)
-  AimsData<C> ZY(const AimsData<C> &data);
+  carto::VolumeRef<C> ZY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dz2 = ZZ(data)
-  AimsData<C> ZZ(const AimsData<C> &data);
+  carto::VolumeRef<C> ZZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dzdt = ZT(data)
-  AimsData<C> ZT(const AimsData<C> &data);
+  carto::VolumeRef<C> ZT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dtdx = TX(data)
-  AimsData<C> TX(const AimsData<C> &data);
+  carto::VolumeRef<C> TX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dtdy = TY(data)
-  AimsData<C> TY(const AimsData<C> &data);
+  carto::VolumeRef<C> TY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dtdz = TZ(data)
-  AimsData<C> TZ(const AimsData<C> &data);
+  carto::VolumeRef<C> TZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d2(data)/dt2 = TT(data)
-  AimsData<C> TT(const AimsData<C> &data);
+  carto::VolumeRef<C> TT(const carto::rc_ptr<carto::Volume<C> > &data);
   //@}
     
   /**@name Third order*/
   //@{
   /// d3(data)/dx3 = XXX(data)
-  AimsData<C> XXX(const AimsData<C> &data);
+  carto::VolumeRef<C> XXX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dx2dy = XXY(data)
-  AimsData<C> XXY(const AimsData<C> &data);
+  carto::VolumeRef<C> XXY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dx2dz = XXZ(data)
-  AimsData<C> XXZ(const AimsData<C> &data);
+  carto::VolumeRef<C> XXZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dx2dt = XXT(data)
-  AimsData<C> XXT(const AimsData<C> &data);
+  carto::VolumeRef<C> XXT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdydx = XYX(data)
-  AimsData<C> XYX(const AimsData<C> &data);
+  carto::VolumeRef<C> XYX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdy2 = XYY(data)
-  AimsData<C> XYY(const AimsData<C> &data);
+  carto::VolumeRef<C> XYY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdydz = XYZ(data)
-  AimsData<C> XYZ(const AimsData<C> &data);
+  carto::VolumeRef<C> XYZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdydt = XYT(data)
-  AimsData<C> XYT(const AimsData<C> &data);
+  carto::VolumeRef<C> XYT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdzdx = XZX(data)
-  AimsData<C> XZX(const AimsData<C> &data);
+  carto::VolumeRef<C> XZX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdzdy = XZY(data)
-  AimsData<C> XZY(const AimsData<C> &data);
+  carto::VolumeRef<C> XZY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdz2 = XZZ(data)
-  AimsData<C> XZZ(const AimsData<C> &data);
+  carto::VolumeRef<C> XZZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdzdt = XZT(data)
-  AimsData<C> XZT(const AimsData<C> &data);
+  carto::VolumeRef<C> XZT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdtdx = XTX(data)
-  AimsData<C> XTX(const AimsData<C> &data);
+  carto::VolumeRef<C> XTX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdtdy = XTY(data)
-  AimsData<C> XTY(const AimsData<C> &data);
+  carto::VolumeRef<C> XTY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdtdz = XTZ(data)
-  AimsData<C> XTZ(const AimsData<C> &data);
+  carto::VolumeRef<C> XTZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dxdt2 = XTT(data)
-  AimsData<C> XTT(const AimsData<C> &data);
+  carto::VolumeRef<C> XTT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydx2 = YXX(data)
-  AimsData<C> YXX(const AimsData<C> &data);
+  carto::VolumeRef<C> YXX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydxdy = YXY(data)
-  AimsData<C> YXY(const AimsData<C> &data);
+  carto::VolumeRef<C> YXY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydxdz = YXZ(data)
-  AimsData<C> YXZ(const AimsData<C> &data);
+  carto::VolumeRef<C> YXZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydxdt = YXT(data)
-  AimsData<C> YXT(const AimsData<C> &data);
+  carto::VolumeRef<C> YXT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dy2dx = YYX(data)
-  AimsData<C> YYX(const AimsData<C> &data);
+  carto::VolumeRef<C> YYX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dy3 = YYY(data)
-  AimsData<C> YYY(const AimsData<C> &data);
+  carto::VolumeRef<C> YYY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dy2dz = YYZ(data)
-  AimsData<C> YYZ(const AimsData<C> &data);
+  carto::VolumeRef<C> YYZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dy2dt = YYT(data)
-  AimsData<C> YYT(const AimsData<C> &data);
+  carto::VolumeRef<C> YYT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydzdx = YZX(data)
-  AimsData<C> YZX(const AimsData<C> &data);
+  carto::VolumeRef<C> YZX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydzdy = YZY(data)
-  AimsData<C> YZY(const AimsData<C> &data);
+  carto::VolumeRef<C> YZY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydz2 = YZZ(data)
-  AimsData<C> YZZ(const AimsData<C> &data);
+  carto::VolumeRef<C> YZZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydzdt = YZT(data)
-  AimsData<C> YZT(const AimsData<C> &data);
+  carto::VolumeRef<C> YZT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydtdx = YTX(data)
-  AimsData<C> YTX(const AimsData<C> &data);
+  carto::VolumeRef<C> YTX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydtdy = YTY(data)
-  AimsData<C> YTY(const AimsData<C> &data);
+  carto::VolumeRef<C> YTY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydtdz = YTZ(data)
-  AimsData<C> YTZ(const AimsData<C> &data);
+  carto::VolumeRef<C> YTZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dydt2 = YTT(data)
-  AimsData<C> YTT(const AimsData<C> &data);
+  carto::VolumeRef<C> YTT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdx2 = ZXX(data)
-  AimsData<C> ZXX(const AimsData<C> &data);
+  carto::VolumeRef<C> ZXX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdxdy = ZXY(data)
-  AimsData<C> ZXY(const AimsData<C> &data);
+  carto::VolumeRef<C> ZXY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdxdz = ZXZ(data)
-  AimsData<C> ZXZ(const AimsData<C> &data);
+  carto::VolumeRef<C> ZXZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdxdt = ZXT(data)
-  AimsData<C> ZXT(const AimsData<C> &data);
+  carto::VolumeRef<C> ZXT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdydx = ZYX(data)
-  AimsData<C> ZYX(const AimsData<C> &data);
+  carto::VolumeRef<C> ZYX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdy2 = ZYY(data)
-  AimsData<C> ZYY(const AimsData<C> &data);
+  carto::VolumeRef<C> ZYY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdydz = ZYZ(data)
-  AimsData<C> ZYZ(const AimsData<C> &data);
+  carto::VolumeRef<C> ZYZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdydt = ZYT(data)
-  AimsData<C> ZYT(const AimsData<C> &data);
+  carto::VolumeRef<C> ZYT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dz2dx = ZZX(data)
-  AimsData<C> ZZX(const AimsData<C> &data);
+  carto::VolumeRef<C> ZZX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dz2dy = ZZY(data)
-  AimsData<C> ZZY(const AimsData<C> &data);
+  carto::VolumeRef<C> ZZY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dz3 = ZZZ(data)
-  AimsData<C> ZZZ(const AimsData<C> &data);
+  carto::VolumeRef<C> ZZZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dz2dt = ZZT(data)
-  AimsData<C> ZZT(const AimsData<C> &data);
+  carto::VolumeRef<C> ZZT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdtdx = ZTX(data)
-  AimsData<C> ZTX(const AimsData<C> &data);
+  carto::VolumeRef<C> ZTX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdtdy = ZTY(data)
-  AimsData<C> ZTY(const AimsData<C> &data);
+  carto::VolumeRef<C> ZTY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdtdz = ZTZ(data)
-  AimsData<C> ZTZ(const AimsData<C> &data);
+  carto::VolumeRef<C> ZTZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dzdt2 = ZTT(data)
-  AimsData<C> ZTT(const AimsData<C> &data);
+  carto::VolumeRef<C> ZTT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdx2 = TXX(data)
-  AimsData<C> TXX(const AimsData<C> &data);
+  carto::VolumeRef<C> TXX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdxdy = TXY(data)
-  AimsData<C> TXY(const AimsData<C> &data);
+  carto::VolumeRef<C> TXY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdxdz = TXZ(data)
-  AimsData<C> TXZ(const AimsData<C> &data);
+  carto::VolumeRef<C> TXZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdxdt = TXT(data)
-  AimsData<C> TXT(const AimsData<C> &data);
+  carto::VolumeRef<C> TXT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdydx = TYX(data)
-  AimsData<C> TYX(const AimsData<C> &data);
+  carto::VolumeRef<C> TYX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdy2 = TYY(data)
-  AimsData<C> TYY(const AimsData<C> &data);
+  carto::VolumeRef<C> TYY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdydz = TYZ(data)
-  AimsData<C> TYZ(const AimsData<C> &data);
+  carto::VolumeRef<C> TYZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdydt = TYT(data)
-  AimsData<C> TYT(const AimsData<C> &data);
+  carto::VolumeRef<C> TYT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdzdx = TZX(data)
-  AimsData<C> TZX(const AimsData<C> &data);
+  carto::VolumeRef<C> TZX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdzdy = TZY(data)
-  AimsData<C> TZY(const AimsData<C> &data);
+  carto::VolumeRef<C> TZY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdz2 = TZZ(data)
-  AimsData<C> TZZ(const AimsData<C> &data);
+  carto::VolumeRef<C> TZZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dtdzdt = TZT(data)
-  AimsData<C> TZT(const AimsData<C> &data);
+  carto::VolumeRef<C> TZT(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dt2dx = TTX(data)
-  AimsData<C> TTX(const AimsData<C> &data);
+  carto::VolumeRef<C> TTX(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dt2dy = TTY(data)
-  AimsData<C> TTY(const AimsData<C> &data);
+  carto::VolumeRef<C> TTY(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dt2dz = TTZ(data)
-  AimsData<C> TTZ(const AimsData<C> &data);
+  carto::VolumeRef<C> TTZ(const carto::rc_ptr<carto::Volume<C> > &data);
   /// d3(data)/dt3 = TTT(data)
-  AimsData<C> TTT(const AimsData<C> &data);
+  carto::VolumeRef<C> TTT(const carto::rc_ptr<carto::Volume<C> > &data);
   //@}
 };
 
@@ -454,221 +454,235 @@ class AimsGradient
 /* gradient 1st order */
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::X(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::X(
+  const carto::rc_ptr<carto::Volume<C> > &data)
 {
   int    beginx=0,endx=0,offx1=0,offx2=0;
   float  divx=0;
+  std::vector<int> dims = data->getSize();
+  std::vector<float> vs = data->getVoxelSize();
 
-  aims::AimsFastAllocationData<C> grad(data.dimX(),data.dimY(),data.dimZ(),data.dimT(),
-                   data.borderWidth());
+  carto::VolumeRef<C> grad( dims, data->getBorders() );
   grad = (C)0;
   grad.fillBorder(0);
-  grad.setHeader(data.header()->cloneHeader());
+  grad.copyHeaderFrom( data->header() );
 
   switch (_type)
   {
   case AIMS_GRADIENT_CENTRAL :
-    beginx = 1;endx = data.dimX()-1;
-    offx1=1;offx2=1;
-    divx=2 * data.sizeX();
+    beginx = 1;
+    endx = dims[0]-1;
+    offx1 = 1;
+    offx2 = 1;
+    divx = 2 * vs[0];
     break;
   case AIMS_GRADIENT_DMINUS  :
-    beginx = 1;endx = data.dimX()  ;
-    offx1=1;offx2=0;
-    divx=data.sizeX();
+    beginx = 1;
+    endx = dims[0];
+    offx1 = 1;
+    offx2 = 0;
+    divx = vs[0];
     break;
   case AIMS_GRADIENT_DPLUS   :
-    beginx = 0;endx = data.dimX()-1;
-    offx1=0;offx2=1;
-    divx=data.sizeX();
+    beginx = 0;
+    endx = dims[0]-1;
+    offx1 = 0;
+    offx2 = 1;
+    divx = vs[0];
     break;
   }
 
-  for (int t=0;t<data.dimT();t++)
-    for (int z=0;z<data.dimZ();z++)
-      for (int y=0;y<data.dimY();y++)
+  for (int t=0;t<dims[3];t++)
+    for (int z=0;z<dims[2];z++)
+      for (int y=0;y<dims[1];y++)
         for (int x=beginx;x<endx;x++)
-          grad(x,y,z,t) = (C)( ((float)data(x+offx2,y,z,t) -
-                                (float)data(x-offx1,y,z,t)) / divx);
-  return(grad);
+          grad(x,y,z,t) = (C)( ((float)data->at(x+offx2,y,z,t) -
+                                (float)data->at(x-offx1,y,z,t)) / divx);
+  return grad;
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::Y(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::Y(
+  const carto::rc_ptr<carto::Volume<C> > &data)
 {
   int    beginy=0,endy=0,offy1=0,offy2=0;
   float  divy=0;
+  std::vector<int> dims = data->getSize();
+  std::vector<float> vs = data->getVoxelSize();
 
-  aims::AimsFastAllocationData<C> grad(data.dimX(),data.dimY(),data.dimZ(),data.dimT(),
-                     data.borderWidth());
+  carto::VolumeRef<C> grad( dims, data->getBorders() );
   grad = (C)0;
   grad.fillBorder(0);
-  grad.setHeader(data.header()->cloneHeader());
+  grad.copyHeaderFrom( data->header() );
 
   switch (_type)
-  { case AIMS_GRADIENT_CENTRAL : beginy = 1;endy = data.dimY()-1;
-                                 offy1=1;offy2=1;divy=2 * data.sizeY();break;
-    case AIMS_GRADIENT_DMINUS  : beginy = 1;endy = data.dimY()  ;
-                                 offy1=1;offy2=0;divy=data.sizeY();break;
-    case AIMS_GRADIENT_DPLUS   : beginy = 0;endy = data.dimY()-1;
-                                 offy1=0;offy2=1;divy=data.sizeY();break;
+  { case AIMS_GRADIENT_CENTRAL : beginy = 1;endy = dims[1]-1;
+                                 offy1=1;offy2=1;divy=2 * vs[1];break;
+    case AIMS_GRADIENT_DMINUS  : beginy = 1;endy = dims[1]  ;
+                                 offy1=1;offy2=0;divy=vs[1];break;
+    case AIMS_GRADIENT_DPLUS   : beginy = 0;endy = dims[1]-1;
+                                 offy1=0;offy2=1;divy=vs[1];break;
   }
 
-  for (int t=0;t<data.dimT();t++)
-    for (int z=0;z<data.dimZ();z++)
+  for (int t=0;t<dims[3];t++)
+    for (int z=0;z<dims[2];z++)
       for (int y=beginy;y<endy;y++)
-        for (int x=0;x<data.dimX();x++)
-          grad(x,y,z,t) = (C)(((float)data(x,y+offy2,z,t) -
-                               (float)data(x,y-offy1,z,t)) / divy);
-  return(grad);
+        for (int x=0;x<dims[0];x++)
+          grad(x,y,z,t) = (C)(((float)data->at(x,y+offy2,z,t) -
+                               (float)data->at(x,y-offy1,z,t)) / divy);
+  return grad;
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::Z(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::Z(
+  const carto::rc_ptr<carto::Volume<C> > &data)
 {
   int    beginz=0,endz=0,offz1=0,offz2=0;
   float  divz=0;
+  std::vector<int> dims = data->getSize();
+  std::vector<float> vs = data->getVoxelSize();
 
-  aims::AimsFastAllocationData<C> grad(data.dimX(),data.dimY(),data.dimZ(),data.dimT(),
-                     data.borderWidth());
+  carto::VolumeRef<C> grad( dims, data->getBorders() );
   grad = (C)0;
   grad.fillBorder(0);
-  grad.setHeader(data.header()->cloneHeader());
+  grad.copyHeaderFrom( data->header() );
 
   switch (_type)
-  { case AIMS_GRADIENT_CENTRAL : beginz = 1;endz = data.dimZ()-1;
-                                 offz1=1;offz2=1;divz=2 * data.sizeZ();break;
-    case AIMS_GRADIENT_DMINUS  : beginz = 1;endz = data.dimZ()  ;
-                                 offz1=1;offz2=0;divz=data.sizeZ();break;
-    case AIMS_GRADIENT_DPLUS   : beginz = 0;endz = data.dimZ()-1;
-                                 offz1=0;offz2=1;divz=data.sizeZ();break;
+  { case AIMS_GRADIENT_CENTRAL : beginz = 1;endz = dims[2]-1;
+                                 offz1=1;offz2=1;divz=2 * vs[2];break;
+    case AIMS_GRADIENT_DMINUS  : beginz = 1;endz = dims[2]  ;
+                                 offz1=1;offz2=0;divz=vs[2];break;
+    case AIMS_GRADIENT_DPLUS   : beginz = 0;endz = dims[2]-1;
+                                 offz1=0;offz2=1;divz=vs[2];break;
   }
 
-  for (int t=0;t<data.dimT();t++)
+  for (int t=0;t<dims[3];t++)
     for (int z=beginz;z<endz;z++)
-      for (int y=0;y<data.dimY();y++)
-        for (int x=0;x<data.dimX();x++)
-          grad(x,y,z,t) = (C)(((float)data(x,y,z+offz2,t) -
-                               (float)data(x,y,z-offz1,t)) / divz);
-  return(grad);
+      for (int y=0;y<dims[1];y++)
+        for (int x=0;x<dims[0];x++)
+          grad(x,y,z,t) = (C)(((float)data->at(x,y,z+offz2,t) -
+                               (float)data->at(x,y,z-offz1,t)) / divz);
+  return grad;
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::T(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::T(
+  const carto::rc_ptr<carto::Volume<C> > &data)
 {
   int    begint=0,endt=0,offt1=0,offt2=0;
   float  divt=0;
+  std::vector<int> dims = data->getSize();
+  std::vector<float> vs = data->getVoxelSize();
 
-  aims::AimsFastAllocationData<C> grad(data.dimX(),data.dimY(),data.dimZ(),data.dimT(),
-                     data.borderWidth());
+  carto::VolumeRef<C> grad( dims, data->getBorders() );
   grad = (C)0;
   grad.fillBorder(0);
-  grad.setHeader(data.header()->cloneHeader());
+  grad.copyHeaderFrom( data->header() );
 
   switch (_type)
-  { case AIMS_GRADIENT_CENTRAL : begint = 1;endt = data.dimY()-1;
-                                 offt1=1;offt2=1;divt=2 * data.sizeT();break;
-    case AIMS_GRADIENT_DMINUS  : begint = 1;endt = data.dimY()  ;
-                                 offt1=1;offt2=0;divt=data.sizeT();break;
-    case AIMS_GRADIENT_DPLUS   : begint = 0;endt = data.dimY()-1;
-                                 offt1=0;offt2=1;divt=data.sizeT();break;
+  { case AIMS_GRADIENT_CENTRAL : begint = 1;endt = dims[3]-1;
+                                 offt1=1;offt2=1;divt=2 * vs[3];break;
+    case AIMS_GRADIENT_DMINUS  : begint = 1;endt = dims[3]  ;
+                                 offt1=1;offt2=0;divt=vs[3];break;
+    case AIMS_GRADIENT_DPLUS   : begint = 0;endt = dims[3]-1;
+                                 offt1=0;offt2=1;divt=vs[3];break;
   }
 
   for (int t=begint;t<endt;t++)
-    for (int z=0;z<data.dimZ();z++)
-      for (int y=0;y<data.dimY();y++)
-        for (int x=0;x<data.dimX();x++)
-          grad(x,y,z,t) = (C)(((float)data(x,y,z,t+offt2) -
-                               (float)data(x,y,z,t-offt1)) / divt);
-  return(grad);
+    for (int z=0;z<dims[2];z++)
+      for (int y=0;y<dims[1];y++)
+        for (int x=0;x<dims[0];x++)
+          grad(x,y,z,t) = (C)(((float)data->at(x,y,z,t+offt2) -
+                               (float)data->at(x,y,z,t-offt1)) / divt);
+  return grad;
 }
 
 
 /* gradient 2nd order */
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(X(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(Y(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(Z(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(T(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(X(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(Y(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(Z(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(T(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(X(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(Y(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(Z(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(T(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(X(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(Y(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(Z(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(T(data)));
 }
 
@@ -676,337 +690,337 @@ AimsData<C> AimsGradient<C>::TT(const AimsData<C> &data)
 /* gradient 3rd order */
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XXX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XXX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(XX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XXY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XXY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(XY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XXZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XXZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(XZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XXT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XXT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(XT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XYX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XYX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(YX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XYY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XYY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(YY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XYZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XYZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(YZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XYT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XYT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(YT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XZX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XZX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(ZX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XZY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XZY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(ZY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XZZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XZZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(ZZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XZT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XZT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(ZT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XTX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XTX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(TX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XTY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XTY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(TY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XTZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XTZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(TZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::XTT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::XTT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(X(TT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YXX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YXX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(XX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YXY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YXY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(XY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YXZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YXZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(XZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YXT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YXT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(XT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YYX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YYX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(YX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YYY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YYY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(YY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YYZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YYZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(YZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YYT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YYT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(YT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YZX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YZX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(ZX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YZY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YZY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(ZY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YZZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YZZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(ZZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YZT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YZT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(ZT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YTX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YTX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(TX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YTY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YTY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(TY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YTZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YTZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(TZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::YTT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::YTT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Y(TT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZXX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZXX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(XX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZXY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZXY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(XY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZXZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZXZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(XZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZXT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZXT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(XT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZYX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZYX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(YX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZYY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZYY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(YY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZYZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZYZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(YZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZYT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZYT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(YT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZZX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZZX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(ZX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZZY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZZY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(ZY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZZZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZZZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(ZZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZZT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZZT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(ZT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZTX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZTX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(TX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZTY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZTY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(TY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZTZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZTZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(TZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::ZTT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::ZTT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(Z(TT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TXX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TXX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(XX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TXY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TXY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(XY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TXZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TXZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(XZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TXT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TXT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(XT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TYX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TYX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(YX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TYY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TYY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(YY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TYZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TYZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(YZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TYT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TYT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(YT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TZX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TZX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(ZX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TZY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TZY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(ZY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TZZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TZZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(ZZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TZT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TZT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(ZT(data)));
 }
 
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TTX(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TTX(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(TX(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TTY(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TTY(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(TY(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TTZ(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TTZ(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(TZ(data)));
 }
 
 template <class C> inline
-AimsData<C> AimsGradient<C>::TTT(const AimsData<C> &data)
+carto::VolumeRef<C> AimsGradient<C>::TTT(const carto::rc_ptr<carto::Volume<C> > &data)
 { return(T(TT(data)));
 }
 

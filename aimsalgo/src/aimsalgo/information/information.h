@@ -36,6 +36,7 @@
 #define AIMS_INFORMATION_INFORMATION_H
 
 #include <aims/mesh/surface.h>
+#include <aims/data/data.h>
 
 float AimsEntropy( const AimsData<float>& p );
 

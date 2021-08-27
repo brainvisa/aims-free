@@ -11,8 +11,12 @@ class AimsGradient_%Template1typecode%
   public:
     AimsGradient_%Template1typecode%(int type=AIMS_GRADIENT_CENTRAL);
 
-    AimsData_%Template1typecode% X(const AimsData_%Template1typecode% &data);
-    AimsData_%Template1typecode% Y(const AimsData_%Template1typecode% &data);
-    AimsData_%Template1typecode% Z(const AimsData_%Template1typecode% &data);
-    AimsData_%Template1typecode% T(const AimsData_%Template1typecode% &data);
+    rc_ptr_Volume_%Template1typecode% X(
+      const rc_ptr_Volume_%Template1typecode% &data);
+    rc_ptr_Volume_%Template1typecode% Y(
+      const rc_ptr_Volume_%Template1typecode% &data);
+    rc_ptr_Volume_%Template1typecode% Z(
+      const rc_ptr_Volume_%Template1typecode% &data);
+    rc_ptr_Volume_%Template1typecode% T(
+      const rc_ptr_Volume_%Template1typecode% &data);
 };
