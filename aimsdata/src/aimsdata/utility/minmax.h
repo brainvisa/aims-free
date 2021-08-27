@@ -34,7 +34,7 @@
 #ifndef AIMS_UTILITY_MINMAX_H
 #define AIMS_UTILITY_MINMAX_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 namespace aims
 {
@@ -50,34 +50,6 @@ template <typename ObjectType, typename ValueType>
 void minmax( const ObjectType &, ValueType &min, ValueType &max )
 {
   ObjectType::error_minmax_not_specialized;
-}
-
-
-  //--------------------------------------------//
- //  minmax< AimsData<ValueType>, ValueType >  //
-//--------------------------------------------//
-template <typename ValueType>
-void minmax( const AimsData<ValueType> &volume, ValueType &min, 
-             ValueType &max )
-{
-  typename AimsData<ValueType>::const_iterator it = 
-    volume.begin() + volume.oFirstPoint();
-
-  min = max = *it;
-  for ( int t = 0; t < volume.dimT(); t++ ) {
-    for ( int z = 0; z < volume.dimZ(); z++ ) {
-      for ( int y = 0; y < volume.dimY(); y++ ) {
-        for ( int x = 0; x < volume.dimX(); x++ ) {
-          if ( *it < min ) min = *it;
-          if ( *it > max ) max = *it;
-          it++;
-        }
-        it += volume.oPointBetweenLine();
-      }
-      it += volume.oLineBetweenSlice();
-    }
-    it += volume.oSliceBetweenVolume();
-  }
 }
 
 

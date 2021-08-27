@@ -30,16 +30,26 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <math.h>
 #include <cartobase/config/verbose.h>
 #include <aims/math/harris.h>
 #include <aims/math/sobel.h>
 
+using namespace aims;
+using namespace carto;
+
+
 /**
 *  Constructor
 */
 template <class T>
-BaseHarrisDetector<T>::BaseHarrisDetector(const AimsData<T> & image, 
+BaseHarrisDetector<T>::BaseHarrisDetector(const rc_ptr<Volume<T> > & image,
                                           const double sigma, 
                                           const double k, 
                                           const double epsilon,
@@ -49,7 +59,7 @@ BaseHarrisDetector<T>::BaseHarrisDetector(const AimsData<T> & image,
     _sigma(sigma),
     _levels(levels),
     _image(image)
-  {
+{
                       
 //     if (! levels){
 //       _levels = DataTypeInfo<T>::depth() * 8 - 1;
@@ -62,14 +72,11 @@ BaseHarrisDetector<T>::BaseHarrisDetector(const AimsData<T> & image,
   _radius = (int)(2 * _sigma);
   _window = 1 + 2 * _radius;
   
-  this->_hmap = AimsData<double>( _image.dimX(), 
-                                  _image.dimY(),
-                                  _image.dimZ(),
-                                  _image.dimT() );
-  this->_hmap.setSizeXYZT(_image.sizeX(),
-                          _image.sizeY(),
-                          _image.sizeZ(),
-                          _image.sizeT());
+  this->_hmap = VolumeRef<double>( _image->getSizeX(),
+                                   _image->getSizeY(),
+                                   _image->getSizeZ(),
+                                   _image->getSizeT() );
+  this->_hmap.setVoxelSize( _image->getVoxelSize() );
   this->_hmap = 0;
 }
 
@@ -80,7 +87,8 @@ BaseHarrisDetector<T>::BaseHarrisDetector(const AimsData<T> & image,
 template <class T>
 double BaseHarrisDetector<T>::gaussian(const double x, 
                                        const double y, 
-                                       const double z) {
+                                       const double z)
+{
   return (_u * exp( -(x * x + y * y + z * z) / (2 * _sigma2) ) );
 }
 
@@ -88,16 +96,18 @@ double BaseHarrisDetector<T>::gaussian(const double x,
 * Compute the Harris measure for each pixel of the image
 */
 template <class T>
-void BaseHarrisDetector<T>::computeHarrisMap() {
+void BaseHarrisDetector<T>::computeHarrisMap()
+{
   
   // precompute derivatives
   this->computeDerivatives();
 
   // for each pixel in the _image
-  for (int t = 0; t < _image.dimT(); t++)
-    for (int z = 0; z < _image.dimZ(); z++)
-      for (int y = 0; y < _image.dimY(); y++)
-        for (int x = 0; x < _image.dimX(); x++) {
+  for (int t = 0; t < _image->getSizeT(); t++)
+    for (int z = 0; z < _image->getSizeZ(); z++)
+      for (int y = 0; y < _image->getSizeY(); y++)
+        for (int x = 0; x < _image->getSizeX(); x++)
+        {
           // compute the harris measure
           double h = this->harrisMeasure(x, y, z, t);
           //std::cout << "h : " << carto::toString(h) << std::endl << std::flush;
@@ -113,25 +123,23 @@ void BaseHarrisDetector<T>::computeHarrisMap() {
 * Perfom the Harris Corner Detection
 */
 template <class T>
-void BaseHarrisDetector<T>::computeCorners() {
-
+void BaseHarrisDetector<T>::computeCorners()
+{
   
   // Initializes corners
   _corners = aims::BucketMap<double>();
-  _corners.setSizeXYZT(_image.sizeX(),
-                        _image.sizeY(),
-                        _image.sizeZ(),
-                        _image.sizeT());
+  _corners.setSizeXYZT( _image->getVoxelSize() );
                       
   // Harris measure map
   this->computeHarrisMap();
 
   // For each pixel in the harrismap, check for spatial maxima
   int cfound = 0;
-  for (int t = 0; t < _image.dimT(); t++)
-    for (int z = 0; z < _image.dimZ(); z++)
-      for (int y = 1; y < _image.dimY() - 1; y++)
-        for (int x = 1; x < _image.dimX() - 1; x++) {
+  for (int t = 0; t < _image->getSizeT(); t++)
+    for (int z = 0; z < _image->getSizeZ(); z++)
+      for (int y = 1; y < _image->getSizeY() - 1; y++)
+        for (int x = 1; x < _image->getSizeX() - 1; x++)
+        {
           // thresholding : harris measure > epsilon
           double h = this->_hmap(x, y, z, t);
           if (h <= this->_epsilon) continue;
@@ -156,7 +164,8 @@ void BaseHarrisDetector<T>::computeCorners() {
 * @param minDistance minimum distance between corners
 */
 template <class T>
-void BaseHarrisDetector<T>::filter(int minDistance) {
+void BaseHarrisDetector<T>::filter(int minDistance)
+{
   this->computeCorners();
   
   // Remove corners too close to each other (keeping the highest measure)
@@ -164,7 +173,8 @@ void BaseHarrisDetector<T>::filter(int minDistance) {
   int s, c, r;
   int dist;
   Point3d n, p;
-  for (int t = 0; t < sz; t++) {
+  for (int t = 0; t < sz; t++)
+  {
     aims::BucketMap<double>::Bucket::iterator it = this->_corners[t].begin(), 
                                               ir, it2, ie = this->_corners[t].end();
     s = this->_corners[t].size();
@@ -202,21 +212,22 @@ void BaseHarrisDetector<T>::filter(int minDistance) {
 }
 
 template <class T>
-AimsData<double> BaseHarrisDetector<T>::harrisMap() {
+VolumeRef<double> BaseHarrisDetector<T>::harrisMap()
+{
   return this->_hmap;
 }
 
 template <class T>
-aims::BucketMap<Void> BaseHarrisDetector<T>::corners() {
+aims::BucketMap<Void> BaseHarrisDetector<T>::corners()
+{
   int sz = _corners.size();
   aims::BucketMap<Void> corners;
-  corners.setSizeXYZT(_corners.sizeX(),
-                      _corners.sizeY(),
-                      _corners.sizeZ(),
-                      _corners.sizeT());
-  for (int t = 0; t < sz; t++) {
+  corners.setVoxelSize( _corners.getVoxelSize() );
+  for (int t = 0; t < sz; t++)
+  {
     aims::BucketMap<double>::Bucket::iterator it, ie = this->_corners[t].end();
-    for(it = this->_corners[t].begin(); it != ie; it++) {
+    for(it = this->_corners[t].begin(); it != ie; it++)
+    {
       corners[t].insert(std::pair<Point3d, Void>(it->first, Void()));
     }
   }
@@ -230,7 +241,7 @@ aims::BucketMap<Void> BaseHarrisDetector<T>::corners() {
 *  Constructor
 */
 template <class T>
-HarrisDetector<T, 2>::HarrisDetector(AimsData<T> image, 
+HarrisDetector<T, 2>::HarrisDetector(const rc_ptr<Volume<T> > & image,
                                      double sigma, 
                                      double k, 
                                      double epsilon,
@@ -241,25 +252,25 @@ HarrisDetector<T, 2>::HarrisDetector(AimsData<T> image,
       k, 
       epsilon,
       levels
-    ) {
-
+    )
+{
   // Initializes derivative images
-  this->_lx2 = AimsData<double>(this->_image.dimX(), 
-                                this->_image.dimY(), 
-                                this->_image.dimZ(), 
-                                this->_image.dimT());
-  this->_ly2 = AimsData<double>(this->_image.dimX(), 
-                                this->_image.dimY(), 
-                                this->_image.dimZ(), 
-                                this->_image.dimT());
-  this->_lxy = AimsData<double>(this->_image.dimX(), 
-                                this->_image.dimY(), 
-                                this->_image.dimZ(), 
-                                this->_image.dimT());
+  this->_lx2 = VolumeRef<double>(this->_image->getSizeX(),
+                                this->_image->getSizeY(),
+                                this->_image->getSizeZ(),
+                                this->_image->getSizeT());
+  this->_ly2 = VolumeRef<double>(this->_image->getSizeX(),
+                                this->_image->getSizeY(),
+                                this->_image->getSizeZ(),
+                                this->_image->getSizeT());
+  this->_lxy = VolumeRef<double>(this->_image->getSizeX(),
+                                this->_image->getSizeY(),
+                                this->_image->getSizeZ(),
+                                this->_image->getSizeT());
 
   
   // Precompute the coefficients of the gaussian filter
-  this->_g = AimsData<double>(this->_window, this->_window);
+  this->_g = VolumeRef<double>(this->_window, this->_window);
   for(int j = (-this->_radius); j <= this->_radius; j++)
     for(int i = (-this->_radius); i <= this->_radius; i++)
       this->_g(i + this->_radius, j + this->_radius) = this->gaussian(i, j, 0);
@@ -270,7 +281,8 @@ HarrisDetector<T, 2>::HarrisDetector(AimsData<T> image,
 * Compute the 3 arrays Ix, Iy and Ixy
 */
 template <class T>
-void HarrisDetector<T, 2>::computeDerivatives() {
+void HarrisDetector<T, 2>::computeDerivatives()
+{
   SobelGradient<T, 2> s(this->_image, 
                         this->_levels);
   s.compute();
@@ -291,16 +303,17 @@ void HarrisDetector<T, 2>::computeDerivatives() {
   //
   int xk, yk;
   double gw, gx, gy;
-  for (int t = 0; t < this->_image.dimT(); t++)
-    for (int z = 0; z < this->_image.dimZ(); z++)
-      for (int y = 0; y < this->_image.dimY(); y++)
-        for (int x = 0; x < this->_image.dimX(); x++)
+  for (int t = 0; t < this->_image->getSizeT(); t++)
+    for (int z = 0; z < this->_image->getSizeZ(); z++)
+      for (int y = 0; y < this->_image->getSizeY(); y++)
+        for (int x = 0; x < this->_image->getSizeX(); x++)
           for (int dy = (-this->_radius); dy <= this->_radius; dy++)
-            for (int dx = (-this->_radius); dx <= this->_radius; dx++) {
+            for (int dx = (-this->_radius); dx <= this->_radius; dx++)
+            {
               xk = x + dx;
               yk = y + dy;
-              if (xk < 0 || xk >= this->_image.dimX()) continue;
-              if (yk < 0 || yk >= this->_image.dimY()) continue;
+              if (xk < 0 || xk >= this->_image->getSizeX()) continue;
+              if (yk < 0 || yk >= this->_image->getSizeY()) continue;
   
               // gaussian weight
               gw = this->_g(dx + this->_radius, dy + this->_radius);
@@ -331,7 +344,8 @@ template <class T>
 double HarrisDetector<T, 2>::harrisMeasure(const int x, 
                                            const int y, 
                                            const int z, 
-                                           const int t) {
+                                           const int t)
+{
   // matrix elements (normalized)
   double m00 = _lx2(x, y, z, t); 
   double m01 = _lxy(x, y, z, t);
@@ -358,7 +372,8 @@ template <class T>
 bool HarrisDetector<T, 2>::isSpatialMaxima(const int x, 
                                            const int y, 
                                            const int z, 
-                                           const int t) {
+                                           const int t)
+{
   int n = 8;
   int dx[] = {-1, 0, 1, 1, 1, 0, -1, -1};
   int dy[] = {-1, -1, -1, 0, 1, 1, 1, 0};
