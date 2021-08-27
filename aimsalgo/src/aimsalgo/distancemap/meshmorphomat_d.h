@@ -573,30 +573,31 @@ Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh,
 }
 
 
-template<class T> inline
-bool SimplePoint( const Texture<T> & tex,
-                  const std::list<unsigned>  & neigho)
+namespace
 {
 
-  std::list<unsigned>::const_iterator              il=neigho.begin(), el=neigho.end();
-  short                                       l=tex.item(*il);
-  int                                         nb=0;//nb chgmt of value
+  template<class T> inline
+  bool SimplePoint( const Texture<T> & tex,
+                    const std::list<unsigned>  & neigho)
+  {
 
-  while(il != el)
-    {
-      if (tex.item(*il) != l)
-        {
-          ++nb;
-          l = tex.item(*il);
-        }
-      ++il;
-    }
-  return(nb == 1 || nb == 2);
+    std::list<unsigned>::const_iterator              il=neigho.begin(), el=neigho.end();
+    short                                       l=tex.item(*il);
+    int                                         nb=0;//nb chgmt of value
+
+    while(il != el)
+      {
+        if (tex.item(*il) != l)
+          {
+            ++nb;
+            l = tex.item(*il);
+          }
+        ++il;
+      }
+    return(nb == 1 || nb == 2);
+  }
+
 }
-
-
-
-
 
 template<class T> inline
 bool HasHole( const Texture<T> &tex,
@@ -661,35 +662,38 @@ bool HasHole( const Texture<T> &tex,
 
   return( (S - A + F != 1) );
 
-
 }
 
-template<class T> inline
-bool ImmortalPoint( const Texture<T> & tex,
-                    const std::list<unsigned>  & neigho )
+
+namespace
 {
 
-  std::list<unsigned>::const_iterator              il=neigho.begin(), el=neigho.end();
-  short                                       l=tex.item(*il);
-  int                                         nb=0;//nb chgmt of value
+  template<class T> inline
+  bool ImmortalPoint( const Texture<T> & tex,
+                      const std::list<unsigned>  & neigho )
+  {
 
-  while(il != el)
-    {
-      if (tex.item(*il) != l)
-        {
-          ++nb;
-          l = tex.item(*il);
-        }
-      ++il;
-    }
-  il = neigho.begin();
-  if (tex.item(*il) != l)
-          ++nb;
+    std::list<unsigned>::const_iterator              il=neigho.begin(), el=neigho.end();
+    short                                       l=tex.item(*il);
+    int                                         nb=0;//nb chgmt of value
 
-  return(nb > 2 || nb ==1 );
-    }
+    while(il != el)
+      {
+        if (tex.item(*il) != l)
+          {
+            ++nb;
+            l = tex.item(*il);
+          }
+        ++il;
+      }
+    il = neigho.begin();
+    if (tex.item(*il) != l)
+            ++nb;
 
+    return(nb > 2 || nb ==1 );
+  }
 
+}
 
 
 

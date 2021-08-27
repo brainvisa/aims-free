@@ -97,14 +97,14 @@ namespace aims
   
     /** Close the sulcus map (dilation and skeletization).
 	All the labels/components are processed */
-    template<class T> inline
+    template<class T>
     Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh, 
 			   const Texture<T> & sulctex,
 			   float nbDilMax,bool connexity,
 			   const T & Back, const T & For,
 			   const std::vector<std::list<unsigned> >  & neigho, 
 			   const std::set<T> & label_forbidden);
-    template<class T> inline
+    template<class T>
     Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh, 
 			   const Texture<T> & sulctex,
 			   float nbDilMax,bool connexity,
@@ -116,7 +116,8 @@ namespace aims
     template<class T>
     bool HasHole(const Texture<T> &tex,
 		       const AimsSurface<3,Void> & mesh, const T label );
-      
+
+#if 0  // these are internal functions implemented as static functions
     /// Tell if a point (whose ordonned neighbourhood is neigho) is simple   
     template<class T>
     inline bool SimplePoint( const Texture<T> & tex,
@@ -127,6 +128,7 @@ namespace aims
     template<class T>
     inline bool ImmortalPoint( const Texture<T> & tex,
 			       const std::list<unsigned>  & neigho);
+#endif
 
     /** Skeletization of the components of the innitex with label label.
 	neigho is the ordonned neighbourhood for each point. 
