@@ -26,7 +26,7 @@ Mesh binary objects in a volume and produce surface meshes.
     Mesher();
     virtual ~Mesher();
 
-    void doit( const AimsData_S16&, const std::string&,
+    void doit( const rc_ptr_Volume_S16&, const std::string&,
                const std::string& = "binar" ) /ReleaseGIL/;
 %Docstring
 doit(object_to_mesh, filename_base, write_mode="binar")
@@ -203,7 +203,7 @@ lists of meshes.
     bool verbose() const;
     void setVerbose( bool);
 
-    void getBrain( const AimsData_S16&, AimsSurfaceTriangle&, 
+    void getBrain( const rc_ptr_Volume_S16&, AimsSurfaceTriangle&,
       bool insideinterface=false )
       throw ( std::runtime_error, carto::assert_error ) /ReleaseGIL/;
 %Docstring
@@ -220,7 +220,7 @@ When meshing a volume, the input volume should have a border of at least
       bool insideinterface=false )
       throw ( std::runtime_error, carto::assert_error ) /ReleaseGIL/;
 
-    void getWhite( const AimsData_S16& , AimsSurfaceTriangle& ) /ReleaseGIL/;
+    void getWhite( const rc_ptr_Volume_S16& , AimsSurfaceTriangle& ) /ReleaseGIL/;
 %Docstring
     getWhite(object_to_mesh, mesh)
 
@@ -234,6 +234,6 @@ When meshing a volume, the input volume should have a border of at least
     void getWhite( const BucketMap_VOID & thing,
                    AimsSurfaceTriangle & surface ) /ReleaseGIL/;
 
-    void getSingleLabel(const AimsData_S16&, AimsSurfaceTriangle &)
+    void getSingleLabel(const rc_ptr_Volume_S16&, AimsSurfaceTriangle &)
       /ReleaseGIL/;
 };
