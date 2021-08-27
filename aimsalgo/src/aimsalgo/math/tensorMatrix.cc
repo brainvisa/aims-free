@@ -32,19 +32,24 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/math/tensorMatrix.h>
 #include <aims/math/mathelem.h>
-#include <aims/data/fastAllocationData.h>
+#include <cartodata/volume/volume.h>
 #include <aims/vector/vector.h>
 #include <aims/math/trieder.h>
 
-using namespace aims;
+using namespace carto;
 
-AimsData<float> 
+VolumeRef<float>
 AimsEigenToMatrix(const Trieder& trieder,
                   float lambda1,float lambda2,float lambda3)
 {
-  AimsFastAllocationData<float> tensor(3,3);
+  VolumeRef<float> tensor( 3, 3, 1, 1, AllocatorContext::fast() );
 
   tensor(0,0) = lambda1 * square(trieder.dirX().item(0)) +
                 lambda2 * square(trieder.dirY().item(0)) +

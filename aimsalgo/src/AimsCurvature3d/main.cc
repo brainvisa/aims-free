@@ -33,8 +33,9 @@
 
 
 #include <cstdlib>
-#include <aims/data/data_g.h>
-#include <aims/io/io_g.h>
+#include <cartodata/volume/volume.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/math/math_g.h>
 
@@ -44,11 +45,11 @@ using namespace std;
 
 int main( int argc, const char **argv )
 {
-  Reader<AimsData<short> >	reader;
-  Writer<AimsData<float> >	writer;
+  Reader<Volume<short> >	reader;
+  Writer<Volume<float> >	writer;
   bool				gaussian = false;
 
-  AimsApplication	app( argc, argv, "2D curvature of an intensity image " 
+  AimsApplication	app( argc, argv, "3D curvature of an intensity image "
                              "f(x,y) = I" );
   app.addOption( reader, "-i", "source matrix" );
   app.addOption( writer, "-o", "destination float matrix" );
@@ -62,16 +63,16 @@ int main( int argc, const char **argv )
     {
       app.initialize();
 
-      AimsData<short> vol;
-      reader >> vol;
+      VolumeRef<short> vol;
+      vol = reader.read();
 
-      AimsData<float> curvature;
+      VolumeRef<float> curvature;
       curvature 
         = AimsIsoIntensityCurvature3D( vol,
                                        ( gaussian ? AIMS_GAUSSIAN_CURVATURE 
                                          : AIMS_MEAN_CURVATURE ) );
 
-      writer << curvature;
+      writer.write( *curvature );
 
       return EXIT_SUCCESS;
     }

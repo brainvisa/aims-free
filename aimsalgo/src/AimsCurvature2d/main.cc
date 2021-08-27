@@ -33,8 +33,9 @@
 
 
 #include <cstdlib>
-#include <aims/data/data_g.h>
-#include <aims/io/io_g.h>
+#include <cartodata/volume/volume.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/math/math_g.h>
 
@@ -45,8 +46,8 @@ using namespace std;
 
 int main( int argc, const char **argv )
 {
-  Reader<AimsData<short> >	reader;
-  Writer<AimsData<float> >	writer;
+  Reader<Volume<short> >	reader;
+  Writer<Volume<float> >	writer;
 
   AimsApplication	app( argc, argv, "2D curvature of an intensity image " 
                              "f(x,y) = I" );
@@ -59,13 +60,13 @@ int main( int argc, const char **argv )
     {
       app.initialize();
 
-      AimsData<short> mat;
-      reader >> mat;
+      VolumeRef<short> mat;
+      mat = reader.read();
 
-      AimsData<float> curvature;
+      VolumeRef<float> curvature;
       curvature = AimsIsoIntensityCurvature2D( mat );
 
-      writer << curvature;
+      writer.write( *curvature );
 
       return EXIT_SUCCESS;
     }
