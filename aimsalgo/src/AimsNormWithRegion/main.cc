@@ -311,7 +311,7 @@ int main(int argc, const char **argv)
     // Lecture des donn�es ===================================================
     AimsData< float > image;
     rd.read( image );
-    rsa.populate( image, roi, motion );
+    rsa.populate<float>( image, roi, motion );
 
     // R�cup�ration de la valeur lue dans le pons.
     set<Vertex*>    sv = rsa.vertices();

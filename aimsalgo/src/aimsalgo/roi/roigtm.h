@@ -37,7 +37,7 @@
 
 
 #include <aims/config/aimsalgo_config.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/bucket/bucket.h>
 #include <aims/roi/roi.h>
 #include <aims/roi/roiselector.h>
@@ -68,12 +68,13 @@ namespace aims
 
     void stamp(std::string &selector_fname, std::string &roi_fname);
     AimsRoi* doit( AimsRoi &roi,
-		   MaskType m = threshold_on_smoothed,
-		   AimsData<float>* smo = NULL );
+                   MaskType m = threshold_on_smoothed,
+                   carto::rc_ptr<carto::Volume<float> > smo
+                   = carto::rc_ptr<carto::Volume<float> >( 0 ) );
     void streamout(   );
   
-    AimsData<float> getMatrix();
-    AimsData<float> getInvMatrix();
+    carto::VolumeRef<float> getMatrix();
+    carto::VolumeRef<float> getInvMatrix();
     std::vector<std::string>  getStructNameList();
     AimsRoi&        getMaskRoi(){return *_maskRoi;}
     void            setMaskRoi(AimsRoi* roi){ _maskRoi = roi;}

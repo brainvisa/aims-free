@@ -108,8 +108,8 @@ VoiStat::VoiStat( RoiStats & rs, AimsRoi & r, Motion & m, const string & fout,
 template<class T>
 bool doit( Process & p, const string & fname, Finder & f )
 {
-  AimsData<T>		vol;
-  Reader<AimsData<T> >	r( fname );
+  VolumeRef<T>		vol;
+  Reader<Volume<T> >	r( fname );
   string		format = f.format();
   VoiStat	& vs = (VoiStat &) p;
 
@@ -141,7 +141,7 @@ bool doit( Process & p, const string & fname, Finder & f )
 	  cout << "Gather stats through frame by frame reading" << endl;
 	  for( int t = 0; t < dimT; ++t )
 	    {
-	      r.read( vol, 0, &format, t );
+	      vol.reset( r.read( 0, &format, t ) );
 	      vs.rsa.populate( vol, vs.roi, vs.motion );
 	    }
 	}
@@ -152,8 +152,7 @@ bool doit( Process & p, const string & fname, Finder & f )
       r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly, 
                                                DataSource::none(), false, 
                                                0.01 ) );
-      if( !r.read( vol, 0, &format ) )
-	return( false );
+      vol.reset( r.read( 0, &format ) );
 
       vs.rsa.populate( vol, vs.roi, vs.motion );
     }
@@ -325,11 +324,11 @@ int main( int argc, const char **argv )
     else if( voitype == "image" )
       {
         LabelReader lrd( filevoi);
-        AimsData< short > label;
+        VolumeRef< short > label;
         lrd.read( label );
         roi.setLabel( label );
         roi.data2bucket();
-        AimsData< short > zero(1,1,1);
+        VolumeRef< short > zero(1,1,1);
         roi.setLabel( zero );
       }
     else if( voitype == "gtm" )

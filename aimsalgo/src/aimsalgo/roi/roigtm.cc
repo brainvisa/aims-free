@@ -32,15 +32,20 @@
  */
 
 
-#include <aims/io/io_g.h>
-#include <aims/morphology/morphology_g.h>
-#include <aims/signalfilter/signalfilter_g.h>
-#include <aims/math/gausslu.h>  
-#include <aims/roi/roi.h>
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/roi/roigtm.h>
+#include <aims/morphology/morphology_g.h>
+#include <aims/signalfilter/g3dsmooth.h>
+#include <aims/math/gausslu.h>
+#include <aims/roi/roi.h>
 #include <aims/roi/roiselector.h>
 #include <aims/utility/threshold.h>
 #include <aims/io/datatypecode.h>
+#include <aims/io/writer.h>
 #include <stdio.h>
 
 using namespace aims;
@@ -94,9 +99,9 @@ void RoiGtm::stamp(string &selector_fname, string &roi_fname)
 }
 
 
-AimsData<float> RoiGtm::getMatrix()
+VolumeRef<float> RoiGtm::getMatrix()
 {
-  AimsData<float>			outmatrix;
+  VolumeRef<float>			outmatrix;
   std::set<Vertex*>				sv = vertices();
   string				surname;
   std::set< Vertex* >::const_iterator	it;
@@ -117,7 +122,7 @@ AimsData<float> RoiGtm::getMatrix()
 	    }
 	}
       
-      outmatrix = AimsData<float>( sy, sx );
+      outmatrix = VolumeRef<float>( sy, sx );
       vector<string>   entete_trans;
 
       int isx=0, isy=0;
@@ -136,18 +141,18 @@ AimsData<float> RoiGtm::getMatrix()
 		}
 	    }
 	}
-      return( outmatrix );
+      return outmatrix;
     }
   else
     {
     AimsError("RoiGtm object : object is not editable");
     }
-  return( outmatrix );
+  return outmatrix;
 }
 
-AimsData<float> RoiGtm::getInvMatrix()
+VolumeRef<float> RoiGtm::getInvMatrix()
 {
-  AimsData<float>	outmatrix;
+  VolumeRef<float>	outmatrix;
   if ( _isEditable )
     {
       return( AimsInversionLU( getMatrix() ) );
@@ -156,7 +161,7 @@ AimsData<float> RoiGtm::getInvMatrix()
     {
       AimsError("RoiGtm object : object is not editable");
     }
-  return( outmatrix );
+  return outmatrix;
 }
 
 vector<string>  RoiGtm::getStructNameList()
@@ -196,7 +201,8 @@ vector<string>  RoiGtm::getStructNameList()
   return(entete);
 }
 
-AimsRoi* RoiGtm::doit( AimsRoi &roi, RoiGtm::MaskType m, AimsData<float>* smo )
+AimsRoi* RoiGtm::doit( AimsRoi &roi, RoiGtm::MaskType m,
+                       rc_ptr<Volume<float> > smo )
 {
   /*	Denis 10/12/02
 	This code is a complete mess - 
@@ -230,8 +236,8 @@ AimsRoi* RoiGtm::doit( AimsRoi &roi, RoiGtm::MaskType m, AimsData<float>* smo )
   vector< float > vsTO;
   roi.getProperty( "boundingbox_max", bbmaxTO);
   roi.getProperty( "voxel_size", vsTO );
-  AimsData<float> imaTmp(bbmaxTO[0],bbmaxTO[1],bbmaxTO[2]);
-  imaTmp.setSizeXYZT(vsTO[0],vsTO[1],vsTO[2]);
+  VolumeRef<float> imaTmp(bbmaxTO[0],bbmaxTO[1],bbmaxTO[2]);
+  imaTmp.setVoxelSize(vsTO[0],vsTO[1],vsTO[2]);
   if (_trans == -1.) _trans = vsTO[0];
   if (_axial == -1.)   _axial = vsTO[2];
 
@@ -294,8 +300,8 @@ AimsRoi* RoiGtm::doit( AimsRoi &roi, RoiGtm::MaskType m, AimsData<float>* smo )
       AimsWarning("No roi selected using RoiFile and SelectorFile");
       return( _maskRoi );     // To be better managed
     }
-  AimsData<short> mask(bbmaxTO[0],bbmaxTO[1],bbmaxTO[2], realMetaRoiNum);
-  mask.setSizeXYZT(vsTO[0],vsTO[1],vsTO[2],1.0);
+  VolumeRef<short> mask(bbmaxTO[0],bbmaxTO[1],bbmaxTO[2], realMetaRoiNum);
+  mask.setVoxelSize(vsTO[0],vsTO[1],vsTO[2],1.0);
 
   // Now Loop on MetaRoi to create mask
   indice = 0;
@@ -305,8 +311,8 @@ AimsRoi* RoiGtm::doit( AimsRoi &roi, RoiGtm::MaskType m, AimsData<float>* smo )
   Gaussian3DSmoothing< float >		g3ds( _trans,_trans,_axial );
 
   for ( metaRoi = metaRoiList.begin();
-	metaRoi != metaRoiList.end();
-	++metaRoi )
+        metaRoi != metaRoiList.end();
+        ++metaRoi )
     {
       tmpTree = dynamic_cast< Tree *>( *metaRoi ); // Test
       if( !tmpTree->getProperty("surname", surname) )
@@ -317,75 +323,84 @@ AimsRoi* RoiGtm::doit( AimsRoi &roi, RoiGtm::MaskType m, AimsData<float>* smo )
       std::map<int, rc_ptr<BucketMap<Void> > > & cbk = corresBuckets[ *metaRoi ];
 
       if( cbk.size() != 0 )
-	{
-	  // Images creation
-	  switch (m)
-	    {
-	    case RoiGtm::threshold_on_smoothed:
-	      {
-		cout << "Mask via smooth and threshold"<< endl;
-		imaTmp = 0.0;
-		for( ib=cbk.begin(), eb=cbk.end(); ib!=eb; ++ib )
-		  for( ibk=ib->second->begin()->second.begin(), 
-			 ebk=ib->second->begin()->second.end();
-		       ibk!=ebk; ++ibk )
-		    imaTmp( ibk->first ) = 1.0;
-		AimsData<float> tmpf;
-		tmpf = g3ds.doit( imaTmp );
-		AimsThreshold<float,short>   thresh( AIMS_GREATER_THAN, 
-						     tmpf.maximum() * 50 / 100,
-						     0);
-		AimsData<short> tmpi = thresh.bin( tmpf );     
-		ForEach3d(tmpi, x, y, z)
-		  {
-		    short tmpival =  tmpi(x,y,z);
-		    if (tmpival)
-		      //Make label vary
-		      mask(x, y, z, indice) = tmpival - indice;
-		    // from 32767.... 32767 - indice..
-		  }
-	      }
-	    break;
+      {
+        // Images creation
+        switch (m)
+        {
+        case RoiGtm::threshold_on_smoothed:
+          {
+            cout << "Mask via smooth and threshold"<< endl;
+            imaTmp = 0.0;
+            for( ib=cbk.begin(), eb=cbk.end(); ib!=eb; ++ib )
+              for( ibk=ib->second->begin()->second.begin(),
+                ebk=ib->second->begin()->second.end();
+                  ibk!=ebk; ++ibk )
+                imaTmp( ibk->first ) = 1.0;
+            VolumeRef<float> tmpf;
+            tmpf = g3ds.doit( imaTmp );
+            AimsThreshold<float,short>   thresh( AIMS_GREATER_THAN,
+                                                tmpf.max() * 50 / 100,
+                                                0);
+            VolumeRef<short> tmpi = thresh.bin( tmpf );
+            vector<int> dim = tmpi->getSize();
+            for( z=0; z<dim[2]; ++z )
+              for( y=0; y<dim[1]; ++y )
+                for( x=0; x<dim[0]; ++x )
+                {
+                  short tmpival =  tmpi(x,y,z);
+                  if (tmpival)
+                    //Make label vary
+                    mask(x, y, z, indice) = tmpival - indice;
+                  // from 32767.... 32767 - indice..
+                }
+          }
+          break;
 
-	    case RoiGtm::threshold_on_closed:
-	      {
-		cout << "Mask via closing and threshold"<<endl;
-		AimsData<short> imaTmpS(bbmaxTO[0],bbmaxTO[1],bbmaxTO[2],1,1);
-		imaTmpS.setSizeXYZT(vsTO[0],vsTO[1],vsTO[2]);
-		imaTmpS = 0;
-		for( ib=cbk.begin(), eb=cbk.end(); ib!=eb; ++ib )
-		  for( ibk=ib->second->begin()->second.begin(), 
-			 ebk=ib->second->begin()->second.end();
-		       ibk!=ebk; ++ibk )
-		    imaTmpS( ibk->first ) = 1;
-		AimsData<short> clo;
-		clo = AimsMorphoChamferClosing<short>( imaTmpS, _trans, 3,3,3,50 );
-		ForEach3d(clo, x, y, z)
-		  if (clo(x,y,z))
-		    mask(x, y, z, indice) = 32767 - indice;//Make label vary
-		// from 32767.... 32767 - indice..
-	      }
-	    break;
+        case RoiGtm::threshold_on_closed:
+          {
+            cout << "Mask via closing and threshold"<<endl;
+            VolumeRef<short> imaTmpS(bbmaxTO[0],bbmaxTO[1],bbmaxTO[2],1,1);
+            imaTmpS.setVoxelSize(vsTO[0],vsTO[1],vsTO[2]);
+            imaTmpS = 0;
+            for( ib=cbk.begin(), eb=cbk.end(); ib!=eb; ++ib )
+              for( ibk=ib->second->begin()->second.begin(),
+                     ebk=ib->second->begin()->second.end();
+                   ibk!=ebk; ++ibk )
+                imaTmpS( ibk->first ) = 1;
+            VolumeRef<short> clo;
+            clo = AimsMorphoChamferClosing<short>( imaTmpS, _trans, 3,3,3,50 );
+            vector<int> dim = clo->getSize();
+            for( z=0; z<dim[2]; ++z )
+              for( y=0; y<dim[1]; ++y )
+                for( x=0; x<dim[0]; ++x )
+                  if (clo(x,y,z))
+                    mask(x, y, z, indice) = 32767 - indice;//Make label vary
+                    // from 32767.... 32767 - indice..
+          }
+          break;
 
-	    case RoiGtm::get_from_file:
-	      cout << "Mask from file"<<endl;
-	      imaTmp = 0.0;
-	      for( ib=cbk.begin(), eb=cbk.end(); ib!=eb; ++ib )
-		for( ibk=ib->second->begin()->second.begin(), 
-		       ebk=ib->second->begin()->second.end();
-		     ibk!=ebk; ++ibk )
-		  imaTmp( ibk->first ) = 1.0;
-	      ForEach3d(imaTmp, x, y, z)
-		if (imaTmp(x,y,z))
-		  mask(x, y, z, indice) = 32767 - indice; //Make label vary
-	      // from 32767.... 32767 - indice..
-	      break;
-	    }
-	
-	  nameList[32767 - indice] = surname;
-	  indice++;
-	  cout << "Indice " << indice << endl ;
-	}
+        case RoiGtm::get_from_file:
+          cout << "Mask from file"<<endl;
+          imaTmp = 0.0;
+          for( ib=cbk.begin(), eb=cbk.end(); ib!=eb; ++ib )
+            for( ibk=ib->second->begin()->second.begin(),
+                   ebk=ib->second->begin()->second.end();
+                 ibk!=ebk; ++ibk )
+              imaTmp( ibk->first ) = 1.0;
+          vector<int> dim = imaTmp->getSize();
+          for( z=0; z<dim[2]; ++z )
+            for( y=0; y<dim[1]; ++y )
+              for( x=0; x<dim[0]; ++x )
+                if (imaTmp(x,y,z))
+                  mask(x, y, z, indice) = 32767 - indice; //Make label vary
+                  // from 32767.... 32767 - indice..
+          break;
+        }
+
+        nameList[32767 - indice] = surname;
+        indice++;
+        cout << "Indice " << indice << endl ;
+      }
     }
 
   // Mask are available : Now compute gaussian contribution
@@ -394,80 +409,90 @@ AimsRoi* RoiGtm::doit( AimsRoi &roi, RoiGtm::MaskType m, AimsData<float>* smo )
   int             smo_cnt = 0;
 
   for ( metaRoi = metaRoiList.begin();
-	metaRoi != metaRoiList.end();
-	metaRoi++)
+        metaRoi != metaRoiList.end();
+        metaRoi++)
+  {
+    tmpTree = dynamic_cast< Tree *>( *metaRoi ); // Test
+    string surname;
+    (*tmpTree).getProperty("surname", surname);
+    cout << "surname : " << surname << endl ;
+    // Construct the corresBucket
+    list<BaseTree*> metaRoiChild = (*metaRoi)->children();
+    std::map<int, rc_ptr<BucketMap<Void> > > & cbk = corresBuckets[ *metaRoi ];
+
+    if( cbk.size() != 0 )
     {
-      tmpTree = dynamic_cast< Tree *>( *metaRoi ); // Test 
-      string surname;
-      (*tmpTree).getProperty("surname", surname);
-      cout << "surname : " << surname << endl ;
-      // Construct the corresBucket
-      list<BaseTree*> metaRoiChild = (*metaRoi)->children();
-      std::map<int, rc_ptr<BucketMap<Void> > > & cbk = corresBuckets[ *metaRoi ];
+      // Images creation
+      imaTmp = 0.0;
+      for( ib=cbk.begin(), eb=cbk.end(); ib!=eb; ++ib )
+        for( ibk=ib->second->begin()->second.begin(),
+               ebk=ib->second->begin()->second.end();
+             ibk!=ebk; ++ibk )
+          imaTmp( ibk->first ) = 1.0;
+      VolumeRef<float> tmpf = g3ds.doit( imaTmp );
 
-      if( cbk.size() != 0 )
-	{
-	  // Images creation
-	  imaTmp = 0.0;
-	  for( ib=cbk.begin(), eb=cbk.end(); ib!=eb; ++ib )
-	    for( ibk=ib->second->begin()->second.begin(), 
-		   ebk=ib->second->begin()->second.end();
-		 ibk!=ebk; ++ibk )
-	      imaTmp( ibk->first ) = 1.0;
-	  AimsData<float> tmpf = g3ds.doit( imaTmp );
+      if ( smo.get() )
+      {
+        vector<int> dim = tmpf->getSize();
+        for( z=0; z<dim[2]; ++z )
+          for( y=0; y<dim[1]; ++y )
+            for( x=0; x<dim[0]; ++x )
+              tmpf(x,y,z) = smo->at(x,y,z,smo_cnt);
+        ++smo_cnt;
+      }
 
-	  if ( smo )
-	    {
-	      ForEach3d(tmpf, x, y, z)
-		tmpf(x,y,z) = (*smo)(x,y,z,smo_cnt);
-	      ++smo_cnt;
-	    }
+      vector<float> gtm_col;
+      float cumul;
+      int currentBucketMass;
+      for( indice=0; indice < realMetaRoiNum; ++indice )
+      {
+        cumul = 0.0;
+        currentBucketMass = 0;
+        vector<int> dim = mask->getSize();
+        for( z=0; z<dim[2]; ++z )
+          for( y=0; y<dim[1]; ++y )
+            for( x=0; x<dim[0]; ++x )
+              if ( mask(x, y, z, indice) )
+              {
+                cumul += tmpf( x, y, z );
+                ++currentBucketMass;
+              }
+        cout << "DBG " << "cumul " << cumul << " "<< currentBucketMass
+          << endl; // ====
+        float ncumul = cumul/currentBucketMass;
+        if (ncumul <  - 1e-6 ) // GaussRecursion may have failed
+        {
+          cout << "Integral of gaussian queue is : " << ncumul << endl;
+          cout << "Keep going computation with 0.0." << endl;
+        }
+        if (ncumul < 0.) ncumul = 0.0;
+        gtm_col.push_back(ncumul);
+      }
 
-	  vector<float> gtm_col;
-	  float cumul;
-	  int currentBucketMass;
-	  for( indice=0; indice < realMetaRoiNum; ++indice )
-	    {
-	      cumul = 0.0;
-	      currentBucketMass = 0;
-	      ForEach3d(imaTmp, x, y, z)
-		if ( mask(x, y, z, indice) ) 
-		  {
-		    cumul += tmpf( x, y, z );
-		    ++currentBucketMass;
-		  }
-	      cout << "DBG " << "cumul " << cumul << " "<< currentBucketMass 
-		   << endl; // ====
-	      float ncumul = cumul/currentBucketMass;
-	      if (ncumul <  - 1e-6 ) // GaussRecursion may have failed
-		{
-		  cout << "Integral of gaussian queue is : " << ncumul << endl;
-		  cout << "Keep going computation with 0.0." << endl;
-		}
-	      if (ncumul < 0.) ncumul = 0.0;
-	      gtm_col.push_back(ncumul);
-	    }
-
-	  Vertex *v = addVertex("structure");
-	  v->setProperty("surname", surname);
-	  v->setProperty("gtm_column", gtm_col);
-	  v->setProperty("column_number", column_cnt++);
-	}
+      Vertex *v = addVertex("structure");
+      v->setProperty("surname", surname);
+      v->setProperty("gtm_column", gtm_col);
+      v->setProperty("column_number", column_cnt++);
     }
-
-  AimsData<short> compressedMask(mask.dimX(), mask.dimY(), mask.dimZ()) ;
-  compressedMask.setSizeXYZT(mask.sizeX(), mask.sizeY(), mask.sizeZ(), 1.0 ) ;
-  if( mask.header() )
-  	compressedMask.setHeader( mask.header()->cloneHeader() ) ;
-  
-  ForEach4d(mask, x, y, z, l ){
-      if( mask(x, y, z, l) )
-  	compressedMask(x, y, z) = mask(x, y, z, l) ;
   }
 
-  Writer< AimsData<short> > wri("ROIGTMmask.ima" ) ;
+  VolumeRef<short> compressedMask(mask->getSizeX(), mask->getSizeY(),
+                                  mask->getSizeZ()) ;
+  compressedMask.setVoxelSize( mask->getVoxelSize() ) ;
+  compressedMask.copyHeaderFrom( mask.header() ) ;
+  
+  vector<int> dim = mask->getSize();
+  for( z=0; z<dim[2]; ++z )
+    for( y=0; y<dim[1]; ++y )
+      for( x=0; x<dim[0]; ++x )
+      {
+        if( mask(x, y, z, l) )
+          compressedMask(x, y, z) = mask(x, y, z, l) ;
+      }
+
+  Writer< VolumeRef<short> > wri("ROIGTMmask.ima" ) ;
   wri.write(compressedMask) ;
-  cout << "NbOfRegions : " << mask.dimT() << endl ;
+  cout << "NbOfRegions : " << mask->getSizeT() << endl ;
   // On finalise la transformation des mask en AimsRoi _maskRoi.
   
   _maskRoi->setLabel(compressedMask);
@@ -496,17 +521,16 @@ void RoiGtm::streamout(   )
     }
     
     
-		   
   if ( _isEditable )
     {
-      AimsData<float> gtm = getMatrix();
-      AimsData<float> gtminv = getInvMatrix();
+      VolumeRef<float> gtm = getMatrix();
+      VolumeRef<float> gtminv = getInvMatrix();
 
       vector<string>  entete = getStructNameList();
 
 
-      int ncol = gtm.dimX();
-      int nlig = gtm.dimY();
+      int ncol = gtm->getSizeX();
+      int nlig = gtm->getSizeY();
       
       //entete            
       cout << "=========== Direct GTM matrix" << endl;

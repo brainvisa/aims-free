@@ -40,9 +40,9 @@
 #include <aims/roi/roistat.h>
 #include <aims/roi/roiselector.h>
 #include <aims/roi/roigtm.h>
-#include <aims/data/pheader.h>
+#include <cartodata/volume/volume.h>
 #include <aims/resampling/resampler.h>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/math/mathelem.h>
 #include <graph/graph/graph.h>
 #include <float.h>
@@ -60,8 +60,8 @@ namespace aims
     virtual ~RoiStats( );
 
     template <typename T>
-    void  populate( AimsData<T> &image, AimsRoi &roi, 
-                    const Motion &motion );
+    void  populate( carto::rc_ptr<carto::Volume<T> > &image, AimsRoi &roi,
+                    const AffineTransformation3d &motion );
     std::vector<float> tacByStructName(std::string s);
 
     void          applyGtm( RoiGtm& rgtm );
@@ -78,8 +78,9 @@ namespace aims
 
 
   template <typename T>
-  void RoiStats::populate( AimsData<T> &image, AimsRoi &roi, 
-                           const Motion &motion )
+  void RoiStats::populate( carto::rc_ptr<carto::Volume<T> > &image,
+                           AimsRoi &roi,
+                           const AffineTransformation3d &motion )
   {
     std::set< Vertex*> currentRoiStatVert;  //tmp var for current set vert of this
     Vertex*       v;                   //tmp var for vertice of the object "this"
@@ -97,38 +98,37 @@ namespace aims
 
     // Gestion de start et duration compte tenu d'appel monoframe ou multi frame
     std::vector< int > i_st, i_dt;
-    PythonHeader	*hd = dynamic_cast<PythonHeader *>( image.header() );
-    if (! hd) {
-      for(int i= 0; i < image.dimT(); i++) {
-        i_st.push_back(i);
-        i_dt.push_back(1);
-      }
-    } else {
-      if ( hd->hasProperty("start_time") ) {
-        hd->getProperty("start_time", i_st);
-      }  else 	{
-        ASSERT(image.dimT() == 1);   // dynamic series with no start/dur time
-        i_st.push_back(0);           // Force val for "static" series
-      }
-      if ( hd->hasProperty("duration_time") ) {
-        hd->getProperty("duration_time", i_dt);
-      } else {
-        ASSERT(image.dimT() == 1);   // dynamic series with no start/dur time
-        i_dt.push_back(1);           // Force val for "static" series
-      }
+    carto::PropertySet & hd = image->header();
+    if( hd.hasProperty("start_time") )
+    {
+      hd.getProperty("start_time", i_st);
+    }
+    else
+    {
+      ASSERT(image->getSizeT() == 1);   // dynamic series with no start/dur time
+      i_st.push_back(0);           // Force val for "static" series
+    }
+    if ( hd.hasProperty("duration_time") )
+    {
+      hd.getProperty("duration_time", i_dt);
+    }
+    else
+    {
+      ASSERT(image->getSizeT() == 1);   // dynamic series with no start/dur time
+      i_dt.push_back(1);           // Force val for "static" series
     }
 
     // Start gathering data.
-    AimsData< float > tmpin( image.dimX(), image.dimY(), image.dimZ() );
-    tmpin.setSizeXYZT( image.sizeX(), image.sizeY(), image.sizeZ(), 1.0 );
-    if(image.header() != 0)
-      tmpin.setHeader(image.header()->cloneHeader()) ;
+    carto::VolumeRef< float > tmpin( image->getSizeX(), image->getSizeY(),
+                                     image->getSizeZ() );
+    tmpin.setVoxelSize( image->getVoxelSize() );
+    tmpin.copyHeaderFrom(image->header());
     const std::list<BaseTree*> & metaRoiList = _roiSel->children();
     carto::rc_ptr<BucketMap<Void> >		bck;
     BucketMap<Void>::Bucket::iterator	ibk, ebk;
 
     // Level 1 : Start loop on time dimension
-    for (int t = 0; t < image.dimT(); ++t) // populate may be invoked in byframe
+    for (int t = 0; t < image->getSizeT(); ++t) // populate may be invoked in byframe
       {                                    // or allframe mode
         // 1-Init des fields start et duration time;
         // 2-Re Copy of one frame in tem image
@@ -141,11 +141,14 @@ namespace aims
         setProperty("duration_time",roi_dt);
 
         int x,y,z;
-        ForEach3d( tmpin, x, y, z )
-          tmpin(x, y, z) = image(x, y, z, t);
+        std::vector<int> dim = tmpin->getSize();
+        for( z=0; z<dim[2]; ++z )
+          for( y=0; y<dim[1]; ++y )
+            for( x=0; x<dim[0]; ++x )
+              tmpin(x, y, z) = image->at(x, y, z, t);
 
         _interpolator->setRef( tmpin );
-        AimsData< float > tmpout = _interpolator->doit( motion, 
+        carto::VolumeRef< float > tmpout = _interpolator->doit( motion,
                                                         bbmaxTO[0]+1, bbmaxTO[1]+1, bbmaxTO[2]+1,
                                                         Point3df(  vsTO[0],vsTO[1],vsTO[2] )   );
 

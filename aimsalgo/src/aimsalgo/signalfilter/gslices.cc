@@ -32,56 +32,54 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/signalfilter/gslices.h>
 
+using namespace carto;
 
-void GaussianSlices::doit( AimsData<float>& data, const GCoef& coef )
+
+void GaussianSlices::doit( rc_ptr<Volume<float> > & data, const GCoef& coef )
 {
   initialize( coef );
   doit( data );
 }
 
 
-void GaussianSlices::doit( AimsData<float>& data )
+void GaussianSlices::doit( rc_ptr<Volume<float> > & data )
 {
-  int dX = data.dimX();
-  int dY = data.dimY();
-  int dZ = data.dimZ();
-  int dT = data.dimT();
-
-  int sliceSize = data.oSlice();
-  int volSize = data.oVolume();
-
-  int opbl = data.oPointBetweenLine();
+  int dX = data->getSizeX();
+  int dY = data->getSizeY();
+  int dZ = data->getSizeZ();
+  int dT = data->getSizeT();
 
   float *input = new float[ dZ + 4 ];
   float *output = new float[ dZ + 4 ];
   float *work = new float[ dZ + 4 ];
 
-  float *in = NULL, *out = NULL, *ptr = NULL, *p1 = NULL;
-  float *dptr = data.begin() + data.oFirstPoint();
+  float *in = NULL, *out = NULL;
 
   int i, j, k, t;
 
   for ( t=0; t<dT; t++ )
-    {
-      p1 = dptr + t * volSize;
+  {
+    for ( j=0; j<dY; ++j )
+      for ( i=0; i<dX; ++i )
+      {
+        in = input;
+        for ( k=0; k<dZ; ++k )
+          *in++ = data->at( i, j, k, t );
 
-      for ( j=dY; j--; p1+=opbl )
-	for ( i=dX; i--; )
-	  {
+        recurse( input, output, work, dZ );
 
-	    ptr = p1;
-	    in = input;
-	    for ( k=dZ; k--; ptr+=sliceSize )  *in++ = *ptr;
-
-	    recurse( input, output, work, dZ );
-
-	    out = output;
-	    ptr = p1++;
-	    for ( k=dZ; k--; ptr+=sliceSize )  *ptr = *out++;
-	  }
-	}
+        out = output;
+        for ( k=0; k<dZ; ++k )
+          data->at( i, j, k, t ) = *out++;
+      }
+  }
 
 
   delete[] work;

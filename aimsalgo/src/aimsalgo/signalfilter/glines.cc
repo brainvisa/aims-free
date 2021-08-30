@@ -32,44 +32,48 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/signalfilter/glines.h>
 
+using namespace carto;
 
-void GaussianLines::doit( AimsData<float>& data, const GCoef& coef )
+
+void GaussianLines::doit( rc_ptr<Volume<float> >& data, const GCoef& coef )
 {
   initialize( coef );
   doit( data );
 }
 
 
-void GaussianLines::doit( AimsData<float>& data )
+void GaussianLines::doit( rc_ptr<Volume<float> > & data )
 {
-  int dX = data.dimX();
-  int dY = data.dimY();
-  int dZ = data.dimZ();
-  int dT = data.dimT();
-
-  int opbl = data.oPointBetweenLine();
-  int olbs = data.oLineBetweenSlice();
-  int osbv = data.oSliceBetweenVolume();
+  int dX = data->getSizeX();
+  int dY = data->getSizeY();
+  int dZ = data->getSizeZ();
+  int dT = data->getSizeT();
 
   float *output = new float[ dX + 4 ];
   float *work = new float[ dX + 4 ];
 
   float *out = NULL;
-  float *ptr = data.begin() + data.oFirstPoint();
+  float *ptr;
 
   int i, j, k, t;
 
-  for ( t=dT; t--; ptr+=osbv )
-    for ( k=dZ; k--; ptr+=olbs )
-      for ( j=dY; j--; ptr+=opbl )
-	{
-	  recurse( ptr, output, work, dX );
+  for ( t=0; t<dT; ++t )
+    for ( k=0; k<dZ; ++k )
+      for ( j=0; j<dY; ++j )
+      {
+        ptr = &data->at( 0, j, k, t );
+        recurse( ptr, output, work, dX );
 
-	  out = output;
-	  for ( i=dX; i--; )  *ptr++ = *out++;
-	}
+        out = output;
+        for ( i=dX; i--; )  *ptr++ = *out++;
+      }
 
 
   delete[] work;

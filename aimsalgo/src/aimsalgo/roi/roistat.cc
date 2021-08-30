@@ -32,11 +32,13 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
 
-#include <aims/io/io_g.h>
-
-#include <aims/roi/roi.h>
 #include <aims/roi/roistat.h>
+#include <aims/roi/roi.h>
 #include <aims/roi/roiselector.h>
 #include <aims/roi/roigtm.h>
 #include <aims/data/pheader.h>
@@ -111,7 +113,7 @@ void RoiStats::applyGtm( RoiGtm& rgtm )
   vector<int> start_time; int dT;
   getProperty("start_time", start_time);
   dT = start_time.size();
-  AimsData<float> StructTac( vecS.size(), dT );
+  VolumeRef<float> StructTac( vecS.size(), dT );
   for(i=0; i < (int)vecS.size(); i++)
     {
       vector<float> tmp = tacByStructName(vecS[i]);
@@ -120,9 +122,9 @@ void RoiStats::applyGtm( RoiGtm& rgtm )
 	  StructTac(i,j) = tmp[j];
 	}
     }
-  AimsData<float> invgtm = rgtm.getInvMatrix();
+  VolumeRef<float> invgtm = rgtm.getInvMatrix();
   //Perform processing and store results
-  AimsData<float> CorrTac = invgtm.cross(StructTac);
+  VolumeRef<float> CorrTac = matrix_product(invgtm, StructTac);
   for(i=0; i < (int) vecS.size(); i++)
     {  
       bool found = false;

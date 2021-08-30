@@ -37,7 +37,7 @@
 
 #include <aims/config/aimsalgo_config.h>
 #include <aims/signalfilter/grecurse.h>
-#include <aims/data/data_g.h>
+#include <cartodata/volume/volume.h>
 
 
 class AIMSALGO_API GaussianSlices : public RecursiveGaussian
@@ -46,8 +46,8 @@ public:
 
   GaussianSlices() : RecursiveGaussian() { }
 
-  void doit( AimsData<float>& );
-  void doit( AimsData<float>&, const GCoef& );
+  void doit( carto::rc_ptr<carto::Volume<float> >& );
+  void doit( carto::rc_ptr<carto::Volume<float> >&, const GCoef& );
 };
 
 

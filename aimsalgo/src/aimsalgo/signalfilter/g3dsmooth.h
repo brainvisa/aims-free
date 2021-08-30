@@ -51,7 +51,7 @@ public:
   Gaussian3DSmoothing( float sx=1.0f, float sy=1.0f, float sz=1.0f );
   virtual ~Gaussian3DSmoothing() { }
 
-  AimsData< T >  doit( const AimsData<T>& );
+  carto::VolumeRef< T >  doit( const carto::rc_ptr<carto::Volume<T> >& );
 
 private:
 
@@ -72,18 +72,17 @@ Gaussian3DSmoothing< T >::Gaussian3DSmoothing( float sx, float sy, float sz )
 
 
 template< class T > inline
-AimsData< T > Gaussian3DSmoothing< T >::doit( const AimsData< T >& data )
+carto::VolumeRef< T > Gaussian3DSmoothing< T >::doit(
+  const carto::rc_ptr<carto::Volume< T > >& data )
 {
-  float sx = sigx / data.sizeX();
-  float sy = sigy / data.sizeY();
-  float sz = sigz / data.sizeZ();
+  std::vector<float> vs = data->getVoxelSize();
+  float sx = sigx / vs[0];
+  float sy = sigy / vs[1];
+  float sz = sigz / vs[2];
 
   carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
-  AimsData< float >
-    dataF( data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
-  dataF.setSizeX(data.sizeX());
-  dataF.setSizeY(data.sizeY());
-  dataF.setSizeZ(data.sizeZ());
+  carto::VolumeRef< float > dataF( data->getSize() );
+  dataF.setVoxelSize(data->getVoxelSize());
   conv.convert( data, dataF );
   
   GaussianSlices gsli;
@@ -96,7 +95,7 @@ AimsData< T > Gaussian3DSmoothing< T >::doit( const AimsData< T >& data )
   gcol.doit( dataF, GCoef( sy ) );
 
   carto::Converter< carto::VolumeRef<float>, carto::VolumeRef<T> > conv2;
-  AimsData<T>	data3( data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
+  carto::VolumeRef<T>	data3( data->getSize() );
   conv2.convert( dataF, data3 );
 
   return data3;
