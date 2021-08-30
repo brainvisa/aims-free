@@ -41,7 +41,6 @@
 #include <aims/roi/roi.h>
 #include <aims/roi/roiselector.h>
 #include <aims/roi/roigtm.h>
-#include <aims/data/pheader.h>
 #include <aims/resampling/resampler.h>
 #include <aims/math/mathelem.h>
 #include <float.h>

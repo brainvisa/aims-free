@@ -48,7 +48,7 @@ public:
   Gaussian2DSmoothing( float sx=1.0f, float sy=1.0f );
   virtual ~Gaussian2DSmoothing() { }
 
-  AimsData< T >  doit( const AimsData<T>& );
+  carto::VolumeRef< T >  doit( const carto::rc_ptr<carto::Volume<T> > & );
 
 private:
 
@@ -67,18 +67,16 @@ Gaussian2DSmoothing< T >::Gaussian2DSmoothing( float sx, float sy )
 
 
 template< class T > inline
-AimsData< T > Gaussian2DSmoothing< T >::doit( const AimsData< T >& data )
+carto::VolumeRef< T > Gaussian2DSmoothing< T >::doit(
+  const carto::rc_ptr<carto::Volume< T > > & data )
 {
-  float sx = sigx / data.sizeX();
-  float sy = sigy / data.sizeY();
+  float sx = sigx / data->getVoxelSize()[0];
+  float sy = sigy / data->getVoxelSize()[0];
 
   carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> >
     conv;
-  AimsData< float > 
-    dataF( data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
-  dataF.setSizeX(data.sizeX());
-  dataF.setSizeY(data.sizeY());
-  dataF.setSizeZ(data.sizeZ());
+  carto::VolumeRef< float > dataF( data->getSize() );
+  dataF.setVoxelSize(data->getVoxelSize());
   conv.convert( data, dataF );
 
   GaussianLines glin;
@@ -88,7 +86,7 @@ AimsData< T > Gaussian2DSmoothing< T >::doit( const AimsData< T >& data )
   gcol.doit( dataF, GCoef( sy ) );
 
   carto::Converter< carto::VolumeRef<float>, carto::VolumeRef<T> > conv2;
-  AimsData<T>	data3( data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
+  carto::VolumeRef<T>	data3( data->getSize() );
   conv2.convert( dataF, data3 );
   return data3;
 }
