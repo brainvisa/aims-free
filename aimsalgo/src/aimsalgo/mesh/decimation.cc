@@ -53,6 +53,7 @@ using namespace std;
 
 namespace
 {
+
 struct Flag
 {
   bool deadFlag;
@@ -103,7 +104,6 @@ void removesNeighbor( Facet* facet, Facet* neigh );
 void addsNeighborAfterRef( Facet* facet, Facet* neigh, Facet* ref );
 void addsNeighborBeforeRef( Facet* facet, Facet* neigh, Facet* ref );
 bool isNeighbor( Facet* facet, Facet* neigh );
-
 
  
 void computesMinMax( vector< Point3df >& vertex, Flag& flag )
@@ -272,8 +272,6 @@ void cleanVectors( vector< Facet* >& vfac,
   vfac = vfac2;
   vFlag = vFlag2;
 }
-
-
 
 
 bool deletesFacet( Flag& flag,

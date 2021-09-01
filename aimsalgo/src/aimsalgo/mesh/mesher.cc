@@ -827,6 +827,55 @@ void Mesher::smooth( AimsSurfaceTriangle& surface )
 }
 
 
+namespace
+{
+
+  // remove unused vertices
+  void cleanMesh( AimsSurface<3, Void> & mesh )
+  {
+    vector<Point3df> & vert = mesh.vertex();
+    vector<AimsVector<uint32_t, 3> > & poly = mesh.polygon();
+    vector<Point3df> & norm = mesh.normal();
+    uint32_t count = 0, i, np = poly.size(), nv = vert.size();
+    map<uint32_t, uint32_t> table;
+    vector<bool> used( vert.size(), false );
+
+    for( i=0; i<np; ++i )
+    {
+      AimsVector<uint32_t, 3> & p = poly[i];
+      used[p[0]] = true;
+      used[p[1]] = true;
+      used[p[2]] = true;
+    }
+    for( i=0; i<nv; ++i )
+      if( used[i] )
+        table[i] = count++;
+    cout << "clean: drop " << nv - count << " vertices: " << count << "\n";
+    nv = count;
+
+    for( i=0; i<nv; ++i )
+      vert[i] = vert[table[i]];
+    vert.resize( nv );
+
+    for( i=0; i<np; ++i )
+    {
+      AimsVector<uint32_t, 3> & p = poly[i];
+      p[0] = table[p[0]];
+      p[1] = table[p[1]];
+      p[2] = table[p[2]];
+    }
+
+    if( nv > norm.size() )
+      nv = norm.size();
+
+    for( i=0; i<nv; ++i )
+      norm[i] = norm[table[i]];
+    norm.resize( nv );
+  }
+
+}
+
+
 float Mesher::decimate( AimsSurfaceTriangle& surface )
 {
   return decimate( surface, vector<float>(), 0 );
@@ -882,6 +931,9 @@ float Mesher::decimate( AimsSurfaceTriangle& surface,
   for ( int n = 0; n < (int)vfac.size(); n++ )
     if ( vfac[ n ] )
       delete vfac[ n ];
+
+  cleanMesh( surface.begin()->second );
+  endMeshSize = surface.vertex().size();
 
   return ( 1.0 - endMeshSize / initMeshSize ) * 100.0;
 }
