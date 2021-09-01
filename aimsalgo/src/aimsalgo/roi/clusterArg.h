@@ -35,7 +35,7 @@
 #ifndef AIMS_ROI_CLUSTERARG_H
 #define AIMS_ROI_CLUSTERARG_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/connectivity/connectivity.h>
 #include <float.h>
 
@@ -79,7 +79,8 @@ namespace aims
     void setUpperThershold( float x ) { _upth = x; }
     float upperThreshold() const { return( _upth ); }
 
-    template<typename T> void make( Graph & gr, const AimsData<T> & data );
+    template<typename T> void make(
+      Graph & gr, const carto::rc_ptr<carto::Volume<T> > & data );
 
   private:
     std::string		_fileout;

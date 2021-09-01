@@ -71,7 +71,7 @@ public:
   ClusterArg();
   virtual ~ClusterArg() {}
 
-  template<typename T> bool makeArg( AimsData<T> & );
+  template<typename T> bool makeArg( VolumeRef<T> & );
 
   string		fileout;
   Connectivity::Type	connectivity;
@@ -100,10 +100,10 @@ ClusterArg::ClusterArg()
 template<typename T> bool
 makearg( Process & p, const string & fname, Finder & f )
 {
-  AimsData<T>		datain;
+  VolumeRef<T>		datain;
   string		format = f.format();
   cout << "Reading input data...\n";
-  Reader<AimsData<T> >	r( fname );
+  Reader<VolumeRef<T> >	r( fname );
   if( !r.read( datain, 1, &format ) )
     return( false );
   cout << "done.\n";
@@ -114,7 +114,7 @@ makearg( Process & p, const string & fname, Finder & f )
 
 
 template<typename T>
-bool ClusterArg::makeArg( AimsData<T> & data )
+bool ClusterArg::makeArg( VolumeRef<T> & data )
 {
   // graph and global attributes
 
@@ -126,8 +126,8 @@ bool ClusterArg::makeArg( AimsData<T> & data )
   Graph		gr( graphsyntax );
 
   ClusterArgMaker	cm( fileout, connectivity, minsize, matrix, domesh, 
-			    deciMaxClearance, deciMaxError, minFacetNumber, 
-			    binarize, lowth, upth );
+                        deciMaxClearance, deciMaxError, minFacetNumber,
+                        binarize, lowth, upth );
   cm.make( gr, data );
 
   // write arg

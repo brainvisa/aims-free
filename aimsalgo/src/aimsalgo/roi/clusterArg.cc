@@ -32,6 +32,11 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/roi/clusterArg_d.h>
 #include <aims/def/path.h>
 
@@ -46,10 +51,10 @@ using namespace std;
 
 
 ClusterArgMaker::ClusterArgMaker( const string & out, Connectivity::Type conn, 
-				  int minsz, const string & mtxfile, 
-				  bool mkmesh, float maxclear, 
-				  float maxerr, uint minfac, bool bin, 
-				  float low, float up )
+                                  int minsz, const string & mtxfile,
+                                  bool mkmesh, float maxclear,
+                                  float maxerr, uint minfac, bool bin,
+                                  float low, float up )
   : _fileout( out ), _connectivity( conn ), _minsize( minsz ), 
     _matrix( mtxfile ), _domesh( mkmesh ), _deciMaxClearance( maxclear ), 
     _deciMaxError( maxerr ), _minFacetNumber( minfac ), _binarize( bin ), 
@@ -64,8 +69,11 @@ ClusterArgMaker::~ClusterArgMaker()
 
 
 template
-void ClusterArgMaker::make( Graph & gr, const AimsData<uint8_t> & data );
+void ClusterArgMaker::make( Graph & gr,
+                            const rc_ptr<Volume<uint8_t> > & data );
 template
-void ClusterArgMaker::make( Graph & gr, const AimsData<int16_t> & data );
+void ClusterArgMaker::make( Graph & gr,
+                            const rc_ptr<Volume<int16_t> > & data );
 template
-void ClusterArgMaker::make( Graph & gr, const AimsData<float> & data );
+void ClusterArgMaker::make( Graph & gr,
+                            const rc_ptr<Volume<float> > & data );

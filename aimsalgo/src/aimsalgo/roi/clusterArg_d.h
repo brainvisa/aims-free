@@ -54,7 +54,8 @@ namespace aims
 {
 
   template<typename T>
-  void ClusterArgMaker::make( Graph & gr, const AimsData<T> & data )
+  void ClusterArgMaker::make( Graph & gr,
+                              const carto::rc_ptr<carto::Volume<T> > & data )
   {
     // graph and global attributes
 
@@ -117,20 +118,16 @@ namespace aims
     Vertex	*v;
 
     gr.setProperty( graphsyntax + "_VERSION", std::string( "1.0" ) );
-    std::vector<float>	vs;
-    vs.push_back( data.sizeX() );
-    vs.push_back( data.sizeY() );
-    vs.push_back( data.sizeZ() );
-    vs.push_back( data.sizeT() );
+    std::vector<float>	vs = data->getVoxelSize();
     gr.setProperty( "voxel_size", vs );
     std::vector<int>	bb;
     bb.push_back( 0 );
     bb.push_back( 0 );
     bb.push_back( 0 );
     gr.setProperty( "boundingbox_min", bb );
-    bb[0] = data.dimX() - 1;
-    bb[1] = data.dimY() - 1;
-    bb[2] = data.dimZ() - 1;
+    bb[0] = data->getSizeX() - 1;
+    bb[1] = data->getSizeY() - 1;
+    bb[2] = data->getSizeZ() - 1;
     gr.setProperty( "boundingbox_max", bb );
     std::string	outdir = _fileout;
     std::string::size_type	pos = outdir.rfind( '.' );
@@ -195,7 +192,7 @@ namespace aims
         //      _upth = 0;
       }
 
-    AimsData<T>		datat;
+    carto::VolumeRef<T>		datat;
 
     if( thresh )
       {
@@ -215,28 +212,21 @@ namespace aims
 
     std::cout << "extracting connected components...\n";
 
-    AimsData<short> 
-      datac( datat.dimX(), datat.dimY(), datat.dimZ(), datat.dimT(), 1 );
+    carto::VolumeRef<short> datac( datat.getSize(), 1 );
     carto::Converter<carto::VolumeRef<T>, carto::VolumeRef<short> >
       conv2( true );
     conv2.convert( datat, datac );
     datac.fillBorder( -1 );
-    /*
-      const AttributedHeader 
-      *ah = dynamic_cast<const AttributedHeader *>( data.header() );
-      if( ah )
-      datac.setHeader( new AttributedHeader( *ah ) );
-      datac.setSizeXYZT( data.sizeX(), data.sizeY(), data.sizeZ(), 
-      data.sizeT() );*/
 
     // find background level
     short	bg = 0;
     bool	bgfound = false;
     int	x, y, z;
+    std::vector<int> dim = datat->getSize();
 
-    for( z=0; z<datat.dimZ() && !bgfound; ++z )
-      for( y=0; y<datat.dimY() && !bgfound; ++y )
-        for( x=0; x<datat.dimX(); ++x )
+    for( z=0; z<dim[2] && !bgfound; ++z )
+      for( y=0; y<dim[1] && !bgfound; ++y )
+        for( x=0; x<dim[0]; ++x )
           if( datat( x, y, z ) == 0 )
             {
               bg = datac( x, y, z );
