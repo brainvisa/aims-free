@@ -51,6 +51,8 @@ using namespace std;
 #define MAX_COS_ALLOWED 0.9
 #define MIN_COS_ALLOWED -0.9
 
+namespace
+{
 struct Flag
 {
   bool deadFlag;
@@ -648,6 +650,8 @@ bool isNeighbor( Facet* facet, Facet* neigh )
       return true;
   return false;
 }
+
+} // namespace {}
 
 
 //
