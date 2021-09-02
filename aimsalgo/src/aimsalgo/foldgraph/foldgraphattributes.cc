@@ -32,6 +32,11 @@
  */
 
 
+// // activate deprecation warning
+// #ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+// #undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+// #endif
+
 #include <cstdlib>
 #include <aims/foldgraph/foldgraphattributes.h>
 #include <aims/utility/threshold.h>
@@ -65,11 +70,12 @@ using namespace carto;
 using namespace std;
 
 
-FoldGraphAttributes::FoldGraphAttributes( const AimsData<int16_t> & skel, 
-                                          Graph & graph, const Motion *motion, 
-                                          int16_t inside, int16_t outside, 
-                                          bool withmeshes,
-                                          const vector<int> & gver )
+FoldGraphAttributes::FoldGraphAttributes(
+  const rc_ptr<Volume<int16_t> > & skel,
+  Graph & graph, const Motion *motion,
+  int16_t inside, int16_t outside,
+  bool withmeshes,
+  const vector<int> & gver )
   : _skel( skel ), _graph( graph ), _inside( inside ), _outside( outside ), 
     _motion( motion ), _domeshes( withmeshes ), _graphversion( gver ),
     _maxthreads( 0 ), _mesher()
@@ -82,107 +88,107 @@ FoldGraphAttributes::FoldGraphAttributes( const AimsData<int16_t> & skel,
 
 void FoldGraphAttributes::cleanup()
 {
-  _depth = AimsData<int16_t>();
-  _ndepth = AimsData<int16_t>();
+  _depth = VolumeRef<int16_t>();
+  _ndepth = VolumeRef<int16_t>();
 }
 
 
-AimsData<int16_t> &FoldGraphAttributes::getNDepth()
+VolumeRef<int16_t> &FoldGraphAttributes::getNDepth()
 {
   return _ndepth;
 }
 
-const AimsData<int16_t> &FoldGraphAttributes::getNDepth() const
+const VolumeRef<int16_t> &FoldGraphAttributes::getNDepth() const
 {
   return _ndepth;
 }
 
-AimsData<int16_t> &FoldGraphAttributes::getDepth()
+VolumeRef<int16_t> &FoldGraphAttributes::getDepth()
 {
   return _depth;
 }
 
-const AimsData<int16_t> &FoldGraphAttributes::getDepth() const
+const VolumeRef<int16_t> &FoldGraphAttributes::getDepth() const
 {
   return _depth;
 }
 
-AimsData<float> &FoldGraphAttributes::getBrainDepth()
+VolumeRef<float> &FoldGraphAttributes::getBrainDepth()
 {
   return _braindepthmap;
 }
 
-const AimsData<float> &FoldGraphAttributes::getBrainDepth() const
+const VolumeRef<float> &FoldGraphAttributes::getBrainDepth() const
 {
   return _braindepthmap;
 }
 
-AimsData<float> &FoldGraphAttributes::getBrainDepthGradX()
+VolumeRef<float> &FoldGraphAttributes::getBrainDepthGradX()
 {
   return _braindepthmap_gradX;
 }
 
-const AimsData<float> &FoldGraphAttributes::getBrainDepthGradX() const
+const VolumeRef<float> &FoldGraphAttributes::getBrainDepthGradX() const
 {
   return _braindepthmap_gradX;
 }
 
-AimsData<float> &FoldGraphAttributes::getBrainDepthGradY()
+VolumeRef<float> &FoldGraphAttributes::getBrainDepthGradY()
 {
   return _braindepthmap_gradY;
 }
 
-const AimsData<float> &FoldGraphAttributes::getBrainDepthGradY() const
+const VolumeRef<float> &FoldGraphAttributes::getBrainDepthGradY() const
 {
   return _braindepthmap_gradY;
 }
 
-AimsData<float> &FoldGraphAttributes::getBrainDepthGradZ()
+VolumeRef<float> &FoldGraphAttributes::getBrainDepthGradZ()
 {
   return _braindepthmap_gradZ;
 }
 
-const AimsData<float> &FoldGraphAttributes::getBrainDepthGradZ() const
+const VolumeRef<float> &FoldGraphAttributes::getBrainDepthGradZ() const
 {
   return _braindepthmap_gradZ;
 }
 
-AimsData<float> &FoldGraphAttributes::getDilatedDepth()
+VolumeRef<float> &FoldGraphAttributes::getDilatedDepth()
 {
   return _dilated_depthmap;
 }
 
-const AimsData<float> &FoldGraphAttributes::getDilatedDepth() const
+const VolumeRef<float> &FoldGraphAttributes::getDilatedDepth() const
 {
   return _dilated_depthmap;
 }
 
-AimsData<float> &FoldGraphAttributes::getDilatedDepthGradX()
+VolumeRef<float> &FoldGraphAttributes::getDilatedDepthGradX()
 {
   return _dilated_depthmap_gradX;
 }
 
-const AimsData<float> &FoldGraphAttributes::getDilatedDepthGradX() const
+const VolumeRef<float> &FoldGraphAttributes::getDilatedDepthGradX() const
 {
   return _dilated_depthmap_gradX;
 }
 
-AimsData<float> &FoldGraphAttributes::getDilatedDepthGradY()
+VolumeRef<float> &FoldGraphAttributes::getDilatedDepthGradY()
 {
   return _dilated_depthmap_gradY;
 }
 
-const AimsData<float> &FoldGraphAttributes::getDilatedDepthGradY() const
+const VolumeRef<float> &FoldGraphAttributes::getDilatedDepthGradY() const
 {
   return _dilated_depthmap_gradY;
 }
 
-AimsData<float> &FoldGraphAttributes::getDilatedDepthGradZ()
+VolumeRef<float> &FoldGraphAttributes::getDilatedDepthGradZ()
 {
   return _dilated_depthmap_gradZ;
 }
 
-const AimsData<float> &FoldGraphAttributes::getDilatedDepthGradZ() const
+const VolumeRef<float> &FoldGraphAttributes::getDilatedDepthGradZ() const
 {
   return _dilated_depthmap_gradZ;
 }
@@ -232,7 +238,7 @@ namespace
 
 
   unsigned addPoints( const BucketMap<Void> & bck, Point3df & grav, 
-                      const Motion* motion )
+                      const AffineTransformation3d* motion )
   {
     const BucketMap<Void>::Bucket		& bk = bck.begin()->second;
     BucketMap<Void>::Bucket::const_iterator	i, e = bk.end();
@@ -254,7 +260,7 @@ namespace
 
 #if 0
   void extrema( const BucketMap<Void> & bck, 
-                const AimsData<int16_t> & depth, int16_t & dmin, 
+                const VolumeRef<int16_t> & depth, int16_t & dmin,
                 int16_t & dmax, bool reset )
   {
     const BucketMap<Void>::Bucket		& bk = bck.begin()->second;
@@ -264,12 +270,12 @@ namespace
     for( i=bk.begin(); i!=e; ++i )
       if( reset )
         {
-          dmin = dmax = depth( i->first );
+          dmin = dmax = depth->at( i->first );
           reset = false;
         }
       else
         {
-          x = depth( i->first );
+          x = depth->at( i->first );
           if( x < dmin )
             dmin = x;
           if( x > dmax )
@@ -280,7 +286,7 @@ namespace
 
 
   void extremaLoc( const BucketMap<Void> & bck, 
-                   const AimsData<int16_t> & depth, int16_t & dmin, 
+                   const VolumeRef<int16_t> & depth, int16_t & dmin,
                    int16_t & dmax, Point3d & pmin, Point3d & pmax, bool reset )
   {
     const BucketMap<Void>::Bucket		& bk = bck.begin()->second;
@@ -291,12 +297,12 @@ namespace
       if( reset )
         {
           pmin = pmax = i->first;
-          dmin = dmax = depth( pmin );
+          dmin = dmax = depth->at( pmin );
           reset = false;
         }
       else
         {
-          x = depth( i->first );
+          x = depth->at( i->first );
           if( x >= 32501 )
           {
             cerr << "invalid point: " << i->first << endl;
@@ -318,7 +324,8 @@ namespace
   }
 
 
-  void addCovariance( const BucketMap<Void> & bck, AimsData<float> & covar, 
+  void addCovariance( const BucketMap<Void> & bck,
+                      VolumeRef<float> & covar,
                       const Motion* motion )
   {
     if( bck.empty() )
@@ -545,7 +552,7 @@ class FoldGraphAttributes::DistanceMapThreadContext : public LoopContext
 {
 public:
   DistanceMapThreadContext( FoldGraphAttributes &fa,
-                            const AimsData<int16_t> & th )
+                            const rc_ptr<Volume<int16_t> > & th )
     : LoopContext(), foldatt( fa ), thresh( th )
   {}
 
@@ -592,7 +599,7 @@ public:
   }
 
   FoldGraphAttributes & foldatt;
-  const AimsData<int16_t> & thresh;
+  const VolumeRef<int16_t> & thresh;
 };
 
 
@@ -616,28 +623,26 @@ void FoldGraphAttributes::prepareNativeDepthMap()
 
 
 void FoldGraphAttributes::prepareNormalizedDepthMap
-( const AimsData<int16_t> & th )
+( const rc_ptr<Volume<int16_t> > & th )
 {
   if( _motion )
   {
     if( verbose )
       cout << "building normalized depth map..." << endl;
     int16_t forbidden = -111;
-    _ndepth = th.clone();
+    _ndepth = VolumeRef<int16_t>( th ).deepcopy();
     // force duplicate voxel size (because in clone(), header properties
     // are shared via ref counting)
-    _ndepth.volume()->header().setProperty( 
-      "voxel_size", vector<float>( _ndepth.volume()->getVoxelSize() ) );
-    Point3df  vs( _skel.sizeX(), _skel.sizeY(), _skel.sizeZ() );
-    _ndepth.setSizeX
-    ( ( _motion->transform( Point3df( vs[0], 0, 0 ) )
-    - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
-    _ndepth.setSizeY
-    ( ( _motion->transform( Point3df( 0, vs[1], 0 ) )
-    - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
-    _ndepth.setSizeZ
-    ( ( _motion->transform( Point3df( 0, 0, vs[2] ) )
-    - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
+    _ndepth->header().setProperty(
+      "voxel_size", vector<float>( _ndepth->getVoxelSize() ) );
+    Point3df  vs( _skel.getVoxelSize() );
+    _ndepth.setVoxelSize(
+      ( _motion->transform( Point3df( vs[0], 0, 0 ) )
+        - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm(),
+      ( _motion->transform( Point3df( 0, vs[1], 0 ) )
+        - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm(),
+      ( _motion->transform( Point3df( 0, 0, vs[2] ) )
+        - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
     AimsDistanceFrontPropagation<int16_t>( _ndepth, forbidden, _inside,
                                           3, 3, 3, depthfactor, false );
     if( verbose )
@@ -647,30 +652,29 @@ void FoldGraphAttributes::prepareNormalizedDepthMap
 
 
 void FoldGraphAttributes::prepareDilatedDepthMap
-( const AimsData<int16_t> & th )
+( const rc_ptr<Volume<int16_t> > & th )
 {
   if( verbose )
     cout << "building dilated depth map..." << endl;
-  AimsData<int16_t> thb;
+  VolumeRef<int16_t> thb, thb0;
   int16_t forbidden = -111;
   AimsThreshold<int16_t, int16_t>       thr2( AIMS_EQUAL_TO, -111, 0, 0);
-  thb = thr2(th);
-  thb = AimsData<int16_t>(thb, 1);
+  thb0 = thr2(th);
+  thb = VolumeRef<int16_t>( thb0->getSize(), vector<int>( 3, 1 ) );
+  thb->copySubVolume( thb0 );
+  thb0.reset( 0 ); // free temp thb0
   thb.fillBorder(-1);
   thb = AimsMorphoDilation<short>(thb, 1.);
-  _dilated_depthmap = AimsData<float>( th.dimX(), th.dimY(),
-                                       th.dimZ(), th.dimT() );
-  _dilated_depthmap.setSizeX(th.sizeX());
-  _dilated_depthmap.setSizeY(th.sizeY());
-  _dilated_depthmap.setSizeZ(th.sizeZ());
+  _dilated_depthmap = VolumeRef<float>( th->getSize() );
+  _dilated_depthmap.setVoxelSize( th->getVoxelSize()) ;
   carto::Converter< VolumeRef<int16_t>, VolumeRef<float> > conv;
   conv.convert( th, _dilated_depthmap );
   int x, y, z, t;
-  for (t = 0; t < thb.dimT(); t++)
-    for (z = 0; z < thb.dimZ(); z++)
-      for (y = 0; y < thb.dimY(); y++)
-        for (x = 0; x < thb.dimX(); x++)
-          if (thb(x, y, z, t) and th(x, y, z, t) == _inside)
+  for (t = 0; t < thb.getSizeT(); t++)
+    for (z = 0; z < thb.getSizeZ(); z++)
+      for (y = 0; y < thb.getSizeY(); y++)
+        for (x = 0; x < thb.getSizeX(); x++)
+          if (thb(x, y, z, t) and th->at(x, y, z, t) == _inside)
             _dilated_depthmap(x, y, z, t) = forbidden;
   AimsDistanceFrontPropagation<float>( _dilated_depthmap, forbidden, _inside,
                                        3, 3, 3, 1., false );
@@ -724,18 +728,18 @@ void FoldGraphAttributes::prepareBrainGradientZ()
 
 void FoldGraphAttributes::prepareDepthMap()
 {
-  if( _depth.dimX() == _skel.dimX() )
+  if( _depth.getSizeX() == _skel.getSizeX() )
     return; // already done
 
   // geodesic depth on skeleton
-  AimsData<int16_t> th;
+  VolumeRef<int16_t> th;
 
   cout << "making various depth maps..." << endl;
   int16_t				forbidden = -111;
   AimsThreshold<int16_t, int16_t>	thr( AIMS_BETWEEN, _inside, _outside, 
                                              forbidden );
   th = thr( _skel );
-  _depth = th.clone();
+  _depth = th.deepcopy();
 
   cout << "running 4 distance maps..." << endl;
   int verb = verbose;
@@ -756,7 +760,7 @@ void FoldGraphAttributes::prepareDepthMap()
 void FoldGraphAttributes::prepareBrainDepthMap()
 {
   carto::Converter< VolumeRef<int16_t>, VolumeRef<float> > conv;
-  AimsData<int16_t> th;
+  VolumeRef<int16_t> th;
   int16_t				forbidden = -111;
 
   if( verbose )
@@ -764,11 +768,8 @@ void FoldGraphAttributes::prepareBrainDepthMap()
   AimsThreshold<int16_t, int16_t>	thr3( AIMS_EQUAL_TO, _outside, 0,
                                              forbidden );
   th = thr3( _skel );
-  _braindepthmap = AimsData<float>(th.dimX(), th.dimY(),
-				th.dimZ(), th.dimT() );
-  _braindepthmap.setSizeX(th.sizeX());
-  _braindepthmap.setSizeY(th.sizeY());
-  _braindepthmap.setSizeZ(th.sizeZ());
+  _braindepthmap = VolumeRef<float>( th.getSize() );
+  _braindepthmap.setVoxelSize( th.getVoxelSize() );
   conv.convert( th, _braindepthmap );
 
   AimsDistanceFrontPropagation<float>( _braindepthmap, forbidden, _inside,
@@ -860,24 +861,25 @@ void FoldGraphAttributes::makeGlobalAttributes()
   else
     GraphManip::storeTalairach( _graph, *_motion, true );
 
-  vector<float>	vs(3), nvs(3);
-  vs[0] = _skel.sizeX();
-  vs[1] = _skel.sizeY();
-  vs[2] = _skel.sizeZ();
+  vector<float>	vs = _skel.getVoxelSize(), nvs(3);
   _graph.setProperty( "voxel_size", vs );
 
   // TODO: AC, PC, IH
 
   // brain hull volume and mesh surface
   AimsThreshold<int16_t, int16_t>	thr( AIMS_DIFFER, _outside );
-  AimsData<int16_t>			bhull = thr.bin( _skel );
+  VolumeRef<int16_t>			bhull = thr.bin( _skel );
   long		sum = 0;
-  float		vol = bhull.sizeX() * bhull.sizeY() * bhull.sizeZ();
+  float		vol = bhull.getVoxelSize()[0] * bhull.getVoxelSize()[1]
+    * bhull.getVoxelSize()[2];
   int		x, y, z;
+  vector<int> dim = bhull.getSize();
 
-  ForEach3d( bhull, x, y, z )
-    if( bhull( x, y, z ) != 0 )
-      ++sum;
+  for( z=0; z<dim[2]; ++z )
+    for( y=0; y<dim[1]; ++y )
+      for( x=0; x<dim[0]; ++x )
+        if( bhull( x, y, z ) != 0 )
+          ++sum;
   _graph.setProperty( "brain_hull_volume", vol * sum );
   Mesher	mesher;
   mesher.setVerbose( false );
@@ -1195,14 +1197,14 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
               normc( 2, 1 ) = normc( 1, 2 );
               AimsEigen<float>	eigen;
               eigen.setReturnType( AimsEigen<float>::VectorOfEigenValues );
-              AimsData<float>	eigenval = eigen.doit( normc );
+              VolumeRef<float>	eigenval = eigen.doit( normc );
               unsigned		mineig = 0, /*maxeig = 0,*/ deptheig = 0;
-	      unsigned          eig1 = 0, eig2 = 0;
-	      float             dotmax = 0;
-	      v->getProperty("depth_direction", point);
-	      
-	      for (unsigned int i = 0; i < 3; ++i)
-	      {
+              unsigned          eig1 = 0, eig2 = 0;
+              float             dotmax = 0;
+              v->getProperty("depth_direction", point);
+
+              for (unsigned int i = 0; i < 3; ++i)
+              {
                  float dot = abs(point[0] * normc(0, i) +
                                  point[1] * normc(1, i) +
                                  point[2] * normc(2, i));
@@ -1883,7 +1885,7 @@ void FoldGraphAttributes::makeSummaryGlobalAttributes()
 namespace
 {
 
-  void printBucket( AimsData<int16_t> vol,
+  void printBucket( VolumeRef<int16_t> vol,
                     const rc_ptr<BucketMap<Void> > bck, int16_t value )
   {
     const BucketMap<Void>::Bucket & bk = bck->begin()->second;
@@ -1899,11 +1901,12 @@ namespace
 }
 
 
-AimsData<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
+VolumeRef<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
 {
-  AimsData<int16_t> seedvol( _skel.dimX(), _skel.dimY(), _skel.dimZ() );
-  seedvol.setHeader( _skel.header()->cloneHeader() );
-  int x, y, z, dx = seedvol.dimX(), dy = seedvol.dimY(), dz = seedvol.dimZ();
+  VolumeRef<int16_t> seedvol( _skel.getSize() );
+  seedvol.copyHeaderFrom( _skel.header() );
+  int x, y, z, dx = seedvol.getSizeX(), dy = seedvol.getSizeY(),
+    dz = seedvol.getSizeZ();
   Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
   Connectivity c6( 0, 0, Connectivity::CONNECTIVITY_6_XYZ );
   int i, j, n = c.nbNeighbors(), m = c6.nbNeighbors();
@@ -1987,7 +1990,7 @@ AimsData<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
   work.insert( -10 );
   cout << "seeds: " << seeds.size() << endl;
   FastMarching<Volume<int16_t> > fm( Connectivity::CONNECTIVITY_26_XYZ, true );
-  fm.doit( seedvol.volume(), work, seeds );
+  fm.doit( seedvol, work, seeds );
   VolumeRef<int16_t> voronoi = fm.voronoiVol();
 
   cout << "clear cortical relations...\n";

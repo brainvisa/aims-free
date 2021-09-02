@@ -35,7 +35,7 @@
 #ifndef AIMS_FOLDGRAPH_FOLDGRAPHATTRIBUTES
 #define AIMS_FOLDGRAPH_FOLDGRAPHATTRIBUTES
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/mesh/mesher.h>
 
 class Graph;
@@ -51,8 +51,10 @@ namespace aims
   public:
     /** skel is the skeleton image of the hemisphere, It must be allocated 
         with a border of at least 1 voxel width. */
-    FoldGraphAttributes( const AimsData<int16_t> & skel, Graph & graph, 
-                         const AffineTransformation3d *talairachAffineTransformation3d = 0,
+    FoldGraphAttributes( const carto::rc_ptr<carto::Volume<int16_t> > & skel,
+                         Graph & graph,
+                         const AffineTransformation3d *
+                           talairachAffineTransformation3d = 0,
                          int16_t inside = 0, int16_t outside = 11, 
                          bool withmeshes = true,
                          const std::vector<int> & graphversion
@@ -70,31 +72,31 @@ namespace aims
     void makeCorticalRelationAttributes();
     void makeSummaryGlobalAttributes();
 
-    AimsData<int16_t> &getDepth();
-    const AimsData<int16_t> &getDepth() const;
-    AimsData<int16_t> &getNDepth();
-    const AimsData<int16_t> &getNDepth() const;
-    AimsData<float> &getBrainDepth();
-    AimsData<float> &getBrainDepthGradX();
-    AimsData<float> &getBrainDepthGradY();
-    AimsData<float> &getBrainDepthGradZ();
-    const AimsData<float> &getBrainDepth() const;
-    const AimsData<float> &getBrainDepthGradX() const;
-    const AimsData<float> &getBrainDepthGradY() const;
-    const AimsData<float> &getBrainDepthGradZ() const;
-    AimsData<float> &getDilatedDepth();
-    AimsData<float> &getDilatedDepthGradX();
-    AimsData<float> &getDilatedDepthGradY();
-    AimsData<float> &getDilatedDepthGradZ();
-    const AimsData<float> &getDilatedDepth() const;
-    const AimsData<float> &getDilatedDepthGradX() const;
-    const AimsData<float> &getDilatedDepthGradY() const;
-    const AimsData<float> &getDilatedDepthGradZ() const;
+    carto::VolumeRef<int16_t> &getDepth();
+    const carto::VolumeRef<int16_t> &getDepth() const;
+    carto::VolumeRef<int16_t> &getNDepth();
+    const carto::VolumeRef<int16_t> &getNDepth() const;
+    carto::VolumeRef<float> &getBrainDepth();
+    carto::VolumeRef<float> &getBrainDepthGradX();
+    carto::VolumeRef<float> &getBrainDepthGradY();
+    carto::VolumeRef<float> &getBrainDepthGradZ();
+    const carto::VolumeRef<float> &getBrainDepth() const;
+    const carto::VolumeRef<float> &getBrainDepthGradX() const;
+    const carto::VolumeRef<float> &getBrainDepthGradY() const;
+    const carto::VolumeRef<float> &getBrainDepthGradZ() const;
+    carto::VolumeRef<float> &getDilatedDepth();
+    carto::VolumeRef<float> &getDilatedDepthGradX();
+    carto::VolumeRef<float> &getDilatedDepthGradY();
+    carto::VolumeRef<float> &getDilatedDepthGradZ();
+    const carto::VolumeRef<float> &getDilatedDepth() const;
+    const carto::VolumeRef<float> &getDilatedDepthGradX() const;
+    const carto::VolumeRef<float> &getDilatedDepthGradY() const;
+    const carto::VolumeRef<float> &getDilatedDepthGradZ() const;
     float getDepthfactor() const;
     void prepareDepthMap();
     void prepareBrainDepthMap();
     /// outputs the voronoi in brain hull from hull junctions
-    AimsData<int16_t> rebuildCorticalRelations();
+    carto::VolumeRef<int16_t> rebuildCorticalRelations();
     /** returns a vector value of 2 or more numbers from the target graph
         version, or the current cartograph library version
     */
@@ -117,8 +119,10 @@ namespace aims
     friend class DistanceMapThreadContext;
 
     void prepareNativeDepthMap();
-    void prepareNormalizedDepthMap( const AimsData<int16_t> & th );
-    void prepareDilatedDepthMap( const AimsData<int16_t> & th );
+    void prepareNormalizedDepthMap(
+      const carto::rc_ptr<carto::Volume<int16_t> > & th );
+    void prepareDilatedDepthMap(
+      const carto::rc_ptr<carto::Volume<int16_t> > & th );
     void prepareGradientX();
     void prepareGradientY();
     void prepareGradientZ();
@@ -126,30 +130,30 @@ namespace aims
     void prepareBrainGradientY();
     void prepareBrainGradientZ();
 
-    AimsData<int16_t>	_skel;
+    carto::VolumeRef<int16_t>	_skel;
     Graph		& _graph;
     int16_t		_inside;
     int16_t		_outside;
     const AffineTransformation3d	*_motion;
     ///depth map from brain hull constrainted to sulci
-    AimsData<int16_t>	_depth;
-    AimsData<int16_t>	_ndepth;
+    carto::VolumeRef<int16_t>	_depth;
+    carto::VolumeRef<int16_t>	_ndepth;
     ///depth map from brain hull unconstrainted (whole brain hull)
-    AimsData<float>	_braindepthmap;
+    carto::VolumeRef<float>	_braindepthmap;
     ///braindepthmap X gradient
-    AimsData<float>	_braindepthmap_gradX;
+    carto::VolumeRef<float>	_braindepthmap_gradX;
     ///braindepthmap Y gradient
-    AimsData<float>	_braindepthmap_gradY;
+    carto::VolumeRef<float>	_braindepthmap_gradY;
     ///braindepthmap Z gradient
-    AimsData<float>	_braindepthmap_gradZ;
+    carto::VolumeRef<float>	_braindepthmap_gradZ;
     ///depth map from brain hull constrainted to dilated sulci
-    AimsData<float>	_dilated_depthmap;
+    carto::VolumeRef<float>	_dilated_depthmap;
     ///braindepthmap X gradient
-    AimsData<float>	_dilated_depthmap_gradX;
+    carto::VolumeRef<float>	_dilated_depthmap_gradX;
     ///braindepthmap Y gradient
-    AimsData<float>	_dilated_depthmap_gradY;
+    carto::VolumeRef<float>	_dilated_depthmap_gradY;
     ///braindepthmap Z gradient
-    AimsData<float>	_dilated_depthmap_gradZ;
+    carto::VolumeRef<float>	_dilated_depthmap_gradZ;
     bool		_domeshes;
     std::vector<int>    _graphversion;
     int                 _maxthreads;

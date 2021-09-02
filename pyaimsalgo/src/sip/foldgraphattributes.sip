@@ -8,7 +8,7 @@ class FoldGraphAttributes
 %End
 
   public:
-    FoldGraphAttributes( const AimsData_S16 & skel, Graph & graph,
+    FoldGraphAttributes( const rc_ptr_Volume_S16 & skel, Graph & graph,
                          const Motion *talairachMotion = 0,
                          int inside = 0, int outside = 11,
                          bool withmeshes = true );
@@ -24,20 +24,20 @@ class FoldGraphAttributes
     void makeCorticalRelationAttributes();
     void makeSummaryGlobalAttributes();
 
-    AimsData_S16 &getNDepth(); 
-    AimsData_S16 &getDepth(); 
-    AimsData_FLOAT &getBrainDepth();
-    AimsData_FLOAT &getBrainDepthGradX();
-    AimsData_FLOAT &getBrainDepthGradY();
-    AimsData_FLOAT &getBrainDepthGradZ();
-    AimsData_FLOAT &getDilatedDepth();
-    AimsData_FLOAT &getDilatedDepthGradX();
-    AimsData_FLOAT &getDilatedDepthGradY();
-    AimsData_FLOAT &getDilatedDepthGradZ();
+    rc_ptr_Volume_S16 &getNDepth();
+    rc_ptr_Volume_S16 &getDepth();
+    rc_ptr_Volume_FLOAT &getBrainDepth();
+    rc_ptr_Volume_FLOAT &getBrainDepthGradX();
+    rc_ptr_Volume_FLOAT &getBrainDepthGradY();
+    rc_ptr_Volume_FLOAT &getBrainDepthGradZ();
+    rc_ptr_Volume_FLOAT &getDilatedDepth();
+    rc_ptr_Volume_FLOAT &getDilatedDepthGradX();
+    rc_ptr_Volume_FLOAT &getDilatedDepthGradY();
+    rc_ptr_Volume_FLOAT &getDilatedDepthGradZ();
     float getDepthfactor();
     void prepareDepthMap();
     void prepareBrainDepthMap();
-    AimsData_S16 rebuildCorticalRelations();
+    rc_ptr_Volume_S16 rebuildCorticalRelations();
     void thickness( const BucketMap_FLOAT & fm,
                     const rc_ptr_Volume_S16 voronoi );
     void greyAndCSFVolumes( const rc_ptr_Volume_S16 gw,
