@@ -286,7 +286,7 @@ namespace aims
 
   /** SimpleDelaunayTriangulation
 
-      Get a Delaunay triangulation for a polygon. Poins in the polygon should
+      Get a Delaunay triangulation for a polygon. Poitns in the polygon should
       be ordered in a clockwise or counterclockwise order.
 
       Note that it is different from a classical Delaunay algorithm wich meshes
