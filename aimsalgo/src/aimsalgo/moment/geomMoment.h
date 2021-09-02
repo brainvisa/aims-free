@@ -57,7 +57,8 @@ class GeometricMoment : public MomentBase, public Moment< T >
     // ignore this warning (the API is broken, see comment in Moment<T>)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Woverloaded-virtual"
-    virtual void doit( AimsData< T >&, T, int d=(int)Moment< T >::mAdd );
+    virtual void doit( carto::rc_ptr<carto::Volume< T > > &, T,
+                       int d=(int)Moment< T >::mAdd );
     virtual void doit( const aims::BucketMap<Void> &, int d=(int)Moment< T >::mAdd );
     #pragma GCC diagnostic pop
 
@@ -95,13 +96,14 @@ void GeometricMoment< T >::update( double x, double y, double z, int dir )
 
 
 template< class T > inline
-void GeometricMoment< T >::doit( AimsData< T >& d, T label, int dir )
+void GeometricMoment< T >::doit( carto::rc_ptr<carto::Volume< T > > & d,
+                                 T label, int dir )
 {
   int i;
 
-  this->_cx = (double)d.sizeX();
-  this->_cy = (double)d.sizeY();
-  this->_cz = (double)d.sizeZ();
+  this->_cx = (double)d->getVoxelSize()[0];
+  this->_cy = (double)d->getVoxelSize()[1];
+  this->_cz = (double)d->getVoxelSize()[2];
   this->_ct = this->_cx * this->_cy * this->_cz;
 
   this->_sum = 0.0;

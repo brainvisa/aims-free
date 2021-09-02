@@ -39,7 +39,7 @@
 #include <aims/moment/momTriStgy.h>
 
 
-class AIMSALGO_API MomentSurfacicStrategy : public MomentTriangleStrategy
+class MomentSurfacicStrategy : public MomentTriangleStrategy
 {
   public:
   

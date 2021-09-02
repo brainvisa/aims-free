@@ -32,11 +32,6 @@
  */
 
 
-// // activate deprecation warning
-// #ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
-// #undef AIMSDATA_CLASS_NO_DEPREC_WARNING
-// #endif
-
 #include <cstdlib>
 #include <aims/foldgraph/foldgraphattributes.h>
 #include <aims/utility/threshold.h>
@@ -47,7 +42,6 @@
 #include <aims/resampling/motion.h>
 #include <aims/graph/graphmanip.h>
 #include <aims/mesh/surfaceOperation.h>
-#include <aims/data/fastAllocationData.h>
 #include <aims/math/eigen.h>
 #include <aims/utility/converter_bucket.h>
 #include <aims/connectivity/component.h>
@@ -919,7 +913,8 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
   Point3df		grav, rgrav, norm, nvs, ptmp;
   vector<float>		point( 3 );
   int16_t		dmin, dmax;
-  AimsFastAllocationData<float>	covar( 3, 3 ), normc( 3, 3 );
+  VolumeRef<float>	covar( 3, 3, 1, 1, AllocatorContext::fast() ),
+    normc( 3, 3, 1, 1, AllocatorContext::fast() );
   vector<float>			talcovar( 9 );
   Motion			transmot;
   Point3d			pmin, pmax;
@@ -1331,7 +1326,8 @@ void FoldGraphAttributes::makeJunctionAttributes()
   rc_ptr<BucketMap<Void> >	jbk;
   Point3df			grav;
   unsigned			n;
-  AimsFastAllocationData<float>	dirc( 3, 3 ), eigen;
+  VolumeRef<float>	dirc( 3, 3, 1, 1, AllocatorContext::fast() ),
+    eigen;
   Motion			transmot;
   vector<float>			point(3);
   vector<int>			pointi(3);

@@ -38,9 +38,9 @@
 #define AIMS_UTILITY_MERGE_H
 
 #include <aims/config/aimsdata_config.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
-AIMSDATA_API enum merge_t
+enum merge_t
 {
   AIMS_MERGE_SAME_VALUES,
   AIMS_MERGE_ONE_TO_ONE,
@@ -59,7 +59,7 @@ AIMSDATA_API enum merge_t
     \\- AIMS_MERGE_ALL_TO_MAXP1
 */ 
 template <class T,class U>
-class AIMSDATA_API AimsMerge
+class AimsMerge
 {
   public :
     /**@name Constructor and destructor*/
@@ -77,20 +77,18 @@ class AIMSDATA_API AimsMerge
     /**@name Methods*/
     //@{
     /// Return the result of the merge of a data and a byte label data
-    inline AimsData<T> operator () (const AimsData<T> &data,
-                                    const AimsData<U> &mask);
+    inline carto::VolumeRef<T> operator () (
+      const carto::rc_ptr<carto::Volume<T> > & data,
+      const carto::rc_ptr<carto::Volume<U> > & mask);
     //@}
 
   protected :
-    /**@name Data*/
-    //@{
     /// Merging type
     merge_t _type;
     /// Merging value
     T    _value;
     /// Label to consider
     U    _label;
-    //@}
 };
 
 
@@ -105,39 +103,41 @@ AimsMerge<T,U>::AimsMerge(merge_t type,T value,U label)
 
 
 template <class T,class U> inline
-AimsData<T> AimsMerge<T,U>::operator () (const AimsData<T> &data,
-                                         const AimsData<U> &mask)
-{ ASSERT(data.dimX() == mask.dimX() &&
-         data.dimY() == mask.dimY() &&
-         data.dimZ() == mask.dimZ() &&
-         data.dimT() == mask.dimT()  );
+carto::VolumeRef<T> AimsMerge<T,U>::operator () (
+  const carto::rc_ptr<carto::Volume<T> > & data,
+  const carto::rc_ptr<carto::Volume<U> > & mask )
+{
+  ASSERT(data->getSizeX() == mask->getSizeX() &&
+         data->getSizeY() == mask->getSizeY() &&
+         data->getSizeZ() == mask->getSizeZ() &&
+         data->getSizeT() == mask->getSizeT()  );
 
-  AimsData<T> res = data.clone();
+  carto::VolumeRef<T> res = carto::VolumeRef<T>( data ).deepcopy();
 
-  typename AimsData<T>::iterator       it1;
-  typename AimsData<U>::const_iterator it2;
+  typename carto::Volume<T>::iterator       it1;
+  typename carto::Volume<U>::const_iterator it2;
 
   switch (_type)
   { case AIMS_MERGE_SAME_VALUES : 
-      for (it1=res.begin(),it2=mask.begin();it1<res.end();it1++,it2++)
+      for (it1=res.begin(),it2=mask->begin();it1!=res.end();it1++,it2++)
         if (*it2) *it1 = (T)*it2;
       break;
     case AIMS_MERGE_ONE_TO_ONE : 
-      for (it1=res.begin(),it2=mask.begin();it1<res.end();it1++,it2++)
+      for (it1=res.begin(),it2=mask->begin();it1!=res.end();it1++,it2++)
         if (*it2==_label) *it1 = (T)_value;
       break;
     case AIMS_MERGE_ALL_TO_ONE : 
-      for (it1=res.begin(),it2=mask.begin();it1<res.end();it1++,it2++)
+      for (it1=res.begin(),it2=mask->begin();it1!=res.end();it1++,it2++)
         if (*it2) *it1 = (T)_value;
       break;
     case AIMS_MERGE_ONE_TO_MAXP1 : 
-      _value = res.maximum() + 1;
-      for (it1=res.begin(),it2=mask.begin();it1<res.end();it1++,it2++)
+      _value = res.max() + 1;
+      for (it1=res.begin(),it2=mask->begin();it1!=res.end();it1++,it2++)
         if (*it2==_label) *it1 = (T)_value;
       break;
     case AIMS_MERGE_ALL_TO_MAXP1 : 
-      _value = res.maximum() + 1;
-      for (it1=res.begin(),it2=mask.begin();it1<res.end();it1++,it2++)
+      _value = res.max() + 1;
+      for (it1=res.begin(),it2=mask->begin();it1!=res.end();it1++,it2++)
         if (*it2) *it1 = (T)_value;
       break;
   }

@@ -46,7 +46,7 @@ class MomentIncrementalStrategy : public MomentStrategy< T >
     MomentIncrementalStrategy() : MomentStrategy< T >() { }
     
     void update( Moment< T > *, double, double, double, int );
-    void doit( Moment< T > *, AimsData< T >&, T, int );
+    void doit( Moment< T > *, carto::rc_ptr<carto::Volume< T > > &, T, int );
     void doit( Moment< T > *, const aims::BucketMap<Void> &, int );
 };
 
@@ -178,22 +178,24 @@ void MomentIncrementalStrategy< T >::update( Moment< T > *m, double x,
 
 
 template< class T > inline
-void MomentIncrementalStrategy< T >::doit( Moment< T > *m, AimsData< T >& d,
-                                           T label, int dir )
+void MomentIncrementalStrategy< T >::doit(
+  Moment< T > *m,  carto::rc_ptr<carto::Volume< T > > & d, T label, int dir )
 {
   int x, y, z;
-  int dx = d.dimX();
-  int dy = d.dimY();
-  int dz = d.dimZ();
-  int olbs = d.oLineBetweenSlice();
-  int opbl = d.oPointBetweenLine();
-  typename AimsData< T >::const_iterator it = d.begin() + d.oFirstPoint();
+  int dx = d->getSizeX();
+  int dy = d->getSizeY();
+  int dz = d->getSizeZ();
+  int o = d->getStrides()[0];
+  T *it;
 
-  for ( z=0; z<dz; z++, it+=olbs )
-    for ( y=0; y<dy; y++, it+=opbl )
-      for ( x=0; x<dx; x++, it++ )
+  for ( z=0; z<dz; z++ )
+    for ( y=0; y<dy; y++ )
+    {
+      it = &d->at( 0, y, z );
+      for ( x=0; x<dx; x++, it+=o )
         if ( *it == label )
           update( m, (double)x, (double)y, (double)z, dir );
+    }
 }
 
 

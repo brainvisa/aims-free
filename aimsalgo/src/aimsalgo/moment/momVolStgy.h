@@ -39,7 +39,7 @@
 #include <aims/moment/momTriStgy.h>
 
 
-class AIMSALGO_API MomentVolumicStrategy : public MomentTriangleStrategy
+class MomentVolumicStrategy : public MomentTriangleStrategy
 {
   public:
   

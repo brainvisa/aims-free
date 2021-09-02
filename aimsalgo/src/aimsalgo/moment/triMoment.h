@@ -43,7 +43,7 @@
 #include <aims/moment/momTriStgy.h>
 
 
-class AIMSALGO_API TriangulationMoment
+class TriangulationMoment
   : public MomentBase, public Moment< int16_t >
 {
   public:

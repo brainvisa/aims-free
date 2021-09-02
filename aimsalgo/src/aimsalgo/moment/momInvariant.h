@@ -79,7 +79,8 @@ class MomentInvariant
 
     void update( double, double, double, int dir=(int)Moment< T >::mAdd );
 
-    void doit( AimsData< T >&, T, int dir=(int)Moment< T >::mAdd );
+    void doit( carto::rc_ptr<carto::Volume< T > > &, T,
+               int dir=(int)Moment< T >::mAdd );
     void doit( AimsSurfaceTriangle& );
     void doit( Moment< T > * );
        
@@ -210,7 +211,8 @@ void MomentInvariant< T >::update( double x, double y, double z, int dir )
 
 
 template< class T > inline
-void MomentInvariant< T >::doit( AimsData< T >& d, T label, int dir )
+void MomentInvariant< T >::doit( carto::rc_ptr<carto::Volume< T > > & d,
+                                 T label, int dir )
 {
   if (_mom )
     {

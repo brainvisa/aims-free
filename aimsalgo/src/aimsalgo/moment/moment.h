@@ -38,7 +38,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/mesh/surface.h>
 #include <aims/bucket/bucket.h>
 #include <aims/math/eigen.h>
@@ -119,8 +119,10 @@ class Moment
     double *m3() { return &_m3[ 0 ]; }
     const double *m3() const { return &_m3[ 0 ]; }
     
-    const AimsData< double >& eigenValue() const { return _eigenValue; }
-    const AimsData< double >& eigenVector() const { return _eigenVector; }
+    const carto::VolumeRef< double >& eigenValue() const
+    { return _eigenValue; }
+    const carto::VolumeRef< double >& eigenVector() const
+    { return _eigenVector; }
   
     virtual void update( Point3df&, int );
     virtual void update( AimsVector<double,3>&, int );
@@ -128,7 +130,7 @@ class Moment
 
     // TODO: fix this API, having these methods left unimplemented is asking
     // for trouble...
-    virtual void doit( AimsData< T >&, T, int );
+    virtual void doit( carto::rc_ptr<carto::Volume< T > > &, T, int );
     virtual void doit( AimsSurfaceTriangle& );
     virtual void doit( const aims::BucketMap<Void> & );
 
@@ -153,8 +155,8 @@ class Moment
     double _m2[ 6 ];
     double _m3[ 10 ];
     
-    AimsData< double > _eigenValue;
-    AimsData< double > _eigenVector;
+    carto::VolumeRef< double > _eigenValue;
+    carto::VolumeRef< double > _eigenVector;
 };
 
 
@@ -243,7 +245,8 @@ void Moment< T >::update( double, double, double, int )
 template< class T > inline
 void Moment< T >::orientation()
 {
-  _eigenVector = AimsData< double >( 3, 3 );
+  _eigenVector = carto::VolumeRef< double >( 3, 3, 1, 1,
+                                             carto::AllocatorContext::fast() );
   
   _eigenVector( 0, 0 ) = _m2[ 0 ];
   _eigenVector( 1, 1 ) = _m2[ 1 ];
@@ -405,14 +408,14 @@ Moment<T> Moment<T>::operator + ( const Moment<T> & m )
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 template< class T >
-void Moment<T>::doit( AimsData< T >&, T, int )
+void Moment<T>::doit( carto::rc_ptr<carto::Volume< T > > &, T, int )
 {
   std::clog << "PROGRAMMING ERROR: called unimplemented base method"
-               " Moment<T>::doit( AimsData< T >&, T, int )"
+               " Moment<T>::doit( VolumeRef< T >&, T, int )"
             << std::endl;
 #ifndef NDEBUG
   throw std::logic_error("called unimplemented base method"
-                         " Moment<T>::doit( AimsData< T >&, T, int )");
+                         " Moment<T>::doit( VolumeRef< T >&, T, int )");
 #endif
 }
 

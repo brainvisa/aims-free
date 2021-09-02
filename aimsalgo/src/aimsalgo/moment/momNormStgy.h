@@ -45,7 +45,7 @@ class MomentNormalStrategy : public MomentStrategy< T >
   
     MomentNormalStrategy() : MomentStrategy< T >() { }
     
-    void doit( Moment< T > *, AimsData< T >&, T, int );
+    void doit( Moment< T > *, carto::rc_ptr<carto::Volume< T > > &, T, int );
     void doit( Moment< T > *, const aims::BucketMap<Void> &, int );
 
   private:
@@ -88,36 +88,39 @@ void MomentNormalStrategy< T >::addVoxel2( Moment< T > *m, const Point3d & p )
 
 
 template< class T > inline
-void MomentNormalStrategy< T >::doit( Moment< T > *m, AimsData< T >& d, 
+void MomentNormalStrategy< T >::doit( Moment< T > *m,
+                                      carto::rc_ptr<carto::Volume< T > > & d,
                                       T label, int )
 {
   int x, y, z;
-  int dx = d.dimX();
-  int dy = d.dimY();
-  int dz = d.dimZ();
-  int olbs = d.oLineBetweenSlice();
-  int opbl = d.oPointBetweenLine();
-  typename AimsData< T >::const_iterator it = d.begin() + d.oFirstPoint();
-  
+  int dx = d->getSizeX();
+  int dy = d->getSizeY();
+  int dz = d->getSizeZ();
+  T *it;
+  long o = d->getStrides()[0];
+
   double cx = m->cx();
   double cy = m->cy();
   double cz = m->cz();
   double ct = m->ct();
 
-  for ( z=0; z<dz; z++, it+=olbs )
-    for ( y=0; y<dy; y++, it+=opbl )
-      for ( x=0; x<dx; x++, it++ )
+  for ( z=0; z<dz; z++ )
+    for ( y=0; y<dy; y++ )
+    {
+      it = &d->at( 0, y, z );
+      for ( x=0; x<dx; x++, it+=o )
         if ( *it == label )
-          {
-	    m->sum()++;
-	    
-	    m->m0()++;
-	    
-	    m->m1()[ 0 ] += (double)x * cx;
-	    m->m1()[ 1 ] += (double)y * cy;
-	    m->m1()[ 2 ] += (double)z * cz;
-	  }
-	  
+        {
+          m->sum()++;
+
+          m->m0()++;
+
+          m->m1()[ 0 ] += (double)x * cx;
+          m->m1()[ 1 ] += (double)y * cy;
+          m->m1()[ 2 ] += (double)z * cz;
+        }
+    }
+
   double mx = m->m1()[ 0 ] / m->m0();
   double my = m->m1()[ 1 ] / m->m0();
   double mz = m->m1()[ 2 ] / m->m0();
@@ -126,12 +129,14 @@ void MomentNormalStrategy< T >::doit( Moment< T > *m, AimsData< T >& d,
   m->gravity()[ 1 ] = my;
   m->gravity()[ 2 ] = mz;
 
-  it = d.begin() + d.oFirstPoint();
-  for ( z=0; z<dz; z++, it+=olbs )
-    for ( y=0; y<dy; y++, it+=opbl )
-      for ( x=0; x<dx; x++, it++ )
+  for ( z=0; z<dz; z++ )
+    for ( y=0; y<dy; y++ )
+    {
+      it = &d->at( 0, y, z );
+      for ( x=0; x<dx; x++, it+=o )
         if ( *it == label )
           addVoxel2( m, Point3d( x, y, z ) );
+    }
 
   m->m0() *= ct; // is is OK or should it have been done before ?
 
