@@ -8,9 +8,14 @@
  *     France
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
+#include <aims/transform/least_square_estimation.h>
 #include <aims/math/svd.h>
 #include <aims/math/eigen.h>
-#include <aims/transform/least_square_estimation.h>
 #ifdef AIMS_USE_MPI
 #include <mpi.h>
 #endif
@@ -77,8 +82,8 @@ AffineLeastSquareEstimation::computeMotion()
   if( _pointsFrom.size() != _pointsTo.size() )
     throw runtime_error("AffineLeastSquareEstimation:Both vectors must have same size !") ;
   unsigned size = _pointsFrom.size();
-  AimsData<float> xx(3, 3), yx(3, 3) ;
-  AimsData<float> x(_pointsFrom.size(), 3), y(_pointsTo.size(), 3) ;		// contient les coords Bary
+  VolumeRef<float> xx(3, 3), yx(3, 3) ;
+  VolumeRef<float> x(_pointsFrom.size(), 3), y(_pointsTo.size(), 3) ;		// contient les coords Bary
   Point3df meanX(0., 0., 0.), meanY(0., 0., 0.) ;
   unsigned nn = 0; unsigned limit = size;
   for( ; nn < limit ; ++nn ) {
@@ -98,10 +103,10 @@ AffineLeastSquareEstimation::computeMotion()
       y(n, d) = _pointsTo[n][d] - meanY[d] ;
   }
   
-  xx = x.clone().transpose().cross(x) ;
+  xx = matrix_product( transpose( x ), x ) ;
 //   cout << "!! xx: " << xx << endl;
 // cout << "xx dims : " << xx.dimX() << ", " << xx.dimY() << endl ;
-  yx = (y.clone().transpose()).cross(x) ;
+  yx = matrix_product( transpose( y ), x ) ;
 //   cout << "!! yx: " << yx << endl;
 // cout << "yx dims : " << yx.dimX() << ", " << yx.dimY() << endl ;
 
@@ -113,26 +118,27 @@ AffineLeastSquareEstimation::computeMotion()
     yx(2,2)=1;
   }
   
-  AimsData< float > u = xx.clone(); // because it is replaced on SVD output
-  AimsData< float > v( xx.dimY(), xx.dimY() );
+  VolumeRef< float > u = xx; // it is replaced on SVD output
+  VolumeRef< float > v( xx->getSizeY(), xx->getSizeY() );
 
   AimsSVD< float > svd2;
-  AimsData< float > w = svd2.doit( u, &v.volume() );
+  VolumeRef< float > w = svd2.doit( u, &v );
   
 
   // Set the singular values lower than threshold to zero
   float s = 0.000000000000000000000000000001 ;
-  float ts = s * w.maximum();
-  int i, n = w.dimX();
+  float ts = s * w.max();
+  int i, n = w->getSizeX();
   for ( i=0; i<n; i++ )
   {
     if ( w( i, i ) > ts )  w( i, i ) = 1.0f / w( i, i );
     else w( i, i ) = 0.0f;
   }
   
-  AimsData<float> invXX = v.cross(w.cross(u.transpose())) ;
+  VolumeRef<float> invXX = matrix_product(
+    v, matrix_product( w, transpose( u ) ) );
   _motion = new DecomposedMotion;
-  _motion->setMatrix(yx.cross(invXX));            
+  _motion->setMatrix( matrix_product( yx, invXX ) );
   _motion->setTranslation(meanY - _motion->transform(meanX));
 
   return 1;
@@ -169,10 +175,10 @@ RigidLeastSquareEstimation::computeRigidMotion()
 //   cout << "!! Is 2d estimation: " << carto::toString(_is2D) << endl;
   
   
-  AimsData<float> criterionMatrix(4, 4);
-  AimsData<float> critItem ;
+  VolumeRef<float> criterionMatrix(4, 4, 1, 1, AllocatorContext::fast() );
+  VolumeRef<float> critItem ;
   criterionMatrix = 0;
-  AimsData<float> eigenValues(4, 4);
+  VolumeRef<float> eigenValues(4, 4, 1, 1, AllocatorContext::fast() );
   vector<Point3df>::iterator iterFrom(_pointsFrom.begin()), 
                              lastFrom(_pointsFrom.end()), 
                              iterTo(_pointsTo.begin()), lastTo(_pointsTo.end()) ;
@@ -197,7 +203,8 @@ RigidLeastSquareEstimation::computeRigidMotion()
   }
 #endif
 
-  while ( iterFrom != lastFrom && iterTo != lastTo ) {
+  while ( iterFrom != lastFrom && iterTo != lastTo )
+  {
           
     critItem = criterionItem( *iterFrom, *iterTo, meanX, meanY, 1. ) ;
     
@@ -217,7 +224,7 @@ RigidLeastSquareEstimation::computeRigidMotion()
   COMM_WORLD.Barrier();
 #endif
 
-  AimsData<float> eigenvectors( criterionMatrix ), eigenvalues ;
+  VolumeRef<float> eigenvectors( criterionMatrix ), eigenvalues ;
   
   AimsEigen<float> aimsEigen;
   eigenvalues = aimsEigen.doit(eigenvectors);
@@ -240,8 +247,10 @@ RigidLeastSquareEstimation::computeRigidMotion()
   if( axis != Point3df(0., 0., 0. ) )
     axis.normalize() ;
 
-  if(_is2D) { 
-    axis[0]=0;axis[1]=0;
+  if(_is2D)
+  {
+    axis[0]=0;
+    axis[1]=0;
   }
 
 //   cout << "!! axis: " << axis << endl;
@@ -280,11 +289,12 @@ RigidLeastSquareEstimation::computeRigidMotion()
 
 
 
-AimsData<float> 
-RigidLeastSquareEstimation::criterionItem( const Point3df& p1, const Point3df& p2, 
-					 const Point3df& gc1, const Point3df& gc2, float weight )
+VolumeRef<float>
+RigidLeastSquareEstimation::criterionItem(
+  const Point3df& p1, const Point3df& p2,
+  const Point3df& gc1, const Point3df& gc2, float weight )
 {
-  AimsData<float> a(4, 4) ;
+  VolumeRef<float> a( 4, 4, 1, 1, AllocatorContext::fast() ) ;
   
   Point3df dep( weight * ( (p2 - gc2) - (p1 - gc1) ) ), add( weight * ( (p1 - gc1) + (p2 - gc2) ) )   ;
   
@@ -294,7 +304,7 @@ RigidLeastSquareEstimation::criterionItem( const Point3df& p1, const Point3df& p
   a( 0, 2 ) = dep[1] ;	a( 1, 2 ) = add[2] ;		a( 3, 2 ) = -add[0] ;	
   a( 0, 3 ) = dep[2] ;	a( 1, 3 ) = -add[1] ;	a( 2, 3 ) = add[0] ;	
 
-  return ( a.cross( a ) ) ;
+  return ( matrix_product( a, a ) ) ;
 }
 
 
@@ -312,7 +322,8 @@ RigidLeastSquareEstimation::error()
   float d = 1.;
 
 
-  while ( iterFrom != lastFrom && iterTo != lastTo ) {
+  while ( iterFrom != lastFrom && iterTo != lastTo )
+  {
     errorVect = *iterTo - _motion->transform( (*iterFrom)[0], (*iterFrom)[1], (*iterFrom)[2] ) ;
     d = sqrt ( errorVect.dot(errorVect) ) ;      
     if (d > dMax)
@@ -348,13 +359,15 @@ TranslationLeastSquareEstimation::computeTranslationMotion()
 
 
 
-AimsData<float> 
-TranslationLeastSquareEstimation::criterionItem( const Point3df& p1, const Point3df& p2, 
-					 const Point3df& gc1, const Point3df& gc2, float weight )
+VolumeRef<float>
+TranslationLeastSquareEstimation::criterionItem(
+  const Point3df& p1, const Point3df& p2,
+  const Point3df& gc1, const Point3df& gc2, float weight )
 {
-  AimsData<float> a(4, 4) ;
+  VolumeRef<float> a( 4, 4, 1, 1, AllocatorContext::fast() ) ;
   
-  Point3df dep( weight * ( (p2 - gc2) - (p1 - gc1) ) ), add( weight * ( (p1 - gc1) + (p2 - gc2) ) )   ;
+  Point3df dep( weight * ( (p2 - gc2) - (p1 - gc1) ) ),
+    add( weight * ( (p1 - gc1) + (p2 - gc2) ) )   ;
   
   a = 0. ; 	
   a( 1, 0 ) = -dep[0] ;	a( 2, 0 ) = -dep[1] ;	a( 3, 0 ) = -dep[2] ;	
@@ -362,7 +375,7 @@ TranslationLeastSquareEstimation::criterionItem( const Point3df& p1, const Point
   a( 0, 2 ) = dep[1] ;	a( 1, 2 ) = add[2] ;		a( 3, 2 ) = -add[0] ;	
   a( 0, 3 ) = dep[2] ;	a( 1, 3 ) = -add[1] ;	a( 2, 3 ) = add[0] ;	
 
-  return ( a.cross( a ) ) ;
+  return matrix_product( a, a );
 }
 
 
@@ -380,7 +393,8 @@ TranslationLeastSquareEstimation::error()
   float d = 1.;
 
 
-  while ( iterFrom != lastFrom && iterTo != lastTo ) {
+  while ( iterFrom != lastFrom && iterTo != lastTo )
+  {
     errorVect = *iterTo - _motion->transform( (*iterFrom)[0], (*iterFrom)[1], (*iterFrom)[2] );
     d = sqrt ( errorVect.dot(errorVect) );      
     if (d > dMax)
@@ -408,14 +422,16 @@ SimiLeastSquareEstimation::computeMotion()
 
   int u, v;
   unsigned size = _pointsFrom.size();
-  AimsData<double> Rotation(3,3);
-  AimsData<float> RotationF = _motion->rotation();
-  ForEach2d(Rotation, u, v)	Rotation(u,v) = double( RotationF(u,v) );
+  VolumeRef<double> Rotation( 3, 3, 1, 1, AllocatorContext::fast() );
+  VolumeRef<float> RotationF = _motion->rotation();
+  for( v=0; v<3; ++v )
+    for( u=0; u<3; ++u )
+      Rotation(u,v) = double( RotationF(u,v) );
 
 
   // On calcul la matrice K = somme(yi * xiT) et le scalaire sigmax2 = somme(xi²)
-  AimsData<double> K(3,3);
-  AimsData<double> temp(3,3);
+  VolumeRef<double> K( 3, 3, 1, 1, AllocatorContext::fast() );
+  VolumeRef<double> temp( 3, 3, 1, 1, AllocatorContext::fast() );
   double sigmax2 = 0;
   K = 0;
   temp = 0;
@@ -426,7 +442,8 @@ SimiLeastSquareEstimation::computeMotion()
   int mpiSize = COMM_WORLD.Get_size();
   int nbPts = size/mpiSize;
   int nbPtsLeft = size%mpiSize;
-  if(rank < nbPtsLeft) {
+  if(rank < nbPtsLeft)
+  {
     n = rank*(nbPts+1);
     size = n + nbPts+1;
   }
@@ -446,7 +463,8 @@ SimiLeastSquareEstimation::computeMotion()
     temp(0,1)=y[1]*x[0];
     temp(1,0)=y[0]*x[1];
 
-    ForEach2d(K, u, v)
+    for( v=0; v<3; ++v )
+      for( u=0; u<3; ++u )
     {
       K(u,v) += temp(u,v) ;
     }
@@ -459,10 +477,10 @@ SimiLeastSquareEstimation::computeMotion()
   COMM_WORLD.Barrier();
 #endif
   // Transposition
-  K = K.transpose();
+  K = transpose( K );
 
   
-  AimsData<double> RKt = Rotation.cross(K);
+  VolumeRef<double> RKt = matrix_product( Rotation, K );
   double trace = RKt(0,0) + RKt(1,1) + RKt(2,2);
 
   // calcul de s, coefficient de similitude

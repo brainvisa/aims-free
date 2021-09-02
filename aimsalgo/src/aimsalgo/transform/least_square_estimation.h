@@ -12,14 +12,16 @@
 #define AIMS_TRANSFORM_LEAST_SQUARE_SESTIMATION_H
 
 #include <aims/vector/vector.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/resampling/motion.h>
 #include <vector>
 
 
-namespace aims {
+namespace aims
+{
   
-  class TransformLeastSquareEstimation {
+  class TransformLeastSquareEstimation
+  {
   public:
     TransformLeastSquareEstimation( const std::vector<Point3df>& from, 
                                     const std::vector<Point3df>& to ) ;
@@ -28,7 +30,8 @@ namespace aims {
     
     const DecomposedMotion* motion()
     { 
-      if (!_motionCalculated){
+      if (!_motionCalculated)
+      {
         computeMotion() ;
         _motionCalculated = true ;
       }
@@ -49,7 +52,8 @@ namespace aims {
 
 
 
-  class AffineLeastSquareEstimation : public TransformLeastSquareEstimation {
+  class AffineLeastSquareEstimation : public TransformLeastSquareEstimation
+  {
   public:
     AffineLeastSquareEstimation( const std::vector<Point3df>& from, 
                                  const std::vector<Point3df>& to ) ;
@@ -63,15 +67,17 @@ namespace aims {
 
 
 
-  class RigidLeastSquareEstimation : public TransformLeastSquareEstimation {
+  class RigidLeastSquareEstimation : public TransformLeastSquareEstimation
+  {
   public:
     RigidLeastSquareEstimation( const std::vector<Point3df>& from, 
                                 const std::vector<Point3df>& to ) ;
     
     virtual ~RigidLeastSquareEstimation() {}
 
-    static AimsData<float> criterionItem( const Point3df& p1, const Point3df& p2, 
-                                          const Point3df& gc1, const Point3df& gc2, float weight ) ;
+    static carto::VolumeRef<float> criterionItem(
+      const Point3df& p1, const Point3df& p2,
+      const Point3df& gc1, const Point3df& gc2, float weight ) ;
     double error() ;
 
     
@@ -82,15 +88,17 @@ namespace aims {
     Point3df _meanY;
   } ;
  
-  class TranslationLeastSquareEstimation : public TransformLeastSquareEstimation {
+  class TranslationLeastSquareEstimation : public TransformLeastSquareEstimation
+  {
   public:
     TranslationLeastSquareEstimation( const std::vector<Point3df>& from, 
                                       const std::vector<Point3df>& to ) ;
     
     virtual ~TranslationLeastSquareEstimation() {}
 
-    static AimsData<float> criterionItem( const Point3df& p1, const Point3df& p2, 
-                                          const Point3df& gc1, const Point3df& gc2, float weight ) ;
+    static carto::VolumeRef<float> criterionItem(
+      const Point3df& p1, const Point3df& p2,
+      const Point3df& gc1, const Point3df& gc2, float weight ) ;
     double error() ;
 
     
@@ -104,10 +112,11 @@ namespace aims {
  
 
 
-  class SimiLeastSquareEstimation : public RigidLeastSquareEstimation {
+  class SimiLeastSquareEstimation : public RigidLeastSquareEstimation
+  {
   public:
     SimiLeastSquareEstimation( const std::vector<Point3df>& from, 
-				 const std::vector<Point3df>& to ) ;
+                               const std::vector<Point3df>& to ) ;
     
     virtual ~SimiLeastSquareEstimation() {}
 
