@@ -31,6 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/transform/talairachtransform.h>
 
 using namespace aims ;
@@ -45,9 +50,9 @@ TalairachTransformation::TranslationComputation( ) :
 }
 
 TalairachTransformation::TranslationComputation( std::vector<Point3df> first, 
-						 AimsData<short> firstMask,
+						 rc_ptr<Volume<short> > firstMask,
 						 std::vector<Point3df> second, 
-						 AimsData<short> secondMask,
+						 rc_ptr<Volume<short> > secondMask,
 					     TranslationComputation translationComputation) :
   _firstPoints(first), _secondPoints(second), _firstMask(firstMask), _secondMask(secondMask),
   _translationComputation(translationComputation), _motion( 0 ), _motionComputed(false), 
@@ -82,7 +87,7 @@ TalairachTransformation::setFirstTalairachPoints( std::vector<Point3df> first )
 }
 
 void 
-TalairachTransformation::setFirstMask( AimsData<short> firstMask )
+TalairachTransformation::setFirstMask( rc_ptr<Volume<short> > firstMask )
 {
   _firstMask = firstMask ;
   if( (firstMask.dimX() > 1 || firstMask.dimY() > 1 ||  firstMask.dimZ() > 1 ) && 
@@ -104,7 +109,8 @@ void TalairachTransformation::setSecondTalairachPoints( std::vector<Point3df> se
 }
 
 
-void TalairachTransformation::setSecondMask( AimsData<short> secondMask )
+void TalairachTransformation::setSecondMask(
+  rc_ptr<Volume<short> > secondMask )
 {
   if( (_firstMask.dimX() > 1 || _firstMask.dimY() > 1 ||  _firstMask.dimZ() > 1 ) && 
       (secondMask.dimX() > 1 || secondMask.dimY() > 1 ||  secondMask.dimZ() > 1) )
@@ -114,14 +120,14 @@ void TalairachTransformation::setSecondMask( AimsData<short> secondMask )
   _motionComputed = false ;
 }
 
-const Motion& 
+const AffineTransformation3d &
 TalairachTransformation::transformation( )
 {
   if( _motionComputed )
     return *_motion ;
 
   if( !_motion )
-    _motion = new Motion ;
+    _motion = new AffineTransformation3d;
   if(!_computable){
     _motion->setToIdentity() ;
     return *_motion ;
@@ -134,14 +140,15 @@ TalairachTransformation::transformation( )
     return withoutMaskComputation() ;
 }
 
-const Motion& 
+const AffineTransformation3d &
 TalairachTransformation::withoutMaskComputation()
 { 
   Point3df AC2 ;
   Point3df PC2 ;
   Point3df PIH2 ;
   
-  if( _toNormalizedTemplate ){
+  if( _toNormalizedTemplate )
+  {
     AC2 = Point3df( 0., 0., 0.) ;
     PC2 = Point3df( 0., 1., 0.) ;
     PIH2 = Point3df( 0., 0., 1.) ;        
@@ -180,29 +187,32 @@ TalairachTransformation::withoutMaskComputation()
 
   //on genere la matrice de passage entre l'ancienne et la nouvelle base constituee des vecteurs
   //de la nouvelle base mis en colonne : cette matrice est la matrice de rotation
-  //RQ:avec AimsData, les indices i et j sont inverses donc ici, on n'a pas a inverser ensuite la matrice
+  //RQ:avec Volume, les indices i et j sont inverses donc ici, on n'a pas a inverser ensuite la matrice
   //pour generer ma matrice de rotation
 
-  AimsData<float> matriceRot1(3, 3) ;
-  for (int i=0; i<3; i++){
+  VolumeRef<float> matriceRot1(3, 3) ;
+  for (int i=0; i<3; i++)
+  {
     matriceRot1(0,i) = ACPC1[i] ;
     matriceRot1(1,i) = ACPIHNormeOrtho1[i] ;
     matriceRot1(2,i) = cross1[i] ;
   }
 
-  AimsData<float> matriceRot2(3, 3) ;
-  for (int i=0; i<3; i++){
+  VolumeRef<float> matriceRot2(3, 3) ;
+  for (int i=0; i<3; i++)
+  {
     matriceRot2(i,0) = ACPC2[i] ;
     matriceRot2(i,1) = ACPIHNormeOrtho2[i] ;
     matriceRot2(i,2) = cross2[i] ;
   }
   
-  _motion->setMatrix(matriceRot2.cross(matriceRot1));
+  _motion->setMatrix( matrix_product( matriceRot2, matriceRot1 ) );
   
  //calcul de la matrice de scaling
 
   
-  _motion->scale( Point3df(scale1, scale1, scale1), Point3df(scale2, scale2, scale2) ) ;
+  _motion->scale( Point3df(scale1, scale1, scale1),
+                  Point3df(scale2, scale2, scale2) ) ;
   
   //calcul du vecteur de translation
   _motion->setTranslation( AC2 - AC1 );
@@ -212,8 +222,9 @@ TalairachTransformation::withoutMaskComputation()
 
 
 
-Motion
-TalairachTransformationStrategy::transformation( const vector<Point3df>& base1, const vector<Point3df>& base2  )
+AffineTransformation3d
+TalairachTransformationStrategy::transformation(
+  const vector<Point3df>& base1, const vector<Point3df>& base2  )
 {
   
  //on norme les vecteurs de indivBase
@@ -252,33 +263,36 @@ TalairachTransformationStrategy::transformation( const vector<Point3df>& base1, 
 
   //on genere la matrice de passage entre l'ancienne et la nouvelle base constituee des vecteurs
   //de la nouvelle base mis en colonne : cette matrice est la matrice de rotation
-  //RQ:avec AimsData, les indices i et j sont inverses donc ici, on n'a pas a inverser ensuite la matrice
+  //RQ:avec Volume, les indices i et j sont inverses donc ici, on n'a pas a inverser ensuite la matrice
   //pour generer ma matrice de rotation
 
 
-  Motion motion ;
+  AffineTransformation3d motion ;
 
-  AimsData<float> matriceRot1(3, 3) ;
-  for (int i=0; i<3; i++){
+  VolumeRef<float> matriceRot1(3, 3) ;
+  for (int i=0; i<3; i++)
+  {
     matriceRot1(0,i) = ACPC1[i] ;
     matriceRot1(1,i) = ACPIHNormeOrtho1[i] ;
     matriceRot1(2,i) = cross1[i] ;
   }
 
 
-  AimsData<float> matriceRot2(3, 3) ;
-  for (int i=0; i<3; i++){
+  VolumeRef<float> matriceRot2(3, 3) ;
+  for (int i=0; i<3; i++)
+  {
     matriceRot2(i,0) = ACPC2[i] ;
     matriceRot2(i,1) = ACPIHNormeOrtho2[i] ;
     matriceRot2(i,2) = cross2[i] ;
   }
   
-  motion.setMatrix(matriceRot2.cross(matriceRot1));
+  motion.setMatrix( matrix_product( matriceRot2, matriceRot1 ) );
   
  //calcul de la matrice de scaling
 
   
-  motion.scale( Point3df(scale1, scale1, scale1), Point3df(scale2, scale2, scale2) ) ;
+  motion.scale( Point3df(scale1, scale1, scale1),
+                Point3df(scale2, scale2, scale2) ) ;
   
   //calcul du vecteur de translation
   motion.setTranslation( AC2 - AC1 );
@@ -287,7 +301,7 @@ TalairachTransformationStrategy::transformation( const vector<Point3df>& base1, 
 
 }
 
-const Motion& 
+const AffineTransformation3d&
 TalairachTransformationStrategy::withMaskComputation()
 {
   throw error("TalairachTransformationStrategy::withMaskComputation not available yet !") ;

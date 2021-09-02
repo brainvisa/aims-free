@@ -35,51 +35,57 @@
 #define AIMS_TRANSFORM_TALAIRACHTRANSFORM_H
 
 #include <aims/vector/vector.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <vector>
 
-class Motion ;
+class AffineTransformation3d;
 
-namespace aims {
+namespace aims
+{
   
-  class TalairachTransformation {
+  class TalairachTransformation
+  {
   public:
-    enum TranslationComputation {
+    enum TranslationComputation
+    {
       FROMMASK,
       FROMAPC
     } ;
     
     TalairachTransformation() ;
-    TalairachTransformation( std::vector<Point3df> first, 
-			     AimsData<short> firstMask = AimsData<short>(),
-			     std::vector<Point3df> second =  std::vector<Point3df>(), 
-			     AimsData<short> secondMask = AimsData<short>(),
-			     TranslationComputation translationComputation = FROMAPC ) ;
+    TalairachTransformation(
+      std::vector<Point3df> first,
+      carto::rc_ptr<carto::Volume<short> > firstMask
+        = carto::rc_ptr<carto::Volume<short> >(),
+      std::vector<Point3df> second =  std::vector<Point3df>(),
+      carto::rc_ptr<carto::Volume<short> > secondMask
+        = carto::rc_ptr<carto::Volume<short> >(),
+      TranslationComputation translationComputation = FROMAPC ) ;
     
     ~TalairachTransformation() ;
     
     void setFirstTalairachPoints( std::vector<Point3df> first ) ;
-    void setFirstMask( AimsData<short> firstMask ) ;
+    void setFirstMask( carto::rc_ptr<carto::Volume<short> > firstMask ) ;
     
     void setSecondTalairachPoints( std::vector<Point3df> second ) ;
-    void setSecondMask( AimsData<short> secondMask ) ;
+    void setSecondMask( carto::rc_ptr<carto::Volume<short> > secondMask ) ;
     
-    const Motion& transformation( ) ;
+    const AffineTransformation3d & transformation( ) ;
     
   private:
     std::vector<Point3df> _firstPoints ;
     std::vector<Point3df> _secondPoints ;
-    AimsData<short> _firstMask ;
-    AimsData<short> _secondMask ;
+    carto::VolumeRef<short> _firstMask ;
+    carto::VolumeRef<short> _secondMask ;
     
     TranslationComputation _translationComputation ;
-    Motion * _motion ;
+    AffineTransformation3d * _motion ;
     bool _motionComputed ;
     bool _computable ;
     bool _withMask ;
     bool _toNormalizedTemplate ;
-    const Motion& withoutMaskComputation() ;
-    const Motion& withMaskComputation() ;
+    const AffineTransformation3d & withoutMaskComputation() ;
+    const AffineTransformation3d & withMaskComputation() ;
   } ;
 }
 
