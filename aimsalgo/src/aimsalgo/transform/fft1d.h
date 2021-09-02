@@ -38,8 +38,13 @@
 
 #include <aims/config/aimsalgo_config.h>
 #include <aims/def/general.h>
+#include <cartobase/smart/rcptr.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <typename T> class Volume;
+  template <typename T> class VolumeRef;
+}
 
 
 /**@name Fourier transform.
@@ -53,8 +58,9 @@ template <class T> class AimsData;
 */
 //@{
 ///
-AIMSALGO_API AimsData< float > AimsXCor1d( const AimsData<float>& data1,
-					   const AimsData<float>& data2 );
+carto::VolumeRef< float > AimsXCor1d(
+  const carto::rc_ptr<carto::Volume<float> > & data1,
+  const carto::rc_ptr<carto::Volume<float> > & data2 );
 //@}
 /**@name Cross-correlation.
 */
@@ -67,13 +73,13 @@ AIMSALGO_API AimsData< float > AimsXCor1d( const AimsData<float>& data1,
 */
 //@{
 ///
-AIMSALGO_API AimsData< cfloat > 
-AimsFFT1D(const AimsData< cfloat > &vec,int isign=1);
+carto::VolumeRef< cfloat >
+AimsFFT1D(const carto::rc_ptr<carto::Volume< cfloat > > & vec,int isign=1 );
 //@}
 
 /// Linear to decibel scale transformation
-AIMSALGO_API AimsData<float> 
-AimsLinearToDecibel(const AimsData<float> &sqv);
+carto::VolumeRef<float>
+AimsLinearToDecibel( const carto::rc_ptr<carto::Volume<float> > & sqv );
 
 //@}
 

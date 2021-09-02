@@ -32,71 +32,85 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/transform/fft1d.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/mathelem.h>
 #include <math.h>
 #include <complex>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
-AimsData<float> AimsXCor1d( const AimsData<float>& data1,
-                            const AimsData<float>& data2 )
+VolumeRef<float> AimsXCor1d( const rc_ptr<Volume<float> > & data1,
+                             const rc_ptr<Volume<float> > & data2 )
 {
-  ASSERT( data1.dimY() == 1 && data1.dimZ() == 1 && data1.dimT() == 1 &&
-          hasSameDim( data2, data1 ) );
+  ASSERT( data1->getSizeY() == 1 && data1->getSizeZ() == 1
+          && data1->getSizeT() == 1 && data2->getSize() == data1->getSize() );
 
-  ASSERT( data1.minimum() != data1.maximum() &&
-          data2.minimum() != data2.maximum()   );
+  ASSERT( data1->min() != data1->max() &&
+          data2->min() != data2->max()   );
 
-  int k;
+  int k, n;
   float mean1 = 0.0f;
-  ForEach1d( data1, k )
-    mean1 += data1( k );
-  mean1 /= float( data1.dimX() );
+  n = data1->getSizeX();
+  for( k=0; k<n; ++k )
+    mean1 += data1->at( k );
+  mean1 /= float( data1->getSizeX() );
 
   float mean2 = 0.0f;
-  ForEach1d( data2, k )
-    mean2 += data2( k );
-  mean2 /= float( data2.dimX() );
+  for( k=0, n=data2->getSizeX(); k<n; ++k )
+    mean2 += data2->at( k );
+  mean2 /= float( data2->getSizeX() );
 
 
-  AimsData<cfloat> cdata1( 2 * data1.dimX() );
-  cdata1 = cfloat( 0.0 );
-  ForEach1d( data1, k )
-    cdata1( k ) = cfloat( data1( k ) - mean1 );
+  VolumeRef<cfloat> cdata1( 2 * data1->getSizeX() );
+  cdata1.fill( cfloat( 0.0, 0.0 ) );
+  n = data1->getSizeX();
+
+  for( k=0; k<n; ++k )
+    cdata1( k ) = cfloat( data1->at( k ) - mean1 );
 
 
-  AimsData<cfloat> cdata2( 2 * data2.dimX() );
+  VolumeRef<cfloat> cdata2( 2 * data2->getSizeX() );
   cdata2 = cfloat( 0.0 );
-  ForEach1d( data2, k )
-    cdata2( k ) = cfloat( data2( k ) - mean2 );
+  n = data2->getSizeX();
+  for( k=0; k<n; ++k )
+    cdata2( k ) = cfloat( data2->at( k ) - mean2 );
 
 
   float sum1 = 0.0f;
-  ForEach1d( cdata1, k )
+  n = cdata1->getSizeX();
+  for( k=0; k<n; ++k )
     sum1 += sqr( real( cdata1( k ) ) );
 
   float sum2 = 0.0f;
-  ForEach1d( cdata2, k )
+  n = cdata2->getSizeX();
+  for( k=0; k<n; ++k )
     sum2 += sqr( real( cdata2( k ) ) );
 
   float sum = sqrt( sum1 * sum2 );
 
   //cout << sum1 << endl << sum2 << endl;
 
-  AimsData<cfloat> fftCdata1 = AimsFFT1D( cdata1 );
-  AimsData<cfloat> fftCdata2 = AimsFFT1D( cdata2 );
+  VolumeRef<cfloat> fftCdata1 = AimsFFT1D( cdata1 );
+  VolumeRef<cfloat> fftCdata2 = AimsFFT1D( cdata2 );
 
-  AimsData<cfloat> fftCXcor( cdata1.dimX() );
-  ForEach1d( fftCXcor, k )
+  VolumeRef<cfloat> fftCXcor( cdata1->getSizeX() );
+  n = fftCXcor->getSizeX();
+  for( k=0; k<n; ++k )
     fftCXcor( k ) = fftCdata1( k ) * conj( fftCdata2( k ) );
 
-  AimsData<cfloat> CXcor = AimsFFT1D( fftCXcor, -1 );
+  VolumeRef<cfloat> CXcor = AimsFFT1D( fftCXcor, -1 );
 
-  AimsData<float> xcor( CXcor.dimX() );
-  ForEach1d( xcor, k )
+  VolumeRef<float> xcor( CXcor->getSizeX() );
+  n = xcor->getSizeX();
+  for( k=0; k<n; ++k )
     xcor( k ) = real( CXcor( k ) ) / sum;
 
   return xcor;

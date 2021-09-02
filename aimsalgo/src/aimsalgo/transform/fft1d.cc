@@ -32,27 +32,33 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
 #include <aims/transform/fft1d.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/mathelem.h>
 #include <math.h>
 #include <complex>
 
+using namespace carto;
 using namespace std;
 
 // isign = + 1 ==> direct transform
 // isign = - 1 ==> inverse transform 
 
-AimsData< cfloat > 
-AimsFFT1D(const AimsData< cfloat > &vec,int isign)
+VolumeRef< cfloat >
+AimsFFT1D(const rc_ptr<Volume< cfloat > > & vec,int isign)
 {
   int n,nn,i,j,m,mmax,istep;
   float wtemp,wr,wpr,wpi,wi,theta;
   float tempr,tempi;
-  AimsData< cfloat > fft = vec.clone();
+  VolumeRef< cfloat > fft( new Volume<cfloat>( *vec ) );
 
-  nn = vec.dimX();
+  nn = vec->getSizeX();
   n  = nn;
   j  = 1;
   for (i=1;i<n;i++)
@@ -92,21 +98,23 @@ AimsFFT1D(const AimsData< cfloat > &vec,int isign)
   if (isign==-1)
     for(i=0;i<n;i++)
       fft(i) /= (float)nn;
-  return(fft);
+
+  return fft;
 }
 
 
-AimsData<float> 
-AimsLinearToDecibel(const AimsData<float> &vec)
-{ AimsData<float> dec(vec.dimX());
+VolumeRef<float>
+AimsLinearToDecibel( const rc_ptr<Volume<float> > & vec )
+{
+  VolumeRef<float> dec( vec->getSizeX() );
 
-  for (int x=0;x<vec.dimX();x++)
+  for (int x=0;x<vec->getSizeX();x++)
   {
-    ASSERT( vec(x)>=0 );
-    if (vec(x)==0)
+    ASSERT( vec->at(x)>=0 );
+    if (vec->at(x)==0)
       dec(x) = -1e38;
     else
-      dec(x) = 20 * (float)log10(abs(vec(x)));
+      dec(x) = 20 * (float)log10(abs(vec->at(x)));
   }
 
   return dec;

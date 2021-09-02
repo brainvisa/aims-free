@@ -36,9 +36,13 @@
 #define AIMS_TRANSFORM_HILBERT1D_H
 
 #include <aims/config/aimsalgo_config.h>
+#include <cartobase/smart/rcptr.h>
 
-template <class T> class AimsData;
-
+namespace carto
+{
+  template <class T> class Volume;
+  template <class T> class VolumeRef;
+}
 /**@name Hilbert transform.
 */
 //@{
@@ -49,8 +53,8 @@ template <class T> class AimsData;
 */
 //@{
 ///
-AIMSALGO_API AimsData<float>
-AimsHilbert1D(const AimsData<float> &vec);
+carto::VolumeRef<float>
+AimsHilbert1D( const carto::rc_ptr<carto::Volume<float> > &vec );
 //@}
 
 //@}

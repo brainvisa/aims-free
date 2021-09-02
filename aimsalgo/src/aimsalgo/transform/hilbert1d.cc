@@ -32,42 +32,47 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/transform/hilbert1d.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/mathelem.h>
 #include <aims/transform/fft1d.h>
 #include <math.h>
 #include <complex>
 
+using namespace carto;
 using namespace std;
 
-AimsData<float>
-AimsHilbert1D(const AimsData<float> &vec)
-{ AimsData<float> *vec1;
+VolumeRef<float>
+AimsHilbert1D(const rc_ptr<Volume<float> > & vec)
+{
   int                x;
   int                newdim;
 
-  newdim = (vec.dimX()==AimsNextPowerOfTwo(vec.dimX())/2) ?
-            vec.dimX() : AimsNextPowerOfTwo(vec.dimX());
+  newdim = (vec->getSizeX()==AimsNextPowerOfTwo(vec->getSizeX())/2) ?
+            vec->getSizeX() : AimsNextPowerOfTwo(vec->getSizeX());
 
-  vec1 = new AimsData<float>(newdim);
-  AimsData< cfloat > cvec(newdim);
-  for (x=0;x<cvec.dimX();x++)
+  VolumeRef<float> vec1(newdim);
+  VolumeRef< cfloat > cvec(newdim);
+  for (x=0;x<cvec->getSizeX();x++)
      cvec(x) = (*vec1)(x);
-  delete(vec1);
 
   cvec = AimsFFT1D(cvec,1);
 
-  for (x=0;x<=cvec.dimX()/2;x++)
+  for (x=0;x<=cvec->getSizeX()/2;x++)
     cvec(x) *= (float)2.0;
 
-  for (x=cvec.dimX()/2+1;x<cvec.dimX();x++)
+  for (x=cvec->getSizeX()/2+1;x<cvec->getSizeX();x++)
     cvec(x) = 0.0;
 
   cvec = AimsFFT1D(cvec,-1);
 
-  AimsData<float> vec2(vec.dimX());
-  for (x=0;x<cvec.dimX();x++)
+  VolumeRef<float> vec2(vec->getSizeX());
+  for (x=0;x<cvec->getSizeX();x++)
      vec2(x) = real(cvec(x));
   
   return(vec2);
