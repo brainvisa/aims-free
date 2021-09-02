@@ -32,27 +32,33 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/transform/rigidestimation.h>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/math/eigen.h>
 #include <iostream>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
-RigidTransformEstimation::RigidTransformEstimation() : 
+RigidTransformEstimation::RigidTransformEstimation() :
   _looseCondition(true), _motionCalculated(true), _is2D(false)
 {
-  _motion = new Motion ;
+  _motion = new AffineTransformation3d;
 }
 
-RigidTransformEstimation::RigidTransformEstimation( vector<Point3df> from, 
-						    vector<Point3df> to, 
-						    bool looseCondition ) :
+RigidTransformEstimation::RigidTransformEstimation(
+  const vector<Point3df> & from, const vector<Point3df> & to,
+  bool looseCondition ) :
   _pointsFrom(from), _pointsTo(to), _looseCondition(looseCondition), 
   _motionCalculated(false), _is2D(false)
 {
-  _motion = new Motion ;
+  _motion = new AffineTransformation3d;
 }
 
 
@@ -62,8 +68,8 @@ RigidTransformEstimation::~RigidTransformEstimation()
 }
 
 void  
-RigidTransformEstimation::setAppariatedPoints( vector<Point3df> from, 
-					       vector<Point3df> to )
+RigidTransformEstimation::setAppariatedPoints(
+  const vector<Point3df> & from, const vector<Point3df> & to )
 {
   _pointsFrom = from ;
   _pointsTo = to ;
@@ -78,14 +84,15 @@ RigidTransformEstimation::setLooseCondition( bool looseCondition )
 }
 
 bool 
-RigidTransformEstimation::motion( Motion& motion )
+RigidTransformEstimation::motion( AffineTransformation3d & motion )
 {
-  if ( _motionCalculated ){
+  if ( _motionCalculated )
+  {
     motion = *_motion ; 
     return true ;
   }
 
-  *_motion = Motion() ;
+  *_motion = AffineTransformation3d() ;
   if( _pointsFrom.size() < 1 || _pointsTo.size() < 1 )
     return 0 ;
   _motion->setTranslation( *(_pointsTo.begin() ) - *(_pointsTo.end() ) ) ;
@@ -178,9 +185,10 @@ RigidTransformEstimation::looseEstimation()
 
 
 void 
-RigidTransformEstimation::rotationEstimation( const Point3df& v1, const Point3df& v2,
-					      const Point3df& n1, const Point3df& n2,
-					      Point3df& axis, float& angle )
+RigidTransformEstimation::rotationEstimation(
+  const Point3df& v1, const Point3df& v2,
+  const Point3df& n1, const Point3df& n2,
+  Point3df& axis, float& angle )
 {
   Point3df vsum, vvect, vsumvectvvect, nsum, nvect, nsumvectnvect ;
   vsum = v1 + v2 ;
@@ -325,8 +333,8 @@ RigidTransformEstimation::pointToPointEstimation()
   gcFrom /= size ;
   gcTo /= size ;
   
-  AimsData<float> criterionMatrix(4, 4) ;
-  AimsData<float> eigenValues(4, 4) ;
+  VolumeRef<float> criterionMatrix(4, 4) ;
+  VolumeRef<float> eigenValues(4, 4) ;
 
   // Weight caculated to take into account the distance between a point and the rotation center.
   float rotWeight, errorWeight ; 
@@ -337,9 +345,10 @@ RigidTransformEstimation::pointToPointEstimation()
   float d = 1. ; float dMax ;
   double dSum = 0; // (unused) , dOlderSum = -1 ;
   Point3df errorVect ;
-  AimsData<float> critItem ;
+  VolumeRef<float> critItem ;
 
-  for( int iteration = 0 ; iteration < 1 ; ++iteration ){
+  for( int iteration = 0 ; iteration < 1 ; ++iteration )
+  {
     iterFrom = _pointsFrom.begin() ; iterTo = _pointsTo.begin() ;
     criterionMatrix = 0. ;
     
@@ -355,20 +364,22 @@ RigidTransformEstimation::pointToPointEstimation()
       //      weightSum += rotWeight * ( firstPass ? 1. : (dMax + 1. - d ) ) ;
       
       critItem = criterionItem( *iterFrom, *iterTo, gcFrom, gcTo, 
-				rotWeight * errorWeight ) ;
+                                rotWeight * errorWeight ) ;
       
-      for( int i = 0 ; i < 4 ; ++i ){
-	cout << endl ;
-	for ( int j = 0 ; j < 4 ; ++j ){
-	  criterionMatrix(i, j) = criterionMatrix(i, j) - critItem(i, j) ;
-	  cout << "\t" << criterionMatrix(i, j) ;
-	}
+      for( int i = 0 ; i < 4 ; ++i )
+      {
+        cout << endl ;
+        for ( int j = 0 ; j < 4 ; ++j )
+        {
+          criterionMatrix(i, j) = criterionMatrix(i, j) - critItem(i, j) ;
+          cout << "\t" << criterionMatrix(i, j) ;
+        }
       }
       ++iterFrom ; ++iterTo ;
       cout << endl<< endl ;
     }
     
-    AimsData<float> eigenvectors( criterionMatrix ), eigenvalues ;
+    VolumeRef<float> eigenvectors( criterionMatrix ), eigenvalues ;
     
     AimsEigen<float> aimsEigen;
     eigenvalues = aimsEigen.doit(eigenvectors);
@@ -376,9 +387,9 @@ RigidTransformEstimation::pointToPointEstimation()
     
     Point4df q;
     for(int i =0; i<4;i++)
-      {
-	q[i] = eigenvectors(i,3) ;
-      }
+    {
+      q[i] = eigenvectors(i,3) ;
+    }
     
     q.normalize() ;
     
@@ -391,7 +402,11 @@ RigidTransformEstimation::pointToPointEstimation()
     if( axis != Point3df(0., 0., 0. ) )
       axis.normalize() ;
 	
-	 if(_is2D){axis[0]=0;axis[1]=0;}
+	 if(_is2D)
+     {
+       axis[0]=0;
+       axis[1]=0;
+    }
     
     _motion->rotation()(0, 0) = t * axis[0] * axis[0] + c ;
     _motion->rotation()(0, 1) = t * axis[0] * axis[1] - s * axis[2] ;
@@ -443,11 +458,12 @@ RigidTransformEstimation::cross( const Point3df& u, const Point3df& v )
   return result ;
 }
 
-AimsData<float> 
-RigidTransformEstimation::criterionItem( const Point3df& p1, const Point3df& p2, 
-					 const Point3df& gc1, const Point3df& gc2, float weight )
+VolumeRef<float>
+RigidTransformEstimation::criterionItem(
+  const Point3df& p1, const Point3df& p2,
+  const Point3df& gc1, const Point3df& gc2, float weight )
 {
-  AimsData<float> a(4, 4) ;
+  VolumeRef<float> a(4, 4) ;
   
   Point3df dep( weight * ( (p2 - gc2) - (p1 - gc1) ) ), add( weight * ( (p1 - gc1) + (p2 - gc2) ) )   ;
   
@@ -457,5 +473,5 @@ RigidTransformEstimation::criterionItem( const Point3df& p1, const Point3df& p2,
   a( 0, 2 ) = dep[1] ;	a( 1, 2 ) = add[2] ;				a( 3, 2 ) = -add[0] ;	
   a( 0, 3 ) = dep[2] ;	a( 1, 3 ) = -add[1] ;	a( 2, 3 ) = add[0] ;	
 
-  return ( a.cross( a ) ) ;
+  return ( matrix_product( a, a ) );
 }
