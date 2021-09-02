@@ -13,33 +13,39 @@
 #define AIMS_REGISTRATION_TRANSFORMATION_D_H
 
 
-#include <aims/data/data_g.h>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/registration/transformation.h>
 #include <iostream>
 #include <math.h>
 
 
 template <class T>
-AimsData<T> Transformation::application(const AimsData<T>& test,Point3df p)
+carto::VolumeRef<T> Transformation::application(
+  const carto::rc_ptr<carto::Volume<T> > & test, Point3df p )
 {
   
   float angle_rad = p[2] /180.0 * M_PI;
   float c = cos( angle_rad );
   float s = sin( angle_rad );
-  AimsData<T>    testtrans(test.dimX(), test.dimY());
-  
-  
-  int x,y;
-  ForEach2d(testtrans, x, y)
+  carto::VolumeRef<T>    testtrans( test->getSizeX(), test->getSizeY() );
+
+  int x,y, nx = testtrans->getSizeX(), ny = testtrans->getSizeY();
+
+  for( y=0; y<ny; ++y )
+    for( x=0; x<nx; ++x )
     {
       testtrans(x,y)      = T( 195 );
 
-      if(((_cx+c*(x-_cx)+s*(y-_cy)-p[1])<test.dimX())&&((_cx+c*(x-_cx)+s*(y-_cy)-p[1])>=0)&&((_cy-s*(x-_cx)+c*(y-_cy)-p[0])<test.dimY())&&((_cy-s*(x-_cx)+c*(y-_cy)-p[0])>=0))
-        testtrans(x,y)	= test( unsigned(_cx+c*(x-_cx)+s*(y-_cy)-p[1]), unsigned(_cy-s*(x-_cx)+c*(y-_cy)-p[0]) ) ;
+      if( ((_cx + c*(x-_cx) + s*(y-_cy) - p[1]) < nx)
+          && ((_cx + c*(x-_cx) + s*(y-_cy) - p[1]) >= 0)
+          && ((_cy - s*(x-_cx) + c*(y-_cy) - p[0]) < ny)
+          && ((_cy - s*(x-_cx) + c*(y-_cy) - p[0]) >= 0) )
+        testtrans(x,y)	= test->at(
+          unsigned( _cx + c*(x-_cx) + s*(y-_cy) - p[1]),
+          unsigned( _cy - s*(x-_cx) + c*(y-_cy)-p[0]) ) ;
     }
 
-  return (testtrans);
+  return testtrans;
 } 
 
 

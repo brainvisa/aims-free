@@ -8,29 +8,35 @@
  *     France
  */
 
-#include <math.h>
-#include <aims/resampling/motion.h>
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/registration/transformation_d.h>
+#include <math.h>
 
 
-// using namespace aims;
+using namespace aims;
+// using namespace carto; // cause namespace conflict for Transformation
 using namespace std;
 
 
 
-template AimsData<int8_t> Transformation::application(const AimsData<int8_t>& test,Point3df p);
-template AimsData<uint8_t> Transformation::application(const AimsData<uint8_t>& test,Point3df p);
-template AimsData<int16_t> Transformation::application(const AimsData<int16_t>& test,Point3df p);
-template AimsData<uint16_t> Transformation::application(const AimsData<uint16_t>& test,Point3df p);
-template AimsData<int32_t> Transformation::application(const AimsData<int32_t>& test,Point3df p);
-template AimsData<uint32_t> Transformation::application(const AimsData<uint32_t>& test,Point3df p);
-template AimsData<float> Transformation::application(const AimsData<float>& test,Point3df p);
-template AimsData<double> Transformation::application(const AimsData<double>& test,Point3df p);
+template carto::VolumeRef<int8_t> Transformation::application(const carto::rc_ptr<carto::Volume<int8_t> > & test,Point3df p);
+template carto::VolumeRef<uint8_t> Transformation::application(const carto::rc_ptr<carto::Volume<uint8_t> > & test,Point3df p);
+template carto::VolumeRef<int16_t> Transformation::application(const carto::rc_ptr<carto::Volume<int16_t> > & test,Point3df p);
+template carto::VolumeRef<uint16_t> Transformation::application(const carto::rc_ptr<carto::Volume<uint16_t> > & test,Point3df p);
+template carto::VolumeRef<int32_t> Transformation::application(const carto::rc_ptr<carto::Volume<int32_t> > & test,Point3df p);
+template carto::VolumeRef<uint32_t> Transformation::application(const carto::rc_ptr<carto::Volume<uint32_t> > & test,Point3df p);
+template carto::VolumeRef<float> Transformation::application(const carto::rc_ptr<carto::Volume<float> > & test,Point3df p);
+template carto::VolumeRef<double> Transformation::application(const carto::rc_ptr<carto::Volume<double> > & test,Point3df p);
 
 
 
 
-bool Transformation::testdelta(const Motion& p, const Motion& q )
+bool Transformation::testdelta(const AffineTransformation3d & p,
+                               const AffineTransformation3d & q )
 {
   bool boule;  
 
@@ -64,7 +70,7 @@ bool Transformation::testdelta(const Motion& p, const Motion& q )
 
 
 
-Point3df Transformation::composition(Point3df p,Point3df q)
+Point3df Transformation::composition(Point3df p, Point3df q)
 {
   
   //mise a jour de la transfo globale p

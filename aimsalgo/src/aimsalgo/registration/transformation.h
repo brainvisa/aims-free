@@ -11,7 +11,8 @@
 #ifndef AIMS_REGISTRATION_TRANSFORMATION_H
 #define AIMS_REGISTRATION_TRANSFORMATION_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
+
 namespace aims
 {
   class AffineTransformation3d;
@@ -25,7 +26,8 @@ class Transformation
   ~Transformation() {};
   
   template <class T>
-  AimsData<T> application(const AimsData<T>&,Point3df);
+  carto::VolumeRef<T> application( const carto::rc_ptr<carto::Volume<T> > &,
+                                   Point3df );
   
   
   float getcx() {return _cx;}
