@@ -106,8 +106,8 @@ class DataModel
     std::vector<float>      _partDer;       ///< dMI/dParam
     std::vector<float>      _upperBound;    ///< parameters bound for optimization
     std::vector<float>      _lowerBound;    ///< parameters bound for optimization
-    carto::VolumeRef<int16_t> & _reference;     ///< reference image
-    carto::VolumeRef<int16_t> & _test;          ///< test image
+    carto::VolumeRef<int16_t> _reference;     ///< reference image
+    carto::VolumeRef<int16_t> _test;          ///< test image
     Point3df                _maxDef;        ///< maximum deformation allowed in mm
 
     // 2d case
