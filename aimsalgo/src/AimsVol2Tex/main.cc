@@ -44,7 +44,7 @@ public:
                    const string & outexfile,
                    float radius, float height, float int_height, int mode,
                    int vmode, const string & projtexfile, float bg,
-                   int16_t mbg );
+                   int16_t mbg, const string & apply_to );
   
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
@@ -53,7 +53,7 @@ public:
   bool labelMap( VolumeRef<T> data );
 
 private:
-  string       meshf, brainf, otexf;
+  string       meshf, brainf, otexf, apply_tof;
   float        radius, height, int_height;
   int          mode;
   int          vmode;
@@ -68,10 +68,11 @@ LabelMapTexture::LabelMapTexture( const string & meshfile,
                                   float rad, float hei, float int_height,
                                   int mod, int vmode,
                                   const string & projtexfile, float bg,
-                                  int16_t mbg )
+                                  int16_t mbg, const string & apply_to )
     : Process(), meshf( meshfile ), brainf(brainfile), otexf( outexfile ),
       radius( rad ), height( hei ), int_height( int_height ), mode( mod ),
-      vmode( vmode ), projtexfile( projtexfile ), bg( bg ), mbg( mbg )
+      vmode( vmode ), projtexfile( projtexfile ), bg( bg ), mbg( mbg ),
+      apply_tof( apply_to )
 {
     registerProcessType( "Volume", "S8", &doit<int8_t> );
     registerProcessType( "Volume", "U8", &doit<uint8_t> );
@@ -174,7 +175,10 @@ void buildCylinder( set<Point3d, BucketMapLess> & cylinder, const Point3df & u,
             }
           }
           else
+          {
             cylinder.insert( pint2 );
+            mask->at( pn + pd ) = 1;
+          }
         }
         else
           cylinder.insert( pint2 );
@@ -184,10 +188,10 @@ void buildCylinder( set<Point3d, BucketMapLess> & cylinder, const Point3df & u,
   bool removed = true;
   set<Point3d, BucketMapLess>::iterator it, jt;
 
-//   cout << "point: " << p << endl;
+  /* cout << "point: " << p << endl;
+  cout << "todo: " << todo.size() << endl; */
   while( removed && !todo.empty() ) // exit when no point has been updated
   {
-//     cout << "todo: " << todo.size() << endl;
     removed = false;
     it = todo.begin();
     while( it!=todo.end() )
@@ -210,7 +214,8 @@ void buildCylinder( set<Point3d, BucketMapLess> & cylinder, const Point3df & u,
         ++it;
     }
   }
-//   cout << "non-connected: " << todo.size() << endl;
+  if( !todo.empty() )
+    cout << "non-connected: " << todo.size() << endl;
 }
 
 
@@ -248,7 +253,58 @@ bool BrainMaskReader::doit( Process & p, const string & fname, Finder & f )
 }
 
 
-template<class T> 
+// --
+
+
+template <typename U>
+class ConvReader : public Process
+{
+public:
+  ConvReader() : Process()
+  {
+      registerProcessType( "Volume", "S8", &doit<int8_t> );
+      registerProcessType( "Volume", "U8", &doit<uint8_t> );
+      registerProcessType( "Volume", "S16", &doit<int16_t> );
+      registerProcessType( "Volume", "U16", &doit<uint16_t> );
+      registerProcessType( "Volume", "S32", &doit<int32_t> );
+      registerProcessType( "Volume", "U32", &doit<uint32_t> );
+      registerProcessType( "Volume", "FLOAT", &doit<float> );
+  }
+
+  template <typename T>
+  static bool doit( Process & p, const string & fname, Finder & f );
+
+  VolumeRef<U> values;
+};
+
+
+template <typename U> template <typename T>
+bool ConvReader<U>::doit( Process & p, const string & fname, Finder & f )
+{
+  ConvReader<U> & proc = static_cast<ConvReader<U> &>( p );
+  Reader<Volume<T> > r( fname );
+  VolumeRef<T> vol( r.read() );
+  ShallowConverter<VolumeRef<T>, VolumeRef<U> > conv;
+  VolumeRef<U> *vp = conv( vol );
+  proc.values = *vp;
+  delete vp;
+}
+
+namespace
+{
+
+  template <typename T>
+  inline
+  bool first_comparator ( const pair<T, T> & l, const pair<T, T> & r )
+  {
+    return l.first < r.first;
+  }
+
+}
+
+// --
+
+template<class T>
 bool LabelMapTexture::labelMap( VolumeRef<T> data )
 {
   /* Loading input */
@@ -272,7 +328,19 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
     br.execute( brainf );
     brainData = br.brainmask;
     if(verbose)
-          cout << "done.\n";
+      cout << "done.\n";
+  }
+
+  rc_ptr<Volume<T> > apply_to;
+  if( !apply_tof.empty() )
+  {
+    if( verbose )
+      cout << "reading values to apply to...";
+    ConvReader<T> fr;
+    fr.execute( apply_tof );
+    apply_to = fr.values;
+    if(verbose)
+      cout << "done.\n";
   }
 
   rc_ptr<TimeTexture<int16_t> > tex_mask;
@@ -303,9 +371,9 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
   unsigned                          p;
   int                               min_cyl, max_cyl;
   T                                 val=0, nlabel, nlabel_max, label_max,
-                                    cur_label;
-  typename vector< T >::iterator    lab, endlab;
-  vector< T >                       label;
+                                    cur_label, apply_val = 0;
+  typename vector< pair<T, T> >::iterator    lab, endlab;
+  vector< pair<T, T> >              label;
   vector< float >                   vs = data->getVoxelSize();
 
   vs.resize( 3, 1. );
@@ -418,7 +486,9 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
           val = data->at( (*ic)[0], (*ic)[1], (*ic)[2], t );
           if( val != bg )
           {
-            label.push_back( val );
+            if( apply_to.get() )
+              apply_val = apply_to->at( (*ic)[0], (*ic)[1], (*ic)[2], t );
+            label.push_back( make_pair( val, apply_val ) );
           }
         }
 
@@ -429,12 +499,15 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
             float sum = 0;
             endlab = label.end();
             for( lab=label.begin(); lab!=endlab; ++lab )
-              sum += *lab; // labels are actually values here
+              if( apply_to.get() )
+                sum += lab->second;
+              else
+                sum += lab->first; // labels are actually values here
             otex.push_back( sum / label.size() );
           }
           else
           {
-            sort(label.begin(), label.end());
+            sort( label.begin(), label.end(), first_comparator<T> );
 
             if( vmode == MAJORITY )
             {
@@ -445,7 +518,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
               label_max = 0;
               for(lab=label.begin(); lab!=endlab; ++lab )
               {
-                if( *lab != cur_label )
+                if( lab->first != cur_label )
                 {
                     if( nlabel > nlabel_max )
                     {  // the largest label
@@ -453,7 +526,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
                       label_max = cur_label;
                     }
                     // new label
-                    cur_label = *lab;
+                    cur_label = lab->first;
                     nlabel = 1;
                 }
                 else
@@ -468,11 +541,26 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
               otex.push_back( label_max );
             }
             else if( vmode == MAX )
-              otex.push_back( label.back() );
+            {
+              if( apply_to.get() )
+                otex.push_back( label.back().second );
+              else
+                otex.push_back( label.back().first );
+            }
             else if( vmode == MIN )
-              otex.push_back( label.front() );
+            {
+              if( apply_to.get() )
+                otex.push_back( label.front().second );
+              else
+                otex.push_back( label.front().first );
+            }
             else if( vmode == MEDIAN )
-              otex.push_back( label[ ( label.size() + 1 ) / 2 ] );
+            {
+              if( apply_to.get() )
+                otex.push_back( label[ ( label.size() + 1 ) / 2 ].second );
+              else
+                otex.push_back( label[ ( label.size() + 1 ) / 2 ].first );
+            }
           }
         }
         else
@@ -493,7 +581,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
 
 int main( int argc, const char** argv )
 {
-  string                       volumefile, outexfile;
+  string                       volumefile, outexfile, apply_to;
   Reader<AimsSurfaceTriangle>  meshfile;
   float                        radius = 1., height = 1., int_height = 0;
   int                          mode = 3;
@@ -537,34 +625,49 @@ int main( int argc, const char** argv )
   app.addOption( mbg, "--maskbg",
                  "background value in the input masks (brain and projection "
                  "texture, if any (default: 0)", true );
+  app.addOption( apply_to, "-a",
+                 "apply to values from this other input volume.\n"
+                 "In min/max/median modes, take the min/max/median position "
+                 "for each cylinder from the input volume, but take the "
+                 "output texture value in another volume specified here. This "
+                 "option is not useful in average mode since in that case it "
+                 "does not differ from using an optional mask and the input "
+                 "volume. To be clearer we get for each cylinder the max "
+                 "position (for instance) of input volume (-i) values, then "
+                 "get the output texture from this volume (-a) at the same "
+                 "position.\nThe \"majority\" value mode does not use this "
+                 "additional volume.\n"
+                 "The apply_to volume is converted into the same data type as "
+                 "the main input volume." );
   app.alias( "--mesh", "-m" );
   app.alias( "--input", "-i" );
   app.alias( "--output", "-o" );
+  app.alias( "--apply_to", "-a" );
 
   try
+  {
+    app.initialize();
+    if( verbose )
+      cout << "Init program" << endl;
+    LabelMapTexture	proc( meshfile.fileName(), brainfile.fileName(),
+                            outexfile,
+                            radius, height, int_height, mode, vmode,
+                            projtexfile.fileName(), bg, mbg, apply_to );
+    if( verbose )
+      cout << "Starting program.." << endl;
+    if( !proc.execute( volumefile ) )
     {
-      app.initialize();
-      if( verbose )
-        cout << "Init program" << endl;
-      LabelMapTexture	proc( meshfile.fileName(), brainfile.fileName(),
-                              outexfile,
-                              radius, height, int_height, mode, vmode,
-                              projtexfile.fileName(), bg, mbg );
-      if( verbose )
-        cout << "Starting program.." << endl;
-      if( !proc.execute( volumefile ) )
-      {
-            cout << "Couldn't process file - aborted\n";
-            return( 1 );
-      }
+      cout << "Couldn't process file - aborted\n";
+      return( 1 );
     }
+  }
   catch( user_interruption & )
-    {
-    }
+  {
+  }
   catch( exception & e )
-    {
-      cerr << e.what() << endl;
-      return EXIT_FAILURE;
-    }
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
   return EXIT_SUCCESS;
 }
