@@ -377,9 +377,51 @@ Here should be an example of an *ascii* bucket file.
 ``.bundles`` bundles / fibers format
 ====================================
 
-.. todo::
+Definition of curve bundles format (``*.bundles``) used in Brainvisa
 
-  To be continued...
+1. Introduction
+---------------
 
+This document describes the main format used by *brainvisa* and *anatomist* to represent named sets of curves.
+
+
+2. Format description
+---------------------
+
+The bundle format is composed of two files. One human readable file with the extension ``.bundles`` and one data file with the extension ``.bundlesdata``. The ``*.bundles`` file contains a generic header with the same format as ``*.minf`` files of *brainvisa*.
+
+A ``*.bundles`` file contains the following fields :
+
+**format:** (required)
+    Format identifier. A format identifier uses the following pattern: ``<format_name>.<major_version>.<minor_version>``. To date, ``bundles_1.0`` value is required.
+
+**space_dimension:** (optional, default = 3)
+    Space dimension. Must be 3 for ``bundles_1.0``.
+
+**curves_count:** (required)
+    Number of fibers in data file (required). Must be > 0 for ``bundles_1.0``.
+
+**data_file_name:** (optional, default = ``*.bundlesdata``)
+    File where to find the data. Must be ``*.bundlesdata`` for ``bundles_1.0``.
+
+A star (``*``) in the file name is replaced by the header file name without its extension. This file contains a series of curves. Each curve is a series of points. Each point is a series of ``space_dimension`` coordinates.
+
+In ascii mode:
+
+* *coordinate* is a decimal number.
+
+* A *point* is ``space_dimension`` space-separated *coordinates*.
+
+* A *curve* is a comma separated series of *points*.
+
+* There is one and only one *curve* per line.
+
+In binary mode:
+
+* A *coordinate* is a 8 bytes floating point number (a *double* in C or C++).
+
+* A *point* is the concatenation of ``space_dimension`` *coordinates*.
+
+* A *curve* is a 4 bytes integer representing the number of points and a series of points.
 
 
