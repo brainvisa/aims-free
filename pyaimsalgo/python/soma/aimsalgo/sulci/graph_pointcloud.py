@@ -98,7 +98,7 @@ def build_split_graph(graph, data, roots, skel=None):
     coords = data.loc[:, ['point_x', 'point_y', 'point_z']].values
     nat_coords = tal_inv.toMatrix().dot(
         np.vstack((coords.T, np.ones(coords.shape[0]))))
-    int_coords = np.round(nat_coords / np.expand_dims(vs[:] + [1.],
+    int_coords = np.round(nat_coords / np.expand_dims(vs[:3] + [1.],
                                                       1)).astype(int)
     int_coords[3,:] = 0
 
