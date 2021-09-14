@@ -37,6 +37,7 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/utility/utility_g.h>
 #include <aims/mesh/mesh_g.h>
+#include <aims/data/data.h>
 #include <cartobase/stream/fileutil.h>
 
 using namespace aims;

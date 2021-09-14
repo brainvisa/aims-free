@@ -98,25 +98,25 @@ bool Flip::flip_m( VolumeRef<T> & data, const string & filename, Finder & f )
   AimsFlip<T> flip ;
   
   if( mode == "XX" )
-    outimage = flip.doXX(data).volume();
+    outimage = flip.doXX(data);
   else if( mode == "YY" )
-      outimage = flip.doYY(data).volume();
+      outimage = flip.doYY(data);
   else if( mode == "ZZ" )
-      outimage = flip.doZZ(data).volume();
+      outimage = flip.doZZ(data);
   else if( mode == "XXYY" )
-      outimage = flip.doXXYY(data).volume();
+      outimage = flip.doXXYY(data);
   else if( mode == "XXZZ" )
-      outimage = flip.doXXZZ(data).volume();
+      outimage = flip.doXXZZ(data);
   else if( mode == "YYZZ" )
-      outimage = flip.doYYZZ(data).volume();
+      outimage = flip.doYYZZ(data);
   else if( mode == "XXYYZZ" )
-      outimage = flip.doXXYYZZ(data).volume();
+      outimage = flip.doXXYYZZ(data);
   else if( mode == "XY" )
-      outimage = flip.doXY(data).volume();
+      outimage = flip.doXY(data);
   else if( mode == "XZ" )
-      outimage = flip.doXZ(data).volume();
+      outimage = flip.doXZ(data);
   else if( mode == "YZ" )
-      outimage = flip.doYZ(data).volume();
+      outimage = flip.doYZ(data);
   else
       throw runtime_error("Wrong mode") ;
 

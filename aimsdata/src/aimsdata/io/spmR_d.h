@@ -41,7 +41,8 @@
 #include <aims/io/defaultItemR.h>
 #include <aims/io/spmheader.h>
 #include <aims/utility/flip.h>
-#include <aims/resampling/motion.h>
+#include <aims/data/data.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
 #include <soma-io/datasource/filedatasource.h>
@@ -185,9 +186,9 @@ namespace aims
     std::string	   fnm;
 
     std::vector<float> vstom;
-    Motion  stom;
+    AffineTransformation3d  stom;
     if( hdr->getProperty( "storage_to_memory", vstom ) )
-      stom = Motion( vstom );
+      stom = AffineTransformation3d( vstom );
     else
     {
       // standard orientation
@@ -240,7 +241,7 @@ namespace aims
   template<typename T> void 
   SpmReader<T>::readFrame( std::ifstream & is, AimsData<T> & data, int t, 
                            const std::string &, SpmHeader*, bool bswap, 
-                           const Motion & stom )
+                           const AffineTransformation3d & stom )
   {
     DefaultItemReader<T> itemR ;
     ItemReader<T>	*ir 
@@ -253,7 +254,7 @@ namespace aims
                            int16_t( rint( incf[2] ) ), 0 );
     Point3df d0f;
     Point4d d0;
-    Motion  m2s = stom.inverse();
+    AffineTransformation3d  m2s = stom.inverse();
     Point3df df = m2s.transform( Point3df( data.dimX(), data.dimY(),
                                  data.dimZ() ) )
         - m2s.transform( Point3df( 0, 0, 0 ) );
@@ -286,7 +287,7 @@ namespace aims
   void 
   SpmReader<T>::readScaledFrame( std::ifstream & is, AimsData<T>& data, 
                                  int t, SpmHeader *hdr, bool bswap, 
-                                 const Motion & stom )
+                                 const AffineTransformation3d & stom )
   {
     float scaleFactor = 1;
     bool scaleFactorApplied = false;
@@ -307,7 +308,7 @@ namespace aims
                            int16_t( rint( incf[2] ) ), 0 );
     Point3df d0f;
     Point4d d0;
-    Motion  m2s = stom.inverse();
+    AffineTransformation3d  m2s = stom.inverse();
     Point3df df = m2s.transform( Point3df( data.dimX(), data.dimY(),
                                  data.dimZ() ) )
         - m2s.transform( Point3df( 0, 0, 0 ) );
@@ -336,7 +337,7 @@ namespace aims
   SpmReader<float>::readFrame( std::ifstream & is, AimsData<float> & data, 
                                int t, const std::string & type, 
                                SpmHeader* hdr, bool bswap, 
-                               const Motion & stom )
+                               const AffineTransformation3d & stom )
   {
     if ( type == "S8") 
       readScaledFrame<int8_t>( is, data, t, hdr, bswap, stom );
@@ -363,7 +364,7 @@ namespace aims
   SpmReader<double>::readFrame( std::ifstream & is, AimsData<double>& data, 
                                 int t, const std::string & type, 
                                 SpmHeader* hdr, bool bswap,
-                                const Motion & stom )
+                                const AffineTransformation3d & stom )
   {
     if ( type == "S8") 
       readScaledFrame<int8_t>( is, data, t, hdr, bswap, stom );
