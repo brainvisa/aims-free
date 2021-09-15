@@ -20,7 +20,10 @@ BRAINVISA_DEPENDENCY( RUN DEPENDS "soma-base" RUN ">= ${soma-base_VERSION};<< ${
 BRAINVISA_DEPENDENCY( RUN RECOMMENDS brainvisa-share RUN ">= ${brainvisa-share_VERSION}" )
 
 
-find_package( Blitz )
+# blitz++ was historically supposed to be an optional dependency, however some
+# code actually requires it now. We should decide if we either want to keep it
+# optional, or require it for good.
+find_package( Blitz REQUIRED )
 if( BLITZ_FOUND )
   BRAINVISA_DEPENDENCY( RUN DEPENDS blitz++ RUN )
   set( BLITZ_FIND_PACKAGE "find_package( Blitz REQUIRED )" )
