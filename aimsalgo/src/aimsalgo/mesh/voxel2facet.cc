@@ -139,10 +139,7 @@ void Mesher::getInterface( map< size_t, list< MapOfFacet > >& interface,
 {
   int x, y, z, f, v;
 
-  cout << "getInterface in_thing.dimZ: " << in_thing->getSizeZ() << endl;
-
   VolumeRef<short> thing = reshapedVolume( in_thing );
-  cout << "getInterface thing.dimZ: " << thing.getSizeZ() << endl;
 
   int dimX = thing.getSizeX();
   int dimY = thing.getSizeY();
