@@ -40,6 +40,7 @@
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/type/datatypetraits.h>
 #include <cartobase/smart/rcptr.h>
+#include <cartobase/containers/nditerator.h>
 //--- std --------------------------------------------------------------------
 #include <algorithm>
 #include <exception>
@@ -406,6 +407,7 @@ namespace carto
     //--- Volume [op] other --------------------------------------------------
 
     template <typename T, typename UnaryFunction>
+    inline
     Volume<typename UnaryFunction::result_type>
     apply( const Volume<T> & vol, UnaryFunction func )
     {
@@ -416,6 +418,7 @@ namespace carto
     }
 
     template <typename T, typename U, typename BinaryFunction>
+    inline
     Volume<typename BinaryFunction::result_type>
     apply( const Volume<T> & vol1, const Volume<U> & vol2, BinaryFunction func )
     {
@@ -428,6 +431,7 @@ namespace carto
     //--- VolumeRef [op]= other ----------------------------------------------
 
     template <typename T, typename UnaryFunction>
+    inline
     rc_ptr<Volume<typename UnaryFunction::result_type> >
     apply( const rc_ptr<Volume<T> > & vol, UnaryFunction func )
     {
@@ -438,6 +442,7 @@ namespace carto
     }
 
     template <typename T, typename U, typename BinaryFunction>
+    inline
     rc_ptr<Volume<typename BinaryFunction::result_type> >
     apply( const rc_ptr<Volume<T> > & vol1, const Volume<U> & vol2, BinaryFunction func )
     {
@@ -450,6 +455,7 @@ namespace carto
     //--- Volume [op]= other -------------------------------------------------
 
     template <typename T, typename UnaryFunction>
+    inline
     Volume<T> & selfApply( Volume<T> & vol, UnaryFunction func )
     {
       applyTowards( vol, vol, func );
@@ -457,6 +463,7 @@ namespace carto
     }
 
     template <typename T, typename U, typename BinaryFunction>
+    inline
     Volume<T> & selfApply( Volume<T> & vol1, const Volume<U> & vol2, BinaryFunction func )
     {
       applyTowards( vol1, vol2, vol1, func );
@@ -466,6 +473,7 @@ namespace carto
     //--- VolumeRef [op]= other ----------------------------------------------
 
     template <typename T, typename UnaryFunction>
+    inline
     rc_ptr<Volume<T> > & selfApply( rc_ptr<Volume<T> > & vol, UnaryFunction func )
     {
       selfApply( *vol, func );
@@ -473,6 +481,7 @@ namespace carto
     }
 
     template <typename T, typename U, typename BinaryFunction>
+    inline
     rc_ptr<Volume<T> > & selfApply( rc_ptr<Volume<T> > & vol1, const Volume<U> & vol2, BinaryFunction func )
     {
       selfApply( *vol1, vol2, func );
@@ -481,45 +490,77 @@ namespace carto
 
     //--- Volume [op] other -> Output  ---------------------------------------
     template <typename T, typename OUTP, typename UnaryFunction>
+    inline
     Volume<OUTP> &
-    applyTowards( const Volume<T> & vol, Volume<OUTP> & dst, UnaryFunction func )
+    applyTowards( const Volume<T> & vol, Volume<OUTP> & dst,
+                  UnaryFunction func )
     {
-      for( long t = 0; t < vol.getSizeT(); ++t )
-        for( long z = 0; z < vol.getSizeZ(); ++z )
-          for( long y = 0; y < vol.getSizeY(); ++y )
-            for( long x = 0; x < vol.getSizeX(); ++x )
-              dst( x, y, z, t ) = func( vol( x, y, z, t ) );
+      carto::const_line_NDIterator<T> it( &vol.at( 0 ), vol.getSize(),
+                                          vol.getStrides() );
+      carto::line_NDIterator<OUTP> dit( &dst.at( 0 ), dst.getSize(),
+                                        dst.getStrides() );
+      const T *p, *pp;
+      OUTP *d;
+      for( ; !it.ended(); ++it, ++dit )
+      {
+        p = &*it;
+        d = &*dit;
+        for( pp=p + it.line_length(); p!=pp;
+             it.inc_line_ptr( p ), dit.inc_line_ptr( d ) )
+          *d = func( *p );
+      }
       return dst;
     }
 
     template <typename T, typename U, typename OUTP, typename BinaryFunction>
+    inline
     Volume<OUTP> &
     applyTowards( const Volume<T> & vol1, const Volume<U> & vol2, Volume<OUTP> & dst, BinaryFunction func )
     {
-      for( long t = 0; t < vol1.getSizeT() && t < vol2.getSizeT(); ++t )
-        for( long z = 0; z < vol1.getSizeZ() && z < vol2.getSizeZ(); ++z )
-          for( long y = 0; y < vol1.getSizeY() && y < vol2.getSizeY(); ++y )
-            for( long x = 0; x < vol1.getSizeX() && x < vol2.getSizeX(); ++x )
-              dst( x, y, z, t ) = func( vol1( x, y, z, t ), vol2( x, y, z, t ) );
+      carto::const_line_NDIterator<T> it1( &vol1.at( 0 ), vol1.getSize(),
+                                           vol1.getStrides() );
+      carto::const_line_NDIterator<U> it2( &vol2.at( 0 ), vol2.getSize(),
+                                           vol2.getStrides() );
+      carto::line_NDIterator<OUTP> dit( &dst.at( 0 ), dst.getSize(),
+                                        dst.getStrides() );
+      const T *p, *pp;
+      const U *p2;
+      OUTP *d;
+      for( ; !it1.ended(); ++it1, ++it2, ++dit )
+      {
+        p = &*it1;
+        p2 = &*it2;
+        d = &*dit;
+        for( pp=p + it1.line_length(); p!=pp;
+             it1.inc_line_ptr( p ), it2.inc_line_ptr( p2 ),
+             dit.inc_line_ptr( d ) )
+          *d = func( *p, *p2 );
+      }
       return dst;
     }
 
     //--- Volume: accumulate -------------------------------------------------
 
     template <typename OUTP, typename T, typename BinaryFunction>
+    inline
     OUTP accumulate( const Volume<T> & vol, BinaryFunction func, OUTP initial )
     {
-      for( long t = 0; t < vol.getSizeT(); ++t )
-        for( long z = 0; z < vol.getSizeZ(); ++z )
-          for( long y = 0; y < vol.getSizeY(); ++y )
-            for( long x = 0; x < vol.getSizeX(); ++x )
-              initial = func( initial, vol( x, y, z, t ) );
+      carto::const_line_NDIterator<T> it( &vol.at( 0 ), vol.getSize(),
+                                          vol.getStrides() );
+      const T *p, *pp;
+      for( ; !it.ended(); ++it )
+      {
+        p = &*it;
+        for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
+          initial = func( initial, *p );
+      }
       return initial;
     }
 
     //--- VolumeRef: accumulate ----------------------------------------------
 
     template <typename OUTP, typename T, typename BinaryFunction>
+    inline
     OUTP accumulate( const rc_ptr<Volume<T> > & vol, BinaryFunction func, OUTP initial )
     {
       return accumulate<OUTP, T, BinaryFunction>( *vol, func, initial );
@@ -534,24 +575,28 @@ namespace carto
   //--- transfer -------------------------------------------------------------
 
   template <typename T>
+  inline
   void transfer( const Volume<T> & src, Volume<T> & dst )
   {
     transfer<T,T>( src, dst );
   }
 
   template <typename T>
+  inline
   void transfer( const rc_ptr<Volume<T> > & src, rc_ptr<Volume<T> > & dst )
   {
     transfer<T,T>( src, dst );
   }
 
   template <typename OUTP, typename INP>
+  inline
   void transfer( const Volume<INP> & src, Volume<OUTP> & dst )
   {
     volumeutil::applyTowards( src, dst, volumeutil::identity<INP>() );
   }
 
   template <typename OUTP, typename INP>
+  inline
   void transfer( const rc_ptr<Volume<INP> > & src, rc_ptr<Volume<OUTP> > & dst )
   {
     transfer( *src, *dst );
@@ -560,25 +605,30 @@ namespace carto
   //--- deepcopy -------------------------------------------------------------
 
   template <typename T>
+  inline
   Volume<T> deepcopy( const Volume<T> & src )
   {
     return deepcopy<T,T>( src );
   }
 
   template <typename T>
+  inline
   rc_ptr<Volume<T> > deepcopy( const rc_ptr<Volume<T> > & src )
   {
     return deepcopy<T,T>( src );
   }
 
   template <typename OUTP, typename INP>
+  inline
   Volume<OUTP> deepcopy( const Volume<INP> & src )
   {
     Volume<OUTP> dst( src.getSize(),
                       src.allocatorContext(),
                       src.allocatorContext().isAllocated() );
     dst.copyHeaderFrom( src.header() );
-    if( src.allocatorContext().isAllocated() )
+    if( src.allocatorContext().isAllocated()
+        && src.allocatorContext().allocatorType()
+          != AllocatorStrategy::Unallocated )
       transfer( src, dst );
 
     if( src.refVolume() )
@@ -588,7 +638,9 @@ namespace carto
           srcparent->getSize(),
           srcparent->allocatorContext(),
           srcparent->allocatorContext().isAllocated() ) );
-      if( srcparent->allocatorContext().isAllocated() )
+      if( srcparent->allocatorContext().isAllocated()
+          && srcparent->allocatorContext().allocatorType()
+          != AllocatorStrategy::Unallocated )
         transfer( srcparent, dstparent );
       dst.setRefVolume( dstparent );
       dst.setPosInRefVolume( src.posInRefVolume() );
@@ -605,7 +657,9 @@ namespace carto
           srcparent->allocatorContext(),
           srcparent->allocatorContext().isAllocated() ) );
       dstparent->copyHeaderFrom( srcparent->header() );
-      if( srcparent->allocatorContext().isAllocated() )
+      if( srcparent->allocatorContext().isAllocated()
+          && srcparent->allocatorContext().allocatorType()
+            != AllocatorStrategy::Unallocated )
         transfer( srcparent, dstparent );
       dstchild->setRefVolume( dstparent );
       dstchild->setPosInRefVolume( srcchild->posInRefVolume() );
@@ -617,6 +671,7 @@ namespace carto
   }
 
   template <typename OUTP, typename INP>
+  inline
   rc_ptr<Volume<OUTP> > deepcopy( const rc_ptr<Volume<INP> > & src )
   {
     rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>(
@@ -624,7 +679,9 @@ namespace carto
         src->allocatorContext(),
         src->allocatorContext().isAllocated() ) );
     dst->copyHeaderFrom( src->header() );
-    if( src->allocatorContext().isAllocated() )
+    if( src->allocatorContext().isAllocated()
+        && src->allocatorContext().allocatorType()
+          != AllocatorStrategy::Unallocated )
       transfer( src, dst );
 
     rc_ptr<Volume<INP> > srcchild = src;
@@ -638,7 +695,9 @@ namespace carto
           srcparent->allocatorContext(),
           srcparent->allocatorContext().isAllocated() ) );
       dstparent->copyHeaderFrom( srcparent->header() );
-      if( srcparent->allocatorContext().isAllocated() )
+      if( srcparent->allocatorContext().isAllocated()
+          && srcparent->allocatorContext().allocatorType()
+          != AllocatorStrategy::Unallocated )
         transfer( srcparent, dstparent );
       dstchild->setRefVolume( dstparent );
       dstchild->setPosInRefVolume( srcchild->posInRefVolume() );
@@ -653,18 +712,21 @@ namespace carto
   //--- copy -----------------------------------------------------------------
 
   template <typename T>
+  inline
   Volume<T> copy( const Volume<T> & src )
   {
     return copy<T,T>( src );
   }
 
   template <typename T>
+  inline
   rc_ptr<Volume<T> > copy( const rc_ptr<Volume<T> > & src )
   {
     return copy<T,T>( src );
   }
 
   template <typename OUTP, typename INP>
+  inline
   Volume<OUTP> copy( const Volume<INP> & src )
   {
     Volume<OUTP> dst( src.getSize() );
@@ -674,6 +736,7 @@ namespace carto
   }
 
   template <typename OUTP, typename INP>
+  inline
   rc_ptr<Volume<OUTP> > copy( const rc_ptr<Volume<INP> > & src )
   {
     rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>( src->getSize() ) );
@@ -686,18 +749,21 @@ namespace carto
   //--- copyStructure --------------------------------------------------------
 
   template <typename T>
+  inline
   Volume<T> copyStructure( const Volume<T> & src )
   {
     return copyStructure<T,T>( src );
   }
 
   template <typename T>
+  inline
   rc_ptr<Volume<T> > copyStructure( const rc_ptr<Volume<T> > & src )
   {
     return copyStructure<T,T>( src );
   }
 
   template <typename OUTP, typename INP>
+  inline
   Volume<OUTP> copyStructure( const Volume<INP> & src )
   {
     Volume<OUTP> dst( src.getSize(),
@@ -744,6 +810,7 @@ namespace carto
   }
 
   template <typename OUTP, typename INP>
+  inline
   rc_ptr<Volume<OUTP> > copyStructure( const rc_ptr<Volume<INP> > & src )
   {
     if( !src.get() )
@@ -785,6 +852,7 @@ namespace carto
   //==========================================================================
 
   template <typename T>
+  inline
   T min( const Volume<T> & vol )
   {
     if( vol.getSizeX() == 0 && vol.getSizeY() == 0 &&
@@ -794,6 +862,7 @@ namespace carto
   }
 
   template <typename T>
+  inline
   T min( const rc_ptr<Volume<T> > & vol )
   {
     if( !vol.get() || ( vol->getSizeX() == 0 && vol->getSizeY() == 0 &&
@@ -803,6 +872,7 @@ namespace carto
   }
 
   template <typename T>
+  inline
   T max( const Volume<T> & vol )
   {
     if( vol.getSizeX() == 0 && vol.getSizeY() == 0 &&
@@ -812,6 +882,7 @@ namespace carto
   }
 
   template <typename T>
+  inline
   T max( const rc_ptr<Volume<T> > & vol )
   {
     if( !vol.get() || ( vol->getSizeX() == 0 && vol->getSizeY() == 0 &&
@@ -821,6 +892,7 @@ namespace carto
   }
 
   template <typename T>
+  inline
   typename DataTypeTraits<T>::LongType sum( const Volume<T> & vol )
   {
     return sum<typename DataTypeTraits<T>::LongType,T>( vol );
@@ -828,18 +900,21 @@ namespace carto
 
 
   template <typename OUTP, typename T>
+  inline
   OUTP sum( const Volume<T> & vol )
   {
     return accumulate( vol, volumeutil::plus<OUTP,T>(), static_cast<OUTP>(0) );
   }
 
   template <typename T>
+  inline
   typename DataTypeTraits<T>::LongType sum( const rc_ptr<Volume<T> > & vol )
   {
     return sum<typename DataTypeTraits<T>::LongType,T>( vol );
   }
 
   template <typename OUTP, typename T>
+  inline
   OUTP sum( const rc_ptr<Volume<T> > & vol )
   {
     if( !vol.get() )
@@ -848,24 +923,28 @@ namespace carto
   }
 
   template <typename T>
+  inline
   bool all( const Volume<T> & vol )
   {
     return volumeutil::accumulate( vol, volumeutil::logical_and<bool,T>(), true );
   }
 
   template <typename T>
+  inline
   bool all( const rc_ptr<Volume<T> > & vol )
   {
     return volumeutil::accumulate( *vol, volumeutil::logical_and<bool,T>(), true );
   }
 
   template <typename T>
+  inline
   bool any( const Volume<T> & vol )
   {
     return volumeutil::accumulate( vol, volumeutil::logical_or<bool,T>(), false );
   }
 
   template <typename T>
+  inline
   bool any( const rc_ptr<Volume<T> > & vol )
   {
     return volumeutil::accumulate( *vol, volumeutil::logical_or<bool,T>(), false );
@@ -890,6 +969,7 @@ namespace carto
   } // namespace internal
 
   template <typename T, typename U>
+  inline
   Volume<bool> valuesIn( const Volume<T> & volume, const U & set )
   {
     Volume<bool> output = copyStructure<bool, T>( volume );
@@ -898,6 +978,7 @@ namespace carto
   }
 
   template <typename T, typename U>
+  inline
   rc_ptr<Volume<bool> > valuesIn( const rc_ptr<Volume<T> > & volume, const U & set )
   {
     rc_ptr<Volume<bool> > output = copyStructure<bool, T>( volume );
@@ -920,6 +1001,7 @@ namespace carto
   } // namespace internal
 
   template <typename T, typename U>
+  inline
   Volume<bool> valuesNotIn( const Volume<T> & volume, const U & set )
   {
     Volume<bool> output = copyStructure<bool, T>( volume );
@@ -928,6 +1010,7 @@ namespace carto
   }
 
   template <typename T, typename U>
+  inline
   rc_ptr<Volume<bool> > valuesNotIn( const rc_ptr<Volume<T> > & volume, const U & set )
   {
     rc_ptr<Volume<bool> > output = copyStructure<bool, T>( volume );
@@ -950,12 +1033,14 @@ namespace carto
   } // namespace internal
 
   template <typename T, typename U>
+  inline
   void conditionalSet( Volume<T> & volume, const Volume<U> & condition, const T & value )
   {
     volumeutil::selfApply( volume, condition, internal::changeIf<T,U>(value) );
   }
 
   template <typename T, typename U>
+  inline
   void conditionalSet( rc_ptr<Volume<T> > & volume, const rc_ptr<Volume<U> > & condition, const T & value )
   {
     volumeutil::selfApply( volume, *condition, internal::changeIf<T,U>(value) );
@@ -981,6 +1066,7 @@ namespace carto
   } // namespace internal
 
   template <typename T>
+  inline
   Volume<T> invertMinMax( const Volume<T> & volume )
   {
     T min = min( volume );
@@ -989,6 +1075,7 @@ namespace carto
   }
 
   template <typename T>
+  inline
   rc_ptr<Volume<T> > invertMinMax( const rc_ptr<Volume<T> > & volume )
   {
     T min = min( volume );
@@ -1001,6 +1088,7 @@ namespace carto
   //==========================================================================
 
   template <typename T>
+  inline
   void setBorders( Volume<T> & volume,
                    const typename Volume<T>::Position4Di & top,
                    const typename Volume<T>::Position4Di & bottom )
@@ -1035,6 +1123,7 @@ namespace carto
   }
 
   template <typename T>
+  inline
   void setBorders( rc_ptr<Volume<T> > & volume,
                    const typename Volume<T>::Position4Di & top,
                    const typename Volume<T>::Position4Di & bottom )
@@ -1069,6 +1158,7 @@ namespace carto
   }
 
   template <typename T>
+  inline
   void setMinBorders( Volume<T> & volume,
                       const typename Volume<T>::Position4Di & top,
                       const typename Volume<T>::Position4Di & bottom )
@@ -1103,6 +1193,7 @@ namespace carto
   }
 
   template <typename T>
+  inline
   void setMinBorders( rc_ptr<Volume<T> > & volume,
                       const typename Volume<T>::Position4Di & top,
                       const typename Volume<T>::Position4Di & bottom )
