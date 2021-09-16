@@ -300,9 +300,6 @@ carto::VolumeRef<T> AimsThreshold<T,U>::operator () (const carto::VolumeRef<T> &
 
   res = T( 0 );
 
-  typename carto::VolumeRef<T>::iterator       it1;
-  typename carto::VolumeRef<T>::const_iterator it2;
-
   switch (_type)
   { case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
