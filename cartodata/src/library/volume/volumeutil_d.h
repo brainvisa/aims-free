@@ -73,9 +73,7 @@ namespace carto
   template <typename T> template <class UnaryFunction>
   VolumeRef<T> VolumeUtil<T>::apply( UnaryFunction f, const VolumeRef<T> & o )
   {
-    VolumeRef<T>	res
-      ( new Volume<T>( o->getSizeX(), o->getSizeY(), o->getSizeZ(),
-                       o->getSizeT() ) );
+    VolumeRef<T>	res( new Volume<T>( o->getSize() ) );
     res->header() = o->header();
 
     const_line_NDIterator<T> it( &o->at( 0 ), o->getSize(), o->getStrides() );
