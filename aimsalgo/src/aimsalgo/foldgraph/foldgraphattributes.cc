@@ -655,6 +655,7 @@ void FoldGraphAttributes::prepareDilatedDepthMap
   AimsThreshold<int16_t, int16_t>       thr2( AIMS_EQUAL_TO, -111, 0, 0);
   thb0 = thr2(th);
   thb = VolumeRef<int16_t>( thb0->getSize(), vector<int>( 3, 1 ) );
+  thb->copyHeaderFrom( thb0->header() );
   thb->copySubVolume( thb0 );
   thb0.reset( 0 ); // free temp thb0
   thb.fillBorder(-1);
@@ -670,9 +671,10 @@ void FoldGraphAttributes::prepareDilatedDepthMap
         for (x = 0; x < thb.getSizeX(); x++)
           if (thb(x, y, z, t) and th->at(x, y, z, t) == _inside)
             _dilated_depthmap(x, y, z, t) = forbidden;
+
   AimsDistanceFrontPropagation<float>( _dilated_depthmap, forbidden, _inside,
                                        3, 3, 3, 1., false );
-  
+
   if( verbose )
     cout << "dilated depth map done." << endl;
 }
