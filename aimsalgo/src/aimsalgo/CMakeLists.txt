@@ -77,10 +77,8 @@ set( _headers
     histogram/regularBinnedHisto.h
     information/information.h
     information/pdf.h
-#    information/mutualinfo.h
     interpolation/interpolatedvolume.h
     interpolation/interpolatedvolume_d.h
-#    interpolation/splineleastsquare.h
     io/roiselectorR.h
     io/roigtmR.h
     io/roigtmW.h
@@ -156,7 +154,6 @@ set( _headers
     optimization/lmfunc.h
     optimization/lmgamma.h
     optimization/lmgauss.h
-#   optimization/lmmultcompmodel.h
     optimization/objective.h
     optimization/optimization_g.h
     optimization/optimizer.h
@@ -341,10 +338,6 @@ set( _headers
     signalfilter/filteringfunction_linear_rgb.h
     signalfilter/filteringfunction_linear_rgb_d.h
     signalfilter/filteringimagealgorithm.h
-#    signalfilter/filter_nonlinear.h
-#    signalfilter/filter_nonlinear_d.h
-#    signalfilter/filter_linear.h
-#    signalfilter/filter_linear_d.h
     signalfilter/firfilter.h
     signalfilter/g2dsmooth.h
     signalfilter/g3dsmooth.h
@@ -452,7 +445,6 @@ set( _sources
     information/mutual.cc
     information/pdf.cc
     interpolation/interpolatedvolume.cc
-#    interpolation/splineleastsquare.cc
     io/roiselectorR.cc
     io/roigtmR.cc
     io/roigtmW.cc
@@ -590,8 +582,6 @@ set( _sources
     signalfilter/filteringfunction_element_rgb.cc
     signalfilter/filteringfunction_linear.cc
     signalfilter/filteringfunction_linear_rgb.cc
-#    signalfilter/filter_nonlinear.cc
-#    signalfilter/filter_linear.cc
     signalfilter/firfilter.cc
     signalfilter/gcoef.cc
     signalfilter/gcolumns.cc
