@@ -157,61 +157,6 @@ set( _headers
     optimization/optimizer.h
     optimization/powell.h
     optimization/singleoptimizer.h
-    perfusion/perfAif.h
-    perfusion/perfAifAvg.h
-    perfusion/perfAifBest.h
-    perfusion/perfAifFactory.h
-    perfusion/perfAifMatFactory.h
-    perfusion/perfAifMatLinear.h
-    perfusion/perfAifMatNoCorr.h
-    perfusion/perfAifMatrix.h
-    perfusion/perfAifMatStgy.h
-    perfusion/perfAifPoints.h
-    perfusion/perfAifSel.h
-    perfusion/perfAifStgy.h
-    perfusion/perfBBB.h
-    perfusion/perfCBF.h
-    perfusion/perfCBV.h
-    perfusion/perfDeconv.h
-    perfusion/perfDeconvFactory.h
-    perfusion/perfDeconvStgy.h
-    perfusion/perfDelay.h
-    perfusion/perfFFTDeconv.h
-    perfusion/perfFit.h
-    perfusion/perfFitFactory.h
-    perfusion/perfFitGammaVariate.h
-    perfusion/perfFitStgy.h
-    perfusion/perfGammaFit.h
-    perfusion/perfH.h
-    perfusion/perfLinFitGamma.h
-    perfusion/perfMapBase.h
-    perfusion/perfMaps.h
-    perfusion/perfMask.h
-    perfusion/perfMTT.h
-    perfusion/perfNoFit.h
-    perfusion/perfNoSmoothing.h
-    perfusion/perfParam.h
-    perfusion/perfPreInj.h
-    perfusion/perfProcCenter.h
-    perfusion/perfProcessing.h
-    perfusion/perfQuantif.h
-    perfusion/perfSkip.h
-    perfusion/perfSmooth.h
-    perfusion/perfSmoothBase.h
-    perfusion/perfSmoothFactory.h
-    perfusion/perfSmoothing2D.h
-    perfusion/perfSmoothing3D.h
-    perfusion/perfSmoothingT.h
-    perfusion/perfSmoothStgy.h
-    perfusion/perfSplitVol.h
-    perfusion/perfSVDDeconv.h
-    perfusion/perfSVDFactory.h
-    perfusion/perfSVDInv.h
-    perfusion/perfSVDStgy.h
-    perfusion/perfSVDTikhoG.h
-    perfusion/perfSVDTikho.h
-    perfusion/perfSVDTrunc.h
-    perfusion/perfTTP.h
     points_distribution/points_distribution.h
     primalsketch/dericheSmoother_d.h
     primalsketch/dericheSmoother.h
@@ -507,46 +452,6 @@ set( _sources
     morphology/morphoopen.cc
     optimization/covsrt.cc
     optimization/levmrq.cc
-    perfusion/perfAif.cc
-    perfusion/perfAifAvg.cc
-    perfusion/perfAifBest.cc
-    perfusion/perfAifFactory.cc
-    perfusion/perfAifMatFactory.cc
-    perfusion/perfAifMatLinear.cc
-    perfusion/perfAifMatNoCorr.cc
-    perfusion/perfAifMatrix.cc
-    perfusion/perfAifPoints.cc
-    perfusion/perfAifSel.cc
-    perfusion/perfBBB.cc
-    perfusion/perfCBF.cc
-    perfusion/perfCBV.cc
-    perfusion/perfDeconv.cc
-    perfusion/perfDeconvFactory.cc
-    perfusion/perfDelay.cc
-    perfusion/perfFFTDeconv.cc
-    perfusion/perfFit.cc
-    perfusion/perfFitFactory.cc
-    perfusion/perfFitGammaVariate.cc
-    perfusion/perfGammaFit.cc
-    perfusion/perfH.cc
-    perfusion/perfLinFitGamma.cc
-    perfusion/perfMapBase.cc
-    perfusion/perfMaps.cc
-    perfusion/perfMask.cc
-    perfusion/perfMTT.cc
-    perfusion/perfNoFit.cc
-    perfusion/perfParam.cc
-    perfusion/perfPreInj.cc
-    perfusion/perfProcCenter.cc
-    perfusion/perfQuantif.cc
-    perfusion/perfSkip.cc
-    perfusion/perfSVDDeconv.cc
-    perfusion/perfSVDFactory.cc
-    perfusion/perfSVDInv.cc
-    perfusion/perfSVDTikhoG.cc
-    perfusion/perfSVDTikho.cc
-    perfusion/perfSVDTrunc.cc
-    perfusion/perfTTP.cc
     points_distribution/points_distribution.cc
     pyramid/splinesubsampler.cc
     pyramid/splinepyramid.cc
