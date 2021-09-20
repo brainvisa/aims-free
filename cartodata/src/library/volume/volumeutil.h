@@ -1410,6 +1410,53 @@ namespace carto
     T accumulate( BinaryFunction f, const Volume<T> & o2, T initial );
   };
 
+
+  template <typename T>
+  inline
+  void sort( Volume<T>& thing, bool ascending = true )
+  {
+    int i, j, n = thing.getSizeX();
+    T tmp;
+
+    if( ascending )
+    {
+      for( j=1; j<n; ++j )
+      {
+        tmp = thing.at( j );
+        i = j - 1;
+        while( i >= 0L && thing.at( i ) > tmp )
+        {
+          thing.at( i + 1 ) = thing.at( i );
+          i--;
+        }
+        thing.at( i + 1 ) = tmp;
+      }
+    }
+    else
+    {
+      for( j=1; j<n; ++j )
+      {
+        tmp = thing.at( j );
+        i = j - 1;
+        while( i >= 0L && thing.at( i ) < tmp )
+        {
+          thing.at( i + 1 ) = thing.at( i );
+          i--;
+        }
+        thing.at( i + 1 ) = tmp;
+      }
+    }
+  }
+
+
+  template <typename T>
+  inline
+  void sort( rc_ptr<Volume<T> >& thing, bool ascending = true )
+  {
+    sort( *thing, ascending );
+  }
+
+
 } // namespace carto
 
 #endif // CARTODATA_VOLUME_VOLUMEUTIL_H
