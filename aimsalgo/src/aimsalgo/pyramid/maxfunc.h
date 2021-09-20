@@ -36,7 +36,7 @@
 #define AIMS_PYRAMID_MAXFUNC_H
 
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/pyramid/pyr-func.h>
 
 //
@@ -50,14 +50,14 @@ class MaxPyramidFunc : public PyramidFunc<T>
     MaxPyramidFunc() : PyramidFunc<T>() { }
     virtual ~MaxPyramidFunc() { }
 
-    T doit( AimsData<T>& data ) const;    
+    T doit( carto::VolumeRef<T>& data ) const;
 };
 
 
 template <class T> inline
-T MaxPyramidFunc<T>::doit( AimsData<T>& data ) const
+T MaxPyramidFunc<T>::doit( carto::VolumeRef<T>& data ) const
 {
-  return data.maximum();
+  return data.max();
 }
 
 

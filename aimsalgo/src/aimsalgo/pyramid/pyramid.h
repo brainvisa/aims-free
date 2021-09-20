@@ -36,7 +36,7 @@
 #define AIMS_PYRAMID_PYRAMID_H
 
 #include <aims/def/assert.h>
-#include <aims/data/data_g.h>
+#include <cartodata/volume/volume.h>
 #include <aims/io/writer.h>
 #include <aims/pyramid/pyr-func.h>
 
@@ -53,17 +53,17 @@ class Pyramid
            : _func( func ), _ref( 0 ), _level( 0 ), _ppItem ( 0 ) { }
     virtual ~Pyramid() { _free_ppItem(); }
 
-    void setRef( AimsData<T>& ref );
+    void setRef( carto::rc_ptr<carto::Volume<T> >& ref );
     void setLevel( int level );
-    const AimsData<T>& item( int level ) const;
+    const carto::rc_ptr<carto::Volume<T> >& item( int level ) const;
     void save( const std::string& name ) const;
 
   protected:
 
     const PyramidFunc<T>& _func;
-    AimsData<T>* _ref;
+    carto::rc_ptr<carto::Volume<T> >* _ref;
     int _level;
-    AimsData<T>** _ppItem;
+    carto::rc_ptr<carto::Volume<T> >** _ppItem;
 
     void _new_ppItem( int level );
     void _free_ppItem();
@@ -72,7 +72,7 @@ class Pyramid
 
 
 template <class T> inline
-void Pyramid<T>::setRef( AimsData<T>& ref )
+void Pyramid<T>::setRef( carto::rc_ptr<carto::Volume<T> >& ref )
 {
   if ( _ref )
   {
@@ -85,17 +85,18 @@ void Pyramid<T>::setRef( AimsData<T>& ref )
 template <class T> inline
 void Pyramid<T>::_new_ppItem( int level )
 {
-  _ppItem = new AimsData<T>*[ level ];
+  _ppItem = new carto::rc_ptr<carto::Volume<T> >*[ level ];
 
-  int dimX = _ref->dimX();
-  int dimY = _ref->dimY();
-  int dimZ = _ref->dimZ();
-  int dimT = _ref->dimT();
+  int dimX = (*_ref)->getSizeX();
+  int dimY = (*_ref)->getSizeY();
+  int dimZ = (*_ref)->getSizeZ();
+  int dimT = (*_ref)->getSizeT();
 
-  float sizeX = _ref->sizeX();
-  float sizeY = _ref->sizeY();
-  float sizeZ = _ref->sizeZ();
-  float sizeT = _ref->sizeT();
+  std::vector<float> vs = (*_ref)->getVoxelSize();
+  float sizeX = vs[0];
+  float sizeY = vs[1];
+  float sizeZ = vs[2];
+  float sizeT = vs[3];
 
   for ( int k = 0; k < level; k++ )
   {
@@ -113,8 +114,8 @@ void Pyramid<T>::_new_ppItem( int level )
     sizeY *= 2.0;
     sizeZ *= 2.0;
 
-    _ppItem[ k ] = new AimsData<T>( dimX, dimY, dimZ, dimT );
-    _ppItem[ k ]->setSizeXYZT( sizeX, sizeY, sizeZ, sizeT );
+    _ppItem[ k ] = new carto::VolumeRef<T>( dimX, dimY, dimZ, dimT );
+    (*_ppItem[ k ])->setVoxelSize( sizeX, sizeY, sizeZ, sizeT );
   }
 }
 
@@ -148,15 +149,15 @@ void Pyramid<T>::_build()
 {
   int x, y, z, t, k, nx, ny, nz, n;
 
-  int dimX = _ref->dimX();
-  int dimY = _ref->dimY();
-  int dimZ = _ref->dimZ();
-  int dimT = _ref->dimT();
+  int dimX = (*_ref)->getSizeX();
+  int dimY = (*_ref)->getSizeY();
+  int dimZ = (*_ref)->getSizeZ();
+  int dimT = (*_ref)->getSizeT();
 
-  AimsData<T>* pUp;
-  AimsData<T>* pDown = _ref;
+  carto::rc_ptr<carto::Volume<T> >* pUp;
+  carto::rc_ptr<carto::Volume<T> >* pDown = _ref;
 
-  AimsData<T> tab( 8 );
+  carto::VolumeRef<T> tab( 8 );
 
   for ( k = 0; k < _level; k++ )
     {
@@ -171,33 +172,34 @@ void Pyramid<T>::_build()
       dimZ /= 2;
       
       if( dimX == 0 )
-	dimX = 1 ;
+        dimX = 1 ;
       if( dimY == 0 )
-	dimY = 1 ;
+        dimY = 1 ;
       if( dimZ == 0 )
-	dimZ = 1 ;
+        dimZ = 1 ;
       for ( t = 0; t < dimT; t++ )
-	for ( z = 0; z < dimZ; z++ )
-	  for ( y = 0; y < dimY; y++ )
-	    for ( x = 0; x < dimX; x++ )
-	      {
-		n = 0;
-		for ( nz = 0; nz < 2; nz++ )
-		  for ( ny = 0; ny < 2; ny++ )
-		    for ( nx = 0; nx < 2; nx++ ){
-		      tab(n++) = (*pDown)( std::min(2 * x + nx, lowerLvlDimX - 1 ), 
-					   std::min(2 * y + ny, lowerLvlDimY - 1 ), 
-					   std::min(2 * z + nz, lowerLvlDimZ - 1 ), t );
-		    }
-		(*pUp)( x, y, z, t ) = _func.doit( tab );
-	      }
+        for ( z = 0; z < dimZ; z++ )
+          for ( y = 0; y < dimY; y++ )
+            for ( x = 0; x < dimX; x++ )
+            {
+              n = 0;
+              for ( nz = 0; nz < 2; nz++ )
+                for ( ny = 0; ny < 2; ny++ )
+                  for ( nx = 0; nx < 2; nx++ )
+                  {
+                    tab(n++) = (*pDown)->at( std::min(2 * x + nx, lowerLvlDimX - 1 ),
+                            std::min(2 * y + ny, lowerLvlDimY - 1 ),
+                            std::min(2 * z + nz, lowerLvlDimZ - 1 ), t );
+                  }
+              (*pUp)->at( x, y, z, t ) = _func.doit( tab );
+            }
       pDown = pUp;
     }
 }
 
 
 template <class T> inline
-const AimsData<T>& Pyramid<T>::item( int level ) const
+const carto::rc_ptr<carto::Volume<T> >& Pyramid<T>::item( int level ) const
 {
   ASSERT( _ref );
   ASSERT( level <= _level );
@@ -217,8 +219,8 @@ void Pyramid<T>::save( const std::string& name ) const
     char ext[5];
     sprintf( ext, "%d", k );
     std::string outName = name + std::string( ext );
-    aims::Writer<AimsData<T> > dataW( outName.c_str() );
-    dataW << item( k );
+    aims::Writer<carto::Volume<T> > dataW( outName.c_str() );
+    dataW.write( *item( k ) );
   }
 }
 

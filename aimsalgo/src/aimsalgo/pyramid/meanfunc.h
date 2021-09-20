@@ -36,7 +36,7 @@
 #define AIMS_PYRAMID_MEANFUNC_H
 
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/pyramid/pyr-func.h>
 
 //
@@ -50,15 +50,15 @@ class MeanPyramidFunc : public PyramidFunc<T>
     MeanPyramidFunc() : PyramidFunc<T>() { }
     virtual ~MeanPyramidFunc() { }
 
-    T doit( AimsData<T>& data ) const;    
+    T doit( carto::VolumeRef<T>& data ) const;
 };
 
 
 template <class T> inline
-T MeanPyramidFunc<T>::doit( AimsData<T>& data ) const
+T MeanPyramidFunc<T>::doit( carto::VolumeRef<T>& data ) const
 {
   float mean = 0;
-  int dim = data.dimX();
+  int dim = data.getSizeX();
 
   for ( int k = 0; k < dim; k++ )
     mean += float( data( k ) );

@@ -36,7 +36,7 @@
 #define AIMS_PYRAMID_MEDFUNC_H
 
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volumeutil.h>
 #include <aims/pyramid/pyr-func.h>
 
 //
@@ -50,16 +50,16 @@ class MedianPyramidFunc : public PyramidFunc<T>
     MedianPyramidFunc() : PyramidFunc<T>() { }
     virtual ~MedianPyramidFunc() { }
 
-    T doit( AimsData<T>& data ) const;    
+    T doit( carto::VolumeRef<T>& data ) const;
 };
 
 
 template <class T> inline
-T MedianPyramidFunc<T>::doit( AimsData<T>& data ) const
+T MedianPyramidFunc<T>::doit( carto::VolumeRef<T>& data ) const
 {
-  incSorting( data );
+  sort( data );
   
-  return data( data.dimX() / 2 );
+  return data( data.getSizeX() / 2 );
 }
 
 

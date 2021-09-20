@@ -9,17 +9,24 @@
  *     France
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 
 #include <aims/registration/scale_control_d.h>
 
-template void ScaleControl::init(const AimsData< int8_t >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
-template void ScaleControl::init(const AimsData< uint8_t >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
-template void ScaleControl::init(const AimsData< int16_t >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
-template void ScaleControl::init(const AimsData< uint16_t >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
-template void ScaleControl::init(const AimsData< int32_t >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
-template void ScaleControl::init(const AimsData< uint32_t >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
-template void ScaleControl::init(const AimsData< float >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
-template void ScaleControl::init(const AimsData< double >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
+using namespace carto;
+
+template void ScaleControl::init(const rc_ptr<Volume< int8_t > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
+template void ScaleControl::init(const rc_ptr<Volume< uint8_t > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
+template void ScaleControl::init(const rc_ptr<Volume< int16_t > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
+template void ScaleControl::init(const rc_ptr<Volume< uint16_t > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
+template void ScaleControl::init(const rc_ptr<Volume< int32_t > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
+template void ScaleControl::init(const rc_ptr<Volume< uint32_t > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
+template void ScaleControl::init(const rc_ptr<Volume< float > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
+template void ScaleControl::init(const rc_ptr<Volume< double > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc );
 
 
 

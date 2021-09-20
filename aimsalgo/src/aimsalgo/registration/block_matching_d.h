@@ -12,7 +12,7 @@
 #ifndef AIMS_REGISTRATION_BLOCK_MATCHING_D_H
 #define AIMS_REGISTRATION_BLOCK_MATCHING_D_H
 
-#include <aims/data/data_g.h>
+#include <aims/data/data.h>
 #include <aims/resampling/resampling_g.h> 
 #include <aims/math/math_g.h>
 #include <aims/registration/block_matching.h>
@@ -110,7 +110,7 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
   transformation.setcy(0);
   transformation.setcz(0);
   if(ref.dimZ()==1) _tailleBloc[2] = 1;
-  scaleControl.init( ref, _level_start, _level_stop, _cutVar, _stopVar, _seuilCorrel, _tailleBloc);
+  scaleControl.init<T>( ref, _level_start, _level_stop, _cutVar, _stopVar, _seuilCorrel, _tailleBloc);
   int count = 0 ;
   // Initialisation de delta au carre de 4 fois un majorant de 2 fois la diagonale en mm...
   float delta_init = 8*pow(test.dimX()*test.sizeX() + test.dimY()*test.sizeY() + test.dimZ()*test.sizeZ(), 2);

@@ -297,7 +297,7 @@ bool doit( Process & process, const string & fileinr, Finder & )
 #endif
   /* Inits */
   if(ref.dimZ()==1) abm.tailleBloc[2] = 1;
-  scaleControl.init( ref, abm.level_start, abm.level_stop, abm.cutVar, abm.stopVar, abm.seuilCorrel, abm.tailleBloc);
+  scaleControl.init<T>( ref, abm.level_start, abm.level_stop, abm.cutVar, abm.stopVar, abm.seuilCorrel, abm.tailleBloc);
   int count = 0 ;
   T templateSeuils[4];
   templateSeuils[0]=  std::numeric_limits<T>::min();

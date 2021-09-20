@@ -18,13 +18,13 @@
 
 
 template <class T>
-void ScaleControl::init(const AimsData< T >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc )
+void ScaleControl::init(const carto::rc_ptr<carto::Volume< T > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc )
 {
   // Calcul du niveau de pyramide adequat si non precise...
   _currentScale = level_start;
   if(level_start==-1)
   {
-  		int dimoy = int( (ref.dimX() + ref.dimY())/2. + 0.5);
+  		int dimoy = int( (ref->getSizeX() + ref->getSizeY())/2. + 0.5);
   		_currentScale = 0;
   		for(int i = 0;i<15;i++)
   		{
@@ -48,13 +48,13 @@ void ScaleControl::init(const AimsData< T >& ref, int level_start, int level_sto
 
 
  // Toutes les valeurs suivantes sont en coordonnees voxels
-  _NN = ( (ref.dimX() < ref.dimY()) ? ref.dimX() : ref.dimY())/8;
+  _NN = ( (ref->getSizeX() < ref->getSizeY()) ? ref->getSizeX() : ref->getSizeY())/8;
   _delta1 = _NN/4;
   _delta2 = 4;
   _derniere = false;
   _seuilCorrel = seuilCorrel;
   _tailleBloc = tailleBloc;
-  if(ref.dimZ()==1)	_tailleBloc[2] = 1;
+  if(ref->getSizeZ()==1)	_tailleBloc[2] = 1;
 }
 
 

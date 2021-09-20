@@ -36,7 +36,10 @@
 #define AIMS_PYRAMID_PYR_FUNC_H
 
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class VolumeRef;
+}
 
 //
 // class PyramidFunc
@@ -49,7 +52,7 @@ class PyramidFunc
     PyramidFunc() { }
     virtual ~PyramidFunc() { }
 
-    virtual T doit( AimsData<T>& data ) const = 0;    
+    virtual T doit( carto::VolumeRef<T>& data ) const = 0;
 };
 
 #endif

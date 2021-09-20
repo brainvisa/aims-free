@@ -14,18 +14,12 @@
 
 
 /////////////////////////
-#include <aims/data/data_g.h>
-#include <aims/io/reader.h>
-#include <aims/io/writer.h>
-
-
-
+#include <aims/registration/displacement_field.h>
+#include <aims/pyramid/pyramid.h>
+#include <aims/pyramid/medfunc.h>
 #include <cartobase/config/verbose.h>
 #include <cartobase/type/limits.h>
 #include <iostream>
-#include <aims/registration/displacement_field.h>
-#include <aims/io/reader.h>
-#include <aims/io/writer.h>
 #include <cartobase/type/string_conversion.h>
 
 #ifdef AIMS_USE_MPI
@@ -37,18 +31,21 @@ using namespace MPI;
 
 // fonction calculant la moyenne et variance de l'imagette(i,j) en parcourant l'offset
 template<class T> inline
-static void  meanVar(const AimsData<T>& im, const AimsData<int>& offset, int i, int j, int k, double &m, double &s, const T &lth, const T &hth)
+static void  meanVar( const carto::rc_ptr<carto::Volume<T> >& im,
+                      const carto::rc_ptr<carto::Volume<int> >& offset, int i, int j, int k,
+                      double &m, double &s, const T &lth, const T &hth )
 {
-  AimsData<int>::const_iterator oit;
-  AimsData<int>::const_iterator eoit = offset.end();  //important optimisation not performed by g++ -O2
+  carto::Volume<int>::const_iterator oit;
+  carto::Volume<int>::const_iterator eoit = offset->end();  //important optimisation not performed by g++ -O2
   // pointeur first sur le niveau im(i,j) du premier point de l'imagette de coin sup. gauche (i,j)
-  T *first = (T*) (im.begin() + im.oFirstPoint() + j*im.oLine() + i + k*im.oSlice() );  
+  T *first = (T*) (&im->at( i, j, k ) );
   T * pt ;		//pointeur courant parcourant l'imagette
-  int N = offset.dimX() * offset.dimY() * offset.dimZ();		// nombre total de points dans l'imagette
+  // nombre total de points dans l'imagette
+  int N = offset->getSizeX() * offset->getSizeY() * offset->getSizeZ();
   
   m = 0. ; s = 0. ;							//initialisation de moyenne et variance a 0
   
-  for(oit =offset.begin(); oit != eoit; oit++ )
+  for(oit =offset->begin(); oit != eoit; oit++ )
     {
       pt = first + *oit;						// absolu + relatif
 
@@ -71,35 +68,35 @@ static void  meanVar(const AimsData<T>& im, const AimsData<int>& offset, int i, 
 }
 
 template<class T>
-void  DisplacementField<T>::selectBlock( const AimsData<T>& image, double cV)
+void  DisplacementField<T>::selectBlock( const carto::rc_ptr<carto::Volume<T> >& image,
+                                         double cV )
 {
   double m = 0.,s = 0.;
   
   int i, j, k;
      
-  // Ecriture sur disque de pyrRef
-  //aims::Writer< AimsData<T> > ecr_T("pyrRef" + carto::toString(_level) );
-  //ecr_T.write(image);
-
   _sel.clear();
   _moy.clear();
+  std::vector<int> dim = image->getSize();
 
 
-  ForEach3d(image, i, j, k)
-    {
-      //std::cout << "selectBlock - [" << i << ", " << j << ", " << k << " ], [" << (image.dimX()- _nx) << ", " << (image.dimY() - _ny) << ", " << (image.dimZ() - _nz23d) << "]"<< std::endl << std::flush;
-      if ( ( i < image.dimX() - _nx) && (j < image.dimY() - _ny) && (k < image.dimZ() - _nz23d) )
+  for( k=0; k<dim[2]; ++k )
+    for( j=0; j<dim[1]; ++j )
+      for( i=0; i<dim[0]; ++i )
       {
-        meanVar( image, _offset, i, j, k, m, s, _lthr, _hthr);
-              //std::cout << "selectBlock - [" << i << ", " << j << ", " << k << " ], mean : " << m << ", var : " << s << std::endl << std::flush;
-        if( s > 0. )
-          {
-            _sel.insert(std::pair<float, Point3d>(s, Point3d(i,j, k) ) ); // on remplit 2 map en classant par variance croissante
-            _moy.insert(std::pair<float, double>(s, m ) ); // l'une avec les coord, l'autre avec la moyenne correspondante
-          }
+        if ( ( i < dim[0] - _nx) && (j < dim[1] - _ny)
+             && (k < dim[2] - _nz23d) )
+        {
+          meanVar( image, _offset, i, j, k, m, s, _lthr, _hthr );
+                //std::cout << "selectBlock - [" << i << ", " << j << ", " << k << " ], mean : " << m << ", var : " << s << std::endl << std::flush;
+          if( s > 0. )
+            {
+              _sel.insert(std::pair<float, Point3d>(s, Point3d(i,j, k) ) ); // on remplit 2 map en classant par variance croissante
+              _moy.insert(std::pair<float, double>(s, m ) ); // l'une avec les coord, l'autre avec la moyenne correspondante
+            }
+        }
       }
-    }
-  
+
   _selThresh = _sel.size() * cV;
 
   
@@ -107,11 +104,12 @@ void  DisplacementField<T>::selectBlock( const AimsData<T>& image, double cV)
 
 
 template<class T>
-void DisplacementField<T>::init(AimsData<T>& ref, ScaleControl& scaleControl, T* seuils)
+void DisplacementField<T>::init( carto::rc_ptr<carto::Volume<T> >& ref,
+                                 ScaleControl& scaleControl, T* seuils )
 {
   // Initialisation des caracteristiques de ref
-  _dimRef = Point3d(ref.dimX(), ref.dimY(), ref.dimZ());
-  _sizeRef = Point3df(ref.sizeX(), ref.sizeY(), ref.sizeZ());
+  _dimRef = Point3d(ref->getSizeX(), ref->getSizeY(), ref->getSizeZ());
+  _sizeRef = Point3df( ref->getVoxelSize() );
 
   // Initialisation de l'echelle
   _level = scaleControl.getScale();
@@ -142,9 +140,7 @@ void DisplacementField<T>::init(AimsData<T>& ref, ScaleControl& scaleControl, T*
   Pref->setRef( ref );
   Pref->setLevel( _level );
   
-  _pyrRef = Pref->item( _level ).clone();		// _pyrRef est l'image au niveau _level
-//   aims::Writer<AimsData<T> > w("pyref_debug.ima");
-//   w.write(_pyrRef);
+  _pyrRef = carto::VolumeRef<T>( Pref->item( _level ) ).deepcopy();		// _pyrRef est l'image au niveau _level
   
   // menage...
   delete Pref ;
@@ -157,13 +153,17 @@ void DisplacementField<T>::init(AimsData<T>& ref, ScaleControl& scaleControl, T*
   
   // Creation des offsets comme pre-calcul des coordonnees
 //  std::cerr<<"offsets"<<std::endl;
-  AimsData<int> tmp(_nx,_ny,_nz);
+  carto::VolumeRef<int> tmp(_nx,_ny,_nz);
   _offset = tmp;
   int i, j, k;
-  ForEach3d(_offset, i, j, k)
-    {
-      _offset(i, j, k) = i + j * _pyrRef.oLine() + k * _pyrRef.oSlice() ;
-    }
+  std::vector<int> dim = _offset->getSize();
+
+  for( k=0; k<dim[2]; ++k )
+    for( j=0; j<dim[1]; ++j )
+      for( i=0; i<dim[0]; ++i )
+      {
+        _offset(i, j, k) = &_pyrRef->at( i, j, k ) - &_pyrRef->at( 0 );
+      }
   
   // Selection des blocks
   //std::cout << "cur var : " << scaleControl.getcutVar() << std::endl << std::flush;
@@ -173,7 +173,8 @@ void DisplacementField<T>::init(AimsData<T>& ref, ScaleControl& scaleControl, T*
 
 
 template <class T>
-AimsData< Point3d > DisplacementField<T>::getField(AimsData<T>& test)
+carto::VolumeRef< Point3d > DisplacementField<T>::getField(
+  carto::rc_ptr<carto::Volume<T> >& test )
 {
   
   // Initialisation des barycentres
@@ -195,21 +196,25 @@ AimsData< Point3d > DisplacementField<T>::getField(AimsData<T>& test)
   Ptest->setRef(test);
   Ptest->setLevel( _level );
   
-  _pyrTest = Ptest->item( _level ).clone();		// _pyrTest est l'image testtrans degrade niveau _level
-  
+  _pyrTest = carto::VolumeRef<T>( Ptest->item( _level ) ).deepcopy();		// _pyrTest est l'image testtrans degrade niveau _level
+
   // menage...
   delete Ptest ;
   delete pyramidfunc ;
   
  
   // Creation des offsets comme pre-calcul des coordonnees pour Test si dim differentes
-  AimsData<int> tmp(_nx,_ny,_nz);
+  carto::VolumeRef<int> tmp(_nx,_ny,_nz);
   _offset2 = tmp;
   int i, j, k;
-  ForEach3d(_offset2, i, j, k)
-  {
-    _offset2(i, j, k) = i + j * _pyrTest.oLine() + k * _pyrTest.oSlice() ;
-  }
+  std::vector<int> dim = _offset2->getSize();
+
+  for( k=0; k<dim[2]; ++k )
+    for( j=0; j<dim[1]; ++j )
+      for( i=0; i<dim[0]; ++i )
+      {
+        _offset2(i, j, k) = &_pyrTest->at( i, j, k ) - &_pyrTest->at( 0 );
+      }
  
 
 
@@ -218,18 +223,18 @@ AimsData< Point3d > DisplacementField<T>::getField(AimsData<T>& test)
   
   
   // Declaration de l'image du champ niveau _level, qui sera renvoyee en sortie
-  AimsData<Point3d> field( _pyrRef.dimX(), _pyrRef.dimY(), _pyrRef.dimZ());
-  field.setSizeXYZT( _pyrRef.sizeX(), _pyrRef.sizeY(), _pyrRef.sizeZ(), _pyrRef.sizeT() );
+  carto::VolumeRef<Point3d> field( _pyrRef->getSize() );
+  field.setVoxelSize( _pyrRef->getVoxelSize() );
   field = Point3d(0, 0, 0) ;
   
   
   std::multimap<float, Point3d>::reverse_iterator it = _sel.rbegin();
   std::multimap<float, double>::reverse_iterator   itm = _moy.rbegin();
-  AimsData<int>::iterator oit, oit2;
+  carto::Volume<int>::iterator oit, oit2;
   std::vector<Point3df> pointstest, pointsref;    /* PAR: useless temporary vectors? */
   
   // Calcul de n puissance 4, pour prendre ro carre, pour positivite entre 0 et 1
-  double norm_fctr = _offset.dimX() * _offset.dimY() * _offset.dimZ() * _offset.dimX() * _offset.dimY() * _offset.dimZ();
+  double norm_fctr = _offset->getSizeX() * _offset->getSizeY() * _offset->getSizeZ() * _offset->getSizeX() * _offset->getSizeY() * _offset->getSizeZ();
 //  norm_fctr *= norm_fctr;	// mise au carre
   
   float puis_level = float(pow((double) 2, (double) _level));
@@ -239,18 +244,18 @@ AimsData< Point3d > DisplacementField<T>::getField(AimsData<T>& test)
   int entLimit = int(_selThresh + .5);  //after this number of blocks, all significant (in termes of enthropy) blocks have been dealt with
   // Declaration d'une image des blocs selectionnes par variance uniquement sur Ref
 
-  /*AimsData<double> selected_blocks(_pyrRef.dimX(),					
-											  _pyrRef.dimY(),
-											  _pyrRef.dimZ() );
+  /*carto::VolumeRef<double> selected_blocks(_pyrRef->getSizeX(),
+                                             _pyrRef->getSizeY(),
+                                             _pyrRef->getSizeZ() );
   selected_blocks.setSizeXYZT(_pyrRef.sizeX(),
 										_pyrRef.sizeY(),
 										_pyrRef.sizeZ(), 1.0);
   selected_blocks=0;
 
 
-  AimsData<double> test_match(_pyrTest.dimX(),
-										_pyrTest.dimY(),
-										_pyrTest.dimZ() );
+  carto::VolumeRef<double> test_match(_pyrTest->getSizeX(),
+										_pyrTest->getSizeY(),
+										_pyrTest->getSizeZ() );
   test_match.setSizeXYZT(_pyrTest.sizeX(),
 										_pyrTest.sizeY(),
 										_pyrTest.sizeZ(), 1.0);
@@ -282,7 +287,7 @@ AimsData< Point3d > DisplacementField<T>::getField(AimsData<T>& test)
   int dspls[size];                  //as in MPI
 #endif
   /* PAR: Important optimisation that g++ does not perform */
-  AimsData<int>::const_iterator oitend = _offset.end();
+  carto::Volume<int>::const_iterator oitend = _offset.end();
 
   // boucle sur tous les blocs selectionnes dans pyrRef
   for(int n = 0; n < entLimit; ++n, ++it, ++itm)
@@ -307,12 +312,12 @@ AimsData< Point3d > DisplacementField<T>::getField(AimsData<T>& test)
           if( (p[0]+k >= 0) && 
               (p[1]+l >= 0) && 
               (p[2]+m >= 0) && 
-              (p[0]+k+_nx < _pyrTest.dimX() ) && 
-              (p[1]+l+_ny < _pyrTest.dimY() ) &&
-              (p[2]+m+ _nz23d < _pyrTest.dimZ() )  )
+              (p[0]+k+_nx < _pyrTest->getSizeX() ) &&
+              (p[1]+l+_ny < _pyrTest->getSizeY() ) &&
+              (p[2]+m+ _nz23d < _pyrTest->getSizeZ() )  )
           {
-            T *pRef       = _pyrRef.begin() + _pyrRef.oFirstPoint() + p[0] + p[1]*_pyrRef.oLine() + p[2]*_pyrRef.oSlice() ;
-            T *pTest = _pyrTest.begin() + _pyrTest.oFirstPoint() + (p[0]+k) + (p[1]+l)*_pyrTest.oLine() + (p[2]+m)*_pyrTest.oSlice() ;
+            T *pRef  = &_pyrRef->at( p );
+            T *pTest = &_pyrTest->at( p[0]+k, p[1]+l, p[2]+m );
 
             meanVar( _pyrTest, _offset2, p[0]+k, p[1]+l, p[2]+m, mLocalTest, sLocalTest, _ltht, _htht);
             //std::cout << "mLocalTest : " << mLocalTest << ", sLocalTest : " << sLocalTest << std::endl << std::flush;
@@ -430,17 +435,6 @@ AimsData< Point3d > DisplacementField<T>::getField(AimsData<T>& test)
   COMM_WORLD.Allreduce(IN_PLACE, _barytest, 3, DOUBLE, SUM);
 #endif
 
-//  Writer< AimsData<T> > testWriter("pyrTest_" + toString(_level) );  
-//  testWriter.write(_pyrTest);
-
-
-  // Ecriture sur disque de selected_bloks
-//  aims::Writer< AimsData<double> > ecr_T("selected_blocks" + carto::toString(_level) );
-//  ecr_T.write(selected_blocks);
-
-//  aims::Writer< AimsData<double> > ecr_T2("test_match" + carto::toString(_level) );
-//  ecr_T2.write(test_match);
-
   _baryref[0]  /= realPointNumber;
   _baryref[1]  /= realPointNumber;
   _baryref[2]  /= realPointNumber;
@@ -453,7 +447,9 @@ AimsData< Point3d > DisplacementField<T>::getField(AimsData<T>& test)
 
 
 template <class T>
-AimsData<T> DisplacementField<T>::getQuality(AimsData<T>& testtrans, AimsData<T>& ref, int level, T thresh)
+carto::VolumeRef<T> DisplacementField<T>::getQuality( carto::rc_ptr<carto::Volume<T> >& testtrans,
+                                               carto::rc_ptr<carto::Volume<T> >& ref,
+                                               int level, T thresh )
 {
   // Declaration pyramide pour l'image testtrans (transformee finale au niveau _level)
   Pyramid<T>      *Ptesttrans = NULL ;
@@ -464,7 +460,8 @@ AimsData<T> DisplacementField<T>::getQuality(AimsData<T>& testtrans, AimsData<T>
   Ptesttrans->setRef(testtrans);
   Ptesttrans->setLevel( level );
   
-  AimsData<T> pyrTrans = Ptesttrans->item( level ).clone();		// pyrTrans est l'image testtrans degradee niveau level
+  carto::VolumeRef<T> pyrTrans
+    = carto::VolumeRef<T>( Ptesttrans->item( level ) ).deepcopy();	// pyrTrans est l'image testtrans degradee niveau level
   
   // menage...
   delete Ptesttrans ;
@@ -479,7 +476,8 @@ AimsData<T> DisplacementField<T>::getQuality(AimsData<T>& testtrans, AimsData<T>
   Pref->setRef(ref);
   Pref->setLevel( level );
   
-  AimsData<T> pyrRef = Pref->item( level ).clone();		// pyrRef est l'image ref degradee niveau level
+  carto::VolumeRef<T> pyrRef
+    = carto::VolumeRef<T>( Pref->item( level ) ).deepcopy();	// pyrRef est l'image ref degradee niveau level
   
   // menage...
   delete Pref ;
@@ -488,15 +486,19 @@ AimsData<T> DisplacementField<T>::getQuality(AimsData<T>& testtrans, AimsData<T>
 
 
   // Creation des offsets comme pre-calcul des coordonnees
-  AimsData<int> tmp(_nx,_ny,_nz);
-  _offset = tmp.clone();
-  _offset2 = tmp.clone();
+  carto::VolumeRef<int> tmp(_nx,_ny,_nz);
+  _offset = tmp.deepcopy();
+  _offset2 = tmp.deepcopy();
   int i, j, k;
-  ForEach3d(_offset2, i, j, k)
-    {
-      _offset(i, j, k) = i + j * pyrRef.oLine() + k * pyrRef.oSlice() ;
-      _offset2(i, j, k) = i + j * pyrTrans.oLine() + k * pyrTrans.oSlice() ;
-    }
+  std::vector<int> dim = _offset2->getSize();
+
+  for( k=0; k<dim[2]; ++k )
+    for( j=0; j<dim[1]; ++j )
+      for( i=0; i<dim[0]; ++i )
+      {
+        _offset(i, j, k) = &pyrRef->at( i, j, k ) - &pyrRef->at( 0 );
+        _offset2(i, j, k) = &pyrTrans->at( i, j, k ) - &pyrTrans->at( 0 );
+      }
 
 
 
@@ -506,43 +508,41 @@ AimsData<T> DisplacementField<T>::getQuality(AimsData<T>& testtrans, AimsData<T>
   double mRef = 0, sRef = 0, mTest = 0, sTest = 0;
 
   // Creation d'une image affichant la correlation en chaque point e un niveau de pyramide
-  AimsData<T> pyrQuality = pyrTrans.clone();
+  carto::VolumeRef<T> pyrQuality = pyrTrans.deepcopy();
 
   ////////////////////////
   pyrQuality = 0;
   
-  AimsData<int>::iterator oit, oit2;
-  AimsData<int>::const_iterator eoit = _offset.end();  //important optimisation that g++ does not perform
+  carto::Volume<int>::iterator oit, oit2;
+  carto::Volume<int>::const_iterator eoit = _offset->end();  //important optimisation that g++ does not perform
   
   // Calcul de n puissance 4, pour prendre ro carre, pour positivite entre 0 et 1
-  double norm = _offset.dimX() * _offset.dimY() * _offset.dimZ() * _offset.dimX() * _offset.dimY() * _offset.dimZ();
+  double norm = _offset->getSizeX() * _offset->getSizeY() * _offset->getSizeZ() * _offset->getSizeX() * _offset->getSizeY() * _offset->getSizeZ();
 
   /////////////////////////////////////////
-//  std::cout<<"thresh : "<<thresh<<std::endl;
-//  std::cout<<"_nz23d : "<<_nz23d<<std::endl;
-
-//  aims::Writer< AimsData<T> > pyrTransWriter("pyrTrans");
-//  pyrTransWriter.write(pyrTrans);
 
 
+  dim = pyrTrans->getSize();
 
-  ForEach3d(pyrTrans, i, j, k)
-  {
+  for( k=0; k<dim[2]; ++k )
+    for( j=0; j<dim[1]; ++j )
+      for( i=0; i<dim[0]; ++i )
+      {
 /*
 		std::cout<<"i, j, k : "<<i<<", "<<j<<", "<<k<<std::endl;
 		std::cout<<"i + _nx, j + _ny, k + _nz : "<<i + _nx<<", "<<j + _ny<<", "<<k + _nz23d*_nz<<std::endl;
-		std::cout<<"pyrTrans.dimX(), pyrTrans.dimY(), pyrTrans.dimZ() : "<<pyrTrans.dimX()<<", "<<pyrTrans.dimY()<<", "<<pyrTrans.dimZ()<<std::endl;
+		std::cout<<"pyrTrans->getSizeX(), pyrTrans->getSizeY(), pyrTrans->getSizeZ() : "<<pyrTrans->getSizeX()<<", "<<pyrTrans->getSizeY()<<", "<<pyrTrans->getSizeZ()<<std::endl;
 */
 
 
-	   if(  (i + _nx < pyrTrans.dimX() ) && (j + _ny < pyrTrans.dimY() )  && (k + _nz23d*_nz < pyrTrans.dimZ() ) )
+	   if(  (i + _nx < dim[0] ) && (j + _ny < dim[1] )  && (k + _nz23d*_nz < dim[2] ) )
 	   {
 			/////////////////////////////////
 		//	std::cout<<"boucle 1"<<std::endl;
 			if( (pyrTrans(i + _nx/2,j + _ny/2, k + _nz23d*_nz/2) < thresh) /*&& (pyrRef(i,j) < thresh) */)
 			{
-		  		T *pRef    = pyrRef.begin()  + pyrRef.oFirstPoint()  + i + j*pyrRef.oLine() + k*pyrRef.oSlice();
-		  		T *pTest 	= pyrTrans.begin() + pyrTrans.oFirstPoint() + i + j*pyrTrans.oLine() + k*pyrRef.oSlice();  
+		  		T *pRef  = &pyrRef->at( i, j, k );
+		  		T *pTest = &pyrTrans->at( i, j, k );
 
 
 				meanVar( pyrTrans, _offset2, i, j , k, mTest, sTest, _ltht, _htht);
@@ -576,7 +576,7 @@ AimsData<T> DisplacementField<T>::getQuality(AimsData<T>& testtrans, AimsData<T>
 			}
 			else pyrQuality(i + _nx/2,j + _ny/2, k + _nz23d*_nz/2) = 0;
 		}
-	}
+      }
 
 
   return(pyrQuality);

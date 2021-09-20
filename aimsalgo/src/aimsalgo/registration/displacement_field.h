@@ -10,12 +10,10 @@
 #ifndef AIMS_REGISTRATION_DISPLACEMENT_FIELD_H
 #define AIMS_REGISTRATION_DISPLACEMENT_FIELD_H
 
-#include <cartobase/type/limits.h>
-#include <aims/data/data_g.h>
-#include <aims/math/math_g.h>
-#include <vector>
-#include <aims/pyramid/pyramid_g.h>  
+#include <cartodata/volume/volume.h>
 #include <aims/registration/scale_control.h>
+#include <cartobase/type/limits.h>
+#include <vector>
 
 template <class T>
 class DisplacementField
@@ -25,18 +23,22 @@ class DisplacementField
   ~DisplacementField() {}
   
   
-  void init(AimsData<T>& ref, ScaleControl& scaleControl, T * seuils);
-  AimsData< Point3d > getField( AimsData<T>& test);
+  void init(carto::rc_ptr<carto::Volume<T> >& ref, ScaleControl& scaleControl,
+            T * seuils);
+  carto::VolumeRef< Point3d > getField(
+    carto::rc_ptr<carto::Volume<T> >& test );
   std::vector<Point3df> getpointstest() {return  _pointstest;}
   std::vector<Point3df> getpointsref() {return  _pointsref;}
   double* getbarytest() {return _barytest;}
   double* getbaryref() {return _baryref;}
-  AimsData< int >* getOffset() { return &_offset;}
+  carto::VolumeRef< int >* getOffset() { return &_offset;}
   int getLevel() {return _level;}
   Point3d getDimRef() {return _dimRef;}
   Point3df getSizeRef() {return _sizeRef;}  
-  AimsData<T> getQuality( AimsData<T>& testtrans, AimsData<T>& ref, 
-							  				  int level, T thresh = std::numeric_limits<T>::max() );
+  carto::VolumeRef<T> getQuality( carto::rc_ptr<carto::Volume<T> >& testtrans,
+                                  carto::rc_ptr<carto::Volume<T> >& ref,
+                                  int level,
+                                  T thresh = std::numeric_limits<T>::max() );
   
  private:
   double _cost;
@@ -47,13 +49,13 @@ class DisplacementField
   double _baryref[3];
   
   
-  void selectBlock(const AimsData<T>& image, double cV);
-  AimsData< T > _pyrRef;
-  AimsData< T > _pyrTest;
+  void selectBlock(const carto::rc_ptr<carto::Volume<T> >& image, double cV);
+  carto::VolumeRef< T > _pyrRef;
+  carto::VolumeRef< T > _pyrTest;
   int               _level;
   int               _nx, _ny, _nz, _nz23d;
-  AimsData<int>   _offset;
-  AimsData<int>   _offset2;
+  carto::VolumeRef<int>   _offset;
+  carto::VolumeRef<int>   _offset2;
   T _lthr, _hthr, _ltht, _htht;
   
   std::multimap<float, Point3d> _sel;
