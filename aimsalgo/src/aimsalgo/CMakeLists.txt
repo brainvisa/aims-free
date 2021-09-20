@@ -145,8 +145,6 @@ set( _headers
     morphology/morphology_g.h
     morphology/operatormorpho.h
     mpi/types.h
-    neuralnet/multilayerperceptron.h
-    neuralnet/selforganizingmap.h
     optimization/covsrt.h
     optimization/deterministic.h
     optimization/levmrq.h
@@ -507,8 +505,6 @@ set( _sources
     morphology/morphoerode.cc
     morphology/morphogreylevel.cc
     morphology/morphoopen.cc
-    neuralnet/multilayerperceptron.cc
-    neuralnet/selforganizingmap.cc
     optimization/covsrt.cc
     optimization/levmrq.cc
     perfusion/perfAif.cc
