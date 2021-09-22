@@ -16,17 +16,7 @@
 #include <aims/io/writer.h>                           // aims::Reader / Writer
 #include <aims/math/bspline.h>                        // aims::TabulBSpline
 #include <aims/resampling/nearestneighborresampler.h>
-// #include <aims/resampling/linearresampler.h>
-// #include <aims/resampling/cubicresampler.h>
-// #include <aims/resampling/resamplerfactory.h>
 #include <soma-io/transformation/transformation.h>    // soma::Transformation
-// #include <aims/utility/channel.h>
-// #include <aims/vector/vector.h>                       // Point*
-// #include <aims/mesh/surface.h>
-// #include <aims/bucket/bucketMap.h>
-// #include <aims/fibers/bundles.h>
-// #include <limits>
-// #include <string>
 
 class Graph;
 
