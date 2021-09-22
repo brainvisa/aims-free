@@ -43,7 +43,6 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <cartodata/volume/volume.h>
-#include <aims/data/pheader.h>
 #include <aims/mesh/texture.h>
 
 
