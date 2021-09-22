@@ -8,12 +8,13 @@
  *     France
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include "dataModel.h"
-#include <aims/data/data.h>
-#include <aims/math/math_g.h>
-#include <aims/resampling/resampling_g.h>
-#include <aims/io/writer.h>
-#include <cmath>
+#include <aims/resampling/cubicresampler.h>
 
 using namespace aims;
 using namespace carto;
@@ -44,7 +45,7 @@ DataModel::~DataModel()
 DataModel::DataModel( BucketMap< Void >&                s,
                       VolumeRef< short >                r,
                       VolumeRef< short >                t,
-                      Motion&                           m,
+                      AffineTransformation3d&           m,
                       SplineFfd&                        d,
                       ParzenProbDensFunction&           pdf,
                       bool                              prepro ):
@@ -66,8 +67,8 @@ DataModel::DataModel( BucketMap< Void >&                s,
   _contrib->header().setProperty( "voxel_size", r->getVoxelSize() );
 
   // Compute histo parameter + replace min max values
-  AimsData<short> ar( r ); // FIXME remove this after updateBinSizeAndMin changes
-  AimsData<short> at( t );
+  VolumeRef<short> ar( r ); // FIXME remove this after updateBinSizeAndMin changes
+  VolumeRef<short> at( t );
   _pdf.updateBinSizeAndMin( ar, at, prepro );
 
   // Construction des coefficients splines pour l'image test
@@ -117,25 +118,29 @@ DataModel::DataModel( BucketMap< Void >&                s,
     // No available points in bucket map
     // Default use of the reference image
     int i, j, k;
-    ForEach3d(ar, i, j, k) {
-      Point3d a(i, j, k);
-      vector<float> vs = _reference->getVoxelSize();
-      Point3df p_ref_mm( float(a[0]) * vs[0],
-                         float(a[1]) * vs[1],
-                         float(a[2]) * vs[2] );
-      Point3df p_test_mm = m.transform( p_ref_mm );
-      vector<float> tvs = _test->getVoxelSize();
-      Point3df p_test_vox( p_test_mm[0] / tvs[0],
-                           p_test_mm[1] / tvs[1],
-                           p_test_mm[2] / tvs[2] );
-      // On saute les bords car interpolation imparfaite
-      if( 0 <= p_test_vox[0] && p_test_vox[0] < sdim[0] &&
-          0 <= p_test_vox[1] && p_test_vox[1] < sdim[1] &&
-          0 <= p_test_vox[2] && p_test_vox[2] < sdim[2] )
-      {
-        this->_selection.insert(a, p_test_mm);
+    vector<int> dim = ar->getSize();
+    for( k=0; k<dim[2]; ++k )
+      for( j=0; j<dim[1]; ++j )
+        for( i=0; i<dim[0]; ++i )
+        {
+        Point3d a(i, j, k);
+        vector<float> vs = _reference->getVoxelSize();
+        Point3df p_ref_mm( float(a[0]) * vs[0],
+                          float(a[1]) * vs[1],
+                          float(a[2]) * vs[2] );
+        Point3df p_test_mm = m.transform( p_ref_mm );
+        vector<float> tvs = _test->getVoxelSize();
+        Point3df p_test_vox( p_test_mm[0] / tvs[0],
+                            p_test_mm[1] / tvs[1],
+                            p_test_mm[2] / tvs[2] );
+        // On saute les bords car interpolation imparfaite
+        if( 0 <= p_test_vox[0] && p_test_vox[0] < sdim[0] &&
+            0 <= p_test_vox[1] && p_test_vox[1] < sdim[1] &&
+            0 <= p_test_vox[2] && p_test_vox[2] < sdim[2] )
+        {
+          this->_selection.insert(a, p_test_mm);
+        }
       }
-    }
   }
 
   cout << "Number of evaluation points: " << this->_selection[0].size() << endl;
@@ -287,9 +292,9 @@ bool  DataModel::evalCrit(const Point3df & pTest, const short & value)
   // Point3d kSplineTestLow( max((int)(std::floor(pX)) - 1, -1),
   //                         max((int)(std::floor(pY)) - 1, -1),
   //                         max((int)(std::floor(pZ)) - 1, -1) );
-  // Point3d kSplineTestUpp( min((int)(std::floor(pX)) + 2, _splineTest.dimX() + 1),
-  //                         min((int)(std::floor(pY)) + 2, _splineTest.dimY() + 1),
-  //                         min((int)(std::floor(pZ)) + 2, _splineTest.dimZ() + 1) );
+  // Point3d kSplineTestUpp( min((int)(std::floor(pX)) + 2, _splineTest->getSizeX() + 1),
+  //                         min((int)(std::floor(pY)) + 2, _splineTest->getSizeY() + 1),
+  //                         min((int)(std::floor(pZ)) + 2, _splineTest->getSizeZ() + 1) );
   Point3d kSplineTestLow( (int)(std::floor(pX)) - 1,
                           (int)(std::floor(pY)) - 1,
                           (int)(std::floor(pZ)) - 1 );

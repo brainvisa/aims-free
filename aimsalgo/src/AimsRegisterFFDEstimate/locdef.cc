@@ -14,30 +14,24 @@
 //   IEEE Transactions on Medical Imaging (2003)
 //============================================================================
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 //--- local ------------------------------------------------------------------
 #include "lbfgsb.h"
 #include "dataModel.h"
 #include "scaleControl.h"
 #include "ppdf.h"
 //--- aims -------------------------------------------------------------------
-#include <aims/data/data_g.h>
 #include <aims/getopt/getopt2.h>
-#include <aims/io/io_g.h>
 #include <aims/io/channelR.h>
 #include <aims/io/reader.h>
-#include <aims/io/motionR.h>
 #include <aims/registration/ffd.h>
-#include <aims/utility/converter_volume.h>
-#include <aims/utility/converter_rgb.h>
 #include <aims/utility/clock.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/stream/fileutil.h>                      // carto::FileUtil
-//--- std --------------------------------------------------------------------
-#include <cstdio>                                              // std::sprintf
-#include <ctime>                                                 // std::clock
-#include <list>
-#include <string>
-#include <vector>
 //----------------------------------------------------------------------------
 
 using namespace aims;
@@ -201,11 +195,11 @@ int main( int argc, const char **argv )
     //------------------------------------------------------------------------
     // Affine motion
     //------------------------------------------------------------------------
-    Motion motion; // default is Identity
+    AffineTransformation3d motion; // default is Identity
     if( !inputmotion.empty() ) {
       cout << "Reading affine motion" << endl;
-      MotionReader mrd(inputmotion);
-      mrd >> motion;
+      Reader<AffineTransformation3d> mrd(inputmotion);
+      mrd.read( motion );
       motion = motion.inverse();
     }
     // motion.scale( Point3df( reference.sizeX(), reference.sizeY(), reference.sizeZ() ),
@@ -651,6 +645,6 @@ int main( int argc, const char **argv )
 
 #include <cartodata/volume/volume_d.h>
 
-template class carto::Volume< AimsData< Point3dd > >;
+template class carto::Volume< VolumeRef< Point3dd > >;
 template class carto::Volume< Point3dd >;
 

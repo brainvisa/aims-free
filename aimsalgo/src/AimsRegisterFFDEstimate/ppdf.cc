@@ -9,8 +9,12 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include "ppdf.h"
-#include <aims/data/data.h>
 #include <aims/math/mathelem.h>                              // aims::MathUtil
 #include <cmath>                                             // std::log
 

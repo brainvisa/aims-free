@@ -11,17 +11,9 @@
 #ifndef _AIMSDATAMODEL_H_
 #define _AIMSDATAMODEL_H_
 
-//#include "ffd.h"
 #include "ppdf.h"
-#include <aims/registration/ffd.h>
-#include <aims/data/data_g.h>
-#include <aims/utility/converter_bucket.h>
-#include <aims/utility/utility_g.h>
-#include <aims/io/motionR.h>
-#include <aims/resampling/motion.h>
-#include <aims/math/bspline.h>
-#include <vector>
-#include <iterator>
+#include <aims/bucket/bucket.h>
+#include <aims/transformation/affinetransformation3d.h>
 
 class DataModel
 {
@@ -39,12 +31,12 @@ class DataModel
     /// \param write_file  Write spline coefficient image as
     ///                    "path/dumpSplineTest.ima"
     DataModel( aims::BucketMap< Void >&            s,
-                carto::VolumeRef< short >          r,
-                carto::VolumeRef< short >          t,
-                Motion&                            m,
-                aims::SplineFfd&                    d,
-                ParzenProbDensFunction&            pdf,
-                bool                               prepro  = true );
+               carto::VolumeRef< short >           r,
+               carto::VolumeRef< short >           t,
+               aims::AffineTransformation3d &      m,
+               aims::SplineFfd&                    d,
+               ParzenProbDensFunction&             pdf,
+               bool                                prepro  = true );
 
     virtual ~DataModel();
 
@@ -94,7 +86,7 @@ class DataModel
     std::vector<float>         _current;       ///< Param
     carto::VolumeRef<double>   _splineTest;    ///< B-Spline coefficients for the test image
     aims::SplineFfd&            _deformation;   ///< FFD transformation
-    Motion&                    _rigid;         ///< Pre computed affine motion
+    aims::AffineTransformation3d& _rigid;       ///< Pre computed affine motion
     ParzenProbDensFunction&    _pdf;
     /// Points in which to compute MI
     /// keys   are reference points in voxels
