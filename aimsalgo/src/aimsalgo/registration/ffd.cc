@@ -8,12 +8,15 @@
  *     France
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/registration/ffd.h>
-#include <aims/data/data_g.h>
-#include <aims/resampling/resampling_g.h>
+#include <aims/resampling/cubicresampler.h>
 #include <aims/math/bspline3.h>
 #include <aims/math/bspline2.h>
-#include <aims/io/io_g.h>
 #include <aims/io/reader_d.h>
 #include <aims/graph/graphmanip.h>
 #include <graph/graph/graph.h>
@@ -40,7 +43,7 @@ FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
   _flatx( dimX == 1 ), _flaty( dimY == 1 ), _flatz( dimZ == 1 )
 {
   _ctrlPointDelta = Point3df(0., 0., 0.);
-  _ctrlPointDelta.setSizeXYZT( sizeX, sizeY, sizeZ );
+  _ctrlPointDelta.setVoxelSize( sizeX, sizeY, sizeZ );
 }
 
 FfdTransformation::FfdTransformation( const FfdTransformation & other ):
@@ -53,10 +56,12 @@ FfdTransformation::FfdTransformation( const FfdTransformation & other ):
   updateAllCtrlKnot(other._ctrlPointDelta);
 }
 
-FfdTransformation::FfdTransformation( const AimsData<Point3df> & other ):
-  _dimx( other.dimX() ), _dimy( other.dimY() ),
-  _dimz( other.dimZ() ), _vsx( other.sizeX() ), _vsy( other.sizeY() ),
-  _vsz( other.sizeZ() ),
+FfdTransformation::FfdTransformation(
+  const rc_ptr<Volume<Point3df> > & other ):
+  _dimx( other->getSizeX() ), _dimy( other->getSizeY() ),
+  _dimz( other->getSizeZ() ), _vsx( other->getVoxelSize()[0] ),
+  _vsy( other->getVoxelSize()[1] ),
+  _vsz( other->getVoxelSize()[2] ),
   _flatx( _dimx == 1 ), _flaty( _dimy == 1 ), _flatz( _dimz == 1 )
 {
   updateAllCtrlKnot(other);
@@ -86,61 +91,55 @@ void FfdTransformation::updateCtrlKnot( int nx, int ny, int nz, const Point3df &
 
 void FfdTransformation::updateDimensions()
 {
-  _dimx = _ctrlPointDelta.dimX();
-  _dimy = _ctrlPointDelta.dimY();
-  _dimz = _ctrlPointDelta.dimZ();
-  _vsx = _ctrlPointDelta.sizeX();
-  _vsy = _ctrlPointDelta.sizeY();
-  _vsz = _ctrlPointDelta.sizeZ();
+  _dimx = _ctrlPointDelta->getSizeX();
+  _dimy = _ctrlPointDelta->getSizeY();
+  _dimz = _ctrlPointDelta->getSizeZ();
+  _vsx = _ctrlPointDelta->getVoxelSize()[0];
+  _vsy = _ctrlPointDelta->getVoxelSize()[1];
+  _vsz = _ctrlPointDelta->getVoxelSize()[2];
   _flatx = _dimx == 1;
   _flaty = _dimy == 1;
   _flatz = _dimz == 1;
 }
 
 
-void FfdTransformation::updateGridResolution( const AimsData<Point3df> & newGrid )
+void FfdTransformation::updateGridResolution(
+  const rc_ptr<Volume<Point3df> > & newGrid )
 {
   // Ctrl Point Grid dimensions
-  if( newGrid.dimX() != _dimx ||
-      newGrid.dimY() != _dimy ||
-      newGrid.dimZ() != _dimz )
+  if( newGrid->getSizeX() != _dimx ||
+      newGrid->getSizeY() != _dimy ||
+      newGrid->getSizeZ() != _dimz )
   {
-    _ctrlPointDelta = AimsData<Point3df>( newGrid.dimX(),
-                                          newGrid.dimY(),
-                                          newGrid.dimZ() );
+    _ctrlPointDelta = VolumeRef<Point3df>( newGrid->getSize() );
   }
 
-  if( newGrid.sizeX() != _vsx ||
-      newGrid.sizeY() != _vsy ||
-      newGrid.sizeZ() != _vsz )
+  if( newGrid->getVoxelSize()[0] != _vsx ||
+      newGrid->getVoxelSize()[1] != _vsy ||
+      newGrid->getVoxelSize()[2] != _vsz )
   {
-    _ctrlPointDelta.setSizeXYZT( newGrid.sizeX(), newGrid.sizeY(), newGrid.sizeZ() );
+    _ctrlPointDelta.setVoxelSize( newGrid->getVoxelSize() );
   }
   updateDimensions();
 }
 
-void FfdTransformation::updateAllCtrlKnot( const AimsData<Point3df> & newCtrlKnotGrid )
+void FfdTransformation::updateAllCtrlKnot(
+  const rc_ptr<Volume<Point3df> > & newCtrlKnotGrid )
 {
   updateGridResolution( newCtrlKnotGrid );
-  int dx = newCtrlKnotGrid.dimX(), dy = newCtrlKnotGrid.dimY(),
-    dz = newCtrlKnotGrid.dimZ();
-  for( int k = 0; k < dz; ++k )
-  for( int j = 0; j < dy; ++j )
-  for( int i = 0; i < dx; ++i )
-    _ctrlPointDelta(i, j, k) = newCtrlKnotGrid(i, j, k);
+  transfer( newCtrlKnotGrid, _ctrlPointDelta );
 }
 
 
-void FfdTransformation::updateAllCtrlKnotFromDeformation( const AimsData<Point3df> & newDeformationGrid )
+void FfdTransformation::updateAllCtrlKnotFromDeformation(
+  const rc_ptr<Volume<Point3df> > & newDeformationGrid )
 {
   updateGridResolution( newDeformationGrid );
 
   // Spline interpolation of displacement vectors of control points
   for( int c = 0; c <= 2; ++c )
   {
-    carto::VolumeRef<float> def( newDeformationGrid.dimX(),
-                                 newDeformationGrid.dimY(),
-                                 newDeformationGrid.dimZ() );
+    carto::VolumeRef<float> def( newDeformationGrid->getSize() );
     def->fill( 0. );
 
     int dx = def->getSizeX(), dy = def->getSizeY(), dz = def->getSizeZ();
@@ -148,7 +147,7 @@ void FfdTransformation::updateAllCtrlKnotFromDeformation( const AimsData<Point3d
     for( int k = 0; k < dz; ++k )
     for( int j = 0; j < dy; ++j )
     for( int i = 0; i < dx; ++i )
-      def->at(i, j, k) = newDeformationGrid(i, j, k)[c];
+      def->at(i, j, k) = newDeformationGrid->at(i, j, k)[c];
 
     // Construction of spline coefficients for test image
     VolumeRef<double> splineCoeff;
@@ -179,15 +178,17 @@ void FfdTransformation::increaseResolution( const Point3d & addKnot )
 
   // 1. we compute a volume of deformations in the new referential, but only
   // inside the image domain
-  AimsData<Point3df> newDef( newDim[0], newDim[1], newDim[2] );
-  newDef.setSizeXYZT( _flatx ? sizeX() : double(dimX() - 1) / double(newDef.dimX() - 1) * sizeX(),
-                      _flaty ? sizeY() : double(dimY() - 1) / double(newDef.dimY() - 1) * sizeY(),
-                      _flatz ? sizeZ() : double(dimZ() - 1) / double(newDef.dimZ() - 1) * sizeZ() );
+  VolumeRef<Point3df> newDef( newDim[0], newDim[1], newDim[2] );
+  newDef.setVoxelSize( _flatx ? sizeX() : double(dimX() - 1) / double(newDef->getSizeX() - 1) * sizeX(),
+                      _flaty ? sizeY() : double(dimY() - 1) / double(newDef->getSizeY() - 1) * sizeY(),
+                      _flatz ? sizeZ() : double(dimZ() - 1) / double(newDef->getSizeZ() - 1) * sizeZ() );
   newDef = Point3df(0.);
   Point3dd nd;
 
-  float vsx = newDef.sizeX(), vsy = newDef.sizeY(), vsz = newDef.sizeZ();
-  int dx = newDef.dimX(), dy = newDef.dimY(), dz = newDef.dimZ();
+  vector<float> vs = newDef->getVoxelSize();
+  float vsx = vs[0], vsy = vs[1], vsz = vs[2];
+  int dx = newDef->getSizeX(), dy = newDef->getSizeY(),
+    dz = newDef->getSizeZ();
 
   for( int k = 0; k < dz; ++k )
   for( int j = 0; j < dy; ++j )
@@ -213,9 +214,9 @@ void FfdTransformation::inverseTransform()
   int x, y, z, i, j, k;
 
   // Save FFD object
-  AimsData<Point3df> tmpPointDelta( _ctrlPointDelta.dimX(),
-                                    _ctrlPointDelta.dimY(),
-                                    _ctrlPointDelta.dimZ() );
+  VolumeRef<Point3df> tmpPointDelta( _ctrlPointDelta.dimX(),
+                                     _ctrlPointDelta.dimY(),
+                                     _ctrlPointDelta.dimZ() );
 
   cout << "Structure copied 1: dX = " << _ctrlPointDelta.dimX()
        << "\tdY = " << _ctrlPointDelta.dimY()
@@ -229,9 +230,9 @@ void FfdTransformation::inverseTransform()
     tmpPointDelta(i,j,k) = _ctrlPointDelta(i,j,k);
 
   //   Creation d un reseau de pts de controle etendu (bord de bord...)
-  AimsData<Point3df> tmpPointDeltaBis( 1+1+this->dimX()+2+1,
-                                       1+1+this->dimY()+2+1,
-                                       1+1+this->dimZ()+2+1 );
+  VolumeRef<Point3df> tmpPointDeltaBis( 1+1+this->dimX()+2+1,
+                                        1+1+this->dimY()+2+1,
+                                        1+1+this->dimZ()+2+1 );
   tmpPointDeltaBis(i,j,k) = Point3df( 0., 0., 0. );
 
   cout << "Grid size before: " << dimX() << "\t"
@@ -288,21 +289,21 @@ void FfdTransformation::inverseTransform()
 
   // Calcul des coordonnees des points de ctrl
   string name_inverse;
-  AimsData< Point3df > coordCtrlKnot(this_init[0],
-                                     this_init[1],
-                                     this_init[2]);
+  VolumeRef< Point3df > coordCtrlKnot(this_init[0],
+                                      this_init[1],
+                                      this_init[2]);
 
-  AimsData< Point3d > origine(this_init[0],
-                              this_init[1],
-                              this_init[2]);
+  VolumeRef< Point3d > origine(this_init[0],
+                               this_init[1],
+                               this_init[2]);
 
-  AimsData< Point3df > inverseDisplacement(this_init[0],
-                                           this_init[1],
-                                           this_init[2]);
+  VolumeRef< Point3df > inverseDisplacement(this_init[0],
+                                            this_init[1],
+                                            this_init[2]);
 
-  AimsData< float > error(this_init[0],
-                          this_init[1],
-                          this_init[2]);
+  VolumeRef< float > error(this_init[0],
+                           this_init[1],
+                           this_init[2]);
 
   float error_tmp;
 
@@ -410,13 +411,13 @@ void FfdTransformation::inverseTransform()
       }
 
   // Spline interpolation of control points displacement vectors
-  AimsData< Point3df > coefInvDisplacement(this_init[0], this_init[1], this_init[2]);
+  VolumeRef< Point3df > coefInvDisplacement(this_init[0], this_init[1], this_init[2]);
 
   for( int c = 0; c <= 2; c++ )
   {
-    AimsData<float> tmp( 1 + this_init[0] + 2,
-                         1 + this_init[1] + 2,
-                         1 + this_init[2] + 2 );
+    VolumeRef<float> tmp( 1 + this_init[0] + 2,
+                          1 + this_init[1] + 2,
+                          1 + this_init[2] + 2 );
 
     tmp = 0.;
 
@@ -429,7 +430,7 @@ void FfdTransformation::inverseTransform()
         }
 
     // Construction of spline coefficients for test image
-    AimsData< double > tmpReech;
+    VolumeRef< double > tmpReech;
     {
       CubicResampler<float> interpolator;
       tmpReech = interpolator.getSplineCoef( tmp );
@@ -451,11 +452,11 @@ void FfdTransformation::inverseTransform()
 //            (int)this->dimY()-2,
 //            (int)this->dimZ()-2 );
 //
-//   Writer< AimsData< Point3df > > winverse( name_inverse );
+//   Writer< Volume< Point3df > > winverse( name_inverse );
 //   winverse << (*coefInvDisplacement);
 
-//   Writer< AimsData< float > > werror( "error" );
-//   werror << error;
+//   Writer< Volume< float > > werror( "error" );
+//   werror << *error;
 
   // Restore FFD
   _ctrlPointDelta = tmpPointDelta;
@@ -476,7 +477,7 @@ void FfdTransformation::estimateLocalDisplacement( const Point3df & VoxelSize)
 {
   int i, j, k;
 
-  AimsData< float > estim_tmp( _imageDimX, _imageDimY, _imageDimZ, 8 );
+  VolumeRef< float > estim_tmp( _imageDimX, _imageDimY, _imageDimZ, 8 );
   estim_tmp.setSizeXYZT( VoxelSize[0], VoxelSize[1], VoxelSize[2], 1 );
   estim_tmp = 0.;
 
@@ -512,16 +513,16 @@ void FfdTransformation::estimateLocalDisplacement( const Point3df & VoxelSize)
                               + sqr( estim_tmp(i, j, k, 6)) );
       }
 
-//   Writer< AimsData< float > > westim( "estimate3d.ima" );
-//   westim << estim_tmp;
+//   Writer< Volume< float > > westim( "estimate3d.ima" );
+//   westim << *estim_tmp;
 }
 #endif
 
 void FfdTransformation::printControlPointsGrid() const
 {
-  for( int z = 0; z < _ctrlPointDelta.dimZ(); ++z ) {
-    for( int y = 0; y < _ctrlPointDelta.dimY(); ++y ) {
-      for( int x = 0; x < _ctrlPointDelta.dimX(); ++x ) {
+  for( int z = 0; z < _ctrlPointDelta->getSizeZ(); ++z ) {
+    for( int y = 0; y < _ctrlPointDelta->getSizeY(); ++y ) {
+      for( int x = 0; x < _ctrlPointDelta->getSizeX(); ++x ) {
         cout << "\t" << _ctrlPointDelta(x, y, z);
       }
       cout << endl ;
@@ -532,8 +533,8 @@ void FfdTransformation::printControlPointsGrid() const
 
 void FfdTransformation::writeDebugCtrlKnots( const string & filename ) const
 {
-  AimsData<float> ctrlknots( dimX(), dimY(), dimZ(), 3 );
-  ctrlknots.setSizeXYZT( sizeX(), sizeY(), sizeZ() );
+  VolumeRef<float> ctrlknots( dimX(), dimY(), dimZ(), 3 );
+  ctrlknots.setVoxelSize( sizeX(), sizeY(), sizeZ() );
 
   for( int k = 0; k < dimZ(); ++k )
   for( int j = 0; j < dimY(); ++j )
@@ -541,20 +542,20 @@ void FfdTransformation::writeDebugCtrlKnots( const string & filename ) const
   for( int c = 0; c < 3; ++c )
     ctrlknots( i, j, k, c ) = _ctrlPointDelta( i, j, k )[c];
 
-  Writer<AimsData<float> > wcoef( filename );
-  wcoef << ctrlknots;
+  Writer<Volume<float> > wcoef( filename );
+  wcoef << *ctrlknots;
 }
 
 void FfdTransformation::writeDebugDeformations( const std::string & filename,
                                         int dimX, int dimY, int dimZ,
                                         float sizeX, float sizeY, float sizeZ ) const
 {
-  AimsData<float> def(dimX, dimY, dimZ, 3);
-  def.setSizeXYZT( sizeX, sizeY, sizeZ );
+  Volume<float> def(dimX, dimY, dimZ, 3);
+  def.setVoxelSize( sizeX, sizeY, sizeZ );
 
-  for( int z = 0; z < def.dimZ(); ++z )
-  for( int y = 0; y < def.dimY(); ++y )
-  for( int x = 0; x < def.dimX(); ++x )
+  for( int z = 0; z < dimZ; ++z )
+  for( int y = 0; y < dimY; ++y )
+  for( int x = 0; x < dimX; ++x )
   {
     Point3dd p = deformation( Point3dd( x * sizeX,
                                         y * sizeY,
@@ -563,7 +564,7 @@ void FfdTransformation::writeDebugDeformations( const std::string & filename,
       def( x, y, z, c ) = p[c];
   }
 
-  Writer<AimsData<float> > wima( filename );
+  Writer<Volume<float> > wima( filename );
   wima << def;
 }
 
@@ -597,7 +598,7 @@ SplineFfd::SplineFfd( const SplineFfd & other ):
   updateDimensions();
 }
 
-SplineFfd::SplineFfd( const AimsData<Point3df> & other ):
+SplineFfd::SplineFfd( const rc_ptr<Volume<Point3df> > & other ):
   FfdTransformation( other ),
   _spline(3, 0)
 {
@@ -708,7 +709,7 @@ TrilinearFfd::TrilinearFfd( const TrilinearFfd & other ):
 {
 }
 
-TrilinearFfd::TrilinearFfd( const AimsData<Point3df> & other ):
+TrilinearFfd::TrilinearFfd( const rc_ptr<Volume<Point3df> > & other ):
   FfdTransformation( other )
 {
 }
@@ -916,7 +917,7 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
 
     // write as a (N+1)D volume
 
-    VolumeRef<Point3df> rvol = AimsData<Point3df>( obj ).volume();
+    VolumeRef<Point3df> rvol = obj;
     vector<int> dims = rvol->getSize();
     dims.push_back( 3 );
     Volume<float> def( dims );

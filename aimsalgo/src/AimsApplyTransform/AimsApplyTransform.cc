@@ -492,9 +492,11 @@ load_ffd_deformation(const string &filename,
   }
 
   const AllocatorContext & actual_allocator =
-    static_cast<const AimsData<Point3df> >(*deformation.get()).allocator();
+    static_cast<const VolumeRef<Point3df> & >(
+      *deformation.get()).allocatorContext();
   if(proc.mmap_fields
-     && actual_allocator.allocatorType() != AllocatorStrategy::ReadOnlyMap) {
+     && actual_allocator.allocatorType() != AllocatorStrategy::ReadOnlyMap)
+  {
     std::clog << "Warning: memory-mapping was requested but could not be used"
               << std::endl;
   }

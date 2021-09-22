@@ -12,7 +12,7 @@
 #ifndef AIMS_REGISTRATION_FFD_H
 #define AIMS_REGISTRATION_FFD_H
 
-#include <aims/data/data.h>                           // AimsData
+#include <cartodata/volume/volume.h>                  // Volume
 #include <aims/io/writer.h>                           // aims::Reader / Writer
 #include <aims/math/bspline.h>                        // aims::TabulBSpline
 #include <aims/resampling/nearestneighborresampler.h>
@@ -32,7 +32,7 @@ namespace aims {
       vector fields. This class is dedicated to the application of the vector
       field deformation to transform coordinates.
 
-      Vector fields are stored in volumes AimsData<Point3df>.
+      Vector fields are stored in volumes VolumeRef<Point3df>.
   **/
   class FfdTransformation : public soma::Transformation3d
   {
@@ -41,21 +41,23 @@ namespace aims {
                        float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
     template <typename T>
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData<T> & test_volume );
+                       const carto::rc_ptr<carto::Volume<T> > & test_volume );
     template <typename T>
     FfdTransformation( int dimX, int dimY, int dimZ,
                        const carto::Volume<T> & test_volume );
 
     FfdTransformation( const FfdTransformation & other );
-    FfdTransformation( const AimsData<Point3df> & other );
+    FfdTransformation( const carto::rc_ptr<carto::Volume<Point3df> > & other );
     FfdTransformation & operator=( const FfdTransformation & other );
 
-//     operator const AimsData<Point3df>&() const { return _ctrlPointDelta; }
-//     operator AimsData<Point3df>&() { return _ctrlPointDelta; }
-    operator const carto::rc_ptr<carto::Volume<Point3df> >() const
-    { return _ctrlPointDelta.volume(); }
-    operator carto::rc_ptr<carto::Volume<Point3df> >()
-    { return _ctrlPointDelta.volume(); }
+    operator const carto::VolumeRef<Point3df> & () const
+    { return _ctrlPointDelta; }
+    operator carto::VolumeRef<Point3df> & ()
+    { return _ctrlPointDelta; }
+    operator const carto::rc_ptr<carto::Volume<Point3df> > & () const
+    { return _ctrlPointDelta; }
+    operator carto::rc_ptr<carto::Volume<Point3df> > & ()
+    { return _ctrlPointDelta; }
 
     /// Always false, because testing for identity is expensive
     bool isIdentity() const CARTO_OVERRIDE { return false; }
@@ -63,8 +65,10 @@ namespace aims {
     //--- Control Knots ------------------------------------------------------
     Point3df     getCtrlKnot( int nx, int ny, int nz ) const;
     void         updateCtrlKnot( int nx, int ny, int nz, const Point3df & newCtrlKnot );
-    void         updateAllCtrlKnot( const AimsData<Point3df> & newCtrlKnotGrid );
-    void         updateAllCtrlKnotFromDeformation( const AimsData<Point3df> & newDeformationGrid );
+    void         updateAllCtrlKnot(
+      const carto::rc_ptr<carto::Volume<Point3df> > & newCtrlKnotGrid );
+    void         updateAllCtrlKnotFromDeformation(
+      const carto::rc_ptr<carto::Volume<Point3df> > & newDeformationGrid );
 
     //--- Modify -------------------------------------------------------------
     void         increaseResolution( const Point3d & addKnots );
@@ -121,11 +125,12 @@ namespace aims {
     //--- Protected methods --------------------------------------------------
     Point3dd     splineVoxToMm( const Point3dd& p ) const;
     Point3dd     mmToSplineVox( const Point3dd& p ) const;
-    void         updateGridResolution( const AimsData<Point3df> & newGrid );
+    void         updateGridResolution(
+      const carto::rc_ptr<carto::Volume<Point3df> > & newGrid );
 
     virtual Point3dd _deformation( const Point3dd& p_mm ) const = 0;
 
-    AimsData<Point3df>  _ctrlPointDelta;
+    carto::VolumeRef<Point3df>  _ctrlPointDelta;
     int _dimx, _dimy, _dimz;
     float _vsx, _vsy, _vsz;
     bool _flatx, _flaty, _flatz;
@@ -133,17 +138,18 @@ namespace aims {
 
   template <typename T>
   inline
-  FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
-                                        const AimsData<T> & test_volume ):
+  FfdTransformation::FfdTransformation(
+    int dimX, int dimY, int dimZ,
+    const carto::rc_ptr<carto::Volume<T> > & test_volume ):
     _ctrlPointDelta( dimX, dimY, dimZ ),
     _dimx( dimX ), _dimy( dimY ), _dimz( dimZ ),
     _flatx( dimX == 1 ), _flaty( dimY == 1 ), _flatz( dimZ == 1 )
   {
     _ctrlPointDelta = Point3df(0., 0., 0.);
-    _ctrlPointDelta.setSizeXYZT(
-      _flatx ? test_volume.sizeX() : double(test_volume.dimX() - 1) / double(dimX - 1) * test_volume.sizeX(),
-      _flaty ? test_volume.sizeY() : double(test_volume.dimY() - 1) / double(dimY - 1) * test_volume.sizeY(),
-      _flatz ? test_volume.sizeZ() : double(test_volume.dimZ() - 1) / double(dimZ - 1) * test_volume.sizeZ()
+    _ctrlPointDelta.setVoxelSize(
+      _flatx ? test_volume->getVoxelSize()[0] : double(test_volume->getSizeX() - 1) / double(dimX - 1) * test_volume->getVoxelSize()[0],
+      _flaty ? test_volume->getVoxelSize()[1] : double(test_volume->getSizeY() - 1) / double(dimY - 1) * test_volume->getVoxelSize()[1],
+      _flatz ? test_volume->getVoxelSize()[2] : double(test_volume->getSizeZ() - 1) / double(dimZ - 1) * test_volume->getSizeZ()
     );
     updateDimensions();
   }
@@ -158,7 +164,7 @@ namespace aims {
   {
     _ctrlPointDelta = Point3df(0., 0., 0.);
     std::vector<float> vs = test_volume.getVoxelSize();
-    _ctrlPointDelta.setSizeXYZT(
+    _ctrlPointDelta.setVoxelSize(
       _flatx ? vs[0] : double(test_volume.getSizeX() - 1) / double(dimX - 1) * vs[0],
       _flaty ? vs[1] : double(test_volume.getSizeY() - 1) / double(dimY - 1) * vs[1],
       _flatz ? vs[2] : double(test_volume.getSizeZ() - 1) / double(dimZ - 1) * vs[2]
@@ -192,7 +198,7 @@ namespace aims {
       vector fields. This class is dedicated to the application of the vector
       field deformation to transform coordinates.
 
-      Vector fields are stored in volumes AimsData<Point3df>.
+      Vector fields are stored in volumes VolumeRef<Point3df>.
 
       This Spline FFD uses cubic spline interpolation between displacement
       vectors to process transformed coordinates. See TrilinearFfd for a
@@ -221,13 +227,13 @@ namespace aims {
                   float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
     template <typename T>
     SplineFfd( int dimX, int dimY, int dimZ,
-                  const AimsData<T> & test_volume );
+                  const carto::rc_ptr<carto::Volume<T> > & test_volume );
     template <typename T>
     SplineFfd( int dimX, int dimY, int dimZ,
                   const carto::Volume<T> & test_volume );
 
     SplineFfd( const SplineFfd & other );
-    SplineFfd( const AimsData<Point3df> & other );
+    SplineFfd( const carto::rc_ptr<carto::Volume<Point3df> > & other );
     SplineFfd & operator=( const SplineFfd & other );
 
     virtual void updateDimensions();
@@ -253,7 +259,7 @@ namespace aims {
   template <typename T>
   inline
   SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
-                        const AimsData<T> & test_volume ):
+                        const carto::rc_ptr<carto::Volume<T> > & test_volume ):
     FfdTransformation( dimX, dimY, dimZ, test_volume ),
     _spline(3, 0)
   {
@@ -290,10 +296,10 @@ namespace aims {
                   float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
     template <typename T>
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData<T> & test_volume );
+                  const carto::rc_ptr<carto::Volume<T> > & test_volume );
 
     TrilinearFfd( const TrilinearFfd & other );
-    TrilinearFfd( const AimsData<Point3df> & other );
+    TrilinearFfd( const carto::rc_ptr<carto::Volume<Point3df> > & other );
     TrilinearFfd & operator=( const TrilinearFfd & other );
 
     //--- Deformation --------------------------------------------------------
@@ -307,8 +313,9 @@ namespace aims {
 
   template <typename T>
   inline
-  TrilinearFfd::TrilinearFfd( int dimX, int dimY, int dimZ,
-                              const AimsData<T> & test_volume ):
+  TrilinearFfd::TrilinearFfd(
+    int dimX, int dimY, int dimZ,
+    const carto::rc_ptr<carto::Volume<T> > & test_volume ):
     FfdTransformation( dimX, dimY, dimZ, test_volume )
   {
   }

@@ -33,16 +33,17 @@ class ParzenProbDensFunction
                           short testbinNb = 64);
 
     virtual  ~ParzenProbDensFunction();
-    void      updateBinSizeAndMin(AimsData<short>& refImage,
-                                 AimsData<short>&  testImage,
-                                 bool              prepro = true );
+    void      updateBinSizeAndMin(
+      carto::rc_ptr<carto::Volume<short> > & refImage,
+      carto::rc_ptr<carto::Volume<short> > &  testImage,
+      bool              prepro = true );
     // add [lambda,kappa] point to the joint histogram
     // testlevel is used to better manage discretisation.
     bool      addContrib(int lambda, int kappa, double testLevel);
     bool      addDerContrib(int i,int j,int k,
                            int lambda, int kappa,double testLevel,
                            double coef, Point3dd &p);
-    void      normalize(AimsData<double>& n); // unused
+    void      normalize(carto::rc_ptr<carto::Volume<double> >& n); // unused
     void      zeroPdfAndDerPdf();
     /// Returns the mutual information score
     float     getMutualInfo();
@@ -52,9 +53,9 @@ class ParzenProbDensFunction
 
     void      resizeParam( Point3d newDim );
 
-    AimsData<double> &    dumpJPdf() { return _jpdf; };
-    AimsData<Point3dd> &  dumpDerJPdf(int i,int j,int k)
-                               {return _derjpdf(i,j,k);}
+    carto::VolumeRef<double> &    dumpJPdf() { return _jpdf; };
+    carto::VolumeRef<Point3dd> &  dumpDerJPdf(int i,int j,int k)
+             {return _derjpdf(i,j,k);}
     int      getKappa( double r ) const;
     int      getLambda( double t) const;
     double   parzenDerivative(int k , double t);
@@ -67,15 +68,15 @@ class ParzenProbDensFunction
     void writeDebugJPdf( const std::string & filename ) const;
 
  private:
-     AimsData<double>  _jpdf;  ///< joint density (refBinNb x testBinNb+2*PAD)
-     AimsData<double>  _xpdf;  ///< reference marginal density (refBinNb)
-     AimsData<double>  _ypdf;  ///< test marginal density (testBinNb+2*PAD)
+     carto::VolumeRef<double>  _jpdf;  ///< joint density (refBinNb x testBinNb+2*PAD)
+     carto::VolumeRef<double>  _xpdf;  ///< reference marginal density (refBinNb)
+     carto::VolumeRef<double>  _ypdf;  ///< test marginal density (testBinNb+2*PAD)
 
      /// joint density derived w.r.t. each parameter
      /// size: (ffd.dimX x ffd.dimY x ffd.dimZ)
      /// -> size: (refBinNb x testBinNb+2*PAD)
      /// ---> size: 3 (param x/y/z)
-     AimsData<AimsData<Point3dd> >  _derjpdf;
+     carto::VolumeRef<carto::VolumeRef<Point3dd> >  _derjpdf;
 
      double              _refDeltaBin;   ///< bin size for ref image
      double              _testDeltaBin;  ///< bin size for test image
@@ -102,10 +103,11 @@ ParzenProbDensFunction::zeroPdfAndDerPdf()
   _ypdf = 0.0;
 
   int i, j, k;
-
-  ForEach3d(_derjpdf, i, j, k) {
-    _derjpdf(i, j, k) = Point3dd(0.0);
-  }
+  std::vector<int> dim = _derjpdf->getSize();
+  for( k=0; k<dim[2]; ++k )
+    for( j=0; j<dim[1]; ++j )
+      for( i=0; i<dim[0]; ++i )
+        _derjpdf->at( i, j, k )->fill( Point3dd( 0. ) );
 }
 
 
@@ -200,7 +202,7 @@ ParzenProbDensFunction::addDerContrib(int i, int j, int k,
   ASSERT( dt >= -2.  && dt + 3. <= 2. );
 
   // /!\ changed
-  AimsData<Point3dd> & df = _derjpdf(i, j, k);
+  carto::VolumeRef<Point3dd> & df = _derjpdf(i, j, k);
   Point3dd cp = p * coef;
 
   // Term 1 * (Term0 * Term2 *t* Term3)

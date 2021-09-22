@@ -24,7 +24,7 @@ Free Form Deformation is the registration technique used to build the
 vector fields. This class is dedicated to the application of the vector
 field deformation to transform coordinates.
 
-Vector fields are stored in volumes AimsData_POINT3DF.
+Vector fields are stored in volumes rc_ptr_Volume_POINT3DF.
 %End
 
    public:
@@ -32,40 +32,40 @@ Vector fields are stored in volumes AimsData_POINT3DF.
     FfdTransformation( int dimX = 0, int dimY = 1, int dimZ = 1,
                        float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_U8 & test_volume );
+                       const rc_ptr_Volume_U8 & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_S16 & test_volume );
+                       const rc_ptr_Volume_S16 & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_U16 & test_volume );
+                       const rc_ptr_Volume_U16 & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_S32 & test_volume );
+                       const rc_ptr_Volume_S32 & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_U32 & test_volume );
+                       const rc_ptr_Volume_U32 & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_FLOAT & test_volume );
+                       const rc_ptr_Volume_FLOAT & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_DOUBLE & test_volume );
+                       const rc_ptr_Volume_DOUBLE & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_RGB & test_volume );
+                       const rc_ptr_Volume_RGB & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_RGBA & test_volume );
+                       const rc_ptr_Volume_RGBA & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_HSV & test_volume );
+                       const rc_ptr_Volume_HSV & test_volume );
     FfdTransformation( int dimX, int dimY, int dimZ,
-                       const AimsData_POINT3DF & test_volume );
+                       const rc_ptr_Volume_POINT3DF & test_volume );
 
     FfdTransformation( const aims::FfdTransformation & other );
-    FfdTransformation( const AimsData_POINT3DF & other );
+    FfdTransformation( const rc_ptr_Volume_POINT3DF & other );
 
-    operator rc_ptr_Volume_POINT3DF ();
+    operator rc_ptr_Volume_POINT3DF & ();
 
     bool isIdentity() const;
 
     //--- Control Knots ------------------------------------------------------
     Point3df     getCtrlKnot( int nx, int ny, int nz ) const;
     void         updateCtrlKnot( int nx, int ny, int nz, const Point3df & newCtrlKnot );
-    void         updateAllCtrlKnot( const AimsData_POINT3DF & newCtrlKnotGrid );
-    void         updateAllCtrlKnotFromDeformation( const AimsData_POINT3DF & newDeformationGrid );
+    void         updateAllCtrlKnot( const rc_ptr_Volume_POINT3DF & newCtrlKnotGrid );
+    void         updateAllCtrlKnotFromDeformation( const rc_ptr_Volume_POINT3DF & newDeformationGrid );
 
     //--- Modify -------------------------------------------------------------
     void         increaseResolution( const Point3d & addKnots );
@@ -180,7 +180,7 @@ Free Form Deformation is the registration technique used to build the
 vector fields. This class is dedicated to the application of the vector
 field deformation to transform coordinates.
 
-Vector fields are stored in volumes AimsData_POINT3DF.
+Vector fields are stored in volumes rc_ptr_Volume_POINT3DF.
 
 This Spline FFD uses cubic spline interpolation between displacement
 vectors to process transformed coordinates. See TrilinearFfd for a
@@ -207,30 +207,30 @@ of objects.
     SplineFfd( int dimX = 0, int dimY = 1, int dimZ = 1,
                float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_U8 & test_volume );
+               const rc_ptr_Volume_U8 & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_S16 & test_volume );
+               const rc_ptr_Volume_S16 & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_U16 & test_volume );
+               const rc_ptr_Volume_U16 & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_S32 & test_volume );
+               const rc_ptr_Volume_S32 & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_U32 & test_volume );
+               const rc_ptr_Volume_U32 & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_FLOAT & test_volume );
+               const rc_ptr_Volume_FLOAT & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_DOUBLE & test_volume );
+               const rc_ptr_Volume_DOUBLE & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_RGB & test_volume );
+               const rc_ptr_Volume_RGB & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_RGBA & test_volume );
+               const rc_ptr_Volume_RGBA & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_HSV & test_volume );
+               const rc_ptr_Volume_HSV & test_volume );
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_POINT3DF & test_volume );
+               const rc_ptr_Volume_POINT3DF & test_volume );
 
     SplineFfd( const aims::SplineFfd & other );
-    SplineFfd( const AimsData_POINT3DF & other );
+    SplineFfd( const rc_ptr_Volume_POINT3DF & other );
 
     double spline3( double x ) const;
 
@@ -266,30 +266,30 @@ between displacement vectors. See SplineFfd for details.
     TrilinearFfd( int dimX = 0, int dimY = 1, int dimZ = 1,
                   float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_U8 & test_volume );
+                  const rc_ptr_Volume_U8 & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_S16 & test_volume );
+                  const rc_ptr_Volume_S16 & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_U16 & test_volume );
+                  const rc_ptr_Volume_U16 & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_S32 & test_volume );
+                  const rc_ptr_Volume_S32 & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_U32 & test_volume );
+                  const rc_ptr_Volume_U32 & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_FLOAT & test_volume );
+                  const rc_ptr_Volume_FLOAT & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_DOUBLE & test_volume );
+                  const rc_ptr_Volume_DOUBLE & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_RGB & test_volume );
+                  const rc_ptr_Volume_RGB & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_RGBA & test_volume );
+                  const rc_ptr_Volume_RGBA & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_HSV & test_volume );
+                  const rc_ptr_Volume_HSV & test_volume );
     TrilinearFfd( int dimX, int dimY, int dimZ,
-                  const AimsData_POINT3DF & test_volume );
+                  const rc_ptr_Volume_POINT3DF & test_volume );
 
     TrilinearFfd( const aims::TrilinearFfd & other );
-    TrilinearFfd( const AimsData_POINT3DF & other );
+    TrilinearFfd( const rc_ptr_Volume_POINT3DF & other );
 
   private:
     virtual Point3dd _deformation( const Point3dd& p_mm ) const;
