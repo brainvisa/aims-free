@@ -38,7 +38,7 @@
 #define AIMS_UTILITY_LINEARCOMB_H
 
 #include <aims/config/aimsdata_config.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 
 /** The template class to make linear combinations.
@@ -47,10 +47,8 @@
     a float casting.
 */
 template <class T>
-class AIMSDATA_API AimsLinearCombination
+class AimsLinearCombination
 { protected:
-    /**@name Data*/
-    //@{
     /// multiplicator for the first data
     float _num1;
     /// dividor for the first data
@@ -59,11 +57,8 @@ class AIMSDATA_API AimsLinearCombination
     float _num2;
     /// dividor for the second data
     float _den2;
-    //@}
 
   public :
-    /**@name Constructor and destructor*/
-    //@{
     /** The programmer should provide at least 2 parameters to the constructor:
         @param num1 multiplicator for the first data
         @param den1 dividor for the first data
@@ -80,53 +75,50 @@ class AIMSDATA_API AimsLinearCombination
     }
     /// Destructor does nothing
     virtual ~AimsLinearCombination() { }
-    //@}
 
-    /**@name Methods*/
-    //@{
     /// Return the combination of data1 and data2
-    AimsData<T> operator () (const AimsData<T> &data1,
-                             const AimsData<T> &data2);
+    carto::VolumeRef<T> operator () (
+      const carto::rc_ptr<carto::Volume<T> > &data1,
+      const carto::rc_ptr<carto::Volume<T> > &data2 );
     /// Return the combination of data1
-    AimsData<T> operator () (const AimsData<T> &data1);
-    //@}
+    carto::VolumeRef<T> operator () (
+      const carto::rc_ptr<carto::Volume<T> > &data1);
 };
 
 
 template <class T> inline
-AimsData<T> AimsLinearCombination<T>::operator () (const AimsData<T> &data1,
-                                                   const AimsData<T> &data2)
-{ if (data1.dimX() != data2.dimX() ||
-      data1.dimY() != data2.dimY() ||
-      data1.dimZ() != data2.dimZ() ||
-      data1.dimT() != data2.dimT()   )
-    AimsError("AimsData<T> AimsLinearCombination(const AimsData<T> &,\
-               float,float,const AimsData<T> &,float,float) : \
+carto::VolumeRef<T> AimsLinearCombination<T>::operator () (
+  const carto::rc_ptr<carto::Volume<T> > &data1,
+  const carto::rc_ptr<carto::Volume<T> > &data2 )
+{
+  if( data1->getSize() != data2->getSize() )
+    AimsError("VolumeRef<T> AimsLinearCombination(const rc_ptr<Volume<T> > &,\
+               float,float,const rc_ptr<Volume<T> > &,float,float) : \
                sizes must be the same");
 
-  AimsData<T> comb(data1.dimX(),data1.dimY(),data1.dimZ(),data1.dimT(),
-                     data1.borderWidth());
-  comb.setSizeXYZT(data1);
-  typename AimsData<T>::iterator       it;
-  typename AimsData<T>::const_iterator it1,it2;
-  for (it=comb.begin(),it1=data1.begin(),it2=data2.begin();
-       it<comb.end();it++,it1++,it2++)
+  carto::VolumeRef<T> comb( data1->getSize(), data1->getBorders() );
+  comb.setVoxelSize( data1->getVoxelSize() );
+  typename carto::Volume<T>::iterator       it;
+  typename carto::Volume<T>::const_iterator it1, it2;
+  for( it=comb->begin(), it1=data1->begin(), it2=data2->begin();
+       it!=comb->end(); it++, it1++, it2++ )
     *it = (T)((double)*it1 * (double)_num1 / (double)_den1 +
               (double)*it2 * (double)_num2 / (double)_den2 );
-  return(comb);
+  return comb;
 }
 
 
 template <class T> inline
-AimsData<T> AimsLinearCombination<T>::operator () (const AimsData<T> &data1)
-{ AimsData<T> comb(data1.dimX(),data1.dimY(),data1.dimZ(),data1.dimT(),
-                     data1.borderWidth());
-  comb.setSizeXYZT(data1);
-  typename AimsData<T>::iterator       it;
-  typename AimsData<T>::const_iterator it1;
-  for (it=comb.begin(),it1=data1.begin();it<comb.end();it++,it1++)
-    *it = (T)((double)*it1 * (double)_num1 / (double)_den1);
-  return(comb);
+carto::VolumeRef<T> AimsLinearCombination<T>::operator () (
+  const carto::rc_ptr<carto::Volume<T> > &data1 )
+{
+  carto::VolumeRef<T> comb( data1->getSize(), data1->getBorders() );
+  comb.setVoxelSize( data1->getVoxelSize() );
+  typename carto::Volume<T>::iterator       it;
+  typename carto::Volume<T>::const_iterator it1;
+  for( it=comb->begin(), it1=data1->begin(); it!=comb->end(); it++, it1++ )
+       *it = (T)((double)*it1 * (double)_num1 / (double)_den1);
+  return comb;
 }
 
 
