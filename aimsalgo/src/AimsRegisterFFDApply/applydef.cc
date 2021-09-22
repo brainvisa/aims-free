@@ -28,6 +28,7 @@
 #include <cartobase/object/object.h>                                 // Object
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/errno.h>
+#include <cartobase/type/datatypeinfo.h>
 //--- std --------------------------------------------------------------------
 #include <algorithm>
 #include <iostream>

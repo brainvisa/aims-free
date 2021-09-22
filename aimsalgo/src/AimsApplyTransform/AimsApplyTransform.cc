@@ -12,6 +12,7 @@
 #include <aims/transform/transform_objects.h>
 #include <aims/resampling/linearresampler.h>                // LinearResampler
 #include <aims/resampling/cubicresampler.h>                  // CubicResampler
+#include <aims/resampling/resamplerfactory.h>
 #include <aims/resampling/standardreferentials.h>
 #include <aims/registration/ffd.h>                        // FfdTransformation
 //--- carto ------------------------------------------------------------------
