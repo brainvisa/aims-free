@@ -40,7 +40,6 @@
 #include <stdexcept>
 
 #include <aims/vector/vector.h>
-#include <aims/data/data.h>
 #include <aims/transformation/affinetransformation3d.h>
 
 
