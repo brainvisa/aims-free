@@ -15,11 +15,6 @@
 #define AIMS_UTILITY_EMTHRESHOLD_H
 
 #include <cartobase/config/verbose.h>
-#include <aims/data/data_g.h>
-#include <aims/math/math_g.h>
-#include <aims/io/writer.h>
-#include <aims/io/reader.h>
-#include <aims/histogram/histogram_g.h>
 #include <aims/histogram/regularBinnedHisto.h>
 #include <aims/utility/threshold.h>
 
@@ -43,14 +38,14 @@ template <class T, class U>
     virtual ~AimsEMThreshold() {}
 
     inline
-    std::vector<T> processEMThresholds(const AimsData<T> &image);
+    std::vector<T> processEMThresholds(const carto::VolumeRef<T> &image);
 
     /// Return the multi-level thresholded image
-    inline AimsData<T> operator () (const AimsData<T> &image);
+    inline carto::VolumeRef<U> operator () (const carto::VolumeRef<T> &image);
   
     /// Return the binary thresholded image
     inline
-    AimsData<U> bin(const AimsData<T> &image);
+    carto::VolumeRef<U> bin(const carto::VolumeRef<T> &image);
   
   private :
     int _classes;
@@ -90,14 +85,15 @@ template <class T, class U> inline
 }
 // EM
 template <class T, class U> inline
-    std::vector<T> AimsEMThreshold<T, U>::processEMThresholds(const AimsData<T> &image)
+    std::vector<T> AimsEMThreshold<T, U>::processEMThresholds(
+      const carto::VolumeRef<T> &image )
 {
   std::vector<T> thresholds, thresholds_mu;
   int bins = _bins;
   int binend;
 
   
-  T maxi = image.maximum(), mini = image.minimum();
+  T maxi = image.max(), mini = image.min();
   if ( bins <= 0 )
     bins = int(maxi - mini);
   
@@ -114,11 +110,11 @@ template <class T, class U> inline
   his.doit(image);
 
   // Declarations
-  AimsData<double> th_pi(_classes);
-  AimsData<double> th_mu(_classes);
-  AimsData<double> th_sigma(_classes);
-  AimsData<double> th_tau(bins, _classes);
-  AimsData<double> aux(_classes);
+  carto::VolumeRef<double> th_pi(_classes);
+  carto::VolumeRef<double> th_mu(_classes);
+  carto::VolumeRef<double> th_sigma(_classes);
+  carto::VolumeRef<double> th_tau(bins, _classes);
+  carto::VolumeRef<double> aux(_classes);
   int n, i, j;
   
   // Initialisation of the EM algorithm
@@ -263,7 +259,8 @@ template <class T, class U> inline
 }
 
 template <class T, class U> inline
-AimsData<T> AimsEMThreshold<T, U>::operator () (const AimsData<T> &image)
+carto::VolumeRef<U> AimsEMThreshold<T, U>::operator () (
+  const carto::VolumeRef<T> &image)
 {
   // Threshold
   std::vector<T> thresholds = processEMThresholds(image);
@@ -274,13 +271,14 @@ AimsData<T> AimsEMThreshold<T, U>::operator () (const AimsData<T> &image)
     AimsEMThreshold<T, U>::_level2 = thresholds[_level2index];
   
 //   std::cout << "Thresholding values ..." << std::endl << std::flush;
-  AimsData<U> thresholded = AimsThreshold<T, U>::operator ()( image );
+  carto::VolumeRef<U> thresholded = AimsThreshold<T, U>::operator ()( image );
   
   return thresholded;
 }
 
 template <class T, class U> inline
-AimsData<U> AimsEMThreshold<T, U>::bin(const AimsData<T> &image)
+carto::VolumeRef<U> AimsEMThreshold<T, U>::bin(
+  const carto::VolumeRef<T> &image)
 {
   // Threshold
   std::vector<T> thresholds = processEMThresholds(image);
@@ -290,7 +288,7 @@ AimsData<U> AimsEMThreshold<T, U>::bin(const AimsData<T> &image)
   if (_level2index < thresholds.size())
     AimsEMThreshold<T, U>::_level2 = thresholds[_level2index];
   
-  AimsData<U> thresholded = AimsThreshold<T, U>::bin( image );
+  carto::VolumeRef<U> thresholded = AimsThreshold<T, U>::bin( image );
   
   return thresholded;
 }
