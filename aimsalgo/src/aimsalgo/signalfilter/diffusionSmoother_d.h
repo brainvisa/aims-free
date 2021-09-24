@@ -40,7 +40,6 @@
 #include <aims/signalfilter/diffusionSmoother.h>
 #include <aims/signalfilter/convol.h>
 #include <aims/utility/converter_volume.h>
-// #include <aims/data/volumemanip.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
