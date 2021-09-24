@@ -39,7 +39,8 @@
 #include <aims/signalfilter/filteringfunction_element.h>
 #include <aims/connectivity/structuring_element.h>
 
-namespace aims {
+namespace aims
+{
 
   template <typename T>
   class MinFilter: public ElementFilteringImageAlgorithm<T>
@@ -68,63 +69,5 @@ namespace aims {
   };
 
 } // namespace aims
-
-//============================================================================
-//   Backward compatibility bindings
-//============================================================================
-
-#include <aims/data/data_g.h>
-#include <vector>
-
-template <typename T>
-class MinSmoothing
-{
-  public:
-    MinSmoothing( int sx = 3, int sy = 3, int sz = 3 );
-    virtual ~MinSmoothing();
-    virtual AimsData<T> doit( const AimsData<T>& in );
-  private:
-    MinSmoothing<T> & operator = ( const MinSmoothing<T> & );
-    int _sx;
-    int _sy;
-    int _sz;
-};
-
-//----------------------------------------------------------------------------
-//   DEFINITIONS
-//----------------------------------------------------------------------------
-
-template <typename T>
-MinSmoothing<T>::MinSmoothing( int sx, int sy, int sz ):
-  _sx(sx), _sy(sy), _sz(sz)
-{}
-
-template <typename T>
-MinSmoothing<T>::~MinSmoothing()
-{}
-
-template <typename T>
-MinSmoothing<T> & MinSmoothing<T>::operator= (
-  const MinSmoothing<T> & other
-)
-{
-  _sx = other._sx;
-  _sy = other._sy;
-  _sz = other._sz;
-  return (*this);
-}
-
-template <typename T>
-AimsData<T> MinSmoothing<T>::doit( const AimsData<T>& in )
-{
-  std::vector<double> amplitude(3,0.);
-  amplitude[0] = .5 * (double)_sx;
-  amplitude[1] = .5 * (double)_sy;
-  amplitude[2] = .5 * (double)_sz;
-  aims::strel::Cube se( amplitude, true );
-  aims::MinFilter<T> f( se );
-  return f.execute( in );
-}
-
 
 #endif

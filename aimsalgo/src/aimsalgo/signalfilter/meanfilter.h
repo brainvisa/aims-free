@@ -39,7 +39,8 @@
 #include <aims/signalfilter/filteringfunction_element.h>
 #include <aims/connectivity/structuring_element.h>
 
-namespace aims {
+namespace aims
+{
 
   template <typename T>
   class MeanFilter: public ElementFilteringImageAlgorithm<T>
@@ -67,7 +68,8 @@ namespace aims {
     MeanFilter<T> *clone() const { return new MeanFilter<T>(*this); }
   };
 
-    template <typename T>
+
+  template <typename T>
   class NotNullMeanFilter: public ElementFilteringImageAlgorithm<T>
   {
   public:
@@ -94,63 +96,6 @@ namespace aims {
   };
 
 } // namespace aims
-
-//============================================================================
-//   Backward compatibility bindings
-//============================================================================
-
-#include <aims/data/data_g.h>
-#include <vector>
-
-template <typename T>
-class MeanSmoothing
-{
-  public:
-    MeanSmoothing( int sx = 3, int sy = 3, int sz = 3 );
-    virtual ~MeanSmoothing();
-    virtual AimsData<T> doit( const AimsData<T>& in );
-  private:
-    MeanSmoothing<T> & operator = ( const MeanSmoothing<T> & );
-    int _sx;
-    int _sy;
-    int _sz;
-};
-
-//----------------------------------------------------------------------------
-//   DEFINITIONS
-//----------------------------------------------------------------------------
-
-template <typename T>
-MeanSmoothing<T>::MeanSmoothing( int sx, int sy, int sz ):
-  _sx(sx), _sy(sy), _sz(sz)
-{}
-
-template <typename T>
-MeanSmoothing<T>::~MeanSmoothing()
-{}
-
-template <typename T>
-MeanSmoothing<T> & MeanSmoothing<T>::operator= (
-  const MeanSmoothing<T> & other
-)
-{
-  _sx = other._sx;
-  _sy = other._sy;
-  _sz = other._sz;
-  return (*this);
-}
-
-template <typename T>
-AimsData<T> MeanSmoothing<T>::doit( const AimsData<T>& in )
-{
-  std::vector<double> amplitude(3,0.);
-  amplitude[0] = .5 * (double)_sx;
-  amplitude[1] = .5 * (double)_sy;
-  amplitude[2] = .5 * (double)_sz;
-  aims::strel::Cube se( amplitude, true );
-  aims::MeanFilter<T> f( se );
-  return f.execute( in );
-}
 
 
 #endif

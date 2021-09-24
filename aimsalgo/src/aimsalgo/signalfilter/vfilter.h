@@ -35,7 +35,7 @@
 #ifndef AIMS_SIGNALFILTER_VFILTER_H
 #define AIMS_SIGNALFILTER_VFILTER_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 
 /** The template class to perform a V-filter.
@@ -54,12 +54,12 @@ public:
   AimsVFilter( int s=2, VFilterType t=Optimized ) : _size( s ), _type( t )  { }
   virtual ~AimsVFilter() { }
 
-  AimsData< T > doit( AimsData< T >& );
+  carto::VolumeRef< T > doit( carto::VolumeRef< T >& );
 
 private:
 
-  AimsData< T > optimized( AimsData< T >& );
-  AimsData< T > nonOptimized( AimsData< T >& );
+  carto::VolumeRef< T > optimized( carto::VolumeRef< T >& );
+  carto::VolumeRef< T > nonOptimized( carto::VolumeRef< T >& );
 
   int _size;
   VFilterType _type;
@@ -67,9 +67,9 @@ private:
 
 
 template< class T > inline
-AimsData< T > AimsVFilter< T >::doit( AimsData< T >& d )
+carto::VolumeRef< T > AimsVFilter< T >::doit( carto::VolumeRef< T >& d )
 {
-  AimsData< T > res;
+  carto::VolumeRef< T > res;
 
   switch( _type )
     {
@@ -87,7 +87,7 @@ AimsData< T > AimsVFilter< T >::doit( AimsData< T >& d )
 
 // This is the non-optimized version!
 template< class T > inline
-AimsData< T > AimsVFilter< T >::nonOptimized( AimsData< T >& d )
+carto::VolumeRef< T > AimsVFilter< T >::nonOptimized( carto::VolumeRef< T >& d )
 {
   int x, y, z, t, i, j, k, index;
   double sum, sum2, varmin, var[8], moy[8];
@@ -96,13 +96,13 @@ AimsData< T > AimsVFilter< T >::nonOptimized( AimsData< T >& d )
   int tm1 = _size - 1;
   double t3 = (double)( _size * _size * _size );
 
-  int dx = d.dimX();
-  int dy = d.dimY();
-  int dz = d.dimZ();
-  int dt = d.dimT();
+  int dx = d->getSizeX();
+  int dy = d->getSizeY();
+  int dz = d->getSizeZ();
+  int dt = d->getSizeT();
 
-  AimsData< T > res( dx, dy, dz, dt );
-  res.setSizeXYZT( d.sizeX(), d.sizeY(), d.sizeZ(), d.sizeT() );
+  carto::VolumeRef< T > res( dx, dy, dz, dt );
+  res.setVoxelSize( d->getVoxelSize() );
 
   for ( t=0; t<dt; t++ )
     for ( z=0; z<dz; z++ )
@@ -272,20 +272,20 @@ AimsData< T > AimsVFilter< T >::nonOptimized( AimsData< T >& d )
 
 // This is the optimized version!
 template< class T > inline
-AimsData< T > AimsVFilter< T >::optimized( AimsData< T >& d )
+carto::VolumeRef< T > AimsVFilter< T >::optimized( carto::VolumeRef< T >& d )
 {
   int i, j, k, x, y, z, loc;
   double somme, carre, somme1, carre1, vars, *pvar, moyenne, temp;
-  int dx = d.dimX();
-  int dy = d.dimY();
-  int dz = d.dimZ();
+  int dx = d->getSizeX();
+  int dy = d->getSizeY();
+  int dz = d->getSizeZ();
   int tm1 = _size - 1;
   double size2 = (double)( _size * _size * _size );
 
-  AimsData< T > vf( dx, dy, dz );
-  vf.setSizeXYZT( d.sizeX(), d.sizeY(), d.sizeZ() );
+  carto::VolumeRef< T > vf( dx, dy, dz );
+  vf.setVoxelSize( d->getVoxelSize() );
 
-  AimsData< double > table( dx, dy, _size );
+  carto::VolumeRef< double > table( dx, dy, _size );
 
   for ( z=_size; z--; )
     for ( y=dy; y--; )

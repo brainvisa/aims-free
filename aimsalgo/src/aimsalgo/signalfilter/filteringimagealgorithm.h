@@ -36,7 +36,6 @@
 
 //--- aims -------------------------------------------------------------------
 #include <aims/algorithm/imagealgorithm.h>
-#include <aims/data/data.h>
 #include <aims/utility/progress.h>
 #include <aims/connectivity/structuring_element.h>
 //--- cartodata --------------------------------------------------------------

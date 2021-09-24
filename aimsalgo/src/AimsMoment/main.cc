@@ -58,7 +58,7 @@ public:
 private:
   template<class U>
   friend bool doit( Process &, const string &, Finder & );
-  template<class T> bool domom( AimsData< T > & );
+  template<class T> bool domom( VolumeRef< T > & );
   bool domom( AimsTimeSurface<3,Void> & );
 
   string	fileout;
@@ -72,47 +72,47 @@ Momentor::Momentor( const string & fout, const string & mode, const string& mtyp
 	    int lbl )
     : Process(), fileout( fout ), dmode( mode ), dtype( mtype ), label( lbl )
 {
-  registerProcessType( "Volume", "S8", &doit< AimsData<int8_t> > );
-  registerProcessType( "Volume", "U8", &doit< AimsData<uint8_t> > );
-  registerProcessType( "Volume", "S16", &doit< AimsData<int16_t> > );
-  registerProcessType( "Volume", "U16", &doit< AimsData<uint16_t> > );
+  registerProcessType( "Volume", "S8", &doit< VolumeRef<int8_t> > );
+  registerProcessType( "Volume", "U8", &doit< VolumeRef<uint8_t> > );
+  registerProcessType( "Volume", "S16", &doit< VolumeRef<int16_t> > );
+  registerProcessType( "Volume", "U16", &doit< VolumeRef<uint16_t> > );
   registerProcessType( "Mesh", "VOID", &doit< AimsTimeSurface<3,Void> > );
 }
 
 
 template<class T> bool
-Momentor::domom( AimsData<T> & data )
+Momentor::domom( VolumeRef<T> & data )
 {
   T	lablst[ 0x10000 ];
   int	nbLab = 0;
   
   if ( label != -1 )
-    {
-      lablst[ 0 ] = label;
-      nbLab = 1;
-    }
+  {
+    lablst[ 0 ] = label;
+    nbLab = 1;
+  }
   else
-    {
-      int	dx = data.dimX();
-      int	dy = data.dimY();
-      int	dz = data.dimZ();
-      int	k, x, y, z;
-      T		val;
-      
-      for ( z=0; z< dz; z++ )
-        for ( y=0; y<dy; y++ )
-	  for ( x=0; x<dx; x++ )
-	    {
-	       val = data( x, y, z );
-	       
-	       if ( val )
-	         {
-		   k = 0;
-		   while( k < nbLab && lablst[ k ] != val )  k++;
-		   if ( k == nbLab )  lablst[ nbLab++ ] = val;
-		 }
-	    }
-    }
+  {
+    int	dx = data->getSizeX();
+    int	dy = data->getSizeY();
+    int	dz = data->getSizeZ();
+    int	k, x, y, z;
+    T		val;
+
+    for ( z=0; z< dz; z++ )
+      for ( y=0; y<dy; y++ )
+        for ( x=0; x<dx; x++ )
+        {
+          val = data( x, y, z );
+
+          if ( val )
+          {
+            k = 0;
+            while( k < nbLab && lablst[ k ] != val )  k++;
+            if ( k == nbLab )  lablst[ nbLab++ ] = val;
+          }
+        }
+  }
 
   GeometricMoment< T > *geom = new GeometricMoment< T >;
   MomentInvariant< T > inv( geom );

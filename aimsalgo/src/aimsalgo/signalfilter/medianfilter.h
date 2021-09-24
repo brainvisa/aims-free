@@ -100,7 +100,6 @@ namespace aims {
 //   Backward compatibility bindings
 //============================================================================
 
-#include <aims/data/data_g.h>
 #include <vector>
 
 template <typename T>
@@ -109,7 +108,7 @@ class MedianSmoothing
   public:
     MedianSmoothing( int sx = 3, int sy = 3, int sz = 3 );
     virtual ~MedianSmoothing();
-    virtual AimsData<T> doit( const AimsData<T>& in ) const;
+    virtual carto::VolumeRef<T> doit( const carto::VolumeRef<T>& in ) const;
   private:
     MedianSmoothing<T> & operator = ( const MedianSmoothing<T> & );
     int _sx;
@@ -142,7 +141,7 @@ MedianSmoothing<T> & MedianSmoothing<T>::operator= (
 }
 
 template <typename T>
-AimsData<T> MedianSmoothing<T>::doit( const AimsData<T>& in ) const
+carto::VolumeRef<T> MedianSmoothing<T>::doit( const carto::VolumeRef<T>& in ) const
 {
   std::vector<double> amplitude(3,0.);
   amplitude[0] = .5 * (double)_sx;
