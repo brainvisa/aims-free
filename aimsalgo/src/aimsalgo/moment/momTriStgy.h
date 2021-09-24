@@ -36,11 +36,10 @@
 #define AIMS_MOMENT_MOMTRISTGY_H
 
 #include <aims/config/aimsalgo_config.h>
-#include <aims/data/data.h>
 #include <aims/moment/moment.h>
 
 
-class AIMSALGO_API MomentTriangleStrategy
+class MomentTriangleStrategy
 {
   public:
   
