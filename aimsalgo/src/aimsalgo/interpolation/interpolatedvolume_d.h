@@ -64,42 +64,25 @@ namespace aims {
     setVolume( vol );
   }
 
-  template <typename T>
-  InterpolatedVolume::InterpolatedVolume( const AimsData<T> & vol,
-                                          unsigned order ):
-    _order( order ),
-    _spline( new FastBSpline( 3 ) )
-  {
-    setVolume( vol );
-  }
-
-
   //--------------------------------------------------------------------------
   //   Change interpolated volume
   //--------------------------------------------------------------------------
 
   template <typename T>
-  void InterpolatedVolume::setVolume( const AimsData<T> & vol, int order )
-  {
-    if( order >= 0 )
-      _order = order;
-
-    InverseBSplineFilter f( _order );
-    _coeff = f.execute( carto::VolumeRef<T>( vol.volume() ) );
-  }
-
-  template <typename T>
   void InterpolatedVolume::setVolume( const carto::Volume<T> & vol, int order )
   {
-    AimsData<T> rvol( carto::VolumeRef<T>( new carto::Volume<T>( vol ) ) );
+    carto::VolumeRef<T> rvol( new carto::Volume<T>( vol ) );
     setVolume( rvol, order );
   }
 
   template <typename T>
   void InterpolatedVolume::setVolume( const carto::VolumeRef<T> & vol, int order )
   {
-    AimsData<T> rvol( vol );
-    setVolume( rvol, order );
+    if( order >= 0 )
+      _order = order;
+
+    InverseBSplineFilter f( _order );
+    _coeff = f.execute( vol );
   }
 
   //--------------------------------------------------------------------------
@@ -121,14 +104,6 @@ namespace aims {
     carto::VolumeRef<T> rvol( new carto::Volume<T>( vol ) );
     setCoeff( rvol, order );
   }
-
-  template <typename T>
-  void InterpolatedVolume::setCoeff( const AimsData<T> & vol, int order )
-  {
-    carto::VolumeRef<T> rvol( vol.volume() );
-    setCoeff( rvol, order );
-  }
-
 
 
 } // namespace aims

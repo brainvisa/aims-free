@@ -31,6 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/interpolation/interpolatedvolume_d.h>
 
 //--- aims -------------------------------------------------------------------
@@ -515,13 +520,10 @@ namespace aims {
 #define instantiate_methods( T ) \
   template InterpolatedVolume::InterpolatedVolume( const carto::Volume<T> &, unsigned );     \
   template InterpolatedVolume::InterpolatedVolume( const carto::VolumeRef<T> &, unsigned );  \
-  template InterpolatedVolume::InterpolatedVolume( const AimsData<T> &, unsigned );          \
   template void InterpolatedVolume::setVolume( const carto::Volume<T> & vol, int );          \
   template void InterpolatedVolume::setVolume( const carto::VolumeRef<T> & vol, int );       \
-  template void InterpolatedVolume::setVolume( const AimsData<T> & vol, int );               \
   template void InterpolatedVolume::setCoeff( const carto::Volume<T> & vol, int );           \
-  template void InterpolatedVolume::setCoeff( const carto::VolumeRef<T> & vol, int );        \
-  template void InterpolatedVolume::setCoeff( const AimsData<T> & vol, int );
+  template void InterpolatedVolume::setCoeff( const carto::VolumeRef<T> & vol, int );
 
 
   instantiate_methods( int8_t )

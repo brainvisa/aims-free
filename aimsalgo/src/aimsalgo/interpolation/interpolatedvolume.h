@@ -34,7 +34,7 @@
 #define AIMS_INTERPOLATION_INTERPOLATEDVOLUME_H
 
 //--- aims -------------------------------------------------------------------
-#include <aims/data/data.h>                 // AimsData
+#include <cartodata/volume/volume.h>        // Volume
 #include <aims/math/bspline.h>              // aims::TabulBSpline
 #include <aims/vector/vector.h>             // Point*
 //--- cartodata --------------------------------------------------------------
@@ -65,15 +65,12 @@ namespace aims {
     InterpolatedVolume();
     /// Constructor from Volume
     /// \warning This is the most expensive constructor because the volume
-    /// has to be fully copied to create an AimsData.
+    /// has to be fully copied.
     template <typename T>
     InterpolatedVolume( const carto::Volume<T> & vol, unsigned order = 3 );
     /// Constructor from VolumeRef
     template <typename T>
     InterpolatedVolume( const carto::VolumeRef<T> & vol, unsigned order = 3 );
-    /// Constructor from AimsData
-    template <typename T>
-    InterpolatedVolume( const AimsData<T> & vol, unsigned order = 3 );
     /// Copy constructor
     /// (underlying data is fully copied and not shared between the volumes)
     InterpolatedVolume( const InterpolatedVolume & other );
@@ -127,8 +124,6 @@ namespace aims {
     void setVolume( const carto::Volume<T> & vol, int order = -1 );
     template <typename T>
     void setVolume( const carto::VolumeRef<T> & vol, int order = -1 );
-    template <typename T>
-    void setVolume( const AimsData<T> & vol, int order = -1 );
     /// @}
 
     /// Change coefficient volume
@@ -137,8 +132,6 @@ namespace aims {
     void setCoeff( const carto::Volume<T> & vol, int order = -1  );
     template <typename T>
     void setCoeff( const carto::VolumeRef<T> & vol, int order = -1  );
-    template <typename T>
-    void setCoeff( const AimsData<T> & vol, int order = -1  );
     /// @}
 
     /// Parameters
