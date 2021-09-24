@@ -392,6 +392,36 @@ namespace carto
   /// @}
 
 
+  template<typename T>
+  inline
+  bool isSameVolumeSize( const Volume<T> & v1, const Volume<T> & v2 )
+  {
+    std::vector<int> dim1 = v1.getSize();
+    std::vector<int> dim2 = v2.getSize();
+    int i, n1 = dim1.size(), n2 = dim2.size(), n = std::min( n1, n2 );
+    for( i=0; i<n; ++i )
+      if( dim1[i] != dim2[i] )
+        return false;
+    for( ; i<n1; ++i )
+      if( dim1[i] != 1 )
+        return false;
+    for( ; i<n2; ++i )
+      if( dim2[i] != 1 )
+        return false;
+
+    return true;
+  }
+
+
+  template<typename T>
+  inline
+  bool isSameVolumeSize( const rc_ptr<Volume<T> > & v1,
+                         const rc_ptr<Volume<T> > & v2 )
+  {
+    return isSameVolumeSize( *v1, *v2 );
+  }
+
+
   //==========================================================================
   //
   //                            DEFINITIONS
