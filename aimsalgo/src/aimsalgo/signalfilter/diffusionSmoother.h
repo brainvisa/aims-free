@@ -43,7 +43,8 @@ namespace aims
 
 /** Base class for Heat diffusion */
 template<typename T>
-class BaseDiffusionSmoother : public Smoother<AimsData<T>, AimsData<T> >
+class BaseDiffusionSmoother
+  : public Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> >
 {
 public:
   BaseDiffusionSmoother(float delta_t) {this->SetDt(delta_t);}
@@ -58,14 +59,14 @@ public:
         << std::endl; exit(EXIT_FAILURE);
     }
   }
-  virtual AimsData<T> doSmoothing(const AimsData<T> & ima,
+  virtual carto::VolumeRef<T> doSmoothing(const carto::VolumeRef<T> & ima,
       int maxiter, bool verbose=false) = 0;
 
   float dt() {return _dt;}
 
 public:
-  static AimsData<float> init_laplacian(void);
-  static AimsData<float> laplacian;
+  static carto::VolumeRef<float> init_laplacian(void);
+  static carto::VolumeRef<float> laplacian;
 
 protected:
   float _dt;
@@ -83,13 +84,13 @@ public:
   ~DiffusionSmoother() {}
 
 public:
-  virtual AimsData<T> doSmoothing(const AimsData<T> & ima,
+  virtual carto::VolumeRef<T> doSmoothing(const carto::VolumeRef<T> & ima,
         int maxiter, bool verbose=false);
-  void setConstantSources( const AimsData<T> &, const T & background );
+  void setConstantSources( const carto::VolumeRef<T> &, const T & background );
   void removeConstantSources();
 
 private:
-  AimsData<T> _constantSources;
+  carto::VolumeRef<T> _constantSources;
   bool _hasConstantSources;
   T _constantSourcesBackground;
 };
@@ -100,20 +101,22 @@ class BaseMaskedDiffusionSmoother : public BaseDiffusionSmoother<T>
 {
 public: 
   BaseMaskedDiffusionSmoother(float delta_t, bool safe=true) :
-    BaseDiffusionSmoother<T>(delta_t), _mask(NULL), _safe(safe) {}
+    BaseDiffusionSmoother<T>(delta_t), _safe(safe)
+  { _mask.reset( 0 ); }
   ~BaseMaskedDiffusionSmoother() {}
 
 public:
-  virtual AimsData<T> doSmoothing(const AimsData<T> & ima,
+  virtual carto::VolumeRef<T> doSmoothing(const carto::VolumeRef<T> & ima,
         int maxiter, bool verbose=false) = 0;
-  void setMask( AimsData<short> *const mask, short background=0)
+  void setMask( const carto::rc_ptr<carto::Volume<short> > & mask,
+                short background=0)
   {
     _mask = mask;
     _background = background;
   }
 
 protected:
-  AimsData<short>    *_mask;
+  carto::VolumeRef<short>    _mask;
   bool      _safe;
   short      _background;
 };
@@ -129,7 +132,7 @@ public:
   ~MaskedDiffusionSmoother() {}
 
 public:
-  AimsData<T> doSmoothing(const AimsData<T> & ima,
+  carto::VolumeRef<T> doSmoothing(const carto::VolumeRef<T> & ima,
       int maxiter, bool verbose=false);
 };
 
@@ -153,12 +156,12 @@ public:
   ~MaskedDiffusionSmoother() {}
 
 public:
-  virtual AimsData<T> doSmoothing(const AimsData<T> & ima,
+  virtual carto::VolumeRef<T> doSmoothing(const carto::VolumeRef<T> & ima,
         int maxiter, bool verbose=false);
   void add_neumann_condition(const Point3df &p);
 
 private :
-  void update_neumann_conditions(AimsData<float> &ima);
+  void update_neumann_conditions(carto::VolumeRef<float> &ima);
 
 private :
   bool      _has_neumann_condition;
@@ -176,7 +179,7 @@ private :
     isolated voxels.
   */
 template<typename T>
-class MaskedDiffusionSmoother<T, AimsData<short> > :
+class MaskedDiffusionSmoother<T, carto::VolumeRef<short> > :
 public BaseMaskedDiffusionSmoother<T>
 {
 public: 
@@ -186,14 +189,14 @@ public:
   ~MaskedDiffusionSmoother() {}
 
 public:
-  virtual AimsData<T> doSmoothing(const AimsData<T> & ima,
+  virtual carto::VolumeRef<T> doSmoothing(const carto::VolumeRef<T> & ima,
         int maxiter, bool verbose=false);
   void  set_neumann_value(short value) {
     _neumann_value = value;
   }
 
-  void convolution(const AimsData<float> &ima1,
-      AimsData<float> &ima2) const;
+  void convolution(const carto::VolumeRef<float> &ima1,
+      carto::VolumeRef<float> &ima2) const;
 private:
   short  _neumann_value;
 };

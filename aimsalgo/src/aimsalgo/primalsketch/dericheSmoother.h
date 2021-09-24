@@ -42,12 +42,16 @@
 namespace aims
 {
 
-  template<class T> class DericheSmoother : public Smoother<AimsData<T>, AimsData<T> > {
+  template<class T>
+  class DericheSmoother
+    : public Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> >
+  {
 
   public:
 
-    AimsData<T> doSmoothing( const AimsData<T> & ima, int maxiter,
-                             bool verbose=false);
+    carto::VolumeRef<T> doSmoothing( const carto::VolumeRef<T> & ima,
+                                     int maxiter,
+                                     bool verbose=false);
 
     float dt() {return 0.0;}
     bool optimal() {return false;}

@@ -106,7 +106,7 @@ int DoImagePrimalSketch ( std::string fileIn,
     DericheSmoother<float> *gaussSmooth;
     gaussSmooth = new DericheSmoother<float>();
 
-    Smoother<AimsData<float>, AimsData<float> > *smooth;
+    Smoother<carto::VolumeRef<float>, carto::VolumeRef<float> > *smooth;
 
     if ( smoothOperator == 0 )
         smooth = gaussSmooth;

@@ -93,12 +93,12 @@ int main(int argc, const char **argv)
       DericheSmoother<float> *gaussSmooth;
       gaussSmooth=new DericheSmoother<float>();
   
-      Smoother<AimsData<float>, AimsData<float> > *smooth;
+      Smoother<VolumeRef<float>, VolumeRef<float> > *smooth;
   
       if (smoothOperator==0)
-  	smooth=gaussSmooth;
+        smooth=gaussSmooth;
       else if (smoothOperator==1)
-	smooth=diffSmooth;
+        smooth=diffSmooth;
       else
         {
           cerr << "Wrong value for -s option" << endl;

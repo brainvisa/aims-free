@@ -40,7 +40,7 @@
 #include <aims/signalfilter/diffusionSmoother.h>
 #include <aims/signalfilter/convol.h>
 #include <aims/utility/converter_volume.h>
-#include <aims/data/volumemanip.h>
+// #include <aims/data/volumemanip.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
@@ -49,13 +49,14 @@ namespace aims {
 
 
 template<typename T>
-AimsData<float> BaseDiffusionSmoother<T>::laplacian =
+carto::VolumeRef<float> BaseDiffusionSmoother<T>::laplacian =
   BaseDiffusionSmoother<T>::init_laplacian();
 
 template<typename T>
-AimsData<float> BaseDiffusionSmoother<T>::init_laplacian(void)
+carto::VolumeRef<float> BaseDiffusionSmoother<T>::init_laplacian(void)
 {
-  AimsData<float>	laplacian(3, 3, 3, 1);
+  carto::VolumeRef<float>	laplacian( 3, 3, 3, 1,
+                                       carto::AllocatorContext::fast() );
   laplacian = 0.;
   /* WARNING: this kernel is only suitable for isotropic, 1mm voxels.
      Moreover I don't explain the 1/2 factor on the whole kernel
@@ -83,18 +84,19 @@ void BaseDiffusionSmoother<T>::check(int maxiter)
 }
 
 template<class T>
-AimsData<T> DiffusionSmoother<T>::doSmoothing(const AimsData<T> & ima,
-        int maxiter, bool verbose)
+carto::VolumeRef<T> DiffusionSmoother<T>::doSmoothing(
+  const carto::VolumeRef<T> & ima, int maxiter, bool verbose)
 {
   this->check(maxiter);
-  AimsData<float> kernel = DiffusionSmoother<T>::laplacian.clone();
+  carto::VolumeRef<float> kernel = DiffusionSmoother<T>::laplacian.copy();
+  std::vector<float> vs = ima->getVoxelSize();
   // rebuild the kernel accounting for possibly anisotropic voxel size
-  kernel(0,1,1) = kernel(2,1,1) = this->_dt / ( ima.sizeX() * ima.sizeX() );
-  kernel(1,0,1) = kernel(1,2,1) = this->_dt / ( ima.sizeY() * ima.sizeY() );
-  kernel(1,1,0) = kernel(1,1,2) = this->_dt / ( ima.sizeZ() * ima.sizeZ() );
-  kernel(1,1,1) = -this->_dt * (2. / (ima.sizeX() * ima.sizeX())
-    + 2. / (ima.sizeY() * ima.sizeY())
-    + 2. / (ima.sizeZ() * ima.sizeZ()) );
+  kernel(0,1,1) = kernel(2,1,1) = this->_dt / ( vs[0] * vs[0] );
+  kernel(1,0,1) = kernel(1,2,1) = this->_dt / ( vs[1] * vs[1] );
+  kernel(1,1,0) = kernel(1,1,2) = this->_dt / ( vs[2] * vs[2] );
+  kernel(1,1,1) = -this->_dt * (2. / (vs[0] * vs[0])
+    + 2. / (vs[1] * vs[1])
+    + 2. / (vs[2] * vs[2]) );
   //
   // 1 (center) + kernel * dt
   kernel(1,1,1) = 1. + kernel(1,1,1);
@@ -104,12 +106,12 @@ AimsData<T> DiffusionSmoother<T>::doSmoothing(const AimsData<T> & ima,
     kernel(2,1,1) = kernel(1,2,1) = kernel(1,1,2) = 0.5 * this->_dt;
   */
 
-  AimsData<float> *tmp1, *tmp2, *swap;
+  carto::VolumeRef<float> *tmp1, *tmp2, *swap;
   AimsConvolution<float> convolution;
 
+  std::vector<int> dim = ima->getSize();
   carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
-  AimsData< float > imaF(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT()),
-      ima2(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT());
+  carto::VolumeRef< float > imaF( dim ), ima2( dim );
   conv.convert(ima, imaF);
   tmp1 = &imaF; tmp2 = &ima2;
 
@@ -119,14 +121,16 @@ AimsData<T> DiffusionSmoother<T>::doSmoothing(const AimsData<T> & ima,
     if( _hasConstantSources )
     {
       int x, y, z;
-      ForEach3d( (*tmp1), x, y, z )
-      {
-        T & v = _constantSources( x, y, z );
-        if( v != _constantSourcesBackground )
-          (*tmp1)( x, y, z ) = v;
-      }
+      for( z=0; z<dim[2]; ++z )
+        for( y=0; y<dim[1]; ++y )
+          for( x=0; x<dim[0]; ++x )
+          {
+            T & v = _constantSources( x, y, z );
+            if( v != _constantSourcesBackground )
+              (*tmp1)( x, y, z ) = v;
+          }
     }
-    (*tmp2) = convolution.doit((*tmp1), kernel);
+    (*tmp2) = convolution.doit( *tmp1, kernel );
     swap = tmp1;
     tmp1 = tmp2;
     tmp2 = swap;
@@ -135,18 +139,20 @@ AimsData<T> DiffusionSmoother<T>::doSmoothing(const AimsData<T> & ima,
   if( _hasConstantSources )
   {
     int x, y, z;
-    ForEach3d( (*tmp1), x, y, z )
-    {
-      T & v = _constantSources( x, y, z );
-      if( v != _constantSourcesBackground )
-        (*tmp1)( x, y, z ) = v;
-    }
+      for( z=0; z<dim[2]; ++z )
+        for( y=0; y<dim[1]; ++y )
+          for( x=0; x<dim[0]; ++x )
+          {
+            T & v = _constantSources( x, y, z );
+            if( v != _constantSourcesBackground )
+              (*tmp1)( x, y, z ) = v;
+          }
   }
 
   if (verbose) std::cout << "Finished" << std::endl;
   carto::ShallowConverter< carto::VolumeRef<float>, carto::VolumeRef<T> >
     conv2;
-  AimsData<T>  ima3( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
+  carto::VolumeRef<T>  ima3( dim );
   conv2.convert( (*tmp1), ima3);
 
   return ima3;
@@ -154,8 +160,8 @@ AimsData<T> DiffusionSmoother<T>::doSmoothing(const AimsData<T> & ima,
 
 
 template<typename T>
-void DiffusionSmoother<T>::setConstantSources( const AimsData<T> & sources,
-                                               const T & bgr )
+void DiffusionSmoother<T>::setConstantSources(
+  const carto::VolumeRef<T> & sources, const T & bgr )
 {
   _constantSources = sources;
   _constantSourcesBackground = bgr;
@@ -167,23 +173,24 @@ template <typename T>
 void DiffusionSmoother<T>::removeConstantSources()
 {
   _hasConstantSources = false;
-  _constantSources = AimsData<T>();
+  _constantSources = carto::VolumeRef<T>();
 }
 
 
-template<typename T> AimsData<T>
+template<typename T> carto::VolumeRef<T>
 MaskedDiffusionSmoother<T, std::vector<Point3df> >::
-doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
+doSmoothing(const carto::VolumeRef<T> & ima, int maxiter, bool verbose)
 {
   this->check(maxiter);
-  AimsData<float> kernel = DiffusionSmoother<T>::laplacian.clone();
+  carto::VolumeRef<float> kernel = DiffusionSmoother<T>::laplacian.copy();
+  std::vector<float> vs = ima->getVoxelSize();
   // rebuild the kernel accounting for possibly anisotropic voxel size
-  kernel(0,1,1) = kernel(2,1,1) = this->_dt / ( ima.sizeX() * ima.sizeX() );
-  kernel(1,0,1) = kernel(1,2,1) = this->_dt / ( ima.sizeY() * ima.sizeY() );
-  kernel(1,1,0) = kernel(1,1,2) = this->_dt / ( ima.sizeZ() * ima.sizeZ() );
-  kernel(1,1,1) = -this->_dt * (2. / (ima.sizeX() * ima.sizeX())
-    + 2. / (ima.sizeY() * ima.sizeY())
-    + 2. / (ima.sizeZ() * ima.sizeZ()) );
+  kernel(0,1,1) = kernel(2,1,1) = this->_dt / ( vs[0] * vs[0] );
+  kernel(1,0,1) = kernel(1,2,1) = this->_dt / ( vs[1] * vs[1] );
+  kernel(1,1,0) = kernel(1,1,2) = this->_dt / ( vs[2] * vs[2] );
+  kernel(1,1,1) = -this->_dt * (2. / (vs[0] * vs[0])
+    + 2. / (vs[1] * vs[1])
+    + 2. / (vs[2] * vs[2]) );
   //
   // 1 (center) + kernel * dt
   kernel(1,1,1) = 1. + kernel(1,1,1);
@@ -193,13 +200,13 @@ doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
     kernel(2,1,1) = kernel(1,2,1) = kernel(1,1,2) = 0.5 * this->_dt;
   */
 
-  AimsData<float> *tmp1, *tmp2, *swap;
-  AimsMaskedConvolution<float> convolution(*(this->_mask),
-    this->_background, this->_safe);
+  carto::VolumeRef<float> *tmp1, *tmp2, *swap;
+  AimsMaskedConvolution<float> convolution( this->_mask,
+    this->_background, this->_safe );
 
   carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
-  AimsData< float > imaF(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT()),
-      ima2(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT());
+  std::vector<int> dim = ima->getSize();
+  carto::VolumeRef< float > imaF( dim ), ima2( dim );
   conv.convert(ima, imaF);
   tmp1 = &imaF; tmp2 = &ima2;
 
@@ -217,7 +224,7 @@ doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
   if (verbose) std::cout << "Finished" << std::endl;
   carto::ShallowConverter< carto::VolumeRef<float>, carto::VolumeRef<T> >
     conv2;
-  AimsData<T>  ima3( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
+  carto::VolumeRef<T>  ima3( dim );
   conv2.convert( (*tmp1), ima3);
 
   return ima3;
@@ -236,10 +243,10 @@ add_neumann_condition(const Point3df &p)
 
 template<typename T> 
 void MaskedDiffusionSmoother<T, std::vector<Point3df> >::
-update_neumann_conditions(AimsData<float> &ima)
+update_neumann_conditions(carto::VolumeRef<float> &ima)
 {
   int    d;
-  Point3df  dim(ima.dimX(), ima.dimY(), ima.dimZ());
+  Point3di  dim( ima->getSizeX(), ima->getSizeY(), ima->getSizeZ() );
 
   for (unsigned int i = 0; i < _neumann_conditions.size(); ++i)
   {
@@ -248,10 +255,10 @@ update_neumann_conditions(AimsData<float> &ima)
     for (i = 0; i < 3; ++i)
     for (d = -1; d <= 1; d += 2)
     {
-      Point3df  p2(p);
+      Point3di  p2(p);
       p2[i] += d;
       if (p2[i] < 0 or p2[i] >= dim[i]) continue;
-      if ((*(this->_mask))(p2[0], p2[1], p2[2]) != 0)
+      if (((this->_mask))(p2[0], p2[1], p2[2]) != 0)
       {
         ima(p[0], p[1], p[2]) =ima(p2[0], p2[1], p2[2]);
         i = d = 3;
@@ -262,17 +269,17 @@ update_neumann_conditions(AimsData<float> &ima)
 }
 
 
-template<typename T> AimsData<T>
-MaskedDiffusionSmoother<T, AimsData<short> >::
-doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
+template<typename T> carto::VolumeRef<T>
+MaskedDiffusionSmoother<T, carto::VolumeRef<short> >::
+doSmoothing(const carto::VolumeRef<T> & ima, int maxiter, bool verbose)
 {
   this->check(maxiter);
 
-  AimsData<float> *tmp1, *tmp2, *swap;
+  carto::VolumeRef<float> *tmp1, *tmp2, *swap;
 
   carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
-  AimsData< float > imaF(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT()),
-      ima2(ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT());
+  std::vector<int> dim = ima->getSize();
+  carto::VolumeRef< float > imaF( dim ), ima2( dim );
   conv.convert(ima, imaF);
   tmp1 = &imaF; tmp2 = &ima2;
 
@@ -288,52 +295,53 @@ doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
   if (verbose) std::cout << "Finished" << std::endl;
   carto::ShallowConverter< carto::VolumeRef<float>, carto::VolumeRef<T> >
     conv2;
-  AimsData<T>  ima3( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
+  carto::VolumeRef<T>  ima3( dim );
   conv2.convert( (*tmp1), ima3);
 
   return ima3;
 }
 
-template<typename T> void MaskedDiffusionSmoother<T, AimsData<short> >::
-convolution(const AimsData<float> &ima1, AimsData<float> &ima2) const
+template<typename T> void
+MaskedDiffusionSmoother<T, carto::VolumeRef<short> >::
+convolution(const carto::VolumeRef<float> &ima1, carto::VolumeRef<float> &ima2) const
 {
   int i, d, x, y, z, t, n;
-  int dx = ima1.dimX();
-  int dy = ima1.dimY();
-  int dz = ima1.dimZ();
-  int dt = ima1.dimT();
-  Point3df  dim(ima1.dimX(), ima1.dimY(), ima1.dimZ());
+  int dx = ima1->getSizeX();
+  int dy = ima1->getSizeY();
+  int dz = ima1->getSizeZ();
+  int dt = ima1->getSizeT();
+  Point3di  dim( dx, dy, dz );
 
   for (t = 0; t < dt; t++)
-  for (z = 0; z < dz; z++)
-  for (y = 0; y < dy; y++)
-  for (x = 0; x < dx; x++)
+    for (z = 0; z < dz; z++)
+      for (y = 0; y < dy; y++)
+        for (x = 0; x < dx; x++)
         {
-    std::cout << "x,y,z = " << x <<", " << y << ", " << z << std::endl;
-    std::cout << "mask = " << ((*this->_mask)(x, y, z, t)) << std::endl;
-    if ((*this->_mask)(x, y, z, t) == this->_background or
-    (*this->_mask)(x, y, z, t) == this->_neumann_value)
-    {
-      ima2(x, y, z, t) = ima1(x, y, z, t);
-      continue;
-    }
-    n = 0;
-    T val = (T) 0.;
+          std::cout << "x,y,z = " << x <<", " << y << ", " << z << std::endl;
+          std::cout << "mask = " << ((*this->_mask)(x, y, z, t)) << std::endl;
+          if ((*this->_mask)(x, y, z, t) == this->_background or
+          (*this->_mask)(x, y, z, t) == this->_neumann_value)
+          {
+            ima2(x, y, z, t) = ima1(x, y, z, t);
+            continue;
+          }
+          n = 0;
+          T val = (T) 0.;
 
-    for (i = 0; i < 3; ++i)
-    for (d = -1; d <= 1; d += 2)
-    {
-      Point3df  p2(x, y, z);
-      p2[i] += d;
-      if (p2[i] < 0 or p2[i] >= dim[i]) continue;
-      if ((*this->_mask)(p2[0], p2[1], p2[2], t)
-        == this->_neumann_value) continue;
-      n++;
-      val += ima1(p2[0], p2[1], p2[2], t);
-    }
-    val -= n * ima1(x, y, z, t);
-    ima2(x, y, z, t) = ima1(x, y, z, t) + this->_dt * val;
-  }
+          for (i = 0; i < 3; ++i)
+          for (d = -1; d <= 1; d += 2)
+          {
+            Point3di  p2(x, y, z);
+            p2[i] += d;
+            if (p2[i] < 0 or p2[i] >= dim[i]) continue;
+            if ((*this->_mask)(p2[0], p2[1], p2[2], t)
+              == this->_neumann_value) continue;
+            n++;
+            val += ima1(p2[0], p2[1], p2[2], t);
+          }
+          val -= n * ima1(x, y, z, t);
+          ima2(x, y, z, t) = ima1(x, y, z, t) + this->_dt * val;
+        }
 }
 //FIXME : manque une version en connexité 26
 

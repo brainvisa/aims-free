@@ -38,7 +38,7 @@
 #define AIMS_IMAGESMOOTHER_H
 
 #include <aims/primalsketch/smoother.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 namespace aims
 {
@@ -47,13 +47,14 @@ namespace aims
   // smoother contains the geometry it is specialised for
   // It can then smooth any texture based on that geometry (mesh)
 
-  template<typename T> class Smoother<AimsData<T>, AimsData<T> >
+  template<typename T>
+  class Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> >
   {
 
   public:
     virtual ~Smoother() {}
-    virtual AimsData<T> doSmoothing(const AimsData<T> & ima,
-		    int maxiter, bool verbose=false)=0;
+    virtual carto::VolumeRef<T> doSmoothing(
+      const carto::VolumeRef<T> & ima, int maxiter, bool verbose=false )=0;
 
     virtual float dt() {return 0.0;}      //smooooth operatooor...
                                                            // virtuel pur

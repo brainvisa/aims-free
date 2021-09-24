@@ -41,7 +41,7 @@ namespace aims
 {
 
   template<class T> class PeronaMalikSmoother
-    : public Smoother<AimsData<T>, AimsData<T> >
+    : public Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> >
   {
 
   private:
@@ -83,8 +83,8 @@ namespace aims
     PeronaMalikSmoother(float dt, float K, float sigma, int cond)
             : _K(K), _sigma(sigma), _conductance(cond) {SetDt(dt);}
 
-    AimsData<T> doSmoothing( const AimsData<T> & ima, int maxiter,
-                              bool verbose=false);
+    carto::VolumeRef<T> doSmoothing( const carto::VolumeRef<T> & ima,
+                                     int maxiter, bool verbose=false);
 
     float dt() {return _dt;}
     bool optimal() {return true;}

@@ -79,22 +79,21 @@ int main(int argc, const char **argv)
 
       app.initialize();
 
-      AimsData<float> imageIn, imageOut;
-      Reader<AimsData<float> > readerS( fileIn );
+      VolumeRef<float> imageIn, imageOut;
+      Reader<Volume<float> > readerS( fileIn );
       cout << "Reading input image " << fileIn << endl;
 
-      if( !readerS.read( imageIn))
-        return EXIT_FAILURE;
-      cout << "Dimensions : " << imageIn.dimX() << "x" << imageIn.dimY() 
-           << "x" << imageIn.dimZ() << endl;
+      imageIn = readerS.read();
+      cout << "Dimensions : " << imageIn.getSizeX() << "x"
+           << imageIn.getSizeY() << "x" << imageIn.getSizeZ() << endl;
 
       cout << "Creating appropriate smoother : ";
 
 
       // --------------------- temp ---------------------
       /*int x,y,z;
-        AimsData<float> test;
-        test=AimsData<float>(60,60,60);
+        VolumeRef<float> test;
+        test=VolumeRef<float>(60,60,60);
 
         for (z=0; z<60; z++)
 	for (y=0; y<60; y++)
@@ -106,7 +105,7 @@ int main(int argc, const char **argv)
         test(x,y,z)=100.0;
         }
 
-        Writer<AimsData<float> > writerTest( "testIma.ima" );
+        Writer<VolumeRef<float> > writerTest( "testIma.ima" );
 
         writerTest.write(test);
       */
@@ -123,7 +122,7 @@ int main(int argc, const char **argv)
       PeronaMalikSmoother<float> *peronaSmooth;
       peronaSmooth=new PeronaMalikSmoother<float>(dt, K, 1.0, 2);
   
-      Smoother<AimsData<float>, AimsData<float> > *smooth;
+      Smoother<VolumeRef<float>, VolumeRef<float> > *smooth;
   
       if (smoothOperator==0)
         {
@@ -152,7 +151,7 @@ int main(int argc, const char **argv)
 
       cout << "Writing smoothed image " << fileout << endl;
 
-      Writer<AimsData<float> > writerS( fileout );
+      Writer<VolumeRef<float> > writerS( fileout );
 
       writerS.write( imageOut);
     }

@@ -31,8 +31,8 @@ sz: float
 
   virtual ~Gaussian3DSmoothing_%Template1typecode%();
 
-  AimsData_%Template1typecode% doit( const AimsData_%Template1typecode% &)
-    /Factory, ReleaseGIL/;
+  rc_ptr_Volume_%Template1typecode% doit(
+    const rc_ptr_Volume_%Template1typecode% & ) /Factory, ReleaseGIL/;
 %Docstring
 doit(volume)
 
@@ -40,12 +40,12 @@ Actually perform the smoothing on the given data.
 
 Parameters
 ----------
-volume: Volume or AimsData
+volume: Volume
     data to be smoothed
 
 Returns
 -------
-smoothed: AimsData
+smoothed: Volume
     smoothed volume
 %End
 };
@@ -66,8 +66,8 @@ public:
   Gaussian2DSmoothing_%Template1typecode%(float sx=1.0, float sy=1.0);
   virtual ~Gaussian2DSmoothing_%Template1typecode%();
 
-  AimsData_%Template1typecode% doit( const AimsData_%Template1typecode% &)
-    /Factory, ReleaseGIL/;
+  rc_ptr_Volume_%Template1typecode% doit(
+    const rc_ptr_Volume_%Template1typecode% & ) /Factory, ReleaseGIL/;
 };
 
 

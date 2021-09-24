@@ -58,7 +58,8 @@ public:
     }
   virtual ~AimsConvolution() { }
 
-  AimsData< T > doit( AimsData< T >&, AimsData< T >& );
+  carto::VolumeRef< T > doit( carto::rc_ptr<carto::Volume< T > >&,
+                              carto::rc_ptr<carto::Volume< T > >& );
 
   void set_safe_status(bool safe=true) {
     if (safe)
@@ -70,19 +71,23 @@ public:
 
 protected:
   /// called for each voxel (user selected function)
-  T doit_voxel(AimsData< T >& img, AimsData< T >& kernel,
-					int x, int y, int z, int t);
+  T doit_voxel( carto::rc_ptr<carto::Volume< T>  >& img,
+                carto::rc_ptr<carto::Volume< T > >& kernel,
+                int x, int y, int z, int t );
   /// called for each voxel (safe version)
-  virtual T doit_voxel_safe(AimsData< T >& img, AimsData< T >& kernel,
-					int x, int y, int z, int t);
+  virtual T doit_voxel_safe( carto::rc_ptr<carto::Volume< T > >& img,
+                             carto::rc_ptr<carto::Volume< T > >& kernel,
+                             int x, int y, int z, int t);
   /// called for each voxel (unsafe version)
-  virtual T doit_voxel_unsafe(AimsData< T >& img, AimsData< T >& kernel,
-					int x, int y, int z, int t);
+  virtual T doit_voxel_unsafe( carto::rc_ptr<carto::Volume< T > >& img,
+                               carto::rc_ptr<carto::Volume< T > >& kernel,
+                               int x, int y, int z, int t);
   T min() const;
   T max() const;
 
-  T (AimsConvolution::*_doit_voxel_method) (AimsData< T >& img,
-		AimsData< T >& kernel, int x, int y, int z, int t);
+  T (AimsConvolution::*_doit_voxel_method) (
+    carto::rc_ptr<carto::Volume< T > >& img,
+    carto::rc_ptr<carto::Volume< T > >& kernel, int x, int y, int z, int t);
 
   bool _safe;
 };
@@ -99,142 +104,160 @@ class AimsMaskedConvolution : public AimsConvolution< T >
 {
 public:
 
-  AimsMaskedConvolution(AimsData< short >&mask, short sources=0,
-                      bool safe=true) : AimsConvolution< T >(safe),
-                      _sources(sources), _mask(mask) { }
+  AimsMaskedConvolution( const carto::rc_ptr<carto::Volume< short > >&mask,
+                         short sources=0, bool safe=true)
+    : AimsConvolution< T >(safe),
+      _sources(sources),
+      _mask(mask)
+  { }
   virtual ~AimsMaskedConvolution() { }
   /// called for each voxel (safe version)
-  virtual T doit_voxel_safe(AimsData< T >& img, AimsData< T >& kernel,
-					int x, int y, int z, int t);
+  virtual T doit_voxel_safe( carto::rc_ptr<carto::Volume< T > >& img,
+                             carto::rc_ptr<carto::Volume< T > >& kernel,
+                             int x, int y, int z, int t);
   /// called for each voxel (unsafe version)
-  virtual T doit_voxel_unsafe(AimsData< T >& img, AimsData< T >& kernel,
-					int x, int y, int z, int t);
+  virtual T doit_voxel_unsafe( carto::rc_ptr<carto::Volume< T > >& img,
+                               carto::rc_ptr<carto::Volume< T > >& kernel,
+                               int x, int y, int z, int t);
 
 protected:
   short			_sources;
-  AimsData<short>	&_mask;
+  const carto::VolumeRef<short>	_mask;
 };
 
 
 template< class T > inline
-AimsData< T > AimsConvolution< T >::doit( AimsData< T >& img, 
-					  AimsData< T >& kernel )
+carto::VolumeRef< T >
+AimsConvolution< T >::doit( carto::rc_ptr<carto::Volume< T > >& img,
+                            carto::rc_ptr<carto::Volume< T > >& kernel )
 {
-  ASSERT( kernel.dimT() == 1 );
-  if (_safe == false) ASSERT(img.borderWidth() >= 1);
-  else if (img.borderWidth() >= 1) set_safe_status(false);
+  ASSERT( kernel->getSizeT() == 1 );
+  if (_safe == false)
+    ASSERT( img->getBorders()[0] >= 1 );
+  else
+    if( img->getBorders()[0] >= 1 )
+      set_safe_status(false);
 
   int x, y, z, t;
 
-  int dx = img.dimX();
-  int dy = img.dimY();
-  int dz = img.dimZ();
-  int dt = img.dimT();
+  int dx = img->getSizeX();
+  int dy = img->getSizeY();
+  int dz = img->getSizeZ();
+  int dt = img->getSizeT();
 
-  AimsData< T > res( dx, dy, dz, dt );
-  res.setSizeXYZT( img.sizeX(), img.sizeY(), img.sizeZ(), img.sizeT() );
+  carto::VolumeRef< T > res( dx, dy, dz, dt );
+  res.setVoxelSize( img->getVoxelSize() );
 
   for ( t=0; t<dt; t++ )
     for ( z=0; z<dz; z++ )
       for ( y=0; y<dy; y++ )
-	for ( x=0; x<dx; x++ )
+        for ( x=0; x<dx; x++ )
         {
-	    T val = doit_voxel(img, kernel, x, y, z, t);
-            if ( val > max() )  val = max();
-            else if ( val < min() )  val = min();
-	    res( x, y, z, t ) = val;
+          T val = doit_voxel(img, kernel, x, y, z, t);
+          if ( val > max() )
+            val = max();
+          else if ( val < min() )
+            val = min();
+          res( x, y, z, t ) = val;
         }
 
   return res;
 }
 
 template< class T > inline
-T AimsConvolution< T >::doit_voxel(AimsData< T >& img, AimsData< T >& kernel,
-						int x, int y, int z, int t)
+T AimsConvolution< T >::doit_voxel( carto::rc_ptr<carto::Volume< T > >& img,
+                                    carto::rc_ptr<carto::Volume< T > >& kernel,
+                                    int x, int y, int z, int t)
 {
-	return (this->*_doit_voxel_method)(img, kernel, x, y, z, t);
+  return (this->*_doit_voxel_method)(img, kernel, x, y, z, t);
 };
 
 template< class T > inline
-T AimsConvolution< T >::doit_voxel_safe(AimsData< T >& img,
-		AimsData< T >& kernel, int x, int y, int z, int t)
+T AimsConvolution< T >::doit_voxel_safe(
+  carto::rc_ptr<carto::Volume< T > >& img,
+  carto::rc_ptr<carto::Volume< T > >& kernel, int x, int y, int z, int t)
 {
-	int i, j, k, idx, idy, idz;
+  int i, j, k, idx, idy, idz;
 
-	int mx = kernel.dimX();
-	int my = kernel.dimY();
-	int mz = kernel.dimZ();
+  int mx = kernel->getSizeX();
+  int my = kernel->getSizeY();
+  int mz = kernel->getSizeZ();
 
-	int mx2 = mx / 2;
-	int my2 = my / 2;
-	int mz2 = mz / 2;
+  int mx2 = mx / 2;
+  int my2 = my / 2;
+  int mz2 = mz / 2;
 
-	int dx = img.dimX();
-	int dy = img.dimY();
-	int dz = img.dimZ();
+  int dx = img->getSizeX();
+  int dy = img->getSizeY();
+  int dz = img->getSizeZ();
 
-	T val = (T)0;
+  T val = (T)0;
 
-	for ( k=0; k<mz; k++ )
-	for ( j=0; j<my; j++ )
-	for ( i=0; i<mx; i++ )
-	{
-		idx = x - i + mx2;
-		idy = y - j + my2;
-		idz = z - k + mz2;
+  for ( k=0; k<mz; k++ )
+    for ( j=0; j<my; j++ )
+      for ( i=0; i<mx; i++ )
+      {
+        idx = x - i + mx2;
+        idy = y - j + my2;
+        idz = z - k + mz2;
 
-		if ( idx >= 0 && idy >= 0 && idz >= 0 &&
-				idx < dx && idy < dy && idz < dz )
-			val += kernel( i, j, k ) * img( idx, idy, idz, t );
-	}
+        if ( idx >= 0 && idy >= 0 && idz >= 0 &&
+             idx < dx && idy < dy && idz < dz )
+          val += kernel->at( i, j, k ) * img->at( idx, idy, idz, t );
+      }
 
-	return val;
+  return val;
 }
 
 template< class T > inline
-T AimsConvolution< T >::doit_voxel_unsafe(AimsData< T >& img,
-		AimsData< T >& kernel, int x, int y, int z, int t)
+T AimsConvolution< T >::doit_voxel_unsafe(
+  carto::rc_ptr<carto::Volume< T > >& img,
+  carto::rc_ptr<carto::Volume< T > >& kernel, int x, int y, int z, int t)
 {
-	int i, j, k, idx, idy, idz;
+  int i, j, k, idx, idy, idz;
 
-	int mx = kernel.dimX();
-	int my = kernel.dimY();
-	int mz = kernel.dimZ();
+  int mx = kernel->getSizeX();
+  int my = kernel->getSizeY();
+  int mz = kernel->getSizeZ();
 
-	int mx2 = mx / 2;
-	int my2 = my / 2;
-	int mz2 = mz / 2;
+  int mx2 = mx / 2;
+  int my2 = my / 2;
+  int mz2 = mz / 2;
 
-	T val = (T)0;
+  T val = (T)0;
 
-	for ( k=0; k<mz; k++ )
-	for ( j=0; j<my; j++ )
-	for ( i=0; i<mx; i++ )
-	{
-		idx = x - i + mx2;
-		idy = y - j + my2;
-		idz = z - k + mz2;
+  for ( k=0; k<mz; k++ )
+  for ( j=0; j<my; j++ )
+  for ( i=0; i<mx; i++ )
+  {
+    idx = x - i + mx2;
+    idy = y - j + my2;
+    idz = z - k + mz2;
 
-		val += kernel( i, j, k ) * img( idx, idy, idz, t );
-	}
+    val += kernel->at( i, j, k ) * img->at( idx, idy, idz, t );
+  }
 
-	return val;
+  return val;
 }
 
 template< class T > inline
-T AimsMaskedConvolution< T >::doit_voxel_safe(AimsData< T >& img,
-		AimsData< T >& kernel, int x, int y, int z, int t)
+T AimsMaskedConvolution< T >::doit_voxel_safe(
+  carto::rc_ptr<carto::Volume< T > >& img,
+  carto::rc_ptr<carto::Volume< T > >& kernel, int x, int y, int z, int t)
 {
-	if (_mask(x, y, z, t) == _sources) return img(x, y, z, t);
-	return AimsConvolution<T>::doit_voxel_safe(img, kernel, x, y, z, t);
+  if (_mask(x, y, z, t) == _sources)
+    return img->at(x, y, z, t);
+  return AimsConvolution<T>::doit_voxel_safe(img, kernel, x, y, z, t);
 }
 
 template< class T > inline
-T AimsMaskedConvolution< T >::doit_voxel_unsafe(AimsData< T >& img,
-		AimsData< T >& kernel, int x, int y, int z, int t)
+T AimsMaskedConvolution< T >::doit_voxel_unsafe(
+  carto::rc_ptr<carto::Volume< T > >& img,
+  carto::rc_ptr<carto::Volume< T > >& kernel, int x, int y, int z, int t )
 {
-	if (_mask(x, y, z, t) == _sources) return img(x, y, z, t);
-	return AimsConvolution<T>::doit_voxel_unsafe(img, kernel, x, y, z, t);
+  if (_mask(x, y, z, t) == _sources)
+    return img->at(x, y, z, t);
+  return AimsConvolution<T>::doit_voxel_unsafe(img, kernel, x, y, z, t);
 }
 
 template <>

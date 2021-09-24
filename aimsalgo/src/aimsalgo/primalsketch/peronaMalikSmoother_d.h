@@ -43,15 +43,18 @@
 namespace aims
 {
 
-  template<class T> AimsData<T> PeronaMalikSmoother<T>::doSmoothing(const AimsData<T> & ima, int maxiter, bool /*verbose*/)
+  template<class T> carto::VolumeRef<T>
+  PeronaMalikSmoother<T>::doSmoothing( const carto::VolumeRef<T> & ima,
+                                       int maxiter, bool /*verbose*/ )
   {
     if (maxiter >= 0)
-      {
-      AimsData<float> kernel(3, 3, 3, 1);
-          AimsData<float> *tmp1, *tmp2, *swap, grad;
+    {
+      carto::VolumeRef<float> kernel( 3, 3, 3, 1,
+                                      carto::AllocatorContext::fast() );
+      carto::VolumeRef<float> *tmp1, *tmp2, *swap, grad;
       int i;
       int x,y,z, count=0;
-      int sx=ima.dimX(), sy=ima.dimY(), sz=ima.dimZ();
+      int sx=ima->getSizeX(), sy=ima->getSizeY(), sz=ima->getSizeZ();
       std::map<float, int> valueSet;
       std::map<float,int>::iterator itVal;
       float nbThresh;
@@ -59,20 +62,20 @@ namespace aims
 
       GaussianGradient<float>  gaussGrad(_sigma, _sigma, _sigma);
       GaussianJacobian<float> gaussJac(_sigma, _sigma, _sigma);
-      AimsVector< AimsData< float >, 3 > jaco;
+      AimsVector< carto::VolumeRef< float >, 3 > jaco;
 
-          carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> >
-            conv;
-          AimsData< float > imaF( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() ),
-                                    ima2( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
-          conv.convert( ima, imaF );
+      carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> >
+        conv;
+      carto::VolumeRef< float > imaF( ima->getSize() ),
+                                ima2( ima->getSize() );
+      conv.convert( ima, imaF );
 
 
       std::cout << "Evaluating gradient bound : " << std::endl;
 
       grad=gaussGrad.doit(imaF);
-      Writer<AimsData<float> > writerG( "gradient.ima" );
-      writerG.write( grad );
+//       Writer<carto::VolumeRef<float> > writerG( "gradient.ima" );
+//       writerG.write( grad );
 
       // Evaluation of the gradient parameter from K
 
@@ -100,10 +103,10 @@ namespace aims
       }
       std::cout << "Gradient bound has been set to " << _gradK << std::endl;
 
-          tmp1=&imaF; tmp2=&ima2;
-          std::cout << "Starting " << maxiter << " iterations of diffusion process" << std::endl;
+      tmp1=&imaF; tmp2=&ima2;
+      std::cout << "Starting " << maxiter << " iterations of diffusion process" << std::endl;
 
-          for (i=0; i<maxiter; i++)
+      for (i=0; i<maxiter; i++)
       {
         std::cout << "+" << std::flush;
         grad=gaussGrad.doit((*tmp1));
@@ -169,19 +172,19 @@ namespace aims
           tmp1=tmp2;
           tmp2=swap;
       }
-          std::cout << "Finished" << std::endl;
-          carto::Converter< carto::VolumeRef<float>, carto::VolumeRef<T> >
-            conv2;
-          AimsData<T>  ima3( ima.dimX(), ima.dimY(), ima.dimZ(), ima.dimT() );
-          conv2.convert( (*tmp1), ima3);
+      std::cout << "Finished" << std::endl;
+      carto::Converter< carto::VolumeRef<float>, carto::VolumeRef<T> >
+        conv2;
+      carto::VolumeRef<T>  ima3( ima->getSize() );
+      conv2.convert( (*tmp1), ima3);
 
-          return ima3;
+      return ima3;
     }
-      else
-      {
-        std::cerr << "PeronaMalik smoother  must have tIn < tOut" << std::endl;
-    exit(EXIT_FAILURE);
-      }
+    else
+    {
+      std::cerr << "PeronaMalik smoother  must have tIn < tOut" << std::endl;
+      exit(EXIT_FAILURE);
+    }
   }
 
 }

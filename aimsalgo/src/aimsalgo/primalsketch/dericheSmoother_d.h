@@ -41,17 +41,18 @@
 namespace aims
 {
 
-  template<class T> AimsData<T> DericheSmoother<T>::doSmoothing(
-    const AimsData<T> & ima, int maxiter, bool /*verbose*/)
+  template<class T> carto::VolumeRef<T> DericheSmoother<T>::doSmoothing(
+    const carto::VolumeRef<T> & ima, int maxiter, bool /*verbose*/)
   {
 
     if (maxiter >= 0)
     {
-      if ((ima.sizeX()==ima.sizeY()) && (ima.sizeX()==ima.sizeZ()))
+      if( (ima.getVoxelSize()[0]==ima.getVoxelSize()[1])
+          && (ima.getVoxelSize()[1]==ima.getVoxelSize()[2]) )
       {
-        AimsData<T> ima2=ima.clone(); // this is to avoid problem caused by
+        carto::VolumeRef<T> ima2=ima.copy(); // this is to avoid problem caused by
         // copy constructor that just makes a reference
-        float sigma=sqrt(maxiter*ima.sizeX()*ima.sizeX());
+        float sigma=sqrt(maxiter*ima.getVoxelSize()[0]*ima.getVoxelSize()[0]);
         std::cout << "sigma=" << sigma << std::endl;
         Gaussian3DSmoothing<T> gaussSmooth(sigma, sigma, sigma);
         return gaussSmooth.doit(ima2);

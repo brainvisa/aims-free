@@ -74,21 +74,21 @@ void aims::HarmonicCageMeshResampler::computeCoordinates(float /*threshold*/)
 	AimsThreshold<uint, short>	thr(AIMS_EQUAL_TO, _border);
 	//only inside voxels
 	AimsThreshold<uint, short>	thr2(AIMS_EQUAL_TO, _inside);
-  	AimsData<short>	border_mask = thr.bin(_cage);
+  	VolumeRef<short>	border_mask = thr.bin(_cage);
 	for (i = _controls.begin(), e = _controls.end(); i != e; ++i)
 	{
 		const	Point3df &p = *i;
 		std::cout << "p = " << p[0] << ", " << p[1] << ", " << p[2] << std::endl;
 		border_mask(p[0], p[1], p[2]) = 1.;
 	}
-  	AimsData<short>	inside_mask = thr2.bin(_cage);
+  	VolumeRef<short>	inside_mask = thr2.bin(_cage);
 
 	//FIXME replace by multiscale solver
-	MaskedDiffusionSmoother<float, AimsData<short> > border_smoother(dt);
+	MaskedDiffusionSmoother<float, VolumeRef<short> > border_smoother(dt);
 	MaskedDiffusionSmoother<float>			 inside_smoother(dt);
 	border_smoother.set_neumann_value(0);
-	border_smoother.setMask(&border_mask, 1.);
-	inside_smoother.setMask(&inside_mask);
+	border_smoother.setMask(border_mask, 1.);
+	inside_smoother.setMask(inside_mask);
 
 	if (_keep_image_coords) _image_coords.reserve(_controls.size());
 

@@ -130,24 +130,26 @@ namespace aims
     // Image Partial Specialisation
 
     template<typename T>
-    class ScaleSpace<AimsData<T>, AimsData<T> > : public BaseScaleSpace {
+    class ScaleSpace<AimsData<T>, AimsData<T> > : public BaseScaleSpace
+    {
 
         protected:
 
             float dt() { return _smoother->dt(); };
             std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*> scales;
-            Smoother<AimsData<T>, AimsData<T> > *_smoother;
+            Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> > *_smoother;
 
         public:
 
             ScaleSpace() : BaseScaleSpace() { _smoother = NULL; }
 
-            ScaleSpace(AimsData<T> * originalImage, Smoother<AimsData<T>,AimsData<T> > *smoother)
-                { PutSmoother(smoother); PutOriginalImage(originalImage); }
+            ScaleSpace( AimsData<T> * originalImage,
+                        Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> > *smoother )
+            { PutSmoother(smoother); PutOriginalImage(originalImage); }
 
             virtual ~ScaleSpace() { }
 
-            void PutSmoother ( Smoother<AimsData<T>, AimsData<T> > *smoother )
+            void PutSmoother ( Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> > *smoother )
                 { _smoother = smoother; }
 
             void PutOriginalImage ( AimsData<T> *originalImage ) {
@@ -165,7 +167,8 @@ namespace aims
 
             AimsData<T> & GetOriginalImage() { return Scale(0.0)->Level(); }
 
-            Smoother<AimsData<T>,AimsData<T> > *smoother() { return _smoother; }
+            Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> > *smoother()
+            { return _smoother; }
 
             std::set<float> GetScaleList();
 
