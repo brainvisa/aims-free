@@ -57,40 +57,38 @@
 namespace aims
 {
 
-template<class T> std::pair<AimsData<T>, AimsData<T> >
-CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, 
-                                           AimsData<T> > & ima,
-                                           const std::pair<AimsData<T>, 
-                                           AimsData<T> > & constraints,
-                                           int maxiter, 
-                                           bool /*verbose*/)
+template<class T> std::pair<carto::VolumeRef<T>, carto::VolumeRef<T> >
+CoupledDiffusion2DSmoother<T>::doSmoothing(
+  const std::pair<carto::VolumeRef<T>, carto::VolumeRef<T> > & ima,
+  const std::pair<carto::VolumeRef<T>, carto::VolumeRef<T> > & constraints,
+  int maxiter, bool /*verbose*/ )
 {
     if ( maxiter >= 0)
     {
-        AimsData<T> ima1, ima2;
+        carto::VolumeRef<T> ima1, ima2;
         ima1=ima.first;
         ima2=ima.second;
 
         int PAS=20;   //10
         float epsilon=0.01;
 
-        if ((ima.first.dimZ()>1) || (ima.second.dimZ()>1))
+        if ((ima.first.getSizeZ()>1) || (ima.second.getSizeZ()>1))
         {
             std::cerr << "coupledDiffusion2DSmoother: only for 2D images !!"
               << std::endl;
             exit(1);
         }
-        if ((!hasSameDim(ima.first, ima.second))
-            || (!hasSameDim(ima.first, constraints.first))
-            || (!hasSameDim(ima.first, constraints.second)))
+        if ( (!carto::isSameVolumeSize( ima.first, ima.second ))
+             || (!carto::isSameVolumeSize( ima.first, constraints.first ))
+             || (!carto::isSameVolumeSize( ima.first, constraints.second )) )
         {
             std::cerr << "coupledDiffusion2DSmoother: images do not all have the same size..." << std::endl;
             exit(1);
         }
 
-        int sx=ima.first.dimX(), sy=ima.first.dimY(), x, y;
-        AimsData<float> *tmp1_1, *tmp1_2, *swap1;
-        AimsData<float> *tmp2_1, *tmp2_2, *swap2;
+        int sx=ima.first.getSizeX(), sy=ima.first.getSizeT(), x, y;
+        carto::VolumeRef<float> *tmp1_1, *tmp1_2, *swap1;
+        carto::VolumeRef<float> *tmp2_1, *tmp2_2, *swap2;
         int i;
         float lapl1,  lapl2, div1, div2, lapx1, lapy1, lapx2, lapy2;
 
@@ -98,7 +96,7 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>,
         std::vector<std::pair<int, int> >::iterator pt1, pt2;
 
         carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
-        AimsData< float > imaF1( sx, sy ),imaF2( sx, sy ),
+        carto::VolumeRef< float > imaF1( sx, sy ),imaF2( sx, sy ),
                           imaB1( sx, sy ),imaB2( sx, sy ),
                           grad1_x( sx, sy ), grad1_y( sx, sy ),
                           grad2_x( sx, sy ), grad2_y( sx, sy );
@@ -137,9 +135,9 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>,
           << " iterations of diffusion process" << std::endl;
 
         int sz=(maxiter/PAS) + 1;
-        AimsData<T> debug1(sx, sy, sz), debug2(sx, sy, sz);
-        AimsData<T> grad1x(sx, sy, sz), grad1y(sx, sy, sz), grad2x(sx, sy, sz), grad2y(sx, sy, sz);
-        AimsData<T> gugv(sx, sy), scal(sx, sy, sz), gu(sx, sy, sz), gv(sx, sy, sz);
+        carto::VolumeRef<T> debug1(sx, sy, sz), debug2(sx, sy, sz);
+        carto::VolumeRef<T> grad1x(sx, sy, sz), grad1y(sx, sy, sz), grad2x(sx, sy, sz), grad2y(sx, sy, sz);
+        carto::VolumeRef<T> gugv(sx, sy), scal(sx, sy, sz), gu(sx, sy, sz), gv(sx, sy, sz);
 
         for (y=0; y<sy; y++)
             for (x=0; x<sx; x++)
@@ -201,7 +199,7 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>,
             // lissage de gugv pour stabilit� du sch�ma num�rique...
 
             Gaussian2DSmoothing<float> g2d(2.0,2.0);
-            AimsData<float> g1x(sx,sy), g2x(sx,sy), g1y(sx,sy), g2y(sx,sy);
+            carto::VolumeRef<float> g1x(sx,sy), g2x(sx,sy), g1y(sx,sy), g2y(sx,sy);
             g1x=g2d.doit(grad1_x);
             g2x=g2d.doit(grad2_x);
             g1y=g2d.doit(grad1_y);
@@ -329,14 +327,14 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>,
 
         std::cout << "Finished" << std::endl;
         carto::Converter< carto::VolumeRef<float>, carto::VolumeRef<T> > conv2;
-        AimsData<T>  out1( sx, sy), out2(sx,sy);
+        carto::VolumeRef<T>  out1( sx, sy), out2(sx,sy);
         conv2.convert( (*tmp1_1),out1);
         conv2.convert( (*tmp2_1),out2);
 
         //Pour debug : evolution des iso-contours
 
         std::cout << "Computing and writing iso-contours" << std::endl;
-        AimsData<uint8_t>  iso( sx, sy, sz);
+        carto::VolumeRef<uint8_t>  iso( sx, sy, sz);
         for (z=0; z<sz; z++)
              for (y=0; y<sy-1; y++)
                   for (x=0; x<sx-1; x++)
@@ -361,25 +359,27 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>,
                        }
                   }
 
-        Writer<AimsData<uint8_t> > writerIso( "grille.ima" );
+        /*
+        Writer<carto::VolumeRef<uint8_t> > writerIso( "grille.ima" );
         writerIso.write(iso);
 
-        Writer<AimsData<float> > writerD1( "evolution1.ima" );
-        Writer<AimsData<float> > writerD2( "evolution2.ima" );
+        Writer<carto::VolumeRef<float> > writerD1( "evolution1.ima" );
+        Writer<carto::VolumeRef<float> > writerD2( "evolution2.ima" );
         writerD1.write(debug1);
         writerD2.write(debug2);
-        Writer<AimsData<float> > writerG1x( "grad1x.ima" );
-        Writer<AimsData<float> > writerG2x( "grad2x.ima" );
+        Writer<carto::VolumeRef<float> > writerG1x( "grad1x.ima" );
+        Writer<carto::VolumeRef<float> > writerG2x( "grad2x.ima" );
         writerG1x.write(grad1x);
         writerG2x.write(grad2x);
-        Writer<AimsData<float> > writerG1y( "grad1y.ima" );
-        Writer<AimsData<float> > writerG2y( "grad2y.ima" );
+        Writer<carto::VolumeRef<float> > writerG1y( "grad1y.ima" );
+        Writer<carto::VolumeRef<float> > writerG2y( "grad2y.ima" );
         writerG1y.write(grad1y);
         writerG2y.write(grad2y);
-        Writer<AimsData<float> > writerGuGv( "gugv.ima" );
+        Writer<carto::VolumeRef<float> > writerGuGv( "gugv.ima" );
         writerGuGv.write(scal);
+        */
 
-        return (std::pair<AimsData<T>, AimsData<T> >(out1, out2) );
+        return std::make_pair( out1, out2 );
     }
     else
     {

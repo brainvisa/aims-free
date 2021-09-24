@@ -35,7 +35,7 @@
 #ifndef AIMS_RESAMPLING_MESHTOVOXELSRESAMPLER_H
 #define AIMS_RESAMPLING_MESHTOVOXELSRESAMPLER_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/vector/vector.h>
 #include <aims/mesh/surface.h>
 #include <cartobase/type/types.h>
@@ -45,7 +45,7 @@ namespace aims
 {
 
 /** 3D rasterization (voxelization) of a mesh
-    O : AimsData<unsigned int> or BucketMap<Void>
+    O : VolumeRef<unsigned int> or BucketMap<Void>
 */
 template<typename O>
 class MeshToVoxelsResampler

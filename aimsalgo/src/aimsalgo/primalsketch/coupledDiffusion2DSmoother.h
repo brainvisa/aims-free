@@ -42,7 +42,7 @@ namespace aims
 {
 
   template<typename T> class CoupledDiffusion2DSmoother
-    : public CoupledSmoother<AimsData<T>, AimsData<T> >
+    : public CoupledSmoother<carto::VolumeRef<T>, carto::VolumeRef<T> >
   {
   private:
     float _dt;
@@ -67,9 +67,9 @@ namespace aims
     }
     float dt() {return _dt;}   //smooooth operatooor...
 
-    std::pair<AimsData<T>, AimsData<T> > doSmoothing(
-      const std::pair<AimsData<T>, AimsData<T> > & ima,
-      const std::pair<AimsData<T>, AimsData<T> > & constraint,
+    std::pair<carto::VolumeRef<T>, carto::VolumeRef<T> > doSmoothing(
+      const std::pair<carto::VolumeRef<T>, carto::VolumeRef<T> > & ima,
+      const std::pair<carto::VolumeRef<T>, carto::VolumeRef<T> > & constraint,
       int maxiter, bool verbose=false );
 
     bool optimal() {return true;}

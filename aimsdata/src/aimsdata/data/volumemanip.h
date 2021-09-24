@@ -172,10 +172,7 @@ namespace aims
   inline
   bool hasSameDim( const AimsData<T> & v1, const AimsData<T> & v2 )
   {
-    return v1.dimX() == v2.dimX() 
-      && v1.dimY() == v2.dimY() 
-      && v1.dimZ() == v2.dimZ() 
-      && v1.dimT() == v2.dimT();
+    return isSameVolumeSize( v1.volume(), v2.volume() );
   }
 
 

@@ -90,9 +90,9 @@ int main(int argc, const char **argv)
   }
 
 
-      AimsData<float> constraint1, constraint2, imageOut1, imageOut2;
-      Reader<AimsData<float> > readerC1( fileCont1 );
-      Reader<AimsData<float> > readerC2( fileCont2 );
+      VolumeRef<float> constraint1, constraint2;
+      Reader<VolumeRef<float> > readerC1( fileCont1 );
+      Reader<VolumeRef<float> > readerC2( fileCont2 );
       cout << "Reading constraint images " << fileCont1 << " and " << fileCont2 << endl;
       int sx, sy, x, y,
         nb1=0,
@@ -104,14 +104,14 @@ int main(int argc, const char **argv)
         return EXIT_FAILURE;
       if ( !readerC2.read( constraint2 ))
         return EXIT_FAILURE;
-      if ( !hasSameDim(constraint1, constraint2))
+      if( !isSameVolumeSize( constraint1, constraint2 ) )
         {
           cerr << "Contraints images do not have same size !!!" << endl;
           return EXIT_FAILURE;
         }
-      sx=constraint1.dimX(); sy=constraint1.dimY();
+      sx=constraint1.getSizeX(); sy=constraint1.getSizeY();
 
-      if ( constraint1.dimZ() >1)
+      if ( constraint1.getSizeZ() >1)
         {
           std::cerr<<"Only 2D images please" << endl;
           return EXIT_FAILURE;
@@ -146,12 +146,12 @@ int main(int argc, const char **argv)
 
 
       cout << "Dimensions : " << sx << "x" << sy << endl;
-      AimsData<float> imageIn1, imageIn2;
+      VolumeRef<float> imageIn1, imageIn2;
 
       if ((fileIn1=="") || (fileIn2==""))
         {
-          imageIn1=AimsData<float>(sx,sy);
-          imageIn2=AimsData<float>(sx,sy);
+          imageIn1=VolumeRef<float>(sx,sy);
+          imageIn2=VolumeRef<float>(sx,sy);
           std::cout << "Computing constraints mean for initial images" << endl;
 
           for (y=0; y<sy; y++)
@@ -179,8 +179,8 @@ int main(int argc, const char **argv)
         }
       else
         {
-          Reader<AimsData<float> > readerI1( fileIn1 );
-          Reader<AimsData<float> > readerI2( fileIn2 );
+          Reader<VolumeRef<float> > readerI1( fileIn1 );
+          Reader<VolumeRef<float> > readerI2( fileIn2 );
           cout << "Reading initial images " << fileIn1 << " and " << fileIn2 << endl;
           if ( !readerI1.read( imageIn1 ))
             return EXIT_FAILURE;
@@ -197,13 +197,15 @@ int main(int argc, const char **argv)
 
       cout << "Starting" << endl;
 
-      std::pair<AimsData<float>, AimsData<float> > result;
-      result=smooth->doSmoothing( std::pair<AimsData<float>, AimsData<float> >(imageIn1, imageIn2), std::pair<AimsData<float>, AimsData<float> >(constraint1, constraint2), tmax / dt);
+      std::pair<VolumeRef<float>, VolumeRef<float> > result;
+      result = smooth->doSmoothing( std::make_pair( imageIn1, imageIn2 ),
+                                    std::make_pair( constraint1, constraint2 ),
+                                    tmax / dt);
 
       cout << "Writing smoothed image " << fileout1 << " and " << fileout2 << endl;
 
-      Writer<AimsData<float> > writer1( fileout1 );
-      Writer<AimsData<float> > writer2( fileout2 );
+      Writer<VolumeRef<float> > writer1( fileout1 );
+      Writer<VolumeRef<float> > writer2( fileout2 );
       writer1.write(result.first);
       writer2.write(result.second);
 

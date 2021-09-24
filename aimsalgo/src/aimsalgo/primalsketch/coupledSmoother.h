@@ -44,7 +44,8 @@
 
 namespace aims {
 
-  template<typename Geom, typename Text> class CoupledSmoother {
+  template<typename Geom, typename Text> class CoupledSmoother
+  {
 
   protected:
 
@@ -53,11 +54,11 @@ namespace aims {
 	CoupledSmoother() {}
     
     virtual std::pair<Text, Text> doSmoothing(const std::pair<Text, Text > & ima, 
-                                                     const std::pair<Text, Text > & constraint,
-                                                     int maxiter, bool verbose=false) = 0;
+                                              const std::pair<Text, Text > & constraint,
+                                              int maxiter, bool verbose=false) = 0;
     
 	virtual float dt() {return 0.0;}                                                                 //smooooth operatooor...                                                        // virtuel pur
-  virtual bool optimal() {return false;}   // optimal smoothing method:
+    virtual bool optimal() {return false;}   // optimal smoothing method:
     //     0 -> from original image (ex: convolution)
     //     1 -> from previous scale (ex: diffusion)
   };

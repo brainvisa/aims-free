@@ -38,7 +38,7 @@
 #define AIMS_IMAGECOUPLEDSMOOTHER_H
 
 #include <aims/primalsketch/coupledSmoother.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 namespace aims
 {
@@ -47,16 +47,20 @@ namespace aims
   // smoother contains the geometry it is specialised for
   // It can then smooth any texture based on that geometry (mesh)
 
-  template<typename T> class CoupledSmoother<AimsData<T>, AimsData<T> >
+  template<typename T>
+  class CoupledSmoother<carto::VolumeRef<T>, carto::VolumeRef<T> >
   {
 
   protected:
 
   public:
     
-    virtual std::pair<AimsData<T>, AimsData<T> > doSmoothing(const std::pair<AimsData<T>, AimsData<T> > & ima, 
-                                                     const std::pair<AimsData<T>, AimsData<T> > & constraint,
-                                            int maxiter, bool verbose=false)=0; // for coupled constrained diffusion
+    virtual std::pair<carto::VolumeRef<T>, carto::VolumeRef<T> >
+    doSmoothing( const std::pair<carto::VolumeRef<T>, carto::VolumeRef<T> >
+                    & ima,
+                 const std::pair<carto::VolumeRef<T>, carto::VolumeRef<T> >
+                    & constraint,
+                 int maxiter, bool verbose=false )=0; // for coupled constrained diffusion
 
 	virtual float dt() {return 0.0;}      
     virtual bool optimal() {return false;}   // optimal smoothing method:
