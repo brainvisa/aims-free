@@ -35,7 +35,7 @@
 #ifndef AIMS_RESAMPLING_HARMONICCAGERESAMPLER_H
 #define AIMS_RESAMPLING_HARMONICCAGERESAMPLER_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/mesh/surface.h>
 #include <aims/distancemap/stlsort.h> //for Point3dfCompare
 
@@ -47,14 +47,15 @@ class HarmonicCageMeshResampler
 public:
 	HarmonicCageMeshResampler(const AimsSurfaceTriangle &cage,
 						float spacing);
-	HarmonicCageMeshResampler(const AimsData<unsigned int> &cage,
-			std::vector<Point3df> &controls,
-			short background=0, short border=1, short inside=2);
+	HarmonicCageMeshResampler(
+      const carto::rc_ptr<carto::Volume<unsigned int> > &cage,
+      std::vector<Point3df> &controls,
+      short background=0, short border=1, short inside=2);
 	~HarmonicCageMeshResampler() { }
 
 public:
 	const Point3df &getControl(int ind) const;
-	const AimsData<float> &get_image_coords(int ind) const;
+	const carto::VolumeRef<float> &get_image_coords(int ind) const;
 	void set_keep_image_coords(bool state)
 		{ _keep_image_coords = state; }
 
@@ -67,13 +68,13 @@ public:
 	void computeCoordinates(float threshold=10e-4);
 
 protected:
-	AimsData<unsigned int>		_cage;
+	carto::VolumeRef<unsigned int>		_cage;
 	std::vector<Point3df>		_controls;
 	short				_background;
 	short				_border;
 	short				_inside;
 	bool				_keep_image_coords;
-	std::vector<AimsData<float> >	_image_coords;
+	std::vector<carto::VolumeRef<float> >	_image_coords;
 	std::map<Point3df, std::map<int, float>, Point3dfCompare > _weights;
 };
 
@@ -96,7 +97,7 @@ Point3df HarmonicCageMeshResampler::coordinate(const Point3df &p) const
 }
 
 
-inline const AimsData<float> &
+inline const carto::VolumeRef<float> &
 HarmonicCageMeshResampler::get_image_coords(int ind) const
 {
 	return _image_coords[ind];

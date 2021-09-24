@@ -57,7 +57,7 @@ const AimsSurfaceTriangle &cage, float spacing)
 }
 
 aims::HarmonicCageMeshResampler::HarmonicCageMeshResampler(
-	const AimsData<unsigned int> &cage, std::vector<Point3df> &controls,
+	const rc_ptr<Volume<unsigned int> > &cage, std::vector<Point3df> &controls,
 	short background, short border, short inside) : _cage(cage),
 	_controls(controls), _background(background),
 	_border(border), _inside(inside), _keep_image_coords(false) {}
@@ -95,13 +95,12 @@ void aims::HarmonicCageMeshResampler::computeCoordinates(float /*threshold*/)
 	for (ind = 0, i = _controls.begin(), e = _controls.end();
 			i != e; ++i, ++ind)
 	{
-		AimsData<float> data(_cage.dimX(), _cage.dimY(),
-					_cage.dimZ(), _cage.dimT());
+		VolumeRef<float> data( _cage->getSize() );
 		const	Point3df &p = *i;
 		data = 0.;
 		data(p[0], p[1], p[2]) = 1.;
-		AimsData<float> r = border_smoother.doSmoothing(data, maxiter);
-	//	AimsData<float> r2 = inside_smoother.doSmoothing(r, maxiter);
+		VolumeRef<float> r = border_smoother.doSmoothing(data, maxiter);
+	//	VolumeRef<float> r2 = inside_smoother.doSmoothing(r, maxiter);
 		//if (_keep_image_coords) _image_coords.push_back(r2);
 		if (_keep_image_coords) _image_coords.push_back(r);
 /*

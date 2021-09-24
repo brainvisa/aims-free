@@ -37,7 +37,6 @@
 //--- aims -------------------------------------------------------------------
 #include <aims/algorithm/imagealgorithm.h>
 #include <aims/signalfilter/filteringfunction.h>
-#include <aims/data/data.h>
 #include <aims/utility/progress.h>
 #include <aims/vector/vector.h>
 //--- cartobase --------------------------------------------------------------
