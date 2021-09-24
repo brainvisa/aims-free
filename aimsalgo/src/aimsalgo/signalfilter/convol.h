@@ -36,7 +36,7 @@
 #define AIMS_SIGNALFILTER_CONVOL_H
 
 #include <aims/config/aimsalgo_config.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/type/limits.h>
 #include <float.h>
 
