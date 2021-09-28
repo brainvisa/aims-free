@@ -71,6 +71,7 @@ namespace aims {
       registerFilter( "notnullmean", NotNullMeanFilter<T>() );
       registerFilter( "maj", MajorityFilter<T>() );
       registerFilter( "majority", MajorityFilter<T>() );
+      registerFilter( "notnullmajority", NotNullMajorityFilter<T>() );
       registerFilter( "dif", ExtremaDifferenceFilter<T>() );
       registerFilter( "difference", ExtremaDifferenceFilter<T>() );
       registerFilter( "sum", SumFilter<T>() );

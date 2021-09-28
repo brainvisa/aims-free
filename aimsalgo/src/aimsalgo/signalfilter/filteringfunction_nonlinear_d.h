@@ -77,6 +77,7 @@ namespace aims {
       registerFunction( "notnullmean", NotNullMeanFilterFunc<T>() );
       registerFunction( "maj", MajorityFilterFunc<T>() );
       registerFunction( "majority", MajorityFilterFunc<T>() );
+      registerFunction( "notnullmajority", NotNullMajorityFilterFunc<T>() );
       registerFunction( "dif", ExtremaDifferenceFilterFunc<T>() );
       registerFunction( "difference", ExtremaDifferenceFilterFunc<T>() );
       registerFunction( "sum", SumFilterFunc<T>() );
@@ -403,6 +404,65 @@ namespace aims {
     return majority( volse.begin(), volse.end(), (T)0 );
   }
 
+  //--------------------------------------------------------------------------
+  // NotNullMajorityFilterFunc
+  //--------------------------------------------------------------------------
+  namespace {
+    template <typename Iterator, typename T>
+    T notNullMajority( Iterator b, Iterator e, T init )
+    {
+      Iterator i;
+      T currentclass, majorityclass = init;
+      uint32_t currentclasscases = 0, majoritycases = 0;
+      std::map<T, uint32_t> classcases;
+
+      // Goes through the data and count number of values for each class
+      for( i=b; i!=e; ++i )
+      {
+        if (*i != 0)
+        {
+            currentclass = (*i);
+
+            if ( !classcases[ currentclass ] )
+            {
+                classcases[ currentclass ] = 1;
+                currentclasscases = 1;
+            }
+            else
+            {
+                currentclasscases = classcases[ currentclass ] + 1;
+                classcases[ currentclass ] = currentclasscases;
+            }
+
+            if (currentclasscases > majoritycases)
+            {
+                // Set the new majority cases and class for which it occurs
+                majorityclass = currentclass;
+                majoritycases = currentclasscases;
+            }
+        }
+      }
+
+      return majorityclass;
+    }
+  } // namespace
+
+  template <class T> inline
+  T NotNullMajorityFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
+  {
+    return notNullMajority( volume.begin(), volume.end(), (T)0 );
+  }
+
+  template <class T> inline
+  T NotNullMajorityFilterFunc<T>::execute(
+    const carto::VolumeRef<T> & volume,
+    const StructuringElementRef & se
+  )
+  {
+    StructuredConstVolume<T> volse( *volume, *se );
+    return notNullMajority( volse.begin(), volse.end(), (T)0 );
+  }
+  
   //--------------------------------------------------------------------------
   // ExtremaDifferenceFilterFunc
   //--------------------------------------------------------------------------

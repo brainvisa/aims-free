@@ -235,6 +235,44 @@ namespace aims {
     }
 
     template <typename Iterator>
+    static T notnull_majority( Iterator b, Iterator e, T default_value = (T)0 )
+    {
+      Iterator i;
+      T currentclass, majorityclass = default_value;
+      uint32_t currentclasscases = 0, majoritycases = 0;
+      std::map<T, uint32_t> classcases;
+
+      // Goes through the data and count number of values for each class
+      for( i=b; i!=e; ++i )
+      {
+        if (*i!=0)
+        {
+            currentclass = (*i);
+
+            if ( !classcases[ currentclass ] )
+            {
+                classcases[ currentclass ] = 1;
+                currentclasscases = 1;
+            }
+            else
+            {
+                currentclasscases = classcases[ currentclass ] + 1;
+                classcases[ currentclass ] = currentclasscases;
+            }
+
+            if (currentclasscases > majoritycases)
+            {
+                // Set the new majority cases and class for which it occurs
+                majorityclass = currentclass;
+                majoritycases = currentclasscases;
+            }
+        }
+      }
+
+      return majorityclass;
+    }
+    
+    template <typename Iterator>
     static T extrema_difference( Iterator b, Iterator e )
     {
       T mi, mx;

@@ -77,6 +77,7 @@ namespace aims {
       registerFunction( "notnullmean", NotNullMeanFilterFunc<T>() );
       registerFunction( "maj", MajorityFilterFunc<T>() );
       registerFunction( "majority", MajorityFilterFunc<T>() );
+      registerFunction( "notnullmajority", NotNullMajorityFilterFunc<T>() );
       registerFunction( "dif", ExtremaDifferenceFilterFunc<T>() );
       registerFunction( "difference", ExtremaDifferenceFilterFunc<T>() );
       registerFunction( "sum", SumFilterFunc<T>() );
@@ -267,6 +268,25 @@ namespace aims {
     return MathUtil<T>::majority( volse.begin(), volse.end() );
   }
 
+  //--------------------------------------------------------------------------
+  // NotNullMajorityFilterFunc
+  //--------------------------------------------------------------------------
+  template <class T> inline
+  T NotNullMajorityFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  {
+    return MathUtil<T>::notnull_majority( volume.begin(), volume.end() );
+  }
+
+  template <class T> inline
+  T NotNullMajorityFilterFunc<T>::execute(
+    const carto::VolumeRef<T> & volume,
+    const carto::rc_ptr<StructuringElement> & se
+  ) const
+  {
+    StructuredConstVolume<T> volse( *volume, *se );
+    return MathUtil<T>::notnull_majority( volse.begin(), volse.end() );
+  }
+  
   //--------------------------------------------------------------------------
   // ExtremaDifferenceFilterFunc
   //--------------------------------------------------------------------------

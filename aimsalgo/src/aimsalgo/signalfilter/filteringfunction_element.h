@@ -161,6 +161,7 @@ namespace aims {
   AIMS_DECLARE_ELEMENTFILTERFUNC_BASIC(MeanFilterFunc)
   AIMS_DECLARE_ELEMENTFILTERFUNC_BASIC(NotNullMeanFilterFunc)
   AIMS_DECLARE_ELEMENTFILTERFUNC_BASIC(NotNullMedianFilterFunc)
+  AIMS_DECLARE_ELEMENTFILTERFUNC_BASIC(NotNullMajorityFilterFunc)
 } // namespace aims
 
 #endif
