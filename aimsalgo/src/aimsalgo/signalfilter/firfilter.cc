@@ -33,9 +33,12 @@
 
 
 #include <aims/signalfilter/firfilter.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/math/mathelem.h>
 #include <aims/math/bessel.h>
+
+using namespace carto;
+
 
 AimsFIRFilter::AimsFIRFilter(float fs,
                              float fc,
@@ -130,23 +133,23 @@ void AimsFIRFilter::numberOfFIRFilterCoef()
 
 
 
-AimsData<float> AimsFIRFilter::kaiserWindow()
+VolumeRef<float> AimsFIRFilter::kaiserWindow()
 { float             num,NN,xx;
-  AimsData<float> w((_nCoef+1)/2);
+  VolumeRef<float> w( (_nCoef+1)/2, 1, 1, 1, AllocatorContext::fast() );
 
   NN = (float)_nCoef;  
   for (int x=0;x<(_nCoef+1)/2;x++)
   { xx   = (float)x;
     num  = _beta * sqrt( 1.0 - square((2.0*xx) / (NN-1.0)) );
-    w[x] = (float)(AimsBessel0((double)num)/
+    w(x) = (float)(AimsBessel0((double)num)/
                    AimsBessel0((double)_beta));
   }
   return w;
 }
 
 
-AimsData<float> AimsFIRFilter::idealImpulseResponse()
-{ AimsData<float> hD((_nCoef+1)/2);
+VolumeRef<float> AimsFIRFilter::idealImpulseResponse()
+{ VolumeRef<float> hD( (_nCoef+1)/2, 1, 1, 1, AllocatorContext::fast() );
   float             f,f1,f2,W,W1,W2,xx;
   int		    x;
 
@@ -154,19 +157,19 @@ AimsData<float> AimsFIRFilter::idealImpulseResponse()
   { case AIMS_FIR_LOWPASS  : 
       f     = ( (_fCut + _deltaF / 2) / _fSampling);
       W     = 2 * M_PI * f;
-      hD[0] = 2.0 * f;
+      hD(0) = 2.0 * f;
       for (x=1;x<(_nCoef+1)/2;x++)
       { xx    = x;
-        hD[x] = 2.0 * f * sin(xx*W) / (xx*W);
+        hD(x) = 2.0 * f * sin(xx*W) / (xx*W);
       }
       break;
     case AIMS_FIR_HIGHPASS : 
       f     = ( (_fCut - _deltaF / 2) / _fSampling);
       W     = 2 * M_PI * f;
-      hD[0] = 1.0 - 2.0 * f;
+      hD(0) = 1.0 - 2.0 * f;
       for (x=1;x<(_nCoef+1)/2;x++)
       { xx    = x;
-        hD[x] = - 2.0 * f * sin(xx*W) / (xx*W);
+        hD(x) = - 2.0 * f * sin(xx*W) / (xx*W);
       }
       break;
     case AIMS_FIR_BANDPASS : 
@@ -174,10 +177,10 @@ AimsData<float> AimsFIRFilter::idealImpulseResponse()
       f2    = ( (_fHigh + _deltaF / 2) / _fSampling);
       W1    = 2 * M_PI * f1;
       W2    = 2 * M_PI * f2;
-      hD[0] = 2.0 * (f2 - f1);
+      hD(0) = 2.0 * (f2 - f1);
       for (x=1;x<(_nCoef+1)/2;x++)
       { xx    = x;
-        hD[x] = 2.0 * f2 * sin(xx*W2) / (xx*W2) - 
+        hD(x) = 2.0 * f2 * sin(xx*W2) / (xx*W2) -
                 2.0 * f1 * sin(xx*W1) / (xx*W1);
       }
       break;
@@ -186,10 +189,10 @@ AimsData<float> AimsFIRFilter::idealImpulseResponse()
       f2    = ( (_fHigh - _deltaF / 2) / _fSampling);
       W1    = 2 * M_PI * f1;
       W2    = 2 * M_PI * f2;
-      hD[0] = 1.0 - 2.0 * (f2 - f1);
+      hD(0) = 1.0 - 2.0 * (f2 - f1);
       for (x=1;x<(_nCoef+1)/2;x++)
       { xx    = x;
-        hD[x] = 2.0 * f1 * sin(xx*W1) / (xx*W1) - 
+        hD(x) = 2.0 * f1 * sin(xx*W1) / (xx*W1) -
                 2.0 * f2 * sin(xx*W2) / (xx*W2);
       }
       break;
@@ -198,11 +201,11 @@ AimsData<float> AimsFIRFilter::idealImpulseResponse()
 }
 
 
-AimsData<float> AimsFIRFilter::impulseResponse()
-{ AimsData<float> res((_nCoef+1)/2),
+VolumeRef<float> AimsFIRFilter::impulseResponse()
+{ VolumeRef<float> res((_nCoef+1)/2),
                   kw = kaiserWindow(),
                   iir = idealImpulseResponse();
-  for (int x=0;x<res.dimX();x++)
+  for (int x=0;x<res.getSizeX();x++)
     res(x) = kw(x) * iir(x);
   return res;
 }
@@ -210,7 +213,7 @@ AimsData<float> AimsFIRFilter::impulseResponse()
 
 void AimsFIRFilter::initialize()
 { numberOfFIRFilterCoef();
-  _impulseResponse = new AimsData<float>(impulseResponse());
+  _impulseResponse = new VolumeRef<float>(impulseResponse());
 }
 
 
@@ -254,52 +257,52 @@ int AimsFIRFilter::type() const
 }
 
 
-AimsData<float> 
-AimsFIRFilter::process(const AimsData<float> &sqv, AimsDirectionAxis dir)
+VolumeRef<float>
+AimsFIRFilter::process( const rc_ptr<Volume<float> > &sqv,
+                        AimsDirectionAxis dir )
 { int hsize;
   float tmp;
-  AimsData<float> res(sqv.dimX(),sqv.dimY(),
-                                      sqv.dimZ(),sqv.dimT(),
-                                      sqv.borderWidth());
+  VolumeRef<float> res(sqv->getSize(), sqv->getBorders());
+  res->copyHeaderFrom( sqv->header() );
   res = 0.0;
 
   int	x, y, z, t, k;
 
-  hsize = _impulseResponse->dimX();
+  hsize = _impulseResponse->getSizeX();
   switch (dir)
   { case AIMS_X_DIRECTION : 
-      for (t=0;t<res.dimT();t++)
-        for (z=0;z<res.dimZ();z++)
-          for (y=0;y<res.dimY();y++)
-            for (x=(hsize-1)/2 ; x<sqv.dimX()+(hsize-1)/2 ; x++)
+      for (t=0;t<res.getSizeT();t++)
+        for (z=0;z<res.getSizeZ();z++)
+          for (y=0;y<res.getSizeY();y++)
+            for (x=(hsize-1)/2 ; x<sqv->getSizeX()+(hsize-1)/2 ; x++)
             { tmp = 0.0;
               for (k=0;k<hsize;k++)
-                if (((x-k)>=0) && ((x-k)<sqv.dimX()))
-                  tmp += (*_impulseResponse)(k) * sqv(x-k,y,z,t);
+                if (((x-k)>=0) && ((x-k)<sqv->getSizeX()))
+                  tmp += (*_impulseResponse)(k) * sqv->at(x-k,y,z,t);
               res(x-(hsize-1)/2,y,z,t) = tmp;
             }
       break;
     case AIMS_Y_DIRECTION : 
-      for (t=0;t<res.dimT();t++)
-        for (z=0;z<res.dimZ();z++)
-          for (x=0;x<res.dimX();x++)
-            for (y=(hsize-1)/2 ; y<sqv.dimY()+(hsize-1)/2 ; y++)
+      for (t=0;t<res.getSizeT();t++)
+        for (z=0;z<res.getSizeZ();z++)
+          for (x=0;x<res.getSizeX();x++)
+            for (y=(hsize-1)/2 ; y<sqv->getSizeY()+(hsize-1)/2 ; y++)
             { tmp = 0.0;
               for (k=0;k<hsize;k++)
-                if (((y-k)>=0) && ((y-k)<sqv.dimY()))
-                  tmp += (*_impulseResponse)(k) * sqv(x,y-k,z,t);
+                if (((y-k)>=0) && ((y-k)<sqv->getSizeY()))
+                  tmp += (*_impulseResponse)(k) * sqv->at(x,y-k,z,t);
               res(x,y-(hsize-1)/2,z,t) = tmp;
             }
       break;
     case AIMS_Z_DIRECTION : 
-      for (t=0;t<res.dimT();t++)
-        for (y=0;y<res.dimY();y++)
-          for (x=0;x<res.dimX();x++)
-            for (z=(hsize-1)/2 ; z<sqv.dimZ()+(hsize-1)/2 ; z++)
+      for (t=0;t<res.getSizeT();t++)
+        for (y=0;y<res.getSizeY();y++)
+          for (x=0;x<res.getSizeX();x++)
+            for (z=(hsize-1)/2 ; z<sqv->getSizeZ()+(hsize-1)/2 ; z++)
             { tmp = 0.0;
               for (k=0;k<hsize;k++)
-                if (((z-k)>=0) && ((z-k)<sqv.dimZ()))
-                  tmp += (*_impulseResponse)(k) * sqv(x,y,z-k,t);
+                if (((z-k)>=0) && ((z-k)<sqv->getSizeZ()))
+                  tmp += (*_impulseResponse)(k) * sqv->at(x,y,z-k,t);
               res(x,y,z-(hsize-1)/2,t) = tmp;
             }
       break;

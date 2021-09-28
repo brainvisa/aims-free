@@ -38,13 +38,17 @@
 #include <aims/config/aimsalgo_config.h>
 #include <aims/def/general.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class Volume;
+  template <class T> class VolumeRef;
+}
 
 
 /** The 4 dimensions.
     Useful enum to specify one direction.
 */
-AIMSDATA_API enum AimsDirectionAxis
+enum AimsDirectionAxis
 {
   AIMS_X_DIRECTION,
   AIMS_Y_DIRECTION,
@@ -72,8 +76,6 @@ enum AimsFirFilterType
 */
 class AIMSALGO_API AimsFIRFilter
 { protected:
-    /**@name Data*/
-    //@{
     /// Sampling frequency
     float _fSampling;
     /// Cut frequency
@@ -95,19 +97,18 @@ class AIMSALGO_API AimsFIRFilter
     /// Number of coefficients
     int _nCoef;
     /// Impulse response
-    AimsData<float> *_impulseResponse;
-    //@}
+    carto::VolumeRef<float> *_impulseResponse;
 
     /**@name Methods*/
     //@{
     /// Process the number of coefficients
     void numberOfFIRFilterCoef();
     /// Return a Kaiser window
-    AimsData<float> kaiserWindow();
+    carto::VolumeRef<float> kaiserWindow();
     /// Return the ideal impulse response of the F.I.R. filter
-    AimsData<float> idealImpulseResponse();
+    carto::VolumeRef<float> idealImpulseResponse();
     /// Return the modified impulse response of the F.I.R. filter
-    AimsData<float> impulseResponse();
+    carto::VolumeRef<float> impulseResponse();
     /// send the process which evaluate the coefficients
     void initialize();
   //@}
@@ -163,8 +164,8 @@ class AIMSALGO_API AimsFIRFilter
         @param data 1D/2D/3D or 4D data const reference to process
         @param dir direction of filtering (AIMS_X_DIRECTION, AIMS_Y_DIRECTION,.)
     */
-    AimsData<float> 
-    process(const AimsData<float> &data,
+    carto::VolumeRef<float>
+    process(const carto::rc_ptr<carto::Volume<float> > &data,
             AimsDirectionAxis dir = AIMS_X_DIRECTION);
     //@}
 };
