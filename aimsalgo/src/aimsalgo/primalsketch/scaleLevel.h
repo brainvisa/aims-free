@@ -41,7 +41,7 @@
 #include <aims/primalsketch/greyLevelBlob.h>
 #include <aims/mesh/surface.h>
 #include <aims/mesh/texture.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <set>
 #include <map>
 #include <string>
@@ -102,25 +102,27 @@ namespace aims
 
     // Scale Levels Image Partial Specialisation
 
-    template<typename T> class ScaleLevel<AimsData<T>, AimsData<T> > {
+    template<typename T>
+    class ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >
+    {
 
         public:
 
-            typedef typename SiteType<AimsData<T> >::type Site;
+            typedef typename SiteType<carto::VolumeRef<T> >::type Site;
 
-            ScaleLevel(float scale, AimsData<T> level) { _scale=scale; _level = level.clone(); _originallevel=NULL; }
+            ScaleLevel(float scale, carto::VolumeRef<T> level) { _scale=scale; _level = level.copy(); _originallevel=NULL; }
 
-            ScaleLevel(float scale, AimsData<T> level, AimsData<T> *originallevel)
-                { _scale=scale; _level = level.clone(); _originallevel=originallevel; }
+            ScaleLevel(float scale, carto::VolumeRef<T> level, carto::VolumeRef<T> *originallevel)
+                { _scale=scale; _level = level.copy(); _originallevel=originallevel; }
 
             ~ScaleLevel() {}
 
-            AimsData<T> & Level() { return _level; }
+            carto::VolumeRef<T> & Level() { return _level; }
 
 
             // Essai
-            TexturedData<AimsData<T>, AimsData<T> > Data() {TexturedData<AimsData<T>, AimsData<T> > data(&_level); return data;}
-            TexturedData<AimsData<T>, AimsData<T> > OriginalData() {TexturedData<AimsData<T>, AimsData<T> > data(_originallevel); return data;}
+            TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > Data() {TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > data(&_level); return data;}
+            TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > OriginalData() {TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > data(_originallevel); return data;}
 
             float     Scale() { return _scale; }
             std::map<int, GreyLevelBlob<Site> *> BlobList() { return blobs; }
@@ -133,10 +135,10 @@ namespace aims
                                                     {std::cerr << "looking for GLB " << label << " that does not exist at scale " << _scale << std::endl;
                                                             exit(EXIT_FAILURE);}}
 
-            void DetectBlobs(TexturedData<AimsData<T>, AimsData<T> > *mask=0, char *stats=0);
+            void DetectBlobs(TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > *mask=0, char *stats=0);
             int nbBlobs() { return blobs.size(); }
 
-            ScaleLevel<AimsData<T>, AimsData<T> > & operator = (const ScaleLevel<AimsData<T>, AimsData<T> > & other)
+            ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > & operator = (const ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > & other)
                 {_scale=other._scale; _level=other._level; blobs=other.blobs;
                 saddlePoints=other.saddlePoints; maximumPoints=other.maximumPoints; return *this;}
 
@@ -145,8 +147,8 @@ namespace aims
         private:
 
             float _scale;
-            AimsData<T> _level;
-            AimsData<T> *_originallevel;
+            carto::VolumeRef<T> _level;
+            carto::VolumeRef<T> *_originallevel;
             std::map<int, GreyLevelBlob<Site> *> blobs;
             std::list<SaddlePoint<Site> *> saddlePoints;
             std::list<MaximumPoint<Site> *> maximumPoints;
@@ -242,13 +244,13 @@ namespace aims
      //---------------- METHOD/FUNCTION DEFINITIONS ------------------------------
 
      template<typename T>
-     void ScaleLevel<AimsData<T>, AimsData<T> >::DetectBlobs(TexturedData<AimsData<T>, AimsData<T> > *mask, char *stats)
+     void ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >::DetectBlobs(TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > *mask, char *stats)
      {
-          TexturedData<AimsData<T>, AimsData<T> >textdata(&_level) ;
-          TexturedData<AimsData<T>, AimsData<T> >rawtextdata(_originallevel) ;
+          TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >textdata(&_level) ;
+          TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >rawtextdata(_originallevel) ;
 
 
-          ExtractGreyLevelBlobs<AimsData<T>, AimsData<T> > extractor(&textdata, &rawtextdata, mask, stats);
+          ExtractGreyLevelBlobs<carto::VolumeRef<T>, carto::VolumeRef<T> > extractor(&textdata, &rawtextdata, mask, stats);
 
         typename std::map<int, GreyLevelBlob<Site> *>::iterator itBlob;
 
@@ -295,19 +297,18 @@ namespace aims
      //-------------------------------------------------------------------
 
      template<typename T>
-     void ScaleLevel<AimsData<T>, AimsData<T> >::WriteBlobImage(std::string fileBlob)
+     void ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >::WriteBlobImage(std::string fileBlob)
      {
           int x,y,z;
-          int sx=_level.dimX(), sy=_level.dimY(), sz=_level.dimZ();
-          float     dx=_level.sizeX(), dy=_level.sizeY(), dz=_level.sizeZ();
-          AimsData<float> imaBlob(sx,sy,sz);
+          int sx=_level.getSizeX(), sy=_level.getSizeY(), sz=_level.getSizeZ();
+          carto::VolumeRef<float> imaBlob(sx,sy,sz);
           typename std::map<int, GreyLevelBlob<Site> *>::iterator itBlob=blobs.begin();;
           typename std::list<SaddlePoint<Site> *>::iterator itSaddle=saddlePoints.begin();
           typename std::list<MaximumPoint<Site> *>::iterator itMax=maximumPoints.begin();
           typename std::set<Site,ltstr_p3d<Site> >::iterator itPoints;
           GreyLevelBlob<Site> *blobby;
 
-          imaBlob.setSizeXYZT(dx,dy,dz);
+          imaBlob.setVoxelSize( _level.getVoxelSize() );
 
           for (z=0; z<sz; z++)
                for (y=0; y<sy; y++)
@@ -336,7 +337,7 @@ namespace aims
                x=int((*itMax)->_node[0]); y=int((*itMax)->_node[1]); z=int((*itMax)->_node[2]);
                imaBlob(x,y,z)=128.0;
           }
-          Writer<AimsData<float> > dataW(fileBlob);
+          Writer<carto::VolumeRef<float> > dataW(fileBlob);
           dataW.write(imaBlob);
      }
 

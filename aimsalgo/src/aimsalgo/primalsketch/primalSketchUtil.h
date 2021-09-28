@@ -52,85 +52,82 @@
 
 namespace aims
 {
-	// Functions that deal with primal sketches
+  // Functions that deal with primal sketches
 
-	//------------------------------------- Declarations ----------------------------------------------------------------
+  //------------------------------------- Declarations ----------------------------------------------------------------
 
-	template<typename T> AimsData<short>   *GetSSBlobImage(PrimalSketch<AimsData<T>, AimsData<T> > *sketch);
-	template<int D, class T> TimeTexture<float> GetSSBlobTexture(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch);
-	template<int D, class T> AimsSurfaceTriangle *GetSSBlobMesh(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch);
+  template<typename T> carto::VolumeRef<short>   *GetSSBlobImage(PrimalSketch<carto::VolumeRef<T>, carto::VolumeRef<T> > *sketch);
+  template<int D, class T> TimeTexture<float> GetSSBlobTexture(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch);
+  template<int D, class T> AimsSurfaceTriangle *GetSSBlobMesh(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch);
 
-	template<typename T> AimsBucket<Void> *GetSSBlobBucket(PrimalSketch<AimsData<T>, AimsData<T> > *sketch);
-	template<int D, class T> AimsSurfaceTriangle *GetSSBlobTore(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch);
+  template<typename T> AimsBucket<Void> *GetSSBlobBucket(PrimalSketch<carto::VolumeRef<T>, carto::VolumeRef<T> > *sketch);
+  template<int D, class T> AimsSurfaceTriangle *GetSSBlobTore(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch);
 
-	template<typename Geom, typename Text> 	void AddBlobsToPSGraph(PrimalSketch<Geom,Text> *sketch, Graph *graph);
-	template<typename T> void AddBlobsToPSGraph(PrimalSketch<AimsData<T>, AimsData<T> > *sketch, Graph *graph);
-	template<int D, class T> void AddBlobsToPSGraph(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch, Graph *graph);
+  template<typename Geom, typename Text>   void AddBlobsToPSGraph(PrimalSketch<Geom,Text> *sketch, Graph *graph);
+  template<typename T> void AddBlobsToPSGraph(PrimalSketch<carto::VolumeRef<T>, carto::VolumeRef<T> > *sketch, Graph *graph);
+  template<int D, class T> void AddBlobsToPSGraph(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch, Graph *graph);
 
-	//------------------------------------  Definitions ------------------------------------------------------------------
+  //------------------------------------  Definitions ------------------------------------------------------------------
 
-	template<typename T> AimsData<short> *GetSSBlobImage(PrimalSketch<AimsData<T>, AimsData<T> > *sketch)
-	{
-		typedef Point3d Site;
+  template<typename T> carto::VolumeRef<short> *GetSSBlobImage(PrimalSketch<carto::VolumeRef<T>, carto::VolumeRef<T> > *sketch)
+  {
+    typedef Point3d Site;
 
-		AimsData<short> *image;
-		int x,y,z,sx,sy,sz, i;
-		float dx, dy, dz;
-		std::list<ScaleSpaceBlob<Site>*> ssBlobList=sketch->BlobSet();
-		std::list<ScaleSpaceBlob<Site>*>::iterator itBlob=ssBlobList.begin();
-		GreyLevelBlob<Site>	*glBlob;
-		std::set<Site,ltstr_p3d<Site> > points;
-		std::set<Site,ltstr_p3d<Site> >::iterator itPoints;
+    carto::VolumeRef<short> *image;
+    int x,y,z,sx,sy,sz, i;
+    std::list<ScaleSpaceBlob<Site>*> ssBlobList=sketch->BlobSet();
+    std::list<ScaleSpaceBlob<Site>*>::iterator itBlob=ssBlobList.begin();
+    GreyLevelBlob<Site>  *glBlob;
+    std::set<Site,ltstr_p3d<Site> > points;
+    std::set<Site,ltstr_p3d<Site> >::iterator itPoints;
 
-		sx=sketch->scaleSpace()->GetOriginalImage().dimX();
-		sy=sketch->scaleSpace()->GetOriginalImage().dimY();
-		sz=sketch->scaleSpace()->GetOriginalImage().dimZ();
-		dx=sketch->scaleSpace()->GetOriginalImage().sizeX();
-		dy=sketch->scaleSpace()->GetOriginalImage().sizeY();
-		dz=sketch->scaleSpace()->GetOriginalImage().sizeZ();
+    sx=sketch->scaleSpace()->GetOriginalImage().getSizeX();
+    sy=sketch->scaleSpace()->GetOriginalImage().getSizeY();
+    sz=sketch->scaleSpace()->GetOriginalImage().getSizeZ();
 
-		image=new AimsData<short>(sx, sy, sz);
-		image->setSizeXYZT(dx,dy,dz);
+    image=new carto::VolumeRef<short>(sx, sy, sz);
+    image->setVoxelSize(
+                  sketch->scaleSpace()->GetOriginalImage().getVoxelSize() );
 
-		for (z=0; z<sz; z++)
-			for (y=0; y<sy; y++)
-				for (x=0; x<sx; x++)
-					(*image)(x,y,z)=0;
+    for (z=0; z<sz; z++)
+      for (y=0; y<sy; y++)
+        for (x=0; x<sx; x++)
+          (*image)(x,y,z)=0;
 
-		for (; itBlob!=ssBlobList.end(); ++itBlob)
-		{
-			glBlob=(*itBlob)->GlBlobRep();
-			points=glBlob->GetListePoints();
-			itPoints=points.begin();
-			for (; itPoints!=points.end(); ++itPoints)
-			{
-				x=(*itPoints)[0]; y=(*itPoints)[1]; z=(*itPoints)[2];
-				if ((i=(*image)(x,y,z))==0)
-					(*image)(x,y,z)=100 + ((*itBlob)->Label() * 10);
-				else
-					(*image)(x,y,z)=105 + ((*itBlob)->Label() * 10);
-			}
-		}
+    for (; itBlob!=ssBlobList.end(); ++itBlob)
+    {
+      glBlob=(*itBlob)->GlBlobRep();
+      points=glBlob->GetListePoints();
+      itPoints=points.begin();
+      for (; itPoints!=points.end(); ++itPoints)
+      {
+        x=(*itPoints)[0]; y=(*itPoints)[1]; z=(*itPoints)[2];
+        if ((i=(*image)(x,y,z))==0)
+          (*image)(x,y,z)=100 + ((*itBlob)->Label() * 10);
+        else
+          (*image)(x,y,z)=105 + ((*itBlob)->Label() * 10);
+      }
+    }
 
-		return image;
-	}
+    return image;
+  }
 
 
-	//------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------
 
-	template<int D, class T> TimeTexture<float> GetSSBlobTexture(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch)
-	{
-		typedef std::pair<Point3df,uint> Site;
+  template<int D, class T> TimeTexture<float> GetSSBlobTexture(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch)
+  {
+    typedef std::pair<Point3df,uint> Site;
 
-		//TexturedData<AimsSurface<D, Void>, Texture<T> > *textBlob;
-		std::list<ScaleSpaceBlob<Site>*> ssBlobList=sketch->BlobSet();
-		std::list<ScaleSpaceBlob<Site>*>::iterator itBlob=ssBlobList.begin();
-		GreyLevelBlob<Site>	*glBlob;
-		std::set<Site,ltstr_p3d<Site> > points;
-		std::set<Site,ltstr_p3d<Site> >::iterator itPoints;
-		//int label;
+    //TexturedData<AimsSurface<D, Void>, Texture<T> > *textBlob;
+    std::list<ScaleSpaceBlob<Site>*> ssBlobList=sketch->BlobSet();
+    std::list<ScaleSpaceBlob<Site>*>::iterator itBlob=ssBlobList.begin();
+    GreyLevelBlob<Site>  *glBlob;
+    std::set<Site,ltstr_p3d<Site> > points;
+    std::set<Site,ltstr_p3d<Site> >::iterator itPoints;
+    //int label;
 
-		//textBlob=new TexturedData<AimsSurface<D, Void>, Texture<T> >(sketch->scaleSpace()->Mesh(), &(sketch->scaleSpace()->GetOriginalImage()));
+    //textBlob=new TexturedData<AimsSurface<D, Void>, Texture<T> >(sketch->scaleSpace()->Mesh(), &(sketch->scaleSpace()->GetOriginalImage()));
 
                 std::set<float> scale= sketch->scaleSpace()->GetScaleList();
                
@@ -147,9 +144,9 @@ namespace aims
                 for (; itBlob!=ssBlobList.end(); ++itBlob)
                 {
                         //label=(*itBlob)->Label();
-			glBlob=(*itBlob)->GlBlobRep();
-			points=glBlob->GetListePoints();
-			itPoints=points.begin();
+      glBlob=(*itBlob)->GlBlobRep();
+      points=glBlob->GetListePoints();
+      itPoints=points.begin();
 //                         if (points.size() == 1){
                           std::list<GreyLevelBlob<Site>*> glBlobs=(*itBlob)->glBlobs;
                           std::list<GreyLevelBlob<Site>*>::iterator glit;
@@ -183,73 +180,73 @@ namespace aims
                 }
 
                 return tex;
-// 		return textBlob->GetTexture();
-	}
+//     return textBlob->GetTexture();
+  }
 
-	//------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------
 
-	template<typename T> AimsBucket<Void> *GetSSBlobBucket(PrimalSketch<AimsData<T>, AimsData<T> > *sketch)
-	{
-		typedef Point3d Site;
-		AimsBucket<Void> *blobBck;
-		float dx, dy, dz;
-		std::list<ScaleSpaceBlob<Site>*> ssBlobList=sketch->BlobSet();
-		std::list<ScaleSpaceBlob<Site>*>::iterator itBlob=ssBlobList.begin();
-		GreyLevelBlob<Site>	*glBlob;
-		std::set<Site,ltstr_p3d<Site> > points;
-		std::set<Site,ltstr_p3d<Site> >::iterator itPoints;
-		AimsBucketItem<Void> bckItem;
+  template<typename T> AimsBucket<Void> *GetSSBlobBucket(PrimalSketch<carto::VolumeRef<T>, carto::VolumeRef<T> > *sketch)
+  {
+    typedef Point3d Site;
+    AimsBucket<Void> *blobBck;
+    float dx, dy, dz;
+    std::list<ScaleSpaceBlob<Site>*> ssBlobList=sketch->BlobSet();
+    std::list<ScaleSpaceBlob<Site>*>::iterator itBlob=ssBlobList.begin();
+    GreyLevelBlob<Site>  *glBlob;
+    std::set<Site,ltstr_p3d<Site> > points;
+    std::set<Site,ltstr_p3d<Site> >::iterator itPoints;
+    AimsBucketItem<Void> bckItem;
 
-		dx=sketch->scaleSpace()->GetOriginalImage().sizeX();
-		dy=sketch->scaleSpace()->GetOriginalImage().sizeY();
-		dz=sketch->scaleSpace()->GetOriginalImage().sizeZ();
+    dx=sketch->scaleSpace()->GetOriginalImage().getVoxelSize()[0];
+    dy=sketch->scaleSpace()->GetOriginalImage().getVoxelSize()[1];
+    dz=sketch->scaleSpace()->GetOriginalImage().getVoxelSize()[2];
 
-		blobBck=new AimsBucket<Void>;
-		blobBck->setSizeX(dx);
-		blobBck->setSizeY(dy);
-		blobBck->setSizeZ(dz);
+    blobBck=new AimsBucket<Void>;
+    blobBck->setSizeX(dx);
+    blobBck->setSizeY(dy);
+    blobBck->setSizeZ(dz);
 
-		for (; itBlob!=ssBlobList.end(); ++itBlob)
-		{
-			glBlob=(*itBlob)->GlBlobRep();
-			points=glBlob->GetListePoints();
-			itPoints=points.begin();
-			for (; itPoints!=points.end(); ++itPoints)
-			{
-				bckItem.location()=(*itPoints);
-				(*blobBck)[(*itBlob)->Label()].push_back(bckItem);
-			}
-		}
-		return blobBck;
-	}
+    for (; itBlob!=ssBlobList.end(); ++itBlob)
+    {
+      glBlob=(*itBlob)->GlBlobRep();
+      points=glBlob->GetListePoints();
+      itPoints=points.begin();
+      for (; itPoints!=points.end(); ++itPoints)
+      {
+        bckItem.location()=(*itPoints);
+        (*blobBck)[(*itBlob)->Label()].push_back(bckItem);
+      }
+    }
+    return blobBck;
+  }
 
-	//------------------------------------------------------------------------------------------
-	template<int D, class T> AimsSurfaceTriangle *GetSSBlobMesh(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch, AimsSurfaceTriangle *mesh)
-	{
-		typedef std::pair<Point3df,uint> Site;		// ATTENTION : cette fonction ne marche que pour les surfaces triangulees
-																			// et pas pour D quelconque. C'est un peu verole mais bon...
-																			// Peut-?tre le primalSketch de surfaces devrait-il ?tre limit? aux triangulations
-		AimsSurfaceTriangle *meshBlob;
-		std::list<ScaleSpaceBlob<Site>*> ssBlobList=sketch->BlobSet();
-		std::list<ScaleSpaceBlob<Site>*>::iterator ssblobit=ssBlobList.begin();
-		std::set<Site,ltstr_p3d<Site> > points;
-		
-		std::map<int,int> tableNodes;
-		int label, index;
+  //------------------------------------------------------------------------------------------
+  template<int D, class T> AimsSurfaceTriangle *GetSSBlobMesh(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch, AimsSurfaceTriangle *mesh)
+  {
+    typedef std::pair<Point3df,uint> Site;    // ATTENTION : cette fonction ne marche que pour les surfaces triangulees
+                                      // et pas pour D quelconque. C'est un peu verole mais bon...
+                                      // Peut-?tre le primalSketch de surfaces devrait-il ?tre limit? aux triangulations
+    AimsSurfaceTriangle *meshBlob;
+    std::list<ScaleSpaceBlob<Site>*> ssBlobList=sketch->BlobSet();
+    std::list<ScaleSpaceBlob<Site>*>::iterator ssblobit=ssBlobList.begin();
+    std::set<Site,ltstr_p3d<Site> > points;
+
+    std::map<int,int> tableNodes;
+    int label, index;
                 uint count=0, count2=0;
-		Point3df coord;
-		AimsTimeSurface<3,Void> oneMesh, tempMesh;
-		std::vector<Point3df> nodes;
+    Point3df coord;
+    AimsTimeSurface<3,Void> oneMesh, tempMesh;
+    std::vector<Point3df> nodes;
                 std::vector<Point3dd>  pts;
-		std::vector< AimsVector<uint,3> > poly, allPoly;
-		std::vector< AimsVector<uint,3> >::iterator itPoly;
-		AimsVector<uint,3> tri;
+    std::vector< AimsVector<uint,3> > poly, allPoly;
+    std::vector< AimsVector<uint,3> >::iterator itPoly;
+    AimsVector<uint,3> tri;
 
-		meshBlob=new AimsSurfaceTriangle();
+    meshBlob=new AimsSurfaceTriangle();
                 (*mesh)[0].updateNormals();
 
                 std::cout << "==============================" << std::endl;
-		for (; ssblobit!=ssBlobList.end(); ++ssblobit ) { //  ON PARCOURT LES SSBLOBS
+    for (; ssblobit!=ssBlobList.end(); ++ssblobit ) { //  ON PARCOURT LES SSBLOBS
                   oneMesh=AimsSurfaceTriangle();
                   label=(*ssblobit)->Label();
 
@@ -269,14 +266,14 @@ namespace aims
                       points=(*ssblobit)->GlBlobRep()->GetListePoints();
                       std::set<Site,ltstr_p3d<Site> >::iterator itPoints=points.begin();
                       std::set<uint> auxpts;
-                      for (; itPoints!=points.end(); ++itPoints){				    
+                      for (; itPoints!=points.end(); ++itPoints){
                         index=(*itPoints).second;
                         auxpts.insert(index);
                       }
                       for (uint i=0; i<(*mesh)[0].polygon().size(); i++){
-                        if ((auxpts.find((*mesh)[0].polygon()[i][0]) != auxpts.end())		// si le polytgone ne contient que des
-                             && (auxpts.find((*mesh)[0].polygon()[i][1]) != auxpts.end())	// points du blob
-                             && (auxpts.find((*mesh)[0].polygon()[i][2]) != auxpts.end())){	// on le garde
+                        if ((auxpts.find((*mesh)[0].polygon()[i][0]) != auxpts.end())    // si le polytgone ne contient que des
+                             && (auxpts.find((*mesh)[0].polygon()[i][1]) != auxpts.end())  // points du blob
+                             && (auxpts.find((*mesh)[0].polygon()[i][2]) != auxpts.end())){  // on le garde
                           for (uint j=0;j<3;j++){
                             Point3df node((*mesh)[0].vertex()[(*mesh)[0].polygon()[i][j]]);
                             Point3df norm((*mesh)[0].normal()[(*mesh)[0].polygon()[i][j]]);
@@ -328,11 +325,11 @@ namespace aims
                     (*meshBlob)[label].updateNormals();
                   }
 
-		}
+    }
                 std::cout << "END" << std::endl;
 
-		return meshBlob;
-	}
+    return meshBlob;
+  }
 
         template<typename T> AimsBucket<Void> *GetSSBlobMeshBucket(AimsSurfaceTriangle *mesh)
         {
@@ -355,14 +352,14 @@ namespace aims
         }
         
 
-	//------------------------------------------------------------------------------------------
-	template<typename Geom, typename Text> 	void AddBlobsToPSGraph(PrimalSketch<Geom,Text> *sketch, Graph *graph)
-	{
-	}
+  //------------------------------------------------------------------------------------------
+  template<typename Geom, typename Text>   void AddBlobsToPSGraph(PrimalSketch<Geom,Text> *sketch, Graph *graph)
+  {
+  }
 
 
-	//------------------------------------------------------------------------------------------
-	template<typename T> void AddBlobsToPSGraph(PrimalSketch<AimsData<T>, AimsData<T> > *sketch, Graph *graph)	{
+  //------------------------------------------------------------------------------------------
+  template<typename T> void AddBlobsToPSGraph(PrimalSketch<carto::VolumeRef<T>, carto::VolumeRef<T> > *sketch, Graph *graph)  {
           std::set<Vertex * > vertSet;
           std::set<Vertex *>::iterator itVert;
           Vertex *node;
@@ -376,12 +373,10 @@ namespace aims
           bounding_min.push_back(0);
           bounding_min.push_back(0);
           bounding_min.push_back(0);
-          bounding_max.push_back(sketch->scaleSpace()->GetOriginalImage().dimX());
-          bounding_max.push_back(sketch->scaleSpace()->GetOriginalImage().dimY());
-          bounding_max.push_back(sketch->scaleSpace()->GetOriginalImage().dimZ());
-          resolution.push_back(sketch->scaleSpace()->GetOriginalImage().sizeX());
-          resolution.push_back(sketch->scaleSpace()->GetOriginalImage().sizeY());
-          resolution.push_back(sketch->scaleSpace()->GetOriginalImage().sizeZ());
+          bounding_max.push_back(sketch->scaleSpace()->GetOriginalImage().getSizeX());
+          bounding_max.push_back(sketch->scaleSpace()->GetOriginalImage().getSizeY());
+          bounding_max.push_back(sketch->scaleSpace()->GetOriginalImage().getSizeZ());
+          resolution = sketch->scaleSpace()->GetOriginalImage().getVoxelSize();
 
           graph->setProperty( "boundingbox_min", bounding_min );
           graph->setProperty( "boundingbox_max", bounding_max );
@@ -403,10 +398,10 @@ namespace aims
             manip.storeAims( *graph, node, "ssblob", ptrBck );
             node->setProperty( "ssblob_label", label );
           }
-	}
+  }
 
-	//------------------------------------------------------------------------------------------
-	template<int D, class T> void AddBlobsToPSGraph(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch, Graph *graph){
+  //------------------------------------------------------------------------------------------
+  template<int D, class T> void AddBlobsToPSGraph(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch, Graph *graph){
           std::set<Vertex * > vertSet;
           std::set<Vertex *>::iterator itVert;
           Vertex *node;
@@ -486,70 +481,70 @@ namespace aims
             node->setProperty("ssblob_label", label);
           }
 
-	}
+  }
 
-	//------------------------------------------------------------------------------------------
-	template<int D, class T> AimsSurfaceTriangle *GetSSBlobTore(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch)
-	{
-		AimsSurfaceTriangle *blobMesh, *blobTore;
+  //------------------------------------------------------------------------------------------
+  template<int D, class T> AimsSurfaceTriangle *GetSSBlobTore(PrimalSketch<AimsSurface<D, Void>, Texture<T> > *sketch)
+  {
+    AimsSurfaceTriangle *blobMesh, *blobTore;
 
 
-		blobMesh=GetSSBlobMesh(sketch);
+    blobMesh=GetSSBlobMesh(sketch);
 
-		// Code from here is a simple extension from the ScaleSpace::surface2Tore function
-		// by Arnaud Cachia
+    // Code from here is a simple extension from the ScaleSpace::surface2Tore function
+    // by Arnaud Cachia
 
-  		unsigned  i, t=0, p, t1, t2, t3;
-		//AimsSurfaceTriangle::iterator itMesh;
-		unsigned		nedge = 0;
-  		AimsSurfaceTriangle	*msh, *tmpMesh;
+      unsigned  i, t=0, p, t1, t2, t3;
+    //AimsSurfaceTriangle::iterator itMesh;
+    unsigned    nedge = 0;
+      AimsSurfaceTriangle  *msh, *tmpMesh;
 
-		blobTore=new AimsSurfaceTriangle;
+    blobTore=new AimsSurfaceTriangle;
 
-  		//for (itMesh==blobMesh->begin();itMesh!=blobMesh->end();++itMesh)
-  		for (t=0; t<blobMesh->size(); t++)
-		{
- 			const std::vector<Point3df>  vert = (*blobMesh)[t].vertex();
-  			const std::vector<AimsVector<uint,3> >  poly = (*blobMesh)[t].polygon();
-			std::map<std::pair<unsigned, unsigned>, unsigned> edges;
-  			std::map<std::pair<unsigned, unsigned>, unsigned>::iterator ie, eie = edges.end();
-			p = poly.size();
+      //for (itMesh==blobMesh->begin();itMesh!=blobMesh->end();++itMesh)
+      for (t=0; t<blobMesh->size(); t++)
+    {
+       const std::vector<Point3df>  vert = (*blobMesh)[t].vertex();
+        const std::vector<AimsVector<uint,3> >  poly = (*blobMesh)[t].polygon();
+      std::map<std::pair<unsigned, unsigned>, unsigned> edges;
+        std::map<std::pair<unsigned, unsigned>, unsigned>::iterator ie, eie = edges.end();
+      p = poly.size();
 
-  			for( i=0; i<p; ++i )
-    		{
-      			t1 = poly[i][0];
-      			t2 = poly[i][1];
-      			t3 = poly[i][2];
+        for( i=0; i<p; ++i )
+        {
+            t1 = poly[i][0];
+            t2 = poly[i][1];
+            t3 = poly[i][2];
 
-				if( t1 < t2 )
-					++edges[ std::pair<unsigned, unsigned>( t1, t2 ) ];
-      			else
-					++edges[ std::pair<unsigned, unsigned>( t2, t1 ) ];
-      			if( t1 < t3 )
-					++edges[ std::pair<unsigned, unsigned>( t1, t3 ) ];
-      			else
-					++edges[ std::pair<unsigned, unsigned>( t3, t1 ) ];
-      			if( t2 < t3 )
-					++edges[ std::pair<unsigned, unsigned>( t2, t3 ) ];
-      			else
-				++edges[ std::pair<unsigned, unsigned>( t3, t2 ) ];
-    		}
+        if( t1 < t2 )
+          ++edges[ std::pair<unsigned, unsigned>( t1, t2 ) ];
+            else
+          ++edges[ std::pair<unsigned, unsigned>( t2, t1 ) ];
+            if( t1 < t3 )
+          ++edges[ std::pair<unsigned, unsigned>( t1, t3 ) ];
+            else
+          ++edges[ std::pair<unsigned, unsigned>( t3, t1 ) ];
+            if( t2 < t3 )
+          ++edges[ std::pair<unsigned, unsigned>( t2, t3 ) ];
+            else
+        ++edges[ std::pair<unsigned, unsigned>( t3, t2 ) ];
+        }
 
-			tmpMesh=new AimsSurfaceTriangle;
-  			for( ie=edges.begin(); ie!=eie; ++ie)
-    			if( (*ie).second == 1 )
-      			{
-					++nedge;
-					msh = SurfaceGenerator::cylinder( vert[(*ie).first.first], vert[(*ie).first.second], 0.3, 0.3, 3, false );
-					SurfaceManip::meshMerge( *tmpMesh, *msh );
-					delete msh;
-      			}
-			(*blobTore)[t]=(*tmpMesh)[0];
-			delete tmpMesh;
-		}
+      tmpMesh=new AimsSurfaceTriangle;
+        for( ie=edges.begin(); ie!=eie; ++ie)
+          if( (*ie).second == 1 )
+            {
+          ++nedge;
+          msh = SurfaceGenerator::cylinder( vert[(*ie).first.first], vert[(*ie).first.second], 0.3, 0.3, 3, false );
+          SurfaceManip::meshMerge( *tmpMesh, *msh );
+          delete msh;
+            }
+      (*blobTore)[t]=(*tmpMesh)[0];
+      delete tmpMesh;
+    }
 
-  		return( blobTore );
-	}
+      return( blobTore );
+  }
 
 }
 

@@ -37,7 +37,7 @@
 #include <aims/mesh/surface.h>
 #include <aims/mesh/surfaceOperation.h>
 #include <aims/mesh/texture.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/utility/converter_volume.h>
 #include <aims/utility/converter_texture.h>
 #include <aims/io/writer.h>
@@ -58,7 +58,7 @@ template<typename T> struct TexType {
 
 // specialisations de SiteType
 
-template<typename T> class SiteType<AimsData<T> >  { // Images
+template<typename T> class SiteType<carto::VolumeRef<T> >  { // Images
     public:
         typedef Point3d type;
 };
@@ -68,7 +68,7 @@ template<int D> class SiteType<AimsSurface<D, Void> > { // surface
         typedef std::pair<Point3df,uint> type;
 };
 
-template<typename T> class TexType<AimsData<T> >  { // texture image
+template<typename T> class TexType<carto::VolumeRef<T> >  { // texture image
     public:
         typedef T type;
 };
@@ -94,18 +94,18 @@ template<typename S> class SiteIterator {
 
 // iterateur semi-specialise pour images
 
-template<typename T> class SiteIterator<AimsData<T> > {
+template<typename T> class SiteIterator<carto::VolumeRef<T> > {
     public:
-        typedef typename SiteType<AimsData<T> >::type Site;
+        typedef typename SiteType<carto::VolumeRef<T> >::type Site;
         Site operator *() { return _pos; }
         //const Site & operator *() const { return (*_data)( _pos ); }
-        SiteIterator<AimsData<T> > & operator ++ ();
-        SiteIterator<AimsData<T> > & operator --(); // optionnel
-        SiteIterator( const AimsData<T> *data, const Site & pos );
-        bool operator == ( const SiteIterator<AimsData<T> > & other ) const;
-        bool operator != ( const SiteIterator<AimsData<T> > & other ) const;
+        SiteIterator<carto::VolumeRef<T> > & operator ++ ();
+        SiteIterator<carto::VolumeRef<T> > & operator --(); // optionnel
+        SiteIterator( const carto::VolumeRef<T> *data, const Site & pos );
+        bool operator == ( const SiteIterator<carto::VolumeRef<T> > & other ) const;
+        bool operator != ( const SiteIterator<carto::VolumeRef<T> > & other ) const;
     private:
-        const AimsData<T>     *_data;
+        const carto::VolumeRef<T>     *_data;
         Site                  _pos;
 };
 
@@ -136,8 +136,8 @@ template<int D> class SiteIterator<AimsSurface<D,Void> > {
 // La classe generique qui nous interesse
 
 template<typename Geom, typename Text> class TexturedData {
-       // Geom est la geometrie (AimsSurface ou AimsData)
-       // Tex est la texture (Texture ou AimsData)
+       // Geom est la geometrie (AimsSurface ou carto::VolumeRef)
+       // Tex est la texture (Texture ou carto::VolumeRef)
 
     public:
         typedef typename SiteType<Geom>::type Site; // j'espere que cette ruse marche
@@ -155,42 +155,42 @@ template<typename Geom, typename Text> class TexturedData {
 // Specialisation de TexturedData pour images
 //=============================================================================
 
-template<typename T> class TexturedData<AimsData<T>, AimsData<T> >
+template<typename T> class TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >
 {
 public:
   // interface standard, commune
-  typedef typename SiteType<AimsData<T> >::type Site;
+  typedef typename SiteType<carto::VolumeRef<T> >::type Site;
   typedef T Tex;
-  SiteIterator<AimsData<T> > siteBegin();           // pointe sur le premier site
-  SiteIterator<AimsData<T> > siteEnd();             // pointe juste apres le dernier site
+  SiteIterator<carto::VolumeRef<T> > siteBegin();           // pointe sur le premier site
+  SiteIterator<carto::VolumeRef<T> > siteEnd();             // pointe juste apres le dernier site
   std::vector<Site> neighbours( const Site & pos ); // acces aux voisins de <pos>
   Tex & intensity( const Site & pos );
   const Tex & intensity( const Site & pos ) const;
 
   TexturedData() {}
-  TexturedData( AimsData<T> *data ){_data=data;} // pass an image
-  TexturedData( const TexturedData<AimsData<T>, AimsData<T> > &other);
+  TexturedData( carto::VolumeRef<T> *data ){_data=data;} // pass an image
+  TexturedData( const TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > &other);
                                      // copy constructor
   TexturedData(int dimx, int dimy, int dimz, int dimt = 1,
 	       int borderw = 0);
 
   // Writer
 
-  void write(char *name) {aims::Writer<AimsData<T> > dataW(name); dataW.write(*_data);}
+  void write(char *name) {aims::Writer<carto::VolumeRef<T> > dataW(name); dataW.write(*_data);}
 
   // Getting the image
 
-  AimsData<T>   *GetImage() {return _data;}
+  carto::VolumeRef<T>   *GetImage() {return _data;}
 
   // nb of sites (comes handy sometime)
 
-  int NbSites() {return (_data->dimX()*_data->dimY()*_data->dimZ());}
+  int NbSites() {return (_data->getSizeX()*_data->getSizeY()*_data->getSizeZ());}
 
-	TexturedData<AimsData<T>, AimsData<T> > & operator = ( const TexturedData<AimsData<T>, AimsData<T> > &other );
+	TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > & operator = ( const TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > &other );
 
 
 private:
-  AimsData<T>   *_data; // ou compteur de reference rc_ptr (cf libcartobase)
+  carto::VolumeRef<T>   *_data; // ou compteur de reference rc_ptr (cf libcartobase)
 };
 
 
@@ -252,14 +252,14 @@ template<int D, class T> class TexturedData<AimsSurface<D,Void>, Texture<T> > {
 //=================================================================================
 
 template<typename T>  bool
-SiteIterator<AimsData<T> >::operator == ( const SiteIterator<AimsData<T> > & other ) const
+SiteIterator<carto::VolumeRef<T> >::operator == ( const SiteIterator<carto::VolumeRef<T> > & other ) const
 {
   if ((_pos[0]==other._pos[0]) && (_pos[1]==other._pos[1]) && (_pos[2]==other._pos[2])) return true;
   else return false;
 }
 
 template<typename T>  bool
-SiteIterator<AimsData<T> >::operator != ( const SiteIterator<AimsData<T> > & other ) const
+SiteIterator<carto::VolumeRef<T> >::operator != ( const SiteIterator<carto::VolumeRef<T> > & other ) const
 {
   if ((this->_pos[0] != other._pos[0]) || (this->_pos[1] != other._pos[1]) || (this->_pos[2] != other._pos[2])) return true;
   else return false;
@@ -281,18 +281,18 @@ SiteIterator<AimsSurface<D,Void> >::operator != ( const SiteIterator<AimsSurface
 
 
 template<typename T> 
-SiteIterator<AimsData<T> >::SiteIterator( const AimsData<T> *data, const Site & pos )
+SiteIterator<carto::VolumeRef<T> >::SiteIterator( const carto::VolumeRef<T> *data, const Site & pos )
 {
   _data=data;
   _pos=pos;
 }
 
-template<typename T> SiteIterator<AimsData<T> > &
-SiteIterator<AimsData<T> >::operator ++() 
+template<typename T> SiteIterator<carto::VolumeRef<T> > &
+SiteIterator<carto::VolumeRef<T> >::operator ++()
 {
-  if ( _pos[0] < (_data->dimX() -1) )
+  if ( _pos[0] < (_data->getSizeX() -1) )
     _pos[0]++;
-  else if ( _pos[1] < (_data->dimY() -1) )
+  else if ( _pos[1] < (_data->getSizeY() -1) )
     {
       _pos[0]=0;
       _pos[1]++;
@@ -306,20 +306,20 @@ SiteIterator<AimsData<T> >::operator ++()
   return(*this);
 }
 
-template<typename T> SiteIterator<AimsData<T> > &
-SiteIterator<AimsData<T> >::operator --()
+template<typename T> SiteIterator<carto::VolumeRef<T> > &
+SiteIterator<carto::VolumeRef<T> >::operator --()
 {
   if ( _pos[0] > 0 )
     _pos[0]--;
   else if ( _pos[1] > 0 )
     {
-      _pos[0]=(_data->dimX() -1);
+      _pos[0]=(_data->getSizeX() -1);
       _pos[1]--;
     }
   else
     {
-      _pos[0]=(_data->dimX() -1);
-      _pos[1]=(_data->dimY() -1);
+      _pos[0]=(_data->getSizeX() -1);
+      _pos[1]=(_data->getSizeY() -1);
       _pos[2]--;
     }
   return(*this);
@@ -361,38 +361,38 @@ SiteIterator<AimsSurface<D,Void> >::operator--()
 //----------------------------
 
 template<typename T>
-TexturedData<AimsData<T>, AimsData<T> >::TexturedData( const TexturedData<AimsData<T>, AimsData<T> > &other)
+TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >::TexturedData( const TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > &other)
 {
-	(*this)._data=new AimsData<T>;
-	*((*this)._data)=(*(other._data)).clone();
+	(*this)._data=new carto::VolumeRef<T>;
+	*((*this)._data)=(*(other._data)).copy();
 }
 
 template<typename T>
-TexturedData<AimsData<T>, AimsData<T> >::TexturedData(int dimx, int dimy, int dimz, int dimt, int borderw)
+TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >::TexturedData(int dimx, int dimy, int dimz, int dimt, int borderw)
 {
-  _data=new AimsData<T>(dimx, dimy, dimz, dimt, borderw);
+  _data=new carto::VolumeRef<T>(dimx, dimy, dimz, dimt, borderw);
 }
 
-template<typename T> SiteIterator<AimsData<T> >
-TexturedData<AimsData<T>, AimsData<T> >::siteBegin()
+template<typename T> SiteIterator<carto::VolumeRef<T> >
+TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >::siteBegin()
 {
   Point3d point(0,0,0);
-  SiteIterator<AimsData<T> > iter((*this)._data, point);
+  SiteIterator<carto::VolumeRef<T> > iter((*this)._data, point);
 
   return iter;
 }
 
-template<typename T> SiteIterator<AimsData<T> >
-TexturedData<AimsData<T>, AimsData<T> >::siteEnd()
+template<typename T> SiteIterator<carto::VolumeRef<T> >
+TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >::siteEnd()
 {
-  Point3d point(0, 0, _data->dimZ());
-  SiteIterator<AimsData<T> > iter((*this)._data, point);
+  Point3d point(0, 0, _data->getSizeZ());
+  SiteIterator<carto::VolumeRef<T> > iter((*this)._data, point);
 
   return iter;
 }
 
-template<typename T> std::vector<typename SiteType<AimsData<T> >::type>
-TexturedData<AimsData<T>, AimsData<T> >::neighbours( const Site & pos )
+template<typename T> std::vector<typename SiteType<carto::VolumeRef<T> >::type>
+TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >::neighbours( const Site & pos )
 {
   // 26-connectivity so far ...
   std::vector<Point3d> neigh;
@@ -406,7 +406,7 @@ TexturedData<AimsData<T>, AimsData<T> >::neighbours( const Site & pos )
 	{
 	  if ((i!=0) || (j!=0) || (k!=0))
 	    {
-	      if ( ((x+i)>=0) && ((x+i)<_data->dimX()) && ((y+j)>=0) && ((y+j)<_data->dimY()) && ((z+k)>=0) && ((z+k)<_data->dimZ()) )
+	      if ( ((x+i)>=0) && ((x+i)<_data->getSizeX()) && ((y+j)>=0) && ((y+j)<_data->getSizeY()) && ((z+k)>=0) && ((z+k)<_data->getSizeZ()) )
 		{
 		  point[0]=x+i;
 		  point[1]=y+j;
@@ -419,13 +419,13 @@ TexturedData<AimsData<T>, AimsData<T> >::neighbours( const Site & pos )
 }
 
 template<typename T> T &
-TexturedData<AimsData<T>, AimsData<T> >::intensity(const Site & pos )
+TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >::intensity(const Site & pos )
 {
   return (*_data)(pos);
 }
 
 template<typename T> const T &
-TexturedData<AimsData<T>, AimsData<T> >::intensity( const Site & pos ) const
+TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >::intensity( const Site & pos ) const
 {
   return (*_data)(pos);
 }
@@ -511,11 +511,11 @@ TexturedData<AimsSurface<D,Void>, Texture<T> >::intensity( const Site & pos ) co
   return((*_tex).item(pos.second));
 }
 
-template <typename T> inline TexturedData<AimsData<T>, AimsData<T> > &
-TexturedData<AimsData<T>, AimsData<T> >::operator = ( const TexturedData<AimsData<T>, AimsData<T> > & other )
+template <typename T> inline TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > &
+TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> >::operator = ( const TexturedData<carto::VolumeRef<T>, carto::VolumeRef<T> > & other )
 {
-	(*this)._data=new AimsData<T>;
-	(*(*this)._data)=(*(other._data)).clone();
+	(*this)._data=new carto::VolumeRef<T>;
+	(*(*this)._data)=(*(other._data)).copy();
 	return *this;
 }
 

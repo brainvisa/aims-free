@@ -41,7 +41,7 @@
 #include <aims/primalsketch/scaleLevel.h>
 #include <aims/mesh/surface.h>
 #include <aims/mesh/texture.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <set>
 #include <map>
 #include <utility>
@@ -130,20 +130,20 @@ namespace aims
     // Image Partial Specialisation
 
     template<typename T>
-    class ScaleSpace<AimsData<T>, AimsData<T> > : public BaseScaleSpace
+    class ScaleSpace<carto::VolumeRef<T>, carto::VolumeRef<T> > : public BaseScaleSpace
     {
 
         protected:
 
             float dt() { return _smoother->dt(); };
-            std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*> scales;
+            std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*> scales;
             Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> > *_smoother;
 
         public:
 
             ScaleSpace() : BaseScaleSpace() { _smoother = NULL; }
 
-            ScaleSpace( AimsData<T> * originalImage,
+            ScaleSpace( carto::VolumeRef<T> * originalImage,
                         Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> > *smoother )
             { PutSmoother(smoother); PutOriginalImage(originalImage); }
 
@@ -152,33 +152,33 @@ namespace aims
             void PutSmoother ( Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> > *smoother )
                 { _smoother = smoother; }
 
-            void PutOriginalImage ( AimsData<T> *originalImage ) {
-                ScaleLevel<AimsData<T>, AimsData<T> > *level;
-                level = new ScaleLevel<AimsData<T>, AimsData<T> > ( 0.0f, *originalImage );
-                scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T> >*> ( 0.0f, level ) );
+            void PutOriginalImage ( carto::VolumeRef<T> *originalImage ) {
+                ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > *level;
+                level = new ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > ( 0.0f, *originalImage );
+                scales.insert(std::pair<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*> ( 0.0f, level ) );
             }
 
-            ScaleLevel<AimsData<T>, AimsData<T> > * Scale (float t) {
+            ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > * Scale (float t) {
                 if (scales.find(t) != scales.end()) return scales[t];
                 else { AddScale(t); return scales[t];}
             }
 
-            AimsData<T> & GetScaleImage ( float t ) { return Scale(t)->Level(); }
+            carto::VolumeRef<T> & GetScaleImage ( float t ) { return Scale(t)->Level(); }
 
-            AimsData<T> & GetOriginalImage() { return Scale(0.0)->Level(); }
+            carto::VolumeRef<T> & GetOriginalImage() { return Scale(0.0)->Level(); }
 
             Smoother<carto::VolumeRef<T>, carto::VolumeRef<T> > *smoother()
             { return _smoother; }
 
             std::set<float> GetScaleList();
 
-            std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*> GetScaleLevels()
+            std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*> GetScaleLevels()
                 { return scales; }
 
             void AddScale ( float t );
-            void AddScale ( float t, AimsData<float> ima );
+            void AddScale ( float t, carto::VolumeRef<float> ima );
 
-            void RemoveScale(float t) {if (scales.find(t) != scales.end()) { ScaleLevel<AimsData<T>, AimsData<T> >* lev=scales[t]; scales.erase(t); delete lev;}}
+            void RemoveScale(float t) {if (scales.find(t) != scales.end()) { ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >* lev=scales[t]; scales.erase(t); delete lev;}}
 
             void GenerateDefaultScaleSpace( float tmax ) {
                 float t;
@@ -194,14 +194,14 @@ namespace aims
 
             void Write(std::string name);
 
-            void uploadPreviouslyComputedScaleSpace( AimsData<float> &scale_space)  {
+            void uploadPreviouslyComputedScaleSpace( carto::VolumeRef<float> &scale_space)  {
                 float t = 1.0;
-                for ( uint i = 0 ; i < scale_space.dimT() ; i++ ) {
+                for ( uint i = 0 ; i < scale_space.getSizeT() ; i++ ) {
                     std::cout << "Adding scale " << t << std::flush;
-                    AimsData<float> scale ( scale_space.dimX(), scale_space.dimY(), scale_space.dimZ(), 1.0 );
-                    for ( uint x = 0 ; x < scale_space.dimX() ; x++ )
-                        for ( uint y = 0 ; y < scale_space.dimY() ; y++ )
-                            for ( uint z = 0 ; z < scale_space.dimZ() ; z++ )
+                    carto::VolumeRef<float> scale ( scale_space.getSizeX(), scale_space.getSizeY(), scale_space.getSizeZ(), 1.0 );
+                    for ( uint x = 0 ; x < scale_space.getSizeX() ; x++ )
+                        for ( uint y = 0 ; y < scale_space.getSizeY() ; y++ )
+                            for ( uint z = 0 ; z < scale_space.getSizeZ() ; z++ )
                                  scale( x, y, z, 0 ) = scale_space( x, y, z, i );
                     AddScale( t, scale );
                     t = t * 2;
@@ -312,17 +312,17 @@ namespace aims
     //-----------------DEFINITIONS--------------------------------------------
     //------------------------------------------------------------------------
 
-    template<typename T> void ScaleSpace<AimsData<T>, AimsData<T> >::AddScale(
-                                                    float t, AimsData<float> ima)
+    template<typename T> void ScaleSpace<carto::VolumeRef<T>, carto::VolumeRef<T> >::AddScale(
+                                                    float t, carto::VolumeRef<float> ima)
     {
         if (scales.find(t) == scales.end())
         {
-            ScaleLevel<AimsData<T>, AimsData<T> > *lisseLevel;
-//            AimsData<float> aux(tex.nItem());
+            ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > *lisseLevel;
+//            carto::VolumeRef<float> aux(tex.nItem());
 //            for (uint i=0;i<tex.nItem();i++)
 //                aux.item(i) = tex.item(i);
-            lisseLevel = new ScaleLevel<AimsData<T>, AimsData<T>  >(t, ima, &GetOriginalImage());
-            scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T>  >*>(t, lisseLevel));
+            lisseLevel = new ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T>  >(t, ima, &GetOriginalImage());
+            scales.insert(std::pair<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T>  >*>(t, lisseLevel));
         }
         else
         {
@@ -350,7 +350,7 @@ namespace aims
         return ;
     }
 
-    template<typename T> void ScaleSpace<AimsData<T>, AimsData<T> >::AddScale(float t)
+    template<typename T> void ScaleSpace<carto::VolumeRef<T>, carto::VolumeRef<T> >::AddScale(float t)
     {
     if (scales.find(t) == scales.end())
     {
@@ -358,19 +358,19 @@ namespace aims
         {
         std::cout << "Smoothing from original image" << std::endl;
             int time = this->get_timediff(0, t);
-        AimsData<T> lisse=_smoother->doSmoothing(GetOriginalImage(), time);
+        carto::VolumeRef<T> lisse=_smoother->doSmoothing(GetOriginalImage(), time);
 
-        ScaleLevel<AimsData<T>, AimsData<T> > *lisseLevel;
-        lisseLevel=new ScaleLevel<AimsData<T>, AimsData<T> >(t,lisse,&GetOriginalImage());
-        scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T> >*>(t, lisseLevel));
+        ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > *lisseLevel;
+        lisseLevel=new ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >(t,lisse,&GetOriginalImage());
+        scales.insert(std::pair<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>(t, lisseLevel));
         }
         else
         {
             std::cout << "Smoothing from previous scale " << std::flush;
 
             float tlow = 0.0f, tmax = 0.0f;
-            AimsData<T> imageLow;
-            typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itS = scales.begin();
+            carto::VolumeRef<T> imageLow;
+            typename std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>::const_iterator itS = scales.begin();
 
             for ( ; itS!=scales.end(); ++itS)
             tmax=itS->first;
@@ -379,8 +379,8 @@ namespace aims
             return;
             else if (t>tmax)
             {
-            typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itscales = scales.begin();
-            typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator  itLow;
+            typename std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>::const_iterator itscales = scales.begin();
+            typename std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>::const_iterator  itLow;
             float tmax=-1;
             for ( ; itscales != scales.end(); ++itscales)
             {
@@ -388,13 +388,13 @@ namespace aims
                 itLow=itscales;
             }
             tlow=(*itLow).first;
-            ScaleLevel<AimsData<T>, AimsData<T> > *nivEch=(*itLow).second;
+            ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > *nivEch=(*itLow).second;
             imageLow=nivEch->Level();
             }
             else
             {
-            typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itscales = scales.begin();
-            typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itnext = itscales;
+            typename std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>::const_iterator itscales = scales.begin();
+            typename std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>::const_iterator itnext = itscales;
 
             for ( ; itnext != scales.end(); ++itscales)
             {
@@ -403,19 +403,19 @@ namespace aims
                 if (((*itscales).first < t) && ((*itnext).first > t))
                 {
                 tlow=(*itscales).first;
-                ScaleLevel<AimsData<T>, AimsData<T> > *nivEch=(*itscales).second;
+                ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > *nivEch=(*itscales).second;
                 imageLow=nivEch->Level();
                 itnext=scales.end();
                 }
             }
             }
-            std::cout << "t=" << tlow << ", image: " << imageLow.dimX() << "x" << imageLow.dimY() << "x" << imageLow.dimZ() << "x" << imageLow.dimT() << std::endl;
+            std::cout << "t=" << tlow << ", image: " << imageLow.getSizeX() << "x" << imageLow.getSizeY() << "x" << imageLow.getSizeZ() << "x" << imageLow.getSizeT() << std::endl;
 
             int time = this->get_timediff(tlow, t);
-            AimsData<T> lisse=_smoother->doSmoothing(imageLow, time);
-            ScaleLevel<AimsData<T>, AimsData<T> > *lisseLevel;
-            lisseLevel=new ScaleLevel<AimsData<T>, AimsData<T> >(t,lisse,&GetOriginalImage());
-            scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T> >*>(t, lisseLevel));
+            carto::VolumeRef<T> lisse=_smoother->doSmoothing(imageLow, time);
+            ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> > *lisseLevel;
+            lisseLevel=new ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >(t,lisse,&GetOriginalImage());
+            scales.insert(std::pair<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>(t, lisseLevel));
         }
         }
 
@@ -510,12 +510,12 @@ namespace aims
  //----------------------------
 
 
- template<typename T> void ScaleSpace<AimsData<T>, AimsData<T> >::WriteScale(float t, std::string name)
+ template<typename T> void ScaleSpace<carto::VolumeRef<T>, carto::VolumeRef<T> >::WriteScale(float t, std::string name)
  {
- 	typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::iterator itscales;
+ 	typename std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>::iterator itscales;
 	if ((itscales=scales.find(t)) != scales.end())
 	{
-		Writer<AimsData<T> > dataW(name);
+		Writer<carto::VolumeRef<T> > dataW(name);
 		dataW.write(((*itscales).second)->Level());
 	}
 	else
@@ -543,13 +543,12 @@ namespace aims
 
   //----------------------------
 
- template<typename T> void ScaleSpace<AimsData<T>, AimsData<T> >::Write(std::string name)
+ template<typename T> void ScaleSpace<carto::VolumeRef<T>, carto::VolumeRef<T> >::Write(std::string name)
  {
- 	typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::iterator itscales=scales.begin();
+ 	typename std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>::iterator itscales=scales.begin();
 	int nbScales=scales.size();
-	int sx=GetOriginalImage().dimX(), sy=GetOriginalImage().dimY(), sz=GetOriginalImage().dimZ(), x, y, z;
-	float dx=GetOriginalImage().sizeX(),dy=GetOriginalImage().sizeY(),dz=GetOriginalImage().sizeZ();
-	AimsData<T> multiEch(sx, sy, sz, nbScales), tmpIma;
+	int sx=GetOriginalImage().getSizeX(), sy=GetOriginalImage().getSizeY(), sz=GetOriginalImage().getSizeZ(), x, y, z;
+	carto::VolumeRef<T> multiEch(sx, sy, sz, nbScales), tmpIma;
 
 	int t=0;
 	for ( ; itscales!=scales.end(); ++itscales)
@@ -568,8 +567,8 @@ namespace aims
 		t++;
 	}
 
-	multiEch.setSizeXYZT(dx, dy, dz, 1.0);
-	Writer<AimsData<T> > dataW(name);
+	multiEch.setVoxelSize(GetOriginalImage().getVoxelSize());
+	Writer<carto::VolumeRef<T> > dataW(name);
 	dataW.write(multiEch);
  }
 
@@ -612,9 +611,9 @@ namespace aims
 
    //----------------------------
 
- template<typename T> std::set<float> ScaleSpace<AimsData<T>, AimsData<T> >::GetScaleList()
+ template<typename T> std::set<float> ScaleSpace<carto::VolumeRef<T>, carto::VolumeRef<T> >::GetScaleList()
  {
-	typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::iterator itscales=scales.begin();
+	typename std::map<float, ScaleLevel<carto::VolumeRef<T>, carto::VolumeRef<T> >*>::iterator itscales=scales.begin();
 	std::set<float> setScales;
 	for ( ; itscales!=scales.end(); ++itscales)
 	{

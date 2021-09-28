@@ -75,13 +75,13 @@ int main(int argc, const char **argv)
 
       app.initialize();
 
-      AimsData<float> imageS;
-      Reader<AimsData<float> > readerS( fileIn );
+      VolumeRef<float> imageS;
+      Reader<VolumeRef<float> > readerS( fileIn );
       cout << "Reading input image " << fileIn << endl;
 
       if( !readerS.read( imageS))
         return EXIT_FAILURE;
-      cout << "Dimensions : " << imageS.dimX() << "x" << imageS.dimY() << "x" << imageS.dimZ() << endl;
+      cout << "Dimensions : " << imageS.getSizeX() << "x" << imageS.getSizeY() << "x" << imageS.getSizeZ() << endl;
 
       cout << "Creating scale-space with geometric sampling of the scales (t=2^n) up to " << tmax << endl;
 
@@ -107,7 +107,7 @@ int main(int argc, const char **argv)
 
       cout << "Création du scale-space" << endl;
 
-      ScaleSpace<AimsData<float>, AimsData<float> > scale_space(&imageS, smooth);
+      ScaleSpace<VolumeRef<float>, VolumeRef<float> > scale_space(&imageS, smooth);
 
       scale_space.GenerateDefaultScaleSpace(tmax);
 

@@ -77,25 +77,25 @@ int main(int argc, const char **argv)
 
       std::cout << "initialisation done" << std::endl;
     
-      AimsData<float> imaIn;
-      Reader<AimsData<float> > readerIn( fileIn );
+      VolumeRef<float> imaIn;
+      Reader<VolumeRef<float> > readerIn( fileIn );
       std::cout << "Reading input image " << fileIn << std::endl;
     
       if( !readerIn.read( imaIn))
     	return EXIT_FAILURE;
     
-      AimsData<float> imaMask;
-      Reader<AimsData<float> > readerMask( fileMask );
+      VolumeRef<float> imaMask;
+      Reader<VolumeRef<float> > readerMask( fileMask );
       std::cout << "Reading input Mask " << std::endl;
 
       if( !readerMask.read( imaMask ))
     	return EXIT_FAILURE;
         
-      TexturedData<AimsData<float>, AimsData<float> > mask(&imaMask);
+      TexturedData<VolumeRef<float>, VolumeRef<float> > mask(&imaMask);
             
-      int sx=imaIn.dimX(),
-        sy=imaIn.dimY(),
-        sz=imaIn.dimZ();
+      int sx=imaIn.getSizeX(),
+        sy=imaIn.getSizeY(),
+        sz=imaIn.getSizeZ();
 
       cout << "Dimensions : " << sx << "x" << sy << "x" << sz << endl;
     
@@ -118,7 +118,7 @@ int main(int argc, const char **argv)
       if (nbN > 0)
         {
           std::cout << "Rewriting a clean volume" << std::endl;
-          aims::Writer<AimsData<float> > scaleN(fileIn);
+          aims::Writer<VolumeRef<float> > scaleN(fileIn);
           scaleN.write(imaIn);
         }
     
@@ -140,7 +140,7 @@ int main(int argc, const char **argv)
           return EXIT_FAILURE;
         }
     
-      ScaleSpace<AimsData<float>, AimsData<float> > sspace(&imaIn, smooth);
+      ScaleSpace<VolumeRef<float>, VolumeRef<float> > sspace(&imaIn, smooth);
     
       std::cout << "Computing scale levels and blobs" << std::endl;
 

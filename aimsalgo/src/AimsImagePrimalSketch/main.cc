@@ -57,10 +57,10 @@ int DoImagePrimalSketch ( std::string fileIn,
                            std::string statFile, 
                            std::string graphFile ) {
     
-    AimsData<float> imageS;
-    Reader<AimsData<float> > readerS( fileIn );
-    AimsData<float> mask;
-    Reader<AimsData<float> > readerM( fileMask );
+    VolumeRef<float> imageS;
+    Reader<VolumeRef<float> > readerS( fileIn );
+    VolumeRef<float> mask;
+    Reader<VolumeRef<float> > readerM( fileMask );
     if ( subject == "none" )
         subject = fileIn;
 
@@ -72,9 +72,9 @@ int DoImagePrimalSketch ( std::string fileIn,
     // This screws up the smoothing. If NaNs are detected, they
     // are replaced with 0 and a new volume is written.
     int x, y, z, sx, sy, sz, nbN = 0;
-    sx = imageS.dimX(); 
-    sy = imageS.dimY(); 
-    sz = imageS.dimZ();
+    sx = imageS.getSizeX();
+    sy = imageS.getSizeY();
+    sz = imageS.getSizeZ();
     for ( z = 0; z < sz; z++ )
         for ( y = 0 ; y < sy ; y++ )
             for ( x = 0 ; x < sx ; x++ ) {
@@ -86,7 +86,7 @@ int DoImagePrimalSketch ( std::string fileIn,
     if (nbN > 0) {
         std::cout << "Found some NaN value in the volume. This must be a spmT ;-)" << std::endl;
         std::cout << "Rewriting a clean volume" << std::endl;
-        aims::Writer<AimsData<float> > writeNoNaN( fileIn );
+        aims::Writer<VolumeRef<float> > writeNoNaN( fileIn );
         writeNoNaN.write(imageS);
     }
 
@@ -94,7 +94,7 @@ int DoImagePrimalSketch ( std::string fileIn,
     if( !readerM.read( mask ) )
         return EXIT_FAILURE;
 
-    TexturedData< AimsData<float>, AimsData<float> > maskData( &mask );
+    TexturedData< VolumeRef<float>, VolumeRef<float> > maskData( &mask );
 
     std::cout << "Creating scale-space with geometric sampling of the scales (t=2^n) up to " << tmax << std::endl;
 
@@ -119,7 +119,7 @@ int DoImagePrimalSketch ( std::string fileIn,
 
     std::cout << "Scale-space computation" << std::endl;
 
-    aims::ScaleSpace<AimsData<float>, AimsData<float> > scale_space( &imageS, smooth );
+    aims::ScaleSpace<VolumeRef<float>, VolumeRef<float> > scale_space( &imageS, smooth );
 
     scale_space.GenerateDefaultScaleSpace(tmax);
 
@@ -129,13 +129,13 @@ int DoImagePrimalSketch ( std::string fileIn,
 
     std::cout << "Computing primal sketch" << std::endl;
 
-    aims::PrimalSketch<AimsData<float>, AimsData<float> > sketch( subject, &scale_space, &maskData, IMAGE );
+    aims::PrimalSketch<VolumeRef<float>, VolumeRef<float> > sketch( subject, &scale_space, &maskData, IMAGE );
 
     sketch.ComputePrimalSketch(tmin, tmax, statFile);
 
     std::cout << "Converting primal sketch into graph" << std::endl;
 
-    Primalsketch2graph<AimsData<float>, AimsData<float> > translate ( &sketch );
+    Primalsketch2graph<VolumeRef<float>, VolumeRef<float> > translate ( &sketch );
 
     translate.DoIt();
 
@@ -149,11 +149,11 @@ int DoImagePrimalSketch ( std::string fileIn,
     dataW.write( *graphSketch );
 
     std::cout << "Getting scale-space blob image" << std::endl;
-    AimsData<short> *blobImage;
+    VolumeRef<short> *blobImage;
     blobImage = GetSSBlobImage ( &sketch );
 
     std::cout << "Writing it in file " << fileoutBlobs << std::endl;
-    aims::Writer<AimsData<short> > blobW ( fileoutBlobs );
+    aims::Writer<VolumeRef<short> > blobW ( fileoutBlobs );
     blobW.write ( *blobImage );
 
     std::cout << "Getting scale-space blob buckets" << std::endl;
