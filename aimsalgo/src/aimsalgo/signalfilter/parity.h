@@ -36,24 +36,23 @@
 #define AIMS_SIGNALFILTER_PARITY_H
 
 #include <aims/config/aimsalgo_config.h>
+#include <cartobase/smart/rcptr.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class Volume;
+  template <class T> class VolumeRef;
+}
 
-/**@name Even and odd parts of a vector
-*/
-//@{
 
 /**@name Even part of a float vector
          @param xmin inferior bound
          @param xmax superior bound
          @param center center of symmetry
 */
-//@{
-///
-AIMSALGO_API AimsData<float> 
-AimsEvenPart(const AimsData<float> &vec,
+carto::VolumeRef<float>
+AimsEvenPart(const carto::rc_ptr<carto::Volume<float> > &vec,
              int xmin,int xmax,int center);
-//@}
 
 /**@name Odd part of a float vector
          @param xmin inferior bound
@@ -62,8 +61,8 @@ AimsEvenPart(const AimsData<float> &vec,
 */
 //@{
 ///
-AIMSALGO_API AimsData<float> 
-AimsOddPart(const AimsData<float> &vec,
+carto::VolumeRef<float>
+AimsOddPart(const carto::rc_ptr<carto::Volume<float> > &vec,
             int xmin,int xmax,int center);
 //@}
 

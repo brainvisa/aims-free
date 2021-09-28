@@ -33,38 +33,44 @@
 
 
 #include <aims/signalfilter/parity.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
+
+using namespace carto;
 
 
-AimsData<float> 
-AimsEvenPart(const AimsData<float> &vec,
+VolumeRef<float>
+AimsEvenPart(const rc_ptr<Volume<float> > &vec,
              int xmin,int xmax,int center)
-{ AimsData<float> even(vec.dimX(),vec.borderWidth());
+{
+  VolumeRef<float> even( vec->getSize(), vec->getBorders() );
   even = 0.0;
 
+  int dx = vec->getSizeX();
   for (int x=xmin;x<=xmax;x++)
-  { if (x<vec.dimX())                   
-      even(x) += 0.5 * vec(x);
+  { if (x<dx)
+      even(x) += 0.5 * vec->at(x);
     if ((2*center-x>=0) &&
-        (2*center-x<vec.dimX()))
-      even(x) += 0.5 * vec(2*center-x);
+        (2*center-x<dx))
+      even(x) += 0.5 * vec->at(2*center-x);
   }
   return even;
 }
 
 
-AimsData<float> 
-AimsOddPart(const AimsData<float> &vec,
+VolumeRef<float>
+AimsOddPart(const rc_ptr<Volume<float> > &vec,
             int xmin,int xmax,int center)
-{ AimsData<float> odd(vec.dimX(),vec.borderWidth());
+{
+  VolumeRef<float> odd( vec->getSize(), vec->getBorders() );
   odd = 0.0;
 
+  int dx = vec->getSizeX();
   for (int x=xmin;x<=xmax;x++)
-  { if (x<vec.dimX())
-      odd(x) += 0.5 * vec(x);
+  { if (x<dx)
+      odd(x) += 0.5 * vec->at(x);
     if ((2*center-x>=0) &&
-        (2*center-x<vec.dimX()))
-      odd(x) -= 0.5 * vec(2*center-x);
+        (2*center-x<dx))
+      odd(x) -= 0.5 * vec->at(2*center-x);
   }
   return odd;
 }
