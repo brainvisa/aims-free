@@ -80,6 +80,7 @@ public:
   double  sz;
   string  vfinterp;
   bool    mmap_fields;
+  string  progress_file;
 };
 
 
@@ -824,6 +825,14 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   unique_ptr<aims::Resampler<T> > resampler
     = get_resampler<T>(proc.interp_type);
 
+  unique_ptr<ostream> progress_stream;
+  if( !proc.progress_file.empty() )
+  {
+    progress_stream.reset( new ofstream( proc.progress_file.c_str(),
+                                         ios::app ) );
+    resampler->setVerboseStream( *progress_stream );
+  }
+
   adjust_header_transforms(proc, out.header(), inverse_transform.pointer(),
                            reference_header);
   // The UUID should NOT be preserved, because the output is a different file
@@ -1347,6 +1356,10 @@ int main(int argc, const char **argv)
                   "Try to memory-map the deformation fields instead of"
                   "loading them entirely in memory. This may improve the "
                   "performance for transforming sparse point sets.", true);
+    app.addOption(proc.progress_file, "--progress",
+                  "write progress info in this file. The file is opened in "
+                  "append mode, so that it can be an existing file, "
+                  "already opened by a monitoring application.", true );
     app.alias("-i",             "--input");
     app.alias("-m",             "--direct-transform");
     app.alias("--motion",       "--direct-transform");

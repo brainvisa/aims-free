@@ -79,6 +79,11 @@ public:
   Resampler();
   virtual ~Resampler() { }
 
+  /// write verbose progress information to this stream. The default is
+  /// std::cout.
+  void setVerboseStream( std::ostream & stream )
+  { _verbose_stream = &stream; }
+
   /** Resample the input volume set with setRef() into an existing volume.
 
       \param[in]     transform   transformation from coordinates of the *input*
@@ -352,6 +357,7 @@ protected:
 
   carto::rc_ptr<carto::Volume<T> > _ref;
   T _defval;
+  std::ostream *_verbose_stream;
 };
 
 } // namespace aims

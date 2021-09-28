@@ -59,7 +59,7 @@ namespace aims
 
 template <typename T>
 Resampler<T>::Resampler()
-  : _ref( 0 ), _defval( T() )
+  : _ref( 0 ), _defval( T() ), _verbose_stream( &std::cout )
 {
 }
 
@@ -89,8 +89,12 @@ resample_inv_to_vox( const carto::Volume< T >& inVolume,
 
   T* o;
 
+  std::ostream *stream = _verbose_stream;
+  if( !stream )
+    stream = &std::cout;
   aims::Progression progress(0, static_cast<size_t>(outSizeX)
-                             * outSizeY * outSizeZ * outSizeT);
+                             * outSizeY * outSizeZ * outSizeT, 0, 100, "%", 3,
+                             *stream );
   int x, y, z, t;
   for ( t = 0; t < outSizeT; t++ )
     {
@@ -115,7 +119,7 @@ resample_inv_to_vox( const carto::Volume< T >& inVolume,
                   ++progress;
                 }
 
-              if(verbose) {
+              if(verbose || _verbose_stream) {
                 progress.print();
               }
             }
