@@ -34,7 +34,7 @@
 #ifndef AIMS_UTILITY_PROGRESS_H
 #define AIMS_UTILITY_PROGRESS_H
 
-#include <ostream>
+#include <iostream>
 #include <string>
 
 namespace aims {
@@ -79,11 +79,13 @@ namespace aims {
                     const T2 progressmin = (T2)0,
                     const T2 progressmax = (T2)100,
                     const std::string unit = "%",
-                    const int width = 3 );
+                    const int width = 3,
+                    std::ostream & stream = std::cout );
 
       /// Constructor of the class
       /// \param max maximum value of the progression
-      ProgressInfo( const T1 max );
+      ProgressInfo( const T1 max,
+                    std::ostream & stream = std::cout );
       //@}
 
       /**@name Methods*/
@@ -101,12 +103,14 @@ namespace aims {
       double progression() const;
       /// Erase the last displayed value
       virtual std::string erase() const;
+      /// End of line (none for stdout, "\\n" otherwise)
+      virtual std::string endline() const;
       /// Render the current progression value if changed or forced.
       /// \param force force to render even the displayed value has not changed
       virtual std::string render(const bool force = false);
       /// Convert progression to the display string
       virtual std::string toString() const;
-      /// Print to cout if value changed or forced
+      /// Print to the output stream if value changed or forced
       virtual void print( const bool force = false );
 
       /// Prefix operator to increment internal value
@@ -123,6 +127,7 @@ namespace aims {
       T1 _current, _min, _max;
       T2 _progressprec, _progressmin, _progressmax;
       std::string _unit;
+      std::ostream & _stream;
   };
 
   typedef ProgressInfo<double, double> Progression;

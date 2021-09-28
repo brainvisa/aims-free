@@ -53,7 +53,8 @@ namespace aims {
                                      const T2 progressmin,
                                      const T2 progressmax,
                                      const std::string unit,
-                                     const int width )
+                                     const int width,
+                                     ostream & stream )
     : _displayed(0),
       _width(width),
       _scale(((double)(progressmax) - (double)(progressmin)) / ((double)(max) - (double)(min))),
@@ -63,11 +64,14 @@ namespace aims {
       _progressprec(progressmin),
       _progressmin(progressmin),
       _progressmax(progressmax),
-      _unit(unit) {
+      _unit(unit),
+      _stream( stream )
+  {
   }
 
   template <class T1, class T2>
-  ProgressInfo<T1, T2>::ProgressInfo( const T1 max )
+  ProgressInfo<T1, T2>::ProgressInfo( const T1 max,
+                                      ostream & stream )
     : _displayed(0),
       _width(3),
       _scale(100. / (double)(max)),
@@ -77,7 +81,9 @@ namespace aims {
       _progressprec(0),
       _progressmin(0),
       _progressmax(100),
-      _unit("%") {
+      _unit("%"),
+      _stream( stream )
+  {
   }
 
   template <class T1, class T2>
@@ -109,7 +115,21 @@ namespace aims {
   template <class T1, class T2>
   std::string ProgressInfo<T1, T2>::erase() const {
     std::string s;
-    s.assign((size_t)_displayed, '\b');
+    if( &_stream == &std::cout )
+      s.assign((size_t)_displayed, '\b');
+    else
+      s = "";
+    return s;
+  }
+
+  template <class T1, class T2>
+  std::string ProgressInfo<T1, T2>::endline() const
+  {
+    std::string s;
+    if( &_stream == &std::cout )
+      s = "";
+    else
+      s = "\n";
     return s;
   }
 
@@ -124,7 +144,7 @@ namespace aims {
       std::string s = toString(), e = erase();
       _displayed = s.length();
       _progressprec = p;
-      return e + s;
+      return e + s + endline();
     }
     else
       return "";
@@ -141,7 +161,7 @@ namespace aims {
       std::string s = toString(), e = erase();
       _displayed = s.length();
       _progressprec = p;
-      std::cout << e + s << std::flush;
+      _stream << e + s + endline() << std::flush;
     }
   }
 
