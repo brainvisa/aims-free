@@ -44,7 +44,7 @@
 //
 // Mean Squared M-estimator function
 //
-class AIMSALGO_API MSFunc : public MEstimatorFunc
+class MSFunc : public MEstimatorFunc
 {
   public:
     MSFunc() : MEstimatorFunc() { }

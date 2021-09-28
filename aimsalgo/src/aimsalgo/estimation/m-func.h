@@ -41,7 +41,7 @@
 //
 // M-estimator function base class
 //
-class AIMSALGO_API MEstimatorFunc
+class MEstimatorFunc
 {
   public:
     MEstimatorFunc() : _sigma( 1.0 ), _sigma2( 1.0 ) { }

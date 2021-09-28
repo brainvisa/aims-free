@@ -45,7 +45,7 @@
 //
 // Median M-estimator function
 //
-class AIMSALGO_API MedFunc : public MEstimatorFunc
+class MedFunc : public MEstimatorFunc
 {
   public:
     MedFunc() : MEstimatorFunc() { }

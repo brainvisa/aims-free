@@ -44,7 +44,7 @@
 // Weighted Linear Mean Squared M-estimator
 //
 template < int D >
-class AIMSALGO_API WLMSEstimator : public MEstimator< D >
+class WLMSEstimator : public MEstimator< D >
 {
   public:
     WLMSEstimator( MEstimatorFunc& mfunc, float error,
@@ -53,44 +53,48 @@ class AIMSALGO_API WLMSEstimator : public MEstimator< D >
                    _verbose( verbose) { }
     virtual ~WLMSEstimator() { }
 
-    void doit( const AimsData< AimsVector< float, D > >& x,
-               const AimsData< float >& y, float& a,
-               AimsVector< float, D >& b );
+    void doit(
+      const carto::rc_ptr<carto::Volume< AimsVector< float, D > > >& x,
+      const carto::rc_ptr<carto::Volume< float > >& y, float& a,
+      AimsVector< float, D >& b );
 
   protected:
     MEstimatorFunc& _mfunc;
     float _error;
     bool _verbose;
 
-    float sigma( const AimsData< AimsVector< float, D > >& x,
-                 const AimsData< float >& y, float a,
-                 const AimsVector< float, D >& b,
-                 AimsData<float>& error );
+    float sigma(
+      const carto::rc_ptr<carto::Volume< AimsVector< float, D > > >& x,
+      const carto::rc_ptr<carto::Volume< float > >& y, float a,
+      const AimsVector< float, D >& b,
+      carto::rc_ptr<carto::Volume<float> >& error );
 
-    void step( const AimsData< AimsVector< float, D > >& x,
-               const AimsData< float >& y, float& a,
-               AimsVector< float, D >& b,
-               const AimsData<float>& error );
+    void step(
+      const carto::rc_ptr<carto::Volume< AimsVector< float, D > > >& x,
+      const carto::rc_ptr<carto::Volume< float > >& y, float& a,
+      AimsVector< float, D >& b,
+      const carto::rc_ptr<carto::Volume<float> >& error );
 };
 
 
 template < int D > inline
-float WLMSEstimator<D>::sigma( const AimsData< AimsVector< float, D > >& x,
-                               const AimsData< float >& y, float a,
-                               const AimsVector< float, D >& b,
-                               AimsData<float>& error )
+float WLMSEstimator<D>::sigma(
+  const carto::rc_ptr<carto::Volume< AimsVector< float, D > > >& x,
+  const carto::rc_ptr<carto::Volume< float > >& y, float a,
+  const AimsVector< float, D >& b,
+  carto::rc_ptr<carto::Volume<float> >& error )
 {
-  int N = y.dimX(), n, k;
+  int N = y->getSizeX(), n, k;
   for ( n = 0; n < N; n++ )
   {
-    error( n ) = y ( n ) - a;
+    error->at( n ) = y->at( n ) - a;
     for ( k = 0; k < D; k++ )
-      error( n ) -= b.item( k ) * x( n ).item( k );
-    error( n ) = fabs( error(  n ) );
+      error->at( n ) -= b.item( k ) * x->at( n ).item( k );
+    error->at( n ) = fabs( error->at(  n ) );
   }
 
-  AimsData<float> errorbis = error.clone();
-  incSorting( errorbis );
+  carto::VolumeRef<float> errorbis = error->copy();
+  carto::sort( errorbis );
 
   return 1.4826 * errorbis( N / 2 );
 }
@@ -99,15 +103,18 @@ float WLMSEstimator<D>::sigma( const AimsData< AimsVector< float, D > >& x,
 template < int D >
 inline
 void
-WLMSEstimator<D>::step( const AimsData< AimsVector< float, D > >& x,
-                        const AimsData< float >& y, float& a,
+WLMSEstimator<D>::step( const carto::rc_ptr<carto::Volume< AimsVector< float, D > > >& x,
+                        const carto::rc_ptr<carto::Volume< float > >& y, float& a,
                         AimsVector< float, D >& b,
-                        const AimsData<float>& error )
+                        const carto::rc_ptr<carto::Volume<float> >& error )
 {
-  int N = y.dimX();
-  AimsData<float> mat( D + 1, D + 1 );
-  AimsData<float> vec( D + 1 );
-  AimsData<float> weight( N );
+  int N = y->getSizeX();
+  carto::VolumeRef<float> mat( D + 1, D + 1, 1, 1,
+                               carto::AllocatorContext::fast() );
+  carto::VolumeRef<float> vec( D + 1, 1, 1, 1,
+                               carto::AllocatorContext::fast() );
+  carto::VolumeRef<float> weight( N, 1, 1, 1,
+                                  carto::AllocatorContext::fast() );
 
   mat = 0.0;
   vec = 0.0;
@@ -117,14 +124,14 @@ WLMSEstimator<D>::step( const AimsData< AimsVector< float, D > >& x,
 
   for ( n = 0; n < N; n++ )
   {
-    weight( n ) = _mfunc.weight( error( n ) );
+    weight( n ) = _mfunc.weight( error->at( n ) );
     mat( 0, 0 ) += weight( n );
   }
 
   for ( k = 1; k <= D; k++ )
   {
     for ( n = 0; n < N; n++ )
-      mat( k, 0 ) += weight( n ) * x( n ).item( k - 1 );
+      mat( k, 0 ) += weight( n ) * x->at( n ).item( k - 1 );
     mat( 0, k ) = mat( k, 0 );
   }
 
@@ -134,19 +141,19 @@ WLMSEstimator<D>::step( const AimsData< AimsVector< float, D > >& x,
     {
       for ( n = 0; n < N; n++ )
         mat( k1, k2 ) += weight( n ) * 
-                         x( n ).item( k1 - 1 ) * x( n ).item( k2 - 1 );
+                         x->at( n ).item( k1 - 1 ) * x->at( n ).item( k2 - 1 );
       mat( k2, k1 ) = mat( k1, k2 );
     }
 
   
   for ( n = 0; n < N; n++ )
   {
-    vec( 0 ) += weight( n ) * y( n );
+    vec( 0 ) += weight( n ) * y->at( n );
     for ( k = 1; k <= D; k++ )
-      vec( k ) += weight( n ) * y( n ) * x( n ).item( k - 1 );
+      vec( k ) += weight( n ) * y->at( n ) * x->at( n ).item( k - 1 );
   }
 
-  AimsData<float> res = AimsLinearResolutionLU( mat, vec );
+  carto::VolumeRef<float> res = AimsLinearResolutionLU( mat, vec );
   a = res( 0 );
   for ( k = 1; k <= D; k++ )
     b.item( k - 1 ) = res( k );
@@ -154,13 +161,13 @@ WLMSEstimator<D>::step( const AimsData< AimsVector< float, D > >& x,
 
 
 template < int D > inline
-void WLMSEstimator<D>::doit( const AimsData< AimsVector< float, D > >& x,
-                             const AimsData< float >& y, float& a,
+void WLMSEstimator<D>::doit( const carto::rc_ptr<carto::Volume< AimsVector< float, D > > >& x,
+                             const carto::rc_ptr<carto::Volume< float > >& y, float& a,
                              AimsVector< float, D >& b )
 {
-  ASSERT( x.dimY() == 1 && x.dimZ() == 1 && x.dimT() == 1 );
-  ASSERT( y.dimY() == 1 && y.dimZ() == 1 && y.dimT() == 1 );
-  ASSERT( x.dimX() == y.dimX() );
+  ASSERT( x->getSizeY() == 1 && x->getSizeZ() == 1 && x->getSizeT() == 1 );
+  ASSERT( y->getSizeY() == 1 && y->getSizeZ() == 1 && y->getSizeT() == 1 );
+  ASSERT( x->getSizeX() == y->getSizeX() );
 
   float obja, objb;
   float old_a;
@@ -170,7 +177,7 @@ void WLMSEstimator<D>::doit( const AimsData< AimsVector< float, D > >& x,
   LMSEstimator<D> lms;
   lms.doit( x, y, a, b );
 
-  AimsData<float> error( x.dimX() );
+  carto::VolumeRef<float> error( x->getSizeX() );
   int count = 0;
   // perform iteration of robust estimation until convergence
   do
