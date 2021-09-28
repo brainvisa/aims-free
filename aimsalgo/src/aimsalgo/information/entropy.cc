@@ -31,19 +31,22 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#include <aims/information/information.h>
 #include <aims/math/mathelem.h>
-#include <aims/data/data.h>
 
-float AimsEntropy(const AimsData<float>& p)
+using namespace carto;
+
+float AimsEntropy(const rc_ptr<Volume<float> >& p)
 {
-    int levels = p.dimX();
+    int levels = p->getSizeX();
 
-    ASSERT( p.dimY() == 1 && p.dimZ() == 1);
+    ASSERT( p->getSizeY() == 1 && p->getSizeZ() == 1);
 
     double entropy = 0.0;
     int x;
     for ( x = 0; x < levels; x++ )
-        entropy -= double(p(x)) * (p(x) > 0. ? std::log(double(p(x))) : 0.);
-    
+        entropy -= double(p->at(x))
+          * (p->at(x) > 0. ? std::log(double(p->at(x))) : 0.);
+
     return float(entropy);
 }

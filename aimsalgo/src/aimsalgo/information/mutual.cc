@@ -32,23 +32,26 @@
  */
 
 
+#include <aims/information/information.h>
 #include <aims/math/mathelem.h>
-#include <aims/data/data.h>
 
-float AimsMutualInformation( const AimsData<float>& p1,
-                             const AimsData<float>& p2,
-                             const AimsData<float>& p12 )
+using namespace carto;
+
+float AimsMutualInformation( const rc_ptr<Volume<float> >& p1,
+                             const rc_ptr<Volume<float> >& p2,
+                             const rc_ptr<Volume<float> >& p12 )
 {
-  int levels = p1.dimX();
+  int levels = p1->getSizeX();
 
-  ASSERT( p2.dimX() == levels && p12.dimX() == levels && p12.dimY() == levels );
+  ASSERT( p2->getSizeX() == levels && p12->getSizeX() == levels && p12->getSizeY() == levels );
 
   float mi=0.0;
   int x, y;
   for ( y = 0; y < levels; y++ )
     for ( x = 0; x < levels; x++ )
-      if ( p2( y ) && p12( x, y ) && p1( x ) )
-        mi += p12( x, y ) * log( p12( x, y ) / ( p1( x ) * p2( y ) ) );
+      if ( p2->at( y ) && p12->at( x, y ) && p1->at( x ) )
+        mi += p12->at( x, y ) * log( p12->at( x, y )
+          / ( p1->at( x ) * p2->at( y ) ) );
 
   return float( mi );
 }

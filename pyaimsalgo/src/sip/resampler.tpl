@@ -96,6 +96,7 @@ point only.
 %TypeHeaderCode
   #include <pyaims/vector/vector.h>
   #include <aims/resampling/resampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
@@ -489,6 +490,7 @@ class SplineResampler_%Template1typecode% : Resampler_%Template1typecode% /Abstr
 %TypeHeaderCode
   #include <pyaims/vector/vector.h>
   #include <aims/resampling/splineresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
@@ -591,6 +593,7 @@ class NearestNeighborResampler_%Template1typecode% : Resampler_%Template1typecod
 %TypeHeaderCode
   #include <pyaims/vector/vector.h>
   #include <aims/resampling/nearestneighborresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
@@ -619,6 +622,7 @@ class LinearResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/linearresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_LINEARRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_LINEARRESAMPLER_%Template1typecode%_DEFINED
@@ -655,6 +659,7 @@ class MedianResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/medianresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_MEDIANRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_MEDIANRESAMPLER_%Template1typecode%_DEFINED
@@ -691,6 +696,7 @@ class MajorityLabelResampler_%Template1typecode% : SplineResampler_%Template1typ
 {
 %TypeHeaderCode
   #include <aims/resampling/majoritylabelresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_MAJORITYLABELRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_MAJORITYLABELRESAMPLER_%Template1typecode%_DEFINED
@@ -727,6 +733,7 @@ class CubicResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/cubicresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_CUBICRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_CUBICRESAMPLER_%Template1typecode%_DEFINED
@@ -763,6 +770,7 @@ class QuarticResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/quarticresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_QUARTICRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_QUARTICRESAMPLER_%Template1typecode%_DEFINED
@@ -799,6 +807,7 @@ class QuinticResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/quinticresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_QUINTICRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_QUINTICRESAMPLER_%Template1typecode%_DEFINED
@@ -835,6 +844,7 @@ class SixthOrderResampler_%Template1typecode% : SplineResampler_%Template1typeco
 {
 %TypeHeaderCode
   #include <aims/resampling/sixthorderresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_SIXTHORDERRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SIXTHORDERRESAMPLER_%Template1typecode%_DEFINED
@@ -871,6 +881,7 @@ class SeventhOrderResampler_%Template1typecode% : SplineResampler_%Template1type
 {
 %TypeHeaderCode
   #include <aims/resampling/seventhorderresampler.h>
+  %Template1typeinclude%
 
   #ifndef PYAIMSALGOSIP_SEVENTHORDERRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SEVENTHORDERRESAMPLER_%Template1typecode%_DEFINED

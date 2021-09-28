@@ -36,19 +36,21 @@
 #define AIMS_INFORMATION_INFORMATION_H
 
 #include <aims/mesh/surface.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
-float AimsEntropy( const AimsData<float>& p );
+float AimsEntropy( const carto::rc_ptr<carto::Volume<float> >& p );
 
-float AimsMutualInformation( const AimsData<float>& p1,
-                             const AimsData<float>& p2,
-                             const AimsData<float>& p12 );
+float AimsMutualInformation( const carto::rc_ptr<carto::Volume<float> >& p1,
+                             const carto::rc_ptr<carto::Volume<float> >& p2,
+                             const carto::rc_ptr<carto::Volume<float> >& p12 );
 
-float AimsCorrelationRatio( const AimsData<float>& p1,
-                            const AimsData<float>& p2,
-                            const AimsData<float>& p12 );
+float AimsCorrelationRatio( const carto::rc_ptr<carto::Volume<float> >& p1,
+                            const carto::rc_ptr<carto::Volume<float> >& p2,
+                            const carto::rc_ptr<carto::Volume<float> >& p12 );
 
-float AimsMeshDistance( const AimsData< float > & refMap,
+// what does this function do here ?? it should be in distancemap/
+
+float AimsMeshDistance( const carto::rc_ptr<carto::Volume< float > > & refMap,
                         const AimsSurfaceTriangle & testMesh,
                         const Point3d  & dimImage,
                         const Point3df & sizeVoxel,
