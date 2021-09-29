@@ -32,30 +32,38 @@
  */
 
 
-#include <aims/data/data.h>
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
+#include <cartodata/volume/volume.h>
 #include <aims/optimization/covsrt.h>
 
 
+using namespace carto;
+
 template < class T >
-AimsData< T > CovarianceStorage< T >::doit( AimsData< T >& covar, 
-					    AimsData< int > *ia, int mfit )
+VolumeRef< T > CovarianceStorage< T >::doit( rc_ptr<Volume< T > >& covar,
+                                             rc_ptr<Volume< int > > *ia,
+                                             int mfit )
 {
-  ASSERT( covar.dimZ() == 1 && covar.dimT() == 1 );
-  ASSERT( covar.dimX() == covar.dimY() );
+  ASSERT( covar->getSizeZ() == 1 && covar->getSizeT() == 1 );
+  ASSERT( covar->getSizeX() == covar->getSizeY() );
 
   int i, j, k;
 
   T dum;
 
-  int ma = covar.dimX();
+  int ma = covar->getSizeX();
 
-  AimsData< int > iab( ma );
+  VolumeRef< int > iab( ma );
 
   if ( ia )
     {
       for ( i=mfit; i<ma; i++ )
-	for ( j=0; j<=i; j++ )
-	  covar( i, j ) = covar( j, i ) = (T)0;
+        for ( j=0; j<=i; j++ )
+          covar->at( i, j ) = covar->at( j, i ) = (T)0;
 
       iab = *ia;
     }
@@ -73,16 +81,16 @@ AimsData< T > CovarianceStorage< T >::doit( AimsData< T >& covar,
 	{
 	  for ( i=0; i<ma; i++ )
 	    {
-	      dum = covar( i, k );
-	      covar( i, k ) = covar( i, j );
-	      covar( i, j ) = dum;
+	      dum = covar->at( i, k );
+	      covar->at( i, k ) = covar->at( i, j );
+	      covar->at( i, j ) = dum;
 	    }
 
 	  for ( i=0; i<ma; i++ )
 	    {
-	      dum = covar( k, i );
-	      covar( k, i ) = covar( j, i );
-	      covar( j, i ) = dum;
+	      dum = covar->at( k, i );
+	      covar->at( k, i ) = covar->at( j, i );
+	      covar->at( j, i ) = dum;
 	    }
 
 	  k--;
@@ -93,11 +101,11 @@ AimsData< T > CovarianceStorage< T >::doit( AimsData< T >& covar,
 }
 
 
-template AimsData< float >
-CovarianceStorage< float >::doit( AimsData< float >& covar, 
-				  AimsData< int > *ia, int mfit );
+template VolumeRef< float >
+CovarianceStorage< float >::doit( rc_ptr<Volume< float > >& covar,
+				  rc_ptr<Volume< int > > *ia, int mfit );
 
 
-template AimsData< double >
-CovarianceStorage< double >::doit( AimsData< double >& covar, 
-				   AimsData< int > *ia, int mfit );
+template VolumeRef< double >
+CovarianceStorage< double >::doit( rc_ptr<Volume< double > >& covar,
+				   rc_ptr<Volume< int > > *ia, int mfit );

@@ -37,8 +37,12 @@
 
 #include <aims/config/aimsalgo_config.h>
 #include <aims/def/general.h>
+#include <cartobase/smart/rcptr.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class Volume;
+}
 
 
 template < class T >
@@ -49,7 +53,9 @@ public:
   CovarianceStorage()  { }
   virtual ~CovarianceStorage() { }
 
-  AimsData< T > doit( AimsData< T >&, AimsData< int > *ia=NULL, int mfit=0 );
+  carto::VolumeRef< T > doit( carto::rc_ptr<carto::Volume< T > >&,
+                              carto::rc_ptr<carto::Volume< int > > *ia=NULL,
+                              int mfit=0 );
 };
 
 #endif

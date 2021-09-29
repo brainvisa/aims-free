@@ -32,40 +32,47 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <cstdlib>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/optimization/levmrq.h>
 #include <aims/io/writer.h>
 
 using namespace std;
+using namespace carto;
 
 template < class T >
-LMFunction< T > *LevenbergMarquardt< T >::doit( AimsData< T >& x,
-						AimsData< T >& y,
-						AimsData< T > *sig,
-						AimsData< int > *ia,
-						AimsData< T > *covar )
+LMFunction< T > *LevenbergMarquardt< T >::doit( rc_ptr<Volume< T > >& x,
+                                                rc_ptr<Volume< T > >& y,
+                                                rc_ptr<Volume< T > > *sig,
+                                                rc_ptr<Volume< int > > *ia,
+                                                rc_ptr<Volume< T > > *covar )
 {
-  ASSERT( x.dimY() == 1 && x.dimZ() == 1 && x.dimT() == 1 );
-  ASSERT( y.dimY() == 1 && y.dimZ() == 1 && y.dimT() == 1 );
-  ASSERT( x.dimX() == y.dimX() );
+  ASSERT( x->getSizeY() == 1 && x->getSizeZ() == 1 && x->getSizeT() == 1 );
+  ASSERT( y->getSizeY() == 1 && y->getSizeZ() == 1 && y->getSizeT() == 1 );
+  ASSERT( x->getSizeX() == y->getSizeX() );
 
   int i, itst;
   T alambda, chisq, ochisq;
   bool ok = true, status = true;
 
-  int n = x.dimX();
+  int n = x->getSizeX();
   int ma = lmFonc->param().size();
 
-  AimsData< T > tsig( n );
-  AimsData< int > tia( ma );
-  AimsData< T > tcov( ma, ma );
-  AimsData< T > alpha( ma, ma );
+  VolumeRef< T > tsig( n );
+  VolumeRef< int > tia( ma );
+  VolumeRef< T > tcov( ma, ma );
+  VolumeRef< T > alpha( ma, ma );
 
   if ( sig )
     {
-      ASSERT( sig->dimY() == 1 && sig->dimZ() == 1 && sig->dimT() == 1);
-      ASSERT( sig->dimX() == x.dimX() );
+      ASSERT( (*sig)->getSizeY() == 1 && (*sig)->getSizeZ() == 1
+              && (*sig)->getSizeT() == 1);
+      ASSERT( (*sig)->getSizeX() == x->getSizeX() );
 
       tsig = *sig;
     }
@@ -74,8 +81,9 @@ LMFunction< T > *LevenbergMarquardt< T >::doit( AimsData< T >& x,
 
   if ( ia )
     {
-      ASSERT( ia->dimY() == 1 && ia->dimZ() == 1 && ia->dimT() == 1 );
-      ASSERT( ia->dimX() == ma );
+      ASSERT( (*ia)->getSizeY() == 1 && (*ia)->getSizeZ() == 1
+              && (*ia)->getSizeT() == 1 );
+      ASSERT( (*ia)->getSizeX() == ma );
 
       tia = *ia;
     }
@@ -119,48 +127,51 @@ LMFunction< T > *LevenbergMarquardt< T >::doit( AimsData< T >& x,
 
 
 template LMFunction< float > *
-LevenbergMarquardt< float >::doit( AimsData< float >& x, AimsData< float >& y,
-				   AimsData< float > *sig, 
-				   AimsData< int > *ia,
-				   AimsData< float > *covar );
+LevenbergMarquardt< float >::doit( rc_ptr<Volume< float > >& x,
+                                   rc_ptr<Volume< float > >& y,
+                                   rc_ptr<Volume< float > > *sig,
+                                   rc_ptr<Volume< int > > *ia,
+                                   rc_ptr<Volume< float > > *covar );
 
 
 template LMFunction< double > *
-LevenbergMarquardt< double >::doit( AimsData< double >& x, 
-				    AimsData< double >& y,
-				    AimsData< double > *sig, 
-				    AimsData< int > *ia,
-				    AimsData< double > *covar );
+LevenbergMarquardt< double >::doit( rc_ptr<Volume< double > >& x,
+                                    rc_ptr<Volume< double > >& y,
+                                    rc_ptr<Volume< double > > *sig,
+                                    rc_ptr<Volume< int > > *ia,
+                                    rc_ptr<Volume< double > > *covar );
 
 
 template< class T >
-bool LevenbergMarquardt< T >::mrqmin( AimsData< T >& x, AimsData< T >& y,
-				      AimsData< T >& sig, AimsData< int >& ia,
-				      T *chisq, T *alambda, 
-				      AimsData< T >& covar, 
-				      AimsData< T >& alpha )
+bool LevenbergMarquardt< T >::mrqmin( rc_ptr<Volume< T > >& x,
+                                      rc_ptr<Volume< T > >& y,
+                                      rc_ptr<Volume< T > >& sig,
+                                      rc_ptr<Volume< int > >& ia,
+                                      T *chisq, T *alambda,
+                                      rc_ptr<Volume< T > >& covar,
+                                      rc_ptr<Volume< T > >& alpha )
 {
   int j, k, l, m;
   int mfit;
 
-  int ma = ia.dimX();
+  int ma = ia->getSizeX();
 
   /*static*/ T ochisq;
 
   /*static*/ vector< T > atry;
 
-  /*static*/ AimsData< T > beta;
-  /*static*/ AimsData< T > da;
-  /*static*/ AimsData< T > oneda;
+  /*static*/ VolumeRef< T > beta;
+  /*static*/ VolumeRef< T > da;
+  /*static*/ VolumeRef< T > oneda;
 
   atry = vector< T >( ma );
-  beta = AimsData< T >( ma );
-  da = AimsData< T >( ma );
+  beta = VolumeRef< T >( ma );
+  da = VolumeRef< T >( ma );
 
   for ( mfit=0, j=0; j<ma; j++ )
-    if ( ia( j ) )  mfit++;
+    if ( ia->at( j ) )  mfit++;
 
-  oneda = AimsData< T >( mfit );
+  oneda = VolumeRef< T >( mfit );
 
   atry = lmFonc->param();
 
@@ -175,13 +186,13 @@ bool LevenbergMarquardt< T >::mrqmin( AimsData< T >& x, AimsData< T >& y,
 
 //       std::cerr << "init " << std::endl ;
 //       atry = vector< T >( ma );
-//       beta = AimsData< T >( ma );
-//       da = AimsData< T >( ma );
+//       beta = VolumeRef< T >( ma );
+//       da = VolumeRef< T >( ma );
 // 
 //       for ( mfit=0, j=0; j<ma; j++ )
-// 	if ( ia( j ) )  mfit++;
+// 	if ( ia->at( j ) )  mfit++;
 // 
-//       oneda = AimsData< T >( mfit );
+//       oneda = VolumeRef< T >( mfit );
 // 
 //       *alambda = (T)0.001;
 // 
@@ -195,25 +206,25 @@ bool LevenbergMarquardt< T >::mrqmin( AimsData< T >& x, AimsData< T >& y,
 
   for ( j=-1, l=0; l<ma; l++ )
     {
-      if ( ia( l ) )
+      if ( ia->at( l ) )
 	{
 	  for ( j++, k=-1, m=0; m<ma; m++ )
 	    {
-	      if ( ia( m ) )
+	      if ( ia->at( m ) )
 		{
 		  k++;
-		  covar( j, k ) = alpha( j, k );
+		  covar->at( j, k ) = alpha->at( j, k );
 		}
 	    }
-	  covar( j, j ) = alpha( j, j ) * ( (T)1 + (*alambda) );
+	  covar->at( j, j ) = alpha->at( j, j ) * ( (T)1 + (*alambda) );
 	  oneda( j ) = beta( j );
 	}
     }
   
-//   aims::Writer< AimsData<T> > wriCov( "covar.ima") ;
+//   aims::Writer< VolumeRef<T> > wriCov( "covar.ima") ;
 //   wriCov.write( covar ) ;
 //   
-//   aims::Writer< AimsData<T> > wriOD( "oneda.ima") ;
+//   aims::Writer< VolumeRef<T> > wriOD( "oneda.ima") ;
 //   wriOD.write( oneda ) ;
   
   bool status = gaussj.doit( covar, oneda, mfit );
@@ -228,7 +239,7 @@ bool LevenbergMarquardt< T >::mrqmin( AimsData< T >& x, AimsData< T >& y,
   else
     {
       for ( j=-1, l=0; l<ma; l++ )
-        if ( ia( l ) )  lmFonc->param()[ l ] += da( ++j );
+        if ( ia->at( l ) )  lmFonc->param()[ l ] += da( ++j );
       
       mrqcof( x, y, sig, ia, chisq, covar, da );
       
@@ -240,14 +251,14 @@ bool LevenbergMarquardt< T >::mrqmin( AimsData< T >& x, AimsData< T >& y,
           
 	  for ( j=-1, l=0; l<ma; l++ )
 	    {
-	      if ( ia( l ) )
+	      if ( ia->at( l ) )
                 {
 		  for ( j++, k=-1, m=0; m<ma; m++ )
 		    {
-		      if ( ia( m ) )
+		      if ( ia->at( m ) )
 			{
 			  k++;
-			  alpha( j, k ) = covar( j, k );
+			  alpha->at( j, k ) = covar->at( j, k );
 			}
 		    }
                   
@@ -271,45 +282,47 @@ bool LevenbergMarquardt< T >::mrqmin( AimsData< T >& x, AimsData< T >& y,
 
 
 template bool
-LevenbergMarquardt< float >::mrqmin( AimsData< float >& x, 
-				     AimsData< float >& y,
-				     AimsData< float >& sig, 
-				     AimsData< int >& ia,
-				     float *chisq, float *alambda, 
-				     AimsData< float >& covar,
-				     AimsData< float >& alpha );
+LevenbergMarquardt< float >::mrqmin( rc_ptr<Volume< float > >& x,
+                                     rc_ptr<Volume< float > >& sig,
+                                     rc_ptr<Volume< float > >& y,
+                                     rc_ptr<Volume< int > >& ia,
+                                     float *chisq, float *alambda,
+                                     rc_ptr<Volume< float > >& covar,
+                                     rc_ptr<Volume< float > >& alpha );
 
 
 template bool
-LevenbergMarquardt< double >::mrqmin( AimsData< double >& x, 
-				      AimsData< double >& y,
-				      AimsData< double >& sig, 
-				      AimsData< int >& ia,
-				      double *chisq, double *alambda, 
-				      AimsData< double >& covar,
-				      AimsData< double >& beta );
+LevenbergMarquardt< double >::mrqmin( rc_ptr<Volume< double > >& x,
+                                      rc_ptr<Volume< double > >& y,
+                                      rc_ptr<Volume< double > >& sig,
+                                      rc_ptr<Volume< int > >& ia,
+                                      double *chisq, double *alambda,
+                                      rc_ptr<Volume< double > >& covar,
+                                      rc_ptr<Volume< double > >& beta );
 
 
 template< class T >
-void LevenbergMarquardt< T >::mrqcof( AimsData< T >& x, AimsData< T >& y,
-				      AimsData< T >& sig, AimsData< int >& ia,
-				      T *chisq, AimsData< T >& alpha, 
-				      AimsData< T >& beta )
+void LevenbergMarquardt< T >::mrqcof( rc_ptr<Volume< T > >& x,
+                                      rc_ptr<Volume< T > >& y,
+                                      rc_ptr<Volume< T > >& sig,
+                                      rc_ptr<Volume< int > >& ia,
+                                      T *chisq, rc_ptr<Volume< T > >& alpha,
+                                      rc_ptr<Volume< T > >& beta )
 {
   int i, j, k, l, m, mfit=0;
   T ymod, wt, sig2i, dy;
 
-  int n = x.dimX();
-  int ma = ia.dimX();
+  int n = x->getSizeX();
+  int ma = ia->getSizeX();
 
   for ( j=0; j<ma; j++ )
-    if ( ia( j ) )  mfit++;
+    if ( ia->at( j ) )  mfit++;
 
   for ( j=0; j<mfit; j++ )
     {
-      for ( k=0; k<=j; k++ )  alpha( j, k ) = (T)0;
+      for ( k=0; k<=j; k++ )  alpha->at( j, k ) = (T)0;
 
-      beta( j ) = (T)0;
+      beta->at( j ) = (T)0;
     }
   
   *chisq = (T)0;
@@ -317,21 +330,21 @@ void LevenbergMarquardt< T >::mrqcof( AimsData< T >& x, AimsData< T >& y,
   for ( i=0; i<n; i++ )
     {
       //std::cerr << "" << << std::endl ;
-      ymod = lmFonc->eval( x( i ) );
-      sig2i = (T)1 / ( sig( i ) * sig( i ) );
-      dy = y( i ) - ymod;
+      ymod = lmFonc->eval( x->at( i ) );
+      sig2i = (T)1 / ( sig->at( i ) * sig->at( i ) );
+      dy = y->at( i ) - ymod;
 
       for ( j=-1, l=0; l<ma; l++ )
 	{
-	  if ( ia( l ) )
+	  if ( ia->at( l ) )
 	    {
 	      wt = lmFonc->derivative()[ l ] * sig2i;
 
 	      for ( j++, k=-1, m=0; m<=l; m++ )
-		if ( ia( m ) )  
-		  alpha( j, ++k ) += wt * lmFonc->derivative()[ m ];
+		if ( ia->at( m ) )
+		  alpha->at( j, ++k ) += wt * lmFonc->derivative()[ m ];
 
-	      beta( j ) += dy * wt;
+	      beta->at( j ) += dy * wt;
 	    }
 	}
 
@@ -339,23 +352,25 @@ void LevenbergMarquardt< T >::mrqcof( AimsData< T >& x, AimsData< T >& y,
     }
 
   for ( j=1; j<mfit; j++ )
-    for ( k=0; k<j; k++ )  alpha( k, j ) = alpha( j, k );
+    for ( k=0; k<j; k++ )  alpha->at( k, j ) = alpha->at( j, k );
 }
 
 
 template void
-LevenbergMarquardt< float >::mrqcof( AimsData< float >& x, 
-				     AimsData< float >& y,
-				     AimsData< float >& sig, 
-				     AimsData< int >& ia,
-				     float *chisq, AimsData< float >& alpha,
-				     AimsData< float >& beta );
+LevenbergMarquardt< float >::mrqcof( rc_ptr<Volume< float > >& x,
+				     rc_ptr<Volume< float > >& y,
+				     rc_ptr<Volume< float > >& sig,
+				     rc_ptr<Volume< int > >& ia,
+				     float *chisq,
+                                     rc_ptr<Volume< float > >& alpha,
+				     rc_ptr<Volume< float > >& beta );
 
 
 template void
-LevenbergMarquardt< double >::mrqcof( AimsData< double >& x, 
-				      AimsData< double >& y,
-				      AimsData< double >& sig, 
-				      AimsData< int >& ia,
-				      double *chisq, AimsData< double >& alpha,
-				      AimsData< double >& beta );
+LevenbergMarquardt< double >::mrqcof( rc_ptr<Volume< double > >& x,
+				      rc_ptr<Volume< double > >& y,
+				      rc_ptr<Volume< double > >& sig,
+				      rc_ptr<Volume< int > >& ia,
+				      double *chisq,
+                                      rc_ptr<Volume< double > >& alpha,
+				      rc_ptr<Volume< double > >& beta );
