@@ -50,7 +50,7 @@ using namespace std;
 using namespace carto;
 
 // SWITCH 2-D / 3-D
-float AimsMeshDistance( const AimsData< float > & refMap,
+float AimsMeshDistance( const carto::rc_ptr<carto::Volume< float > > &  refMap,
 												const AimsSurfaceTriangle & regMesh,
 												const Point3d  & dimImage,
 												const Point3df & sizeVoxel,
@@ -92,7 +92,7 @@ float AimsMeshDistance( const AimsData< float > & refMap,
 					for(int16_t pY = 0; pY < 2; pY++) {
 							score += (pX*(1-2*Weights[0])+Weights[0])*
 												(pY*(1-2*Weights[1])+Weights[1])*
-												refMap( floorPixCoords[0]+pX,
+												(*refMap)( floorPixCoords[0]+pX,
 																floorPixCoords[1]+pY, 0 );
 				}
 			}
@@ -122,7 +122,7 @@ float AimsMeshDistance( const AimsData< float > & refMap,
 							score += (pX*(1-2*Weights[0])+Weights[0])*
 											(pY*(1-2*Weights[1])+Weights[1])*
 											(pZ*(1-2*Weights[2])+Weights[2])*
-												refMap( floorPixCoords[0]+pX,
+												(*refMap)( floorPixCoords[0]+pX,
 																floorPixCoords[1]+pY,
 																floorPixCoords[2]+pZ );
 				}
