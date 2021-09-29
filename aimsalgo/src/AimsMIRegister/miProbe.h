@@ -52,7 +52,7 @@ public:
   virtual void end() ;
 
 private:
-  AimsData<float>* _pdfOverIterations ;
+  carto::VolumeRef<float>* _pdfOverIterations ;
   int _iteration ;
   int _verbosity ;
 } ;

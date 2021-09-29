@@ -48,12 +48,12 @@ template <class T, int D>
 MIRegistrationProbe<T,D>::MIRegistrationProbe( int numLevel, int maxIteration, int verbosity) :
   _iteration(0), _verbosity( verbosity )
 {
-  _pdfOverIterations = new AimsData<float>( numLevel, numLevel, maxIteration ) ;
-  _pdfOverIterations->setSizeXYZT(1., 1., 1., 1. ) ;
+  _pdfOverIterations = new VolumeRef<float>( numLevel, numLevel, maxIteration ) ;
+  _pdfOverIterations->setVoxelSize(1., 1., 1., 1. ) ;
   
 
-  //   cout << "CONSTRUCT\txsize= " << _pdfOverIterations->dimX() 
-  //        << "\tysize= " << _pdfOverIterations->dimY()  << endl ;
+  //   cout << "CONSTRUCT\txsize= " << _pdfOverIterations->getSizeX()
+  //        << "\tysize= " << _pdfOverIterations->getSizeY()  << endl ;
   
 }
 
@@ -68,15 +68,16 @@ MIRegistrationProbe<T,D> *
 MIRegistrationProbe<T,D>::clone()
 {
   MIRegistrationProbe<T,D> * probe = 
-    new MIRegistrationProbe<T,D>( _pdfOverIterations->dimX(), 
-				  _pdfOverIterations->dimZ(), this->_verbosity ) ;
+    new MIRegistrationProbe<T,D>( (*_pdfOverIterations)->getSizeX(),
+                                  (*_pdfOverIterations)->getSizeZ(),
+                                  this->_verbosity ) ;
   
   probe->_pdfOverIterations = this->_pdfOverIterations ;
   probe->_iteration = this->_iteration ;
-  probe->_pdfOverIterations->setSizeXYZT(1., 1., 1., 1. ) ;
+  probe->_pdfOverIterations->setVoxelSize(1., 1., 1., 1. ) ;
   
-  //   cout << "CLONE\txsize= " << probe->_pdfOverIterations->dimX() 
-  //        << "\tysize= " << probe->_pdfOverIterations->dimY()  << endl ;
+  //   cout << "CLONE\txsize= " << probe->_pdfOverIterations->getSizeX()
+  //        << "\tysize= " << probe->_pdfOverIterations->getSizeY()  << endl ;
   
   return probe ;
 }
@@ -146,7 +147,7 @@ MIRegistrationProbe<T,D>::iteration( const AimsVector<T,D> & parameters,
 	   << "\t value = " << ( costFunction != 0 ? 
 				 *costFunction : 0 ) << endl ;
     }
-  AimsData<float> joint ;
+  VolumeRef<float> joint ;
   if( ! specific.hasProperty("joint_histogram" ) )
     cout << "No joint histogram" << endl ;
   else {
@@ -154,21 +155,21 @@ MIRegistrationProbe<T,D>::iteration( const AimsVector<T,D> & parameters,
     
     
     //     cout << "Iteration : " << _iteration << endl;
-    //     cout << "FINAL\txsize= " << _pdfOverIterations->dimX() 
-    // 	 << "\tysize= " << _pdfOverIterations->dimY()  
-    // 	 << "\tzsize= " << _pdfOverIterations->dimZ() << endl ;
-    //     cout << "INITIAL\txsize= " << joint.dimX() 
+    //     cout << "FINAL\txsize= " << _pdfOverIterations->getSizeX()
+    // 	 << "\tysize= " << _pdfOverIterations->getSizeY()
+    // 	 << "\tzsize= " << _pdfOverIterations->getSizeZ() << endl ;
+    //     cout << "INITIAL\txsize= " << joint.getSizeX()
     // 	 << "\tysize= " << joint.dimY()  << endl ;
     
-    for( int y = 0 ; y < joint.dimY()  ; ++y )
-      for( int x = 0 ; x < joint.dimX()  ; ++x ){
+    for( int y = 0 ; y < joint.getSizeY()  ; ++y )
+      for( int x = 0 ; x < joint.getSizeX()  ; ++x ){
 	(*_pdfOverIterations)(x, y, _iteration ) = joint(x, y, 0) ;
       }
     
     //     cout << "Copy done" << endl ;
     
-    //     AimsData<float>::iterator destIter(&((*_pdfOverIterations)(0, 0, _iteration)));
-    //     AimsData<float>::const_iterator fromIter( joint.begin() ),
+    //     VolumeRef<float>::iterator destIter(&((*_pdfOverIterations)(0, 0, _iteration)));
+    //     VolumeRef<float>::const_iterator fromIter( joint.begin() ),
     //       fromLast( joint.end() ) ;
     //     while( fromIter != fromLast ){
     //       *destIter = *fromIter ;
@@ -184,7 +185,7 @@ template <class T, int D>
 void 
 MIRegistrationProbe<T,D>::end( )
 {
-  Writer< AimsData<float> > w( "jointpdf.ima" ) ;
+  Writer< VolumeRef<float> > w( "jointpdf.ima" ) ;
   w.write( *_pdfOverIterations ) ;
   
   *_pdfOverIterations = 0 ;
@@ -194,4 +195,4 @@ MIRegistrationProbe<T,D>::end( )
 
 /* this source is only here to force instanciation of some of the most useful
     templates */
-template class AIMSDATA_API MIRegistrationProbe< float, 6 >;
+template class MIRegistrationProbe< float, 6 >;
