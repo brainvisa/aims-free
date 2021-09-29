@@ -657,7 +657,7 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
 }
 
 void AimsJointPVPdf(const aims::BucketMap<short>&               data1,
-                    const rc_ptr<Volume<short> >                data2,
+                    const rc_ptr<Volume<short> >&               data2,
                     const vector< PVVectorItem >& comb,
                     rc_ptr<Volume<float> >& p12,
                     rc_ptr<Volume<float> >& p1,
