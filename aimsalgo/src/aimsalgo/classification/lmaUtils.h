@@ -35,29 +35,7 @@
 #ifndef LMA_UTILS_H
 #define LMA_UTILS_H
 
-#include <cartobase/smart/rcptr.h>
-#include <aims/roi/roiIterator.h>
-#include <aims/roi/maskIterator.h>
-#include <aims/data/fastAllocationData.h>
-#include <aims/io/io_g.h>
-#include <aims/data/data_g.h>
-#include <aims/getopt/getopt2.h>
-#include <aims/utility/utility_g.h>
-#include <aims/bucket/bucketMap.h>
-#include <aims/math/math_g.h>
-#include <aims/math/pca.h>
-#include <aims/math/ppca.h>
-#include <aims/math/discriminantanalysis.h>
-#include <aims/classification/cah.h>
-#include <aims/connectivity/connectivity.h>
-#include <aims/connectivity/component_d.h>
-#include <aims/morphology/morphology_g.h>
-#include <aims/signalfilter/signalfilter_g.h>
-#include <cmath>
-#include <map>
-#include <set>
-#include <queue>
-#include <utility>
+#include <cartodata/volume/volume.h>
 
 namespace aims {
   class LMAUtils {
@@ -65,43 +43,58 @@ namespace aims {
     static inline bool in( const Point3d& dims, const Point3d& p ) ;
 
     template <class T>
-    void data2OptimizedFormat( const AimsData<T>& data, const AimsData<short>& mask, 
-		      const Point3d& radiusAround, 
-		      AimsData<float>& totalIndivMatrix, AimsData<int>& localisationMatrix, 
-		      AimsData<short>& dilatedMask ) ;
+    void data2OptimizedFormat(
+      const carto::rc_ptr<carto::Volume<T> >& data,
+      const carto::rc_ptr<carto::Volume<short> >& mask,
+      const Point3d& radiusAround,
+      carto::rc_ptr<carto::Volume<float> >& totalIndivMatrix,
+      carto::rc_ptr<carto::Volume<int> >& localisationMatrix,
+      carto::rc_ptr<carto::Volume<short> >& dilatedMask ) ;
 
     template<class T>
-    inline void extractIndividualFromMatrix( const AimsData<float>& totalIndivMatrix, int ind, AimsData<T>& indiv ) ;
+    inline void extractIndividualFromMatrix(
+      const carto::rc_ptr<carto::Volume<float> >& totalIndivMatrix, int ind,
+      carto::rc_ptr<carto::Volume<T> >& indiv ) ;
 
-    inline bool extractIndividualsFromMatrix( const AimsData<float>& totalIndivMatrix, 
-			      const AimsData<int>& localisationMatrix,
-			      const list<Point3d>& selectedPoints,
-			      AimsData<float>& mean,
-			      AimsData<float>& individuals ) ;
+    inline bool extractIndividualsFromMatrix(
+      const carto::rc_ptr<carto::Volume<float> >& totalIndivMatrix,
+      const carto::rc_ptr<carto::Volume<int> >& localisationMatrix,
+      const list<Point3d>& selectedPoints,
+      carto::rc_ptr<carto::Volume<float> >& mean,
+      carto::rc_ptr<carto::Volume<float> >& individuals ) ;
 
-    inline bool extractIndividualsFromMatrix( const AimsData<float>& totalIndivMatrix, 
-			      const AimsData<int>& localisationMatrix,
-			      const Point3d& center,
-			      const Point3d& radius,
-			      AimsData<float>& mean,
-			      AimsData<float>& individuals ) ;
+    inline bool extractIndividualsFromMatrix(
+      const carto::rc_ptr<carto::Volume<float> >& totalIndivMatrix,
+      const carto::rc_ptr<carto::Volume<int> >& localisationMatrix,
+      const Point3d& center,
+      const Point3d& radius,
+      carto::rc_ptr<carto::Volume<float> >& mean,
+      carto::rc_ptr<carto::Volume<float> >& individuals ) ;
 
-    inline void weightTimeVectors( AimsData<float>& indivMatrix, 
-		   const AimsData<float>& weights ) ;
+    inline void weightTimeVectors(
+      carto::rc_ptr<carto::Volume<float> >& indivMatrix,
+      const carto::rc_ptr<carto::Volume<float> >& weights ) ;
     
-    inline void projectIndividualOnLinearModel( const AimsData<float>& indivMatrix, int ind, 
-				const AimsData<float>& modelMean, const AimsData<float>& modelDirVect,
-				AimsData<float>& projection, AimsData<float>& residual ) ;
+    inline void projectIndividualOnLinearModel(
+      const carto::rc_ptr<carto::Volume<float> >& indivMatrix, int ind,
+      const carto::rc_ptr<carto::Volume<float> >& modelMean,
+      const carto::rc_ptr<carto::Volume<float> >& modelDirVect,
+      carto::rc_ptr<carto::Volume<float> >& projection,
+      carto::rc_ptr<carto::Volume<float> >& residual ) ;
 
     template <class T>
-    AimsData<T> getImageFromMapped( const AimsData<int>& locMap,
-		    const AimsData<T>& mapped, const AimsData<short>& mask ) ;
+    carto::VolumeRef<T> getImageFromMapped(
+      const carto::rc_ptr<carto::Volume<int> >& locMap,
+      const carto::rc_ptr<carto::Volume<T> >& mapped,
+      const carto::rc_ptr<carto::Volume<short> >& mask ) ;
     
     template <class T>
-    AimsData<T> getImageFromVector( const AimsData<int>& locMap,
-		    const vector<T>& mapped, const AimsData<short>& mask ) ;
+    carto::VolumeRef<T> getImageFromVector(
+      const carto::rc_ptr<carto::Volume<int> >& locMap,
+      const vector<T>& mapped,
+      const carto::rc_ptr<carto::Volume<short> >& mask ) ;
 		    
-    AimsData<double> kineticSampleDistance( const vector<DiscriminantAnalysisElement*>& classes ) ;
+    carto::VolumeRef<double> kineticSampleDistance( const vector<DiscriminantAnalysisElement*>& classes ) ;
   private:
   } ;
 }
