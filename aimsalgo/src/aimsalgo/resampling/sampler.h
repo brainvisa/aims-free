@@ -184,13 +184,14 @@ void Sampler<T>::_sliceResamp( carto::rc_ptr<carto::Volume<PVItem> >& resamp,
 
   int xCurrent, yCurrent, zCurrent;
   const T *it;
-  int   incr_vois[8] = {0, &(*_ref)->at( 1 ) - &(*_ref)->at( 0 ),
-            &(*_ref)->at( 1, 1 ) - &(*_ref)->at( 0 ),
-            &(*_ref)->at( 0, 1 ) - &(*_ref)->at( 0 ),
-            &(*_ref)->at( 0, 0, 1 ) - &(*_ref)->at( 0 ),
-            &(*_ref)->at( 1, 0, 1 ) - &(*_ref)->at( 0 ),
-            &(*_ref)->at( 1, 1, 1 ) - &(*_ref)->at( 0 ),
-            &(*_ref)->at( 0, 1, 1 ) - &(*_ref)->at( 0 )};
+  int   incr_vois[8] = { 0,
+            int( &(*_ref)->at( 1 ) - &(*_ref)->at( 0 ) ),
+            int( &(*_ref)->at( 1, 1 ) - &(*_ref)->at( 0 ) ),
+            int( &(*_ref)->at( 0, 1 ) - &(*_ref)->at( 0 ) ),
+            int( &(*_ref)->at( 0, 0, 1 ) - &(*_ref)->at( 0 ) ),
+            int( &(*_ref)->at( 1, 0, 1 ) - &(*_ref)->at( 0 ) ),
+            int( &(*_ref)->at( 1, 1, 1 ) - &(*_ref)->at( 0 ) ),
+            int( &(*_ref)->at( 0, 1, 1 ) - &(*_ref)->at( 0 ) ) };
   for ( int v = dimY2; v--; )
     {
     xCurrent = xLinCurrent;
