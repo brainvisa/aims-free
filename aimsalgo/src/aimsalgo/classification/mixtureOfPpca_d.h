@@ -44,7 +44,6 @@
 #include <aims/bucket/bucketMap.h>
 #include <cartobase/type/string_conversion.h>
 #include <aims/math/svd.h>
-#include <aims/data/data.h>
 #include <vector>
 #include <iostream>
 #include <iomanip>
@@ -74,60 +73,62 @@ PpcaAnalyserElement::PpcaAnalyserElement( int significantNumberOfVp, bool useOnl
 
 template <class T>
 void
-PpcaAnalyserElement::init( const std::list<int>& selectedIndividuals, double initialPi, 
-			   const AimsData<T>& individuals, double noiseRef )
+PpcaAnalyserElement::init(
+  const std::list<int>& selectedIndividuals, double initialPi,
+  const carto::rc_ptr<carto::Volume<T> >& individuals, double noiseRef )
 {
-  AimsData<T> indivMatrix( max(int(selectedIndividuals.size()), 1), individuals.dimY() ) ;
+  carto::VolumeRef<T> indivMatrix( max(int(selectedIndividuals.size()), 1), individuals->getSizeY() ) ;
   list<int>::const_iterator iter( selectedIndividuals.begin() ),
     last( selectedIndividuals.end() ) ;
   int i = 0 ;
 
   while( iter != last ){
-    for( int t = 0 ; t < individuals.dimY() ; ++t )
+    for( int t = 0 ; t < individuals->getSizeY() ; ++t )
       indivMatrix( i, t ) = individuals( *iter, t ) ;
     ++i ;
     ++iter ;
   }
 
   _Pi = initialPi ;
-  doIt( indivMatrix, individuals.dimX(), noiseRef ) ;
+  doIt( indivMatrix, individuals->getSizeX(), noiseRef ) ;
 }
 
 
 template <class T>
 void
-PpcaAnalyserElement::doIt( const AimsData<T>& indivMatrix, int totalNbOfIndividuals, double noiseRef )
+PpcaAnalyserElement::doIt( const carto::rc_ptr<carto::Volume<T> >& indivMatrix,
+                           int totalNbOfIndividuals, double noiseRef )
 {
   _computed = true ;
-  int nbInd = indivMatrix.dimX() ;
-  int nbFrame = indivMatrix.dimY() ;
+  int nbInd = indivMatrix->getSizeX() ;
+  int nbFrame = indivMatrix->getSizeY() ;
 
-  AimsData<double> centeredIndivMatrix( nbInd, nbFrame ) ;
-  _mean = AimsData<double>( nbFrame ) ;
+  carto::VolumeRef<double> centeredIndivMatrix( nbInd, nbFrame ) ;
+  _mean = carto::VolumeRef<double>( nbFrame ) ;
 
   for( int ind = 0 ; ind < nbInd ; ++ind )
     for( int t = 0 ; t < nbFrame ; ++t )
       _mean[t] += indivMatrix( ind, t ) ;
   for( int t = 0 ; t < nbFrame ; ++t ){
-    _mean[t] /= centeredIndivMatrix.dimX() ;
-    for( int ind = 0 ; ind < centeredIndivMatrix.dimX() ; ++ind )
+    _mean[t] /= centeredIndivMatrix->getSizeX() ;
+    for( int ind = 0 ; ind < centeredIndivMatrix->getSizeX() ; ++ind )
       centeredIndivMatrix( ind, t ) = indivMatrix( ind, t ) - _mean[t] ;
   }
 //  cout << "mean = " << _mean << endl ; 
  
   // Matrice des correlations
-  AimsData<double> matVarCov( nbFrame, nbFrame ) ;
+  carto::VolumeRef<double> matVarCov( nbFrame, nbFrame ) ;
   int x, y ;
   ForEach2d( matVarCov, x, y ){
-    for( int k = 0 ;  k < centeredIndivMatrix.dimX() ; ++k )
+    for( int k = 0 ;  k < centeredIndivMatrix->getSizeX() ; ++k )
       matVarCov(x, y) += centeredIndivMatrix(k, x) * centeredIndivMatrix(k, y) ;
-    matVarCov(x, y) /= centeredIndivMatrix.dimX() - 1 ;
+    matVarCov(x, y) /= centeredIndivMatrix->getSizeX() - 1 ;
   }
   
   // Decomposition SVD 
   AimsSVD<double>  svd;
   svd.setReturnType( AimsSVD<double>::VectorOfSingularValues ) ;
-  AimsData<double> eigenValues = svd.doit( matVarCov ) ;  
+  carto::VolumeRef<double> eigenValues = svd.doit( matVarCov ) ;
   svd.sort( matVarCov, eigenValues ) ;  
 //  cout << "valeurs propres = " << eigenValues << endl ;
 
@@ -138,7 +139,7 @@ PpcaAnalyserElement::doIt( const AimsData<T>& indivMatrix, int totalNbOfIndividu
   _sigma2 /= (double)( nbFrame - _significantNumberOfVp ) ;  
   cout << endl << "sigma2 = " << setprecision(3) << _sigma2 << endl ; 
   
-  AimsData<double> selectedEigenVectors( nbFrame, _significantNumberOfVp ) ; //dim dxq
+  carto::VolumeRef<double> selectedEigenVectors( nbFrame, _significantNumberOfVp ) ; //dim dxq
   for( int i = 0 ; i < _significantNumberOfVp ; ++i ){
     for( int t = 0 ; t < nbFrame ; ++t ){
       selectedEigenVectors(t, i) = matVarCov( t, i ) ;
@@ -147,28 +148,28 @@ PpcaAnalyserElement::doIt( const AimsData<T>& indivMatrix, int totalNbOfIndividu
 //  cout << "selected EV = " << endl << setprecision(3) << selectedEigenVectors << endl ;
 
   // Calcul de la "weight" matrice Wi (dim. dxq) 
-  AimsData<double> tempWi( _significantNumberOfVp, _significantNumberOfVp ) ;
+  carto::VolumeRef<double> tempWi( _significantNumberOfVp, _significantNumberOfVp ) ;
 
   for( int i = 0 ; i < _significantNumberOfVp ; ++i )
     tempWi(i, i) = sqrt( eigenValues[i] - _sigma2 ) ; 
   _Wi = selectedEigenVectors.cross( tempWi ) ;  
   
   // calcul de la matrice de covariance Ci = sigma^2I+WWT  
-  AimsData<double> Ci = _Wi.cross( _Wi.clone().transpose() ) ;        
+  carto::VolumeRef<double> Ci = _Wi.cross( _Wi.clone().transpose() ) ;
   for( int i = 0 ; i < nbFrame ; ++i )
     Ci(i, i) += _sigma2 ;  
 
   // calcul de detCi et invCi
   double s = 0.000001 ;
-  AimsData< double > u = Ci.clone(); // because it is replaced on SVD output
-  AimsData< double > v( Ci.dimY(), Ci.dimY() );
+  carto::VolumeRef< double > u = Ci.clone(); // because it is replaced on SVD output
+  carto::VolumeRef< double > v( Ci->getSizeY(), Ci->getSizeY() );
   AimsSVD< double > svd2;
   svd2.setReturnType( AimsSVD<double>::MatrixOfSingularValues ) ;
-  AimsData< double > w = svd2.doit( u, &v );
+  carto::VolumeRef< double > w = svd2.doit( u, &v );
   
   // Set the singular values lower than threshold to zero
   double ts = s * w.maximum();
-  int i, n = w.dimX();
+  int i, n = w->getSizeX();
   double detCi = 1. ;
   for ( i = 0 ; i < n; i++ ){
     if ( w( i, i ) < 0. ){ 
@@ -190,17 +191,17 @@ PpcaAnalyserElement::doIt( const AimsData<T>& indivMatrix, int totalNbOfIndividu
   cout << "norm factor avec noiseRef = " << _normFactor << endl ;
         
   // calcul de la matrice de covariance posterieure Mi = sigma^2I+WTW et de invMi  
-  AimsData<double> Mi = ( _Wi.clone().transpose() ).cross( _Wi ) ;        
+  carto::VolumeRef<double> Mi = ( _Wi.clone().transpose() ).cross( _Wi ) ;
   for( int i = 0 ; i < _significantNumberOfVp ; ++i )
     Mi(i, i) += _sigma2 ;  
 
   u = Mi.clone(); // because it is replaced on SVD output
-  v( Mi.dimY(), Mi.dimY() );
+  v( Mi->getSizeY(), Mi->getSizeY() );
   AimsSVD< double > svd3;
   w = svd3.doit( u, &v );
   
   ts = s * w.maximum();
-  n = w.dimX();
+  n = w->getSizeX();
   for ( i = 0 ; i < n; i++ ){
     if ( w( i, i ) > ts )  w( i, i ) = 1.0f / w( i, i );
     else w( i, i ) = 0.0f;
@@ -208,30 +209,31 @@ PpcaAnalyserElement::doIt( const AimsData<T>& indivMatrix, int totalNbOfIndividu
   _invMi = v.cross( w.cross(  u.transpose() ) ) ;
 //  cout << "invMi = " << _invMi << endl ;
 
-  _Rn = AimsData<double>( totalNbOfIndividuals ) ;
+  _Rn = carto::VolumeRef<double>( totalNbOfIndividuals ) ;
 }
 
 
 template <class T>
 bool
-PpcaAnalyserElement::newStep1( const AimsData<T>& indivMatrix, bool useOnlyCorrIndiv )
+PpcaAnalyserElement::newStep1(
+  const carto::rc_ptr<carto::Volume<T> >& indivMatrix, bool useOnlyCorrIndiv )
 {
-  int nbInd = indivMatrix.dimX() ;
-  int nbFrame = indivMatrix.dimY() ;
+  int nbInd = indivMatrix->getSizeX() ;
+  int nbFrame = indivMatrix->getSizeY() ;
 
 /////////////////////////////////////////////////////
 //  calcul pour tous les individus de p(tn|i) 
 //  + CALCUL DE LA CORRELATION ENTRE CHAQUE INDIV ET LE VECTEUR MOYEN
 
-  AimsData<double> indivn( nbFrame ) ;
-  AimsData<double> centeredIndivn( nbFrame ) ;
-  _dist = AimsData<double>( nbInd ) ;
-  _pTni = AimsData<double>( nbInd ) ;
+  carto::VolumeRef<double> indivn( nbFrame ) ;
+  carto::VolumeRef<double> centeredIndivn( nbFrame ) ;
+  _dist = carto::VolumeRef<double>( nbInd ) ;
+  _pTni = carto::VolumeRef<double>( nbInd ) ;
 
   double sumInd, sumMean, indMean, meanMean, corr = 0. ;
   int count = 0 ;
-  AimsData<double> antiCorr( nbInd, nbFrame ) ;
-  AimsData<double> Corr( nbInd, nbFrame ) ;
+  carto::VolumeRef<double> antiCorr( nbInd, nbFrame ) ;
+  carto::VolumeRef<double> Corr( nbInd, nbFrame ) ;
   int nbIndTaken = 0 ;
 
   //float invDimNormFactor = 1. / ( nbFrame - _significantNumberOfVp ) ;
@@ -286,11 +288,11 @@ PpcaAnalyserElement::newStep1( const AimsData<T>& indivMatrix, bool useOnlyCorrI
       ++nbIndTaken ;
   }
 
-/*   Writer < AimsData<double> > wr( "correlated.ima" ) ; */
+/*   Writer < carto::VolumeRef<double> > wr( "correlated.ima" ) ; */
 /*   wr.write( Corr ) ; */
-/*   Writer < AimsData<double> > wr2( "anti-correlated.ima" ) ; */
+/*   Writer < carto::VolumeRef<double> > wr2( "anti-correlated.ima" ) ; */
 /*   wr2.write( antiCorr ) ; */
-/*   Writer < AimsData<double> > wr3( "mean.ima" ) ; */
+/*   Writer < carto::VolumeRef<double> > wr3( "mean.ima" ) ; */
 /*   wr3.write( _mean ) ; */
   
 /*   double sumPtni = 0., prodPtni = 0., meanPtni = 0. , varPtni = 0. ; */
@@ -304,7 +306,7 @@ PpcaAnalyserElement::newStep1( const AimsData<T>& indivMatrix, bool useOnlyCorrI
 /*    cout << ( _useOnlyCorrIndiv ? " anticorreles = " : "" ) << ( _useOnlyCorrIndiv ? toString(count) : "" )  */
 /*         << " - moyenne et variance des p(tn|i) = "  */
 /*         << meanPtni << " - " << varPtni << endl ; */
-  if( nbIndTaken < indivMatrix.dimY() * 2 )
+  if( nbIndTaken < indivMatrix->getSizeY() * 2 )
     _valid = false ;
   else
     _valid = true  ;
@@ -314,20 +316,22 @@ PpcaAnalyserElement::newStep1( const AimsData<T>& indivMatrix, bool useOnlyCorrI
 
 template <class T>
 double
-PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMatrix, 
-			       double noiseRef )
+PpcaAnalyserElement::newStep2(
+  carto::rc_ptr<carto::Volume<double> > pTn,
+  const carto::rc_ptr<carto::Volume<T> >& indivMatrix,
+  double noiseRef )
 {
   bool explicitComputing = true ;
 
-  int nbInd = indivMatrix.dimX() ;
-  int nbFrame = indivMatrix.dimY() ;
+  int nbInd = indivMatrix->getSizeX() ;
+  int nbFrame = indivMatrix->getSizeY() ;
    _energy = 0. ;
 
   ////////////////////////////////////////////
   //  _Rn[i] = probabilityOfTnKnownI * Pi[i] / pTn ;
 
   
-//  _Rn = AimsData<double>( nbInd ) ; 
+//  _Rn = carto::VolumeRef<double>( nbInd ) ;
   double previousRn ;
   int nbIndTemp = 0 ;        // nb d'individus dont p(tn)!=0
 //  double previousRn = 0. ;
@@ -372,7 +376,7 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
   // _mean = sum(Rni*tn)/sum(Rni)
 
   double sumRn = 0. ;
-  AimsData<double> sumRnTn( nbFrame ) ;
+  carto::VolumeRef<double> sumRnTn( nbFrame ) ;
   int nullRniNb = 0, nearNullRni = 0 ;
   for( int n = 0 ; n < nbInd ; ++n ){
       sumRn += _Rn[n] ;
@@ -393,8 +397,8 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
   ////////////////////////////////////////////////
   // Si = 1/Pi*nbInd sum( Rni (tn-mui) (tn-mui)T )
 
-  AimsData<double> centeredIndiv( nbFrame ) ;
-  AimsData<double> Si( nbFrame, nbFrame ) ; 
+  carto::VolumeRef<double> centeredIndiv( nbFrame ) ;
+  carto::VolumeRef<double> Si( nbFrame, nbFrame ) ;
   
 /*   for( int n = 0 ; n < nbInd ; ++n ) */
 /*       for( int t = 0 ; t < nbFrame ; ++t ) */
@@ -422,7 +426,7 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
     //cout << "Compute Si svd begin" << endl ;
     AimsSVD<double>  svd;
     svd.setReturnType( AimsSVD<double>::VectorOfSingularValues ) ;
-    AimsData<double> eigenValues = svd.doit( Si ) ;  
+    carto::VolumeRef<double> eigenValues = svd.doit( Si ) ;
     svd.sort( Si, eigenValues ) ;  
     
     //cout << "Compute Si svd end" << endl ;
@@ -434,34 +438,34 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
     _sigma2 /= (double)( nbFrame - _significantNumberOfVp ) ;  
     cout << "sigma2 = " << _sigma2 << " (explicite)" << " - " ;
 
-    AimsData<double> selectedEigenVectors( nbFrame, _significantNumberOfVp ) ; //dim dxq
+    carto::VolumeRef<double> selectedEigenVectors( nbFrame, _significantNumberOfVp ) ; //dim dxq
     for( int i = 0 ; i < _significantNumberOfVp ; ++i )
       for( int t = 0 ; t < nbFrame ; ++t )
 	selectedEigenVectors(t, i) = Si( t, i ) ;
         
     // Calcul de la "weight" matrice Wi (dim. dxq) 
-    AimsData<double> tempWi( _significantNumberOfVp, _significantNumberOfVp ) ;
+    carto::VolumeRef<double> tempWi( _significantNumberOfVp, _significantNumberOfVp ) ;
     
     for( int i = 0 ; i < _significantNumberOfVp ; ++i )
       tempWi(i, i) = sqrt( eigenValues[i] - _sigma2 ) ; 
    _Wi = selectedEigenVectors.cross( tempWi ) ;  
     
     // calcul de la matrice de covariance Ci = sigma^2I+WWT  
-    AimsData<double> Ci = _Wi.cross( _Wi.clone().transpose() ) ;        
+    carto::VolumeRef<double> Ci = _Wi.cross( _Wi.clone().transpose() ) ;
     for( int i = 0 ; i < nbFrame ; ++i )
       Ci(i, i) += _sigma2 ;  
 
     // calcul de detCi et invCi
     double s = 0.000001 ;
-    AimsData< double > u = Ci.clone(); // because it is replaced on SVD output
-    AimsData< double > v( Ci.dimY(), Ci.dimY() );
+    carto::VolumeRef< double > u = Ci.clone(); // because it is replaced on SVD output
+    carto::VolumeRef< double > v( Ci->getSizeY(), Ci->getSizeY() );
     AimsSVD< double > svd2;
     svd2.setReturnType( AimsSVD<double>::MatrixOfSingularValues ) ;
-    AimsData< double > w = svd2.doit( u, &v );
+    carto::VolumeRef< double > w = svd2.doit( u, &v );
     
     // Set the singular values lower than threshold to zero
     double ts = s * w.maximum();
-    int i, n = w.dimX();
+    int i, n = w->getSizeX();
     for ( i = 0 ; i < n; i++ ){
       if ( w( i, i ) < 0. ){ 
 	cout << endl << "pour i = " << i << ",valeur w = " << w( i, i ) << "! VALEUR NEGATIVE CHANGEE!" << endl ;
@@ -482,18 +486,18 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
   ////////////////////////////////////////////////
   // _Wi = SiWi (sigma2I + Mi-1 WiT Si Wi)-1     avec Mi = sigma2I + WiT*Wi
 
-  AimsData<double> newWi = _invMi.cross( ( _Wi.clone().transpose() ).cross( Si.cross( _Wi ) ) ) ;
-  for( int i = 0 ; i < newWi.dimX() ; ++i ) 
+  carto::VolumeRef<double> newWi = _invMi.cross( ( _Wi.clone().transpose() ).cross( Si.cross( _Wi ) ) ) ;
+  for( int i = 0 ; i < newWi->getSizeX() ; ++i )
     newWi(i, i) += _sigma2 ;
 
   double s = 0.000001 ;
-  AimsData<double> u = newWi.clone(); // because it is replaced on SVD output
-  AimsData<double> v( newWi.dimY(), newWi.dimY() );
+  carto::VolumeRef<double> u = newWi.clone(); // because it is replaced on SVD output
+  carto::VolumeRef<double> v( newWi->getSizeY(), newWi->getSizeY() );
   AimsSVD<double> svd1;
   svd1.setReturnType( AimsSVD<double>::MatrixOfSingularValues ) ;
-  AimsData<double> w = svd1.doit( u, &v );
+  carto::VolumeRef<double> w = svd1.doit( u, &v );
   double ts = s * w.maximum();
-  int i, n = w.dimX();
+  int i, n = w->getSizeX();
 
   for ( i = 0 ; i < n ; i++ ){
     if ( w( i, i ) < 0. ){ 
@@ -512,17 +516,17 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
   //////////////////////////////////////////
   // Mi = _sigmai2I + WiT Wi & invMi
 
-/*   AimsData<double> Mi = ( newWi.clone().transpose() ).cross( newWi ) ;         */
-/*   for( int i = 0 ; i < Mi.dimX() ; ++i ) */
+/*   carto::VolumeRef<double> Mi = ( newWi.clone().transpose() ).cross( newWi ) ;         */
+/*   for( int i = 0 ; i < Mi->getSizeX() ; ++i ) */
 /*     Mi(i, i) += _sigma2 ; */
   
-/*   AimsData<double> u2 = Mi.clone(); */
-/*   AimsData<double> v2( Mi.dimY(), Mi.dimY() ) ;   */
+/*   carto::VolumeRef<double> u2 = Mi.clone(); */
+/*   carto::VolumeRef<double> v2( Mi->getSizeY(), Mi->getSizeY() ) ;   */
 /*   AimsSVD< double > svd2 ; */
 /*   svd2.setReturnType( AimsSVD<double>::MatrixOfSingularValues ) ; */
-/*   AimsData<double> w2 = svd2.doit( u2, &v2 ) ;  */
+/*   carto::VolumeRef<double> w2 = svd2.doit( u2, &v2 ) ;  */
 /*   ts = s * w2.maximum(); */
-/*   n = w2.dimX(); */
+/*   n = w2->getSizeX(); */
 
 /*   for( i = 0 ; i < n ; i++ ){ */
 /*     if ( w2( i, i ) < 0. ){  */
@@ -539,9 +543,9 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
   // _sigmai2 = 1/d tr(Si - Si Wi Mi-1 WiT)
 
   _sigma2 = 0. ;
-  AimsData<double> temp = Si.cross( _Wi.cross( _invMi.cross( newWi.clone().transpose() ) ) ) ;
+  carto::VolumeRef<double> temp = Si.cross( _Wi.cross( _invMi.cross( newWi.clone().transpose() ) ) ) ;
 
-  for( int i = 0 ; i < temp.dimX() ; ++i ) 
+  for( int i = 0 ; i < temp->getSizeX() ; ++i )
     _sigma2 += ( Si(i, i) - temp(i, i) ) ;
   _sigma2 /= nbFrame ;
   cout << "sigma2 = " << _sigma2 << " - " ;
@@ -557,17 +561,17 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
   //////////////////////////////////////////
   // Mi = _sigmai2I + WiT Wi & invMi
 
-  AimsData<double> Mi = ( _Wi.clone().transpose() ).cross( _Wi ) ;        
-  for( int i = 0 ; i < Mi.dimX() ; ++i )
+  carto::VolumeRef<double> Mi = ( _Wi.clone().transpose() ).cross( _Wi ) ;
+  for( int i = 0 ; i < Mi->getSizeX() ; ++i )
     Mi(i, i) += _sigma2 ;
   
-  AimsData<double> u2 = Mi.clone();
-  AimsData<double> v2( Mi.dimY(), Mi.dimY() ) ; 
+  carto::VolumeRef<double> u2 = Mi.clone();
+  carto::VolumeRef<double> v2( Mi->getSizeY(), Mi->getSizeY() ) ;
   AimsSVD< double > svd2 ;
   svd2.setReturnType( AimsSVD<double>::MatrixOfSingularValues ) ;
-  AimsData<double> w2 = svd2.doit( u2, &v2 ) ; 
+  carto::VolumeRef<double> w2 = svd2.doit( u2, &v2 ) ;
   ts = s * w2.maximum();
-  n = w2.dimX();
+  n = w2->getSizeX();
   for( i = 0 ; i < n ; i++ ){
     if ( w2( i, i ) < 0. ){ 
       cout << endl << "pour i = " << i << ", w2 = " << w2( i, i ) << " ! VALEUR NEGATIVE CHANGEE !" << endl ;
@@ -582,18 +586,18 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
   //////////////////////////////////////////////////
   // Ci = sigmai2 + Wi WiT  --> Ci-1 & det(Ci)
 
-  AimsData<double> Ci = _Wi.cross( _Wi.clone().transpose() ) ;        
+  carto::VolumeRef<double> Ci = _Wi.cross( _Wi.clone().transpose() ) ;
   for( int i = 0 ; i < nbFrame ; ++i )
     Ci(i, i) += _sigma2 ;
     
   // verification Ci pas de valeurs negatives & symetrique
   bool sym = true ;
-  for( i = 0 ; i < Ci.dimX() ; i++ ){
+  for( i = 0 ; i < Ci->getSizeX() ; i++ ){
     if( Ci(i, i) < 0 ){ 
       cout << "pour i = " << i << ", Ci = " << Ci( i, i ) << " ! VALEUR NEGATIVE CHANGEE !" << endl ;
       Ci( i, i ) = - Ci( i, i ) ;
     }
-    for( int j = 0 ; j < Ci.dimY() ; j++ ){
+    for( int j = 0 ; j < Ci->getSizeY() ; j++ ){
       if( Ci(i,j) != Ci(j,i) ){
 	sym = false ;
 	cout << "pour i,j = " << i << "," << j << " Ci(i,j) = " << Ci(i,j) << ",Ci(j,i) = " << Ci(j,i) << endl ; 
@@ -603,13 +607,13 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
   if( sym == false ) cout << "--> Ci pas symetrique !" << endl ;
 
 
-  AimsData<double> u3 = Ci.clone();
-  AimsData<double> v3( Ci.dimY(), Ci.dimY() );
+  carto::VolumeRef<double> u3 = Ci.clone();
+  carto::VolumeRef<double> v3( Ci->getSizeY(), Ci->getSizeY() );
   AimsSVD< double > svd3 ;
   svd3.setReturnType( AimsSVD<double>::MatrixOfSingularValues ) ;
-  AimsData<double> w3 = svd3.doit( u3, &v3 );
+  carto::VolumeRef<double> w3 = svd3.doit( u3, &v3 );
   ts = s * w3.maximum();
-  n = w3.dimX();
+  n = w3->getSizeX();
   bool saveCi = false ;
 
 //  cout << endl << "valeurs diagonale w3 = " ;
@@ -638,10 +642,10 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
 /*     diff_file.open( "diff_file.txt" ) ; */
 
 /*     bool newLine ; */
-/*     cout << "dimensions de Ci = " << Ci.dimX() << " " << Ci.dimY() << endl ; */
-/*     for( int j = 0 ; j < Ci.dimY() ; j++ ){ */
+/*     cout << "dimensions de Ci = " << Ci->getSizeX() << " " << Ci->getSizeY() << endl ; */
+/*     for( int j = 0 ; j < Ci->getSizeY() ; j++ ){ */
 /*       newLine = true ; */
-/*       for( int i = 0 ; i < Ci.dimX() ; i++ ){ */
+/*       for( int i = 0 ; i < Ci->getSizeX() ; i++ ){ */
 /* 	if( newLine == true && j != 0 ) ci_file << endl ; */
 /* 	ci_file << Ci( i, j ) << " " ; */
 /* 	newLine = false ; */
@@ -651,10 +655,10 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
 /*     ci_file.close() ; */
 
 /*     // verification  */
-/*     AimsData<double> prod = u3.cross( w3.cross( v3.clone().transpose()  ) ) ; */
-/*     for( int j = 0 ; j < Ci.dimY() ; j++ ){ */
+/*     carto::VolumeRef<double> prod = u3.cross( w3.cross( v3.clone().transpose()  ) ) ; */
+/*     for( int j = 0 ; j < Ci->getSizeY() ; j++ ){ */
 /*       newLine = true ; */
-/*       for( int i = 0 ; i < Ci.dimX() ; i++ ){ */
+/*       for( int i = 0 ; i < Ci->getSizeX() ; i++ ){ */
 /* 	if( newLine == true && j != 0 ) diff_file << endl ; */
 /* 	diff_file << Ci(i,j) - prod(i,j) << " " ; */
 /* 	newLine = false ; */
@@ -684,10 +688,10 @@ template <class T>
 double
 MixtureOfPPCA<T>::pTnComputation() 
 {
-  int nbInd = _individuals.dimX() ;
+  int nbInd = _individuals->getSizeX() ;
   int nbIndTemp = 0 ;
   double sumPtn = 0., prodPtn = 0., meanPtn = 0. , varPtn = 0. ;
-  AimsData<double> pTni( _individuals.dimX() ) ;
+  carto::VolumeRef<double> pTni( _individuals->getSizeX() ) ;
   double Pi = 0. ;
 
   _nullPtnIndiv.clear() ;
@@ -736,22 +740,22 @@ template <class T>
 double 
 MixtureOfPPCA<T>::distComputation() 
 {
-  AimsData<double> mean( _individuals.dimY() ) ;
-  AimsData<double> invCi( _individuals.dimY(), _individuals.dimY() ) ; 
-  AimsData<double> centeredIndivn( _individuals.dimY() ) ;
-  AimsData<double> dist(1, 1) ;  
-  AimsData<double> Rn( _individuals.dimX() ) ; 
-  AimsData<double> Rni( _individuals.dimX(), _nbOfClasses ) ; 
-  AimsData<int> results( _individuals.dimX() ) ; 
+  carto::VolumeRef<double> mean( _individuals->getSizeY() ) ;
+  carto::VolumeRef<double> invCi( _individuals->getSizeY(), _individuals->getSizeY() ) ;
+  carto::VolumeRef<double> centeredIndivn( _individuals->getSizeY() ) ;
+  carto::VolumeRef<double> dist(1, 1) ;
+  carto::VolumeRef<double> Rn( _individuals->getSizeX() ) ;
+  carto::VolumeRef<double> Rni( _individuals->getSizeX(), _nbOfClasses ) ;
+  carto::VolumeRef<int> results( _individuals->getSizeX() ) ;
   double max = 0., global_dist = 0. ;
   
   for( int c = 0 ; c < _nbOfClasses ; ++c ){
     Rn = _elements[c].getRn() ;
-    for( int ind = 0 ; ind < _individuals.dimX() ; ++ind )
+    for( int ind = 0 ; ind < _individuals->getSizeX() ; ++ind )
       Rni(ind, c) = Rn[ind] ;
   }  
 
-  for( int ind = 0 ; ind < _individuals.dimX() ; ++ind ){
+  for( int ind = 0 ; ind < _individuals->getSizeX() ; ++ind ){
     max = Rni( ind, 0 ) ;
     results[ind] = 1 ;
     for( int c = 1 ; c < _nbOfClasses ; ++c ){
@@ -762,7 +766,7 @@ MixtureOfPPCA<T>::distComputation()
     }
     mean = _elements[results[ind]-1].getMean() ;
     invCi = _elements[results[ind]-1].getInvCi() ;
-    for( int t = 0 ; t < _individuals.dimY() ; ++t )
+    for( int t = 0 ; t < _individuals->getSizeY() ; ++t )
       centeredIndivn[t] = _individuals(ind, t) - mean[t] ;
     dist = ( centeredIndivn.clone().transpose() ).cross( invCi.cross( centeredIndivn ) ) ;
     global_dist += dist(0,0) ;
@@ -780,13 +784,13 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
 
 // POUR TOUS LES INDIVIDUS
   double max = 0. ;
-  AimsData<double> score( _individuals.dimX(), _nbOfClasses ) ; 
-  AimsData<int> results( _individuals.dimX() ) ; 
+  carto::VolumeRef<double> score( _individuals->getSizeX(), _nbOfClasses ) ;
+  carto::VolumeRef<int> results( _individuals->getSizeX() ) ;
   vector< list< int > > tempList( _nbOfClasses ) ;
 
-  AimsData<double> Rni = getRni() ;
+  carto::VolumeRef<double> Rni = getRni() ;
 
-/*   for( int ind = 0 ; ind < _individuals.dimX() ; ++ind ){ */
+/*   for( int ind = 0 ; ind < _individuals->getSizeX() ; ++ind ){ */
 /*     sumRn = 0. ; */
 /*     for( int c = 0 ; c < _nbOfClasses ; ++c ) */
 /*       sumRn += Rni( ind, c ) ; */
@@ -795,7 +799,7 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
 /*   } */
 
 // CALCUL DES CLASSES FINALES
-  for( int ind = 0 ; ind < _individuals.dimX() ; ++ind ){
+  for( int ind = 0 ; ind < _individuals->getSizeX() ; ++ind ){
     max = 0. ;
     results[ind] = 0 ;
     for( int c = 0 ; c < _nbOfClasses ; ++c ){
@@ -809,18 +813,18 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
   }
  
  
-// SAUVEGARDE DES CLASSES toutes les 10 it�rations
-//  AimsData< short > resultImage( data->dimX(), data->dimY(), data->dimZ() ) ;  // data inconnu ici
-//  resultImage.setSizeXYZT( data->sizeX(), data->sizeY(), data->sizeZ() ) ;
+// SAUVEGARDE DES CLASSES toutes les 10 iterations
+//  carto::VolumeRef< short > resultImage( data->getSizeX(), data->getSizeY(), data->getSizeZ() ) ;  // data inconnu ici
+//  resultImage.setVoxelSize( data->getVoxelSize() ) ;
   if( nbOfIterations% 30  == 0  || theEnd ){
-    AimsData< short > resultImage( 128, 128, 111 ) ;
-    AimsData< short > rejected( 128, 128, 111 ) ;
-    AimsData< float > rniImage( 128, 128, 111, _nbOfClasses ) ;
-    rejected.setSizeXYZT( 0.858086, 0.858086, 2.425 ) ;
+    carto::VolumeRef< short > resultImage( 128, 128, 111 ) ;
+    carto::VolumeRef< short > rejected( 128, 128, 111 ) ;
+    carto::VolumeRef< float > rniImage( 128, 128, 111, _nbOfClasses ) ;
+    rejected.setVoxelSize( 0.858086, 0.858086, 2.425 ) ;
     rejected = 0 ;
-    rniImage.setSizeXYZT( 0.858086, 0.858086, 2.425 ) ;
+    rniImage.setVoxelSize( 0.858086, 0.858086, 2.425 ) ;
     rniImage = 0. ;
-    resultImage.setSizeXYZT( 0.858086, 0.858086, 2.425 ) ;
+    resultImage.setVoxelSize( 0.858086, 0.858086, 2.425 ) ;
     resultImage = 0 ;
     Point3d theVoxel ;
     // recuperer le x,y,z du voxel dont la valeur est *iter
@@ -844,13 +848,13 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
     }
     
     string iter_nb = carto::toString( nbOfIterations ) ;  
-    Writer< AimsData< short > > writer( "iter" + iter_nb + "_classes_" + fileOut ) ;
+    Writer< carto::VolumeRef< short > > writer( "iter" + iter_nb + "_classes_" + fileOut ) ;
     writer.write( resultImage ) ;
 
-    Writer< AimsData< short > > writer3( "iter" + iter_nb + "_rejected__" + fileOut ) ;
+    Writer< carto::VolumeRef< short > > writer3( "iter" + iter_nb + "_rejected__" + fileOut ) ;
     writer3.write( rejected ) ;
     
-    Writer< AimsData< float > > writer2( "iter" + iter_nb + "_rni.ima" ) ;
+    Writer< carto::VolumeRef< float > > writer2( "iter" + iter_nb + "_rni.ima" ) ;
     writer2.write( rniImage ) ;
   }
   
@@ -862,8 +866,8 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
   // A LA DERNIERE ITERATION
   if( theEnd ){
 
-    // sauvegarder la matrice des individus _individuals (AimsData) et les classes finales (1 bucketMap)
-    Writer< AimsData<T> > writerMatrix( "indivMatrix" ) ;
+    // sauvegarder la matrice des individus _individuals (carto::VolumeRef) et les classes finales (1 bucketMap)
+    Writer< carto::VolumeRef<T> > writerMatrix( "indivMatrix" ) ;
     Finder f ;
     string fformat = f.format() ;
     if( !writerMatrix.write( _individuals, false, &fformat ) )
@@ -892,13 +896,13 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
     writerClasses.write( bClasses, true, &fformat ) ;
     bClasses.clear() ;
   
-    AimsData<double> classCorrelationMatrix( _nbOfClasses, _nbOfClasses  ) ;
+    carto::VolumeRef<double> classCorrelationMatrix( _nbOfClasses, _nbOfClasses  ) ;
     vector<double> classesNorm( _nbOfClasses, 0. ) ;
     multimap<double, Point2d> fusion ;
     multimap<double, int> split ;
     
     for( int i = 0 ; i < _nbOfClasses ; ++i )
-      for( int n = 0 ; n < _individuals.dimX() ; ++n ) {
+      for( int n = 0 ; n < _individuals->getSizeX() ; ++n ) {
 	for( int j = i ; j < _nbOfClasses ; ++j )
 	  classCorrelationMatrix(i, j) += Rni( n, i ) * Rni(n, j ) ;
 	
@@ -908,7 +912,7 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
     for( int i = 0 ; i < _nbOfClasses ; ++i ){
       classesNorm[i] = sqrt( classesNorm[i] ) ;
       double meanNorm = 0. ;
-      for( int t  = 0 ; t < _elements[i].getMean().dimX() ; ++t )
+      for( int t  = 0 ; t < _elements[i].getMean()->getSizeX() ; ++t )
 	meanNorm += _elements[i].getMean()[t] ;
       
       split.insert( pair<double, int>( _elements[i].getSigma2() / meanNorm, i) ) ;
@@ -926,13 +930,13 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
 	  fusion.insert( pair<double, Point2d> ( classCorrelationMatrix(i, j), Point2d(i, j) ) ) ;
       }
     
-    cout << "Classes � fusionner : " << endl ;
+    cout << "Classes to fusion : " << endl ;
 
     count = 0 ;
     for( multimap<double, Point2d>::reverse_iterator rit = fusion.rbegin() ; rit != fusion.rend() && count < 5 ; ++rit, ++count )
       cout << (rit->second)[0] << " avec " << (rit->second)[1] << " : " << rit->first << endl ;
     
-    cout << "Classe � s�parer : " << endl ;
+    cout << "Classes to separe : " << endl ;
     count = 0 ;
     for( multimap<double, int>::reverse_iterator rit = split.rbegin() ; rit != split.rend() && count < 5  ; ++rit, ++count )
       cout << rit->second << " : " << rit->first << endl ;
@@ -948,7 +952,7 @@ MixtureOfPPCA<T>::distMatrixComputation()
   bool res = true ;
   int count ;
   double sumDist ;
-  AimsData<double> meanDistMatrix( _nbOfClasses, _nbOfClasses ) ;
+  carto::VolumeRef<double> meanDistMatrix( _nbOfClasses, _nbOfClasses ) ;
   multimap< float, Point2d > fScore ;
   multimap< float, Point2d > meanFScore ;
 
@@ -1007,18 +1011,19 @@ MixtureOfPPCA<T>::distMatrixComputation()
 
 
 template <class T>
-MixtureOfPPCA<T>::MixtureOfPPCA( int nbOfClasses, int significantNumberOfVp, 
-				 int maxNbOfIterations, 
-				 const AimsData<T>& individuals, const std::vector< Point3d > indPosVector,
-				 const std::vector< std::list <int> >& initialClasses,
-				 const std::string & fileOut, int runNb, int iterationToUseOnlyCorrelatedIndiv ) :
+MixtureOfPPCA<T>::MixtureOfPPCA(
+  int nbOfClasses, int significantNumberOfVp,
+  int maxNbOfIterations,
+  const carto::rc_ptr<carto::Volume<T> >& individuals, const std::vector< Point3d > indPosVector,
+  const std::vector< std::list <int> >& initialClasses,
+  const std::string & fileOut, int runNb, int iterationToUseOnlyCorrelatedIndiv ) :
   _nbOfClasses( nbOfClasses ), _valid( true ), _significantNumberOfEigenValues( significantNumberOfVp ), _maxNbOfIterations( maxNbOfIterations ), _individuals( individuals ), _indPosVector( indPosVector ), _fileOut( fileOut ), _runNb( runNb ), _itToUseOnlyCorrelatedIndiv(iterationToUseOnlyCorrelatedIndiv)
 {
   cout << "Entering MixtureOfPPCA Constructor" << endl ;
   
   double Pi_init = 1. / (double)_nbOfClasses ;
   _elements.reserve( _nbOfClasses ) ;  
-  _pTn = AimsData<double>( _individuals.dimX() ) ;
+  _pTn = carto::VolumeRef<double>( _individuals->getSizeX() ) ;
   _pTn = 1 ;
   _noiseRef = 1. ;
   _sigma2init = vector<double>( _nbOfClasses ) ;
@@ -1028,7 +1033,7 @@ MixtureOfPPCA<T>::MixtureOfPPCA( int nbOfClasses, int significantNumberOfVp,
 
   if( initClasses.size() == 0 ){
     initClasses = std::vector< std::list<int> >( _nbOfClasses ) ;
-    for( int i = 0 ; i < _individuals.dimX() ; ++i ){
+    for( int i = 0 ; i < _individuals->getSizeX() ; ++i ){
       double aux = UniformRandom( 0., 0.99999 ) ;
       int c = int( aux * _nbOfClasses ) ;
       initClasses[c].push_back( i ) ;
@@ -1044,7 +1049,7 @@ MixtureOfPPCA<T>::MixtureOfPPCA( int nbOfClasses, int significantNumberOfVp,
   }
 
   for( int c = 0 ; c < _nbOfClasses ; ++c ){
-    if( int( initClasses[c].size() ) > _individuals.dimY() ) {
+    if( int( initClasses[c].size() ) > _individuals->getSizeY() ) {
       PpcaAnalyserElement el( _significantNumberOfEigenValues ) ;
       cout << endl << "Initialization class " << c << " ..." ;
 
@@ -1082,19 +1087,19 @@ MixtureOfPPCA<T>::doIt()
 {
   int nbOfIterations = 0 ;
   bool res ;
-//  AimsData<double> distToClass( _individuals.dimX() ) ;
-//  _distToClasses = AimsData<double>( _individuals.dimX(), _nbOfClasses ) ;
+//  carto::VolumeRef<double> distToClass( _individuals->getSizeX() ) ;
+//  _distToClasses = carto::VolumeRef<double>( _individuals->getSizeX(), _nbOfClasses ) ;
   _finalClasses = vector< list< int > >( _nbOfClasses ) ;
-  _sigma2Matrix = AimsData<double>( _nbOfClasses ) ;
+  _sigma2Matrix = carto::VolumeRef<double>( _nbOfClasses ) ;
   double sumOfEnergies, criteria ;
 
-  AimsData<double> imageOfMean( _nbOfClasses, _maxNbOfIterations, _individuals.dimY() ) ;
-  AimsData<double> imageOfSigma2( _nbOfClasses, _maxNbOfIterations ) ;
-  AimsData<double> imageOfPi( _nbOfClasses, _maxNbOfIterations ) ;
-  AimsData<double> imageOfRniDiff( _nbOfClasses, _maxNbOfIterations ) ;
-  AimsData<double> imageOfEnergy( _maxNbOfIterations ) ;
-  AimsData<double> imageOfLogLikelihood( _maxNbOfIterations ) ;
-  AimsData<double> imageOfLogLikelihoodProgression( _maxNbOfIterations ) ;
+  carto::VolumeRef<double> imageOfMean( _nbOfClasses, _maxNbOfIterations, _individuals->getSizeY() ) ;
+  carto::VolumeRef<double> imageOfSigma2( _nbOfClasses, _maxNbOfIterations ) ;
+  carto::VolumeRef<double> imageOfPi( _nbOfClasses, _maxNbOfIterations ) ;
+  carto::VolumeRef<double> imageOfRniDiff( _nbOfClasses, _maxNbOfIterations ) ;
+  carto::VolumeRef<double> imageOfEnergy( _maxNbOfIterations ) ;
+  carto::VolumeRef<double> imageOfLogLikelihood( _maxNbOfIterations ) ;
+  carto::VolumeRef<double> imageOfLogLikelihoodProgression( _maxNbOfIterations ) ;
 
   _nbOfRejected = 0 ;
   int oldNbOfRejected = 0 ;
@@ -1136,8 +1141,8 @@ MixtureOfPPCA<T>::doIt()
 	sumOfEnergies += _elements[i].getEnergy() ;
 	criteria += _elements[i].getSumDiff2Rni() ;
 	
-	//------ AJOUT 12/11 pour visualiser les param�tres sous forme d'AimsData -----
-	for( int t = 0 ; t < _individuals.dimY() ; ++t )
+	//------ AJOUT 12/11 pour visualiser les param�tres sous forme d'carto::VolumeRef -----
+	for( int t = 0 ; t < _individuals->getSizeY() ; ++t )
 	  imageOfMean( i, nbOfIterations, t ) = ( _elements[i].getMean() )[t] ;
 	imageOfSigma2( i, nbOfIterations ) = _elements[i].getSigma2() ; 
 	imageOfPi( i, nbOfIterations ) = _elements[i].getPi() ;
@@ -1148,19 +1153,19 @@ MixtureOfPPCA<T>::doIt()
     cout << endl << "Critere d'arret = " << criteria << " or " << (oldSumOfEnergies - sumOfEnergies)/_elements.size() << endl ;
     imageOfEnergy( nbOfIterations ) = sumOfEnergies ; 
 
-/*     Writer < AimsData<double> > wr( "Mean3D.ima" ) ; */
+/*     Writer < carto::VolumeRef<double> > wr( "Mean3D.ima" ) ; */
 /*     wr.write( imageOfMean ) ; */
-/*     Writer < AimsData<double> > wr2( "Sigma2D.ima" ) ; */
+/*     Writer < carto::VolumeRef<double> > wr2( "Sigma2D.ima" ) ; */
 /*     wr2.write( imageOfSigma2 ) ; */
-/*     Writer < AimsData<double> > wr3( "Pi2D.ima" ) ; */
+/*     Writer < carto::VolumeRef<double> > wr3( "Pi2D.ima" ) ; */
 /*     wr3.write( imageOfPi ) ; */
-/*     Writer < AimsData<double> > wr4( "RniDiff2D.ima" ) ; */
+/*     Writer < carto::VolumeRef<double> > wr4( "RniDiff2D.ima" ) ; */
 /*     wr4.write( imageOfRniDiff ) ; */
-/*     Writer < AimsData<double> > wr5( "Energy1D.ima" ) ; */
+/*     Writer < carto::VolumeRef<double> > wr5( "Energy1D.ima" ) ; */
 /*     wr5.write( imageOfEnergy ) ; */
-/*     Writer < AimsData<double> > wr6( "logLikelihood.ima" ) ; */
+/*     Writer < carto::VolumeRef<double> > wr6( "logLikelihood.ima" ) ; */
 /*     wr6.write( imageOfLogLikelihood ) ; */
-/*     Writer < AimsData<double> > wr7( "logLikelihoodProgression.ima" ) ; */
+/*     Writer < carto::VolumeRef<double> > wr7( "logLikelihoodProgression.ima" ) ; */
 /*     wr7.write( imageOfLogLikelihoodProgression ) ; */
     
     notYetTheEnd = (nbOfIterations < _maxNbOfIterations) && 
@@ -1176,9 +1181,9 @@ MixtureOfPPCA<T>::doIt()
   // matrice des distances de chaque individu � chaque classe
   /*   for( int i = 0 ; i < _nbOfClasses ; ++i ){ */
   /*     distToClass = _elements[i].getDist() ; */
-  /*     for( int n = 0 ; n < distToClass.dimX() ; ++n ){ */
+  /*     for( int n = 0 ; n < distToClass->getSizeX() ; ++n ){ */
   /*       // distToClass d�j� au carr� - division par la dimension */
-      /*       _distToClasses(n, i) = distToClass[n] / _individuals.dimY() ;  */
+      /*       _distToClasses(n, i) = distToClass[n] / _individuals->getSizeY() ;  */
       /*     } */
       /*   } */
       
@@ -1192,14 +1197,14 @@ MixtureOfPPCA<T>::doIt()
 
 
 template <class T>
-AimsData<double>
+carto::VolumeRef<double>
 MixtureOfPPCA<T>::getRni()
 {
-  AimsData<double> Rn( _individuals.dimX() ) ; 
-  AimsData<double> RnAll( _individuals.dimX(), _nbOfClasses ) ; 
+  carto::VolumeRef<double> Rn( _individuals->getSizeX() ) ;
+  carto::VolumeRef<double> RnAll( _individuals->getSizeX(), _nbOfClasses ) ;
   for( int c = 0 ; c < _nbOfClasses ; ++c ){
     Rn = _elements[c].getRn() ;
-    for( int ind = 0 ; ind < _individuals.dimX() ; ++ind )
+    for( int ind = 0 ; ind < _individuals->getSizeX() ; ++ind )
       RnAll(ind, c) = Rn[ind] ;
   }  
 
