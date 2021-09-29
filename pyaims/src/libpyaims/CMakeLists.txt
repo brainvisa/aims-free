@@ -6,8 +6,6 @@ set( _headers
         data/sipdatatypes.h
         data/volumeoperators.h
         debugging/debuggingvol.h
-        io/reader.h
-        io/writer.h
         object/numconv.h
         object/object.h
         object/rcptrconv.h

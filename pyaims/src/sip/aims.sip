@@ -326,40 +326,6 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include reader_Object.sip
 %Include soma_reader_Object.sip
 
-/*
-%Include rcptr_AimsData_BOOL.sip
-%Include rcptr_AimsData_U8.sip
-%Include rcptr_AimsData_S16.sip
-%Include rcptr_AimsData_U16.sip
-%Include rcptr_AimsData_S32.sip
-%Include rcptr_AimsData_U32.sip
-%Include rcptr_AimsData_FLOAT.sip
-%Include rcptr_AimsData_DOUBLE.sip
-%Include rcptr_AimsData_RGB.sip
-%Include rcptr_AimsData_RGBA.sip
-%Include rcptr_AimsData_HSV.sip
-%Include rcptr_AimsData_CFLOAT.sip
-%Include rcptr_AimsData_CDOUBLE.sip
-%Include rcptr_AimsData_POINT3DF.sip
-*/
-
-/*
-// %Include reader_AimsData_BOOL.sip
-%Include reader_AimsData_U8.sip
-%Include reader_AimsData_S16.sip
-%Include reader_AimsData_U16.sip
-%Include reader_AimsData_S32.sip
-%Include reader_AimsData_U32.sip
-%Include reader_AimsData_FLOAT.sip
-%Include reader_AimsData_DOUBLE.sip
-%Include reader_AimsData_RGB.sip
-%Include reader_AimsData_RGBA.sip
-%Include reader_AimsData_HSV.sip
-%Include reader_AimsData_CFLOAT.sip
-%Include reader_AimsData_CDOUBLE.sip
-%Include reader_AimsData_POINT3DF.sip
-*/
-
 %Include rawconverter_bucket_S16.sip
 %Include rcptr_SparseMatrix.sip
 %Include rcptr_SparseOrDenseMatrix.sip

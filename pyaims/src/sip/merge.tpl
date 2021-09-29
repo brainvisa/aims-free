@@ -14,8 +14,8 @@ public :
   AimsMerge_%Template1typecode%_%Template2typecode%(
     merge_t type, %Template1% value=0, %Template2% label=0 );
   virtual ~AimsMerge_%Template1typecode%_%Template2typecode%();
-  AimsData_%Template1typecode% operator () (
-    const AimsData_%Template1typecode% &data,
-    const AimsData_%Template2typecode% &mask );
+  rc_ptr_Volume_%Template1typecode% operator () (
+    const rc_ptr_Volume_%Template1typecode% &data,
+    const rc_ptr_Volume_%Template2typecode% &mask );
 };
 

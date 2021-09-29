@@ -3,22 +3,13 @@ class Moment_%Template1typecode%
 %TypeHeaderCode
   #include <aims/moment/moment.h>
   #include <pyaims/vector/stdvector.h>
-  
+  #include <pyaims/data/data.h>
+
   #ifndef PYAIMSSIP_MOMENT_%Template1typecode%_DEFINED
   #define PYAIMSSIP_MOMENT_%Template1typecode%_DEFINED
   typedef Moment<%Template1% > Moment_%Template1typecode%;
   #endif
   
-  #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  #define PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  typedef AimsData<%Template1% > AimsData_%Template1typecode%;
-  #endif
-  
-  #ifndef PYAIMSSIP_AIMSDATA_DOUBLE_DEFINED
-  #define PYAIMSSIP_AIMSDATA_DOUBLE_DEFINED
-  typedef AimsData<double> AimsData_DOUBLE;
-  #endif
-    
   #ifndef PYAIMSSIP_AIMSDATA_BUCKETMAP_VOID_DEFINED
   #define PYAIMSSIP_AIMSDATA_BUCKETMAP_VOID_DEFINED
   typedef aims::BucketMap<Void> BucketMap_VOID;
@@ -103,8 +94,8 @@ class Moment_%Template1typecode%
       sipRes = pyaimsCopyFrom_Array(sipCpp->m3(), 10);
 %End
 	
-    const AimsData_DOUBLE& eigenValue() const;
-    const AimsData_DOUBLE& eigenVector() const;
+    const rc_ptr_Volume_DOUBLE& eigenValue() const;
+    const rc_ptr_Volume_DOUBLE& eigenVector() const;
 	
     virtual void doit( AimsSurfaceTriangle& ) /ReleaseGIL/;
     virtual void doit( const BucketMap_VOID& ) /ReleaseGIL/;
@@ -135,7 +126,8 @@ class MomentInvariant_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/moment/momInvariant.h>
-  
+  #include <pyaims/data/data.h>
+
   #ifndef PYAIMSSIP_MOMENTINVARIANT_%Template1typecode%_DEFINED
   #define PYAIMSSIP_MOMENTINVARIANT_%Template1typecode%_DEFINED
   typedef MomentInvariant<%Template1%> MomentInvariant_%Template1typecode%;
@@ -150,12 +142,7 @@ class MomentInvariant_%Template1typecode%
   #define PYAIMSSIP_VECTOR_DOUBLE_DEFINED
   typedef std::vector<double> vector_DOUBLE;
   #endif
-  
-  #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  #define PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  typedef AimsData<%Template1%> AimsData_%Template1typecode%;
-  #endif
-  
+
 %End
 
   public:
@@ -219,9 +206,7 @@ class GeometricMoment_%Template1typecode% : MomentBase, Moment_%Template1typecod
   #include <aims/moment/momBase.h>
   #include <aims/moment/moment.h>
   #include <aims/moment/geomMoment.h>
-  #if SIP_VERSION < 0x040700
-  #include "sipaimsalgosipMoment_%Template1typecode%.h"
-  #endif
+  #include <pyaims/data/data.h>
 
   #ifndef PYAIMSSIP_MOMENT_%Template1typecode%_DEFINED
   #define PYAIMSSIP_MOMENT_%Template1typecode%_DEFINED
@@ -232,12 +217,7 @@ class GeometricMoment_%Template1typecode% : MomentBase, Moment_%Template1typecod
   #define PYAIMSSIP_GEOMETRICMOMENT_%Template1typecode%_DEFINED
   typedef GeometricMoment<%Template1%> GeometricMoment_%Template1typecode%;
   #endif
-  
-  #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  #define PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  typedef AimsData<%Template1%> AimsData_%Template1typecode%;
-  #endif
-  
+
   #ifndef PYAIMSSIP_AIMSDATA_BUCKETMAP_VOID_DEFINED
   #define PYAIMSSIP_AIMSDATA_BUCKETMAP_VOID_DEFINED
   typedef aims::BucketMap<Void> BucketMap_VOID;
@@ -259,7 +239,7 @@ typedef AimsTimeSurface<3,Void> AimsTimeSurface_3_VOID;
     void setMomentType( MomentBase::MomentType );
     void update( double, double, double,
       int = Moment_%Template1typecode%::mAdd ) /ReleaseGIL/;
-    void doit( AimsData_%Template1typecode% &,
+    void doit( rc_ptr_Volume_%Template1typecode% &,
       int = Moment_%Template1typecode%::mAdd ) /ReleaseGIL/;
     void doit( const BucketMap_VOID & ,
       int = Moment_%Template1typecode%::mAdd ) /ReleaseGIL/;

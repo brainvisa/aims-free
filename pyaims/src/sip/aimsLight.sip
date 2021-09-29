@@ -50,12 +50,6 @@ carto::pyaims_init();
 %Include rcptr_Motion.sip
 %Include reader_Motion.sip
 
-%Include rcptr_AimsData_S16.sip
-%Include rcptr_AimsData_FLOAT.sip
-
-%Include reader_AimsData_S16.sip
-%Include reader_AimsData_FLOAT.sip
-
 %If ( CARTODATA )
 
 %Include volume_S16.sip
@@ -63,9 +57,6 @@ carto::pyaims_init();
 
 %Include rcptr_Volume_S16.sip
 %Include rcptr_Volume_FLOAT.sip
-
-%Include reader_Volume_S16.sip
-%Include reader_Volume_FLOAT.sip
 
 
 %End

@@ -7,7 +7,7 @@ class HarmonicCageMeshResampler
   #include <aims/resampling/harmonicCageResampler.h>
 %End
   public:
-    HarmonicCageMeshResampler(const AimsData_U32 &, vector_POINT3DF &controls,
+    HarmonicCageMeshResampler(const rc_ptr_Volume_U32 &, vector_POINT3DF &controls,
                              short background=0, short border=1, short inside=2);
     virtual ~HarmonicCageMeshResampler();
 
@@ -16,7 +16,7 @@ class HarmonicCageMeshResampler
     AimsSurfaceTriangle *coordinates(const AimsSurfaceTriangle &) /Factory, ReleaseGIL/;
     const Point3df &getControl(int ind);
     void set_keep_image_coords(bool state);
-    const AimsData_FLOAT &get_image_coords(int ind);
+    const rc_ptr_Volume_FLOAT &get_image_coords(int ind);
     void moveControl(int ind, const Point3df &p);
 };
 

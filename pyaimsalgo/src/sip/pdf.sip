@@ -2,46 +2,46 @@
 #include <aims/information/pdf.h>
 %End
 
-void    AimsParzenJointPdf(const AimsData_S16& data1,
-                           const AimsData_S16& data2,
-                           AimsData_FLOAT& p12, 
-                           AimsData_FLOAT& p1, AimsData_FLOAT& p2 );
+void    AimsParzenJointPdf(const rc_ptr_Volume_S16& data1,
+                           const rc_ptr_Volume_S16& data2,
+                           rc_ptr_Volume_FLOAT& p12,
+                           rc_ptr_Volume_FLOAT& p1, rc_ptr_Volume_FLOAT& p2 );
 
-void    AimsParzenPdf(const AimsData_S16& data,
-                      AimsData_FLOAT& p );
-
-
-
-void    AimsWinParzenJointPdf(const AimsData_S16& data1,
-                              const AimsData_S16& data2,
-                              AimsData_FLOAT& p12, 
-                              AimsData_FLOAT& p1, 
-                              AimsData_FLOAT& p2,
-                              const AimsData_FLOAT& mask );
-
-void    AimsWinParzenPdf(const AimsData_S16& data,
-                         AimsData_FLOAT& p, 
-                         const AimsData_FLOAT& mask );
+void    AimsParzenPdf(const rc_ptr_Volume_S16& data,
+                      rc_ptr_Volume_FLOAT& p );
 
 
 
-void    AimsJointPdf(const AimsData_S16& data1,
-                     const AimsData_S16& data2,
-                     AimsData_FLOAT& p12, 
-                     AimsData_FLOAT& p1,
-                     AimsData_FLOAT& p2);
+void    AimsWinParzenJointPdf(const rc_ptr_Volume_S16& data1,
+                              const rc_ptr_Volume_S16& data2,
+                              rc_ptr_Volume_FLOAT& p12,
+                              rc_ptr_Volume_FLOAT& p1,
+                              rc_ptr_Volume_FLOAT& p2,
+                              const rc_ptr_Volume_FLOAT& mask );
 
-void    AimsPdf(const AimsData_S16& data,
-                AimsData_FLOAT& p);
+void    AimsWinParzenPdf(const rc_ptr_Volume_S16& data,
+                         rc_ptr_Volume_FLOAT& p,
+                         const rc_ptr_Volume_FLOAT& mask );
 
-void    AimsJointMaskPdf(const AimsData_S16& data1,
-                         const AimsData_S16& data2,
-                         AimsData_FLOAT& p12, 
-                         AimsData_FLOAT& p1, 
-                         AimsData_FLOAT& p2);
+
+
+void    AimsJointPdf(const rc_ptr_Volume_S16& data1,
+                     const rc_ptr_Volume_S16& data2,
+                     rc_ptr_Volume_FLOAT& p12,
+                     rc_ptr_Volume_FLOAT& p1,
+                     rc_ptr_Volume_FLOAT& p2);
+
+void    AimsPdf(const rc_ptr_Volume_S16& data,
+                rc_ptr_Volume_FLOAT& p);
+
+void    AimsJointMaskPdf(const rc_ptr_Volume_S16& data1,
+                         const rc_ptr_Volume_S16& data2,
+                         rc_ptr_Volume_FLOAT& p12,
+                         rc_ptr_Volume_FLOAT& p1,
+                         rc_ptr_Volume_FLOAT& p2);
 
 void    AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
-                        AimsData_FLOAT &pdf, unsigned int k);
+                        rc_ptr_Volume_FLOAT &pdf, unsigned int k);
 
 void    AimsKnnPdf(aims::knn::Database &db,
-                        AimsData_FLOAT &pdf, unsigned int k);
+                        rc_ptr_Volume_FLOAT &pdf, unsigned int k);
