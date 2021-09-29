@@ -39,54 +39,66 @@
 #include <aims/resampling/sampler.h>
 #include <aims/math/knn.h>
 
-template <class T> class AimsData;
+namespace carto
+{
+  template <class T> class Volume;
+  template <class T> class VolumeRef;
+}
 
 
-void AimsParzenJointPdf( const AimsData<short>& data1,
-                         const AimsData<short>& data2,
-                         AimsData<float>& p12, 
-                         AimsData<float>& p1, AimsData<float>& p2 );
+void AimsParzenJointPdf( const carto::rc_ptr<carto::Volume<short> >& data1,
+                         const carto::rc_ptr<carto::Volume<short> >& data2,
+                         carto::rc_ptr<carto::Volume<float> >& p12,
+                         carto::rc_ptr<carto::Volume<float> >& p1,
+                         carto::rc_ptr<carto::Volume<float> >& p2 );
 
-void AimsParzenPdf( const AimsData<short>& data,
-                    AimsData<float>& p );
-
-
-
-void AimsWinParzenJointPdf( const AimsData<short>& data1,
-                            const AimsData<short>& data2,
-                            AimsData<float>& p12, 
-                            AimsData<float>& p1, AimsData<float>& p2,
-                            const AimsData<float>& mask );
-
-void AimsWinParzenPdf( const AimsData<short>& data,
-                       AimsData<float>& p, const AimsData<float>& mask );
+void AimsParzenPdf( const carto::rc_ptr<carto::Volume<short> >& data,
+                    carto::rc_ptr<carto::Volume<float> >& p );
 
 
 
-void AimsJointPdf( const AimsData<short>& data1,
-                   const AimsData<short>& data2,
-                   AimsData<float>& p12, 
-                   AimsData<float>& p1, AimsData<float>& p2 );
+void AimsWinParzenJointPdf( const carto::rc_ptr<carto::Volume<short> >& data1,
+                            const carto::rc_ptr<carto::Volume<short> >& data2,
+                            carto::rc_ptr<carto::Volume<float> >& p12,
+                            carto::rc_ptr<carto::Volume<float> >& p1,
+                            carto::rc_ptr<carto::Volume<float> >& p2,
+                            const carto::rc_ptr<carto::Volume<float> >& mask );
 
-void AimsPdf( const AimsData<short>& data, AimsData<float>& p );
+void AimsWinParzenPdf( const carto::rc_ptr<carto::Volume<short> >& data,
+                       carto::rc_ptr<carto::Volume<float> >& p,
+                       const carto::rc_ptr<carto::Volume<float> >& mask );
 
 
-void AimsJointMaskPdf( const AimsData<short>& data1,
-		       const AimsData<short>& data2,
-		       AimsData<float>& p12, 
-		       AimsData<float>& p1, AimsData<float>& p );
 
-void AimsJointPVPdf( const AimsData<short>& data1,
-		     const AimsData<short>& data2,
-		     const AimsData<PVItem>& comb,
-		     AimsData<float>& p12, 
-		     AimsData<float>& p1, AimsData<float>& p2 );
+void AimsJointPdf( const carto::rc_ptr<carto::Volume<short> >& data1,
+                   const carto::rc_ptr<carto::Volume<short> >& data2,
+                   carto::rc_ptr<carto::Volume<float> >& p12,
+                   carto::rc_ptr<carto::Volume<float> >& p1,
+                   carto::rc_ptr<carto::Volume<float> >& p2 );
+
+void AimsPdf( const carto::rc_ptr<carto::Volume<short> >& data,
+              carto::rc_ptr<carto::Volume<float> >& p );
+
+
+void AimsJointMaskPdf( const carto::rc_ptr<carto::Volume<short> >& data1,
+		       const carto::rc_ptr<carto::Volume<short> >& data2,
+		       carto::rc_ptr<carto::Volume<float> >& p12,
+		       carto::rc_ptr<carto::Volume<float> >& p1,
+                       carto::rc_ptr<carto::Volume<float> >& p );
+
+void AimsJointPVPdf( const carto::rc_ptr<carto::Volume<short> >& data1,
+		     const carto::rc_ptr<carto::Volume<short> >& data2,
+		     const carto::rc_ptr<carto::Volume<PVItem> >& comb,
+		     carto::rc_ptr<carto::Volume<float> >& p12,
+		     carto::rc_ptr<carto::Volume<float> >& p1,
+                     carto::rc_ptr<carto::Volume<float> >& p2 );
 
 void AimsJointPVPdf( const aims::BucketMap<short>&         data1, 
-		     const AimsData<short>&                data2,
+		     const carto::rc_ptr<carto::Volume<short> >& data2,
 		     const std::vector< PVVectorItem >& comb,
-		     AimsData<float>& p12, 
-		     AimsData<float>& p1, AimsData<float>& p2 );
+		     carto::rc_ptr<carto::Volume<float> >& p12,
+		     carto::rc_ptr<carto::Volume<float> >& p1,
+                     carto::rc_ptr<carto::Volume<float> >& p2 );
 
 /** Compute Knn density estimation.
     img : output pdf
@@ -94,8 +106,9 @@ void AimsJointPVPdf( const aims::BucketMap<short>&         data1,
     k : distance to the kth nearest neighbours is used to set parzen
         window width
  */
-void	AimsKnnPdf(aims::knn::Database &db,
-			AimsData<float> &pdf, unsigned int k);
+void	AimsKnnPdf( aims::knn::Database &db,
+                    carto::rc_ptr<carto::Volume<float> > &pdf,
+                    unsigned int k );
 
 /** Compute Generalized Knn Parzen density estimation.
     img : output pdf
@@ -103,7 +116,8 @@ void	AimsKnnPdf(aims::knn::Database &db,
     k : distance to the kth nearest neighbours is used to set parzen
         window width
  */
-void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
-			AimsData<float> &pdf, unsigned int k);
+void AimsGeneralizedKnnParzenPdf( aims::knn::Database &db,
+                                  carto::rc_ptr<carto::Volume<float> > &pdf,
+                                  unsigned int k );
 
 #endif

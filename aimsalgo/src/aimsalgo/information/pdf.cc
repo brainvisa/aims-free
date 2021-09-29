@@ -32,16 +32,22 @@
  */
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/information/pdf.h>
 #include <aims/math/mathelem.h>
-#include <aims/data/data.h>
 #include <aims/bucket/bucketMap.h>
+#include <cartodata/volume/volume.h>
 #include <iostream>
 #include <list>
 #include <math.h>
 
 using namespace std;
 using namespace aims;
+using namespace carto;
 
 inline
 double parzen( double u, double h )
@@ -59,21 +65,22 @@ double parzen2( double u, double h, int dim)
 
 
 
-void AimsParzenJointPdf( const AimsData<short>& data1,
-                         const AimsData<short>& data2,
-                         AimsData<float>& p12, 
-                         AimsData<float>& p1, AimsData<float>& p2 )
+void AimsParzenJointPdf( const rc_ptr<Volume<short> >& data1,
+                         const rc_ptr<Volume<short> >& data2,
+                         rc_ptr<Volume<float> >& p12,
+                         rc_ptr<Volume<float> >& p1,
+                         rc_ptr<Volume<float> >& p2 )
 {
-    int levels = p12.dimX();
+    int levels = p12->getSizeX();
 
-    ASSERT( p12.dimY() == levels && p1.dimX() == levels && p2.dimX() == levels );
+    ASSERT( p12->getSizeY() == levels && p1->getSizeX() == levels && p2->getSizeX() == levels );
 
-    float mini1 = float( data1.minimum() );
-    float maxi1 = float( data1.maximum() );
+    float mini1 = float( data1->min() );
+    float maxi1 = float( data1->max() );
     ASSERT( maxi1 != mini1 );
 
-    float mini2 = float( data2.minimum() );
-    float maxi2 = float( data2.maximum() );
+    float mini2 = float( data2->min() );
+    float maxi2 = float( data2->max() );
     if ( maxi2 == mini2 )
     {
         cerr << "Warning ! AimsParzenJointPdf : maxi2 == mini2" << endl;
@@ -84,89 +91,102 @@ void AimsParzenJointPdf( const AimsData<short>& data1,
     float h2 = ( maxi2 - mini2 ) / levels;
 
     int i, j, k, n1, n2;
+    vector<int> dim = data1->getSize();
+    vector<int> p12dim = p12->getSize();
 
-    p12 = 0.0;
+    *p12 = 0.0;
 
-    ForEach3d( data1, i, j, k )
-    {
-        ForEach2d( p12, n1, n2 )
+    for( k=0; k<dim[2]; ++k )
+      for( j=0; j<dim[1]; ++j )
+        for( i=0; i<dim[0]; ++i )
         {
-            p12( n1, n2 ) += parzen( mini1 + ( n1 + 0.5 ) * h1 - 
-                                     float( data1( i, j, k ) ), h1 )
-                           * parzen( mini2 + ( n2 + 0.5 ) * h2 - 
-                                     float( data2( i, j, k ) ), h2 );
+          for( n2=0; n2<p12dim[1]; ++n2 )
+            for( n1=0; n1<p12dim[0]; ++n1 )
+            {
+              p12->at( n1, n2 ) += parzen( mini1 + ( n1 + 0.5 ) * h1 -
+                                           float( data1->at( i, j, k ) ), h1 )
+                                   * parzen( mini2 + ( n2 + 0.5 ) * h2 -
+                                             float( data2->at( i, j, k ) ), h2 );
+            }
         }
-    }
 
     float sum=0.0;
     int x, y;
-    ForEach2d( p12, x, y )
-        sum += p12( x, y );
-        
-    if (sum)
-        ForEach2d( p12, x, y )
-            p12( x, y ) /= sum;
+    for( y=0; y<p12dim[1]; ++y )
+      for( x=0; x<p12dim[0]; ++x )
+        sum += p12->at( x, y );
 
-    p1 = 0.0;
-    p2 = 0.0;
+    if (sum)
+      for( y=0; y<p12dim[1]; ++y )
+        for( x=0; x<p12dim[0]; ++x )
+          p12->at( x, y ) /= sum;
+
+    *p1 = 0.0;
+    *p2 = 0.0;
     for ( y = 0; y < levels; y++ )
-        for ( x = 0; x < levels; x++ )
-        {
-            p1( x ) += p12( x, y );
-            p2( y ) += p12( x, y );
-        }
+      for ( x = 0; x < levels; x++ )
+      {
+        p1->at( x ) += p12->at( x, y );
+        p2->at( y ) += p12->at( x, y );
+      }
 }
 
 
-void AimsParzenPdf(const AimsData<short>& data,
-                   AimsData<float>& p)
+void AimsParzenPdf(const rc_ptr<Volume<short> >& data,
+                   rc_ptr<Volume<float> >& p)
 {
-    int levels = p.dimX();
+    int levels = p->getSizeX();
 
-    float mini = float( data.minimum() );
-    float maxi = float( data.maximum() );
+    float mini = float( data->min() );
+    float maxi = float( data->max() );
     ASSERT( maxi != mini );
 
     float h = ( maxi - mini ) / levels;
 
     int i, j, k, n;
+    vector<int> dim = data->getSize();
+    int nd = p->getSizeX();
 
-    p = 0.0;
+    *p = 0.0;
 
-    ForEach3d(data, i, j, k)
-    {
-        ForEach1d( p, n )
-            p( n ) += parzen(mini + ( n + 0.5 ) * h 
-                             - float( data( i, j, k ) ), h);
-    }
+    for( k=0; k<dim[2]; ++k )
+      for( j=0; j<dim[1]; ++j )
+        for( i=0; i<dim[0]; ++i )
+        {
+          for( n=0; n<nd; ++n )
+            p->at( n ) += parzen(mini + ( n + 0.5 ) * h
+                             - float( data->at( i, j, k ) ), h);
+        }
 
     float sum=0.0;
     int x;
-    ForEach1d( p, x )
-        sum += p( x );
-        
+    for( x=0; x<nd; ++x )
+        sum += p->at( x );
+
     if (sum)
-        ForEach1d( p, x )
-            p( x ) /= sum;
+      for( x=0; x<nd; ++x )
+        p->at( x ) /= sum;
 }
 
 
-void AimsWinParzenJointPdf(const AimsData<short>& data1,
-                           const AimsData<short>& data2,
-                           AimsData<float>& p12, 
-                           AimsData<float>& p1, AimsData<float>& p2,
-                           const AimsData<float>& mask)
+void AimsWinParzenJointPdf(const rc_ptr<Volume<short> >& data1,
+                           const rc_ptr<Volume<short> >& data2,
+                           rc_ptr<Volume<float> >& p12,
+                           rc_ptr<Volume<float> >& p1,
+                           rc_ptr<Volume<float> >& p2,
+                           const rc_ptr<Volume<float> >& mask)
 {
-    int levels = p12.dimX();
+    int levels = p12->getSizeX();
 
-    ASSERT(p12.dimY() == levels && p1.dimX() == levels && p2.dimX() == levels);
+    ASSERT( p12->getSizeY() == levels && p1->getSizeX() == levels
+            && p2->getSizeX() == levels );
 
-    float mini1 = float( data1.minimum() );
-    float maxi1 = float( data1.maximum() );
+    float mini1 = float( data1->min() );
+    float maxi1 = float( data1->max() );
     ASSERT(maxi1 != mini1);
 
-    float mini2 = float( data2.minimum() );
-    float maxi2 = float( data2.maximum() );
+    float mini2 = float( data2->min() );
+    float maxi2 = float( data2->max() );
     if ( maxi2 == mini2 )
     {
         cerr << "Warning ! AimsWinParzenJointPdf : maxi2 == mini2" << endl;
@@ -176,267 +196,275 @@ void AimsWinParzenJointPdf(const AimsData<short>& data1,
     float h1 = ( maxi1 - mini1 ) / levels;
     float h2 = ( maxi2 - mini2 ) / levels;
 
-    int sMask = mask.dimX();
+    int sMask = mask->getSizeX();
     int sMaskdiv2 = sMask / 2;
     ASSERT( sMask % 2 == 1 );
 
     int i, j, k, n1, n2, v1, v2, val1, val2;
+    vector<int> dim = data1->getSize();
 
-    AimsData<float> mask2d( sMask, sMask );
+    VolumeRef<float> mask2d( sMask, sMask );
     for ( v1 = 0; v1 < sMask; v1++ )
         for ( v2 = 0; v2 < sMask; v2++ )
-            mask2d( v1, v2 ) += mask( v1 ) * mask( v2 );
+            mask2d( v1, v2 ) += mask->at( v1 ) * mask->at( v2 );
 
-    p12 = 0.0;
+    *p12 = 0.0;
 
-    ForEach3d( data1, i, j, k )
-    {
-        n1 = int((float(data1(i, j, k)) - mini1) / h1);
-        n2 = int((float(data2(i, j, k)) - mini2) / h2);
-        if ( n1 == levels )
+    for( k=0; k<dim[2]; ++k )
+      for( j=0; j<dim[1]; ++j )
+        for( i=0; i<dim[0]; ++i )
+        {
+          n1 = int((float(data1->at(i, j, k)) - mini1) / h1);
+          n2 = int((float(data2->at(i, j, k)) - mini2) / h2);
+          if ( n1 == levels )
             n1--;
-        if ( n2 == levels )
+          if ( n2 == levels )
             n2--;
 
-        for (v1 = 0; v1 < sMask; v1++)
+          for (v1 = 0; v1 < sMask; v1++)
             for (v2 = 0; v2 < sMask; v2++)
             {
-                val1 = n1 + v1 - sMaskdiv2;
-                val2 = n2 + v2 - sMaskdiv2;
-                if (val1 >= 0 && val1 < levels &&
-                    val2 >= 0 && val2 < levels)
-                    p12(val1, val2) += mask2d(v1, v2);
+              val1 = n1 + v1 - sMaskdiv2;
+              val2 = n2 + v2 - sMaskdiv2;
+              if (val1 >= 0 && val1 < levels &&
+                  val2 >= 0 && val2 < levels)
+                  p12->at(val1, val2) += mask2d(v1, v2);
             }
-    }
+        }
 
     float sum=0.0;
     int x, y;
-    ForEach2d(p12, x, y)
-        sum += p12( x, y );
-        
-    if (sum)
-        ForEach2d(p12, x, y)
-            p12( x, y ) /= sum;
+    vector<int> pd = p12->getSize();
+    for ( y = 0; y < pd[1]; y++ )
+      for ( x = 0; x < pd[0]; x++ )
+        sum += p12->at( x, y );
 
-    p1 = 0.0;
-    p2 = 0.0;
+    if (sum)
+      for ( y = 0; y < pd[1]; y++ )
+        for ( x = 0; x < pd[0]; x++ )
+          p12->at( x, y ) /= sum;
+
+    *p1 = 0.0;
+    *p2 = 0.0;
     for (y = 0; y < levels; y++)
-        for (x = 0; x < levels; x++)
-        {
-            p1( x ) += p12( x, y );
-            p2( y ) += p12( x, y );
-        }
+      for (x = 0; x < levels; x++)
+      {
+        p1->at( x ) += p12->at( x, y );
+        p2->at( y ) += p12->at( x, y );
+      }
 }
 
 
-void AimsWinParzenPdf(const AimsData<short>& data,
-                      AimsData<float>& p, const AimsData<float>& mask)
+void AimsWinParzenPdf(const rc_ptr<Volume<short> >& data,
+                      rc_ptr<Volume<float> >& p,
+                      const rc_ptr<Volume<float> >& mask)
 {
-    int levels = p.dimX();
+    int levels = p->getSizeX();
 
-    float mini = float( data.minimum() );
-    float maxi = float( data.maximum() );
+    float mini = float( data->min() );
+    float maxi = float( data->max() );
     ASSERT( maxi != mini );
 
     float h = ( maxi - mini ) / levels;
 
-    int sMask = mask.dimX();
+    int sMask = mask->getSizeX();
     ASSERT( sMask % 2 == 1 );
     int i, j, k, n, v, val;
+    vector<int> dim = data->getSize();
 
-    p = 0.0;
+    *p = 0.0;
 
-    ForEach3d( data, i, j, k )
-    {
-        n = int( ( float( data( i, j, k ) ) - mini ) / h );
-        if ( n == levels )
-            n--;
-
-        for ( v = 0; v < sMask; v++ )
+    for( k=0; k<dim[2]; ++k )
+      for( j=0; j<dim[1]; ++j )
+        for( i=0; i<dim[0]; ++i )
         {
+          n = int( ( float( data->at( i, j, k ) ) - mini ) / h );
+          if ( n == levels )
+              n--;
+
+          for ( v = 0; v < sMask; v++ )
+          {
             val = n + v - sMask / 2;
             if ( val >= 0 && val < levels )
-                p( val ) += mask( v );
+              p->at( val ) += mask->at( v );
+          }
         }
-    }
 
     float sum=0.0;
-    int x;
-    ForEach1d(p, x)
-        sum += p(x);
+    int x, np = p->getSizeX();
+
+    for( x=0; x<np; ++x )
+      sum += p->at(x);
     if (sum)
-        ForEach1d(p, x)
-            p(x) /= sum;
+      for( x=0; x<np; ++x )
+        p->at(x) /= sum;
 }
 
-void AimsJointPdf( const AimsData<short>& data1,
-                   const AimsData<short>& data2,
-                   AimsData<float>& p12, 
-                   AimsData<float>& p1, AimsData<float>& p2 )
-{
-    int levels = p12.dimX();
 
-    ASSERT( p12.dimY() == levels && p1.dimX() == levels && p2.dimX() == levels );
+void AimsJointPdf( const rc_ptr<Volume<short> >& data1,
+                   const rc_ptr<Volume<short> >& data2,
+                   rc_ptr<Volume<float> >& p12,
+                   rc_ptr<Volume<float> >& p1, rc_ptr<Volume<float> >& p2 )
+{
+    int levels = p12->getSizeX();
+
+    ASSERT( p12->getSizeY() == levels && p1->getSizeX() == levels
+            && p2->getSizeX() == levels );
 
     // TODO: data1 and data2 must necessarily have the same voxel size. It would
     // probably be better to use the lower voxel sizes and field of view 
     // to determine the step and the grid to use during pdf updates
-    ASSERT( data1.sizeX() == data2.sizeX()
-         && data1.sizeY() == data2.sizeY()
-         && data1.sizeZ() == data2.sizeZ() );
+    ASSERT( data1->getVoxelSize() == data2->getVoxelSize() );
 
-    int dx = min(data1.dimX(), data2.dimX()), 
-        dy = min(data1.dimY(), data2.dimY()), 
-        dz = min(data1.dimZ(), data2.dimZ());
+    int dx = min(data1->getSizeX(), data2->getSizeX()),
+        dy = min(data1->getSizeY(), data2->getSizeY()),
+        dz = min(data1->getSizeZ(), data2->getSizeZ());
 
-    float mini1 = float( data1.minimum() );
-    float maxi1 = float( data1.maximum() );
-    float mini2 = float( data2.minimum() );
-    float maxi2 = float( data2.maximum() );
+    float mini1 = float( data1->min() );
+    float maxi1 = float( data1->max() );
+    float maxi2 = float( data2->max() );
+    float mini2 = float( data2->min() );
 
     double h1 = (( mini1 == maxi1) ? 1 : ( maxi1 - mini1 ) / levels);
     double h2 = (( mini2 == maxi2) ? 1 : ( maxi2 - mini2 ) / levels);
 
     int i, j, k, n1, n2;
 
-    p12 = 0.0;
+    *p12 = 0.0;
 
     for(k = 0; k < dz; ++k)
         for(j = 0; j < dy; ++j)
             for(i = 0; i < dx; ++i)
             {
-                n1 = int( ( float( data1( i, j, k ) ) - mini1 ) / h1 );
-                n2 = int( ( float( data2( i, j, k ) ) - mini2 ) / h2 );
+                n1 = int( ( float( data1->at( i, j, k ) ) - mini1 ) / h1 );
+                n2 = int( ( float( data2->at( i, j, k ) ) - mini2 ) / h2 );
                 if ( n1 == levels )
                     n1--;
                 if ( n2 == levels )
                     n2--;
 
-                p12( n1, n2 )++;
+                p12->at( n1, n2 )++;
             }
 
     float sum=0.0;
     int x, y;
-    ForEach2d( p12, x, y )
-        sum += p12( x, y );
-        
-    if (sum)
-        ForEach2d( p12, x, y )
-            p12( x, y ) /= sum;
+    vector<int> pd = p12->getSize();
 
-    p1 = 0.0;
-    p2 = 0.0;
+    for (y = 0; y<pd[1]; y++)
+      for (x = 0; x<pd[0]; x++)
+        sum += p12->at( x, y );
+
+    if (sum)
+      for (y = 0; y<pd[1]; y++)
+        for (x = 0; x<pd[0]; x++)
+          p12->at( x, y ) /= sum;
+
+    *p1 = 0.0;
+    *p2 = 0.0;
     for ( y = 0; y < levels; y++ )
-        for ( x = 0; x < levels; x++ )
+      for ( x = 0; x < levels; x++ )
         {
             // Due to floatting point arithmetic, probability
             // can be a little bit over 1. Min function is used
             // to fix the issue
-            p1(x) = std::min((double)p1(x) + p12( x, y ), (double)1.0);
-            p2(y) = std::min((double)p2(y) + p12( x, y ), (double)1.0);
+            p1->at(x) = std::min((double)p1->at(x) + p12->at( x, y ),
+                                 (double)1.0);
+            p2->at(y) = std::min((double)p2->at(y) + p12->at( x, y ),
+                                 (double)1.0);
         }
 }
 
 
 
-void AimsPdf( const AimsData<short>& data, AimsData<float>& p )
+void AimsPdf( const rc_ptr<Volume<short> >& data, rc_ptr<Volume<float> >& p )
 {
-    int levels = p.dimX();
+    int levels = p->getSizeX();
 
 
-    float mini = float( data.minimum() );
-    float maxi = float( data.maximum() );
+    float mini = float( data->min() );
+    float maxi = float( data->max() );
     ASSERT( maxi != mini );
 
     float h = ( maxi - mini ) / levels;
 
     int i, j, k, n;
+    vector<int> dim = data->getSize();
 
-    p = 0.0;
+    *p = 0.0;
 
-    ForEach3d(data, i, j, k)
-    {
-        n = int((float(data(i, j, k )) - mini) / h);
-        if (n == levels)
-            n--;
+    for( k=0; k<dim[2]; ++k )
+      for( j=0; j<dim[1]; ++j )
+        for( i=0; i<dim[0]; ++i )
+        {
+          n = int((float(data->at(i, j, k )) - mini) / h);
+          if (n == levels)
+              n--;
 
-        p(n)++;
-    }
+          p->at(n)++;
+        }
 
     float sum=0.0;
-    int x;
-    ForEach1d( p, x )
-        sum += p( x );
-        
+    int x, np=p->getSizeX();
+    for( x=0; x<np; ++x )
+      sum += p->at( x );
+
     if (sum) 
-        ForEach1d( p, x )
-            p( x ) /= sum;
+      for( x=0; x<np; ++x )
+        p->at( x ) /= sum;
 }
 
 
-static float minMask(const AimsData<short>& d)
+static float minMask(const rc_ptr<Volume<short> >& d)
 {
     short mini;
-    AimsData<short>::const_iterator it = d.begin() + d.oFirstPoint();
-    
+    line_NDIterator<short> it( &d->at( 0 ), d->getSize(), d->getStrides() );
+    short *t, *tt;
 
     mini = 32767;
-    int dt = d.dimT(), dz = d.dimZ(), dy =  d.dimY(), dx = d.dimX();
-    for ( int t = 0; t < dt; t++ )
+    for( ; !it.ended(); ++it )
     {
-        for ( int z = 0; z < dz; z++ )
-        {
-            for ( int y = 0; y < dy; y++ )
-            {
-                for ( int x = 0; x < dx; x++ )
-                {
-                    if ( (*it < mini)  && (*it != -32768))
-                        mini = *it;
-                    it++;
-                }
-                it += d.oPointBetweenLine();
-            }
-            it += d.oLineBetweenSlice();
-        }
-        it += d.oSliceBetweenVolume();
+      t = &*it;
+      for( tt=t + it.line_length(); t!=tt; it.inc_line_ptr( t ) )
+        if ( (*t < mini)  && (*t != -32768))
+          mini = *t;
     }
-    
-    return ( (float)mini );           
+
+    return ( (float)mini );
 }
 
 
-void AimsJointMaskPdf(const AimsData<short>& data1,
-                      const AimsData<short>& data2,
-                      AimsData<float>& p12, 
-                      AimsData<float>& p1, AimsData<float>& p2 )
+void AimsJointMaskPdf(const rc_ptr<Volume<short> >& data1,
+                      const rc_ptr<Volume<short> >& data2,
+                      rc_ptr<Volume<float> >& p12,
+                      rc_ptr<Volume<float> >& p1,
+                      rc_ptr<Volume<float> >& p2 )
 {
-    int levels = p12.dimX();
+    int levels = p12->getSizeX();
 
-    ASSERT( p12.dimY() == levels && p1.dimX() == levels && p2.dimX() == levels );
+    ASSERT( p12->getSizeY() == levels && p1->getSizeX() == levels
+            && p2->getSizeX() == levels );
 
     // TODO: data1 and data2 must necessarily have the same voxel size. It would
     // probably be better to use the lower voxel sizes and field of view 
     // to determine the step and the grid to use during pdf updates
-    ASSERT( data1.sizeX() == data2.sizeX()
-         && data1.sizeY() == data2.sizeY()
-         && data1.sizeZ() == data2.sizeZ() );
+    ASSERT( data1->getVoxelSize() == data2->getVoxelSize() );
 
-    int dx = min(data1.dimX(), data2.dimX()), 
-        dy = min(data1.dimY(), data2.dimY()), 
-        dz = min(data1.dimZ(), data2.dimZ());
+    int dx = min(data1->getSizeX(), data2->getSizeX()),
+        dy = min(data1->getSizeY(), data2->getSizeY()),
+        dz = min(data1->getSizeZ(), data2->getSizeZ());
 
-    //  float mini1 = float( data1.minimum() );
+    //  float mini1 = float( data1->min() );
     double mini1 = minMask( data1 );
-    double maxi1 = double( data1.maximum() );
+    double maxi1 = double( data1->max() );
     double mini2 = minMask( data2 );
-    double maxi2 = double( data2.maximum() );
+    double maxi2 = double( data2->max() );
  
     double h1 = (( mini1 == maxi1) ? 1 : ( maxi1 - mini1 ) / levels);
     double h2 = (( mini2 == maxi2) ? 1 : ( maxi2 - mini2 ) / levels);
 
     int i, j, k, n1, n2;
 
-    p12 = 0.0;
+    *p12 = 0.0;
     #ifdef DEBUG
     cout << "DEBUG>>min1 max1 min2 max2 " << mini1 << " " << maxi1 <<" " <<mini2<<" "<<maxi2<<endl;
     #endif
@@ -445,66 +473,72 @@ void AimsJointMaskPdf(const AimsData<short>& data1,
         for(j = 0; j < dy; ++j)
             for(i = 0; i < dx; ++i)
             {
-                if (data1(i, j, k ) != short(-32768) && data2(i,j,k) != short(-32768))
+                if (data1->at(i, j, k ) != short(-32768) && data2->at(i,j,k) != short(-32768))
                 {
-                    n1 = int( ( double( data1( i, j, k ) ) - mini1 ) / h1 );
-                    n2 = int( ( double( data2( i, j, k ) ) - mini2 ) / h2 );
+                    n1 = int( ( double( data1->at( i, j, k ) ) - mini1 ) / h1 );
+                    n2 = int( ( double( data2->at( i, j, k ) ) - mini2 ) / h2 );
                     if ( n1 == levels )
                         n1--;
                     if ( n2 == levels )
                         n2--;
-                    
-                    p12( n1, n2 )++;
+
+                    p12->at( n1, n2 )++;
                 }
             }
 
     double sum=0.0;
     int x, y;
+    vector<int> pd = p12->getSize();
     
-    ForEach2d( p12, x, y )
-        sum += p12( x, y );
-    
-    if (sum)
-        ForEach2d( p12, x, y )
-            p12( x, y ) /= float(sum);
+    for(y = 0; y<pd[1]; ++y)
+      for(x = 0; x<pd[0]; ++x)
+        sum += p12->at( x, y );
 
-    p1 = 0.0;
-    p2 = 0.0;
+    if (sum)
+      for(y = 0; y<pd[1]; ++y)
+        for(x = 0; x<pd[0]; ++x)
+          p12->at( x, y ) /= float(sum);
+
+    *p1 = 0.0;
+    *p2 = 0.0;
     for( y = 0; y < levels; y++)
         for ( x = 0; x < levels; x++ )
         {
             // Due to floatting point arithmetic, probability
             // can be a little bit over 1. Min function is used
             // to fix the issue
-            p1(x) = std::min((double)p1(x) + p12( x, y ), (double)1.0);
-            p2(y) = std::min((double)p2(y) + p12( x, y ), (double)1.0);
+            p1->at(x) = std::min((double)p1->at(x) + p12->at( x, y ),
+                                 (double)1.0);
+            p2->at(y) = std::min((double)p2->at(y) + p12->at( x, y ),
+                                 (double)1.0);
         }
 }
 
 
-void AimsJointPVPdf(const AimsData<short>& data1,
-                    const AimsData<short>& data2,
-                    const AimsData<PVItem>& comb,
-                    AimsData<float>& p12, 
-                    AimsData<float>& p1, AimsData<float>& p2 )
+void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
+                    const rc_ptr<Volume<short> >& data2,
+                    const rc_ptr<Volume<PVItem> >& comb,
+                    rc_ptr<Volume<float> >& p12,
+                    rc_ptr<Volume<float> >& p1,
+                    rc_ptr<Volume<float> >& p2 )
 {
-    int levels = p12.dimX();
+    int levels = p12->getSizeX();
     const int  TWO_THEN_SIXTEEN  = 65536;
     const float TWO_THEN_SIXTEEN_CUBE = 65536.0 * 65536.0 * 65536.0;
 
 
-    ASSERT( p12.dimY() == levels &&
-        p1.dimX() == levels &&
-        p2.dimX() == levels );
+    ASSERT( p12->getSizeY() == levels &&
+        p1->getSizeX() == levels &&
+        p2->getSizeX() == levels );
     
-    //   float mini1 = float( data1.minimum() );
+    //   float mini1 = float( data1->min() );
     float mini1 = minMask( data1 );
-    float maxi1 = float( data1.maximum() );
+    float maxi1 = float( data1->max() );
     ASSERT( maxi1 != mini1 );
 
     //   float mini2 = float( data2.minimum() );
     float mini2 = minMask( data2 );
-    float maxi2 = float( data2.maximum() );
+    float maxi2 = float( data2->max() );
     if ( maxi2 == mini2 )
     {
         cerr << "Warning ! AimsJointPdf : maxi2 == mini2" << endl;
@@ -518,125 +552,124 @@ void AimsJointPVPdf(const AimsData<short>& data1,
     #endif
     int  n1, n2;
 
-    p12 = 0.0;
+    *p12 = 0.0;
 
-    int dx = data2.dimX(); int oS = data2.oSlice();
-
-    AimsData<PVItem>::const_iterator it;
-    AimsData<short>::const_iterator  it1;
-    AimsData<short>::const_iterator  n2ptr;
-    float                            tmp;
+    const_NDIterator<PVItem> it( &comb->at( 0 ), comb->getSize(),
+                                 comb->getStrides() );
+    const_NDIterator<short>  it1( &data1->at( 0 ), data1->getSize(),
+                                  data1->getStrides() );
+    float                    tmp;
 
     int pvf = 0;
-    for (it = comb.begin(), it1 = data1.begin(); it < comb.end(); it++, it1++, pvf++)
-        if ( it->offset !=  -1L && *it1 != -32768)
+    for( ; !it.ended(); ++it, ++it1, pvf++)
+        if ( (*it).offset != -1L && *it1 != -32768)
         {
             n1 = (int) ((*it1 - mini1)/h1);
             if (n1 == levels) n1--;
 
-            n2ptr =  data2.begin() + it->offset;
-            n2 = (int) (( *n2ptr - mini2)/h2);
-            if (n2 == levels) n2--;     
-            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
-                (float)(TWO_THEN_SIXTEEN - it->y) *
-                (float)(TWO_THEN_SIXTEEN - it->z);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
-
-
-            n2ptr++;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            vector<int> pos = it.position();
+            vector<int> vp = pos; // orig position
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(it->x) *
-                (float)(TWO_THEN_SIXTEEN - it->y) *
-                (float)(TWO_THEN_SIXTEEN - it->z);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            tmp = (float)(TWO_THEN_SIXTEEN - pos[0]) *
+                (float)(TWO_THEN_SIXTEEN - pos[1]) *
+                (float)(TWO_THEN_SIXTEEN - pos[2]);
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
 
-            n2ptr += dx;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            ++pos[0];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(it->x) *
-                (float)(it->y) *
-                (float)(TWO_THEN_SIXTEEN - it->z);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            tmp = (float)(vp[0]) *
+                (float)(TWO_THEN_SIXTEEN - vp[1]) *
+                (float)(TWO_THEN_SIXTEEN - vp[2]);
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
 
-            n2ptr--;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            ++pos[1];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
-                (float)(it->y) *
-                (float)(TWO_THEN_SIXTEEN - it->z);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            tmp = (float)(vp[0]) *
+                (float)(vp[1]) *
+                (float)(TWO_THEN_SIXTEEN - vp[2]);
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            n2ptr += oS - dx;
-            n2 = (int) (( *n2ptr - mini2)/h2);
-            if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
-                (float)(TWO_THEN_SIXTEEN - it->y)*
-                (float)(it->z);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            n2ptr++;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            --pos[0];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(it->x) * 
-                (float)(TWO_THEN_SIXTEEN - it->y) *
-                (float)(it->z);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            tmp = (float)(TWO_THEN_SIXTEEN - vp[0]) *
+                (float)(vp[1]) *
+                (float)(TWO_THEN_SIXTEEN - vp[2]);
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            n2ptr +=dx;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            ++pos[2];
+            --pos[1];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(it->x)*
-                (float)(it->y)*
-                (float)(it->z);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            tmp = (float)(TWO_THEN_SIXTEEN - vp[0]) *
+                (float)(TWO_THEN_SIXTEEN - vp[1])*
+                (float)(vp[2]);
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            n2ptr--;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            ++pos[0];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
-                (float)(it->y)*
-                (float)(it->z);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;                  
+            tmp = (float)(vp[0]) *
+                (float)(TWO_THEN_SIXTEEN - vp[1]) *
+                (float)(vp[2]);
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+
+            ++pos[1];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            if (n2 == levels) n2--;
+            tmp = (float)(vp[0])*
+                (float)(vp[1])*
+                (float)(vp[2]);
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+
+            --pos[0];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            if (n2 == levels) n2--;
+            tmp = (float)(TWO_THEN_SIXTEEN - vp[0]) *
+                (float)(vp[1])*
+                (float)(vp[2]);
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
         }
     
 
     // Normalization
-    float sum=0.0;
-    int x, y;
-    ForEach2d( p12, x, y )
-        sum += p12( x, y );
-        
+    float sum = carto::sum( p12 );
+
     if (sum)
-        ForEach2d( p12, x, y )
-            p12( x, y ) /= sum;
+      *p12 /= sum;
 
     // Partial pdf's
-    p1 = 0.0;
-    p2 = 0.0;
+    *p1 = 0.0;
+    *p2 = 0.0;
+    int x, y;
     for ( y = 0; y < levels; y++ )
         for ( x = 0; x < levels; x++ )
         {
-            p1( x ) += p12( x, y );
-            p2( y ) += p12( x, y );
+            p1->at( x ) += p12->at( x, y );
+            p2->at( y ) += p12->at( x, y );
         }
 }
 
 void AimsJointPVPdf(const aims::BucketMap<short>&               data1,
-                    const AimsData<short>&                      data2,
-                    const vector< PVVectorItem  >& comb,
-                    AimsData<float>& p12, 
-                    AimsData<float>& p1, AimsData<float>& p2 )
+                    const rc_ptr<Volume<short> >                data2,
+                    const vector< PVVectorItem >& comb,
+                    rc_ptr<Volume<float> >& p12,
+                    rc_ptr<Volume<float> >& p1,
+                    rc_ptr<Volume<float> >& p2 )
 {
     const int TWO_THEN_SIXTEEN = 65536;
     const float TWO_THEN_SIXTEEN_CUBE = 65536.0 * 65536.0 * 65536.0;
-    int levels = p12.dimX();
+    int levels = p12->getSizeX();
 
-    ASSERT(p12.dimY() == levels &&
-           p1.dimX() == levels &&
-           p2.dimX() == levels);
+    ASSERT(p12->getSizeY() == levels &&
+           p1->getSizeX() == levels &&
+           p2->getSizeX() == levels);
     
     BucketMap<short>::Bucket::const_iterator itb, itblast= data1.begin()->second.end() ;
     
@@ -649,7 +682,7 @@ void AimsJointPVPdf(const aims::BucketMap<short>&               data1,
         }
 
 
-    float maxi2 = data2.maximum();
+    float maxi2 = data2->max();
     float mini2 = minMask( data2 );
 
 
@@ -665,12 +698,9 @@ void AimsJointPVPdf(const aims::BucketMap<short>&               data1,
 
 
     int  n1, n2;
-    int dx = data2.dimX(); int oS = data2.oSlice();
-    p12 = 0.0;
+    *p12 = 0.0;
 
     float                            tmp;
-
-    AimsData<short>::const_iterator  n2ptr;
 
     int i;
     for(itb=data1.begin()->second.begin(), i=0; itb != itblast; ++itb, ++i)
@@ -683,97 +713,98 @@ void AimsJointPVPdf(const aims::BucketMap<short>&               data1,
             n1 = (int) ((itb->second - mini1)/h1);
             if (n1 == levels) n1--;
 
-            n2ptr =  data2.begin() + (comb[i]).offset;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            vector<int> pos( 3 );
+            pos[0] = comb[i].x;
+            pos[1] = comb[i].y;
+            pos[2] = comb[i].z;
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;     
             tmp = (float)(TWO_THEN_SIXTEEN - deltax) *
                 (float)(TWO_THEN_SIXTEEN - deltay) *
                 (float)(TWO_THEN_SIXTEEN - deltaz);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
 
-
-            n2ptr++;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            ++pos[0];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
             tmp = (float)(deltax) *
                 (float)(TWO_THEN_SIXTEEN - deltay) *
                 (float)(TWO_THEN_SIXTEEN - deltaz);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
 
-            n2ptr += dx;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            ++pos[1];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
             tmp = (float)(deltax) *
                 (float)(deltay) *
                 (float)(TWO_THEN_SIXTEEN - deltaz);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
 
-            n2ptr--;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            --pos[0];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
             tmp = (float)(TWO_THEN_SIXTEEN - deltax) *
                 (float)(deltay) *
                 (float)(TWO_THEN_SIXTEEN - deltaz);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            n2ptr += oS - dx;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            ++pos[2];
+            --pos[1];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
             tmp = (float)(TWO_THEN_SIXTEEN - deltax) *
                 (float)(TWO_THEN_SIXTEEN - deltay)*
                 (float)(deltaz);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            n2ptr++;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            ++pos[0];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
             tmp = (float)(deltax) * 
                 (float)(TWO_THEN_SIXTEEN - deltay) *
                 (float)(deltaz);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            n2ptr +=dx;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            ++pos[1];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
             tmp = (float)(deltax)*
                 (float)(deltay)*
                 (float)(deltaz);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            n2ptr--;
-            n2 = (int) (( *n2ptr - mini2)/h2);
+            --pos[0];
+            n2 = (int) (( data2->at( pos ) - mini2)/h2);
             if (n2 == levels) n2--;
             tmp = (float)(TWO_THEN_SIXTEEN - deltax) *
                 (float)(deltay)*
                 (float)(deltaz);
-            p12( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;              
+            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
         }
 
     
     // Normalization
-    float sum=0.0;
+    float sum = carto::sum( p12 );
     int x, y;
-    ForEach2d( p12, x, y )
-        sum += p12( x, y );
     if (sum)
-        ForEach2d( p12, x, y ) p12( x, y ) /= sum;
+      *p12 /= sum;
 
     // Partial pdf's
-    p1 = 0.0;
-    p2 = 0.0;
+    *p1 = 0.0;
+    *p2 = 0.0;
     for ( y = 0; y < levels; y++ )
         for ( x = 0; x < levels; x++ )
         {
-            p1( x ) += p12( x, y );
-            p2( y ) += p12( x, y );
+            p1->at( x ) += p12->at( x, y );
+            p2->at( y ) += p12->at( x, y );
         }
 }
 
-void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
-                AimsData<float> &pdf, unsigned int k)
+void AimsGeneralizedKnnParzenPdf( aims::knn::Database &db,
+                                  rc_ptr<Volume<float> > &pdf, unsigned int k )
 {
     int        x, y, z;
     double        dx, dy, dz;
@@ -784,38 +815,41 @@ void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
     std::pair<std::vector<unsigned int>, std::vector<double> > res;
     knn.precompute();
 
-    pdf = 0.;
+    *pdf = 0.;
     sum = 0.;
 
-    ForEach3d(pdf, x, y, z )
-    {
-        vec[0] = x;
-        vec[1] = y;
-        vec[2] = z;
-        res = knn.find(vec);
-        h = res.second[0];
-        if (h == 0) h = 10e-10;
-        const std::vector<unsigned int> &id = res.first;
+    vector<int> pd = pdf->getSize();
 
-        for (int i = id.size() - 1; i >= 0; --i)
+    for ( z=0; z<pd[2]; ++z )
+      for ( y=0; y<pd[1]; ++y )
+        for ( x=0; x<pd[0]; ++x )
         {
-            const double	*d = db[id[i]];
-            dx = (x - d[0]);
-            dy = (y - d[1]);
-            dz = (z - d[2]);
-            dist = dx * dx + dy * dy + dz * dz;
-            val = parzen2(dist, h, dim);
-            pdf(x, y, z) += val;
-            sum += val;
+          vec[0] = x;
+          vec[1] = y;
+          vec[2] = z;
+          res = knn.find(vec);
+          h = res.second[0];
+          if (h == 0) h = 10e-10;
+          const std::vector<unsigned int> &id = res.first;
+
+          for (int i = id.size() - 1; i >= 0; --i)
+          {
+              const double	*d = db[id[i]];
+              dx = (x - d[0]);
+              dy = (y - d[1]);
+              dz = (z - d[2]);
+              dist = dx * dx + dy * dy + dz * dz;
+              val = parzen2(dist, h, dim);
+              pdf->at(x, y, z) += val;
+              sum += val;
+          }
         }
-    }
     if (sum)
-        ForEach3d(pdf, x, y, z )
-            pdf(x, y, z) /= sum;
+      *pdf /= sum;
 }
 
 void  AimsKnnPdf(aims::knn::Database &db,
-      AimsData<float> &pdf, unsigned int k)
+      rc_ptr<Volume<float> > &pdf, unsigned int k)
 {
     int        x, y, z;
     double        h, sum, val;
@@ -825,26 +859,29 @@ void  AimsKnnPdf(aims::knn::Database &db,
     std::pair<std::vector<unsigned int>, std::vector<double> > res;
     knn.precompute();
 
-    pdf = 0.;
+    *pdf = 0.;
     sum = 0.;
 
-    ForEach3d(pdf, x, y, z )
-    {
-        vec[0] = x;
-        vec[1] = y;
-        vec[2] = z;
-        res = knn.find(vec);
-        h = res.second[0];
-        if (h == 0) h = 10e-10;
-        h = pow(h, dim); // proportional to volume
-        val = k / h;
-        pdf(x, y, z) = val;
-        sum += val;
-    }
+    vector<int> pd = pdf->getSize();
+
+    for ( z=0; z<pd[2]; ++z )
+      for ( y=0; y<pd[1]; ++y )
+        for ( x=0; x<pd[0]; ++x )
+        {
+          vec[0] = x;
+          vec[1] = y;
+          vec[2] = z;
+          res = knn.find(vec);
+          h = res.second[0];
+          if (h == 0) h = 10e-10;
+          h = pow(h, dim); // proportional to volume
+          val = k / h;
+          pdf->at(x, y, z) = val;
+          sum += val;
+        }
     
     if (sum)
-        ForEach3d(pdf, x, y, z )
-            pdf(x, y, z) /= sum;
+      *pdf /= sum;
 }
 
 
