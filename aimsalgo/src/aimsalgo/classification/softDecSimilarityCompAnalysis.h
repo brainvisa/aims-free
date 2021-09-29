@@ -36,7 +36,7 @@
 #ifndef SOFT_DECISION_SIMILAR_COMPONENT_H
 #define SOFT_DECISION_SIMILAR_COMPONENT_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <vector>
 #include <string.h>
 
@@ -49,9 +49,9 @@ public:
 
   void init( ) ;
   
-  double doIt( const AimsData<float>& indivMatrix ) ;
+  double doIt( const carto::rc_ptr<carto::Volume<float> >& indivMatrix ) ;
   
-  const AimsData<double>& getRnk() const 
+  const carto::VolumeRef<double>& getRnk() const
   {
     return _Rnk ;
   }
@@ -89,32 +89,32 @@ private:
   std::vector<short> _labels ;
   std::vector<bool> _valids ;
   
-  double lnLikelyhood( const AimsData<float>& indivMatrix ) ;
-  void expectationStep( const AimsData<float>& indivMatrix ) ;
-  void maximisationStep( const AimsData<float>& indivMatrix ) ;
+  double lnLikelyhood( const carto::rc_ptr<carto::Volume<float> >& indivMatrix ) ;
+  void expectationStep( const carto::rc_ptr<carto::Volume<float> >& indivMatrix ) ;
+  void maximisationStep( const carto::rc_ptr<carto::Volume<float> >& indivMatrix ) ;
 
   bool stopCriterion( double threshold ) ;
 
-  inline double similarity( const AimsData<float>& indivMatrix, int ind, int k ) ;
-  inline double projection( const AimsData<float>& indivMatrix, int ind, int k, 
-			    const AimsData<double>& newek ) ;
+  inline double similarity( const carto::rc_ptr<carto::Volume<float> >& indivMatrix, int ind, int k ) ;
+  inline double projection( const carto::rc_ptr<carto::Volume<float> >& indivMatrix, int ind, int k,
+			    const carto::rc_ptr<carto::Volume<double> >& newek ) ;
   std::vector<double> _pk ; // class weight
-  std::vector< AimsData<double> > _ek ; // class mean normalized vect
+  std::vector< carto::VolumeRef<double> > _ek ; // class mean normalized vect
   std::vector<double> _An ;
   std::vector<double> _newpk ; // class weight
-  std::vector< AimsData<double> > _newek ; // class mean normalized vect
+  std::vector< carto::VolumeRef<double> > _newek ; // class mean normalized vect
   std::vector<double> _newAn ;
 
-  AimsData<double> _Rnk ; // posterior proba of classes regarding to data
+  carto::VolumeRef<double> _Rnk ; // posterior proba of classes regarding to data
 } ;
 
 double 
-SoftDecisionSimilarComponent::similarity( const AimsData<float>& indivMatrix, int ind, int k )
+SoftDecisionSimilarComponent::similarity( const carto::rc_ptr<carto::Volume<float> >& indivMatrix, int ind, int k )
 {
   double norm = 0., sim = 0. ;
   for( int t = 0 ; t < _nbVar ; ++t ){
-    norm += indivMatrix( ind, t ) * indivMatrix( ind, t ) ;
-    sim += indivMatrix( ind, t ) * _ek[k](t) ;
+    norm += indivMatrix->at( ind, t ) * indivMatrix->at( ind, t ) ;
+    sim += indivMatrix->at( ind, t ) * _ek[k](t) ;
   }
   if( norm <= 0. )
     return 0. ;
@@ -122,14 +122,15 @@ SoftDecisionSimilarComponent::similarity( const AimsData<float>& indivMatrix, in
 }
 
 double 
-SoftDecisionSimilarComponent::projection( const AimsData<float>& indivMatrix,
-                                          int ind, int /* k */,
-                                          const AimsData<double>& newek )
+SoftDecisionSimilarComponent::projection(
+  const carto::rc_ptr<carto::Volume<float> >& indivMatrix,
+  int ind, int /* k */,
+  const carto::rc_ptr<carto::Volume<double> >& newek )
 {
   double proj = 0. ;
   for( int t = 0 ; t < _nbVar ; ++t ){
-    proj += indivMatrix( ind, t ) * newek(t) ;
-    //std::cout << "proj : " << proj << " with indMat = " << indivMatrix( ind, t ) << " && newek[k](t) = " << newek(t) << std::endl ;
+    proj += indivMatrix->at( ind, t ) * newek->at(t) ;
+    //std::cout << "proj : " << proj << " with indMat = " << indivMatrix->at( ind, t ) << " && newek(k)(t) = " << newek->at(t) << std::endl ;
   }
   
   return proj ;

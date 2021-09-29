@@ -33,6 +33,11 @@
 
 
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/classification/softDecSimilarityCompAnalysis.h>
 #include <aims/io/finder.h>
 #include <aims/io/writer.h>
@@ -42,7 +47,6 @@
 #include <aims/bucket/bucketMap.h>
 #include <cartobase/type/string_conversion.h>
 #include <aims/math/svd.h>
-#include <aims/data/data.h>
 #include <vector>
 #include <iostream>
 #include <iomanip>
@@ -68,14 +72,14 @@ SoftDecisionSimilarComponent::init()
 {
   _isInit = true ;
   _pk = vector<double>( _nbClasses, 1. / _nbClasses ) ;
-  _ek = vector< AimsData<double> >( _nbClasses ) ;
+  _ek = vector< VolumeRef<double> >( _nbClasses ) ;
   
   _newpk = vector<double>( _nbClasses, 1. / _nbClasses ) ;
-  _newek = vector< AimsData<double> >( _nbClasses ) ;
+  _newek = vector< VolumeRef<double> >( _nbClasses ) ;
 
   for( int k = 0 ; k < _nbClasses ; ++k ){
-    _ek[k] = AimsData<double>( _nbVar ) ;
-    _newek[k] = AimsData<double>( _nbVar ) ;
+    _ek[k] = VolumeRef<double>( _nbVar ) ;
+    _newek[k] = VolumeRef<double>( _nbVar ) ;
     double norm2 = 0. ;
     for( int t = 0 ; t < _nbVar ; ++t ){
       _ek[k](t) = UniformRandom() ;
@@ -90,13 +94,13 @@ SoftDecisionSimilarComponent::init()
 }
 
 double 
-SoftDecisionSimilarComponent::doIt( const AimsData<float>& indivMatrix )
+SoftDecisionSimilarComponent::doIt( const rc_ptr<Volume<float> >& indivMatrix )
 {
-  if( indivMatrix.dimY() != _nbVar ){
+  if( indivMatrix->getSizeY() != _nbVar ){
     cerr << "Incoherent input indiv matrix" << endl ;
     throw runtime_error("Incoherent input indiv matrix") ;
   }
-  _nbInd = indivMatrix.dimX() ;
+  _nbInd = indivMatrix->getSizeX() ;
   _An = vector<double>( _nbInd, 1. ) ;
   _newAn = vector<double>( _nbInd, 1. ) ;
   _valids = vector<bool>( _nbInd ) ;
@@ -105,7 +109,7 @@ SoftDecisionSimilarComponent::doIt( const AimsData<float>& indivMatrix )
   for(int ind = 0 ; ind < _nbInd ; ++ind ){
     _valids[ind] = false ;
     for( int t = 0 ; t < _nbVar ; ++t )
-      if( indivMatrix(ind, t) != 0. )
+      if( indivMatrix->at(ind, t) != 0. )
 	_valids[ind] = true ;
     if(_valids[ind] )
       ++_corrNbInd ;
@@ -121,7 +125,7 @@ SoftDecisionSimilarComponent::doIt( const AimsData<float>& indivMatrix )
       num += proj * proj ;
       double noise = 0. ;
       for( int t = 0 ; t < _nbVar ; ++t ){
-	double val = indivMatrix(ind, t) - proj * _newek[k](t) ;
+	double val = indivMatrix->at(ind, t) - proj * _newek[k](t) ;
 	noise += val * val ;
       }
       den += noise ;
@@ -132,7 +136,7 @@ SoftDecisionSimilarComponent::doIt( const AimsData<float>& indivMatrix )
   
   bool notFinished = true ;
   int iter = 0 ;
-  _Rnk = AimsData<double>(indivMatrix.dimX(), _nbClasses ) ;
+  _Rnk = VolumeRef<double>(indivMatrix->getSizeX(), _nbClasses ) ;
   double lnL = 0. ;
   cout << endl ;
   while( notFinished ){
@@ -153,7 +157,7 @@ SoftDecisionSimilarComponent::doIt( const AimsData<float>& indivMatrix )
 
 
 void 
-SoftDecisionSimilarComponent::expectationStep( const AimsData<float>& indivMatrix ) 
+SoftDecisionSimilarComponent::expectationStep( const rc_ptr<Volume<float> >& indivMatrix )
 {
   vector<double> val( _nbVar ) ;
   for( int ind = 0 ; ind < _nbInd ; ++ind ){
@@ -182,12 +186,12 @@ SoftDecisionSimilarComponent::expectationStep( const AimsData<float>& indivMatri
 }
 
 void 
-SoftDecisionSimilarComponent::maximisationStep( const AimsData<float>& indivMatrix )
+SoftDecisionSimilarComponent::maximisationStep( const rc_ptr<Volume<float> >& indivMatrix )
 {
   _newpk = std::vector<double>( _nbClasses, 0. ) ;
-  _newek = std::vector< AimsData<double> >( _nbClasses ) ; 
+  _newek = std::vector< VolumeRef<double> >( _nbClasses ) ;
   for( int k = 0 ; k < _nbClasses ; ++k )
-    _newek[k] = AimsData<double>( _nbVar ) ;
+    _newek[k] = VolumeRef<double>( _nbVar ) ;
   _newAn = std::vector<double>( _nbInd, 0. ) ;
   
   // maximization step : pk
@@ -205,12 +209,12 @@ SoftDecisionSimilarComponent::maximisationStep( const AimsData<float>& indivMatr
     if( _valids[ind] ){
       double normInd = 0. ;
       for( int t = 0 ; t < _nbVar ; ++t )
-	normInd += indivMatrix(ind, t) * indivMatrix(ind, t) ;
+	normInd += indivMatrix->at(ind, t) * indivMatrix->at(ind, t) ;
       normInd = sqrt( normInd ) ;
       if( normInd != 0. )
 	for( int k = 0 ; k < _nbClasses ; ++k )
 	  for( int t = 0 ; t < _nbVar ; ++t ){
-	    _newek[k](t) += _Rnk(ind, k) * _An[ind] / normInd * indivMatrix(ind, t) ;
+	    _newek[k](t) += _Rnk(ind, k) * _An[ind] / normInd * indivMatrix->at(ind, t) ;
 	  }
     }
   }
@@ -230,12 +234,12 @@ SoftDecisionSimilarComponent::maximisationStep( const AimsData<float>& indivMatr
     }
   }
 
-  AimsData<double> eks( _nbClasses, _nbVar ) ;
+  VolumeRef<double> eks( _nbClasses, _nbVar ) ;
   for( int k = 0 ; k < _nbClasses ; ++k )
     for( int t = 0 ; t < _nbVar ; ++t ){
       eks(k, t) = _newek[k](t) ;
     }
-  Writer< AimsData<double> > wriEks( "ek.ima") ;
+  Writer< VolumeRef<double> > wriEks( "ek.ima") ;
   wriEks.write( eks ) ;
 
 
@@ -251,7 +255,7 @@ SoftDecisionSimilarComponent::maximisationStep( const AimsData<float>& indivMatr
       num += _Rnk(ind, k) * proj * proj ;
       double noise = 0. ;
       for( int t = 0 ; t < _nbVar ; ++t ){
-	double val = indivMatrix(ind, t) - proj * _newek[k](t) ;
+	double val = indivMatrix->at(ind, t) - proj * _newek[k](t) ;
 	noise += val * val ;
       }
       //noise /= _nbVar ;
@@ -267,7 +271,7 @@ SoftDecisionSimilarComponent::maximisationStep( const AimsData<float>& indivMatr
 }
 
 double 
-SoftDecisionSimilarComponent::lnLikelyhood( const AimsData<float>& indivMatrix )
+SoftDecisionSimilarComponent::lnLikelyhood( const rc_ptr<Volume<float> >& indivMatrix )
 {
   //cout << "lnLikely" << endl ;
   double lnLikely = 0. ;
