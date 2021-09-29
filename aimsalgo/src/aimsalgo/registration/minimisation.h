@@ -12,14 +12,8 @@
 #define AIMS_REGISTRATION_MINIMISATION_H
 
 
-#include <aims/data/data_g.h>
-#include <aims/resampling/motion.h>
-
-
-#include <aims/math/math_g.h>
-#include <vector>
-
 #include <aims/registration/displacement_field.h>
+#include <aims/resampling/motion.h>
 
 
 class Minimisation
