@@ -81,7 +81,6 @@ PSUBDIRS = \
     AimsRegisterFFDApply           \
     AimsReplaceLevel               \
     AimsResample                   \
-    AimsSimilarComponentAnalysisSegmentation \
     AimsSegmentsToMesh             \
     AimsSNR \
     AimsSphereDistribution         \
