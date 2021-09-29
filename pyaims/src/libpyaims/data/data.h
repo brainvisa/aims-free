@@ -34,21 +34,9 @@
 #ifndef PYAIMS_DATA_DATA_H
 #define PYAIMS_DATA_DATA_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/rgb/rgb.h>
 #include <aims/vector/vector.h>
-
-typedef AimsData<int8_t> AimsData_S8;
-typedef AimsData<uint8_t> AimsData_U8;
-typedef AimsData<int16_t> AimsData_S16;
-typedef AimsData<uint16_t> AimsData_U16;
-typedef AimsData<int32_t> AimsData_S32;
-typedef AimsData<uint32_t> AimsData_U32;
-typedef AimsData<float> AimsData_FLOAT;
-typedef AimsData<double> AimsData_DOUBLE;
-typedef AimsData<AimsRGB> AimsData_RGB;
-typedef AimsData<AimsRGBA> AimsData_RGBA;
-typedef AimsData<Point3df> AimsData_POINT3DF;
 
 typedef carto::Volume<int8_t> Volume_S8;
 typedef carto::Volume<uint8_t> Volume_U8;

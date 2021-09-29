@@ -1,5 +1,10 @@
 add_subdirectory( aimsalgo )
 set(HEADERS ${AIMSALGO_HEADERS} ${PUBLIC_HEADERS} PARENT_SCOPE)
+
+# don't warn on obsolete classes within this library: we still provide obsolete
+# features so we have to build them without warnings
+add_definitions( "-DAIMSDATA_CLASS_NO_DEPREC_WARNING=1" )
+
 #------------------------------------------------------------------------------
 # Build targets for commands by looking into directories listed in src.pro
 #------------------------------------------------------------------------------

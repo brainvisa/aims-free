@@ -13,12 +13,6 @@ class MaskLinearResampler_S16 : Resampler_S16
   #define PYAIMSALGOSIP_MASKLINEARRESAMPLER_S16_DEFINED
   typedef aims::MaskLinearResampler<int16_t> MaskLinearResampler_S16;
   #endif
-
-  #ifndef PYAIMSSIP_AIMSDATA_S16_DEFINED
-  #define PYAIMSSIP_AIMSDATA_S16_DEFINED
-  typedef AimsData<int16_t> AimsData_S16;
-  #endif
-
 %End
 %Docstring
 Volume resampler using linear (order 1) interpolation.

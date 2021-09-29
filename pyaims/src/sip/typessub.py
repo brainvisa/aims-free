@@ -1042,7 +1042,12 @@ typessub = {'bool':
                'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_BOOL',
                'sipClass': 'AimsData_BOOL',
-               'typeinclude': '#include <aims/data/data.h>',
+               'typeinclude': '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
                'inline int pyaimsVolume_BOOL_Check( PyObject* o )\n'
@@ -1066,7 +1071,12 @@ typessub = {'bool':
                'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_S8',
                'sipClass': 'AimsData_S8',
-               'typeinclude': '#include <aims/data/data.h>',
+               'typeinclude': '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_S8_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_S8_CHECK_DEFINED\n'
                'inline int pyaimsVolume_S8_Check( PyObject* o )\n'
@@ -1090,7 +1100,12 @@ typessub = {'bool':
                'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_U8',
                'sipClass': 'AimsData_U8',
-               'typeinclude': '#include <aims/data/data.h>',
+               'typeinclude': '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_U8_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_U8_CHECK_DEFINED\n'
                'inline int pyaimsVolume_U8_Check( PyObject* o )\n'
@@ -1114,7 +1129,12 @@ typessub = {'bool':
                'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_S16',
                'sipClass': 'AimsData_S16',
-               'typeinclude': '#include <aims/data/data.h>',
+               'typeinclude': '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_S16_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_S16_CHECK_DEFINED\n'
                'inline int pyaimsVolume_S16_Check( PyObject* o )\n'
@@ -1138,7 +1158,12 @@ typessub = {'bool':
                'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_U16',
                'sipClass': 'AimsData_U16',
-               'typeinclude': '#include <aims/data/data.h>',
+               'typeinclude': '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_U16_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_U16_CHECK_DEFINED\n'
                'inline int pyaimsVolume_U16_Check( PyObject* o )\n'
@@ -1162,7 +1187,12 @@ typessub = {'bool':
                'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_S32',
                'sipClass': 'AimsData_S32',
-               'typeinclude': '#include <aims/data/data.h>',
+               'typeinclude': '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_S32_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_S32_CHECK_DEFINED\n'
                'inline int pyaimsVolume_S32_Check( PyObject* o )\n'
@@ -1186,7 +1216,12 @@ typessub = {'bool':
                'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_U32',
                'sipClass': 'AimsData_U32',
-               'typeinclude': '#include <aims/data/data.h>',
+               'typeinclude': '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_U32_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_U32_CHECK_DEFINED\n'
                'inline int pyaimsVolume_U32_Check( PyObject* o )\n'
@@ -1210,7 +1245,12 @@ typessub = {'bool':
                'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_FLOAT',
                'sipClass': 'AimsData_FLOAT',
-               'typeinclude': '#include <aims/data/data.h>',
+               'typeinclude': '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_FLOAT_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_FLOAT_CHECK_DEFINED\n'
                'inline int pyaimsVolume_FLOAT_Check( PyObject* o )\n'
@@ -1234,7 +1274,12 @@ typessub = {'bool':
                'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_DOUBLE',
                'sipClass': 'AimsData_DOUBLE',
-               'typeinclude': '#include <aims/data/data.h>',
+               'typeinclude': '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_DOUBLE_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_DOUBLE_CHECK_DEFINED\n'
                'inline int pyaimsVolume_DOUBLE_Check( PyObject* o )\n'
@@ -1259,7 +1304,13 @@ typessub = {'bool':
                'PyType': 'AimsData_RGB',
                'sipClass': 'AimsData_RGB',
                'typeinclude':
-               '#include <aims/data/data.h>\n#include <aims/rgb/rgb.h>',
+               '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>'
+               '#include <aims/rgb/rgb.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_RGB_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_RGB_CHECK_DEFINED\n'
                'inline int pyaimsVolume_RGB_Check( PyObject* o )\n'
@@ -1284,7 +1335,13 @@ typessub = {'bool':
                'PyType': 'AimsData_RGBA',
                'sipClass': 'AimsData_RGBA',
                'typeinclude':
-               '#include <aims/data/data.h>\n#include <aims/rgb/rgb.h>',
+               '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>'
+               '#include <aims/rgb/rgb.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_RGBA_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_RGBA_CHECK_DEFINED\n'
                'inline int pyaimsVolume_RGBA_Check( PyObject* o )\n'
@@ -1309,7 +1366,13 @@ typessub = {'bool':
                'PyType': 'AimsData_HSV',
                'sipClass': 'AimsData_HSV',
                'typeinclude':
-               '#include <aims/data/data.h>\n#include <aims/hsv/hsv.h>',
+               '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>'
+               '#include <aims/hsv/hsv.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_HSV_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_HSV_CHECK_DEFINED\n'
                'inline int pyaimsVolume_HSV_Check( PyObject* o )\n'
@@ -1334,7 +1397,13 @@ typessub = {'bool':
                'PyType': 'AimsData_CFLOAT',
                'sipClass': 'AimsData_CFLOAT',
                'typeinclude':
-               '#include <aims/data/data.h>\n#include <cartobase/type/types.h>',
+               '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>'
+               '#include <cartobase/type/types.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_CFLOAT_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_CFLOAT_CHECK_DEFINED\n'
                'inline int pyaimsVolume_CFLOAT_Check( PyObject* o )\n'
@@ -1359,7 +1428,13 @@ typessub = {'bool':
                'PyType': 'AimsData_CDOUBLE',
                'sipClass': 'AimsData_CDOUBLE',
                'typeinclude':
-               '#include <aims/data/data.h>\n#include <cartobase/type/types.h>',
+               '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>'
+               '#include <cartobase/type/types.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_CDOUBLE_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_CDOUBLE_CHECK_DEFINED\n'
                'inline int pyaimsVolume_CDOUBLE_Check( PyObject* o )\n'
@@ -1384,7 +1459,13 @@ typessub = {'bool':
                'PyType': 'AimsData_POINT3DF',
                'sipClass': 'AimsData_POINT3DF',
                'typeinclude':
-               '#include <aims/data/data.h>\n#include <cartobase/type/types.h>',
+               '// we don\'t want to issue a warning while compiling the obsolete classes\n'
+               '// themselves...\n'
+               '#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#define AIMSDATA_CLASS_NO_DEPREC_WARNING\n'
+               '#endif\n'
+               '#include <aims/data/data.h>'
+               '#include <cartobase/type/types.h>',
                'sipinclude': '#ifndef PYAIMS_VOLUME_POINT3DF_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_POINT3DF_CHECK_DEFINED\n'
                'inline int pyaimsVolume_POINT3DF_Check( PyObject* o )\n'

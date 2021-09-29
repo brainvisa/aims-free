@@ -2,7 +2,6 @@ class MeshToVoxelsResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/meshToVoxelsResampler.h>
-  #include <aims/data/data.h>
   %Template1typeinclude%
   %Template1sipinclude%
 

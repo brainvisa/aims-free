@@ -3,6 +3,11 @@
 %MappedType AimsData<%Template1% >
 {
 %TypeHeaderCode
+// we don't want to issue a warning while compiling the obsolete classes
+// themselves...
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
 #include <aims/data/data.h>
 %Template1typeinclude%
 %Template1sipinclude%
@@ -95,6 +100,11 @@ inline int pyaimsVolume_%Template1typecode%_Check( PyObject* o )
 %MappedType AimsData_%Template1typecode%
 {
 %TypeHeaderCode
+// we don't want to issue a warning while compiling the obsolete classes
+// themselves...
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
 #include <aims/data/data.h>
 %Template1typeinclude%
 %Template1sipinclude%

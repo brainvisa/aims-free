@@ -31,6 +31,12 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+// we don't want to issue a warning while compiling the obsolete classes
+// themselves...
+#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#define AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/plugin/qtformatsplugin.h>
 #include <aims/io/qtformats_d.h>
 #include <aims/io/qtfinderformats.h>

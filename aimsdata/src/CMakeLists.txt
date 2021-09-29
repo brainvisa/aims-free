@@ -2,6 +2,10 @@
 add_subdirectory(aimsdata)
 set(HEADERS ${AIMSDATA_HEADERS})
 
+# don't warn on obsolete classes within this library: we still provide obsolete
+# features so we have to build them without warnings
+add_definitions( "-DAIMSDATA_CLASS_NO_DEPREC_WARNING=1" )
+
 if( BUILD_ECAT )
   add_subdirectory(aimsecat)
   set(HEADERS ${HEADERS} ${AIMSECAT_HEADERS})
