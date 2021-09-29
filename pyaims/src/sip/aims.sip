@@ -262,21 +262,6 @@ typedef int int32_t;
 
 %Include bucket_util.sip
 
-%Include aimsdata_BOOL.sip
-%Include aimsdata_U8.sip
-%Include aimsdata_S16.sip
-%Include aimsdata_U16.sip
-%Include aimsdata_S32.sip
-%Include aimsdata_U32.sip
-%Include aimsdata_FLOAT.sip
-%Include aimsdata_DOUBLE.sip
-%Include aimsdata_RGB.sip
-%Include aimsdata_RGBA.sip
-%Include aimsdata_HSV.sip
-%Include aimsdata_CFLOAT.sip
-%Include aimsdata_CDOUBLE.sip
-%Include aimsdata_POINT3DF.sip
-
 %Include motion.sip
 %Include transformation.sip
 %Include rcptr_Transformation3d.sip
