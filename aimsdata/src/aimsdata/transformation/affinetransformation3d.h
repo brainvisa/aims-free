@@ -64,7 +64,7 @@ namespace aims
   WARNING: this is the old Motion class of Aims 3.x, which has been renamed and
   changed in Aims 4.0. Since Aims 4.7, most of the code is in soma-io where it
   is used to transform voxels coordinates in IO code. This additional layer
-  mainly adds compatibility with older code which uses AimsData for rotation()
+  mainly adds compatibility with older code which uses VolumeRef for rotation()
   and Point3df for translation(), and the header.
 
   A new transformation classes tree has been setup to allow non-linear
@@ -111,7 +111,7 @@ namespace aims
     soma::AffineTransformation3dBase which already does pretty much
     everything, which is in soma-io and used this way there, and
     AffineTransformation3d which is still here in aims, and merely adds
-    compatibility methods converting with aims types (AimsData, Volume,
+    compatibility methods converting with aims types (Volume,
     Quaternion).
 
   - AffineTransformation3d::rotation does not return a reference any longer.

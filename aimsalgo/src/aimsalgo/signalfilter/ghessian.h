@@ -49,7 +49,8 @@ public:
   GaussianHessian( float sx=1.0f, float sy=1.0f, float sz=1.0f );
   virtual ~GaussianHessian() { }
 
-  AimsVector< AimsData< float >, 6 >  doit( const AimsData<T>& );
+  AimsVector< carto::VolumeRef< float >, 6 > doit(
+    const carto::rc_ptr<carto::Volume<T> >& );
 
 private:
 
@@ -69,23 +70,23 @@ GaussianHessian< T >::GaussianHessian( float sx, float sy, float sz )
 }
 
 
-template< class T > inline AimsVector< AimsData< float >, 6 > 
-GaussianHessian< T >::doit( const AimsData< T >& data )
+template< class T > inline AimsVector< carto::VolumeRef< float >, 6 >
+GaussianHessian< T >::doit( const carto::rc_ptr<carto::Volume< T > >& data )
 {
-  float sx = sigx / data.sizeX();
-  float sy = sigy / data.sizeY();
-  float sz = sigz / data.sizeZ();
+  std::vector<float> vs = data->getVoxelSize();
+  float sx = sigx / vs[0];
+  float sy = sigy / vs[1];
+  float sz = sigz / vs[2];
 
   carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
-  AimsVector< AimsData< float >, 6 > res;
+  AimsVector< carto::VolumeRef< float >, 6 > res;
 
- AimsData< float> imaF;
-  imaF=AimsData<float>( data.dimX(), data.dimY(), data.dimZ(),
-			  data.dimT() );
+ carto::VolumeRef< float> imaF;
+  imaF=carto::VolumeRef<float>( data->getSize() );
   conv.convert( data, imaF );
 
   for ( int i=0; i<6; i++ )
-	  res[i]=imaF.clone();
+    res[i]=imaF.copy();
 
   GaussianSlices gsli;
   GaussianLines glin;

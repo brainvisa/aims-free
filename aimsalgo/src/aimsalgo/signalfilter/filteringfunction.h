@@ -42,7 +42,6 @@
 namespace carto {
   template <typename T> class VolumeRef;
 }
-template <typename T> class AimsData;
 //----------------------------------------------------------------------------
 
 namespace aims {
@@ -77,15 +76,6 @@ namespace aims {
       virtual void updateOptions( const carto::Object & /*options*/ ) {}
       /// clone method. It is better to implement it using a copy constructor.
       virtual FilteringFunctionInterface *clone() const = 0;
-
-      //----------------------------------------------------------------------
-      // backward compability
-      //----------------------------------------------------------------------
-      /// \deprecated
-      T doit( const AimsData<T> & in ) __attribute__((__deprecated__))
-      {
-        return execute( in.volume() );
-      }
 
     protected:
       //----------------------------------------------------------------------

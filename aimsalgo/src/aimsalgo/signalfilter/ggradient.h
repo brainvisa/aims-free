@@ -50,8 +50,9 @@ public:
   GaussianGradient( float sx=1.0f, float sy=1.0f, float sz=1.0f );
   virtual ~GaussianGradient() { }
 
-  AimsData< float >  doit( const AimsData<T>& );
-  AimsVector< AimsData< float >, 3 > doitGradientVector( const AimsData< T >& data ) ;
+  carto::VolumeRef< float >  doit( const carto::rc_ptr<carto::Volume<T> >& );
+  AimsVector< carto::VolumeRef< float >, 3 > doitGradientVector(
+    const carto::rc_ptr<carto::Volume< T > >& data ) ;
 private:
   
   float sigx;
@@ -70,29 +71,29 @@ GaussianGradient< T >::GaussianGradient( float sx, float sy, float sz )
 }
 
 
-template< class T > inline AimsData< float >
-GaussianGradient< T >::doit( const AimsData< T >& data )
+template< class T > inline carto::VolumeRef< float >
+GaussianGradient< T >::doit( const carto::rc_ptr<carto::Volume< T > >& data )
 {
   int x,y,z;
-  float sx = sigx / data.sizeX();
-  float sy = sigy / data.sizeY();
-  float sz = sigz / data.sizeZ();
+  std::vector<float> vs = data->getVoxelSize();
+  float sx = sigx / vs[0];
+  float sy = sigy / vs[1];
+  float sz = sigz / vs[2];
 
   carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
-  AimsVector< AimsData< float >, 3 > res;
+  AimsVector< carto::VolumeRef< float >, 3 > res;
 
-  AimsData< float> imaF;
-  imaF=AimsData<float>( data.dimX(), data.dimY(), data.dimZ(),
-			  data.dimT() );
+  carto::VolumeRef< float> imaF;
+  imaF=carto::VolumeRef<float>( data->getSize() );
   conv.convert( data, imaF );
 
   for ( int i=0; i<3; i++ )
-	  res[i]=imaF.clone();
+	  res[i]=imaF.copy();
 
 
 
-  AimsData<float> grad;
-  grad=AimsData<float>( data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
+  carto::VolumeRef<float> grad;
+  grad=carto::VolumeRef<float>( data->getSize() );
 
   GaussianSlices gsli;
   GaussianLines glin;
@@ -113,9 +114,9 @@ GaussianGradient< T >::doit( const AimsData< T >& data )
   gcol.doit( res[ 2 ], GCoef( sy ) );
   gsli.doit( res[ 2 ], GCoef( sz, GCoef::gradient ) );
 
-  for (z=0; z< data.dimZ(); z++)
-  	for (y=0; y< data.dimY(); y++)
-		for(x=0; x< data.dimX(); x++)
+  for (z=0; z< data->getSizeZ(); z++)
+  	for (y=0; y< data->getSizeY(); y++)
+		for(x=0; x< data->getSizeX(); x++)
 		{
 			grad(x,y,z)=sqrt ( (res[0](x,y,z)*res[0](x,y,z))
 									+	(res[1](x,y,z)*res[1](x,y,z))
@@ -125,28 +126,29 @@ GaussianGradient< T >::doit( const AimsData< T >& data )
   return grad;
 }
 
-template< class T > inline AimsVector< AimsData< float >, 3 >
-GaussianGradient< T >::doitGradientVector( const AimsData< T >& data )
+template< class T > inline AimsVector< carto::VolumeRef< float >, 3 >
+GaussianGradient< T >::doitGradientVector(
+  const carto::rc_ptr<carto::Volume< T > >& data )
 {
-  float sx = sigx / data.sizeX();
-  float sy = sigy / data.sizeY();
-  float sz = sigz / data.sizeZ();
+  std::vector<float> vs = data->getVoxelSize();
+  float sx = sigx / vs[0];
+  float sy = sigy / vs[1];
+  float sz = sigz / vs[2];
 
   carto::Converter< carto::VolumeRef<T>, carto::VolumeRef<float> > conv;
-  AimsVector< AimsData< float >, 3 > res;
+  AimsVector< carto::VolumeRef< float >, 3 > res;
 
-  AimsData< float> imaF;
-  imaF=AimsData<float>( data.dimX(), data.dimY(), data.dimZ(),
-			  data.dimT() );
+  carto::VolumeRef< float> imaF;
+  imaF=carto::VolumeRef<float>( data->getSize() );
   conv.convert( data, imaF );
 
   for ( int i=0; i<3; i++ )
-	  res[i]=imaF.clone();
+	  res[i]=imaF.copy();
 
 
 
-  AimsData<float> grad;
-  grad=AimsData<float>( data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
+  carto::VolumeRef<float> grad;
+  grad=carto::VolumeRef<float>( data->getSize() );
 
   GaussianSlices gsli;
   GaussianLines glin;

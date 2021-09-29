@@ -90,14 +90,6 @@ namespace aims
   std::vector<Point3d> MorphoGreyLevel<T>::doStructElement(
     float radius, const Point4df & voxelsize )
   {
-  //   AimsData< int16_t > sphere( 2*int_radius[0]-1,
-  //                               2*int_radius[1]-1,
-  //                               2*int_radius[2]-1 );
-  //   sphere.setSizeXYZT( voxelsize[0],
-  //                       voxelsize[1],
-  //                       voxelsize[2] );
-  //   sphere = 0;
-
     //   Test if list have been already created
     //   List of the voxel of the strust elem
     float sqradius = radius * radius;
@@ -115,8 +107,6 @@ namespace aims
                     //               sphere(u, v, w) = 1;
                   }
               }
-        //   Writer< AimsData< int16_t > > ws( "sphere.ima" );
-        //   ws.write( sphere );
         std::cout << "Number of voxels in the structuring element = "
           << list.size() << std::endl << std::endl;
         return list;

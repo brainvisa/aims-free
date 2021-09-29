@@ -103,10 +103,11 @@ namespace aims {
             BlobMeasurements & operator = (const BlobMeasurements & other);
     };
 
-    // Class for grey-level blobs
-    // Templated with respect to the type of points:
-    // TypeSite<AimsData<T> >::type for images
-    // TypeSite<AimsSurface<D, Void> >::type for textures.
+    /** Class for grey-level blobs
+        Templated with respect to the type of points:
+        TypeSite<carto::VolumeRef<T> >::type for images
+        TypeSite<AimsSurface<D, Void> >::type for textures.
+    */
 
     template<class T> class GreyLevelBlob {
 
@@ -160,7 +161,7 @@ namespace aims {
 
     };
 
-    // class for saddle points
+    /// class for saddle points
 
     template<class T> class SaddlePoint {
 
@@ -179,7 +180,7 @@ namespace aims {
 
     };
 
-    // class for maxima
+    /// class for maxima
 
     template<class T> class MaximumPoint {
 
@@ -194,7 +195,7 @@ namespace aims {
 
     };
 
-  // Class that define grey-level blobs algorithm extraction
+  /// Class that define grey-level blobs algorithm extraction
 
   template<typename Geom, typename Text> class ExtractGreyLevelBlobs {
 
@@ -247,7 +248,7 @@ namespace aims {
   };
 
 
- // class that provide some tools for blob management
+ /// class that provide some tools for blob management
 
  template<typename T> class GreyLevelBlobTools {
 
