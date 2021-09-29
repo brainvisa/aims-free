@@ -12,10 +12,9 @@
 #ifndef AIMS_REGISTRATION_BLOCK_MATCHING_D_H
 #define AIMS_REGISTRATION_BLOCK_MATCHING_D_H
 
-#include <aims/data/data.h>
-#include <aims/resampling/resampling_g.h> 
-#include <aims/math/math_g.h>
 #include <aims/registration/block_matching.h>
+#include <aims/resampling/resampling_g.h>
+#include <aims/math/math_g.h>
 #include <aims/registration/displacement_field.h>
 #include <aims/registration/scale_control.h>
 #include <aims/registration/transformation.h>
@@ -47,25 +46,27 @@ BlockMatching<T>::BlockMatching()
 
 
 template<typename T>
-Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
+Motion BlockMatching<T>::doit(
+  carto::rc_ptr<carto::Volume<T> >& ref,
+  const carto::rc_ptr<carto::Volume<T> >& test_orig )
 {
 
 
-  AimsData<T> test=test_orig.clone();
+  carto::VolumeRef<T> test = carto::VolumeRef<T>( test_orig ).copy();
 
   // Mise de l'image test a la resolution de l'image de reference si besoin
-  if( (ref.sizeX()!=test.sizeX()) || (ref.sizeY()!=test.sizeY()) || (ref.sizeZ()!=test.sizeZ()) )
+  if( ref->getVoxelSize() != test->getVoxelSize() )
   {
     Motion identity;
     identity.setToIdentity();
       aims::LinearResampler<T> reech;
-      reech.setRef( test.volume() );
+      reech.setRef( test );
 
       test = reech.doit( identity, 
-                          unsigned (test.dimX()*test.sizeX()/(1.0*ref.sizeX()) + .5),
-                          unsigned (test.dimY()*test.sizeY()/(1.0*ref.sizeY()) + .5),
-                          unsigned (test.dimZ()*test.sizeZ()/(1.0*ref.sizeZ()) + .5),
-                          Point3df(ref.sizeX(),ref.sizeY(),ref.sizeZ()));
+                          unsigned (test->getSizeX()*test->getVoxelSize()[0]/(1.0*ref->getVoxelSize()[0]) + .5),
+                          unsigned (test->getSizeY()*test->getVoxelSize()[1]/(1.0*ref->getVoxelSize()[1]) + .5),
+                          unsigned (test->getSizeZ()*test->getVoxelSize()[2]/(1.0*ref->getVoxelSize()[2]) + .5),
+                          Point3df(ref->getVoxelSize()[0],ref->getVoxelSize()[1],ref->getVoxelSize()[2]));
   }
 
   
@@ -77,7 +78,7 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
     
   
   //declaration de l'image transformee a chaque etape
-  AimsData<T> testtrans = test.clone();
+  carto::VolumeRef<T> testtrans = carto::VolumeRef<T>( test ).copy();
   
   
   
@@ -90,30 +91,29 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
 
   {
   aims::LinearResampler<T> reech;
-  reech.setRef( test.volume() );
+  reech.setRef( test );
 
   testtrans = reech.doit( p,
-                          testtrans.dimX(),
-                          testtrans.dimY(),
-                          testtrans.dimZ(),
-                          Point3df(testtrans.sizeX(),testtrans.sizeY(),testtrans.sizeZ()));
+                          testtrans->getSizeX(),
+                          testtrans->getSizeY(),
+                          testtrans->getSizeZ(),
+                          Point3df( testtrans->getVoxelSize() ) );
   }
 
 
-  
   // Quelques initialisations en millimetres
-  transformation.setX(int(test.dimX()*test.sizeX()));
-  transformation.setY(int(test.dimY()*test.sizeY())); 
-  transformation.setZ(int(test.dimZ()*test.sizeZ())); 
+  transformation.setX(int(test->getSizeX()*test->getVoxelSize()[0]));
+  transformation.setY(int(test->getSizeY()*test->getVoxelSize()[1]));
+  transformation.setZ(int(test->getSizeZ()*test->getVoxelSize()[2]));
   transformation.setiterMax(_itermax); //on fixe le nombre maxi d'iter par niveau
   transformation.setcx(0);
   transformation.setcy(0);
   transformation.setcz(0);
-  if(ref.dimZ()==1) _tailleBloc[2] = 1;
+  if(ref->getSizeZ()==1) _tailleBloc[2] = 1;
   scaleControl.init<T>( ref, _level_start, _level_stop, _cutVar, _stopVar, _seuilCorrel, _tailleBloc);
   int count = 0 ;
   // Initialisation de delta au carre de 4 fois un majorant de 2 fois la diagonale en mm...
-  float delta_init = 8*pow(test.dimX()*test.sizeX() + test.dimY()*test.sizeY() + test.dimZ()*test.sizeZ(), 2);
+  float delta_init = 8*pow(test->getSizeX()*test->getVoxelSize()[0] + test->getSizeY()*test->getVoxelSize()[1] + test->getSizeZ()*test->getVoxelSize()[2], 2);
 
 
   // Affichage de tous les parametres avant debut :
@@ -140,9 +140,9 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
   }
 
   // MISE DE p EN VOXELS !
-  p.matrix()(0, 3) /= test.sizeX();
-  p.matrix()(1, 3) /= test.sizeY();
-  p.matrix()(2, 3) /= test.sizeZ();
+  p.matrix()(0, 3) /= test->getVoxelSize()[0];
+  p.matrix()(1, 3) /= test->getVoxelSize()[1];
+  p.matrix()(2, 3) /= test->getVoxelSize()[2];
 
   
   do
@@ -165,7 +165,7 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
       p = q * p ;
   
       // Calcul effectif du champ
-      AimsData< Point3d > df = displacementField.getField( testtrans);
+      carto::VolumeRef< Point3d > df = displacementField.getField( testtrans);
   
     // Attention, le champ va de Ref a Test et non l'inverse !!!!!!!!!!!!!!!!!!!!!!!!
   
@@ -179,16 +179,16 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
       r = q * p ;
   
       // MISE DES TRANSLATIONS EN MILLIMETRES !
-      r.matrix()(0, 3) *= test.sizeX();
-      r.matrix()(1, 3) *= test.sizeY();
-      r.matrix()(2, 3) *= test.sizeZ();
+      r.matrix()(0, 3) *= test->getVoxelSize()[0];
+      r.matrix()(1, 3) *= test->getVoxelSize()[1];
+      r.matrix()(2, 3) *= test->getVoxelSize()[2];
 
   
       // Resampling de test en testtrans par r la transfo totale la plus recente
       aims::LinearResampler<T> resampler;
-      resampler.setRef( test.volume() );
-      testtrans = resampler.doit( r, test.dimX(), test.dimY(), test.dimZ(),
-                          Point3df(test.sizeX(),test.sizeY(),test.sizeZ()));
+      resampler.setRef( test );
+      testtrans = resampler.doit( r, test->getSizeX(), test->getSizeY(), test->getSizeZ(),
+                                  Point3df(test->getVoxelSize()) );
   
   
       // Compteur du nombre d'iterations a cette echelle	  
@@ -204,14 +204,14 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
   } while (scaleControl.goOn());		// test fin pyramide
 
 
-  _result = test_orig.clone();
+  _result = carto::VolumeRef<T>( test_orig ).copy();
   aims::LinearResampler<T> linres;
-  linres.setRef( test_orig.volume() );
+  linres.setRef( test_orig );
   _result = linres.doit( r, 
-                         test_orig.dimX(), 
-                         test_orig.dimY(), 
-                         test_orig.dimZ(),
-                         Point3df(test_orig.sizeX(),test_orig.sizeY(),test_orig.sizeZ()));
+                         test_orig->getSizeX(),
+                         test_orig->getSizeY(),
+                         test_orig->getSizeZ(),
+                         Point3df( test_orig->getVoxelSize() ) );
 
   _done=true;
 

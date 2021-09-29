@@ -8,6 +8,11 @@
  *     France
  */
 
+// activate deprecation warning
+#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
+#endif
+
 #include <aims/resampling/motion.h>
 #include <aims/registration/block_matching_d.h>
 

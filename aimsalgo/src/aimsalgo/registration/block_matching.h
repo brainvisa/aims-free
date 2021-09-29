@@ -11,7 +11,9 @@
 #ifndef AIMS_REGISTRATION_BLOCK_MATCHING_H
 #define AIMS_REGISTRATION_BLOCK_MATCHING_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
+
+
 namespace aims
 {
   class AffineTransrformation3d;
@@ -30,8 +32,9 @@ public:
   BlockMatching(); 
   virtual ~BlockMatching() {}
 
-  aims::AffineTransformation3d doit(AimsData<T>& ref,
-                                    const AimsData<T>& test_orig);
+  aims::AffineTransformation3d doit(
+    carto::rc_ptr<carto::Volume<T> >& ref,
+    const carto::rc_ptr<carto::Volume<T> >& test_orig );
   void setinitialisation(const aims::AffineTransformation3d& m)
   {_initialisation = m;}
   void setlevel_start(int lsta) {_level_start=lsta;}
@@ -51,11 +54,11 @@ public:
   void setitermax(int itm) {_itermax=itm;}
   void setinfo(bool info) {_info=info;}
 
-  AimsData<T> getresult() {return _result;}
+  carto::VolumeRef<T> getresult() {return _result;}
   
 
 private:
-  AimsData<T> _result;
+  carto::VolumeRef<T> _result;
   bool _done;
   aims::AffineTransformation3d _initialisation;
   int _level_start;

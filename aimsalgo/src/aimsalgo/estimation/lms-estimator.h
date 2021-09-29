@@ -37,7 +37,7 @@
 
 
 #include <aims/config/aimsalgo_config.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/vector/vector.h>
 #include <aims/def/assert.h>
 #include <aims/math/gausslu.h>
