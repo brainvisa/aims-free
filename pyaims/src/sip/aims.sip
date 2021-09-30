@@ -134,6 +134,7 @@ typedef int int32_t;
 %Include map_S32_ULONG.sip
 %Include map_S32_ULONGLONG.sip
 %Include map_S32_U32.sip
+%Include map_S32_FLOAT.sip
 %Include map_U32_ULONG.sip
 %Include map_U32_ULONGLONG.sip
 %Include map_U32_U32.sip

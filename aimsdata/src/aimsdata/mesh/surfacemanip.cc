@@ -2363,11 +2363,21 @@ float SurfaceManip::meshArea( const AimsSurfaceTriangle & surf )
 
 float SurfaceManip::meshArea( const AimsSurface<3, Void> & surf )
 {
+  map<int, float> areas = meshArea( surf, 0 );
+  return areas.begin()->second;
+}
+
+
+map<int, float> SurfaceManip::meshArea( const AimsSurface<3, Void> & surf,
+                                        const Texture<int16_t> *tex )
+{
   const vector<Point3df>		& vert = surf.vertex();
   const vector<AimsVector<uint, 3> >	& poly = surf.polygon();
-  unsigned				ip, np = poly.size();
-  float					area = 0;
+  unsigned				ip, np = poly.size(), p;
+  float					area = 0, a;
   Point3df				v, n, ca, cb;
+  map<int, float>                       areas;
+  map<int, float>::iterator             ae = areas.end();
 
   for( ip=0; ip<np; ++ip )
   {
@@ -2387,11 +2397,49 @@ float SurfaceManip::meshArea( const AimsSurface<3, Void> & surf )
     if( !v.isNull() )
     {
       v /= v.norm();
-      area += ca.norm() * fabs( cb.dot( v ) ) * 0.5;
+      a = ca.norm() * fabs( cb.dot( v ) ) * 0.5;
+      if( tex )
+      {
+        a /= 3.;  // 1/3 for each vertex
+        p = poly[ip][0];
+        if( areas.find( (*tex)[p] ) == ae )
+          areas[(*tex)[p]] = a;
+        else
+          areas[(*tex)[p]] += a;
+        p = poly[ip][1];
+        if( areas.find( (*tex)[p] ) == ae )
+          areas[(*tex)[p]] = a;
+        else
+          areas[(*tex)[p]] += a;
+        p = poly[ip][2];
+        if( areas.find( (*tex)[p] ) == ae )
+          areas[(*tex)[p]] = a;
+        else
+          areas[(*tex)[p]] += a;
+      }
+      else
+        area += a;
     }
   }
-  return area;
+  if( !tex )
+    areas[0] = area;
+  return areas;
 }
+
+
+map<int, float> SurfaceManip::meshArea( const AimsSurfaceTriangle & surf,
+                                        const TimeTexture<int16_t> & tex )
+{
+  map<int, float> areas;
+  if( surf.size() == 0 )
+    return areas;
+
+  const AimsSurface<3, Void> & mesh = surf.begin()->second;
+  const Texture<int16_t> & t0 = tex.begin()->second;
+
+  return meshArea( mesh, &t0 );
+}
+
 
 
 float SurfaceManip::meshVolume( const AimsSurfaceTriangle & surf )

@@ -137,6 +137,10 @@ namespace aims
 			   AimsSurfaceTriangle *outsurf = 0 );
     static float meshArea( const AimsSurfaceTriangle & surf );
     static float meshArea( const AimsSurface<3, Void> & surf );
+    static std::map<int, float> meshArea( const AimsSurfaceTriangle & surf,
+                                          const TimeTexture<int16_t> & tex );
+    static std::map<int, float> meshArea( const AimsSurface<3, Void> & surf,
+                                          const Texture<int16_t> *tex );
     static float meshVolume( const AimsSurfaceTriangle & surf );
     static float meshVolume( const AimsSurface<3, Void> & surf );
     /// concatenates 2 meshes into one (adds the second to the first one)
@@ -151,6 +155,8 @@ namespace aims
     template<int D, typename T>
     static void meshTransform( AimsTimeSurface<D,T> & mesh, 
                                const Motion & trans );
+    /** Extracts a sub-mesh region from a label texture
+    */
     template <int D, typename T>
     static AimsTimeSurface<D,T> *
         meshExtract( const AimsTimeSurface<D,T> & mesh,

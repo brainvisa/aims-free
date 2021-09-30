@@ -103,6 +103,12 @@ None
 Surface area of a triangular mesh, in mm^2
 %End
 
+  static std::map<int, float> meshArea( const AimsSurfaceTriangle & surf,
+                                        const TimeTexture_S16 & tex );
+%Docstring
+Surface areas of regions of a triangular mesh, in mm^2. Regions are given as a texture.
+%End
+
   static float meshVolume( const AimsSurfaceTriangle & surf );
 %Docstring
 meshVolume(mesh)
