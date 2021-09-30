@@ -18,6 +18,11 @@
 #include <aims/mesh/texture.h>
 #include <cartobase/config/verbose.h>
 #include <limits>
+#ifdef CARTO_USE_KDTREE
+#include <kdtree++/kdtree.hpp>
+#else
+#warning libkdtree not used, mesh interpolation will be SLOW !
+#endif
 
 using namespace aims;
 using namespace carto;
@@ -68,7 +73,27 @@ bool doit( Process & p, const string & fname, Finder & f)
   string		format = f.format();
   data.reset( reader.read( 0, &format) );
   return( cx.parcellation( data ) );
-} 
+}
+
+
+#ifdef CARTO_USE_KDTREE
+namespace
+{
+
+  struct Bracket_accessor_PointIndex
+  {
+    typedef float result_type;
+    typedef pair<uint, Point3df> _Val;
+
+    result_type
+    operator()(_Val const& V, size_t const N) const
+    {
+      return V.second[N];
+    }
+  };
+
+}
+#endif
 
 
 template<class T> 
@@ -154,6 +179,21 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
   if( verbose )
     cout << "Computing closest vertex location" << endl;
 
+#ifdef CARTO_USE_KDTREE
+
+  // make a KDtree with mesh vertices
+  vector<pair<uint, Point3df> > ipts( pmax );
+  for( p=0; p<pmax; ++p )
+  {
+    ipts[p].first = p;
+    ipts[p].second = vert[p];
+  }
+
+  KDTree::KDTree<3, pair<uint, Point3df>, Bracket_accessor_PointIndex >
+  kdtree( ipts.begin(), ipts.end() );
+
+#endif
+
   int pct, lastpct = -1;
   for( g=0; g<gmax; g++ )
   {
@@ -163,8 +203,15 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
     lastpct = pct;
 
     // searching for the closest vertex
+
+#ifdef CARTO_USE_KDTREE
+    pmin = kdtree.find_nearest( make_pair( 0U, gm[g] ) ).first->first;
+    d2min = (vert[pmin] - gm[g]).norm2();
+#else
+
     d2min = 1000.;
     pmin = numeric_limits<unsigned>::max();
+
     for( p=0; p<pmax; p++)
     {
       d2 = (vert[p][0]-gm[g][0])*(vert[p][0]-gm[g][0]) 
@@ -176,6 +223,8 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
         pmin = p;
       }
     }
+#endif
+
     if(pmin != numeric_limits<unsigned>::max())
     {
       x=(int)round(gm[g][0]/sx);
