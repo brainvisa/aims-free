@@ -158,7 +158,7 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
   for( g=0; g<gmax; g++ )
   {
     pct = int( g * 100 / gmax );
-    if( int( pct / 10 ) != int( lastpct / 10 )
+    if( int( pct / 10 ) != int( lastpct / 10 ) )
       cout << pct << " pct done" << endl;
     lastpct = pct;
 
