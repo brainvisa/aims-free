@@ -125,7 +125,7 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
   const AimsSurface<3,Void>         & surface = mesh[0];
   const vector<Point3df>            & vert = surface.vertex();
   unsigned                          pmax = vert.size();
-  vector<Point3df>                  gm = vector<Point3df>();
+  vector<Point3df>                  gm;
 
   if( verbose )
     cout << "Computing 3D cortical locations (in mm)" << endl;
@@ -137,7 +137,7 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
       for(x=0; x<xmax; x++)
         if(gmdata->at(x,y,z) == static_cast<T>(gm_value))
 	       gmax++;
-  gm.reserve(gmax);
+  gm.resize(gmax);
 
   g=0;
   for(z=0; z<zmax; z++)
@@ -154,11 +154,14 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
   if( verbose )
     cout << "Computing closest vertex location" << endl;
 
+  int pct, lastpct = -1;
   for( g=0; g<gmax; g++ )
   {
-    if( g / (gmax/10) ==0)
-      cout << g % (gmax/10) << "0 pct done" << endl;
-    
+    pct = int( g * 100 / gmax );
+    if( int( pct / 10 ) != int( lastpct / 10 )
+      cout << pct << " pct done" << endl;
+    lastpct = pct;
+
     // searching for the closest vertex
     d2min = 1000.;
     pmin = numeric_limits<unsigned>::max();
