@@ -37,8 +37,12 @@
 #endif
 
 #include <aims/resampling/standardreferentials.h>
+#include <aims/io/reader.h>
+#include <aims/data/pheader.h>
+#include <cartobase/config/paths.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 string StandardReferentials::mniTemplateReferential()
@@ -80,6 +84,94 @@ string StandardReferentials::acPcReferentialID()
 string StandardReferentials::commonScannerBasedReferentialID()
 {
   return "a397f441-a525-298a-c8f9-26011047eadf";
+}
+
+
+string StandardReferentials::icbm2009cTemplateReferentialID()
+{
+  return "84b1989b-eb68-8665-0049-8feaf3c22679";
+}
+
+
+namespace
+{
+  AffineTransformation3d *tal_to_icbm = 0;
+  AffineTransformation3d *tal_to_icbm_template = 0;
+  Object icbm2009c_header;
+}
+
+const AffineTransformation3d & StandardReferentials::talairachToICBM()
+{
+  if( !tal_to_icbm )
+  {
+    string tpath = Paths::findResourceFile(
+      "transformation/talairach_TO_spm_template_novoxels.trm" );
+    Reader<AffineTransformation3d> r( tpath );
+    tal_to_icbm = r.read();
+  }
+  return *tal_to_icbm;
+}
+
+
+const carto::Object StandardReferentials::icbm2009cTemplateHeader()
+{
+  if( !icbm2009c_header.get() )
+  {
+    icbm2009c_header = Object::value( Dictionary() );
+
+    AffineTransformation3d shift;
+    // invert all axes
+    shift.affine()( 0, 0 ) = -1;
+    shift.affine()( 1, 1 ) = -1;
+    shift.affine()( 2, 2 ) = -1;
+    // shift FOV
+    shift.affine()( 0, 3 ) = 96;
+    shift.affine()( 1, 3 ) = 96;
+    shift.affine()( 2, 3 ) = 114;
+
+    // set shift in header
+    vector<string> refs( 1, StandardReferentials::mniTemplateReferential() );
+    vector<vector<float> > trans( 1 );
+    trans[0] = shift.toVector();
+    vector<int> dims( 4, 1 );
+    dims[0] = 193;
+    dims[1] = 229;
+    dims[2] = 193;
+    vector<float> vs( 4, 1. );
+
+    icbm2009c_header->setProperty( "referentials", refs );
+    icbm2009c_header->setProperty( "transformations", trans );
+    icbm2009c_header->setProperty( "volume_dimension", dims );
+    icbm2009c_header->setProperty( "voxel_size", vs );
+    icbm2009c_header->setProperty( "referential",
+                                   icbm2009cTemplateReferentialID() );
+  }
+  return icbm2009c_header;
+}
+
+
+const AffineTransformation3d &
+  StandardReferentials::talairachToICBM2009cTemplate()
+{
+  if( !tal_to_icbm_template )
+  {
+    tal_to_icbm_template = new AffineTransformation3d;
+    AffineTransformation3d shift;
+    // invert all axes
+    shift.affine()( 0, 0 ) = -1;
+    shift.affine()( 1, 1 ) = -1;
+    shift.affine()( 2, 2 ) = -1;
+    // shift FOV
+    shift.affine()( 0, 3 ) = 96;
+    shift.affine()( 1, 3 ) = 96;
+    shift.affine()( 2, 3 ) = 114;
+
+    *tal_to_icbm_template = shift * talairachToICBM();
+
+    tal_to_icbm_template->header()->copyProperties(
+      icbm2009cTemplateHeader() );
+  }
+  return *tal_to_icbm_template;
 }
 
 

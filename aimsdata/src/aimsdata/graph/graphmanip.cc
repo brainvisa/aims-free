@@ -45,13 +45,11 @@
 #include <aims/mesh/surface.h>
 #include <aims/mesh/surfaceOperation.h>
 #include <aims/mesh/texture.h>
-#include <aims/io/reader.h>
 #include <graph/graph/graph.h>
 #include <cartodata/volume/volume.h>
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/containers/nditerator.h>
-#include <cartobase/config/paths.h>
 #include <vector>
 #include <map>
 
@@ -558,75 +556,34 @@ void GraphManip::storeTalairach( Graph & g, const AffineTransformation3d & m,
 }
 
 
-namespace
-{
-  AffineTransformation3d *tal_to_icbm = 0;
-  AffineTransformation3d *tal_to_icbm_template = 0;
-
-  const AffineTransformation3d & talairachToICBM()
-  {
-    if( !tal_to_icbm )
-    {
-      string tpath = Paths::findResourceFile(
-        "transformation/talairach_TO_spm_template_novoxels.trm" );
-      Reader<AffineTransformation3d> r( tpath );
-      tal_to_icbm = r.read();
-    }
-    return *tal_to_icbm;
-  }
-
-  const AffineTransformation3d & talairachToICBMTemplate()
-  {
-    if( !tal_to_icbm_template )
-    {
-      tal_to_icbm_template = new AffineTransformation3d;
-      AffineTransformation3d shift;
-      // invert all axes
-      shift.affine()( 0, 0 ) = -1;
-      shift.affine()( 1, 1 ) = -1;
-      shift.affine()( 2, 2 ) = -1;
-      // shift FOV
-      shift.affine()( 0, 3 ) = 98;
-      shift.affine()( 1, 3 ) = 98;
-      shift.affine()( 2, 3 ) = 116;
-
-      *tal_to_icbm_template = shift * talairachToICBM();
-
-      // set shift in header
-      vector<string> refs( 1, StandardReferentials::mniTemplateReferential() );
-      vector<vector<float> > trans( 1 );
-      trans[0] = shift.toVector();
-      tal_to_icbm_template->header()->setProperty( "referentials", refs );
-      tal_to_icbm_template->header()->setProperty( "transformations", trans );
-    }
-    return *tal_to_icbm_template;
-  }
-
-}
-
-
-AffineTransformation3d GraphManip::getICBM152Transform( const Graph & g )
+AffineTransformation3d GraphManip::getICBMTransform( const Graph & g )
 {
   AffineTransformation3d tal = GraphManip::talairach( g );
-  const AffineTransformation3d & tal_to_icbm = talairachToICBM();
+  const AffineTransformation3d & tal_to_icbm
+    = StandardReferentials::talairachToICBM();
   return tal_to_icbm * tal;
 }
 
 
-AffineTransformation3d GraphManip::getICBM152TemplateTransform(
+AffineTransformation3d GraphManip::getICBM2009cTemplateTransform(
   const Graph & g )
 {
   AffineTransformation3d tal = GraphManip::talairach( g );
   const AffineTransformation3d & tal_to_icbm_template
-    = talairachToICBMTemplate();
+    = StandardReferentials::talairachToICBM2009cTemplate();
 
   Object refs = tal_to_icbm_template.header()->getProperty( "referentials" );
   Object trans = tal_to_icbm_template.header()->getProperty(
     "transformations" );
+  Object dims = tal_to_icbm_template.header()->getProperty(
+    "volume_dimensions" );
+  Object vs = tal_to_icbm_template.header()->getProperty( "voxel_size" );
 
   AffineTransformation3d to_template = tal_to_icbm_template * tal;
   to_template.header()->setProperty( "referentials", refs );
   to_template.header()->setProperty( "transformations", trans );
+  to_template.header()->setProperty( "volume_dimension", dims );
+  to_template.header()->setProperty( "voxel_size", vs );
 
   return to_template;
 }

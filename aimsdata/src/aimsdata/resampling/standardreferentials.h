@@ -31,7 +31,10 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <string>
+#ifndef AIMS_TRANSFORMATION_STANDARDREFERENTIALS_H
+#define AIMS_TRANSFORMATION_STANDARDREFERENTIALS_H
+
+#include <aims/transformation/affinetransformation3d.h>
 
 namespace aims
 {
@@ -46,7 +49,32 @@ namespace aims
     static std::string mniTemplateReferentialID();
     static std::string acPcReferentialID();
     static std::string commonScannerBasedReferentialID();
+    static std::string icbm2009cTemplateReferentialID();
+
+    static const AffineTransformation3d & talairachToICBM();
+    /** Transformation between the ICBM152 standard space and the ICBM152
+        template space.
+
+        includes shifts and axes inversions.
+
+        This is the "most standard" field of view of the template image, the
+        one from the ICBM2009c_nlin_asym template from the MNI. Actually we
+        find various fields of view for the templates. The one we use here is
+        (193, 229, 193).
+        The transform to the "real" ICBM space (0 roughly at AC) is provided
+        in the output transformation header.
+        This space has a fixed transformation with our Aims Talairach, along
+        with the template volume size and voxel size.
+        This space has a fixed transformation with our Aims Talairach.
+    */
+    static const AffineTransformation3d & talairachToICBM2009cTemplate();
+    /** Return a header with size and characteristics of the ICBM2009c MNI
+        template volume.
+    */
+    static const carto::Object icbm2009cTemplateHeader();
   };
 
 }
+
+#endif
 

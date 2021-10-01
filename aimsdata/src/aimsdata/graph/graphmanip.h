@@ -159,17 +159,20 @@ namespace aims
     /** Extract the transformation to the MNI ICBM152 space. This space has
         a fixed transformation with our Aims Talairach.
     */
-    static AffineTransformation3d getICBM152Transform( const Graph & g );
-    /** Extract the transformation to the MNI ICBM152 space, shifted to the
-        "most standard" field of view of the template image, the one from the
-        ICBM2009c_asym template from the MNI. Actually we find various fields
-        of view of the template. The one we use here is (197, 233, 189).
-        The transform to the "real" ICBM space (0 roughly at AC) is provided in
-        the output transformation header.
-        This space has a fixed transformation with our Aims Talairach.
-    */
+    static AffineTransformation3d getICBMTransform( const Graph & g );
+    /**   Extract the transformation to the MNI ICBM152 space, shifted to the
+          "most standard" field of view of the template image, the one from the
+          ICBM2009c_nlin_asym template from the MNI. Actually we find various
+          fields of view for the templates. The one we use here is
+          (193, 229, 193).
+          The transform to the "real" ICBM space (0 roughly at AC) is provided
+          in the output transformation header.
+          This space has a fixed transformation with our Aims Talairach, along
+          with the template volume size and voxel size.
+          Includes shifts and axes inversions.
+      */
     static AffineTransformation3d
-      getICBM152TemplateTransform( const Graph & g );
+      getICBM2009cTemplateTransform( const Graph & g );
     /** converts internal representations of graph nodes from buckets to
         volume
         \return false if it fails: if all buckets have not been read from disk
