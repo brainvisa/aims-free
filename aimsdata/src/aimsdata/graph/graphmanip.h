@@ -44,9 +44,8 @@ class Graph;
 class GraphObject;
 namespace aims
 {
-class AffineTransformation3d;
+  class AffineTransformation3d;
 }
-typedef aims::AffineTransformation3d Motion;
 class Void;
 
 namespace aims
@@ -139,7 +138,7 @@ namespace aims
 
         3. Otherwise, identity is returned.
      */
-    static Motion talairach( const Graph & g );
+    static AffineTransformation3d talairach( const Graph & g );
     /** Store Talairach transformation in graph
 
         The transformation is written in the modern attributes ("referentials"
@@ -147,7 +146,7 @@ namespace aims
         ("Talairach_translation", "Talairach_rotation", and "Talairach_scale"),
         if these are already present, or if force_old_attributes is true.
      */
-    static void storeTalairach( Graph & g, const Motion & m,
+    static void storeTalairach( Graph & g, const AffineTransformation3d & m,
                                 bool force_old_attributes=false);
     /** Test if a Graph has the old Talairach attributes
 
@@ -157,7 +156,21 @@ namespace aims
         "transformations" attributes.
      */
     static bool hasOldTalairachTransform( const Graph & g );
-    /** converts internal representations of graph nodes from buckets to 
+    /** Extract the transformation to the MNI ICBM152 space. This space has
+        a fixed transformation with our Aims Talairach.
+    */
+    static AffineTransformation3d getICBM152Transform( const Graph & g );
+    /** Extract the transformation to the MNI ICBM152 space, shifted to the
+        "most standard" field of view of the template image, the one from the
+        ICBM2009c_asym template from the MNI. Actually we find various fields
+        of view of the template. The one we use here is (197, 233, 189).
+        The transform to the "real" ICBM space (0 roughly at AC) is provided in
+        the output transformation header.
+        This space has a fixed transformation with our Aims Talairach.
+    */
+    static AffineTransformation3d
+      getICBM152TemplateTransform( const Graph & g );
+    /** converts internal representations of graph nodes from buckets to
         volume
         \return false if it fails: if all buckets have not been read from disk
     */

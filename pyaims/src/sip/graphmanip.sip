@@ -19,8 +19,30 @@ typedef carto::rc_ptr<aims::BucketMap<Void> > rc_ptr_BucketMap_VOID;
 %End
 
 public:
-  static Motion talairach( const Graph & g );
-  static void storeTalairach( Graph & g, const Motion & m );
+  static AffineTransformation3d talairach( const Graph & g );
+  static void storeTalairach( Graph & g, const AffineTransformation3d & m );
+  static AffineTransformation3d getICBM152Transform( const Graph & g );
+%Docstring
+  transform = aims.GraphManip.getICBM152Transform(graph)
+
+  Extract the transformation to the MNI ICBM152 space. This space has
+  a fixed transformation with our Aims Talairach.
+%End
+
+  static AffineTransformation3d
+    getICBM152TemplateTransform( const Graph & g );
+%Docstring
+  transform = aims.GraphManip.getICBM152TemplateTransform(graph)
+
+  Extract the transformation to the MNI ICBM152 space, shifted to the
+  "most standard" field of view of the template image, the one from the
+  ICBM2009c_asym template from the MNI. Actually we find various fields
+  of view of the template. The one we use here is (197, 233, 189).
+  The transform to the "real" ICBM space (0 roughly at AC) is provided in
+  the output transformation header.
+  This space has a fixed transformation with our Aims Talairach.
+%End
+
   static void buckets2Volume( Graph & g );
   static void volume2Buckets( Graph & g );
   static void storeAims( Graph & graph, GraphObject* vertex,

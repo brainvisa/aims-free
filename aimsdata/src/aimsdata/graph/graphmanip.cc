@@ -38,18 +38,20 @@
 
 #include <cartobase/object/object_d.h>
 #include <aims/graph/graphmanip_d.h>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/resampling/standardreferentials.h>
 #include <aims/io/aimsGraphR.h>
 #include <aims/io/datatypecode.h>
 #include <aims/mesh/surface.h>
 #include <aims/mesh/surfaceOperation.h>
 #include <aims/mesh/texture.h>
+#include <aims/io/reader.h>
 #include <graph/graph/graph.h>
 #include <cartodata/volume/volume.h>
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/containers/nditerator.h>
+#include <cartobase/config/paths.h>
 #include <vector>
 #include <map>
 
@@ -408,7 +410,7 @@ bool GraphManip::hasOldTalairachTransform( const Graph & g )
 }
 
 
-Motion GraphManip::talairach( const Graph & g )
+AffineTransformation3d GraphManip::talairach( const Graph & g )
 {
   // First, try to read a Talairach transformation stored in the modern way
   // (using the "referentials" and "transformations" attributes).
@@ -432,7 +434,7 @@ Motion GraphManip::talairach( const Graph & g )
 
   // Read a Talairach transformation stored in the old attributes
   // (Talairach_translation, Talairach_rotation, and Talairach_scale).
-  Motion		m;
+  AffineTransformation3d		m;
 
   vector<float>	trans, rot, scl;
   if( g.getProperty( "Talairach_translation", trans ) 
@@ -472,7 +474,7 @@ Motion GraphManip::talairach( const Graph & g )
 }
 
 
-void GraphManip::storeTalairach( Graph & g, const Motion & m,
+void GraphManip::storeTalairach( Graph & g, const AffineTransformation3d & m,
                                  bool force_old_attributes )
 {
   // Part 1: store the transformation in the modern way (using the
@@ -553,6 +555,80 @@ void GraphManip::storeTalairach( Graph & g, const Motion & m,
     g.setProperty( "Talairach_translation", trans );
     g.setProperty( "Talairach_scale", scl );
   }
+}
+
+
+namespace
+{
+  AffineTransformation3d *tal_to_icbm = 0;
+  AffineTransformation3d *tal_to_icbm_template = 0;
+
+  const AffineTransformation3d & talairachToICBM()
+  {
+    if( !tal_to_icbm )
+    {
+      string tpath = Paths::findResourceFile(
+        "transformation/talairach_TO_spm_template_novoxels.trm" );
+      Reader<AffineTransformation3d> r( tpath );
+      tal_to_icbm = r.read();
+    }
+    return *tal_to_icbm;
+  }
+
+  const AffineTransformation3d & talairachToICBMTemplate()
+  {
+    if( !tal_to_icbm_template )
+    {
+      tal_to_icbm_template = new AffineTransformation3d;
+      AffineTransformation3d shift;
+      // invert all axes
+      shift.affine()( 0, 0 ) = -1;
+      shift.affine()( 1, 1 ) = -1;
+      shift.affine()( 2, 2 ) = -1;
+      // shift FOV
+      shift.affine()( 0, 3 ) = 98;
+      shift.affine()( 1, 3 ) = 98;
+      shift.affine()( 2, 3 ) = 116;
+
+      *tal_to_icbm_template = shift * talairachToICBM();
+
+      // set shift in header
+      vector<string> refs( 1, StandardReferentials::mniTemplateReferential() );
+      vector<vector<float> > trans( 1 );
+      trans[0] = shift.toVector();
+      tal_to_icbm_template->header()->setProperty( "referentials", refs );
+      tal_to_icbm_template->header()->setProperty( "transformations", trans );
+    }
+    return *tal_to_icbm_template;
+  }
+
+}
+
+
+AffineTransformation3d GraphManip::getICBM152Transform( const Graph & g )
+{
+  AffineTransformation3d tal = GraphManip::talairach( g );
+  const AffineTransformation3d & tal_to_icbm = talairachToICBM();
+  return tal_to_icbm * tal;
+}
+
+
+AffineTransformation3d GraphManip::getICBM152TemplateTransform(
+  const Graph & g )
+{
+  AffineTransformation3d tal = GraphManip::talairach( g );
+  const AffineTransformation3d & tal_to_icbm_template
+    = talairachToICBMTemplate();
+
+  Object refs = tal_to_icbm_template.header()->getProperty( "referentials" );
+  Object trans = tal_to_icbm_template.header()->getProperty(
+    "transformations" );
+
+  AffineTransformation3d to_template = tal_to_icbm_template * tal;
+  to_template.header()->setProperty( "referentials", refs );
+  to_template.header()->setProperty( "transformations", trans );
+
+  return to_template;
 }
 
 
@@ -1252,7 +1328,8 @@ namespace
 {
 
   void getArea( const AttributedObject* ao, rc_ptr<GraphElementTable> mgec, 
-                float & area, float & narea, const Motion* mtal )
+                float & area, float & narea,
+                const AffineTransformation3d* mtal )
   {
     GraphElementTable::iterator			imgec, emgec = mgec->end();
     map<string, GraphElementCode>::iterator	igec, egec;
@@ -1331,8 +1408,8 @@ void GraphManip::completeGraph( Graph & g )
   float						area, narea;
   float						size, nsize;
   float						vvol,nvvol = 0;
-  Graph::iterator				ig, eg = g.end();
-  Motion					mtal = talairach( g );
+  Graph::iterator			ig, eg = g.end();
+  AffineTransformation3d	mtal = talairach( g );
   bool	normalized = !mtal.isIdentity();
   vector<float>	vs(3), nvs(3);
 
