@@ -468,6 +468,13 @@ AffineTransformation3d GraphManip::talairach( const Graph & g )
       r(2,2) = rot[8];
     }
 
+  m.header()->setProperty( "destination_referential",
+                           StandardReferentials::acPcReferentialID() );
+
+  if( g.hasProperty( "referential" ) )
+    m.header()->setProperty( "source_referential",
+                             g.getProperty( "referential" ) );
+
   return m;
 }
 
@@ -561,7 +568,18 @@ AffineTransformation3d GraphManip::getICBMTransform( const Graph & g )
   AffineTransformation3d tal = GraphManip::talairach( g );
   const AffineTransformation3d & tal_to_icbm
     = StandardReferentials::talairachToICBM();
-  return tal_to_icbm * tal;
+
+  AffineTransformation3d to_icbm = tal_to_icbm * tal;
+
+  to_icbm.header()->setProperty(
+    "destination_referential",
+    tal_to_icbm.header()->getProperty( "destination_referential" ) );
+
+  if( g.hasProperty( "referential" ) )
+    to_icbm.header()->setProperty( "source_referential",
+                                   g.getProperty( "referential" ) );
+
+  return to_icbm;
 }
 
 
@@ -572,18 +590,22 @@ AffineTransformation3d GraphManip::getICBM2009cTemplateTransform(
   const AffineTransformation3d & tal_to_icbm_template
     = StandardReferentials::talairachToICBM2009cTemplate();
 
-  Object refs = tal_to_icbm_template.header()->getProperty( "referentials" );
-  Object trans = tal_to_icbm_template.header()->getProperty(
-    "transformations" );
-  Object dims = tal_to_icbm_template.header()->getProperty(
-    "volume_dimensions" );
-  Object vs = tal_to_icbm_template.header()->getProperty( "voxel_size" );
+  Object dheader1 = tal_to_icbm_template.header()->getProperty(
+    "destination_header" );
+  Object dref = tal_to_icbm_template.header()->getProperty(
+    "destination_referential" );
+
+  Object dheader = Object::value( Dictionary() );
+  dheader->copyProperties( dheader1 );
 
   AffineTransformation3d to_template = tal_to_icbm_template * tal;
-  to_template.header()->setProperty( "referentials", refs );
-  to_template.header()->setProperty( "transformations", trans );
-  to_template.header()->setProperty( "volume_dimension", dims );
-  to_template.header()->setProperty( "voxel_size", vs );
+
+  to_template.header()->setProperty( "destination_header", dheader );
+  to_template.header()->setProperty( "destination_referential", dref );
+
+  if( g.hasProperty( "referential" ) )
+    to_template.header()->setProperty( "source_referential",
+                                       g.getProperty( "referential" ) );
 
   return to_template;
 }
