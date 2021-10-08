@@ -268,17 +268,18 @@ int main( int argc, const char** argv )
 
   try
     {
-	app.initialize();
-	if( verbose )
-	  cout << "Init program" << endl;
-	CxParcel	proc( meshfile.fileName(), intexfile, outputfile, gm_value);
-	if( verbose )
-	  cout << "Starting program.." << endl;      
-	if( !proc.execute( gmvolumefile ) )
-	{
-	      cout << "Couldn't process file - aborted\n";
-	      return( 1 );
-	}
+      app.initialize();
+      if( verbose )
+        cout << "Init program" << endl;
+      CxParcel	proc( meshfile.fileName(), intexfile, outputfile, gm_value);
+      if( verbose )
+        cout << "Starting program.." << endl;
+      if( !proc.execute( gmvolumefile ) )
+      {
+        cout << "Couldn't process file - aborted\n";
+        return EXIT_FAILURE;
+      }
+      return EXIT_SUCCESS;
      }
   catch( user_interruption & )
     {
