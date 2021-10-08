@@ -374,10 +374,10 @@ class Reader(object):
             open(filename).close()  # "file not found"-case raising first
             raise IOError(
                 'Unknown file format or missing meta-file(s): ' + filename)
-        if object is not None:
-            finaltype = typeCode(object)
-        elif dtype is not None:
+        if dtype is not None:
             finaltype = typeCode(dtype)
+        elif object is not None:
+            finaltype = typeCode(object)
         else:
             otype = f.objectType()
             dtype = f.dataType()
