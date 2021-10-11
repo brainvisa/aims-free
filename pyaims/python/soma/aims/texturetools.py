@@ -543,3 +543,90 @@ def clean_gyri_texture(mesh, gyri_tex):
             gyri_tex, win = change_wrong_labels(
                 l + 1, label, gyri_tex, mesh_neighbors_vector, cc_tex_label)
     return gyri_tex
+
+
+def set_textrure_colormap(texture, colormap, cmap_name='custom',
+                          tex_max=None, tex_index=0):
+    """ Set a colormap in a texture object header.
+
+    The texture object may be any kind of textured object: a TimeTexture
+    instance, or a Volume.
+
+    Parameters
+    ----------
+    texture: TimeTexture, Volume...
+        The texture object should have a header() method.
+    colormap: array, Volume, or filename
+        The colormap may be provided as RGB or RGBA, and as an aims Volume
+        object, or a numpy array, or as an image filename. It should be a 1D
+        colormap (for now at least).
+    cmap_name: str (optional)
+        name of the colormap to be used in Anatomist.
+    tex_max: float (optional)
+        Max texture value to be mapped to the colormap bounds. It is used to
+        scale the max value of the colormap in Anatomist. If not specified,
+        the texture or volume max will be looked for in the texture object.
+    tex_index: int (optional)
+        Texture index in the textured object
+    """
+    header = texture.header()
+    if isinstance(colormap, str):
+        # colormap is a filename
+        colormap = aims.read(colormap)
+    if hasattr(colormap, 'np'):
+        cmap = colormap.np
+    else:
+        # assume already a np array nx3 or nx4
+        cmap = colormap
+    if cmap.shape[-1] ==4:
+        mode = 'rgba'
+    cols = cmap.ravel(order='C')
+    nmax = cmap.shape[0]
+    if tex_max is None:
+        if hasattr(texture, 'max'):
+            # volume ?
+            tex_max = texture.max()
+        elif hasattr(texture, 'np'):
+            # volume also ?
+            tex_max = np.max(texture.np)
+        elif hasattr(texture[0], 'np'):
+            tex_max = np.max(texture[0].np)
+    header.setdefault('palette', {}).update({
+        'sizex': nmax,
+        'colors': cols,
+        'colormap': cmap_name,
+        'max': (nmax - 1) / texmax})
+    header['volumeInterpolation'] = 0
+    tprops = header.setdefault('texture_properties', [])
+    while len(tprops) <= tex_index:
+      tprops.append({})
+    tprop = tprops[tex_index]
+    tprop.update({'interpolation': 'rgb'})
+
+
+def set_texture_labels(texture, labels, tex_index=0):
+    """ Set a labels list or dict in a texture object header.
+
+    The texture object may be any kind of textured object: a TimeTexture
+    instance, or a Volume.
+
+    Parameters
+    ----------
+    texture: TimeTexture, Volume...
+        The texture object should have a header() method.
+    labels: list ot dict
+        Values are labels strings. Keys are ints. It may be either a list (keys
+        are list indices) or a dict.
+    tex_index: int (optional)
+        Texture index in the textured object
+    """
+    header = texture.header()
+    header['volumeInterpolation'] = 0
+    tprops = header.setdefault('texture_properties', [])
+    while len(tprops) <= tex_index:
+      tprops.append({})
+    tprop = tprops[tex_index]
+    tprop.update({'interpolation': 'rgb'})
+    header['labels'] = labels
+
+
