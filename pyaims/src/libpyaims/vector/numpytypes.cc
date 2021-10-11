@@ -19,6 +19,7 @@ PyArray_Descr* NPY_AimsRGB_Descr()
   return descr;
 }
 
+using namespace std;
 
 PyArray_Descr* NPY_AimsRGBA_Descr()
 {
@@ -27,7 +28,7 @@ PyArray_Descr* NPY_AimsRGBA_Descr()
   {
     PyObject *op;
 
-    op = Py_BuildValue( "[(s, s)", "v", "4u1" );
+    op = Py_BuildValue( "[(s, s)]", "v", "4u1" );
     PyArray_DescrConverter( op, &descr );
     Py_DECREF( op );
   }
