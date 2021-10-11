@@ -144,7 +144,7 @@ namespace aims
   {
     Writer<T> w( filename );
     w.setOptions( options );
-    w.write( obj, false, format );
+    return w.write( obj, false, format );
   }
 
 }
