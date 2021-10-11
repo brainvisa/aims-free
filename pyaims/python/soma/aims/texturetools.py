@@ -5,7 +5,6 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 from soma import aims, aimsalgo
-import exceptions
 import numpy
 import os
 import six
@@ -545,8 +544,9 @@ def clean_gyri_texture(mesh, gyri_tex):
     return gyri_tex
 
 
-def set_textrure_colormap(texture, colormap, cmap_name='custom',
-                          tex_max=None, tex_index=0):
+def set_texture_colormap(texture, colormap, cmap_name='custom',
+                         tex_max=None, tex_min=None, tex_index=0,
+                         col_mapping='all'):
     """ Set a colormap in a texture object header.
 
     The texture object may be any kind of textured object: a TimeTexture
@@ -565,39 +565,80 @@ def set_textrure_colormap(texture, colormap, cmap_name='custom',
     tex_max: float (optional)
         Max texture value to be mapped to the colormap bounds. It is used to
         scale the max value of the colormap in Anatomist. If not specified,
-        the texture or volume max will be looked for in the texture object.
+        the texture or volume max will be looked for in the texture object. Used
+        only if col_mapping is "one".
+    tex_min: float (optional)
+        Min texture value to be mapped to the colormap bounds. It is used to
+        scale the max value of the colormap in Anatomist. If not specified,
+        the texture or volume max will be looked for in the texture object. Used
+        only if col_mapping is "one".
     tex_index: int (optional)
         Texture index in the textured object
+    col_mapping: str or None (optional)
+        "all": map the full texture range to the colormap bounds (default);
+        "one": one-to-one mapping between colors and values (int values);
+        "none" or None: don't force any mapping - anatomist will choose to use a
+        histogram if needed.
     """
     header = texture.header()
     if isinstance(colormap, str):
         # colormap is a filename
         colormap = aims.read(colormap)
     if hasattr(colormap, 'np'):
-        cmap = colormap.np
+        cmap = colormap['v']
     else:
         # assume already a np array nx3 or nx4
         cmap = colormap
     if cmap.shape[-1] ==4:
         mode = 'rgba'
-    cols = cmap.ravel(order='C')
+    else:
+        mode = 'rgb'
+    cols = cmap.flatten().tolist()
     nmax = cmap.shape[0]
-    if tex_max is None:
-        if hasattr(texture, 'max'):
-            # volume ?
-            tex_max = texture.max()
-        elif hasattr(texture, 'np'):
-            # volume also ?
-            tex_max = np.max(texture.np)
-        elif hasattr(texture[0], 'np'):
-            tex_max = np.max(texture[0].np)
-    header.setdefault('palette', {}).update({
+    params = {}
+    if col_mapping not in (None, "none"):
+        if col_mapping == "all":
+            params['min'] = 0.
+            params['max'] = 1.
+        elif col_mapping == "one":
+            if tex_max is None:
+                if hasattr(texture, 'max'):
+                    # volume ?
+                    tex_max = texture.max()
+                elif hasattr(texture, 'np'):
+                    # volume also ?
+                    tex_max = numpy.max(texture.np)
+                elif hasattr(texture[0], 'np'):
+                    tex_max = numpy.max(texture[0].np)
+            if tex_min is None:
+                if hasattr(texture, 'min'):
+                    # volume ?
+                    tex_max = texture.min()
+                elif hasattr(texture, 'np'):
+                    # volume also ?
+                    tex_min = numpy.min(texture.np)
+                elif hasattr(texture[0], 'np'):
+                    tex_min = numpy.min(texture[0].np)
+            params['min'] = 0.
+            if tex_max != tex_min:
+                params['max'] = (nmax - 1) / (tex_max - tex_min)
+            else:
+                params['max'] = 1.
+    pal = header.get('palette')
+    if pal is None:
+        pal = {}
+        header['palette'] = pal
+    pal.update({
         'sizex': nmax,
         'colors': cols,
-        'colormap': cmap_name,
-        'max': (nmax - 1) / texmax})
+        'color_mode': mode,
+        'colormap': cmap_name})
+    pal.update(params)
     header['volumeInterpolation'] = 0
-    tprops = header.setdefault('texture_properties', [])
+    tprops = header.get('texture_properties')
+    if tprops is None:
+        tprops = []
+        header['texture_properties'] = tprops
     while len(tprops) <= tex_index:
       tprops.append({})
     tprop = tprops[tex_index]
@@ -622,7 +663,10 @@ def set_texture_labels(texture, labels, tex_index=0):
     """
     header = texture.header()
     header['volumeInterpolation'] = 0
-    tprops = header.setdefault('texture_properties', [])
+    tprops = header.get('texture_properties')
+    if tprops is None:
+        tprops = []
+        header['texture_properties'] = tprops
     while len(tprops) <= tex_index:
       tprops.append({})
     tprop = tprops[tex_index]
