@@ -43,7 +43,7 @@ Comptibility and requirements
 
 Since version 4.5.1 both Python 2 (2.7 and higher) and Python 3 (3.4 and higher) are supported. However as the module contains compiled code (python / C++ bindings) using specific python C interfaces (APIs/ABIs), PyAIMS has to be compiled separately for a given version of python.
 
-PyAIMS also has bindings to the `numpy <https://numpy.org>`_ library, allowing easy array manipulations. This also involves constraints on the Numpy ABI version: once PyAims is compiled, it is not possible to swith numpy to a different version featuring a different ABI (which `pip <https://docs.python.org/3.9/installing/index.html>`_ often does without warning, unfortunately).
+PyAIMS also has bindings to the :numpy:`numpy <index.html>` library, allowing easy array manipulations. This also involves constraints on the Numpy ABI version: once PyAims is compiled, it is not possible to swith numpy to a different version featuring a different ABI (which `pip <https://docs.python.org/3.9/installing/index.html>`_ often does without warning, unfortunately).
 
 Most of it is a set of direct bindings to the
 :aimsdox:`AIMS C++ library <index.html>` API. But a few
@@ -63,11 +63,13 @@ Main classes
     :py:func:`write` functions. :py:class:`Finder` is
     also part of the IO system to identify files and get information about
     them.
-  - Volume_<type>: volumes. An important feature of Volumes is
-    the link with the numpy_ arrays, so all the power of numpy_ can be
+  - Volume_<type>: :class:`volumes <Volume_FLOAT>`. An important feature of
+    Volumes is
+    the link with the :class:`numpy.ndarray` arrays, so all the power of
+    :numpy:`numpy <index.html>` can be
     used to work on volumes. See for instance :py:class:`Volume_FLOAT`.
     Volumes of various types can be build using the convenience factory
-    function :py:func:`Volume`. Note that the older classes ̀``AimsData`` are
+    function :func:`Volume`. Note that the older classes ̀``AimsData`` are
     deprecated in the C++ library and have been removed from the python
     bindings in Aims 5.1.
   - :py:class:`carto.GenericObject`: the dynamic C++ generic object which
@@ -99,7 +101,6 @@ Main classes
     functions :py:func:`Converter` and :py:func:`ShallowConverter`
   - a few algorithms will be added
 
-.. _numpy: https://numpy.org/
 '''
 from __future__ import print_function
 from __future__ import absolute_import
@@ -1820,9 +1821,37 @@ def Converter(*args, **kwargs):
     to find types arguments.
 
     Types may be specified as allowed by typeCode().
+
+    Note that for volumes, the method :meth:`astype <Volume_FLOAT.astype>` is
+    often more convenient than using a Converter object (with the same result).
     '''
     intype, outtype, args, kwargs = _parse2TypesInArgs(*args, **kwargs)
-    return getattr(aimssip, 'Converter_' + intype + '_' + outtype)(*args)
+    try:
+        return getattr(aimssip, 'Converter_' + intype + '_' + outtype)(*args)
+    except AttributeError:
+        # try using rc_ptr_ as prefix(es) to types
+        in_rc = False
+        if not intype.startswith('rc_ptr_'):
+            in_rc = True
+            try:
+                return getattr(aimssip, 'Converter_rc_ptr_' + intype + '_'
+                               + outtype)(*args)
+            except AttributeError:
+                pass
+        if not outtype.startswith('rc_ptr_'):
+            outtype = 'rc_ptr_%s' % outtype
+            try:
+                return getattr(aimssip, 'Converter_' + intype + '_' + outtype)(
+                    *args)
+            except AttributeError:
+                pass
+            if in_rc:
+                try:
+                    return getattr(aimssip, 'Converter_rc_ptr_' + intype + '_'
+                                   + outtype)(*args)
+                except AttributeError:
+                    pass
+        raise
 
 
 def ShallowConverter(*args, **kwargs):
@@ -1832,6 +1861,9 @@ def ShallowConverter(*args, **kwargs):
     to find types arguments.
 
     Types may be specified as allowed by typeCode().
+
+    Note that for volumes, the method :meth:`astype <Volume_FLOAT.astype>` is
+    often more convenient than using a Converter object (with the same result).
     '''
     intype, outtype, args, kwargs = _parse2TypesInArgs(*args, **kwargs)
     return getattr( aimssip, 'ShallowConverter_' + intype + '_' + outtype ) \
@@ -2443,11 +2475,11 @@ specific type of data: for instance S16 is signed 16 bit short ints, FLOAT is
 32 bit floats,
 etc.
 
-Volumes are read and written using the :py:class:`soma.aims.Reader` and
-:py:class:`soma.aims.Writer` classes, which are in turn used by the simple
-:py:func:`soma.aims.read` and :py:func:`soma.aims.write` functions.
+Volumes are read and written using the :class:`Reader` and
+:class:`Writer` classes, which are in turn used by the simple
+:func:`read` and :func:`write` functions.
 
-A volume of a given type can be built either using its specialized class constructor, or the general Volume() function which can take a voxel type in its arguments: the following are equivalent:
+A volume of a given type can be built either using its specialized class constructor, or the general :func:`Volume` function which can take a voxel type in its arguments: the following are equivalent:
 
     >>> v = aims.Volume_S16(100, 100, 10)
     >>> v = aims.Volume('S16', 100, 100, 10)
@@ -2458,15 +2490,15 @@ A volume of a given type can be built either using its specialized class constru
 
 **Numpy arrays and volumes**
 
-A volume is an array of voxels, which can be accessed via the ``at()``
+A volume is an array of voxels, which can be accessed via the :meth:`at`
 method.
 For standard numeric types, it is also possible to get the voxels array as a
 numpy_ array, using the ``__array__()`` method, or more conveniently,
 ``numpy.asarray(volume)`` or ``numpy.array(volume, copy=False)``.
-In aims >= 5.0.2, a more concise shortcut is also available: volume.np (this is available on all types providing numpy bindings actually).
+In aims >= 5.0.2, a more concise shortcut is also available: :meth:`volume.np <Volume_FLOAT.np>` (this is available on all types providing numpy bindings actually).
 
 The array returned is a reference to the actual data block, so any
-modification to its contents also affect the Volume contents, so it is
+modification to its contents also affects the Volume contents, so it is
 generally an easy way of manipulating volume voxels because all the power of
 the numpy module can be used on Volumes.
 The obsoloete ``arraydata()`` method used to return a numpy array just like it
@@ -2501,10 +2533,10 @@ Both arrays share their memory with the aims volume.
 
 Volumes also store a header which can contain various information (including
 sizes and voxel sizes). The header is a dictionary-like generic object
-(:py:class:`soma.aims.Object`) which can be accessed by the ``header()``
+(:class:`Object`) which can be accessed by the ``header()``
 method.
 This header object also has a read-write access with some restrictions
-inherent to the :py:class:`soma.aims.Object` mechanism. It will be saved with
+inherent to the :class:`Object` mechanism. It will be saved with
 the volume contents when the volume is saved on disk.
 
 Volumes support a number of arithmetic operators like +, - etc. when the
@@ -2517,14 +2549,16 @@ operands types and sizes match: for instance:
     >>> V3 = V1 * V2  # itemwise multiplication
 
 Some type conversions can be performed on volumes, for istance to
-convert a Volume_S16 to a Volume_FLOAT: see the converter classes
+convert a Volume_S16 to a Volume_FLOAT. The simplest, to convert to another data type, is to use the :meth:`astype` method.
+
+To convert a volume into diffent structure types, such as :class:`Buckets <BucketMap_VOID>`, use the converter classes
 ``Converter_<type1>_<type2>`` and ``ShallowConverter_<type1>_<type2>``
-with <type1> and <type2> being volume types: for instance
-:py:class:`soma.aims.Converter_Volume_S16_Volume_FLOAT`.
+with <type1> and <type2> being volume or other object types: for instance
+:class:`Converter_Volume_S16_Volume_FLOAT`.
 The converter can also be called using type arguments:
 
     >>> vol1 = aims.Volume('S16', 100, 100, 10)
-    >>> c = aims.Converter(intype=vol1, outtype='Volume_DOUBLE')
+    >>> c = aims.Converter(intype=vol1, outtype='BucketMap_VOID')
     >>> vol2 = c(vol1)
 
 **Volume from a numpy array**
@@ -2544,7 +2578,7 @@ Note that passing a 1D numpy array of ints will build a volume mapping the array
     >>> print(v.getSize())
     [ 100, 100, 10, 1 ]
 
-.. _numpy: http://numpy.scipy.org/
+.. _numpy: https://numpy.org/
 
 Array ordering:
 
