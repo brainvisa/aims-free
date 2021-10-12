@@ -57,7 +57,9 @@
   <li>Support Volume classes with strides on X axis. Strides were present in the volume structure but most functions assumed that voxels were contiguous on the first (X) axis. This forbid for instance bindings to numpy arrays which had a "C" ordering convention. This limitation is now gone in main Volume methods and operator. However many algorithms are still assuming that the first axis is contiguous (and use pointers with ++ incrementation), so these volumes should be reserved for specific and tested uses.</li>
   <li>Volume IO have been updated to support strides.</li>
   <li>PyAims bindings to readers taking existing data as input/output. This allows partial reading views in allocated volumes.</li>
-  <li>Huge cleanup in Aimsdata library: the obsolete classes AimsData have been actually marked as obsolete, and their use in the libraries and commands have been notably reduced (but not removed). A set of classes and functions originally working with AimsData have been moved to Volume API, thus many APIs have changed, normally in a way that is "as compatible as possible", but still require a few changes in client uses.
+  <li>Huge cleanup in Aimsdata library: the obsolete classes AimsData have been actually marked as obsolete, and their use in the libraries and commands have been drastically reduced (almost removed). A set of classes and functions originally working with AimsData have been moved to Volume API, thus many APIs have changed, normally in a way that is "as compatible as possible", but still require a few changes in client uses.
+  </li>
+  <li>Pyaims: AimsData classes have completely be wiped out. They are not needed any longer.
   </li>
 </ul>
 
