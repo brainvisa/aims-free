@@ -618,7 +618,43 @@ namespace carto
         return x;
       }
 
-      static inline Object 
+      static inline bool isContiguous( const TypedObject< PyObject * > & to )
+      {
+        PyGILState_STATE gstate;
+        gstate = PyGILState_Ensure();
+        bool x = PySequence_Check( to.getValue() );
+        if( !x && PyObject_HasAttrString( to.getValue(), "isContiguous" ) )
+        {
+          PyObject *res = PyObject_CallMethod(
+            to.getValue(), const_cast<char *>( "isContiguous" ), 0 );
+          if( res )
+          {
+            x = ( res == Py_True );
+            Py_DECREF( res );
+          }
+        }
+        PyGILState_Release(gstate);
+        return x;
+      }
+
+      static inline bool hasItem( const TypedObject< PyObject * > & to,
+                                  int index )
+      {
+        PyGILState_STATE gstate;
+        gstate = PyGILState_Ensure();
+        bool x = false;
+        PyObject	*o = PySequence_GetItem( to.getValue(), index );
+        if( !o )
+        {
+          PyErr_Clear();
+          PyGILState_Release(gstate);
+        }
+        Py_DECREF( o );
+        PyGILState_Release(gstate);
+        return x;
+      }
+
+      static inline Object
       getArrayItem( const TypedObject<PyObject *> & to, int index )
       {
         PyGILState_STATE gstate;
