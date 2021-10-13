@@ -2515,14 +2515,14 @@ The Volume object now also wraps the numpy accessors to the volume object itself
 Since PyAims 4.7 the numpy arrays bindings have notably improved, and are now able to bind arrays to voxels types which are not scalar numeric types. Volumes of RGB, RGBA, HSV, or Point3df now have numpy bindings. The bound object have generally a "numpy struct" binding, that is not the usual C++/python object binding, but instead a structure managed by numpy which also supports indexing. For most objects we are using, they also have an array stucture (a RGB is an array with 3 int8 items), and are bound under a sturcture with a unique field, named "v" (for "vector"):
 
     >>> v = aims.Volume('RGB', 100, 100, 10)
-    >>> v.np[0, 0, 0, 0]
+    >>> v[0, 0, 0, 0]
     ([0, 0, 0],)
 
 Such an array may be indexed by the field name, which returns another array with scalar values and additional dimensions:
 
-    >>> v.np['v'].dtype
+    >>> v['v'].dtype
     dtype('uint8')
-    >>> v.['v'].shape
+    >>> v['v'].shape
     (100, 100, 10, 1, 3)
 
 Both arrays share their memory with the aims volume.
@@ -2557,7 +2557,7 @@ with <type1> and <type2> being volume or other object types: for instance
 :class:`Converter_Volume_S16_Volume_FLOAT`.
 The converter can also be called using type arguments:
 
-    >>> vol1 = aims.Volume('S16', 100, 100, 10)
+    >>> vol1 = aims.AimsData('S16', 100, 100, 10)
     >>> c = aims.Converter(intype=vol1, outtype='BucketMap_VOID')
     >>> vol2 = c(vol1)
 
