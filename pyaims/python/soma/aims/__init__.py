@@ -69,7 +69,7 @@ Main classes
     :numpy:`numpy <index.html>` can be
     used to work on volumes. See for instance :py:class:`Volume_FLOAT`.
     Volumes of various types can be build using the convenience factory
-    function :func:`Volume`. Note that the older classes ̀``AimsData`` are
+    function :func:`Volume`. Note that the older classes ``AimsData`` are
     deprecated in the C++ library and have been removed from the python
     bindings in Aims 5.1.
   - :py:class:`carto.GenericObject`: the dynamic C++ generic object which
