@@ -48,7 +48,7 @@ PyAIMS also has bindings to the :numpy:`numpy <index.html>` library, allowing ea
 Most of it is a set of direct bindings to the
 :aimsdox:`AIMS C++ library <index.html>` API. But a few
 classes have been customized or specially written to make easy links to the
-python world. See also the small :aimsdata:`AIMS C++ developer doc <dev/index.html>`.
+python world. See also the small :aimsdata:`AIMS C++ developer doc <dev_doc/index.html>`.
 
 aims contains mainly the AIMS and carto data structures and IO system.
 It covers several C++ libraries: cartobase, cartodata, graph, aimsdata, plus
