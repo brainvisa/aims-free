@@ -75,7 +75,7 @@ Main classes
   - :py:class:`carto.GenericObject`: the dynamic C++ generic object which
     behaves
     much like a python object, and its proxy :py:class:`Object` which should
-    always be used to access a :py:class:`GenericObject`
+    always be used to access a :class:`~carto.GenericObject`
   - AimsVector_<type>_<size> for fixed-size vectors, and their aliases
     for points: :py:class:`Point3df`, :py:class:`Point2df`,
     :py:class:`Point3d`
