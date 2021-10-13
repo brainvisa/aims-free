@@ -168,8 +168,14 @@ const AffineTransformation3d &
 
     *tal_to_icbm_template = shift * talairachToICBM();
 
-    tal_to_icbm_template->header()->copyProperties(
-      icbm2009cTemplateHeader() );
+    tal_to_icbm_template->header()->setProperty(
+      "source_referential", acPcReferentialID() );
+    tal_to_icbm_template->header()->setProperty(
+      "destination_referential", icbm2009cTemplateReferentialID() );
+    Object dheader = Object::value( Dictionary() );
+    dheader->copyProperties( icbm2009cTemplateHeader() );
+    tal_to_icbm_template->header()->setProperty(
+      "destination_header", dheader );
   }
   return *tal_to_icbm_template;
 }
