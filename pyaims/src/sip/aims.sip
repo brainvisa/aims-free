@@ -11,6 +11,9 @@
 %Feature CARTODATA
 %Platforms { SIPTHROW_BUG }
 
+%DefaultDocstringFormat "deindented"
+%DefaultDocstringSignature "prepended"
+
 %ModuleCode
 #include <pyaims/init.h>
 %End

@@ -2,6 +2,9 @@
 
 %Module soma.aimsalgo.aimsalgosip
 
+%DefaultDocstringFormat "deindented"
+%DefaultDocstringSignature "prepended"
+
 %Include moment_DOUBLE.sip
 %Include moment_FLOAT.sip
 %Include moment_S16.sip
