@@ -18,7 +18,7 @@
 
 
 template <class T>
-void ScaleControl::init(const carto::rc_ptr<carto::Volume< T > >& ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc )
+void ScaleControl::init(const carto::rc_ptr<carto::Volume< T > > ref, int level_start, int level_stop, double cutVar, double stopVar, double seuilCorrel, const Point3d& tailleBloc )
 {
   // Calcul du niveau de pyramide adequat si non precise...
   _currentScale = level_start;

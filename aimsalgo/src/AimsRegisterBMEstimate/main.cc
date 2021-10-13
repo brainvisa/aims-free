@@ -182,10 +182,12 @@ bool doit( Process & process, const string & fileinr, Finder & )
   T bv;
   stringTo(abm.background, bv);
 
-  cout<<"Type is: "<<DataTypeCode<T>().dataType()<<endl;
+  cout << "Type is: " <<DataTypeCode<T>().dataType() << endl;
 
   // Instanciation des differentes classes externes
-  AimsData< T > ref, test; //image fixe et flottante respectivement
+  VolumeRef< T > ref, test; //image fixe et flottante respectivement
+  vector<float> vs_test, vs_ref;
+  vector<int> dim_test, dim_ref;
   ScaleControl scaleControl; // Gere la pyramide
   DisplacementField<T> displacementField; // Calcule le champ d'appariemment
   Minimisation minimisation(abm.Pkept, abm.transfo); // Calcule la transformation a partir du champ
@@ -211,8 +213,12 @@ bool doit( Process & process, const string & fileinr, Finder & )
     ChannelReader< VolumeRef<T> > rdtest(abm.fileint);
     cout << "Reading channel " << carto::toString(abm.channelref) << " of reference image" << endl << flush;
     rdref.read(ref, abm.channelref);
+    ref.header().getProperty("voxel_size", vs_ref);
+    dim_ref = ref.getSize();
     cout << "Reading channel " << carto::toString(abm.channeltest) << " of test image" << endl << flush;
     rdtest.read(test, abm.channeltest);
+    test.header().getProperty("voxel_size", vs_test);
+    dim_test = test.getSize();
     //  Writer< AimsData<T> > checkWriter("ref");  
     //  checkWriter.write(ref);
     //  Writer< AimsData<T> > check2Writer("test");  
@@ -230,23 +236,23 @@ bool doit( Process & process, const string & fileinr, Finder & )
     /* Transmit dim and size info to slaves, normally enough for correct recreation of
       images in slaves. No direct mem copy of whole AimsData because header and contents
       not of constant length, and it's not faster. Same for Motion p.*/
-    masterIntInfo[0] = ref.dimX();
-    masterIntInfo[1] = ref.dimY();
-    masterIntInfo[2] = ref.dimZ();
-    masterIntInfo[3] = ref.dimT();
-    masterIntInfo[4] = test.dimX();
-    masterIntInfo[5] = test.dimY();
-    masterIntInfo[6] = test.dimZ();
-    masterIntInfo[7] = test.dimT();
+    masterIntInfo[0] = dim_ref[0];
+    masterIntInfo[1] = dim_ref[1];
+    masterIntInfo[2] = dim_ref[2];
+    masterIntInfo[3] = dim_ref[3];
+    masterIntInfo[4] = dim_test[0];
+    masterIntInfo[5] = dim_test[1];
+    masterIntInfo[6] = dim_test[2];
+    masterIntInfo[7] = dim_test[3];
 
-    masterFInfo[0] = ref.sizeX();
-    masterFInfo[1] = ref.sizeY();
-    masterFInfo[2] = ref.sizeZ();
-    masterFInfo[3] = ref.sizeT();
-    masterFInfo[4] = test.sizeX();
-    masterFInfo[5] = test.sizeY();
-    masterFInfo[6] = test.sizeZ();
-    masterFInfo[7] = test.sizeT();
+    masterFInfo[0] = vs_ref[0];
+    masterFInfo[1] = vs_ref[1];
+    masterFInfo[2] = vs_ref[2];
+    masterFInfo[3] = vs_ref[3];
+    masterFInfo[4] = vs_test[0];
+    masterFInfo[5] = vs_test[1];
+    masterFInfo[6] = vs_test[2];
+    masterFInfo[7] = vs_test[3];
 
     if(abm.filemotion.length() != 0) {
       masterMotionInfo[0] = p.translation()[0];
@@ -272,16 +278,35 @@ bool doit( Process & process, const string & fileinr, Finder & )
   COMM_WORLD.Barrier(); //unnecessary? Non-synch Bcast would mean that it is non-blocking...& collective comms are blocking in mpich2
 
   if(rank!=ROOT) {
-    ref = AimsData<T>(masterIntInfo[0],masterIntInfo[1],masterIntInfo[2],masterIntInfo[3]); //useless memCopy, to avoid using pointers
-    test = AimsData<T>(masterIntInfo[4],masterIntInfo[5],masterIntInfo[6],masterIntInfo[7]);
-    ref.setSizeXYZT(masterFInfo[0],masterFInfo[1],masterFInfo[2],masterFInfo[3]);
-    test.setSizeXYZT(masterFInfo[4],masterFInfo[5],masterFInfo[6],masterFInfo[7]);
+    dim_ref[0] = masterIntInfo[0];
+    dim_ref[1] = masterIntInfo[1];
+    dim_ref[2] = masterIntInfo[2];
+    dim_ref[3] = masterIntInfo[3];
+    dim_test[0] = masterIntInfo[4];
+    dim_test[1] = masterIntInfo[5];
+    dim_test[2] = masterIntInfo[6];
+    dim_test[3] = masterIntInfo[7];
+    
+    vs_ref[0] = masterFInfo[0];
+    vs_ref[1] = masterFInfo[1];
+    vs_ref[2] = masterFInfo[2];
+    vs_ref[3] = masterFInfo[3];
+    vs_test[0] = masterFInfo[4];
+    vs_test[1] = masterFInfo[5];
+    vs_test[2] = masterFInfo[6];
+    vs_test[3] = masterFInfo[7];
+    
+    ref = VolumeRef<T>(dim_ref); //useless memCopy, to avoid using pointers
+    test = VolumeRef<T>(dim_test);
+    ref.setVoxelSize(vs_ref);
+    test.setVoxelSize(vs_test);
+    
     if(abm.filemotion.length() != 0)
     {
       p.setTranslation(
         Point3df( masterMotionInfo[0], masterMotionInfo[1],
                   masterMotionInfo[2]) );
-      AimsData<float> tmp(3,3);
+      VolumeRef<float> tmp(3,3);
       for(int i = 0;i < 9; i++)
         tmp[i] = masterMotionInfo[i+3];
       p.setMatrix(tmp);
@@ -291,12 +316,12 @@ bool doit( Process & process, const string & fileinr, Finder & )
 
   Datatype usedType = MpiDataTypeCode<T>::mpiDataType();
 
-  COMM_WORLD.Bcast(&ref(0), ref.dimX() * ref.dimY() * ref.dimZ() * ref.dimT(), usedType, ROOT);
-  COMM_WORLD.Bcast(&test(0), test.dimX() * test.dimY() * test.dimZ() * test.dimT(), usedType, ROOT);
+  COMM_WORLD.Bcast(&ref(0), dim_ref[0] * dim_ref[1] * dim_ref[2] * dim_ref[3], usedType, ROOT);
+  COMM_WORLD.Bcast(&test(0), dim_test[0] * dim_test[1] * dim_test[2] * dim_test[3], usedType, ROOT);
   COMM_WORLD.Barrier(); //unnecessary?
 #endif
   /* Inits */
-  if(ref.dimZ()==1) abm.tailleBloc[2] = 1;
+  if(dim_ref[2]==1) abm.tailleBloc[2] = 1;
   scaleControl.init<T>( ref, abm.level_start, abm.level_stop, abm.cutVar, abm.stopVar, abm.seuilCorrel, abm.tailleBloc);
   int count = 0 ;
   T templateSeuils[4];
@@ -322,47 +347,50 @@ bool doit( Process & process, const string & fileinr, Finder & )
     // Affichage de tous les parametres avant debut :
     if(abm.Info=="y")
       {
-        cout<<endl<<"PARAMETRES INITIAUX :"<<endl;
-        cout<<"Image  reference : "<<fileinr<<endl;
-        cout<<"Image  test : "<<abm.fileint<<endl;
+        cout << endl << "PARAMETRES INITIAUX :" << endl;
+        cout << "Image  reference : " << fileinr << endl;
+        cout << "Image  test : " << abm.fileint << endl;
         if ( abm.fileout.length() == 0 )
         {
           cout << "Pas de sauvegarde de l'image recalee" << endl;
         }
         else
         {
-          cout<<"Nom image resultat test recalee : " << abm.fileout <<endl;
+          cout << "Nom image resultat test recalee : " << abm.fileout << endl;
         }
 
-        if(abm.filemotion=="") cout<<"Pas de transfo initiale"<<endl;
+        if(abm.filemotion=="") cout << "Pas de transfo initiale" << endl;
         else
           { 
-            cout<<"Transfo initiale : "<<flush;
+            cout << "Transfo initiale : " << flush;
             cout << p;
           }
-        cout<<"Transformation recherchee : ";
+        cout << "Transformation recherchee : ";
         switch(abm.transfo){
-        case 1: cout<<"RIGIDE"<<endl; break;
-        case 2: cout<<"SIMILITUDE"<<endl; break;
-        case 3: cout<<"AFFINE"<<endl; break;}
+        case 1: cout << "RIGIDE" << endl; break;
+        case 2: cout << "SIMILITUDE" << endl; break;
+        case 3: cout << "AFFINE" << endl; break;}
 
-        cout<<"Pyramide debut : "<<scaleControl.getScale()<<"  fin : "<<scaleControl.getlevel_stop()<<endl;
-        cout<<"Taille des blocs : x = "<<abm.tailleBloc[0]<<"  y = "<<abm.tailleBloc[1]<<"  z = "<<abm.tailleBloc[2]<<endl;
-        cout<<"Pourcentage de blocs conserves par variance : %initial = "<<scaleControl.getcutVar()<<"  %final ="<<scaleControl.getstopVar()<<endl;
-        cout<<"Seuil sur la mesure de similarite = "<<abm.seuilCorrel<<endl;
-        cout<<"Seuils sur les niveaux de gris : "<<endl;
-        cout<<"     seuilBasRef = "<<templateSeuils[0]<<"  seuilHautRef = "<<templateSeuils[1]<<endl;
-        cout<<"     seuilBasTest = "<<templateSeuils[2]<<"  seuilHautTest = "<<templateSeuils[3]<<endl;
-        cout<<"Nombre d'iterations par niveau de pyramide : "<<abm.iterMax<<endl;
+        cout << "Pyramide debut : " << scaleControl.getScale() << "  fin : " << scaleControl.getlevel_stop() << endl;
+        cout << "Taille des blocs : x = " << abm.tailleBloc[0] 
+                              << "  y = " << abm.tailleBloc[1] 
+                              << "  z = " << abm.tailleBloc[2] << endl;
+        cout << "Pourcentage de blocs conserves par variance : %initial = " << scaleControl.getcutVar() 
+                                                         << "  %final = " << scaleControl.getstopVar() << endl;
+        cout << "Seuil sur la mesure de similarite = " << abm.seuilCorrel << endl;
+        cout << "Seuils sur les niveaux de gris : " << endl;
+        cout << "     seuilBasRef = " << templateSeuils[0] << "  seuilHautRef = " << templateSeuils[1] << endl;
+        cout << "     seuilBasTest = " << templateSeuils[2] << "  seuilHautTest = " << templateSeuils[3] << endl;
+        cout << "Nombre d'iterations par niveau de pyramide : " << abm.iterMax << endl;
       }
 #ifdef AIMS_USE_MPI
   } //end master
 #endif
 
 
-  AimsData<T> test_orig = test.clone();
+  VolumeRef<T> test_orig = test.deepcopy();
   // Mise de l'image test a la resolution de l'image de reference si besoin
-  if( (ref.sizeX()!=test.sizeX()) || (ref.sizeY()!=test.sizeY()) || (ref.sizeZ()!=test.sizeZ()) )
+  if( (vs_ref[0]!=vs_test[0]) || (vs_ref[1]!=vs_test[1]) || (vs_ref[2]!=vs_test[2]) )
   {
     Motion identity;
     identity.setToIdentity();
@@ -376,10 +404,10 @@ bool doit( Process & process, const string & fileinr, Finder & )
 //               << carto::toString(std::max((unsigned)(test.dimZ()*test.sizeZ()/ref.sizeZ() + .5), (unsigned)1)) << "]"
 //               << std::endl << std::flush;
     test = reech.doit( identity, 
-                       std::max((unsigned)(test.dimX()*test.sizeX()/ref.sizeX() + .5), (unsigned)1),
-                       std::max((unsigned)(test.dimY()*test.sizeY()/ref.sizeY() + .5), (unsigned)1),
-                       std::max((unsigned)(test.dimZ()*test.sizeZ()/ref.sizeZ() + .5), (unsigned)1),
-                       Point3df(ref.sizeX(),ref.sizeY(),ref.sizeZ()));
+                       std::max((unsigned)(dim_test[0]*vs_test[0]/vs_ref[0] + .5), (unsigned)1),
+                       std::max((unsigned)(dim_test[1]*vs_test[1]/vs_ref[1] + .5), (unsigned)1),
+                       std::max((unsigned)(dim_test[2]*vs_test[2]/vs_ref[2] + .5), (unsigned)1),
+                       Point3df(vs_ref[0],vs_ref[1],vs_ref[2]));
   }
 
 
@@ -396,7 +424,8 @@ bool doit( Process & process, const string & fileinr, Finder & )
   //float delta_init = 8*pow(test.dimX()*test.sizeX() + test.dimY()*test.sizeY() + test.dimZ()*test.sizeZ(), 2);
 
   // Declaration de l image transformee a chaque etape
-  AimsData<T> testtrans = test.clone();
+  VolumeRef<T> testtrans = test.deepcopy();
+  
   
   //Prise en compte d'une transfo initiale éventuelle
   if(abm.filemotion.length() != 0)
@@ -406,38 +435,35 @@ bool doit( Process & process, const string & fileinr, Finder & )
       reech.setDefaultValue( bv );
       
       testtrans = reech.doit( p, 
-                              testtrans.dimX(),
-                              testtrans.dimY(),
-                              testtrans.dimZ(),
-                              Point3df(testtrans.sizeX(),testtrans.sizeY(),testtrans.sizeZ()) );
+                              dim_test[0],
+                              dim_test[1],
+                              dim_test[2],
+                              Point3df(vs_test[0],vs_test[1],vs_test[2]) );
     }
 
   // MISE DE p EN VOXELS !
-  p.matrix()(0, 3) /= test.sizeX();
-  p.matrix()(1, 3) /= test.sizeY();
-  p.matrix()(2, 3) /= test.sizeZ();
+  p.matrix()(0, 3) /= vs_test[0];
+  p.matrix()(1, 3) /= vs_test[1];
+  p.matrix()(2, 3) /= vs_test[2];
   
-
   do
   {
     // boucle echelle
     int pyra = scaleControl.getScale();
     //cerr << endl << endl << "PYRAMID LEVEL: " << pyra << endl;
-
     //transformation.setdeltaprev(delta_init);
     displacementField.init( ref,  scaleControl, templateSeuils);
-
     count = 1; // count compte le nbre d iterations sans changer d echelle
 
     do 
     {  
       // boucle delta
-      cout<<"		ITERATION N "<<count<<endl;
+      cout << "        ITERATION N " << count << endl;
       
       // mise a jour transfo ancienne a ancienne nouvelle...	  
       p = q * p ;
 //       std::cout << "!! New p: " << p << std::endl;
-      
+
       // Calcul effectif du champ
       cartoMsg( 2, "Processing displacement field...", "BlockMatching" );
       AimsData< Point3d > df = displacementField.getField( testtrans);
@@ -491,9 +517,9 @@ bool doit( Process & process, const string & fileinr, Finder & )
       r = q * p ;
       
       // MISE DES TRANSLATIONS EN MILLIMETRES !
-      r.matrix()(0, 3) *= test.sizeX();
-      r.matrix()(1, 3) *= test.sizeY();
-      r.matrix()(2, 3) *= test.sizeZ();
+      r.matrix()(0, 3) *= test.getVoxelSize()[0];
+      r.matrix()(1, 3) *= test.getVoxelSize()[1];
+      r.matrix()(2, 3) *= test.getVoxelSize()[2];
       
 //       std::cout << "!! New matrix: " << r << std::endl;
       
@@ -503,11 +529,12 @@ bool doit( Process & process, const string & fileinr, Finder & )
       resampler.setRef( test );
       resampler.setDefaultValue( bv );
       testtrans = resampler.doit( r, 
-                                  test.dimX(), 
-                                  test.dimY(), 
-                                  test.dimZ(),
-                                  Point3df(test.sizeX(),test.sizeY(),test.sizeZ()));
-      
+                                  test.getSizeX(), 
+                                  test.getSizeY(), 
+                                  test.getSizeZ(),
+                                  Point3df(test.getVoxelSize()[0],
+                                           test.getVoxelSize()[1],
+                                           test.getVoxelSize()[2]));
       // Ecriture de testrans pour verification du bon deroulement des iterations
       //	  		Writer< AimsData<T> > wri( "testtrans" + toString(count) ) ;
       //	  		wri.write( testtrans ) ;
@@ -519,7 +546,6 @@ bool doit( Process & process, const string & fileinr, Finder & )
   
     // } while ( 0 /*transformation.testdelta(p,q,scaleControl)*/);	 test delta < epsilon INACTIVE
     
-    
     // On a fini d'iterer a cette echelle, on monte un niveau de pyramide
     scaleControl.nextScale();
     
@@ -527,13 +553,13 @@ bool doit( Process & process, const string & fileinr, Finder & )
   } while (scaleControl.goOn());		// test fin pyramide
 
 
-
+  
   //Resampling de testtrans dans sa geometrie initiale
   LinearResampler<T> resampler;
   resampler.setRef( test_orig );
   resampler.setDefaultValue( bv );
-  testtrans = resampler.doit( r, test_orig.dimX(), test_orig.dimY(), test_orig.dimZ(), 
-            Point3df(test_orig.sizeX(), test_orig.sizeY(), test_orig.sizeZ() ) );
+  testtrans = resampler.doit( r, test_orig.getSizeX(), test_orig.getSizeY(), test_orig.getSizeZ(), 
+            Point3df(test_orig.getVoxelSize()[0], test_orig.getVoxelSize()[1], test_orig.getVoxelSize()[2] ) );
   
 #ifdef AIMS_USE_MPI
   if(rank==ROOT) {
@@ -570,12 +596,12 @@ bool doit( Process & process, const string & fileinr, Finder & )
   MotionWriter wm( outmotion );
   wm.write( r );
   
-  cout<<"End of the process"<<endl<<"Motion estimated is: "<<endl;
+  cout << "End of the process" << endl << "Motion estimated is: " << endl;
   cout << r << endl;
 #ifdef AIMS_USE_MPI
   } //end master
 #endif
-  
+
   return(1);
 }
 

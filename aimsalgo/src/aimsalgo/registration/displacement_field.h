@@ -23,10 +23,10 @@ class DisplacementField
   ~DisplacementField() {}
   
   
-  void init(carto::rc_ptr<carto::Volume<T> >& ref, ScaleControl& scaleControl,
+  void init(carto::rc_ptr<carto::Volume<T> > ref, ScaleControl& scaleControl,
             T * seuils);
   carto::VolumeRef< Point3d > getField(
-    carto::rc_ptr<carto::Volume<T> >& test );
+    carto::rc_ptr<carto::Volume<T> > test );
   std::vector<Point3df> getpointstest() {return  _pointstest;}
   std::vector<Point3df> getpointsref() {return  _pointsref;}
   double* getbarytest() {return _barytest;}
@@ -35,8 +35,8 @@ class DisplacementField
   int getLevel() {return _level;}
   Point3d getDimRef() {return _dimRef;}
   Point3df getSizeRef() {return _sizeRef;}  
-  carto::VolumeRef<T> getQuality( carto::rc_ptr<carto::Volume<T> >& testtrans,
-                                  carto::rc_ptr<carto::Volume<T> >& ref,
+  carto::VolumeRef<T> getQuality( carto::rc_ptr<carto::Volume<T> > testtrans,
+                                  carto::rc_ptr<carto::Volume<T> > ref,
                                   int level,
                                   T thresh = std::numeric_limits<T>::max() );
   
@@ -49,7 +49,7 @@ class DisplacementField
   double _baryref[3];
   
   
-  void selectBlock(const carto::rc_ptr<carto::Volume<T> >& image, double cV);
+  void selectBlock(const carto::rc_ptr<carto::Volume<T> > image, double cV);
   carto::VolumeRef< T > _pyrRef;
   carto::VolumeRef< T > _pyrTest;
   int               _level;

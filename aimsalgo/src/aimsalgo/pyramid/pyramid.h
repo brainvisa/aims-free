@@ -53,9 +53,9 @@ class Pyramid
            : _func( func ), _ref( 0 ), _level( 0 ), _ppItem ( 0 ) { }
     virtual ~Pyramid() { _free_ppItem(); }
 
-    void setRef( carto::rc_ptr<carto::Volume<T> >& ref );
+    void setRef( carto::rc_ptr<carto::Volume<T> > ref );
     void setLevel( int level );
-    const carto::rc_ptr<carto::Volume<T> >& item( int level ) const;
+    const carto::rc_ptr<carto::Volume<T> > item( int level ) const;
     void save( const std::string& name ) const;
 
   protected:
@@ -72,7 +72,7 @@ class Pyramid
 
 
 template <class T> inline
-void Pyramid<T>::setRef( carto::rc_ptr<carto::Volume<T> >& ref )
+void Pyramid<T>::setRef( carto::rc_ptr<carto::Volume<T> > ref )
 {
   if ( _ref )
   {
@@ -85,6 +85,8 @@ void Pyramid<T>::setRef( carto::rc_ptr<carto::Volume<T> >& ref )
 template <class T> inline
 void Pyramid<T>::_new_ppItem( int level )
 {
+//   std::cout << "Pyramid: Creating new array of " << carto::toString(level) 
+//             << " to store volumes" << std::endl << std::flush;
   _ppItem = new carto::rc_ptr<carto::Volume<T> >*[ level ];
 
   int dimX = (*_ref)->getSizeX();
@@ -113,7 +115,12 @@ void Pyramid<T>::_new_ppItem( int level )
     sizeX *= 2.0;
     sizeY *= 2.0;
     sizeZ *= 2.0;
-
+    
+//     std::cout << "Pyramid: Creating new volume ("
+//               << carto::toString(dimX) << ","
+//               << carto::toString(dimY) << ","
+//               << carto::toString(dimZ) << ","
+//               << carto::toString(dimT) << ") for level " << carto::toString(k) << std::endl << std::flush;
     _ppItem[ k ] = new carto::VolumeRef<T>( dimX, dimY, dimZ, dimT );
     (*_ppItem[ k ])->setVoxelSize( sizeX, sizeY, sizeZ, sizeT );
   }
@@ -124,8 +131,6 @@ void Pyramid<T>::_free_ppItem()
 {
   if ( _ppItem )
   {
-    for ( int k = 0; k < _level; k++ )
-      delete _ppItem[ k ];
     delete[] _ppItem;
     _ppItem = 0;
   }
@@ -199,7 +204,7 @@ void Pyramid<T>::_build()
 
 
 template <class T> inline
-const carto::rc_ptr<carto::Volume<T> >& Pyramid<T>::item( int level ) const
+const carto::rc_ptr<carto::Volume<T> > Pyramid<T>::item( int level ) const
 {
   ASSERT( _ref );
   ASSERT( level <= _level );

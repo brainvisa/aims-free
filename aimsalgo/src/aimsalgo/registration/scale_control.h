@@ -20,7 +20,7 @@ class ScaleControl
   ~ScaleControl() {};
 
   template <class T>
-  void init(const carto::rc_ptr<carto::Volume<T> >& ref, int level_start, int level_stop, double cutVar, double stopVar, double
+  void init(const carto::rc_ptr<carto::Volume<T> > ref, int level_start, int level_stop, double cutVar, double stopVar, double
 seuilCorrel, const Point3d& tailleBloc = Point3d(4, 4, 4) );
   bool minReached();
 
