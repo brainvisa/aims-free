@@ -36,7 +36,7 @@
 
 
 //=============================================================================
-//	H E A D E R  F I L E S
+//    H E A D E R  F I L E S
 //=============================================================================
 
 #include <graph/config/graph_config.h>
@@ -47,249 +47,252 @@
 
 
 //=============================================================================
-//	F O R W A R D  D E C L A R A T I O N S
+//    F O R W A R D  D E C L A R A T I O N S
 //=============================================================================
 
 class Edge;
 
 
 //=============================================================================
-//	C L A S S  D E C L A R A T I O N
+//    C L A S S  D E C L A R A T I O N
 //=============================================================================
 
-/**	Vertices are created and managed by \link Graph Graphs\endlink. 
-	See Graph for vertex creation.
+/**    Vertices are created and managed by \link Graph Graphs\endlink.
+    See Graph for vertex creation.
 */
 class GRAPH_API Vertex : public GraphObject
 {
 
 private:
-	typedef std::set<Edge*> ESet;
+    typedef std::set<Edge*> ESet;
 
 
 public:
-	typedef ESet::value_type             value_type;
+    typedef ESet::value_type             value_type;
 #ifndef _WIN32
-	///	pointer is absent from MS Visual C++ / Intel Win32
-	typedef ESet::pointer                pointer;
+    ///    pointer is absent from MS Visual C++ / Intel Win32
+    typedef ESet::pointer                pointer;
 #endif
-	typedef ESet::reference              reference;
-	typedef ESet::const_reference        const_reference;
-	typedef ESet::iterator               iterator;	
-	typedef ESet::const_iterator         const_iterator;	
-	typedef ESet::reverse_iterator       reverse_iterator;	
-	typedef ESet::const_reverse_iterator const_reverse_iterator;
+    typedef ESet::reference              reference;
+    typedef ESet::const_reference        const_reference;
+    typedef ESet::iterator               iterator;
+    typedef ESet::const_iterator         const_iterator;
+    typedef ESet::reverse_iterator       reverse_iterator;
+    typedef ESet::const_reverse_iterator const_reverse_iterator;
 
-	//---------------------------------------------------------------------
-	/**	@name Constructors, destructor*/
-	//---------------------------------------------------------------------
-	//@{
+    //---------------------------------------------------------------------
+    /**    @name Constructors, destructor*/
+    //---------------------------------------------------------------------
+    //@{
 
-	virtual ~Vertex();
+    virtual ~Vertex();
 
-	//@}
+    //@}
 
-	//---------------------------------------------------------------------
-	/**	@name Edge handling*/
-	//---------------------------------------------------------------------
-	//@{
+    //---------------------------------------------------------------------
+    /**    @name Edge handling*/
+    //---------------------------------------------------------------------
+    //@{
 
-	/** \deprecated{specialization deprecated because ambiguous: use
-	    edgeSize() for the number of edges. In a future release, size()
-	    will return the number properties as it does in GenericObject} */
-	size_t size() const
-	  __attribute__((__deprecated__("use edgesSize() for "
-	    "the number of edges. In a future release, size() will return the "
-	    "number properties as it does in GenericObject")));
-	/**	The edgesSize of a vertex is the number of attached edges
-		@return the number of edges attached to the vertex
-	*/
-	size_t edgesSize() const;
+    /** \deprecated{specialization deprecated because ambiguous: use
+        edgeSize() for the number of edges. In a future release, size()
+        will return the number properties as it does in GenericObject} */
+    size_t size() const
+#ifndef AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
+      __attribute__((__deprecated__("use edgesSize() for "
+        "the number of edges. In a future release, size() will return the "
+        "number properties as it does in GenericObject")))
+#endif
+        ;
+    /**    The edgesSize of a vertex is the number of attached edges
+        @return the number of edges attached to the vertex
+    */
+    size_t edgesSize() const;
 
-	/**	Is a given edge attached to this vertex?
-		@param edge tested edge
-		@return true if the edge is attached to this vertex
-	*/
-	bool hasEdge(const Edge* edge) const;
+    /**    Is a given edge attached to this vertex?
+        @param edge tested edge
+        @return true if the edge is attached to this vertex
+    */
+    bool hasEdge(const Edge* edge) const;
 
-	/**     Returns the edges linking this vertex to a given vertex
-		@param vertex is the sink vertex
-		@return the set of vertices for which this vertex is the
-		source and vertex is the sink
-	*/
-	std::set<Edge*> edgesTo(const Vertex* vertex) const;
+    /**     Returns the edges linking this vertex to a given vertex
+        @param vertex is the sink vertex
+        @return the set of vertices for which this vertex is the
+        source and vertex is the sink
+    */
+    std::set<Edge*> edgesTo(const Vertex* vertex) const;
 
-	//@}
+    //@}
 
-	//---------------------------------------------------------------------
-	/**	@name Iterators iterate on the edges*/
-	//---------------------------------------------------------------------
-	//@{
+    //---------------------------------------------------------------------
+    /**    @name Iterators iterate on the edges*/
+    //---------------------------------------------------------------------
+    //@{
 
-	/**	Get the beginning of the edge collection
-		@return an iterator pointing to the beginning of the
-		        edge collection
-	*/
-	iterator               begin();
+    /**    Get the beginning of the edge collection
+        @return an iterator pointing to the beginning of the
+                edge collection
+    */
+    iterator               begin();
 
-	/**	Get the end of the edge collection
-		@return an iterator pointing to the end of the
-		        edge collection
-	*/
-	iterator	       end();
+    /**    Get the end of the edge collection
+        @return an iterator pointing to the end of the
+                edge collection
+    */
+    iterator           end();
 
-	/**	Get the beginning of the edge collection
-		@return a const_iterator pointing to the beginning of the
-		        edge collection
-	*/
-	const_iterator         begin() const;
+    /**    Get the beginning of the edge collection
+        @return a const_iterator pointing to the beginning of the
+                edge collection
+    */
+    const_iterator         begin() const;
 
-	/**	Get the end of the edge collection
-		@return a const_iterator pointing to the end of the
-		        edge collection
-	*/
-	const_iterator         end() const;
+    /**    Get the end of the edge collection
+        @return a const_iterator pointing to the end of the
+                edge collection
+    */
+    const_iterator         end() const;
 
-	/**	Get the beginning of the reversed edge collection
-		@return a reverse_iterator pointing to the beginning of the
-		        reversed edge collection
-	*/
-	reverse_iterator       rbegin();
+    /**    Get the beginning of the reversed edge collection
+        @return a reverse_iterator pointing to the beginning of the
+                reversed edge collection
+    */
+    reverse_iterator       rbegin();
 
-	/**	Get the end of the reversed edge collection
-		@return a reverse_iterator pointing to the end of the
-		        reversed edge collection
-	*/
-	reverse_iterator       rend();
+    /**    Get the end of the reversed edge collection
+        @return a reverse_iterator pointing to the end of the
+                reversed edge collection
+    */
+    reverse_iterator       rend();
 
-	/**	Get the beginning of the reversed edge collection
-		@return a const_reverse_iterator pointing to the end of the
-		        reversed edge collection
-	*/
-	const_reverse_iterator rbegin() const;
+    /**    Get the beginning of the reversed edge collection
+        @return a const_reverse_iterator pointing to the end of the
+                reversed edge collection
+    */
+    const_reverse_iterator rbegin() const;
 
-	/**	Get the end of the reversed edge collection
-		@return a const_reverse_iterator pointing to the end of the
-		        reversed edge collection
-	*/
-	const_reverse_iterator rend() const;
+    /**    Get the end of the reversed edge collection
+        @return a const_reverse_iterator pointing to the end of the
+                reversed edge collection
+    */
+    const_reverse_iterator rend() const;
 
-	//@}
+    //@}
 
-	//---------------------------------------------------------------------
-	/**	@name Neighbours*/
-	//---------------------------------------------------------------------
-	//@{
+    //---------------------------------------------------------------------
+    /**    @name Neighbours*/
+    //---------------------------------------------------------------------
+    //@{
 
-	/**	Same as outNeighbours.
-		Still don't know why it works with directed edges!
-	*/
-	std::set<Vertex*> neighbours() const;
+    /**    Same as outNeighbours.
+        Still don't know why it works with directed edges!
+    */
+    std::set<Vertex*> neighbours() const;
 
-	/**	Find the vertices for which this vertex is the sink
-		@return the set of vertices for which this vertex is the sink
-	*/
-	std::set<Vertex*> inNeighbours() const;
+    /**    Find the vertices for which this vertex is the sink
+        @return the set of vertices for which this vertex is the sink
+    */
+    std::set<Vertex*> inNeighbours() const;
 
-	/**	Find the vertices for which this vertex is the source
-		@return the set of vertices for which this vertex is the source
-	*/
-	std::set<Vertex*> outNeighbours() const;
+    /**    Find the vertices for which this vertex is the source
+        @return the set of vertices for which this vertex is the source
+    */
+    std::set<Vertex*> outNeighbours() const;
 
-	/**	Return a random neighbour (CAUTION! not perfectly random)
-		@return a random neighbour
-	*/
-	Vertex* randomNeighbour() const;
+    /**    Return a random neighbour (CAUTION! not perfectly random)
+        @return a random neighbour
+    */
+    Vertex* randomNeighbour() const;
 
-	//@}
+    //@}
 
 protected:
 
-	//---------------------------------------------------------------------
-	/**	@name Constructors, Destructor*/
-	//---------------------------------------------------------------------
-	//@{
+    //---------------------------------------------------------------------
+    /**    @name Constructors, Destructor*/
+    //---------------------------------------------------------------------
+    //@{
 
-	/**	The programmer should not call the constructor.
-		@param s syntactic attribute of the new vertex
-		@see Graph for creating vertices
-	*/
-	Vertex(std::string s);
+    /**    The programmer should not call the constructor.
+        @param s syntactic attribute of the new vertex
+        @see Graph for creating vertices
+    */
+    Vertex(std::string s);
 
-	/**	The programmer should not call the copy constructor.
-		@param x vertex to clone
-		@see Graph for creating vertices
-	*/
-	Vertex(const Vertex& x);
+    /**    The programmer should not call the copy constructor.
+        @param x vertex to clone
+        @see Graph for creating vertices
+    */
+    Vertex(const Vertex& x);
 
-	/**	The programmer should not clone
-		@return a copy of this vertex
-		@see Graph for creating vertices
-	*/
+    /**    The programmer should not clone
+        @return a copy of this vertex
+        @see Graph for creating vertices
+    */
         virtual Vertex * cloneVertex() const;
 
-	//@}
+    //@}
 
 private:
 
-	//---------------------------------------------------------------------
-	/**	@name Friends*/
-	//---------------------------------------------------------------------
-	//@{
+    //---------------------------------------------------------------------
+    /**    @name Friends*/
+    //---------------------------------------------------------------------
+    //@{
 
-	///	export addEdge and removeEdge
-	friend class Graph;
-	///	export the constructors
-	friend class GraphFactory;
+    ///    export addEdge and removeEdge
+    friend class Graph;
+    ///    export the constructors
+    friend class GraphFactory;
 
-	//@}
+    //@}
 
-	//---------------------------------------------------------------------
-	/**	@name Edge handling*/
-	//---------------------------------------------------------------------
-	//@{
+    //---------------------------------------------------------------------
+    /**    @name Edge handling*/
+    //---------------------------------------------------------------------
+    //@{
 
-	/**	For friends only!
-		Add an edge to the edge collection.
-		@param edge edge to add to the collection		
-	*/
-	void addEdge(Edge* edge);
+    /**    For friends only!
+        Add an edge to the edge collection.
+        @param edge edge to add to the collection
+    */
+    void addEdge(Edge* edge);
 
-	/**	For friends only!
-		Remove an edge from the edge collection.
-		@param edge edge to remove from the collection		
-	*/
-	void removeEdge(Edge* edge);
+    /**    For friends only!
+        Remove an edge from the edge collection.
+        @param edge edge to remove from the collection
+    */
+    void removeEdge(Edge* edge);
 
-	//@}
+    //@}
 
-	//---------------------------------------------------------------------
-	/**	@name Disable copy*/
-	//---------------------------------------------------------------------
-	//@{
+    //---------------------------------------------------------------------
+    /**    @name Disable copy*/
+    //---------------------------------------------------------------------
+    //@{
 
-	/**	Assignment operator
-	*/
-	Vertex& operator=(const Vertex&);
+    /**    Assignment operator
+    */
+    Vertex& operator=(const Vertex&);
 
-	//@}
+    //@}
 
-	/**	Collection of edges the vertex is attached to
-	*/
-	ESet _edges;
+    /**    Collection of edges the vertex is attached to
+    */
+    ESet _edges;
 
 };
 
 
 //=============================================================================
-//	I N L I N E  M E T H O D S
+//    I N L I N E  M E T H O D S
 //=============================================================================
 
 inline
 Vertex::iterator
 Vertex::begin()
 {
-	return _edges.begin();
+    return _edges.begin();
 }
 
 
@@ -297,7 +300,7 @@ inline
 Vertex::iterator
 Vertex::end()
 {
-	return _edges.end();
+    return _edges.end();
 }
 
 
@@ -305,7 +308,7 @@ inline
 Vertex::const_iterator
 Vertex::begin() const
 {
-	return _edges.begin();
+    return _edges.begin();
 }
 
 
@@ -313,7 +316,7 @@ inline
 Vertex::const_iterator
 Vertex::end() const
 {
-	return _edges.end();
+    return _edges.end();
 }
 
 
@@ -321,7 +324,7 @@ inline
 Vertex::reverse_iterator
 Vertex::rbegin()
 {
-	return _edges.rbegin();
+    return _edges.rbegin();
 }
 
 
@@ -329,7 +332,7 @@ inline
 Vertex::reverse_iterator
 Vertex::rend()
 {
-	return _edges.rend();
+    return _edges.rend();
 }
 
 
@@ -337,7 +340,7 @@ inline
 Vertex::const_reverse_iterator
 Vertex::rbegin() const
 {
-	return _edges.rbegin();
+    return _edges.rbegin();
 }
 
 
@@ -345,7 +348,7 @@ inline
 Vertex::const_reverse_iterator
 Vertex::rend() const
 {
-	return _edges.rend();
+    return _edges.rend();
 }
 
 
@@ -353,7 +356,7 @@ inline
 std::set<Vertex*>
 Vertex::neighbours() const
 {
-	return outNeighbours();
+    return outNeighbours();
 }
 
 

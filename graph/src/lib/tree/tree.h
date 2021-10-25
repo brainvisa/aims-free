@@ -55,7 +55,7 @@ class ConstTreeVisitor;
 
 //--- class declarations ------------------------------------------------------
 
-/**	Attributed tree element
+/**    Attributed tree element
  */
 class GRAPH_API Tree : public carto::AttributedObject, public BaseTree
 {
@@ -63,33 +63,37 @@ public:
   Tree( bool allowChildren=true, const std::string & str="" );
   virtual ~Tree();
 
-  /**@name	Visitor pattern */
+  /**@name    Visitor pattern */
   //@{
   virtual void accept( TreeVisitor & visitor );
   virtual void const_accept( ConstTreeVisitor & visitor ) const;
   //@}
 
   virtual bool check (const carto::SyntaxSet& syntax, 
-		      std::set<std::string>& missing) const;
+                      std::set<std::string>& missing) const;
 
   std::set< Tree * > getElementsWith( const std::string&, 
-				      bool recurse=true ) const;
+                                      bool recurse=true ) const;
   template< class T >
   std::set< Tree * > getElementsWith( const std::string&, const T&, 
-				      bool recurse=true ) const;
+                                      bool recurse=true ) const;
   /// deprecated
-  virtual size_t size() const __attribute__((__deprecated__));
+  virtual size_t size() const
+#ifndef AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
+    __attribute__((__deprecated__))
+#endif
+    ;
   virtual size_t childrenSize() const;
 
 protected:
 
 private:
   void recurseElementsWith( const std::string&, bool, const Tree *, 
-			    std::set< Tree * >&  ) const;
+                            std::set< Tree * >&  ) const;
 
   template< class T >
   void recurseElementsWith( const std::string&, const T&, bool, const Tree *, 
-			    std::set< Tree * >& ) const;
+                            std::set< Tree * >& ) const;
 };
 
 
@@ -105,25 +109,25 @@ template< class T >
 inline
 void
 Tree::recurseElementsWith( const std::string& s, const T& t, bool recurse,
-			   const Tree *p, std::set< Tree * >& trees ) const
+               const Tree *p, std::set< Tree * >& trees ) const
 {
   for ( const_iterator e = p->begin(); e != p->end(); ++e )
     {
       Tree *ao;
 
       if ( ( ao = dynamic_cast< Tree * >( *e ) ) != 0 )
-	{
-	  if ( ao->hasProperty( s ) )
-	    {
-	      T tmp;
+    {
+      if ( ao->hasProperty( s ) )
+        {
+          T tmp;
 
-	      if ( ao->getProperty( s, tmp ) && tmp == t ) 
-		trees.insert( ao );
-	    }
+          if ( ao->getProperty( s, tmp ) && tmp == t )
+        trees.insert( ao );
+        }
 
-	  if ( recurse )
-	    recurseElementsWith( s, t, recurse, ao, trees );
-	}
+      if ( recurse )
+        recurseElementsWith( s, t, recurse, ao, trees );
+    }
     }
 }
 

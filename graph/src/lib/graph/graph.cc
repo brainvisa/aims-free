@@ -36,7 +36,9 @@
 //=============================================================================
 
 #include <cstdlib>
+#define AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
 #include <graph/graph/graph.h>
+#undef AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
 #include <graph/graph/uedge.h>
 #include <graph/graph/dedge.h>
 #include <cartobase/object/syntax.h>

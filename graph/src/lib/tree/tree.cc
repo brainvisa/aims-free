@@ -33,7 +33,9 @@
 
 //--- header files ------------------------------------------------------------
 
+#define AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
 #include <graph/tree/tree.h>
+#undef AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
 #include <graph/tree/tvisitor.h>
 #include <soma-io/checker/achecker.h>
 
