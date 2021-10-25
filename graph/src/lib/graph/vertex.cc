@@ -36,7 +36,9 @@
 //=============================================================================
 #include <cstdlib>
 #include <cstdlib>
+#define AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
 #include <graph/graph/vertex.h>
+#undef AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
 #include <graph/graph/edge.h>
 
 using namespace carto;

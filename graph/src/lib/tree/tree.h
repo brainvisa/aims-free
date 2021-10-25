@@ -79,7 +79,10 @@ public:
                                       bool recurse=true ) const;
   /// deprecated
   virtual size_t size() const
-    __attribute__((__deprecated__));
+#ifndef AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
+    __attribute__((__deprecated__))
+#endif
+    ;
   virtual size_t childrenSize() const;
 
 protected:

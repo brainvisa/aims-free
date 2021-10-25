@@ -351,9 +351,12 @@ public:
         edgesSize() for the number of edges. In a future release, size()
         will return the number properties as it does in GenericObject} */
     size_t size() const
+#ifndef AIMS_GRAPH_SIZE_NO_DEPREC_WARNING
       __attribute__((__deprecated__("use edgeSize() for "
         "the number of edges. In a future release, size() will return the "
-        "number properties as it does in GenericObject")));
+        "number properties as it does in GenericObject")))
+#endif
+        ;
     /**    The edgesSize of a graph is the number of its edges
         \return number of edges in the graph
     */
