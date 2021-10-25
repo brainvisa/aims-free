@@ -219,7 +219,9 @@ template class ResamplerFactory<Point3df>;
 } // namespace aims
 
 
+#define AIMS_MASKLINEARRESAMPLER_NO_DEPREC_WARNING
 #include <aims/resampling/masklinresampler_d.h>
+#undef AIMS_MASKLINEARRESAMPLER_NO_DEPREC_WARNING
 
 namespace aims {
 
