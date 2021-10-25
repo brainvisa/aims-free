@@ -942,7 +942,7 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
     }
 
     Writer<Volume<float> > wima( fileName() );
-    wima.write( def );
+    return wima.write( def );
   }
 
 
