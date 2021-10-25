@@ -925,3 +925,4 @@ Volume_%Template1typecode% * operator * ( long, Volume_%Template1typecode% & ) /
 
 %#undef PyAims_Volume_%Template1typecode%_defined%
 
+

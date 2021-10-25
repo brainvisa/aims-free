@@ -1043,10 +1043,7 @@ typessub = {'bool':
                'PyType': 'Volume_BOOL',
                'sipClass': 'Volume_BOOL',
                'typeinclude': '#include <cartodata/volume/volume.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipVolume_BOOL.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
+               'sipinclude': '#ifndef PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
                'inline int pyaimsVolume_BOOL_Check( PyObject* o )\n'
                '{ return sipCanConvertToInstance( o, sipClass_Volume_BOOL, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'

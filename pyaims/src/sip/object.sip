@@ -16,6 +16,10 @@ namespace carto
   Returns a null aims.Object
 %End
 
+
+typedef rc_ptr_GenericObject Object;
+
+/*
   class Object : rc_ptr_GenericObject
   {
 %TypeHeaderCode
@@ -106,8 +110,8 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
           (*sipCppPtr)->release();
           delete *sipCppPtr;
           *sipCppPtr = new carto::Object( o, true );
-          /* std::cout << "refcount: "
-            << carto::rc_ptr_trick::refCount( **sipCppPtr ) << std::endl; */
+          // std::cout << "refcount: "
+            // << carto::rc_ptr_trick::refCount( **sipCppPtr ) << std::endl;
         }
         sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
         return sipGetState(sipTransferObj);
@@ -160,8 +164,8 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         // no other solution works: embed a PyObject* into a GenericObject
         // std::cout << "create Object around PyObject\n";
         *sipCppPtr = new carto::Object( carto::Object::value( sipPy ) );
-        /* std::cout << "-> " << *sipCppPtr << std::endl;
-        std::cout << "type: " << (**sipCppPtr)->type() << std::endl; */
+        // std::cout << "-> " << *sipCppPtr << std::endl;
+        // std::cout << "type: " << (**sipCppPtr)->type() << std::endl;
       }
       sipIsErr = 0;
       PyErr_Clear();
@@ -213,7 +217,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
   }
 %End
   };
-
+*/
 
 
   // --------
