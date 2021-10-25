@@ -166,6 +166,12 @@ BRAINVISA_INSTALL( FILES "${CMAKE_BINARY_DIR}/include/cartodata/config/config.h"
 BRAINVISA_INSTALL( FILES "${CMAKE_BINARY_DIR}/include/aims/config/config.h"
                    DESTINATION "include/aims/config"
                    COMPONENT ${PROJECT_NAME}-dev )
+
+if( CMAKE_COMPILER_IS_GNUCXX )
+  # remove annoying warnings "the ABI of passing structure with complex float member has changed in GCC 4.4"
+  add_compile_options( -Wno-psabi )
+endif()
+
 add_subdirectory( cartodata )
 add_subdirectory( graph )
 
