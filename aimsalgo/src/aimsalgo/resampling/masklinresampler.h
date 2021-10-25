@@ -59,7 +59,11 @@ namespace aims
     The resampling API is described in the base class, Resampler.
  */
 template <class T>
-class __attribute__((__deprecated__)) MaskLinearResampler : public Resampler< T >
+class
+#ifndef AIMS_MASKLINEARRESAMPLER_NO_DEPREC_WARNING
+  __attribute__((__deprecated__))
+#endif
+  MaskLinearResampler : public Resampler< T >
 {
 
   public:
