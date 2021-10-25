@@ -68,7 +68,7 @@ inline Point3df cross( const Point3df & a, const Point3df & b )
 // Cross product between two 2D points
 inline float cross( const Point2df & a, const Point2df & b )
 {
-  (a[0] * b[1]) - (a[1] * b[0]);
+  return (a[0] * b[1]) - (a[1] * b[0]);
 }
 
 namespace aims
