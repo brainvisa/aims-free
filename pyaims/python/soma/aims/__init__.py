@@ -818,7 +818,7 @@ else:
 def __vol_pow__(self, y, z=None):
     ''' Power operation: x**y, pow(x, y [,z]) is performed using numpy.
     '''
-    vol = aims.Volume(numpy.asarray(self).__pow__(y, z))
+    vol = Volume(numpy.asarray(self).__pow__(y, z))
     vol.copyHeaderFrom(self.header())
     return vol
 
@@ -834,7 +834,7 @@ def __vol_ipow__(self, y):
 def __vol_floordiv__(self, y):
     ''' Power operation: x // y is performed using numpy.
     '''
-    vol = aims.Volume(numpy.asarray(self).__floordiv__(y))
+    vol = Volume(numpy.asarray(self).__floordiv__(y))
     vol.copyHeaderFrom(self.header())
     return vol
 
