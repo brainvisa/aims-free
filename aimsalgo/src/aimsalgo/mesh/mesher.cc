@@ -165,6 +165,8 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, surface.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
+        surface.header().copyProperties(
+          Object::reference( thing->header() ) );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -229,10 +231,10 @@ void Mesher::doit( const AimsData<short>& thing,
                 ss << fname << '_' << n << '_' << nObject << '_' << l->first 
                    << '_' << nSubObject;
 
-		Writer<AimsSurfaceTriangle> surfaceW( ss.str() );
-		static string	tris( "TRI" );
-		surfaceW.write( *s, mode == "ascii", 
-				_triOutputFlag ? &tris : 0 );
+                Writer<AimsSurfaceTriangle> surfaceW( ss.str() );
+                static string	tris( "TRI" );
+                surfaceW.write( *s, mode == "ascii",
+                  _triOutputFlag ? &tris : 0 );
                 nSubObject++;
               }
             }
@@ -324,6 +326,8 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, current.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
+        current.header().copyProperties(
+          Object::reference( thing->header() ) );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -419,6 +423,8 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, theSurface.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
+        theSurface.header().copyProperties(
+          Object::reference( thing->header() ) );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -506,6 +512,8 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
         cout << "vertices             " << flush;
       getVertices( vfac, surface.vertex(), 
                    thing.sizeX(), thing.sizeY(), thing.sizeZ() );
+      surface.header().copyProperties(
+        Object::reference( thing->header() ) );
       if( _verbose )
         cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
 
