@@ -290,6 +290,8 @@ void Mesher::doit( const rc_ptr<Volume<short> > & thing,
         getVertices( vfac, surface.vertex(), 
                      thing->getVoxelSize()[0], thing->getVoxelSize()[1],
                      thing->getVoxelSize()[2] );
+        surface.header().copyProperties(
+          Object::reference( thing->header() ) );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -354,10 +356,10 @@ void Mesher::doit( const rc_ptr<Volume<short> > & thing,
                 ss << fname << '_' << n << '_' << nObject << '_' << l->first 
                    << '_' << nSubObject;
 
-		Writer<AimsSurfaceTriangle> surfaceW( ss.str() );
-		static string	tris( "TRI" );
-		surfaceW.write( *s, mode == "ascii", 
-				_triOutputFlag ? &tris : 0 );
+                Writer<AimsSurfaceTriangle> surfaceW( ss.str() );
+                static string	tris( "TRI" );
+                surfaceW.write( *s, mode == "ascii",
+                  _triOutputFlag ? &tris : 0 );
                 nSubObject++;
               }
             }
@@ -525,6 +527,8 @@ void Mesher::doit( const rc_ptr<Volume<short> > & thing,
         getVertices( vfac, current.vertex(), 
                      thing->getVoxelSize()[0], thing->getVoxelSize()[1],
                      thing->getVoxelSize()[2] );
+        current.header().copyProperties(
+          Object::reference( thing->header() ) );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -635,6 +639,8 @@ void Mesher::doit( const rc_ptr<Volume<short> > & thing,
         getVertices( vfac, theSurface.vertex(), 
                      thing->getVoxelSize()[0], thing->getVoxelSize()[1],
                      thing->getVoxelSize()[2] );
+        theSurface.header().copyProperties(
+          Object::reference( thing->header() ) );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -723,6 +729,8 @@ void	Mesher::getMeshFromMapOfFacet(const rc_ptr<Volume<short> > & thing,
       getVertices( vfac, surface.vertex(), 
                    thing->getVoxelSize()[0], thing->getVoxelSize()[1],
                    thing->getVoxelSize()[2] );
+      surface.header().copyProperties(
+        Object::reference( thing->header() ) );
       if( _verbose )
         cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
 
