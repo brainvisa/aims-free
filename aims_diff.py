@@ -36,12 +36,13 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL licence and that you accept its terms.
 
-from __future__ import print_function
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 import argparse
 import sys
 
-import numpy as np
+import numpy
 
 from soma import aims
 
@@ -56,6 +57,8 @@ TEXTURE_TYPES = [getattr(aims, t) for t in dir(aims)
                  if t.startswith('TimeTexture_')]
 MESH_TYPES = [getattr(aims, t) for t in dir(aims)
               if t.startswith('AimsTimeSurface_')]
+
+IGNORED_FIELDS = ['uuid']
 
 
 def get_data_kind(data_type):
@@ -74,6 +77,8 @@ def get_data_kind(data_type):
 def diff_headers(reference_header, test_header):
     difference_found = False
     for key, reference_value in reference_header.items():
+        if key in IGNORED_FIELDS:
+            continue
         try:
             test_value = test_header[key]
         except KeyError:
@@ -83,9 +88,6 @@ def diff_headers(reference_header, test_header):
         except TypeError as e:
             print("TypeError when reading {0}: {1}".format(key, e))
             continue
-        # TODO Special cases for fields containing UUIDs (uuid, referentials).
-        # Difference in their values (or in their presence) should not count
-        # (except maybe in a strict mode).
         if test_value != reference_value:
             print("Header field {0} differs:\n"
                   "  Reference value: {1}\n"
@@ -93,6 +95,8 @@ def diff_headers(reference_header, test_header):
                   .format(key, reference_value, test_value))
             difference_found = True
     for key, test_value in test_header.items():
+        if key in IGNORED_FIELDS:
+            continue
         if key not in reference_header:
             print("Header field {0} is present in the test header, "
                   "not in the reference header (value: {1})"
@@ -102,53 +106,162 @@ def diff_headers(reference_header, test_header):
 
 
 def diff_volumes(reference_volume, test_volume):
-    reference_arr = np.asarray(reference_volume)
-    test_arr = np.asarray(test_volume)
-
-    if reference_arr.shape != test_arr.shape:
-        print("Volumes have differing shapes:\n"
-              "  Shape of reference: {0}\n"
-              "  Shape of test: {1}"
-              .format(reference_arr.shape, test_arr.shape))
-        return True
-
-    if np.array_equiv(reference_arr, test_arr):
+    if reference_volume == test_volume:
         return False
 
+    reference_arr = numpy.asarray(reference_volume)
+    test_arr = numpy.asarray(test_volume)
+
+    return diff_arrays(reference_arr, test_arr, text_bits={
+        'array': 'volume',
+        'Arrays': 'Volumes',
+        'indent': '',
+    })
+
+
+DEFAULT_TEXT_BITS = {
+    'array': 'volume',
+    'Arrays': 'Volumes',
+    'indent': '',
+}
+
+def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
+
+    if reference_arr.shape != test_arr.shape:
+        print("{indent}{Arrays} have differing shapes:\n"
+              "{indent}  Shape of reference: {0}\n"
+              "{indent}  Shape of test: {1}"
+              .format(reference_arr.shape, test_arr.shape, **text_bits))
+        return True
+
+    try:
+        numpy.promote_types(reference_arr.dtype, test_arr.dtype)
+    except TypeError:
+        print("{indent}{Arrays} have incompatible data types:\n"
+              "{indent}  Data type of reference: {0}\n"
+              "{indent}  Data type of test: {1}"
+              .format(reference_arr.dtype, test_arr.dtype, **text_bits))
+        return True
+
+    # Only arrays with numeric dtypes can be compared. Return right away if
+    # one array has a non-numeric dtype (dtypes with unsupported conversion to
+    # NumPy, like Point3df before AIMS 4.7, are converted to Object).
+    if (reference_arr.dtype.fields is not None
+            and 'v' in reference_arr.dtype.fields):
+        reference_arr = reference_arr['v']
+    if not numpy.issubdtype(reference_arr.dtype, numpy.number):
+        print("{indent}A detailed data comparison cannot be done, because the "
+              "NumPy data type for the reference {array} ({0}) is not numeric."
+              .format(reference_arr.dtype, **text_bits))
+        return True
+
+    if (test_arr.dtype.fields is not None
+            and 'v' in test_arr.dtype.fields):
+        test_arr = test_arr['v']
+    if not numpy.issubdtype(test_arr.dtype, numpy.number):
+        print("{indent}A detailed data comparison cannot be done, because the "
+              "NumPy data type for the test {array} ({0}) is not numeric."
+              .format(test_arr.dtype, **text_bits))
+        return True
+
+    if numpy.array_equiv(reference_arr, test_arr):
+        return False
+
+    print("{indent}{Arrays} have different data:"
+          .format(**text_bits))
+
     bool_diff = (reference_arr != test_arr)
-    total_diff = np.count_nonzero(bool_diff)
-    bool_diff[np.isnan(reference_arr)] = False
-    bool_diff[np.isnan(test_arr)] = False
-    print("Count of differing values ({0} / {1} total):"
-          .format(total_diff, bool_diff.size))
-    print("                     reference\n"
-          "t          │      NaN      │    non-NaN    │\n"
-          "e ─────────┼───────────────┼───────────────┤\n"
-          "s      NaN │ {0:13d} │ {1:13d} │\n"
-          "t  non-NaN │ {2:13d} │ {3:13d} │\n"
-          .format(
-              np.count_nonzero(np.logical_and(
-                np.isnan(test_arr), np.isnan(reference_arr))),
-              np.count_nonzero(np.logical_and(np.isnan(test_arr),
-                np.logical_not(np.isnan(reference_arr)))),
-              np.count_nonzero(np.logical_and(np.isnan(reference_arr),
-                np.logical_not(np.isnan(test_arr)))),
-              np.count_nonzero(bool_diff)
-          ))
+    total_diff_count = numpy.count_nonzero(bool_diff)
+
+    has_nans = False
+    reference_nans = numpy.isnan(reference_arr)
+    if numpy.any(reference_nans):
+        bool_diff[reference_nans] = False
+        has_nans = True
+    del reference_nans
+
+    test_nans = numpy.isnan(test_arr)
+    if numpy.any(test_nans):
+        bool_diff[test_nans] = False
+        has_nans = True
+    del test_nans
+
+    print("{indent}  {0} value(s) differ ({2:.02%} of {1})"
+          .format(total_diff_count,
+                  bool_diff.size,
+                  total_diff_count / bool_diff.size,
+                  **text_bits))
+    if has_nans:
+        print(
+            "{indent}  Breakdown of differing values:"
+            "{indent}                         reference\n"
+            "{indent}    t          │      NaN      │    non-NaN    │\n"
+            "{indent}    e ─────────┼───────────────┼───────────────┤\n"
+            "{indent}    s      NaN │ {0:13d} │ {1:13d} │\n"
+            "{indent}    t  non-NaN │ {2:13d} │ {3:13d} │\n".format(
+                numpy.count_nonzero(numpy.logical_and(
+                    numpy.isnan(test_arr),
+                    numpy.isnan(reference_arr)
+                )),
+                numpy.count_nonzero(numpy.logical_and(
+                    numpy.isnan(test_arr),
+                    numpy.logical_not(numpy.isnan(reference_arr))
+                )),
+                numpy.count_nonzero(numpy.logical_and(
+                    numpy.isnan(reference_arr),
+                    numpy.logical_not(numpy.isnan(test_arr))
+                )),
+                numpy.count_nonzero(bool_diff),
+            ))
     del bool_diff
 
-    print("Min-max of reference: {0} -- {1}\n"
-          "Min-max of test: {2} -- {3}"
-          .format(np.nanmin(reference_arr), np.nanmax(reference_arr),
-                  np.nanmin(test_arr), np.nanmax(test_arr)))
+    # Print most different values and their coordinates
+    MAX_DIFF_TO_PRINT = 5
+    diff_arr = numpy.abs(test_arr - reference_arr)
+    max_diff_indices = numpy.argsort(diff_arr, axis=None)
+    print(
+        "{indent}  Summary of the most different values (in absolute difference):\n"
+        "{indent}    │ Reference value │   Test value    │ Abs. difference │ Coordinates\n"
+        "{indent}    ├─────────────────┼─────────────────┼─────────────────┼─────────────"
+        .format(**text_bits)
+    )
+    for i in range(1, MAX_DIFF_TO_PRINT + 1):
+        current_diff_index = max_diff_indices[-i]
+        if diff_arr.flat[current_diff_index] == 0:
+            break  # only display values that actually differ
+        print(
+            "{indent}    │{0: ^17.17g}│{1: ^17.17g}│{2: ^17.17g}│ {3}"
+            .format(reference_arr.flat[current_diff_index],
+                    test_arr.flat[current_diff_index],
+                    diff_arr.flat[current_diff_index],
+                    numpy.unravel_index(current_diff_index, diff_arr.shape),
+                    **text_bits)
+        )
 
-    abs_diff = np.abs(test_arr - reference_arr)
-    print("average absolute difference: {0}".format(np.nanmean(abs_diff)))
-    with np.errstate(divide="ignore", invalid="ignore"):
-        avg_rel_diff = np.nanmean(abs_diff / np.abs(reference_arr))
-    print("average relative difference: {0:.2} %".format(100 * avg_rel_diff))
-    print("absolute RMS difference: {0}"
-          .format(np.sqrt(np.nanmean(np.square(abs_diff)))))
+    print("{indent}  Min-max of reference: {0} -- {1}"
+          .format(numpy.nanmin(reference_arr), numpy.nanmax(reference_arr),
+                  **text_bits))
+    print("{indent}  Min-max of test: {0} -- {1}"
+          .format(numpy.nanmin(test_arr), numpy.nanmax(test_arr), **text_bits))
+
+    abs_diff = numpy.abs(test_arr - reference_arr)
+    print("{indent}  Average absolute difference: {0}"
+          .format(numpy.nanmean(abs_diff), **text_bits))
+    print("{indent}  Min-max absolute difference: {0} -- {1}"
+          .format(numpy.nanmin(abs_diff), numpy.nanmax(abs_diff), **text_bits))
+    print("{indent}  Median absolute difference: {0}"
+          .format(numpy.nanmedian(abs_diff), **text_bits))
+    print("{indent}  Mean absolute difference: {0}"
+          .format(numpy.nanmean(abs_diff), **text_bits))
+    print("{indent}  RMS absolute difference: {0}"
+          .format(numpy.sqrt(numpy.nanmean(numpy.square(abs_diff))),
+                  **text_bits))
+
+    with numpy.errstate(divide="ignore", invalid="ignore"):
+        avg_rel_diff = numpy.nanmean(abs_diff / numpy.abs(reference_arr))
+    print("{indent}  Average relative difference: {0:%}"
+          .format(avg_rel_diff, **text_bits))
+
     return True
 
 
@@ -221,57 +334,41 @@ def diff_single_mesh(reference_mesh, test_mesh, reference_key, test_key):
 
 def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name):
     if reference_vec.size() != test_vec.size():
-        print("Vectors {0} and {2} differ in size:\n"
-              "  Size of {0}: {1}\n"
-              "  Size of {2}: {3}"
+        print("Vectors reference.{0} and test.{2} differ in size:\n"
+              "  Size of reference.{0}: {1}\n"
+              "  Size of test.{2}: {3}"
               .format(reference_name, reference.size(),
                       test_name, test.size()))
         return True
 
     if reference_vec == test_vec:
+        if reference_vec.size() != 0:
+            # print the message only for non-empty vectors
+            print("Vectors reference.{0} and test.{1} are identical."
+                  .format(reference_name, test_name))
         return False
 
     # Vectors may compare unequal but still be equivalent (AIMS bug
     # https://github.com/brainvisa/aims-free/issues/42) so we do the comparison
     # with NumPy before printing the message
 
-    reference_arr = np.asarray(reference_vec)
-    test_arr = np.asarray(test_vec)
+    reference_arr = numpy.asarray(reference_vec)
+    test_arr = numpy.asarray(test_vec)
 
-    if np.array_equiv(reference_arr, test_arr):
-        return False
-
-    print("Vectors {0} and {1} differ in values:"
-          .format(reference_name, test_name))
-
-    # The shapes should always be the same because we return earlier if size()
-    # is different.
-    assert reference_arr.shape == test_arr.shape
-
-    # Texture arrays have only one dimension
-    if reference_arr.ndim < 2:
-        reference_arr = reference_arr[:, np.newaxis]
-        test_arr = test_arr[:, np.newaxis]
-
-    # TODO handle NaNs (see diff_volumes)
-    bool_diff = np.any(reference_arr != test_arr, axis=1)
+    bool_diff = numpy.any(reference_arr != test_arr, axis=1)
     print("  {0} / {1} lines differ"
-          .format(np.count_nonzero(bool_diff), len(bool_diff)))
+          .format(numpy.count_nonzero(bool_diff), len(bool_diff)))
 
-    print("  Min-max of reference: {0} -- {1}\n"
-          "  Min-max of test: {2} -- {3}"
-          .format(np.nanmin(reference_arr), np.nanmax(reference_arr),
-                  np.nanmin(test_arr), np.nanmax(test_arr)))
+    if reference_name == test_name:
+        vector_name = reference_name
+    else:
+        vector_name = reference_name + '/' + test_name
 
-    # TODO reconsider what is meaningful here
-    abs_diff = np.abs(test_arr - reference_arr)
-    print("  average absolute difference: {0}".format(np.nanmean(abs_diff)))
-    with np.errstate(divide="ignore", invalid="ignore"):
-        avg_rel_diff = np.nanmean(abs_diff / np.abs(reference_arr))
-    print("  average relative difference: {0:.2} %".format(100 * avg_rel_diff))
-    print("  absolute RMS difference: {0}"
-          .format(np.sqrt(np.nanmean(np.square(abs_diff)))))
-    return True
+    return diff_arrays(reference_arr, test_arr, text_bits={
+        'array': 'vector {0}'.format(vector_name),
+        'Arrays': 'Vectors {0}'.format(vector_name),
+        'indent': '  ',
+    })
 
 
 def diff_single_texture(reference_texture, test_texture,
@@ -360,6 +457,7 @@ Compare two files read by AIMS and summarize the differences""")
 
     args = parser.parse_args(argv[1:])
     return args
+
 
 def main(argv=sys.argv):
     """The script's entry point."""
