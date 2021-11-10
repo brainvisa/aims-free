@@ -339,9 +339,9 @@ def diff_single_mesh(reference_mesh, test_mesh, reference_key, test_key):
 
 def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name):
     if reference_vec.size() != test_vec.size():
-        print("Vectors reference.{0} and test.{2} differ in size:\n"
-              "  Size of reference.{0}: {1}\n"
-              "  Size of test.{2}: {3}"
+        print("Vectors {0} and {2} differ in size:\n"
+              "  Size of {0}: {1}\n"
+              "  Size of {2}: {3}"
               .format(reference_name, reference_vec.size(),
                       test_name, test_vec.size()))
         return True
@@ -349,7 +349,7 @@ def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name):
     if reference_vec == test_vec:
         if reference_vec.size() != 0:
             # print the message only for non-empty vectors
-            print("Vectors reference.{0} and test.{1} are identical."
+            print("Vectors {0} and {1} are identical."
                   .format(reference_name, test_name))
         return False
 
