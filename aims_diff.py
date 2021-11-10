@@ -125,8 +125,8 @@ DEFAULT_TEXT_BITS = {
     'indent': '',
 }
 
-def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
 
+def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
     if reference_arr.shape != test_arr.shape:
         print("{indent}{Arrays} have differing shapes:\n"
               "{indent}  Shape of reference: {0}\n"
@@ -212,6 +212,7 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
                     numpy.logical_not(numpy.isnan(test_arr))
                 )),
                 numpy.count_nonzero(bool_diff),
+                **text_bits
             ))
     del bool_diff
 
@@ -220,9 +221,12 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
     diff_arr = numpy.abs(test_arr - reference_arr)
     max_diff_indices = numpy.argsort(diff_arr, axis=None)
     print(
-        "{indent}  Summary of the most different values (in absolute difference):\n"
-        "{indent}    │ Reference value │   Test value    │ Abs. difference │ Coordinates\n"
-        "{indent}    ├─────────────────┼─────────────────┼─────────────────┼─────────────"
+        "{indent}  "
+        "Summary of the most different values (in absolute difference):\n"
+        "{indent}    "
+        "│ Reference value │   Test value    │ Abs. difference │ Coordinates\n"
+        "{indent}    "
+        "├─────────────────┼─────────────────┼─────────────────┼─────────────"
         .format(**text_bits)
     )
     for i in range(1, MAX_DIFF_TO_PRINT + 1):
@@ -337,8 +341,8 @@ def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name):
         print("Vectors reference.{0} and test.{2} differ in size:\n"
               "  Size of reference.{0}: {1}\n"
               "  Size of test.{2}: {3}"
-              .format(reference_name, reference.size(),
-                      test_name, test.size()))
+              .format(reference_name, reference_vec.size(),
+                      test_name, test_vec.size()))
         return True
 
     if reference_vec == test_vec:
@@ -463,6 +467,7 @@ def main(argv=sys.argv):
     """The script's entry point."""
     args = parse_command_line(argv)
     return diff_files(args.reference_file, args.test_file) or 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
