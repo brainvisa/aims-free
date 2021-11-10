@@ -262,7 +262,8 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
                   **text_bits))
 
     with numpy.errstate(divide="ignore", invalid="ignore"):
-        avg_rel_diff = numpy.nanmean(abs_diff / numpy.abs(reference_arr))
+        avg_rel_diff = 2 * numpy.nanmean(abs_diff / (numpy.abs(reference_arr)
+                                                     + numpy.abs(test_arr)))
     print("{indent}  Average relative difference: {0:%}"
           .format(avg_rel_diff, **text_bits))
 
