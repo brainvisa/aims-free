@@ -5,7 +5,6 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 from soma import aims, aimsalgo
-import exceptions
 import numpy
 import os
 import six
@@ -81,8 +80,7 @@ def connectedComponents(mesh, tex, areas_mode=0):
 
     # test for homogeneity dimension
     if len(dtex) != nbvert:
-        raise exceptions.ValueError(
-            'mesh and texture have not the same dimension...')
+        raise ValueError('mesh and texture have not the same dimension...')
 
     # list of existing labels
     labels = numpy.unique(dtex)
