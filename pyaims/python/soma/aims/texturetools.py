@@ -80,8 +80,7 @@ def connectedComponents(mesh, tex, areas_mode=0):
 
     # test for homogeneity dimension
     if len(dtex) != nbvert:
-        raise exceptions.ValueError(
-            'mesh and texture have not the same dimension...')
+        raise ValueError('mesh and texture have not the same dimension...')
 
     # list of existing labels
     labels = numpy.unique(dtex)
