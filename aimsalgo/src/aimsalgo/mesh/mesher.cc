@@ -45,6 +45,27 @@ using namespace carto;
 using namespace std;
 
 
+namespace
+{
+
+  void copyHeader( Object src, GenericObject & dest )
+  {
+    set<string> forbidden;
+    forbidden.insert( "object_type" );
+    forbidden.insert( "data_type" );
+    forbidden.insert( "uuid" );
+
+    Object it = src->objectIterator();
+    for( ; it->isValid(); it->next() )
+    {
+      if( forbidden.find( it->key() ) == forbidden.end() )
+        dest.setProperty( it->key(), it->currentValue() );
+    }
+  }
+
+}
+
+
 void Mesher::setSmoothing( SmoothingType smoothType, int smoothIt, float smoothRate )
 {
   _smoothFlag = true;
@@ -165,8 +186,8 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, surface.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
-        surface.header().copyProperties(
-          Object::reference( thing->header() ) );
+        copyHeader( Object::reference( thing->header() ),
+                    surface.header() );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -326,8 +347,8 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, current.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
-        current.header().copyProperties(
-          Object::reference( thing->header() ) );
+        copyHeader( Object::reference( thing->header() ),
+                    current.header() );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -423,8 +444,8 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, theSurface.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
-        theSurface.header().copyProperties(
-          Object::reference( thing->header() ) );
+        copyHeader( Object::reference( thing->header() ),
+                    theSurface.header() );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
 
@@ -512,8 +533,8 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
         cout << "vertices             " << flush;
       getVertices( vfac, surface.vertex(), 
                    thing.sizeX(), thing.sizeY(), thing.sizeZ() );
-      surface.header().copyProperties(
-        Object::reference( thing->header() ) );
+      copyHeader( Object::reference( thing->header() ),
+                  surface.header() );
       if( _verbose )
         cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
 
