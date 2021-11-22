@@ -186,7 +186,7 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, surface.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
-        copyHeader( Object::reference( thing->header() ),
+        copyHeader( Object::reference( thing.header() ),
                     surface.header() );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
@@ -347,7 +347,7 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, current.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
-        copyHeader( Object::reference( thing->header() ),
+        copyHeader( Object::reference( thing.header() ),
                     current.header() );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
@@ -444,7 +444,7 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, theSurface.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
-        copyHeader( Object::reference( thing->header() ),
+        copyHeader( Object::reference( thing.header() ),
                     theSurface.header() );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
@@ -533,7 +533,7 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
         cout << "vertices             " << flush;
       getVertices( vfac, surface.vertex(), 
                    thing.sizeX(), thing.sizeY(), thing.sizeZ() );
-      copyHeader( Object::reference( thing->header() ),
+      copyHeader( Object::reference( thing.header() ),
                   surface.header() );
       if( _verbose )
         cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
