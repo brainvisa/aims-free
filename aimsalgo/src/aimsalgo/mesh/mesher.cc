@@ -37,6 +37,7 @@
 #include <aims/io/writer.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/sstream.h>
+#include <cartobase/object/object.h>
 #include <iomanip>
 #include <stdio.h>
 
@@ -186,7 +187,7 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, surface.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
-        copyHeader( Object::reference( thing.header() ),
+        copyHeader( Object::reference( thing.volume()->header() ),
                     surface.header() );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
@@ -347,7 +348,7 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, current.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
-        copyHeader( Object::reference( thing.header() ),
+        copyHeader( Object::reference( thing.volume()->header() ),
                     current.header() );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
@@ -444,7 +445,7 @@ void Mesher::doit( const AimsData<short>& thing,
           cout << "vertices             " << flush;
         getVertices( vfac, theSurface.vertex(), 
                      thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
-        copyHeader( Object::reference( thing.header() ),
+        copyHeader( Object::reference( thing.volume()->header() ),
                     theSurface.header() );
         if( _verbose )
           cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
@@ -533,7 +534,7 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
         cout << "vertices             " << flush;
       getVertices( vfac, surface.vertex(), 
                    thing.sizeX(), thing.sizeY(), thing.sizeZ() );
-      copyHeader( Object::reference( thing.header() ),
+      copyHeader( Object::reference( thing.volume()->header() ),
                   surface.header() );
       if( _verbose )
         cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
