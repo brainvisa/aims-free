@@ -84,7 +84,7 @@ namespace aims
   void QtFormatsWriter<T>::write( const AimsData<T>& thing )
   {
     std::string fmt = format();
-//     std::cout << "QtFormatsWriter<T>::write, format: " << fmt << std::endl;
+    // std::cout << "QtFormatsWriter< " << carto::DataTypeCode<T>::name() << " >::write, format: " << fmt << std::endl;
     if( !qApp && ( fmt == "EPS" || fmt == "EPSF" || fmt == "EPSI" ) )
       throw carto::format_error( fmt + " format needs a QApplication",
                                  _name );
