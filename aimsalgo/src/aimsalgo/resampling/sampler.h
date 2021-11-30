@@ -111,7 +111,6 @@ void
 Sampler<T>::doit( const Motion& motion, carto::rc_ptr<carto::Volume<PVItem> >& thing ) const
 {
 
-
   ASSERT( _ref );
   ASSERT( thing->getSizeT() == (*_ref)->getSizeT() && thing->getBorders()[0] == 0 );
 
@@ -128,20 +127,20 @@ Sampler<T>::doit( const Motion& motion, carto::rc_ptr<carto::Volume<PVItem> >& t
   PVItem *it;
 
 #ifdef DEBUG
-  cout << "Sampling volume [  1] / slice [  1]" << flush;
+  std::cout << "Sampling volume [  0] / slice [  0]" << std::flush;
 #endif
-  for (int t = 1; t <= thing->getSizeT(); t++ )
+  for (int t = 0; t < thing->getSizeT(); t++ )
   {
     Point3df start = invMotion.translation();
-    for ( int s = 1; s <= thing->getSizeZ(); s++ )
+    for ( int s = 0; s < thing->getSizeZ(); s++ )
     {
 #ifdef DEBUG
-      cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" 
-           << setw( 3 ) << t << "] / slice ["
-           << setw( 3 ) << s << "]" << flush;
+      std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
+           << std::setw( 3 ) << t << "] / slice ["
+           << std::setw( 3 ) << s << "]" << std::flush;
 #endif
       it = &thing->at( 0, 0, s, t );
-      _sliceResamp( thing, it, start, t - 1, invMotion.rotation() );
+      _sliceResamp( thing, it, start, t, invMotion.rotation() );
       start[ 0 ] += invMotion.rotation()( 0, 2 );
       start[ 1 ] += invMotion.rotation()( 1, 2 );
       start[ 2 ] += invMotion.rotation()( 2, 2 );
