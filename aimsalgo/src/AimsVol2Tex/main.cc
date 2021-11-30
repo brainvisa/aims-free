@@ -638,7 +638,8 @@ int main( int argc, const char** argv )
                  "position.\nThe \"majority\" value mode does not use this "
                  "additional volume.\n"
                  "The apply_to volume is converted into the same data type as "
-                 "the main input volume." );
+                 "the main input volume.",
+                 true );
   app.alias( "--mesh", "-m" );
   app.alias( "--input", "-i" );
   app.alias( "--output", "-o" );
