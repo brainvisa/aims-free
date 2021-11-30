@@ -182,7 +182,7 @@ def compare_images(vol, vol2, vol1_name='input', vol2_name='output',
         while not end:
             diff = max([np.abs(x - y) for x, y in zip(vol.at(pos), vol2.at(pos))])
             if diff >= thresh:
-                print('values at', pos, ':', vol.at(pos), vol2.at(pos), voldiff.at(pos))
+                print('values at', pos, ':', vol.at(pos), vol2.at(pos))
                 raise RuntimeError(
                     msg + ', diff %f exceeds max allowed: %f at %s'
                     % (diff, thresh, repr(pos)))
