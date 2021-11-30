@@ -147,6 +147,8 @@ void QtFormatsHeader::read()
   if( d->hasread )
     return;
 
+  // cout << "QtFormatsHeader::read( " << _name << ")\n";
+
   string	fname = _name;
   bool lock = false;
   qformatsMutex().lock();
@@ -211,15 +213,24 @@ void QtFormatsHeader::read()
   vector<string>	pdt;
 
   bool gray = im.allGray();
+  // cout << "gray: " << gray << ", alpha: " << im.hasAlphaChannel() << endl;
+  if( im.hasAlphaChannel() )
+    {
+      if( dt.empty() )
+        dt = DataTypeCode<AimsRGBA>().dataType();
+      pdt.push_back( DataTypeCode<AimsRGBA>().dataType() );
+      pdt.push_back( DataTypeCode<AimsRGB>().dataType() );
+    }
   if( gray )
     {
-      //cout << "gray image, numCol: " << im.colorCount() << endl;
+      // cout << "gray image, numCol: " << im.colorCount() << endl;
       if( im.colorCount() == 0 )
         switch( im.depth() )
           {
           case 1:
           case 8:
-            dt = DataTypeCode<uint8_t>().dataType();
+            if( dt.empty() )
+                dt = DataTypeCode<uint8_t>().dataType();
             pdt.push_back( DataTypeCode<uint8_t>().dataType() );
             pdt.push_back( DataTypeCode<uint16_t>().dataType() );
             pdt.push_back( DataTypeCode<int16_t>().dataType() );
@@ -227,7 +238,8 @@ void QtFormatsHeader::read()
             pdt.push_back( DataTypeCode<int32_t>().dataType() );
             break;
           case 16:
-            dt = DataTypeCode<uint16_t>().dataType();
+            if( dt.empty() )
+                dt = DataTypeCode<uint16_t>().dataType();
             pdt.push_back( DataTypeCode<uint16_t>().dataType() );
             pdt.push_back( DataTypeCode<int16_t>().dataType() );
             pdt.push_back( DataTypeCode<uint32_t>().dataType() );
@@ -235,7 +247,8 @@ void QtFormatsHeader::read()
             pdt.push_back( DataTypeCode<uint8_t>().dataType() );
             break;
           case 32:
-            dt = DataTypeCode<uint32_t>().dataType();
+            if( dt.empty() )
+                dt = DataTypeCode<uint32_t>().dataType();
             pdt.push_back( DataTypeCode<uint32_t>().dataType() );
             pdt.push_back( DataTypeCode<int32_t>().dataType() );
             pdt.push_back( DataTypeCode<uint16_t>().dataType() );
@@ -265,14 +278,7 @@ void QtFormatsHeader::read()
           pdt.push_back( DataTypeCode<int32_t>().dataType() );
         }
     }
-  if( im.hasAlphaChannel() )
-    {
-      if( dt.empty() )
-        dt = DataTypeCode<AimsRGBA>().dataType();
-      pdt.push_back( DataTypeCode<AimsRGBA>().dataType() );
-      pdt.push_back( DataTypeCode<AimsRGB>().dataType() );
-    }
-  else
+  if( !im.hasAlphaChannel() )
     {
       if( dt.empty() )
         dt = DataTypeCode<AimsRGB>().dataType();
