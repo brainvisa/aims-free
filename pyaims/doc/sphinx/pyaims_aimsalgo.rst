@@ -15,6 +15,8 @@ Contents
 In soma.aims module
 -------------------
 
+.. automodule:: soma.aimsalgo
+
 .. autoclass:: soma.aims.ResamplerFactory_FLOAT
   :members:
 
@@ -39,15 +41,26 @@ In soma.aims module
 .. autoclass:: soma.aims.RegularBinnedHistogram_FLOAT
   :members:
 
-.. autofunction:: soma.aims.meshdistance.MeshDilation
+** MESHDISTANCE**
 
-.. autofunction:: soma.aims.meshdistance.MeshDistance
+.. autoclass:: soma.aims.meshdistance
+  :members:
 
-.. autofunction:: soma.aims.meshdistance.MeshErosion
+.. function:: soma.aims.meshdistance.MeshDilation
 
-.. autofunction:: soma.aims.meshdistance.MeshVoronoi
+.. function:: soma.aims.meshdistance.MeshDistance
 
-.. autofunction:: soma.aims.meshdistance.MeshVoronoiStepbyStep
+.. function:: soma.aims.meshdistance.MeshErosion
+
+.. function:: soma.aims.meshdistance.MeshVoronoiStepbyStep
+
+.. .. autofunction:: soma.aims.meshdistance.MeshDilation
+..
+.. .. autofunction:: soma.aims.meshdistance.MeshDistance
+..
+.. .. autofunction:: soma.aims.meshdistance.MeshErosion
+..
+.. .. autofunction:: soma.aims.meshdistance.MeshVoronoiStepbyStep
 
 .. autoclass:: soma.aims.GeodesicPath
   :members:
