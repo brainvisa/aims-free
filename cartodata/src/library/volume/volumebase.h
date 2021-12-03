@@ -767,5 +767,11 @@ namespace carto
 } // namespace carto:
 
 
+#  ifdef CARTO_USE_BLITZ
+// the CT macro defined in blitz++ interferes with QColor::CT in Qt
+#    ifdef CT
+#      undef CT
+#    endif
+#  endif
 
 #endif // CARTODATA_VOLUME_VOLUMEBASE_H
