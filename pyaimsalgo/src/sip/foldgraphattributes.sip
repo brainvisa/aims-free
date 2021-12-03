@@ -1,7 +1,7 @@
 
 namespace aims
 {
-class FoldGraphAttributes
+class FoldGraphAttributes /NoDefaultCtors/
 {
 %TypeHeaderCode
   #include <aims/foldgraph/foldgraphattributes.h>

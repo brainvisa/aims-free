@@ -5,7 +5,7 @@
 
 namespace aims
 {
-  class GeometricProperties
+  class GeometricProperties /NoDefaultCtors/
   {
   public:
     typedef list_U32 Neighborhood;
@@ -54,7 +54,7 @@ namespace aims
   };
 
 
-  class Curvature : aims::GeometricProperties
+  class Curvature : aims::GeometricProperties /NoDefaultCtors/
   {
   public:
     Curvature( const AimsSurfaceTriangle & mesh );
@@ -75,7 +75,7 @@ namespace aims
                                        const std::string & method );
   };
 
-  class FiniteElementCurvature : public aims::Curvature
+  class FiniteElementCurvature : public aims::Curvature /NoDefaultCtors/
   {
   public:
     FiniteElementCurvature( const AimsSurfaceTriangle & mesh );
@@ -87,7 +87,7 @@ namespace aims
 
   // All these are Mean Curvature estimates
 
-  class BoixCurvature : public aims::Curvature
+  class BoixCurvature : public aims::Curvature /NoDefaultCtors/
   {
   public:
     BoixCurvature( const AimsSurfaceTriangle & mesh );
@@ -96,7 +96,7 @@ namespace aims
     virtual Texture_FLOAT doIt();
   };
 
-  class BarycenterCurvature : public aims::Curvature
+  class BarycenterCurvature : public aims::Curvature /NoDefaultCtors/
   {
   public:
     BarycenterCurvature( const AimsSurfaceTriangle & mesh );
@@ -107,7 +107,7 @@ namespace aims
 
   // This is a Gaussian Curvature estimate
 
-  class BoixGaussianCurvature : public aims::Curvature
+  class BoixGaussianCurvature : public aims::Curvature /NoDefaultCtors/
   {
   public:
     BoixGaussianCurvature( const AimsSurfaceTriangle & mesh );
@@ -118,7 +118,7 @@ namespace aims
 
   // This is another Gaussian Curvature estimate (from aims-til/Cathier)
 
-  class GaussianCurvature : public aims::Curvature
+  class GaussianCurvature : public aims::Curvature /NoDefaultCtors/
   {
   public:
     GaussianCurvature( const AimsSurfaceTriangle & mesh );
