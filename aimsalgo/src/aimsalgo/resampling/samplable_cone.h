@@ -72,8 +72,8 @@ namespace aims
   };
 
 
-  ConeSamplable::ConeSamplable( const Point3df & arrow, 
-                                const Point3df & base, float radius )
+  inline ConeSamplable::ConeSamplable( const Point3df & arrow,
+                                       const Point3df & base, float radius )
   : aimsalgo::Samplable<float, 3>(), _arrow( arrow ), _base( base ), 
     _radius( radius )
   {

@@ -57,7 +57,8 @@ namespace aims
   };
 
 
-  SphereSamplable::SphereSamplable( const Point3df & center, float radius )
+  inline SphereSamplable::SphereSamplable( const Point3df & center,
+                                           float radius )
   : aimsalgo::Samplable<float, 3>(), _center( center ),
     _sqrradius( radius*radius )
   {}
