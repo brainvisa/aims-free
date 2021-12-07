@@ -677,7 +677,7 @@ void LabelSelector::loadPreselection()
   QString	fname 
     = QFileDialog::getOpenFileName( this, tr( "Open a pre-selection" ), 
                                     QString(), "Selections (*.sel)" );
-  if( fname != QString::null )
+  if( !fname.isEmpty() )
     loadPreselection( fname );
 }
 
@@ -697,8 +697,8 @@ void LabelSelector::loadHierarchy()
 {
   QString	fname 
     = QFileDialog::getOpenFileName( this, tr( "Select a hierarchy" ), 
-                                    QString::null, "Hierarchies (*.hie)" );
-  if( fname != QString::null )
+                                    QString(), "Hierarchies (*.hie)" );
+  if( !fname.isEmpty() )
     loadHierarchy( fname );
 }
 
@@ -921,8 +921,8 @@ void LabelSelector::loadModel()
 {
   QString	fname
     = QFileDialog::getOpenFileName( this, tr( "Select a model" ), 
-                                    QString::null, "Model graphs (*.arg)" );
-  if( fname != QString::null )
+                                    QString(), "Model graphs (*.arg)" );
+  if( !fname.isEmpty() )
     loadModel( fname );
 }
 
