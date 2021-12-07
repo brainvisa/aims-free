@@ -250,6 +250,8 @@ bool BrainMaskReader::doit( Process & p, const string & fname, Finder & f )
   VolumeRef<int16_t> *vp = conv( vol );
   proc.brainmask = *vp;
   delete vp;
+
+  return true;
 }
 
 
@@ -288,6 +290,8 @@ bool ConvReader<U>::doit( Process & p, const string & fname, Finder & f )
   VolumeRef<U> *vp = conv( vol );
   proc.values = *vp;
   delete vp;
+
+  return true;
 }
 
 namespace
