@@ -308,7 +308,7 @@ int main(int argc, const char **argv)
 	char filename[10];
 	char filenameBis[10];
 	char filenameMod[10];
-	char filenameBisMod[10];
+	char filenameBisMod[12];
 
 
 	sprintf(filename,    "vect%d"   ,    k+1);
