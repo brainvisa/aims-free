@@ -126,16 +126,21 @@ class AIMSDATA_API AimsSurface
     /// Update/Compute the normals
     inline void updateNormals();
 
-    /// Output stream operator
-    friend
-    std::ostream& operator << <>( std::ostream& out,
-				  const AimsSurface<D,T>& thing );
-
     inline bool operator == ( const AimsSurface<D, T> & s ) const
     {
       return _vertex == s._vertex && _normal == s._normal
         && _polygon == s._polygon && _texture == s._texture;
     }
+    inline bool operator != ( const AimsSurface<D, T> & s ) const
+    {
+      return !( *this == s );
+    }
+
+    /// Output stream operator
+    friend
+    std::ostream& operator << <>( std::ostream& out,
+                                  const AimsSurface<D,T>& thing );
+
 };
 
 
@@ -326,8 +331,6 @@ class AIMSDATA_API AimsTimeSurface
     /// Set the header
     void setHeader( const aims::PythonHeader &hdr ) { _header = hdr; }
 
-    /**@name Item manipulation and methods*/
-    //@{
     /** Get a const reference to the vector of verteces of the surface
         of index 0.
         The function was redefined to omit time. It is equivalent to write:\\
@@ -378,11 +381,16 @@ class AIMSDATA_API AimsTimeSurface
     /// Update/Compute the normals
     inline void updateNormals();
 
+    bool operator == ( const AimsTimeSurface<D,T> & ) const;
+    inline bool operator != ( const AimsTimeSurface<D, T> & other ) const
+    {
+      return !( *this == other );
+    }
+
     /// Output stream operator
     friend
     std::ostream& operator << <>( std::ostream& out,  
-				  const AimsTimeSurface<D,T>& thing );
-    //@}
+                                  const AimsTimeSurface<D,T>& thing );
 
   protected:
     /**@name Data*/
@@ -525,6 +533,26 @@ void AimsTimeSurface<4,Void>::updateNormals()
   AimsTimeSurface<4,Void>::iterator it;
   for (it=this->begin();it!=this->end();it++)
     ((*it).second).updateNormals();
+}
+
+
+template <int D, typename T> inline
+bool AimsTimeSurface<D, T>::operator == ( const AimsTimeSurface<D, T> & other )
+  const
+{
+  if( this->size() != other.size() )
+    return false;
+  if( header() != other.header() )
+    return false;
+  const_iterator i, j, e = this->end();
+  for( i=this->begin(), j=other.begin(); i!=e; ++i, ++j )
+  {
+    if( i->first != j->first )
+      return false;
+    if( i->second != j->second )
+      return false;
+  }
+  return true;
 }
 
 
