@@ -120,6 +120,9 @@ The header contains all meta-data.
       }
 %End
 
+  bool operator == (
+    const AimsTimeSurface_%Template1typecode%_%Template2typecode% & ) const;
+
 };
 
 
