@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
+from soma import aims
 from soma.aims.graph_comparison import same_graphs
 from soma.aims.volumetools import compare_images
 import filecmp
@@ -12,7 +13,7 @@ def filter_header(hdr):
     Removed uuid and referential properties from the given header, in order to
     be compared with another file wich may differ only in thoses identifiers
     '''
-    for prop in ('uuid', 'referential'):
+    for prop in ('uuid', 'referential', 'GIFTI_dataarrays_info'):
         if prop in hdr:
             del hdr[prop]
     # gifti-specific
@@ -55,7 +56,7 @@ def cmp(ref_file, test_file, skip_suffixes=None):
         return np.max(np.abs(arr2 - arr1)) <= 1e-5
     try:
         obj1 = aims.read(ref_file)
-        obj3 = aims.read(test_file)
+        obj2 = aims.read(test_file)
         if type(obj1).__name__.startswith('soma.aims.Volume_') \
                 and type(obj2).__name__.startswith('soma.aims.Volume_'):
             return compare_images(obj1, obj2)
@@ -66,11 +67,11 @@ def cmp(ref_file, test_file, skip_suffixes=None):
         if hasattr(obj1, 'header'):
             filter_header(obj1.header())
         if hasattr(obj2, 'header'):
-            filter_header(obj1.header())
+            filter_header(obj2.header())
         if obj1 == obj2:
-            return
+            return True
 
-    except Exception:
+    except Exception as e:
         # aims cannot read them: use the standard filecmp
         pass
     return filecmp.cmp(ref_file, test_file)
