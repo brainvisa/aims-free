@@ -28,8 +28,8 @@ def cmp(ref_file, test_file, skip_suffixes=None):
     Some specific comparison function will be called for graphs, meshes,
     images, CSV files.
     '''
-    if skipped_suffixes is None:
-        skipped_suffixes = [
+    if skip_suffixes is None:
+        skip_suffixes = [
             ".minf",
             # SPAM probas differ up tp 0.15 in energy and I don't know why, so
             # skip the test
@@ -38,7 +38,7 @@ def cmp(ref_file, test_file, skip_suffixes=None):
             "_global_TO_local.dat",
             # referentials with registration are allocated differently (uuids)
             "_auto.referential"]
-    for ext in skipped_suffixes:
+    for ext in skip_suffixes:
         if ref_file.endswith(ext):
             return True
     if ref_file.endswith(".arg"):
