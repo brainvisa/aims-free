@@ -862,7 +862,18 @@ bool GraphManip::volume2Buckets( Graph & g, CreateBucketFunc createfunc )
   cs.graph = &g;
 
   if( g.getProperty( "boundingbox_min", vdims ) )
-    cs.offset = Point3d( vdims[0], vdims[1], vdims[2] );
+  {
+    if( vdims.size() != 0 )
+    {
+      cs.offset[0] = vdims[0];
+      if( vdims.size() >= 2 )
+      {
+        cs.offset[1] = vdims[1];
+        if( vdims.size() >= 3 )
+          cs.offset[2] = vdims[2];
+      }
+    }
+  }
 
   //cout << "starting conversion...\n";
 
