@@ -415,6 +415,42 @@ void transformGraph( Graph & graph,
                           out_vs, &bbmin, &bbmax,
                           &inverse_transformation_missing );
 
+  // ensure bounding box is well formed
+  if( bbmax.empty() )
+  {
+    // bbox has not been updated at all (only buckets do that)
+    graph.getProperty( "boundingbox_min", bbmin );
+    graph.getProperty( "boundingbox_max", bbmax );
+    while( bbmin.size() < 3 )
+      bbmin.push_back( 0 );
+    while( bbmax.size() < 3 )
+      bbmax.push_back( 0 );
+    const AffineTransformation3d *adirect
+      = dynamic_cast<const AffineTransformation3d *>( &direct_transformation );
+    // transform bounding box only if direct_transformation is affine
+    // (otherwise we can't do it and leave the bbox untransformed)
+    if( adirect )
+    {
+      Point3df bmin( bbmin[0] * vs[0], bbmin[1] * vs[1], bbmin[2] * vs[2] );
+      Point3df bmax( bbmax[0] * vs[0], bbmax[1] * vs[1], bbmax[2] * vs[2] );
+      Point3df obmin, obmax;
+      transformBoundingBox( *adirect, bmin, bmax, obmin, obmax );
+      bbmin[0] = int( rint( obmin[0] / out_vs[0] ) );
+      bbmin[1] = int( rint( obmin[1] / out_vs[1] ) );
+      bbmin[2] = int( rint( obmin[2] / out_vs[2] ) );
+      bbmax[0] = int( rint( obmax[0] / out_vs[0] ) );
+      bbmax[1] = int( rint( obmax[1] / out_vs[1] ) );
+      bbmax[2] = int( rint( obmax[2] / out_vs[2] ) );
+    }
+  }
+  else
+  {
+    while( bbmin.size() < 3 )
+      bbmin.push_back( 0 );
+    while( bbmax.size() < 3 )
+      bbmax.push_back( 0 );
+  }
+
   graph.setProperty( "boundingbox_min", bbmin );
   graph.setProperty( "boundingbox_max", bbmax );
 
