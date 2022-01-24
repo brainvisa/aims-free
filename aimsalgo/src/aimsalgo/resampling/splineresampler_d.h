@@ -228,7 +228,15 @@ SplineResampler< T >::doResampleChannel(
 
         }
 
-      carto::RawConverter<double, ChannelType>().convert(intensity, outValue);
+      // Clip the values to the output datatype: such out-of-range should be
+      // rare, but they can occur due to overshoot with spline order >= 2.
+      if(intensity < std::numeric_limits<ChannelType>::lowest())
+        intensity = std::numeric_limits<ChannelType>::lowest();
+      else if(intensity > std::numeric_limits<ChannelType>::max())
+        intensity = std::numeric_limits<ChannelType>::max();
+      else
+        carto::RawConverter<double, ChannelType>().convert(intensity,
+                                                           outValue);
 
     }
   else
