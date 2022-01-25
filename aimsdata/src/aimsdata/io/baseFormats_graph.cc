@@ -100,22 +100,28 @@ Graph* ArgFormat::read( const string & filename,
 
 
 bool ArgFormat::write( const string & filename, const Graph & obj, 
-		       carto::Object options )
+                       carto::Object options )
 {
   //cout << "ArgFormat::write " << filename << endl;
   ArgWriter	w( filename );
   ArgWriter::SavingMode mode = ArgWriter::Keep;
-  try
+  bool saveOnlyModified = true;
+
+  if( !options.isNull() )
   {
-    if( !options.isNull() )
+    try
     {
       carto::Object aso = options->getProperty( "force_global" );
       if( !aso.isNull() )
         if( (bool) aso->getScalar() )
           mode = ArgWriter::Global;
-      aso = options->getProperty( "saving_mode" );
-      if( !aso.isNull() )
-        try
+    }
+    catch( ... )
+    {
+      try
+      {
+        carto::Object aso = options->getProperty( "saving_mode" );
+        if( !aso.isNull() )
         {
           string sm = aso->getString();
           if( sm == "local" )
@@ -123,25 +129,23 @@ bool ArgFormat::write( const string & filename, const Graph & obj,
           else if( sm == "global" )
             mode = ArgWriter::Global;
         }
-        catch( ... )
-        {
-        }
+      }
+      catch( ... )
+      {
+      }
     }
-  }
-  catch( ... )
-  {
+
     try
     {
-      // compatibility: try the old ascii flag which was misused
-      carto::Object aso = options->getProperty( "ascii" );
-      if( !aso.isNull() && (bool) aso->getScalar() )
-        mode = ArgWriter::Global;
+      carto::Object som = options->getProperty( "save_only_modified" );
+      if( !som.isNull() )
+        saveOnlyModified = bool( som->getScalar() );
     }
     catch( ... )
     {
     }
   }
-  return w.write( (Graph &) obj, mode );
+  return w.write( (Graph &) obj, mode, saveOnlyModified );
 }
 
 

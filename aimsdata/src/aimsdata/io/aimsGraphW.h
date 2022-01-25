@@ -108,21 +108,21 @@ namespace aims
     AimsGraphWriter( const std::string & filename );
     virtual ~AimsGraphWriter();
 
-    /**	Saves elements contained in the graph. Elements must be referred by the
-	aims_objects_table map. Input graph \c g is not const since some of 
-	the graph attributed are updated. Hence you must always call 
-	writeElements() \e before saving the graph structure (using a regular 
-	GraphWriter)
-	\todo save only some objects
-	\todo save only modified objects
-	\par newmode saving mode of "new" objects (those created after loading)
-	\par oldmode saving mode of already existing (loaded) objects
-	\par saveOnlyModified : if true, saves only objects in graph elements 
-	with a modification flag (attribute "modified" set to true)
+    /** Saves elements contained in the graph. Elements must be referred by the
+        aims_objects_table map. Input graph \c g is not const since some of
+        the graph attributed are updated. Hence you must always call
+        writeElements() \e before saving the graph structure (using a regular
+        GraphWriter)
+        \todo save only some objects
+        \todo save only modified objects
+        \par newmode saving mode of "new" objects (those created after loading)
+        \par oldmode saving mode of already existing (loaded) objects
+        \par saveOnlyModified : if true, saves only objects in graph elements
+        with a modification flag (attribute "modified" set to true)
     */
     virtual void writeElements( Graph & g, SavingMode newmode = Keep, 
-				SavingMode oldmode = Keep, 
-				bool saveOnlyModified = false );
+                                SavingMode oldmode = Keep,
+                                bool saveOnlyModified = false );
 
     template<class T> 
     static bool defaultTakeObject( Process &, const std::string &, Finder & );

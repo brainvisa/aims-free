@@ -126,7 +126,8 @@ void ArgWriter::deleteWriter( const string & syntax )
 }
 
 
-bool ArgWriter::write( Graph & g, SavingMode mode ) const
+bool ArgWriter::write( Graph & g, SavingMode mode,
+                       bool saveOnlyModified ) const
 {
   // cout << "ArgWriter::write " << _name << endl;
   string	syntax = g.getSyntax();
@@ -137,7 +138,8 @@ bool ArgWriter::write( Graph & g, SavingMode mode ) const
   if( i != sp->writers.end() )
     try
       {
-        i->second->write( name, g, LowLevelArgWriter::SavingMode( mode ) );
+        i->second->write( name, g, LowLevelArgWriter::SavingMode( mode ),
+                          saveOnlyModified );
         Object minf = i->second->getMinf( g );
         if( minf->size() != 0 )
         {
@@ -158,7 +160,8 @@ bool ArgWriter::write( Graph & g, SavingMode mode ) const
   if( i != sp->writers.end() )
     try
       {
-        i->second->write( name, g, LowLevelArgWriter::SavingMode( mode ) );
+        i->second->write( name, g, LowLevelArgWriter::SavingMode( mode ),
+                          saveOnlyModified );
         Object minf = i->second->getMinf( g );
         if( minf->size() != 0 )
         {
@@ -246,14 +249,14 @@ LowLevelStandardArgWriter::~LowLevelStandardArgWriter()
 
 
 void LowLevelStandardArgWriter::write( const string & filename, Graph & g, 
-                                       SavingMode mode )
+                                       SavingMode mode, bool saveOnlyModified )
 {
   //cout << "LowLevelStandardArgWriter::write " << filename << endl;
   GraphWriter	w( filename, *_syntax );
   AimsGraphWriter	gw( filename );
   AimsGraphWriter::SavingMode	sm
     = static_cast<AimsGraphWriter::SavingMode>( mode );
-  gw.writeElements( g, sm, sm );
+  gw.writeElements( g, sm, sm, saveOnlyModified );
   //cout << "writeElements done\n";
   try
   {

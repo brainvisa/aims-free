@@ -60,7 +60,8 @@ namespace aims
     virtual ~LowLevelArgWriter();
     /// in case of failure, raise an exception
     virtual void write( const std::string & filename, Graph & graph, 
-                        SavingMode mode = Keep ) = 0;
+                        SavingMode mode = Keep,
+                        bool saveOnlyModified = true ) = 0;
     /** get / reconstruct the minf header from the graph.
         The default implementation takes it from the "header" property of the
         graph (if any), and tries to rebuild referentials / transformations
@@ -70,8 +71,8 @@ namespace aims
   };
 
   /* This class is a wrapper for several GraphWriters: standard GraphWriter, 
-     FoldWriter, FRGWriter (defined in sigraph library), RoiArgWriter (defined
-     in aimsalgo), etc. New writers can be added as plugins.
+     FoldWriter, FRGWriter (defined in sigraph library), etc. New writers can
+     be added as plugins.
    */
   class ArgWriter
   {
@@ -85,11 +86,12 @@ namespace aims
 
     ArgWriter( const std::string& filename );
     ~ArgWriter();
-    bool write( Graph &, SavingMode mode = Keep ) const;
+    bool write( Graph &, SavingMode mode = Keep,
+                bool saveOnlyModified = true ) const;
     /** sets the writer to use for graphs of a specific syntax. The writer 
-	then belongs to ArgWriter (never delete it) */
+        then belongs to ArgWriter (never delete it) */
     static void registerWriter( const std::string & syntax, 
-				LowLevelArgWriter *writer );
+                                LowLevelArgWriter *writer );
     static bool hasWriter( const std::string & syntax );
     /// removes and deletes a writer
     static void deleteWriter( const std::string & syntax );
@@ -108,7 +110,7 @@ namespace aims
     LowLevelStandardArgWriter();
     virtual ~LowLevelStandardArgWriter();
     virtual void write( const std::string & filename, Graph & graph, 
-                        SavingMode mode = Keep );
+                        SavingMode mode = Keep, bool saveOnlyModified = true );
 
   private:
     carto::SyntaxSet	*_syntax;
