@@ -78,10 +78,18 @@ public:
   double  sx;
   double  sy;
   double  sz;
+  double  fov_xmin;
+  double  fov_ymin;
+  double  fov_zmin;
+  double  fov_xmax;
+  double  fov_ymax;
+  double  fov_zmax;
   string  vfinterp;
   bool    mmap_fields;
   string  progress_file;
 };
+
+constexpr double NaN = std::numeric_limits<double>::quiet_NaN();
 
 
 ApplyTransformProc::ApplyTransformProc()
@@ -94,6 +102,8 @@ ApplyTransformProc::ApplyTransformProc()
     ignore_reference_transforms(false),
     dx(0), dy(0), dz(0),
     sx(0.), sy(0.), sz(0.),
+    fov_xmin(NaN), fov_ymin(NaN), fov_zmin(NaN),
+    fov_xmax(NaN), fov_ymax(NaN), fov_zmax(NaN),
     vfinterp("linear"),
     mmap_fields(false)
 {
@@ -225,6 +235,10 @@ void set_geometry(ApplyTransformProc& proc,
                   const DictionaryInterface& fallback_header,
                   bool set_dimensions)
 {
+  // TODO bbox options
+
+  // TODO if reference header, automatically adapt dx, dy, dz to keep bbox constant
+
   bool dimension_ok = !set_dimensions || (proc.dx > 0 && proc.dy > 0 && proc.dz > 0);
   bool voxel_size_ok = proc.sx > 0 && proc.sy > 0 && proc.sz > 0;
   if(dimension_ok && voxel_size_ok)
@@ -1339,6 +1353,18 @@ int main(int argc, const char **argv)
                   "Output Y voxel size [default: same as input]", true);
     app.addOption(proc.sz, "--sz",
                   "Output Z voxel size [default: same as input]", true);
+    app.addOption(proc.fov_xmin, "--fov-xmin",
+                  "Minimum X coordinate of the field of view", true);
+    app.addOption(proc.fov_ymin, "--fov-ymin",
+                  "Minimum Y coordinate of the field of view", true);
+    app.addOption(proc.fov_zmin, "--fov-zmin",
+                  "Minimum Z coordinate of the field of view", true);
+    app.addOption(proc.fov_xmax, "--fov-xmax",
+                  "Maximum X coordinate of the field of view", true);
+    app.addOption(proc.fov_ymax, "--fov-ymax",
+                  "Maximum Y coordinate of the field of view", true);
+    app.addOption(proc.fov_zmax, "--fov-zmax",
+                  "Maximum Z coordinate of the field of view", true);
     app.addOption(proc.reference, "--reference",
                   "Volume used to define output voxel size and volume "
                   "dimension (values are overridden by --dx, --dy, "
