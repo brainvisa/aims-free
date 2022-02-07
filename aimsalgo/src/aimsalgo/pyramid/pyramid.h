@@ -61,9 +61,9 @@ class Pyramid
   protected:
 
     const PyramidFunc<T>& _func;
-    carto::rc_ptr<carto::Volume<T> >* _ref;
+    carto::rc_ptr<carto::Volume<T> > _ref;
     int _level;
-    carto::rc_ptr<carto::Volume<T> >** _ppItem;
+    carto::rc_ptr<carto::Volume<T> >* _ppItem;
 
     void _new_ppItem( int level );
     void _free_ppItem();
@@ -78,7 +78,7 @@ void Pyramid<T>::setRef( carto::rc_ptr<carto::Volume<T> > ref )
   {
       setLevel( _level );
   }
-  _ref = &ref;
+  _ref = ref;
 }
 
 
@@ -87,14 +87,14 @@ void Pyramid<T>::_new_ppItem( int level )
 {
 //   std::cout << "Pyramid: Creating new array of " << carto::toString(level) 
 //             << " to store volumes" << std::endl << std::flush;
-  _ppItem = new carto::rc_ptr<carto::Volume<T> >*[ level ];
+  _ppItem = new carto::rc_ptr<carto::Volume<T> >[ level ];
 
-  int dimX = (*_ref)->getSizeX();
-  int dimY = (*_ref)->getSizeY();
-  int dimZ = (*_ref)->getSizeZ();
-  int dimT = (*_ref)->getSizeT();
+  int dimX = _ref->getSizeX();
+  int dimY = _ref->getSizeY();
+  int dimZ = _ref->getSizeZ();
+  int dimT = _ref->getSizeT();
 
-  std::vector<float> vs = (*_ref)->getVoxelSize();
+  std::vector<float> vs = _ref->getVoxelSize();
   float sizeX = vs[0];
   float sizeY = vs[1];
   float sizeZ = vs[2];
@@ -121,8 +121,8 @@ void Pyramid<T>::_new_ppItem( int level )
 //               << carto::toString(dimY) << ","
 //               << carto::toString(dimZ) << ","
 //               << carto::toString(dimT) << ") for level " << carto::toString(k) << std::endl << std::flush;
-    _ppItem[ k ] = new carto::VolumeRef<T>( dimX, dimY, dimZ, dimT );
-    (*_ppItem[ k ])->setVoxelSize( sizeX, sizeY, sizeZ, sizeT );
+    _ppItem[ k ] = carto::VolumeRef<T>( dimX, dimY, dimZ, dimT );
+    _ppItem[ k ]->setVoxelSize( sizeX, sizeY, sizeZ, sizeT );
   }
 }
 
@@ -140,7 +140,7 @@ void Pyramid<T>::_free_ppItem()
 template <class T> inline
 void Pyramid<T>::setLevel( int level )
 {
-  ASSERT( _ref );
+  ASSERT( _ref.get() );
 
   _free_ppItem();
   _level = level;
@@ -154,13 +154,13 @@ void Pyramid<T>::_build()
 {
   int x, y, z, t, k, nx, ny, nz, n;
 
-  int dimX = (*_ref)->getSizeX();
-  int dimY = (*_ref)->getSizeY();
-  int dimZ = (*_ref)->getSizeZ();
-  int dimT = (*_ref)->getSizeT();
+  int dimX = _ref->getSizeX();
+  int dimY = _ref->getSizeY();
+  int dimZ = _ref->getSizeZ();
+  int dimT = _ref->getSizeT();
 
-  carto::rc_ptr<carto::Volume<T> >* pUp;
-  carto::rc_ptr<carto::Volume<T> >* pDown = _ref;
+  carto::rc_ptr<carto::Volume<T> > pUp;
+  carto::rc_ptr<carto::Volume<T> > pDown = _ref;
 
   carto::VolumeRef<T> tab( 8 );
 
@@ -192,11 +192,11 @@ void Pyramid<T>::_build()
                 for ( ny = 0; ny < 2; ny++ )
                   for ( nx = 0; nx < 2; nx++ )
                   {
-                    tab(n++) = (*pDown)->at( std::min(2 * x + nx, lowerLvlDimX - 1 ),
+                    tab(n++) = pDown->at( std::min(2 * x + nx, lowerLvlDimX - 1 ),
                             std::min(2 * y + ny, lowerLvlDimY - 1 ),
                             std::min(2 * z + nz, lowerLvlDimZ - 1 ), t );
                   }
-              (*pUp)->at( x, y, z, t ) = _func.doit( tab );
+              pUp->at( x, y, z, t ) = _func.doit( tab );
             }
       pDown = pUp;
     }
@@ -206,13 +206,13 @@ void Pyramid<T>::_build()
 template <class T> inline
 const carto::rc_ptr<carto::Volume<T> > Pyramid<T>::item( int level ) const
 {
-  ASSERT( _ref );
+  ASSERT( _ref.get() );
   ASSERT( level <= _level );
 
   if ( level == 0 )
-    return *_ref;
+    return _ref;
   else
-    return *_ppItem[ level - 1 ];
+    return _ppItem[ level - 1 ];
 }
 
 

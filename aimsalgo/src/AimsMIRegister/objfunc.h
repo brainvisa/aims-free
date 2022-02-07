@@ -72,8 +72,8 @@ protected:
   void doPdf( const AimsVector<float,6>& param ) const;
   
   
-  const AimsData<short>*  _ref;    // Master ref image geree comme reference
-  const AimsData<short>*  _test;   // Master Test image gere comme reference
+  mutable AimsData<short>  _ref;    // Master ref image geree comme reference
+  mutable AimsData<short>  _test;   // Master Test image gere comme reference
   AimsData<short>*  _reg;
   AimsData<PVItem>*  _regc;
   
@@ -98,7 +98,7 @@ ObjFunc::ObjFunc( int numLevel,
 		  aims::Resampler<short>* interpolator,
 		  Sampler<short>* comb,
 		  int maskSize )
-        : ObjectiveFunc<float,6>(), _ref( NULL ), _test( NULL ),
+        : ObjectiveFunc<float,6>(), _ref(), _test(),
 	                      _numLevel( numLevel ),
                               _interpolator( interpolator ),
                               _comb( comb )
@@ -114,7 +114,6 @@ ObjFunc::ObjFunc( int numLevel,
   _p2  = new AimsData<float>( _numLevel );
   _p12 = new AimsData<float>( _numLevel, _numLevel );
  
-  _ref = _test = NULL;
   _gctest = _gcref = AimsVector<float, 3>(0., 0., 0.) ;
   
 }
@@ -141,8 +140,8 @@ inline
 void ObjFunc::setTest( const AimsData<short>& test )
 {
 
-  _test = &test;
-  //_Vtest = converter.doit( *_test );
+  _test = test;
+  //_Vtest = converter.doit( _test );
   // Ici insertion des codes de seuils et morpho
   _testOK = true;
 }
@@ -151,7 +150,7 @@ inline
 void ObjFunc::setRef( const AimsData<short>& ref )
 {
 
-  _ref = &ref;
+  _ref = ref;
   if ( usePV() )
     {
       _regc = new AimsData<PVItem>(  ref.dimX(), ref.dimY(), ref.dimZ() );
@@ -197,17 +196,17 @@ void ObjFunc::doPdf( const AimsVector<float,6>& param ) const
   //clock_t start = clock();
   if ( usePV() ) // Calcul pdf par PV
     {
-      _comb->setRef( *_test );
+      _comb->setRef( _test );
       _comb->doit( motion, *_regc );
-      AimsJointPVPdf( *_ref, *_test, *_regc,  *_p12, *_p1, *_p2 );
+      AimsJointPVPdf( _ref, _test, *_regc,  *_p12, *_p1, *_p2 );
     }
   else         // Calcul direct de la pdf
     {
       ASSERT( _interpolator );  // il doit exister necesaire un interpolateur
-      _interpolator->setRef( *_test );
+      _interpolator->setRef( _test );
       
       _interpolator->doit( motion, *_reg->volume() );
-      AimsJointMaskPdf( *_ref, *_reg, *_p12, *_p1, *_p2 );
+      AimsJointMaskPdf( _ref, *_reg, *_p12, *_p1, *_p2 );
     }
 }
 
