@@ -558,85 +558,86 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
                                  comb->getStrides() );
     const_NDIterator<short>  it1( &data1->at( 0 ), data1->getSize(),
                                   data1->getStrides() );
+    vector<unsigned long> n2str = data2->getStrides();
+    short *n2ptr;
+
     float                    tmp;
 
     int pvf = 0;
     for( ; !it.ended(); ++it, ++it1, pvf++)
-        if ( (*it).offset != -1L && *it1 != -32768)
+        if ( it->offset != -1L && *it1 != -32768)
         {
             n1 = (int) ((*it1 - mini1)/h1);
             if (n1 == levels) n1--;
 
-            vector<int> pos = it.position();
-            vector<int> vp = pos; // orig position
-            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            n2ptr =  &data2->at(0) + it->offset;
+
+            n2 = (int) (( *n2ptr - mini2 ) / h2 );
             if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - pos[0]) *
-                (float)(TWO_THEN_SIXTEEN - pos[1]) *
-                (float)(TWO_THEN_SIXTEEN - pos[2]);
+            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
+                (float)(TWO_THEN_SIXTEEN - it->y) *
+                (float)(TWO_THEN_SIXTEEN - it->z);
             p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
 
-            ++pos[0];
-            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            n2ptr += n2str[0];
+            n2 = (int) (( *n2ptr - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(vp[0]) *
-                (float)(TWO_THEN_SIXTEEN - vp[1]) *
-                (float)(TWO_THEN_SIXTEEN - vp[2]);
+            tmp = (float)(it->x) *
+                (float)(TWO_THEN_SIXTEEN - it->y) *
+                (float)(TWO_THEN_SIXTEEN - it->z);
             p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
 
-            ++pos[1];
-            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            n2ptr += n2str[1];
+            n2 = (int) (( *n2ptr - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(vp[0]) *
-                (float)(vp[1]) *
-                (float)(TWO_THEN_SIXTEEN - vp[2]);
+            tmp = (float)(it->x) *
+                (float)(it->y) *
+                (float)(TWO_THEN_SIXTEEN - it->z);
             p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
 
-            --pos[0];
-            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            n2ptr -= n2str[0];
+            n2 = (int) (( *n2ptr - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - vp[0]) *
-                (float)(vp[1]) *
-                (float)(TWO_THEN_SIXTEEN - vp[2]);
+            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
+                (float)(it->y) *
+                (float)(TWO_THEN_SIXTEEN - it->z);
             p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            ++pos[2];
-            --pos[1];
-            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            n2ptr += n2str[2] - n2str[1];
+            n2 = (int) (( *n2ptr - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - vp[0]) *
-                (float)(TWO_THEN_SIXTEEN - vp[1])*
-                (float)(vp[2]);
+            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
+                (float)(TWO_THEN_SIXTEEN - it->y)*
+                (float)(it->z);
             p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            ++pos[0];
-            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            n2ptr += n2str[0];
+            n2 = (int) (( *n2ptr - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(vp[0]) *
-                (float)(TWO_THEN_SIXTEEN - vp[1]) *
-                (float)(vp[2]);
+            tmp = (float)(it->x) *
+                (float)(TWO_THEN_SIXTEEN - it->y) *
+                (float)(it->z);
             p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            ++pos[1];
-            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            n2ptr += n2str[1];
+            n2 = (int) (( *n2ptr - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(vp[0])*
-                (float)(vp[1])*
-                (float)(vp[2]);
+            tmp = (float)(it->x)*
+                (float)(it->y)*
+                (float)(it->z);
             p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
-            --pos[0];
-            n2 = (int) (( data2->at( pos ) - mini2)/h2);
+            n2ptr -= n2str[0];
+            n2 = (int) (( *n2ptr - mini2)/h2);
             if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - vp[0]) *
-                (float)(vp[1])*
-                (float)(vp[2]);
+            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
+                (float)(it->y)*
+                (float)(it->z);
             p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
         }
-    
 
     // Normalization
     float sum = carto::sum( p12 );
