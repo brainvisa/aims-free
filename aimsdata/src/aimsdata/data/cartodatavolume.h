@@ -37,7 +37,6 @@
 #include <cartodata/volume/volume.h>
 #include <cartodata/volume/volumeoperators.h>
 #include <aims/vector/vector.h>
-#include <aims/border/border.h>
 #include <aims/rgb/rgb.h>
 #include <cartobase/smart/rcptr.h>
 #include <soma-io/allocator/allocator.h>
@@ -71,7 +70,7 @@ class
 // #ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
 //     __attribute__((__deprecated__("use carto::VolumeRef() instead")))
 // #endif
-  AimsData : public carto::RCObject, public aims::Border
+  AimsData : public carto::RCObject
 {
 
 public:
@@ -171,8 +170,28 @@ public:
   AimsData<T> cross( const AimsData<T>& other );
   AimsData<T>& transpose();
 
+  // functions from former Border API
+
+  /// Size of the border
+  int borderWidth() const;
+  /// Offset from the start of the allocated memory to the first point
+  int oFirstPoint() const;
+  /// Offset between 2 consecutive lines
+  int oLine() const;
+  /// Offset between the end of a line and the start of the consecutive line
+  int oPointBetweenLine() const;
+  /// Offset between 2 consecutive slices
+  int oSlice() const;
+  /// Number of lines between 2 consecutive slices
+  int oLineBetweenSlice() const;
+  /// Offset between 2 consecutive volumes
+  int oVolume() const;
+  /// Number of slices between 2 consecutive volumes
+  int oSliceBetweenVolume() const;
+  /// Sizes of the border
+  const std::vector<int> & borders() const;
+
  private:
-  void initBorder();
   struct Private;
 
   carto::VolumeRef<T>  _volume;
@@ -345,23 +364,8 @@ bool AimsData<T>::empty() const
 
 template<typename T>
 inline
-void AimsData<T>::initBorder()
-{
-  _oFirstPoint = 0;
-  _oLine       = &_volume->at( 0, 1 ) - &_volume->at( 0 );
-  _oPointBetweenLine = &_volume->at( 0, 1 ) - &_volume->at( dimX() );
-  _oSlice      =  &_volume->at( 0, 0, 1 ) - &_volume->at( 0 );
-  _oLineBetweenSlice = &_volume->at( 0, 0, 1 ) - &_volume->at( 0, dimY() );
-  _oVolume     = &_volume->at( 0, 0, 0, 1 ) - &_volume->at( 0 );
-  _oSliceBetweenVolume = &_volume->at( 0, 0, 0, 1 )
-    - &_volume->at( 0, 0, dimZ() );
-}
-
-
-template<typename T>
-inline
 AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt, int borderw )
-  : carto::RCObject(), aims::Border( dimx, dimy, dimz, borderw ), 
+  : carto::RCObject(),
     _volume( new carto::Volume<T>( dimx + borderw * 2, dimy + borderw * 2, 
                                    dimz + borderw * 2, dimt ) ), 
     d( new Private )
@@ -372,7 +376,6 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt, int borderw )
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ) ) );
   d->header = new aims::PythonHeader( *_volume );
-  initBorder();
 }
 
 
@@ -380,7 +383,7 @@ template < typename T >
 inline
 AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt, 
 		       int borderw, const carto::AllocatorContext & al )
-  : carto::RCObject(), aims::Border( dimx, dimy, dimz, borderw ), 
+  : carto::RCObject(),
     _volume( new carto::Volume<T>( dimx + borderw * 2, dimy + borderw * 2, 
                                    dimz + borderw * 2, dimt, al ) ),
     d( new Private )
@@ -391,28 +394,25 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt,
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ), al ) );
   d->header = new aims::PythonHeader( *_volume );
-  initBorder();
 }
 
 
 template < typename T >
 inline 
 AimsData<T>::AimsData( const AimsData<T>& other )
-  : carto::RCObject(), aims::Border( other.dimX(), other.dimY(), 
-                                     other.dimZ(), other.borders() ),
+  : carto::RCObject(),
     _volume( other._volume ), 
     d( new Private )
 {
   d->header = new aims::PythonHeader( *_volume );
-  initBorder();
 }
 
 
 template < typename T >
 inline 
 AimsData<T>::AimsData( const AimsData<T>& other, int borderw )
-  : carto::RCObject(), aims::Border( other.dimX(), other.dimY(), other.dimZ(),
-  borderw ), _volume( new carto::Volume<T>( other.dimX() + borderw * 2,
+  : carto::RCObject(),
+  _volume( new carto::Volume<T>( other.dimX() + borderw * 2,
   other.dimY() + borderw * 2, other.dimZ() + borderw * 2, other.dimT() ) ), 
     d( new Private )
 {
@@ -432,8 +432,6 @@ AimsData<T>::AimsData( const AimsData<T>& other, int borderw )
         for ( x = 0; x < xm; x++ )
           (*this)( x, y, z, t ) = other( x, y, z, t );
   d->header = new aims::PythonHeader( *_volume );
-  
-  initBorder();
 }
 
 
@@ -449,30 +447,20 @@ template < typename T >
 inline 
 AimsData<T>::AimsData( const carto::rc_ptr<carto::Volume<T> > & vol )
   : carto::RCObject(), 
-    aims::Border( vol->getSizeX(),
-                  vol->getSizeY(),
-                  vol->getSizeZ(),
-                  vol->getBorders() ),
     _volume( vol ), 
     d( new Private )
 {
   d->header = new aims::PythonHeader( *_volume );
-  initBorder();
 }
 
 template < typename T >
 inline
 AimsData<T>::AimsData( const carto::VolumeRef<T> & vol )
   : carto::RCObject(),
-    aims::Border( vol->getSizeX(),
-                  vol->getSizeY(),
-                  vol->getSizeZ(),
-                  vol->getBorders() ),
     _volume( vol ),
     d( new Private )
 {
   d->header = new aims::PythonHeader( *_volume );
-  initBorder();
 }
 
 
@@ -484,12 +472,9 @@ AimsData<T> & AimsData<T>::operator = (
   if( _volume.get() == vol.get() )
     return *this;
 
-  _setBorder( vol->getSizeX(), vol->getSizeY(), vol->getSizeZ(), 
-              vol->getBorders() );
   delete d->header;
   _volume = vol;
   d->header = new aims::PythonHeader( *_volume );
-  initBorder();
   
   return *this;
 }
@@ -502,13 +487,11 @@ AimsData<T>& AimsData<T>::operator = ( const AimsData<T>& other )
   if ( &other == this )
     return *this;
 
-  _setBorder( other.dimX(), other.dimY(), other.dimZ(), 
-              other.borders() );
   delete d->header;
   _volume = other._volume;
   *d = *other.d;
   d->header = new aims::PythonHeader( *_volume );
-  initBorder();
+
   return *this;
 }
 
@@ -590,20 +573,10 @@ template < typename T >
 inline
 float AimsData<T>::sizeX() const
 {
-  if( !d->header )
-    return 1;
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( !ph )
-    return 1;
-  try
-    {
-      carto::Object	vs = ph->getProperty( "voxel_size" );
-      if( !vs.isNull() && vs->size() >= 1 )
-        return (float) vs->getArrayItem( 0 )->getScalar();
-    }
-  catch( ... )
-    {
-    }
+  std::vector<float> vs = _volume->getVoxelSize();
+  if( vs.size() >= 1 )
+    return vs[0];
+
   return 1;
 }
 
@@ -612,20 +585,10 @@ template < typename T >
 inline
 float AimsData<T>::sizeY() const
 {
-  if( !d->header )
-    return 1;
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( !ph )
-    return 1;
-  try
-    {
-      carto::Object	vs = ph->getProperty( "voxel_size" );
-      if( !vs.isNull() && vs->size() >= 2 )
-        return (float) vs->getArrayItem( 1 )->getScalar();
-    }
-  catch( ... )
-    {
-    }
+  std::vector<float> vs = _volume->getVoxelSize();
+  if( vs.size() >= 2 )
+    return vs[1];
+
   return 1;
 }
 
@@ -634,20 +597,10 @@ template < typename T >
 inline
 float AimsData<T>::sizeZ() const
 {
-  if( !d->header )
-    return 1;
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( !ph )
-    return 1;
-  try
-    {
-      carto::Object	vs = ph->getProperty( "voxel_size" );
-      if( !vs.isNull() && vs->size() >= 3 )
-        return (float) vs->getArrayItem( 2 )->getScalar();
-    }
-  catch( ... )
-    {
-    }
+  std::vector<float> vs = _volume->getVoxelSize();
+  if( vs.size() >= 3 )
+    return vs[2];
+
   return 1;
 }
 
@@ -656,20 +609,10 @@ template < typename T >
 inline
 float AimsData<T>::sizeT() const
 {
-  if( !d->header )
-    return 1;
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( !ph )
-    return 1;
-  try
-    {
-      carto::Object	vs = ph->getProperty( "voxel_size" );
-      if( !vs.isNull() && vs->size() >= 4 )
-        return (float) vs->getArrayItem( 3 )->getScalar();
-    }
-  catch( ... )
-    {
-    }
+  std::vector<float> vs = _volume->getVoxelSize();
+  if( vs.size() >= 4 )
+    return vs[3];
+
   return 1;
 }
 
@@ -678,25 +621,11 @@ template < typename T >
 inline
 void AimsData<T>::setSizeX( float sizex )
 {
-  if( !d->header )
-    setHeader( new aims::PythonHeader );
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( ph )
-    {
-      try
-        {
-          carto::Object	vs = ph->getProperty( "voxel_size" );
-          if( !vs.isNull() )
-            if( vs->size() >= 1 )
-              vs->setArrayItem( 0, carto::Object::value( sizex ) );
-        }
-      catch( ... )
-        {
-          std::vector<float>  vs( 4, 1. );
-          vs[0] = sizex;
-          ph->setProperty( "voxel_size", vs );
-        }
-    }
+  std::vector<float> vs = _volume->getVoxelSize();
+  if( vs.size() == 0 )
+    vs.push_back( 1. );
+  vs[0] = sizex;
+  _volume->setVoxelSize( vs );
 }
 
 
@@ -704,35 +633,11 @@ template < typename T >
 inline
 void AimsData<T>::setSizeY( float sizey )
 {
-  if( !d->header )
-    setHeader( new aims::PythonHeader );
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( ph )
-  {
-    std::vector<float>  vs( 4, 1. );
-    try
-    {
-      carto::Object	vso = ph->getProperty( "voxel_size" );
-      if( !vso.isNull() )
-      {
-        if( vso->size() >= 2 )
-        {
-          vso->setArrayItem( 1, carto::Object::value( sizey ) );
-          return;
-        }
-        else
-        {
-          if( vso->size() >= 1 )
-            vs[0] = vso->getArrayItem(0)->getScalar();
-        }
-      }
-    }
-  catch( ... )
-    {
-    }
+  std::vector<float> vs = _volume->getVoxelSize();
+  while( vs.size() < 2 )
+    vs.push_back( 1. );
   vs[1] = sizey;
-    ph->setProperty( "voxel_size", vs );
-  }
+  _volume->setVoxelSize( vs );
 }
 
 
@@ -740,38 +645,11 @@ template < typename T >
 inline
 void AimsData<T>::setSizeZ( float sizez )
 {
-  if( !d->header )
-    setHeader( new aims::PythonHeader );
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( ph )
-    {
-      std::vector<float>  vs( 4, 1. );
-      try
-        {
-          carto::Object	vso = ph->getProperty( "voxel_size" );
-          if( !vso.isNull() )
-          {
-            if( vso->size() >= 3 )
-              {
-                vso->setArrayItem( 2, carto::Object::value( sizez ) );
-                return;
-              }
-            else
-              {
-                carto::Object	it;
-                int	i;
-                for( i=0, it=vso->objectIterator(); 
-                     it->isValid() && i<3; ++i, it->next() )
-                  vs[i] = it->currentValue()->getScalar();
-              }
-          }
-        }
-      catch( ... )
-        {
-        }
-      vs[2] = sizez;
-      ph->setProperty( "voxel_size", vs );
-    }
+  std::vector<float> vs = _volume->getVoxelSize();
+  while( vs.size() < 3 )
+    vs.push_back( 1. );
+  vs[2] = sizez;
+  _volume->setVoxelSize( vs );
 }
 
 
@@ -779,38 +657,11 @@ template < typename T >
 inline
 void AimsData<T>::setSizeT( float sizet )
 {
-  if( !d->header )
-    setHeader( new aims::PythonHeader );
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( ph )
-    {
-      std::vector<float>  vs( 4, 1. );
-      try
-        {
-          carto::Object	vso = ph->getProperty( "voxel_size" );
-          if( !vso.isNull() )
-          {
-            if( vso->size() >= 4 )
-              {
-                vso->setArrayItem( 3, carto::Object::value( sizet ) );
-                return;
-              }
-            else
-              {
-                carto::Object	it;
-                int	i;
-                for( i=0, it=vso->objectIterator(); 
-                     it->isValid() && i<4; ++i, it->next() )
-                  vs[i] = it->currentValue()->getScalar();
-              }
-          }
-        }
-      catch( ... )
-        {
-        }
-      vs[3] = sizet;
-      ph->setProperty( "voxel_size", vs );
-    }
+  std::vector<float> vs = _volume->getVoxelSize();
+  while( vs.size() < 4 )
+    vs.push_back( 1. );
+  vs[3] = sizet;
+  _volume->setVoxelSize( vs );
 }
 
 
@@ -819,18 +670,7 @@ inline
 void 
 AimsData<T>::setSizeXYZT( float sizex, float sizey, float sizez, float sizet )
 {
-  if( !d->header )
-    setHeader( new aims::PythonHeader );
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( ph )
-    {
-      std::vector<float>  vs( 4 );
-      vs[0] = sizex;
-      vs[1] = sizey;
-      vs[2] = sizez;
-      vs[3] = sizet;
-      ph->setProperty( "voxel_size", vs );
-    }
+  _volume->setVoxelSize( sizex, sizey, sizez, sizet );
 }
 
 
@@ -838,18 +678,7 @@ template < typename T >
 inline
 void AimsData<T>::setSizeXYZT( const AimsData<T>& other )
 {
-  if( !d->header )
-    setHeader( new aims::PythonHeader );
-  aims::PythonHeader *ph = dynamic_cast<aims::PythonHeader *>( d->header );
-  if( ph )
-    {
-      std::vector<float>  vs( 4 );
-      vs[0] = other.sizeX();
-      vs[1] = other.sizeY();
-      vs[2] = other.sizeZ();
-      vs[3] = other.sizeT();
-      ph->setProperty( "voxel_size", vs );
-    }
+  _volume->setVoxelSize( other.volume()->getVoxelSize() );
 }
 
 
@@ -865,7 +694,8 @@ template < typename T >
 inline
 const aims::Header* AimsData<T>::header() const
 {
-  return d->header;
+  // allow to rebuild the header in this (non-const) if needed.
+  return const_cast< AimsData<T> & >( *this ).header();
 }
 
 
@@ -873,6 +703,15 @@ template < typename T >
 inline
 aims::Header* AimsData<T>::header()
 {
+  if( !dynamic_cast<aims::PythonHeader *>( d->header )
+      || &dynamic_cast<aims::PythonHeader *>( d->header )->getValue()
+         != &_volume->header() )
+  {
+    // the header is out of date, maybe because the underlying Volume has
+    // reallocated a new one. We have to rebuild it
+    delete d->header;
+    d->header = new aims::PythonHeader( *_volume );
+  }
   return d->header;
 }
 
@@ -881,7 +720,7 @@ template<typename T>
 inline
 void AimsData<T>::setHeader( aims::Header* hdr )
 {
-  if( hdr != d->header )
+  if( hdr != header() )
     {
       aims::PythonHeader	*mh;
       if( !d->header )
@@ -1238,7 +1077,6 @@ AimsData<T> AimsData<T>::clone() const
     dat._volume.reset( new carto::Volume<T>( *_volume ) );
   delete dat.d->header;
   dat.d->header = new aims::PythonHeader( *dat._volume );
-  dat.initBorder();
   
   return dat;
 }
@@ -1295,6 +1133,90 @@ AimsData<T>& AimsData<T>::transpose()
 
   *this = tmp;
   return *this;
+}
+
+
+template < typename T >
+inline
+int AimsData<T>::borderWidth() const
+{
+  std::vector<int> borders = _volume->getBorders();
+  int s = borders.size();
+  if (s > 0)
+  {
+    int width;
+    width = borders[0];
+    for( int i = 1; i < s; ++i )
+      width = std::min( width, borders[i] );
+    return width;
+  }
+  return 0;
+}
+
+
+template < typename T >
+inline
+const std::vector<int> & AimsData<T>::borders() const
+{
+  return _volume->getBorders();
+}
+
+
+template < typename T >
+inline
+int AimsData<T>::oFirstPoint() const
+{
+  if( _volume->refVolume().isNull() )
+    return 0;
+  return &_volume->at(0) - &_volume->refVolume()->at( 0 );
+}
+
+
+template < typename T >
+inline int AimsData<T>::oLine() const
+{
+  return &_volume->at( 0, 1 ) - &_volume->at( 0 );
+}
+
+
+template < typename T >
+inline
+int AimsData<T>::oPointBetweenLine() const
+{
+  return &_volume->at( 0, 1 ) - &_volume->at( _volume->getSizeX() );
+}
+
+
+template < typename T >
+inline
+int AimsData<T>::oSlice() const
+{
+  return &_volume->at( 0, 0, 1 ) - &_volume->at( 0 );
+}
+
+
+template < typename T >
+inline
+int AimsData<T>::oLineBetweenSlice() const
+{
+  return &_volume->at( 0, 0, 1 ) - &_volume->at( 0, _volume->getSizeY() );
+}
+
+
+template < typename T >
+inline
+int AimsData<T>::oVolume() const
+{
+  return &_volume->at( 0, 0, 0, 1 ) - &_volume->at( 0 );
+}
+
+
+template < typename T >
+inline
+int AimsData<T>::oSliceBetweenVolume() const
+{
+  return &_volume->at( 0, 0, 0, 1 )
+    - &_volume->at( 0, 0, _volume->getSizeZ() );
 }
 
 
