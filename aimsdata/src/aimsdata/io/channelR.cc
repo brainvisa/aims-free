@@ -92,12 +92,6 @@ namespace aims
     
     r.read(input, ic.border, &fmt, ic.frame);
 
-    ic.data = carto::VolumeRef<OUTP>(input.getSizeX(), 
-                                     input.getSizeY(),
-                                     input.getSizeZ(), 
-                                     input.getSizeT());
-    ic.data.copyHeaderFrom(input.header());
-
     ChannelSelector<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> > selector;
     ic.data = selector.select(input, ic.channel);
 
