@@ -533,8 +533,11 @@ int main( int argc, const char** argv )
     Pref->setRef( ref );
     Pref->setLevel( rspLevel );
 
-    objfunc->setRef( Pref->item( rspLevel ) );
-    
+    // objfunc->setRef takes the address of an AimsData - it has to exist
+    // while objfunc exists. Pref->item() gives a rc_ptr<Volume>.
+    AimsData<short> pref = Pref->item( rspLevel );
+    objfunc->setRef( pref );
+
 
     AimsVector<float,6> p;
     for (int i=0; i<sizeT; i++) //- - - - - - - - - - - - -  - - - Loop on frames

@@ -526,7 +526,6 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
     const int  TWO_THEN_SIXTEEN  = 65536;
     const float TWO_THEN_SIXTEEN_CUBE = 65536.0 * 65536.0 * 65536.0;
 
-
     ASSERT( p12->getSizeY() == levels &&
         p1->getSizeX() == levels &&
         p2->getSizeX() == levels );
@@ -562,6 +561,8 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
     short *n2ptr;
 
     float                    tmp;
+
+//     cout << endl;
 
     int pvf = 0;
     for( ; !it.ended(); ++it, ++it1, pvf++)
