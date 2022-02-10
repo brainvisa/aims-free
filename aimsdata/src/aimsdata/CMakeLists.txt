@@ -1,7 +1,6 @@
 set( _headers
     bucket/bucket_g.h
     data/data_g.h
-    border/border.h
     border/borderfiller.h
     border/borderiterator.h
     bucket/bucket.h
@@ -246,7 +245,6 @@ set( _aimsdata_0_sources
 )
 
 set(_aimsdata_sources
-    border/border.cc
     bucket/bucketMap.cc
     bucket/bucketgen.cc
     bucket/bucketutil.cc
