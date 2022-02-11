@@ -74,7 +74,7 @@ class Pyramid
 template <class T> inline
 void Pyramid<T>::setRef( carto::rc_ptr<carto::Volume<T> > ref )
 {
-  if ( _ref )
+  if ( _ref.get() )
   {
       setLevel( _level );
   }
