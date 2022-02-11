@@ -123,7 +123,6 @@ Sampler<T>::doit( const Motion& motion, carto::rc_ptr<carto::Volume<PVItem> >& t
   dirMotion.scale( sizeFrom, sizeTo );
   invMotion.scale( sizeTo, sizeFrom );
 
-
   PVItem *it;
 
 #ifdef DEBUG
@@ -147,7 +146,6 @@ Sampler<T>::doit( const Motion& motion, carto::rc_ptr<carto::Volume<PVItem> >& t
     }
   }
   //cout << endl;
-
 
 }
 
