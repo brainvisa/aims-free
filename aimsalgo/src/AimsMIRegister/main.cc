@@ -538,7 +538,6 @@ int main( int argc, const char** argv )
     AimsData<short> pref = Pref->item( rspLevel );
     objfunc->setRef( pref );
 
-
     AimsVector<float,6> p;
     for (int i=0; i<sizeT; i++) //- - - - - - - - - - - - -  - - - Loop on frames
     {
@@ -610,7 +609,10 @@ int main( int argc, const char** argv )
       int level;
       for (level=tspLevel; level >=tepLevel; level--)
       {
-        objfunc->setTest( Ptest->item( level ) );
+        // objfunc->setTest takes the address of an AimsData - it has to exist
+        // while objfunc exists. Ptest->item() gives a rc_ptr<Volume>.
+        AimsData<short> ptest = Ptest->item( level );
+        objfunc->setTest( ptest );
         cout << "Processing Plevel " << level << param << deltaP << endl;
 
         clock_t start = clock();  
