@@ -110,19 +110,14 @@ void AimsParzenJointPdf( const rc_ptr<Volume<short> >& data1,
             }
         }
 
-    float sum=0.0;
-    int x, y;
-    for( y=0; y<p12dim[1]; ++y )
-      for( x=0; x<p12dim[0]; ++x )
-        sum += p12->at( x, y );
+    double sum = p12->sum();
 
     if (sum)
-      for( y=0; y<p12dim[1]; ++y )
-        for( x=0; x<p12dim[0]; ++x )
-          p12->at( x, y ) /= sum;
+      *p12 /= sum;
 
     *p1 = 0.0;
     *p2 = 0.0;
+    int x, y;
     for ( y = 0; y < levels; y++ )
       for ( x = 0; x < levels; x++ )
       {
@@ -158,14 +153,10 @@ void AimsParzenPdf(const rc_ptr<Volume<short> >& data,
                              - float( data->at( i, j, k ) ), h);
         }
 
-    float sum=0.0;
-    int x;
-    for( x=0; x<nd; ++x )
-        sum += p->at( x );
+    double sum = p->sum();
 
     if (sum)
-      for( x=0; x<nd; ++x )
-        p->at( x ) /= sum;
+      *p /= sum;
 }
 
 
@@ -232,20 +223,14 @@ void AimsWinParzenJointPdf(const rc_ptr<Volume<short> >& data1,
             }
         }
 
-    float sum=0.0;
-    int x, y;
-    vector<int> pd = p12->getSize();
-    for ( y = 0; y < pd[1]; y++ )
-      for ( x = 0; x < pd[0]; x++ )
-        sum += p12->at( x, y );
+    double sum = p12->sum();
 
     if (sum)
-      for ( y = 0; y < pd[1]; y++ )
-        for ( x = 0; x < pd[0]; x++ )
-          p12->at( x, y ) /= sum;
+      *p12 /= sum;
 
     *p1 = 0.0;
     *p2 = 0.0;
+    int x, y;
     for (y = 0; y < levels; y++)
       for (x = 0; x < levels; x++)
       {
@@ -290,14 +275,10 @@ void AimsWinParzenPdf(const rc_ptr<Volume<short> >& data,
           }
         }
 
-    float sum=0.0;
-    int x, np = p->getSizeX();
+    double sum = p->sum();
 
-    for( x=0; x<np; ++x )
-      sum += p->at(x);
     if (sum)
-      for( x=0; x<np; ++x )
-        p->at(x) /= sum;
+      *p /= sum;
 }
 
 
@@ -346,21 +327,14 @@ void AimsJointPdf( const rc_ptr<Volume<short> >& data1,
                 p12->at( n1, n2 )++;
             }
 
-    float sum=0.0;
-    int x, y;
-    vector<int> pd = p12->getSize();
-
-    for (y = 0; y<pd[1]; y++)
-      for (x = 0; x<pd[0]; x++)
-        sum += p12->at( x, y );
+    double sum = p12->sum();
 
     if (sum)
-      for (y = 0; y<pd[1]; y++)
-        for (x = 0; x<pd[0]; x++)
-          p12->at( x, y ) /= sum;
+      *p12 /= sum;
 
     *p1 = 0.0;
     *p2 = 0.0;
+    int x, y;
     for ( y = 0; y < levels; y++ )
       for ( x = 0; x < levels; x++ )
         {
@@ -403,14 +377,10 @@ void AimsPdf( const rc_ptr<Volume<short> >& data, rc_ptr<Volume<float> >& p )
           p->at(n)++;
         }
 
-    float sum=0.0;
-    int x, np=p->getSizeX();
-    for( x=0; x<np; ++x )
-      sum += p->at( x );
+    double sum = p->sum();
 
     if (sum) 
-      for( x=0; x<np; ++x )
-        p->at( x ) /= sum;
+      *p /= sum;
 }
 
 
@@ -486,21 +456,14 @@ void AimsJointMaskPdf(const rc_ptr<Volume<short> >& data1,
                 }
             }
 
-    double sum=0.0;
-    int x, y;
-    vector<int> pd = p12->getSize();
-    
-    for(y = 0; y<pd[1]; ++y)
-      for(x = 0; x<pd[0]; ++x)
-        sum += p12->at( x, y );
+    double sum = p12->sum();
 
     if (sum)
-      for(y = 0; y<pd[1]; ++y)
-        for(x = 0; x<pd[0]; ++x)
-          p12->at( x, y ) /= float(sum);
+      *p12 /= sum;
 
     *p1 = 0.0;
     *p2 = 0.0;
+    int x, y;
     for( y = 0; y < levels; y++)
         for ( x = 0; x < levels; x++ )
         {
@@ -564,8 +527,7 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
 
 //     cout << endl;
 
-    int pvf = 0;
-    for( ; !it.ended(); ++it, ++it1, pvf++)
+    for( ; !it.ended(); ++it, ++it1 )
         if ( it->offset != -1L && *it1 != -32768)
         {
             n1 = (int) ((*it1 - mini1)/h1);
@@ -641,7 +603,7 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
         }
 
     // Normalization
-    float sum = carto::sum( p12 );
+    double sum = p12->sum();
 
     if (sum)
       *p12 /= sum;
@@ -789,7 +751,7 @@ void AimsJointPVPdf(const aims::BucketMap<short>&               data1,
 
     
     // Normalization
-    float sum = carto::sum( p12 );
+    double sum = p12->sum();
     int x, y;
     if (sum)
       *p12 /= sum;
