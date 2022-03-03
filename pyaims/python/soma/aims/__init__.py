@@ -172,6 +172,15 @@ Transformation3d = soma.Transformation3d
 
 del ExtendedImporter
 
+# move functions
+my_mod = sys.modules[__name__]
+for n, f in aimssip.aims.__dict__.items():
+    if type(f).__name__ == 'methoddescriptor':
+        # print(n)
+        setattr(my_mod, n, getattr(aimssip.aims, n))
+del my_mod, n, f
+
+
 # version string is more or less standard as __version__
 __version__ = versionString()
 
