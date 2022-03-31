@@ -148,6 +148,7 @@ AimsFloatChamferDistanceMap( const rc_ptr<Volume<int16_t> > &vol, int side,
                                    xsize,ysize,zsize,mult_factor);
 
   VolumeRef<float> distfloat( distmap->getSize(), distmap->getBorders() );
+  distfloat->copyHeaderFrom( vol->header() );
 
   distfloat->setVoxelSize( vol->getVoxelSize() );
 
@@ -178,6 +179,7 @@ AimsFloatSignedChamferDistanceMap( const rc_ptr<Volume<int16_t> > &vol,
   vector<int> sz = vol->getSize();
   VolumeRef<float> res( sz, vol->getBorders() );
   res.setVoxelSize( vol->getVoxelSize() );
+  res->copyHeaderFrom( vol->header() );
 
   for( int z=0; z<sz[2]; z++ )
     for( int y=0; y<sz[1]; y++ )
