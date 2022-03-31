@@ -427,3 +427,29 @@ labels: tuple of tuples
 
 };
 
+%ModuleHeaderCode
+#include <aims/distancemap/chamfer.h>
+%End
+
+rc_ptr_Volume_S16
+AimsChamferDistanceMap( const rc_ptr_Volume_S16 &vol,
+                        int xmask=3,int ymask=3,int zmask=3,
+                        float mult_factor=50);
+
+rc_ptr_Volume_S16
+AimsConnectivityChamferDistanceMap(
+  const rc_ptr_Volume_S16 &vol,
+  aims::Connectivity::Type type);
+
+rc_ptr_Volume_FLOAT
+AimsFloatChamferDistanceMap( const rc_ptr_Volume_S16 &vol,
+                             int side=AIMS_CHAMFER_OUTSIDE,
+                             int xsize=3,int ysize=3,int zsize=3,
+                             float mult_factor=50);
+
+rc_ptr_Volume_FLOAT
+AimsFloatSignedChamferDistanceMap(
+  const rc_ptr_Volume_S16 &vol,
+  int xsize=3,int ysize=3,int zsize=3,
+  float mult_factor=50);
+
