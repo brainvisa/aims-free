@@ -502,10 +502,24 @@ namespace aims
       ( const SparseVolume<carto::Volume<U> > & other )
   {
     carto::Volume<U> & src = *other.data();
+    const carto::AllocatorContext *ac = &src.allocatorContext();
+    // look for the upper-level allocator, because views have an "Unallocated"
+    // allocator
+    if( src.refVolume().get() )
+    {
+      carto::Volume<U> *rvol = &src;
+      while( rvol->refVolume().get() )
+      {
+        rvol = rvol->refVolume().get();
+        if( rvol->allocatorContext().isAllocated() )
+          ac = &rvol->allocatorContext();
+        else
+          break;
+      }
+    }
     carto::Volume<T> *data = new carto::Volume<T>( src.getSizeX(),
-        src.getSizeY(), src.getSizeZ(), src.getSizeT(),
-        src.allocatorContext() );
-    data->header() = src.header();
+        src.getSizeY(), src.getSizeZ(), src.getSizeT(), *ac );
+    data->copyHeaderFrom( src.header() );
     data->fill( other.background() );
     SparseVolume<carto::Volume<T> > svol( data );
     svol.setBackground( other.background() );
