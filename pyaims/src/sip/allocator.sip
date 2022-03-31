@@ -72,7 +72,8 @@ This object is used when memory must be allocated for large objects (volumes, ar
     typedef carto::AllocatorStrategy::DataAccess DataAccess;
     typedef carto::AllocatorStrategy::MappingMode MappingMode;
 
-    AllocatorContext( carto::AllocatorContext::DataAccess mode,
+    AllocatorContext( carto::AllocatorContext::DataAccess mode
+                        = carto::AllocatorStrategy::InternalModif,
                       const std::string & filename = "", 
                       unsigned long long offset = 0,
                       bool isDiskformatOK = false, 
