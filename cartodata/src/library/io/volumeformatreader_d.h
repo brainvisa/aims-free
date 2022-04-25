@@ -402,12 +402,36 @@ namespace soma
       for( i=0; i<parent1->posInRefVolume().size(); ++i )
         pos[i] += parent1->posInRefVolume()[i];
     }
+    
+    // Reading position can not be negative, so restrict the read area in the 
+    // full image
+    for(i=0; i<ndim; ++i)
+        if (pos[i] < 0)
+        {
+            viewsize[i] += pos[i];
+            pos[i] = 0;
+        }
+    
     localMsg( " -> view position ( "
               + carto::toString( pos[ 0 ] ) + ", "
               + carto::toString( pos[ 1 ] ) + ", "
               + carto::toString( pos[ 2 ] ) + ", "
               + carto::toString( pos[ 3 ] ) + " )" );
 
+    //=== region's size ===================================================
+    localMsg( "reading view size in reference to full volume..." );
+    // Reading size can not be over image size, so restrict the read area in the 
+    // full image
+    for( i=0; i<ndim; ++i )
+        if (pos[i] + viewsize[i] > imagesize[i])
+            viewsize[i] = (pos[i] < imagesize[i] ? imagesize[i] - pos[i] : 0);          
+            
+    localMsg( " -> view size ( "
+              + carto::toString( viewsize[ 0 ] ) + ", "
+              + carto::toString( viewsize[ 1 ] ) + ", "
+              + carto::toString( viewsize[ 2 ] ) + ", "
+              + carto::toString( viewsize[ 3 ] ) + " )" );
+    
     //=== possibilities : with borders, partial reading ======================
     bool withborders = false;
     bool partialreading = false;
@@ -422,7 +446,10 @@ namespace soma
               + std::string( ( withborders ? "yes" : "no" ) ) );
     localMsg( "Partial Reading : "
               + std::string( ( partialreading ? "yes" : "no" ) ) );
-    partialreading = partialreading; // compilation warning
+    
+    // Compilation warning, I don't think this is necessary, because 
+    // VolumeFormatReader does not have partialreading field
+    //partialreading = partialreading;
     
     //=== reading volume =====================================================
     //int y, z, t;

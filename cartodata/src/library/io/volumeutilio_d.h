@@ -74,7 +74,6 @@ namespace soma {
     properties.insert( "bz" );
     properties.insert( "border" );
     properties.insert( "ox1" );
-    properties.insert( "ox1" );
     properties.insert( "ox2" );
     properties.insert( "ox3" );
     properties.insert( "ox4" );
@@ -106,7 +105,7 @@ namespace soma {
     if( obj )
       localMsg( "with existing object" );
     std::vector<int> position( 4, 0 );
-    std::vector<int> frame( 4, 0 );
+    std::vector<int> frame( 4, -1 );
     std::vector<int> borders( 4, 0 );
     try {
       position[0] = (int) rint(options->getProperty( "ox" )->getScalar() );
@@ -182,7 +181,7 @@ namespace soma {
         value = (int) rint( options->getProperty( key )->getScalar() );
         options->removeProperty( key );
         if( frame.size() <= dim )
-          frame.resize( dim + 1, 0 );
+          frame.resize( dim + 1, -1 );
         frame[ dim ] = value;
       }
       catch( ... ) {}
@@ -193,7 +192,7 @@ namespace soma {
       if( position[dim] != 0 )
         partial = true;
     for( dim=0; !partial && dim<frame.size(); ++dim )
-      if( frame[dim] != 0 )
+      if( frame[dim] != -1 )
         partial = true;
 
     if( partial )
@@ -343,7 +342,7 @@ namespace soma {
     std::vector<int> viewframe( frame );
     size_t dim, ndim = std::max( position.size(), frame.size() );
     if( viewframe.size() < ndim )
-      viewframe.resize( ndim, 0 );
+      viewframe.resize( ndim, -1 );
     std::vector<int> viewpos( position );
     if( viewpos.size() < ndim )
       viewpos.resize( ndim, 0 );
@@ -385,9 +384,9 @@ namespace soma {
 //               + carto::toString( borders[2] ) + ", "
 //               + carto::toString( borders[3] ) + " )" );
     for( dim=0; dim<ndim; ++dim )
-      if( viewframe[ dim ] == 0
-          || viewframe[ dim ] + position[ dim ] > fullsize[ dim ] )
+      if( viewframe[ dim ] == -1 )
         viewframe[ dim ] = (fullsize[ dim ] - position[ dim ]);
+     
     localMsg( "===" );
 
     if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 ) 
