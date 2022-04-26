@@ -66,7 +66,7 @@ class LazyResampleVolume(LazyReadData):
             self.dtype = None
         else:
             self.dtype = aims.typeCode(dtype)
-        if isinstance(transform, six.types.StringTypes):
+        if isinstance(transform, six.string_types):
             self.transform_filename = [transform]
             self.transform = None
         elif isinstance(transform, (list, tuple)):

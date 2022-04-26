@@ -121,7 +121,7 @@ class LazyReadData(object):
             read.
         '''
         # print('init', self)
-        if isinstance(data_or_filename, six.types.StringTypes):
+        if isinstance(data_or_filename, six.string_types):
             self.filename = data_or_filename
             self.data = None
         elif isinstance(data_or_filename, LazyReadData):
