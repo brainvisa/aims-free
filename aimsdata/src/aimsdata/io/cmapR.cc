@@ -89,7 +89,7 @@ void AimsColorMapReader::read( ColorMap& thing )
   for ( n = 0; n < size; n++ )
   {
     _is >> tp;
-    thing.item( n ).red() = (byte)tp;
+    thing.item( n ).red() = (::byte)tp;
   }
 
   _is >> tmp;
@@ -97,7 +97,7 @@ void AimsColorMapReader::read( ColorMap& thing )
   for ( n = 0; n < size; n++ )
   {
     _is >> tp;
-    thing.item( n ).green() = (byte)tp;
+    thing.item( n ).green() = (::byte)tp;
   }
 
   _is >> tmp;
@@ -105,7 +105,7 @@ void AimsColorMapReader::read( ColorMap& thing )
   for ( n = 0; n < size; n++ )
   {
     _is >> tp;
-    thing.item( n ).blue() = (byte)tp;
+    thing.item( n ).blue() = (::byte)tp;
   }
 
   _is.close();

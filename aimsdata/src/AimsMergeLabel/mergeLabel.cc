@@ -148,7 +148,7 @@ int main( int argc, const char **argv )
     merged->header().setProperty( "voxel_size", vs );
     merged->fill( outBackground );
 
-    VolumeRef< byte > intersections( dims );
+    VolumeRef< ::byte > intersections( dims );
     intersections->header().setProperty( "voxel_size", vs );
     intersections->fill( 0 );
     cout << endl;
@@ -252,7 +252,7 @@ int main( int argc, const char **argv )
       if (ext == ".dim" || ext == ".ima")
         res = res.substr( 0, res.length() - 4 );
       fileOut = res + "_intersections";
-      Writer< VolumeRef< byte > > intersectionsWriter( fileOut );
+      Writer< VolumeRef< ::byte > > intersectionsWriter( fileOut );
       intersectionsWriter.write( intersections );
       cout << endl;
 

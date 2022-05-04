@@ -63,9 +63,9 @@ bool LabelReader::read( VolumeRef<int16_t> & vol, int border,
   // allow on-fly conversion of byte formats
   if( f.dataType() == "U8" )
   {
-    Reader<VolumeRef<byte> >		reader( _filename );
-    VolumeRef< byte >			tmp;
-    Converter< carto::VolumeRef<byte>, carto::VolumeRef<int16_t> >	conv;
+    Reader<VolumeRef<::byte> >		reader( _filename );
+    VolumeRef< ::byte >			tmp;
+    Converter< carto::VolumeRef<::byte>, carto::VolumeRef<int16_t> >	conv;
     if( reader.read( tmp, border, format ) )
     {
       carto::VolumeRef<int16_t>	*v = conv( tmp );

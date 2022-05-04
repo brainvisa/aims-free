@@ -60,8 +60,8 @@ int main( int argc, const char **argv )
 
     app.initialize();
 
-    Reader< AimsData< byte > > reader;
-    AimsData< byte > dataR, dataG, dataB;
+    Reader< AimsData< ::byte > > reader;
+    AimsData< ::byte > dataR, dataG, dataB;
 
     cout << "reading R channel";
     reader.setFileName( fileInR );
