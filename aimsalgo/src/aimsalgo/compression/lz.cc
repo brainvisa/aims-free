@@ -67,11 +67,11 @@ using namespace std;
 
 
 inline 
-uint _calcHash( const byte* src )
+uint _calcHash( const ::byte* src )
 {
   uint hash = 0;
-  const byte* pEnd = src + LZMATCH;
-  for( const byte* p = src; p < pEnd ; )
+  const ::byte* pEnd = src + LZMATCH;
+  for( const ::byte* p = src; p < pEnd ; )
     UPDATE_HASH( hash, *p++ );
 
   return hash;
@@ -82,7 +82,7 @@ uint _calcHash( const byte* src )
 // class LZBuffer
 //
 inline
-int LZBuffer::_nMatch( int pos, const byte* p, int nLimit )
+int LZBuffer::_nMatch( int pos, const ::byte* p, int nLimit )
 {
   ASSERT( nLimit < LZBUFSIZE );
   int begin = pos;
@@ -128,7 +128,7 @@ LZHLCompressor::~LZHLCompressor()
 
 inline 
 uint 
-LZHLCompressor::_updateTable( uint hash, const byte* src, uint pos,
+LZHLCompressor::_updateTable( uint hash, const ::byte* src, uint pos,
                               int len )
 {
   if ( len <= 0 )
@@ -138,8 +138,8 @@ LZHLCompressor::_updateTable( uint hash, const byte* src, uint pos,
   {
     src++;
     hash = 0;
-    const byte* pEnd = src + len + LZMATCH;
-    for ( const byte* p = src + len; p < pEnd ; )
+    const ::byte* pEnd = src + len + LZMATCH;
+    for ( const ::byte* p = src + len; p < pEnd ; )
       UPDATE_HASH( hash, *p++ );
     return hash;
   }
@@ -157,16 +157,16 @@ LZHLCompressor::_updateTable( uint hash, const byte* src, uint pos,
 }
 
 
-size_t LZHLCompressor::compress( byte* dst, const byte* src, size_t sz )
+size_t LZHLCompressor::compress( ::byte* dst, const ::byte* src, size_t sz )
 {
   LZHLEncoder coder( &_stat, dst );
-  const byte* srcEnd = src + sz;
+  const ::byte* srcEnd = src + sz;
 
   uint hash = 0;
   if ( sz >= LZMATCH )
   {
-    const byte* pEnd = src + LZMATCH;
-    for ( const byte* p = src; p < pEnd ; )
+    const ::byte* pEnd = src + LZMATCH;
+    for ( const ::byte* p = src; p < pEnd ; )
       UPDATE_HASH( hash, *p++ );
   }
 

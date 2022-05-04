@@ -262,7 +262,7 @@ void QtFormatsHeader::read()
         {
           if( im.colorCount() <= 256 )
             {
-              dt = DataTypeCode<byte>().dataType();
+              dt = DataTypeCode<::byte>().dataType();
               pdt.push_back( DataTypeCode<uint8_t>().dataType() );
             }
           if( im.colorCount() <= 65536 )
