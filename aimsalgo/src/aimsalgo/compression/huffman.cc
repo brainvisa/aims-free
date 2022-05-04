@@ -355,14 +355,14 @@ void LZHLEncoder::_callStat()
 }
 
 
-void LZHLEncoder::putRaw( const byte * src, size_t sz )
+void LZHLEncoder::putRaw( const ::byte * src, size_t sz )
 {
-  for ( const byte* srcEnd = src + sz; src < srcEnd ; ++src )
+  for ( const ::byte* srcEnd = src + sz; src < srcEnd ; ++src )
     _put( *src );
 }
 
 
-void LZHLEncoder::putMatch( const byte* src, size_t nRaw, size_t matchOver, 
+void LZHLEncoder::putMatch( const ::byte* src, size_t nRaw, size_t matchOver,
                             size_t disp )
 {
   ASSERT ( nRaw <= maxRaw );
@@ -469,7 +469,7 @@ size_t LZHLEncoder::flush()
   _put( NHUFFSYMBOLS - 1 );
   while ( _nBits > 0 )
   {
-    *_dst++ = (byte )( _bits >> 24 );
+    *_dst++ = (::byte )( _bits >> 24 );
     _nBits -= 8;
     _bits <<= 8;
   }
@@ -580,7 +580,7 @@ LZHLDecompressor::~LZHLDecompressor()
 }
 
 
-int LZHLDecompressor::_get( const byte*& src, const byte* srcEnd, int n )
+int LZHLDecompressor::_get( const ::byte*& src, const ::byte* srcEnd, int n )
 {
   ASSERT ( n <= 8 );
   if( _nBits < n )
@@ -602,13 +602,13 @@ int LZHLDecompressor::_get( const byte*& src, const byte* srcEnd, int n )
 }
 
 
-bool LZHLDecompressor::decompress( byte* dst, size_t* dstSz, const byte* src,
+bool LZHLDecompressor::decompress( ::byte* dst, size_t* dstSz, const ::byte* src,
                                    size_t* srcSz )
 {
-  byte* startDst = dst;
-  const byte* startSrc = src;
-  const byte* endSrc = src + *srcSz;
-  const byte* endDst = dst + *dstSz;
+  ::byte* startDst = dst;
+  const ::byte* startSrc = src;
+  const ::byte* endSrc = src + *srcSz;
+  const ::byte* endDst = dst + *dstSz;
   _nBits = 0;
   for ( ; ; )
   {
@@ -640,7 +640,7 @@ bool LZHLDecompressor::decompress( byte* dst, size_t* dstSz, const byte* src,
     {
       if ( dst >= endDst )
         return false;
-      *dst++ = ( byte )symbol;
+      *dst++ = ( ::byte )symbol;
       _toBuf( symbol );
       continue;
     }

@@ -154,7 +154,7 @@ int main( int argc, const char **argv )
     reader >> dataRgb;
 
     if( datatype == "U8" )
-      doit<byte>( dataRgb, fileOut );
+      doit<::byte>( dataRgb, fileOut );
     else if( datatype == "S16" )
       doit<int16_t>( dataRgb, fileOut );
     else if( datatype == "U16" )
