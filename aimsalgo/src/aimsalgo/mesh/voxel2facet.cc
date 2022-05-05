@@ -170,7 +170,7 @@ void Mesher::getInterface( map< size_t, list< MapOfFacet > >& interface,
             {
               facet = new Facet;
               facet->offset() = (short *)it; // ### mais qu'est-ce que c'est que ca ? ca marche vraiment ? code a revoir !
-              facet->type() = (byte)f;
+              facet->type() = (::byte)f;
               facet->location() = Point3d( x, y, z );
               facet->id() = facet->key();
               mf[ facet->id() ] = facet;

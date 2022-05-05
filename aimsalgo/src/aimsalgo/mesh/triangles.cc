@@ -48,7 +48,7 @@ void Mesher::getTriangles( const vector< Facet* >& vfac,
   int n, size = (int)vfac.size();
 
   // flags initialization
-  vector< byte > vflag( size );
+  vector< ::byte > vflag( size );
   for ( n = 0; n != size; n++ )
   {
     facet = vfac[ n ];

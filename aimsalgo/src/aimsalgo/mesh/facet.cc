@@ -50,7 +50,7 @@ Facet::getNeighbor( const Connectivity& connect, Facet** pNeighbor ) const
   short* it_front   = _offset + connect.offset( _type );
 
   int t = 0;
-  for ( byte i = 0; i < 3; i++ )
+  for ( ::byte i = 0; i < 3; i++ )
     if ( _type != i && _type != 5 - i )
     {
       if ( *( it_front + connect.offset( i ) ) == *it_central )
