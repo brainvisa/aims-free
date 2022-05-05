@@ -32,11 +32,10 @@ namespace soma
 //    Reader_%Template1typecode%( std::istream & stream );
     virtual ~Reader_%Template1typecode%();
 
-%If (SIPTHROW_BUG)
     virtual bool read( %Template1PyType% & obj,
         carto::Object header = carto::none(),
         int passbegin = 1, int passend = 4 )
-        throw ( ) /Factory, ReleaseGIL/;
+    throw () /Factory/; //, ReleaseGIL/;
 %Docstring
     Read an object from source.
     Two main modes exist:
@@ -70,47 +69,6 @@ namespace soma
         False upon failure (but readers will more likely throw an exception)
     full mode:
         the read object
-%End
-%End
-%If (!SIPTHROW_BUG)
-    virtual bool read( %Template1PyType% & obj,
-        carto::Object header = carto::none(),
-        int passbegin = 1, int passend = 4 )
-    throw ( carto::io_error, std::exception ) /Factory/; //, ReleaseGIL/;
-%Docstring
-    Read an object from source.
-    Two main modes exist:
-
-    * full: read a full new object and return it
-    * in-place: read an existing object, in-place
-
-    A multi-pass procedure is used to identify and read the data from the data source:
-
-    * pass 1: format hint
-    * pass 2: extension
-    * pass 3: empty extension
-    * pass 4: all readers
-
-    Parameters
-    ----------
-    obj or header:
-        in-place mode: %Template1PyType%, object to be read.
-        OR:
-        full mode: header (Object), optional
-    header: Object (optional)
-    passbegin: int (optional)
-        begin at given step of the multi-pass identification/read procedure
-    passend: int (optional)
-        end at given step of the multi-pass identification/read procedure
-
-    Returns
-    -------
-    in-place mode:
-        True upon success
-        False upon failure (but readers will more likely throw an exception)
-    full mode:
-        the read object
-%End
 %End
 
     virtual %Template1PyType%* read( carto::Object header = carto::none(),
@@ -211,7 +169,7 @@ namespace soma
     virtual bool write( const %Template1PyType% & obj,
                         carto::Object options = carto::none(),
                         int passbegin = 1 , int passend = 4 )
-        throw ( carto::io_error, std::exception ) /Factory/; //, ReleaseGIL/;
+        throw () /Factory/; //, ReleaseGIL/;
 %Docstring
     Write the given object to the data source (generally files)
 

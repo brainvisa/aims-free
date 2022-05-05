@@ -174,7 +174,7 @@ int main( int argc, const char **argv )
 {
   Reader<AimsData<Point3df> >	fileEigen;
   Writer<AimsSurfaceTriangle>	fileOut;
-  Reader<AimsData<byte> >	fileMask;
+  Reader<AimsData<::byte> >	fileMask;
   Reader<AimsData<float> >	fileAniso;
   int				xmin = -1, ymin = -1, zmin = -1;
   int				xmax = -1, ymax = -1, zmax = -1;
@@ -252,7 +252,7 @@ int main( int argc, const char **argv )
           zmax = eigen.dimZ() - 1;
         }
 
-      AimsData<byte> mask;
+      AimsData<::byte> mask;
       if( !fileMask.fileName().empty() )
         fileMask.read( mask );
 

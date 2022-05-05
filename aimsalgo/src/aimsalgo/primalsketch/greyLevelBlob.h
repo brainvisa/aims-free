@@ -45,12 +45,15 @@
 namespace aims {
     const int BACKGROUND = 0;
 
-    template<typename T> struct ltstr_p3d { // comparaison de Sites pour conteneurs tri�s (set, map)
-        bool operator()(const T p1, const T p2) { return false;}
+    template<typename T> struct ltstr_p3d
+    { // comparaison de Sites pour conteneurs tri�s (set, map)
+        bool operator()(const T p1, const T p2) const { return false;}
     };
 
-    template <> struct ltstr_p3d<Point3d> {
-        bool operator ()( const Point3d p1, const Point3d p2 ) {
+    template <> struct ltstr_p3d<Point3d>
+    {
+        bool operator ()( const Point3d p1, const Point3d p2 ) const
+        {
             if ( p1[2] < p2[2] )
                 return true;
             else if ( p1[2] > p2[2] )
@@ -70,9 +73,11 @@ namespace aims {
         }
     };
 
-    template <> struct ltstr_p3d<std::pair<Point3df, uint> > {
+    template <> struct ltstr_p3d<std::pair<Point3df, uint> >
+    {
         bool operator () ( const std::pair<Point3df, uint> p1,
-                           const std::pair<Point3df, uint> p2 ) {
+                           const std::pair<Point3df, uint> p2 ) const
+        {
             if ( p1.second < p2.second )
                 return true;
             else
@@ -84,7 +89,8 @@ namespace aims {
     template<class T> class SaddlePoint;
     template<class T> class GreyLevelBlob;
 
-    class BlobMeasurements {
+    class BlobMeasurements
+    {
 
         public:
             BlobMeasurements() {}
@@ -109,7 +115,8 @@ namespace aims {
         TypeSite<AimsSurface<D, Void> >::type for textures.
     */
 
-    template<class T> class GreyLevelBlob {
+    template<class T> class GreyLevelBlob
+    {
 
         protected:
 
@@ -122,7 +129,8 @@ namespace aims {
 
         public:
 
-            GreyLevelBlob ( MaximumPoint<T> *node, int label ) {
+            GreyLevelBlob ( MaximumPoint<T> *node, int label )
+            {
                 saddle = 0;
                 maximum = node;
                 node->blob = this;
@@ -146,7 +154,8 @@ namespace aims {
 
             std::set<T, ltstr_p3d<T> > & GetListePoints () { return listePoints; }
 
-            void SetSaddle (SaddlePoint<T>  *node) {
+            void SetSaddle (SaddlePoint<T>  *node)
+            {
                 saddle = node;
                 node->AddBlob (this);
                 StopGrowth();
@@ -163,7 +172,8 @@ namespace aims {
 
     /// class for saddle points
 
-    template<class T> class SaddlePoint {
+    template<class T> class SaddlePoint
+    {
 
         public:
             T _node;
@@ -182,7 +192,8 @@ namespace aims {
 
     /// class for maxima
 
-    template<class T> class MaximumPoint {
+    template<class T> class MaximumPoint
+    {
 
         public:
             T                _node;
@@ -197,7 +208,8 @@ namespace aims {
 
   /// Class that define grey-level blobs algorithm extraction
 
-  template<typename Geom, typename Text> class ExtractGreyLevelBlobs {
+  template<typename Geom, typename Text> class ExtractGreyLevelBlobs
+  {
 
     private :
 
@@ -250,7 +262,8 @@ namespace aims {
 
  /// class that provide some tools for blob management
 
- template<typename T> class GreyLevelBlobTools {
+ template<typename T> class GreyLevelBlobTools
+ {
 
      private :
      GreyLevelBlob<T> *_blob;

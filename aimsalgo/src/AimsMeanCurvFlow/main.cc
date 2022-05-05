@@ -204,7 +204,7 @@ int main( int argc, const char *argv[] )
     // Binary BYTE image to set points that are in the tube
     //
     int count = 0;
-    AimsData<byte>  *flag = new AimsData<byte>(X,Y,Z);
+    AimsData<::byte>  *flag = new AimsData<::byte>(X,Y,Z);
     for (z=0;z<Z;z++)
       for (y=0;y<Y;y++)
         for (x=0;x<X;x++)

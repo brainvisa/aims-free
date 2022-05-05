@@ -69,7 +69,7 @@ int main( int argc, const char *argv[] )
     Writer< AimsData<float> > faFile;
     Writer<AimsData<Point3df> > dirFile;
     Writer<AimsData<AimsRGB> > rgbFile;
-    Writer<AimsData<byte> > emFile;
+    Writer<AimsData<::byte> > emFile;
     float gamma = 267475199;
     bool verbose = false;
     float bvalue = -1;
@@ -639,7 +639,7 @@ int main( int argc, const char *argv[] )
 
     if ( emFile.fileName() != "" ) {
       if ( verbose ) cout << "saving error mask : " << flush;
-      AimsData<byte> em( dimX, dimY, dimZ );
+      AimsData<::byte> em( dimX, dimY, dimZ );
       em.setSizeX( bucket.sizeX() );
       em.setSizeY( bucket.sizeY() );
       em.setSizeZ( bucket.sizeZ() );
@@ -680,11 +680,11 @@ int main( int argc, const char *argv[] )
 	if ( it->value().category() <= DtiTensor::NO_PROBLEM )
 	  {
 	    (*dirRGB)( it->location() ).red() = 
-	      byte( fabs( it->value().dir().item( 0 ) ) * 255.0 );
+	      ::byte( fabs( it->value().dir().item( 0 ) ) * 255.0 );
 	    (*dirRGB)( it->location() ).green() = 
-	      byte( fabs( it->value().dir().item( 1 ) ) * 255.0 );
+	      ::byte( fabs( it->value().dir().item( 1 ) ) * 255.0 );
 	    (*dirRGB)( it->location() ).blue() = 
-	      byte( fabs( it->value().dir().item( 2 ) ) * 255.0 );
+	      ::byte( fabs( it->value().dir().item( 2 ) ) * 255.0 );
 	  }
       rgbFile << *dirRGB;
       delete dirRGB;

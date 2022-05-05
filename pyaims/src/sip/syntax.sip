@@ -83,7 +83,7 @@ class SyntaxReader
 %End
 
 public:
-  SyntaxReader( const std::string & ) throw ( carto::file_error );
+  SyntaxReader( const std::string & ) throw ();
   virtual ~SyntaxReader();
   carto::PySyntaxSet *_read() /Factory, PyName=read/;
 %MethodCode

@@ -62,7 +62,7 @@ using namespace std;
 class lessPoint
 {
 public:
-  bool operator () ( const Point3d & p1, const Point3d & p2 )
+  bool operator () ( const Point3d & p1, const Point3d & p2 ) const
   {
     return( p1[0] < p2[0] || ( p1[0] == p2[0]
                                 && ( p1[1] < p2[1]

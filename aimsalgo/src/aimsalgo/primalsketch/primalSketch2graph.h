@@ -55,7 +55,8 @@ namespace aims
 
     struct ltstr_blob // ranking criteria for blobs
     {
-        bool operator()(const std::pair<int,float> p1, const std::pair<int,float> p2)
+        bool operator()(const std::pair<int,float> p1,
+                        const std::pair<int,float> p2) const
         {
             if (p1.second>p2.second)
                  return true;

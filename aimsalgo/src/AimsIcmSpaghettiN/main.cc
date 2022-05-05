@@ -89,8 +89,8 @@ float attachment( int k,
 float spaghetti( int k,
                  const AimsData< list<short> >& neighbor_lShort,
                  const AimsData< list<int> >& neighbor_lLong,
-                 const AimsData< byte >& isForwNeigh,
-                 const AimsData< byte >& isBackNeigh,
+                 const AimsData< ::byte >& isForwNeigh,
+                 const AimsData< ::byte >& isBackNeigh,
                  const AimsData< float >& dir2dir,
                  const AimsData< DtiTensor* >& lut1d_pDtiTensor,
                  AimsData< float >& potForw,
@@ -286,8 +286,8 @@ int main( int argc, const char **argv )
           }
 
     AimsData<float> cosDir2neighbor( sampling, 26 );
-    AimsData<byte>  isForwNeigh( sampling, 26 );
-    AimsData<byte>  isBackNeigh( sampling, 26 );
+    AimsData<::byte>  isForwNeigh( sampling, 26 );
+    AimsData<::byte>  isBackNeigh( sampling, 26 );
     Point3df neigh;
     isForwNeigh = false;
     isBackNeigh = false;

@@ -13,18 +13,12 @@ public:
   Reader_%Template1typecode%( const std::string & );
   virtual ~Reader_%Template1typecode%();
 
-%If (SIPTHROW_BUG)
   virtual %Template1PyType% *read( int = 0, const std::string * = 0, int = -1 )
     throw ( ) /Factory, ReleaseGIL/;
-%End
-%If (!SIPTHROW_BUG)
-  virtual %Template1PyType% *read( int = 0, const std::string * = 0, int = -1 )
-    throw ( carto::io_error, std::exception ) /Factory, ReleaseGIL/;
-%End
 
   virtual bool read( %Template1PyType% & obj, int border=0,
                      const std::string* format = 0, int frame = -1 )
-    throw ( carto::io_error, std::exception ) /Factory, ReleaseGIL/;
+    throw ( ) /Factory, ReleaseGIL/;
 
   void setFileName( std::string & );
   const std::string & fileName() const;
@@ -50,16 +44,9 @@ public:
     carto::Object = carto::none() );
   virtual ~Writer_%Template1typecode%();
 
-%If (SIPTHROW_BUG)
   virtual bool write( const %Template1PyType% &, bool = false, 
                       const std::string * = 0 )
-    throw ( ) /Factory, ReleaseGIL/;
-%End
-%If (!SIPTHROW_BUG)
-  virtual bool write( const %Template1PyType% &, bool = false, 
-                      const std::string * = 0 )
-    throw ( carto::io_error, std::exception ) /Factory/; //, ReleaseGIL/;
-%End
+    throw ( ) /Factory/; //, ReleaseGIL/;
 
   void setFileName( std::string & );
   const std::string & fileName() const;

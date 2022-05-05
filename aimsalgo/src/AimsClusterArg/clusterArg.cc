@@ -91,7 +91,7 @@ public:
 ClusterArg::ClusterArg()
   : Process()
 {
-  registerProcessType( "Volume", "U8", &makearg<byte> );
+  registerProcessType( "Volume", "U8", &makearg<::byte> );
   registerProcessType( "Volume", "S16", &makearg<short> );
   registerProcessType( "Volume", "FLOAT", &makearg<float> );
 }
