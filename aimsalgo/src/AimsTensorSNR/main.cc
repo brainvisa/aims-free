@@ -46,7 +46,7 @@ using namespace std;
 int main( int argc, const char **argv )
 {
   Reader<AimsBucket<DtiTensor> >	bucketR;
-  Reader<AimsData< byte > > dataR1;
+  Reader<AimsData< ::byte > > dataR1;
 
   string fileout;
   int t = 0, npoint = 0;
@@ -74,7 +74,7 @@ int main( int argc, const char **argv )
     else
       assert( centerX >= 0 && centerY >= 0 && centerZ >= 0 && radius >= 0 );
 
-    AimsData< byte > mask;
+    AimsData< ::byte > mask;
     if( !dataR1.fileName().empty() )
     {
       dataR1.read( mask );

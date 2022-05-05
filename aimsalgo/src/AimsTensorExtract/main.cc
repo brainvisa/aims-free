@@ -164,15 +164,15 @@ int main( int argc, const char **argv )
         (*dirRGB)( it->location().item(0),
                   it->location().item(1),
                   it->location().item(2) ).red() =
-                byte( fabs( it->value().dir().item(0) ) * 255.0 );
+                ::byte( fabs( it->value().dir().item(0) ) * 255.0 );
         (*dirRGB)( it->location().item(0),
                   it->location().item(1),
                   it->location().item(2) ).green() =
-                byte( fabs( it->value().dir().item(1) ) * 255.0 );
+                ::byte( fabs( it->value().dir().item(1) ) * 255.0 );
         (*dirRGB)( it->location().item(0),
                   it->location().item(1),
                   it->location().item(2) ).blue() =
-                byte( fabs( it->value().dir().item(2) ) * 255.0 );
+                ::byte( fabs( it->value().dir().item(2) ) * 255.0 );
       }
     dataW5.write( *dirRGB );
     delete dirRGB;

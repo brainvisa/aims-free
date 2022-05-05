@@ -52,7 +52,7 @@ static bool doit( Process &, const string &, Finder & );
 class SNR : public Process
 {
 public:
-  SNR( AimsData<byte> & mk, short cx, short cy, short cz, float r, bool lf,
+  SNR( AimsData<::byte> & mk, short cx, short cy, short cz, float r, bool lf,
        const string & fout );
 
 private:
@@ -60,7 +60,7 @@ private:
   friend bool doit( Process &, const string &, Finder & );
   bool snr( AimsData<float> & );
 
-  AimsData<byte>	& mask;
+  AimsData<::byte>	& mask;
   short			centerX;
   short			centerY;
   short			centerZ;
@@ -70,7 +70,7 @@ private:
 };
 
 
-SNR::SNR( AimsData<byte> & mk, short cx, short cy, short cz, float r, bool lf,
+SNR::SNR( AimsData<::byte> & mk, short cx, short cy, short cz, float r, bool lf,
           const string & fout )
     : Process(), mask( mk ), centerX( cx ), centerY( cy ), centerZ( cz ), 
       radius( r ), lineflag(lf), fileout( fout )
@@ -254,10 +254,10 @@ int main( int argc, const char **argv )
     else
       assert( centerX >= 0 && centerY >= 0 && centerZ >= 0 && radius >= 0 );
 
-    AimsData< byte > mask;
+    AimsData< ::byte > mask;
     if( !filemask.empty() )
     {
-      Reader<AimsData<byte> > dataR1( filemask );
+      Reader<AimsData<::byte> > dataR1( filemask );
       dataR1 >> mask;
     }
 

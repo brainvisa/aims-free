@@ -82,7 +82,7 @@ int main( int argc, const char **argv )
     cout << "done" << endl;
 
 
-    VolumeRef<byte> mask;
+    VolumeRef<::byte> mask;
     int dimX = 0, dimY = 0, dimZ = 0;
 
     if( !bucketRM.fileName().empty() )
@@ -100,7 +100,7 @@ int main( int argc, const char **argv )
         if ( it->location().item(2) > dimZ )
           dimZ = it->location().item(2);
       }
-      mask.reset( new Volume<byte>( ++dimX, ++dimY, ++dimZ ) );
+      mask.reset( new Volume<::byte>( ++dimX, ++dimY, ++dimZ ) );
       mask = false;
       list< AimsBucketItem<Void> >::iterator vi;
       for ( vi = bucketM[0].begin(); vi != bucketM[0].end(); vi++ )

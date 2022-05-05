@@ -94,7 +94,7 @@ int main( int argc, const char** argv )
   dataR >> B;
 
   AimsData<short> brute( 26, 25, 1, 31 );
-  AimsData<byte> mask( 26, 25, 1 );
+  AimsData<::byte> mask( 26, 25, 1 );
   brute = 0;
   mask = 0;
   for ( t = 0; t < 31; t++ )
@@ -125,9 +125,9 @@ int main( int argc, const char** argv )
   {
     x = d % 26;
     y = d / 26;
-    rgb( x, y ).red()   = byte( fabs( direction( d ).item( 0 ) ) * 255.0 );
-    rgb( x, y ).green() = byte( fabs( direction( d ).item( 1 ) ) * 255.0 );
-    rgb( x, y ).blue()  = byte( fabs( direction( d ).item( 2 ) ) * 255.0 );
+    rgb( x, y ).red()   = ::byte( fabs( direction( d ).item( 0 ) ) * 255.0 );
+    rgb( x, y ).green() = ::byte( fabs( direction( d ).item( 1 ) ) * 255.0 );
+    rgb( x, y ).blue()  = ::byte( fabs( direction( d ).item( 2 ) ) * 255.0 );
   }
   Writer<AimsData<AimsRGB> > dataW3( "direction_RGB" );
   dataW3 << rgb;
