@@ -38,7 +38,9 @@ execute_process( COMMAND ${__command}
   
 if( NOT _returnValue EQUAL 0 )
   message( SEND_ERROR "The sip generation from pyaims templates failed. Command:\n${_command}\nreturned output:\n${_generatedSipFileList}\n========================")
-
+# else( NOT _returnValue EQUAL 0 )
+#   message("Command:\n${_command}\ngenerated sip files:\n${_generatedSipFileList}
+#   \n========================")
 endif( NOT _returnValue EQUAL 0 )
 unset(__command)
 

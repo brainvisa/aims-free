@@ -365,6 +365,27 @@ typessub = {'bool':
                'testPyType': 'carto::PyaimsInt_Check',
                'compareElement': '',
             },
+            'long':
+            {'typecode': 'S64',
+               'pyFromC': 'PyLong_FromLong',
+               'CFromPy': 'PyLong_AsLong',
+               'castFromSip': '',
+               'deref': '',
+               'pyderef': '',
+               'address': '',
+               'pyaddress': '',
+               'defScalar': '#define PYAIMS_SCALAR',
+               'defNumpyBindings': '',
+               'new': '',
+               'NumType': 'NPY_INT64',
+               'PyType': 'long',
+               'sipClass': '',
+               'typeinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
+               'module': 'aims',
+               'testPyType': 'carto::PyaimsInt_Check',
+               'compareElement': '',
+            },
             'unsigned long':
             {'typecode': 'ULONG',
                'pyFromC': 'PyLong_FromLong',
@@ -788,6 +809,38 @@ typessub = {'bool':
                'compareElement' : '',
                },
 
+             'Point4dl' : \
+             { 'typecode' : 'POINT4DL',
+               'pyFromC' : 'pyaimsConvertFrom_AimsVector',
+               'CFromPy' : 'pyaimsConvertTo_AimsVector<int64_t,4>',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&', 
+               'pyaddress' : '&', 
+               'defScalar' : '',
+               'new' : 'new Point4dl', 
+               'defNumpyBindings': '#define PYAIMS_NUMPY_BINDINGS',
+               'NumType': 'NPY_AimsVector<int64_t, 4>()',
+               'NumType_Descr': 'NPY_AimsVector_Descr<int64_t, 4>()',
+               'defNumpyIsSubArray': '#define PYAIMS_NPY_IS_SUBARRAY',
+               'PyType' : 'Point4dl',
+               'sipClass' : 'AimsVector_S64_4',
+               'typeinclude' : '#include <pyaims/vector/vector.h>', 
+               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipAimsVector_S64_4.h"\n' 
+               '#endif\n'
+               '#include <pyaims/vector/sipvector.h>\n'
+               '#ifndef PYAIMS_WRAPPER_AIMSVECTOR_S64_4\n'
+               '#define PYAIMS_WRAPPER_AIMSVECTOR_S64_4\n'
+               'template <> inline const sipTypeDef*\n'
+               'sipType_AimsVector<int64_t,4>()\n'
+               '{ return sipFindType( "AimsVector_S64_4" ); }\n'
+               '#endif',
+               'module' : 'aims', 
+               'testPyType' : 'pyaimsCheck_AimsVector<int64_t,4>', 
+               'compareElement' : '',
+               },
              'AimsVector<unsigned,2>' : \
              { 'typecode' : 'AimsVector_U32_2',
                'pyFromC' : 'pyaimsConvertFrom_AimsVector',

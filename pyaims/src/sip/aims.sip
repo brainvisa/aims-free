@@ -67,6 +67,9 @@ typedef int int32_t;
 %Include aimsvector_U32_2.sip
 %Include aimsvector_U32_3.sip
 %Include aimsvector_U32_4.sip
+%Include aimsvector_S64_2.sip
+%Include aimsvector_S64_3.sip
+%Include aimsvector_S64_4.sip
 
 %Include point.sip
 %Include vector_U8.sip
@@ -589,6 +592,17 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include converter_BucketMap_DOUBLE_rc_ptr_Volume_S32.sip
 %Include converter_BucketMap_DOUBLE_rc_ptr_Volume_FLOAT.sip
 %Include converter_BucketMap_DOUBLE_rc_ptr_Volume_DOUBLE.sip
+
+%Include borderfiller_BOOL.sip
+%Include borderfiller_U8.sip
+%Include borderfiller_S16.sip
+%Include borderfiller_U16.sip
+%Include borderfiller_S32.sip
+%Include borderfiller_U32.sip
+%Include borderfiller_FLOAT.sip
+%Include borderfiller_DOUBLE.sip
+%Include borderfiller_RGB.sip
+%Include borderfiller_RGBA.sip
 
 %Include fill.sip
 

@@ -36,7 +36,7 @@ from __future__ import absolute_import
 import sip
 
 numtypes = ['bool', 'unsigned char', 'short', 'unsigned short',
-            'int', 'unsigned', 'unsigned long', 'unsigned long long',
+            'int', 'long', 'unsigned', 'unsigned long', 'unsigned long long',
             'float', 'double']
 if sip.SIP_VERSION >= 0x04130d:
     numtypes.append('size_t')
@@ -324,6 +324,7 @@ todo = {'system': ['Void'],
                        ('double', '4'),
                        ('short', '2'), ('short', '3'), ('short', '4'),
                        ('int', '2'), ('int', '3'), ('int', '4'),
+                       ('long', '2'), ('long', '3'), ('long', '4'),
                        ('unsigned', '2'), ('unsigned', '3'),
                        ('unsigned', '4'),
                        ],
@@ -332,6 +333,8 @@ todo = {'system': ['Void'],
         'soma': ['Void'],
         'connected_component': ['short', 'int', 'unsigned char',
                                 'unsigned short', 'unsigned'],
+        'borderfiller': ['bool', 'unsigned char', 'short', 'unsigned short',
+                         'int', 'unsigned', 'float', 'double', 'AimsRGB', 'AimsRGBA', 'AimsHSV']
         }
 
 if sip.SIP_VERSION >= 0x04130d:

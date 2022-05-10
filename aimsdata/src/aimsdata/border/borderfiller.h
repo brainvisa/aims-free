@@ -153,7 +153,7 @@ namespace aims
   
   template<typename T>
   carto::VolumeRef<T> BorderFiller<T>::buildUnfilledBorderView(
-      const carto::VolumeRef<T> & vol)
+      const carto::VolumeRef<T> & vol )
   {
     if (!vol.isNull()) {
         const carto::VolumeRef<T> parent1 = vol.refVolume();
@@ -162,6 +162,8 @@ namespace aims
             const carto::VolumeRef<T> parent2 = parent1.refVolume();
             if (!parent2.isNull() 
                 && !parent2.allocatorContext().isAllocated()) {
+//                std::cout << "buildUnfilledBorderView::unallocated parent found" 
+//                          << std::endl;
                 typedef typename carto::Volume<T>::Position Position;
                 Position pos = vol.posInRefVolume().toVector();
                 Position pos1 = parent1.posInRefVolume().toVector();
@@ -176,13 +178,19 @@ namespace aims
                     size[d] = std::min(size1[d], size2[d] - pos1[d]) - pos[d];
                 }
                 
+//                std::cout << "buildUnfilledBorderView::border view position [" 
+//                          << pos[0] << ", " << pos[1] << ", " << pos[2] << "]"
+//                          << std::endl;
+//                std::cout << "buildUnfilledBorderView::border view size [" 
+//                          << size[0] << ", " << size[1] << ", " << size[2] 
+//                          << "]" << std::endl;
                 return carto::VolumeRef<T>(vol.refVolume(), pos, size);
             }
         }
     }
     
     return vol;
-}
+  }
 
 } // namespace aims
 

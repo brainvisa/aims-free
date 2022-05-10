@@ -216,3 +216,129 @@ def compare_images(vol, vol2, vol1_name='input', vol2_name='output',
     return True
 
 
+def fill_border_constant(data, value = 0, whole=False):
+    '''Fill the border of data using a constant value.
+    In aims, a Volume with border is managed as an unallocated view
+    (the visible data) in a larger allocated Volume (the Volume that contains 
+    borders). In order to be filled, the borders must exists, otherwise the 
+    function has no effect on the Volume.
+    
+    Parameters
+    ----------
+        data: Volume_* or rc_ptr_Volume_*
+        value: value to fill border with (optional)
+            Default is 0.
+        whole: bool (optional)
+            For partially read Volume, it forces to fill the borders also when 
+            they has been already filled with data from parent full unallocated 
+            Volume.
+            Default is False
+    '''
+    if type(data).__name__.startswith('Volume_') \
+       or type(data).__name__.startswith('rc_ptr_Volume_') :
+        vt = aims.voxelTypeCode(data)
+        bf = getattr(aims, 
+                    'BorderFiller_{}'.format(vt))
+        
+        if vt in ('RGB', 'RGBA'):
+            if type(value) in (aims.AimsRGB, aims.AimsRGBA):
+                val = value
+            else:
+                t = getattr(aims, 'Aims' + vt)
+                val = t(*value)
+        else:
+            t = data.np.dtype
+            val = t(value)
+            
+        bf.fillConstant(data, val, not whole)
+        
+    else:
+        raise TypeError('data parameter must be of Volume_* type')
+    
+
+def fill_border_median(data, size = (-1,-1,-1,-1), whole=False):
+    '''Fill the border of data using the median value processed in the inside 
+    border.
+    In aims, a Volume with border is managed as an unallocated view
+    (the visible data) in a larger allocated Volume (the Volume that contains 
+    borders). In order to be filled, the borders must exists, otherwise the 
+    function has no effect on the Volume.
+    
+    Parameters
+    ----------
+        data: Volume_* or rc_ptr_Volume_*
+        size: list or Point4dl size of the inside border to process median 
+            value. (-1,-1,-1,-1) means that the median value is processed in 
+            the inside border of equal outside border size. if the outside 
+            border is of size (2, 2, 0) in dimensions x, y, z, the inside border 
+            is also of size (2, 2, 0)  (optional)
+            Default is (-1,-1,-1,-1).
+        whole: bool (optional)
+            For partially read Volume, it forces to fill the borders also when 
+            they has been already filled with data from parent full unallocated 
+            Volume.
+            Default is False
+    '''
+    if type(data).__name__.startswith('Volume_') \
+       or type(data).__name__.startswith('rc_ptr_Volume_') :
+        vt = aims.voxelTypeCode(data)
+        bf = getattr(aims, 
+                    'BorderFiller_{}'.format(vt))
+        bf.fillMedian(data, aims.Point4dl(size), not whole)
+            
+    else:
+        raise TypeError('data parameter must be of Volume_* type')
+
+def fill_border_nearest(data, whole=False):
+    '''Fill the border of data using the inside border voxel value.
+    In aims, a Volume with border is managed as an unallocated view
+    (the visible data) in a larger allocated Volume (the Volume that contains 
+    borders). In order to be filled, the borders must exists, otherwise the 
+    function has no effect on the Volume.
+    
+    Parameters
+    ----------
+        data: Volume_* or rc_ptr_Volume_*
+        whole: bool (optional)
+            For partially read Volume, it forces to fill the borders also when 
+            they has been already filled with data from parent full unallocated 
+            Volume.
+            Default is False
+    '''
+    if type(data).__name__.startswith('Volume_') \
+       or type(data).__name__.startswith('rc_ptr_Volume_') :
+        vt = aims.voxelTypeCode(data)
+        bf = getattr(aims, 
+                    'BorderFiller_{}'.format(vt))
+        bf.fillNearest(data, not whole)
+            
+    else:
+        raise TypeError('data parameter must be of Volume_* type')
+
+def fill_border_mirror(data, whole=False):
+    '''Fills the border mirroring the inside border.
+    In aims, a Volume with border is managed as an unallocated view
+    (the visible data) in a larger allocated Volume (the Volume that contains 
+    borders). In order to be filled, the borders must exists, otherwise the 
+    function has no effect on the Volume.
+    
+    Parameters
+    ----------
+        data: Volume_* or rc_ptr_Volume_*
+        whole: bool (optional)
+            For partially read Volume, it forces to fill the borders also when 
+            they has been already filled with data from parent full unallocated 
+            Volume.
+            Default is False
+    '''
+    if type(data).__name__.startswith('Volume_') \
+       or type(data).__name__.startswith('rc_ptr_Volume_') :
+        vt = aims.voxelTypeCode(data)
+        bf = getattr(aims, 
+                    'BorderFiller_{}'.format(vt))
+        bf.fillMirror(data, not whole)
+            
+    else:
+        raise TypeError('data parameter must be of Volume_* type')
+    
+

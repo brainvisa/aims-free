@@ -3411,7 +3411,7 @@ Volume_RGBA* __mul__( Volume_RGBA &, Volume_DOUBLE & )
   /Factory, ReleaseGIL, PyName=__mul_Volume_RGBA__/;
 
 Volume_RGBA & __imul__( Volume_RGBA &, Volume_DOUBLE & )
-  /ReleaseGIL, PyName=__imul_Volume_RGAB__/;
+  /ReleaseGIL, PyName=__imul_Volume_RGBA__/;
 
 Volume_RGBA* __div__( Volume_RGBA &, Volume_DOUBLE & )
   /Factory, ReleaseGIL, PyName=__div_Volume_RGBA__/;

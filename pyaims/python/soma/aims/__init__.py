@@ -1155,23 +1155,27 @@ __fixsipclasses__.fakerepr = lambda a: "<%s.%s object at 0x%x>" % (
 # added aimssip.Point3df attributes/methods
 Point4d = AimsVector_S16_4
 Point4du = AimsVector_U32_4
+Point4dl = AimsVector_S64_4
 Point4df = AimsVector_FLOAT_4
 Point4dd = AimsVector_DOUBLE_4
 Point3d = AimsVector_S16_3
 Point3du = AimsVector_U32_3
+Point3dl = AimsVector_S64_3
 Point3df = AimsVector_FLOAT_3
 Point3dd = AimsVector_DOUBLE_3
 Point2d = AimsVector_S16_2
 Point2du = AimsVector_U32_2
+Point2dl = AimsVector_S64_2
 Point2df = AimsVector_FLOAT_2
 Point2dd = AimsVector_DOUBLE_2
 Point3df.__doc__ = """This class wraps an aims Point3df aka AimsVector<3, float>
 use the method items() to get a tuple out of it
 use setItems(Point3df) to affect new values"""
 
-Point4d.__repr__ = Point4du.__repr__ = Point4df.__repr__ = Point4dd.__repr__ \
-    = Point3d.__repr__ = Point3du.__repr__ = Point3df.__repr__ \
-    = Point3dd.__repr__ = Point2d.__repr__ = Point2du.__repr__ \
+Point4d.__repr__ = Point4du.__repr__ = Point4dl.__repr__= Point4df.__repr__ \
+    = Point4dd.__repr__ = Point3d.__repr__ = Point3du.__repr__ \
+    = Point3dl.__repr__ = Point3df.__repr__ = Point3dd.__repr__ \
+    = Point2d.__repr__ = Point2du.__repr__ = Point2dl.__repr__ \
     = Point2df.__repr__ = Point2dd.__repr__ \
     = lambda self: __fixsipclasses__.fakerepr(self) + "\n" + str(list(self.items()))
 
@@ -1757,7 +1761,6 @@ def VolumeView(volume, position, size):
                 size[i] = 1
     return volclass(vol, position, size)
 
-
 def TimeTexture(*args, **kwargs):
     '''Create an instance of Aims texture (TimeTexture_<type>) from a type
     parameter, which may be specified as the dtype keyword argument, or as one
@@ -2202,7 +2205,6 @@ def get_transform_to(aims_obj, ref):
     except IndexError:
         return None
     return aims.AffineTransformation3d(tr)
-
 
 # documentation
 
