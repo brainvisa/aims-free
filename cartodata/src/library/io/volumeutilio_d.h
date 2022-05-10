@@ -89,6 +89,7 @@ namespace soma {
     properties.insert( "sx6" );
     properties.insert( "sx7" );
     properties.insert( "sx8" );
+    
     return properties;
   }
 
@@ -348,7 +349,7 @@ namespace soma {
       viewpos.resize( ndim, 0 );
     std::vector<int> fullsize;     // full size
     std::vector<int> borderframe( ndim, 1 );  // allocated volume size
-    std::vector<int> borderpos;    // allocated volume size
+    std::vector<int> borderpos;    // allocated volume origin
     std::vector<int> readframe( ndim, 0 );    // read frame size
     std::vector<int> readpos( ndim, 0 );      // read frame origin
     carto::Object newoptions;
@@ -389,7 +390,38 @@ namespace soma {
      
     localMsg( "===" );
 
-    if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 ) 
+    // processes full image upper and lower overflows
+    std::vector<int> loverflow(3,0), uoverflow(3, 0);
+    loverflow[0] = (viewpos[0] < 0 ? -viewpos[0] : 0);
+    loverflow[1] = (viewpos[1] < 0 ? -viewpos[1] : 0);
+    loverflow[2] = (viewpos[2] < 0 ? -viewpos[2] : 0);
+    
+    uoverflow[0] = (viewpos[0] + viewframe[0] - fullsize[0] > 0 ? 
+                    viewpos[0] + viewframe[0] - fullsize[0] : 0);
+    uoverflow[1] = (viewpos[1] + viewframe[1] - fullsize[1] > 0 ? 
+                    viewpos[1] + viewframe[1] - fullsize[1] : 0);
+    uoverflow[2] = (viewpos[2] + viewframe[2] - fullsize[2] > 0 ? 
+                    viewpos[2] + viewframe[2] - fullsize[2] : 0);
+    
+    // To deal with negative view positions and view frames that ends over the
+    // full volume size, we use an overflow policy.
+    // Overflow policy : 0 => overflow is managed as unread data in the view
+    //                   1 => overflow is managed as border
+    int overflow_policy = 0;
+    try
+    {
+        carto::Object overflow_pol = newoptions->getProperty(
+                                        "overflow_policy" );
+        overflow_policy = int( overflow_pol->getScalar() );
+    }
+    catch( ... )
+    {
+    }
+      
+    if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 
+        || (overflow_policy == 1 && 
+                (loverflow[0] > 0 || loverflow[1] > 0 || loverflow[2] > 0 
+              || uoverflow[0] > 0 || uoverflow[1] > 0 || uoverflow[2] > 0 ) ) )
     {
       //=== ALLOCATED BORDERS VOLUME =========================================
       localMsg( "=== ALLOCATED BORDERS VOLUME" );
@@ -399,10 +431,12 @@ namespace soma {
       borderpos[0] -= borders[0];
       borderpos[1] -= borders[1];
       borderpos[2] -= borders[2];
+      
       borderframe = viewframe;
       borderframe[0] += 2*borders[0];
       borderframe[1] += 2*borders[1];
       borderframe[2] += 2*borders[2];
+      
       localMsg( "creating volume..." );
       localMsg( "-> with frame size ( "
                 + carto::toString( borderframe[0] ) + ", "
@@ -430,17 +464,17 @@ namespace soma {
       localMsg( "=== UNALLOCATED READ VIEW" );
       localMsg( "computing read frame..." );
       // setting "readVolume" position / "bordersVolume"
-      readpos[0] = ( borderpos[0] < 0 ? borders[0] : 0 );
-      readpos[1] = ( borderpos[1] < 0 ? borders[1] : 0 );
-      readpos[2] = ( borderpos[2] < 0 ? borders[2] : 0 );
+      readpos[0] = ( borderpos[0] < 0 ? borders[0] + loverflow[0] : 0 );
+      readpos[1] = ( borderpos[1] < 0 ? borders[1] + loverflow[1] : 0 );
+      readpos[2] = ( borderpos[2] < 0 ? borders[2] + loverflow[2] : 0 );
       readpos[3] = 0;
       std::vector<int> borderdep( 3, 0 );
       borderdep[0] = ( borderpos[0] + borderframe[0] - fullsize[0] > 0 
-                       ? borderpos[0] + borderframe[0] - fullsize[0] : 0 );
+                     ? borderpos[0] + borderframe[0] - fullsize[0] : 0 );
       borderdep[1] = ( borderpos[1] + borderframe[1] - fullsize[1] > 0 
-                       ? borderpos[1] + borderframe[1] - fullsize[1] : 0 );
+                     ? borderpos[1] + borderframe[1] - fullsize[1] : 0 );
       borderdep[2] = ( borderpos[2] + borderframe[2] - fullsize[2] > 0 
-                       ? borderpos[2] + borderframe[2] - fullsize[2] : 0 );
+                     ? borderpos[2] + borderframe[2] - fullsize[2] : 0 );
       readframe[0] = borderframe[0] - readpos[0] - borderdep[0];
       readframe[1] = borderframe[1] - readpos[1] - borderdep[1];
       readframe[2] = borderframe[2] - readpos[2] - borderdep[2];
@@ -450,7 +484,7 @@ namespace soma {
       newoptions->setProperty( "partial_reading", true );
       newoptions->copyProperties( options );
       rView.setOptions( newoptions );
-      localMsg( "creating volume..." );
+      localMsg( "creating read volume..." );
       localMsg( "-> with frame size ( "
                 + carto::toString( readframe[0] ) + ", "
                 + carto::toString( readframe[1] ) + ", "
@@ -487,10 +521,24 @@ namespace soma {
       localMsg( "=== UNALLOCATED PROCESSED VOLUME" );
       localMsg( "computing view frame..." );
       // setting "viewVolume" position / "bordersVolume"
-      viewpos[0] = borders[0];
-      viewpos[1] = borders[1];
-      viewpos[2] = borders[2];
+      if (overflow_policy == 1)
+      {
+        viewframe[0] -= loverflow[0] + uoverflow[0];
+        viewframe[1] -= loverflow[1] + uoverflow[1];
+        viewframe[2] -= loverflow[2] + uoverflow[2];
+        
+        viewpos[0] = borders[0] + loverflow[0];
+        viewpos[1] = borders[1] + loverflow[1];
+        viewpos[2] = borders[2] + loverflow[2];
+      }
+      else
+      {
+        viewpos[0] = borders[0];
+        viewpos[1] = borders[1];
+        viewpos[2] = borders[2];
+      }
       viewpos[3] = 0;
+      
       localMsg( "creating volume..." );
       localMsg( "-> with frame size ( "
                 + carto::toString( viewframe[0] ) + ", "
@@ -590,8 +638,8 @@ namespace soma {
              border case.
           */
 
-          tmp.reset( new Volume<T>( fullVolume, viewpos, viewframe,
-                                    &obj->at(0), obj->getStrides() ) );
+          tmp.reset( new carto::Volume<T>( fullVolume, viewpos, viewframe,
+                                           &obj->at(0), obj->getStrides() ) );
 
           obj = tmp.get(); // read the temp volume
         }
@@ -600,9 +648,58 @@ namespace soma {
       }
       else
         obj = new carto::Volume<T>( fullVolume, viewpos, viewframe );
-
-      localMsg( "reading partial volume..." );
-      rView.read( *obj );
+      
+      if ( loverflow[0] > 0 || loverflow[1] > 0 || loverflow[2] > 0 
+        || uoverflow[0] > 0 || uoverflow[1] > 0 || uoverflow[2] > 0 )
+      {
+        //=== UNALLOCATED READ VIEW ============================================
+        localMsg( "=== UNALLOCATED READ VIEW" );
+        localMsg( "computing read frame for overflows..." );
+        // setting "readVolume" position / "bordersVolume"
+        readpos[0] = loverflow[0];
+        readpos[1] = loverflow[1];
+        readpos[2] = loverflow[2];
+        readpos[3] = 0;
+        readframe[0] = viewframe[0] - loverflow[0] - uoverflow[0];
+        readframe[1] = viewframe[1] - loverflow[1] - uoverflow[1];
+        readframe[2] = viewframe[2] - loverflow[2] - uoverflow[2];
+        readframe[3] = viewframe[3];
+        localMsg( "creating read volume..." );
+        localMsg( "-> with frame size ( "
+                    + carto::toString( readframe[0] ) + ", "
+                    + carto::toString( readframe[1] ) + ", "
+                    + carto::toString( readframe[2] ) + ", "
+                    + carto::toString( readframe[3] ) + " )"
+                    );
+        localMsg( "-> with frame pos ( "
+                    + carto::toString( readpos[0] ) + ", "
+                    + carto::toString( readpos[1] ) + ", "
+                    + carto::toString( readpos[2] ) + ", "
+                    + carto::toString( readpos[3] ) + " )"
+                    );
+        
+        // To avoid underlying data deletion when readVolume is deleted
+        // We need to recreate a Volume that is based on the full volume
+        tmp.reset( new carto::Volume<T>( fullVolume, viewpos, viewframe,
+                                         &obj->at(0), obj->getStrides() ) );
+        readVolume = carto::VolumeRef<T>( 
+                        new carto::Volume<T>( tmp, 
+                                              readpos, readframe ) );
+        
+    //       localMsg( "-> effective read view size ( "
+    //                 + carto::toString( readVolume->getSizeX() ) + ", "
+    //                 + carto::toString( readVolume->getSizeY() ) + ", "
+    //                 + carto::toString( readVolume->getSizeZ() ) + ", "
+    //                 + carto::toString( readVolume->getSizeT() ) + " )"
+    //                  );
+        
+        localMsg( "reading partial volume using read view ..." );
+        rView.read( *readVolume );
+      }
+      else {
+        localMsg( "reading partial volume..." );
+        rView.read( *obj );
+      }
     }
     
     return obj;

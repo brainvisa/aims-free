@@ -439,7 +439,7 @@ namespace soma
     {
       if( allocsize[i] > viewsize[i] )
         withborders = true;
-      if( imagesize[i] > viewsize[i] )
+      if( imagesize[i] != viewsize[i] )
         partialreading = true;
     }
     localMsg( "With Borders : "
