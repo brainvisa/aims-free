@@ -105,14 +105,17 @@ def diff_headers(reference_header, test_header):
     return difference_found
 
 
-def diff_volumes(reference_volume, test_volume):
+def diff_volumes(reference_volume, test_volume,
+                 min_value=None, max_value=None):
     if reference_volume == test_volume:
         return False
 
     reference_arr = numpy.asarray(reference_volume)
     test_arr = numpy.asarray(test_volume)
 
-    return diff_arrays(reference_arr, test_arr, text_bits={
+    return diff_arrays(reference_arr, test_arr,
+                       min_value=min_value, max_value=max_value,
+                       text_bits={
         'array': 'volume',
         'Arrays': 'Volumes',
         'indent': '',
@@ -126,7 +129,8 @@ DEFAULT_TEXT_BITS = {
 }
 
 
-def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
+def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS,
+                min_value=None, max_value=None):
     if reference_arr.shape != test_arr.shape:
         print("{indent}{Arrays} have differing shapes:\n"
               "{indent}  Shape of reference: {0}\n"
@@ -135,7 +139,7 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
         return True
 
     try:
-        numpy.promote_types(reference_arr.dtype, test_arr.dtype)
+        common_dtype = numpy.promote_types(reference_arr.dtype, test_arr.dtype)
     except TypeError:
         print("{indent}{Arrays} have incompatible data types:\n"
               "{indent}  Data type of reference: {0}\n"
@@ -170,8 +174,21 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
     print("{indent}{Arrays} have different data:"
           .format(**text_bits))
 
+    # Do this test before converting to floating-point (no loss of precision)
     bool_diff = (reference_arr != test_arr)
-    total_diff_count = numpy.count_nonzero(bool_diff)
+
+    # Do the numerical comparisons using a floating-point type
+    comparison_dtype = numpy.promote_types(common_dtype, numpy.float32)
+    reference_arr = reference_arr.astype(comparison_dtype, casting='safe')
+    test_arr = test_arr.astype(comparison_dtype, casting='safe')
+
+    with numpy.errstate(invalid="ignore"):
+        if min_value is not None:
+            reference_arr[reference_arr < min_value] = numpy.nan
+            test_arr[test_arr < min_value] = numpy.nan
+        if max_value is not None:
+            reference_arr[reference_arr > max_value] = numpy.nan
+            test_arr[test_arr > max_value] = numpy.nan
 
     has_nans = False
     reference_nans = numpy.isnan(reference_arr)
@@ -185,6 +202,8 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
         bool_diff[test_nans] = False
         has_nans = True
     del test_nans
+
+    total_diff_count = numpy.count_nonzero(bool_diff)
 
     print("{indent}  {0} value(s) differ ({2:.02%} of {1})"
           .format(total_diff_count,
@@ -219,6 +238,11 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS):
     # Print most different values and their coordinates
     MAX_DIFF_TO_PRINT = 5
     diff_arr = numpy.abs(test_arr - reference_arr)
+    # Do not show differences where one of the inputs is NaN. Note that we do
+    # not test for diff_arr to be NaN, because NaN could be the result of Inf -
+    # Inf, which is a useful difference to show.
+    diff_arr[numpy.isnan(test_arr)] = 0
+    diff_arr[numpy.isnan(reference_arr)] = 0
     max_diff_indices = numpy.argsort(diff_arr, axis=None)
     print(
         "{indent}  "
@@ -288,7 +312,8 @@ def diff_meshes(reference_mesh, test_mesh):
     return difference_found
 
 
-def diff_textures(reference_texture, test_texture):
+def diff_textures(reference_texture, test_texture,
+                  min_value=None, max_value=None):
     difference_found = False
     reference_keys = set(reference_texture.keys())
     test_keys = set(test_texture.keys())
@@ -301,8 +326,9 @@ def diff_textures(reference_texture, test_texture):
         difference_found = True
 
     for key in set(reference_keys) & set(test_keys):
-        difference_found = diff_single_texture(reference_texture, test_texture,
-                                               key, key) or difference_found
+        difference_found = diff_single_texture(
+            reference_texture, test_texture, key, key,
+            min_value=min_value, max_value=max_value) or difference_found
 
     return difference_found
 
@@ -336,7 +362,8 @@ def diff_single_mesh(reference_mesh, test_mesh, reference_key, test_key):
     return difference_found
 
 
-def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name):
+def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name,
+                      min_value=None, max_value=None):
     if reference_vec.size() != test_vec.size():
         print("Vectors {0} and {2} differ in size:\n"
               "  Size of {0}: {1}\n"
@@ -368,7 +395,9 @@ def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name):
     else:
         vector_name = reference_name + '/' + test_name
 
-    return diff_arrays(reference_arr, test_arr, text_bits={
+    return diff_arrays(reference_arr, test_arr,
+                       min_value=min_value, max_value=max_value,
+                       text_bits={
         'array': 'vector {0}'.format(vector_name),
         'Arrays': 'Vectors {0}'.format(vector_name),
         'indent': '  ',
@@ -376,13 +405,15 @@ def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name):
 
 
 def diff_single_texture(reference_texture, test_texture,
-                        reference_key, test_key):
+                        reference_key, test_key,
+                        min_value=None, max_value=None):
     difference_found = False
     difference_found = diff_mesh_vectors(
         reference_texture[reference_key],
         test_texture[test_key],
         'reference[{0}]'.format(reference_key),
-        'test[{0}]'.format(test_key)
+        'test[{0}]'.format(test_key),
+        min_value=min_value, max_value=max_value,
     ) or difference_found
     return difference_found
 
@@ -399,8 +430,39 @@ def diff_trm(reference_trm, test_trm):
     return True
 
 
-def diff_files(reference_file_name, test_file_name):
+def diff_files(reference_file_name, test_file_name, reader="AIMS",
+               min_value=None, max_value=None):
+    if reader == "AIMS":
+        return diff_files_AIMS(reference_file_name, test_file_name,
+                               min_value=min_value, max_value=max_value)
+    elif reader == "nibabel":
+        return diff_files_nibabel(reference_file_name, test_file_name,
+                                  min_value=min_value, max_value=max_value)
+
+
+def diff_files_nibabel(reference_file_name, test_file_name,
+                       min_value=None, max_value=None):
+    """Print the differences between two files read by nibabel."""
+    import nibabel
+    reference_data = nibabel.load(reference_file_name)
+    reference_arr = numpy.array(reference_data.dataobj)
+    test_data = nibabel.load(test_file_name)
+    test_arr = numpy.array(test_data.dataobj)
+    difference_found = diff_arrays(reference_arr, test_arr,
+                                   min_value=min_value,
+                                   max_value=max_value,
+                                   text_bits={
+        'array': 'volume',
+        'Arrays': 'Volumes',
+        'indent': '',
+    })
+    return 1 if difference_found else 0
+
+
+def diff_files_AIMS(reference_file_name, test_file_name,
+                    min_value=None, max_value=None):
     """Print the differences between two files read by AIMS."""
+    from soma import aims
     reference_data = aims.read(reference_file_name)
     test_data = aims.read(test_file_name)
 
@@ -432,11 +494,15 @@ def diff_files(reference_file_name, test_file_name):
 
     data_difference_found = None
     if type(reference_data) in VOLUME_TYPES:
-        data_difference_found = diff_volumes(reference_data, test_data)
+        data_difference_found = diff_volumes(reference_data, test_data,
+                                             min_value=min_value,
+                                             max_value=max_value)
     elif type(reference_data) in MESH_TYPES:
         data_difference_found = diff_meshes(reference_data, test_data)
     elif type(reference_data) in TEXTURE_TYPES:
-        data_difference_found = diff_textures(reference_data, test_data)
+        data_difference_found = diff_textures(reference_data, test_data,
+                                             min_value=min_value,
+                                             max_value=max_value)
     elif type(reference_data) is aims.AffineTransformation3d:
         data_difference_found = diff_trm(reference_data, test_data)
     else:
@@ -458,6 +524,17 @@ Compare two files read by AIMS and summarize the differences""")
                         help="reference data file")
     parser.add_argument("test_file",
                         help="test data file")
+    parser.add_argument("--reader", default="AIMS",
+                        choices=("AIMS", "nibabel"),
+                        help="library used for reading the data")
+    parser.add_argument("--min-value", type=float, default=None,
+                        help="minimum value to be taken into account in "
+                        "comparisons (smaller values are replaced by NaN "
+                        "internally")
+    parser.add_argument("--max-value", type=float, default=None,
+                        help="maximum value to be taken into account in "
+                        "comparisons (larger values are replaced by NaN "
+                        "internally")
 
     args = parser.parse_args(argv[1:])
     return args
@@ -466,7 +543,10 @@ Compare two files read by AIMS and summarize the differences""")
 def main(argv=sys.argv):
     """The script's entry point."""
     args = parse_command_line(argv)
-    return diff_files(args.reference_file, args.test_file) or 0
+    return diff_files(args.reference_file, args.test_file,
+                      reader=args.reader,
+                      min_value=args.min_value,
+                      max_value=args.max_value) or 0
 
 
 if __name__ == "__main__":
