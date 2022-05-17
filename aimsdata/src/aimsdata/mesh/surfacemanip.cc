@@ -2441,6 +2441,18 @@ map<int, float> SurfaceManip::meshArea( const AimsSurfaceTriangle & surf,
 }
 
 
+map<int, float> SurfaceManip::meshArea( const AimsSurfaceTriangle & surf,
+                                        const Texture<int16_t> &tex )
+{
+  map<int, float> areas;
+  if( surf.size() == 0 )
+    return areas;
+
+  const AimsSurface<3, Void> & mesh = surf.begin()->second;
+
+  return meshArea( mesh, &tex );
+}
+
 
 float SurfaceManip::meshVolume( const AimsSurfaceTriangle & surf )
 {
