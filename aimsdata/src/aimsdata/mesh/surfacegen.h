@@ -94,7 +94,8 @@ namespace aims
     static AimsSurfaceTriangle* cylinder( const Point3df & p1, 
                                           const Point3df & p2, float radius, 
                                           float radius2, unsigned nfacets, 
-                                          bool closed, bool smooth = false );
+                                          bool closed, bool smooth = false,
+                                          bool smoooth_tube = true );
 
     static AimsSurfaceTriangle* cone( const carto::GenericObject & params );
     static AimsSurfaceTriangle* cone( const Point3df & arrow, 

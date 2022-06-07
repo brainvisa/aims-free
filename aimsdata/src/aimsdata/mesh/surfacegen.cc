@@ -244,7 +244,11 @@ namespace
                                "the cylinder ends (default: 0)" ) );
     p[ "smooth" ] 
       = Object::value( string( "(optional) make smooth normals and shared " 
-                               "vertices (default: 0)" ) );
+                               "vertices for the closing part (default: 0)" )
+                     );
+    p[ "smooth" ]
+      = Object::value( string( "(optional) make smooth normals and shared "
+                               "vertices for the tube part (default: 1)" ) );
     return d;
   }
 
@@ -813,6 +817,7 @@ SurfaceGenerator::cylinder( const GenericObject & params )
   unsigned	nf = 4;
   bool		closed = false;
   bool		smth = false;
+  bool      smth_tube = true;
 
   vp1 = params.getProperty( "point1" );
   vp2 = params.getProperty( "point2" );
@@ -846,26 +851,33 @@ SurfaceGenerator::cylinder( const GenericObject & params )
   catch( exception & )
     {
     }
+  try
+  {
+    smth_tube = (bool) params.getProperty( "smooth_tube" )->getScalar();
+  }
+  catch( exception & )
+  {
+  }
   return cylinder( Point3df( vp1->getArrayItem(0)->getScalar(),
                              vp1->getArrayItem(1)->getScalar(),
                              vp1->getArrayItem(2)->getScalar() ),
                    Point3df( vp2->getArrayItem(0)->getScalar(),
                              vp2->getArrayItem(1)->getScalar(),
                              vp2->getArrayItem(2)->getScalar() ),
-                   sz, sz2, nf, closed, smth );
+                   sz, sz2, nf, closed, smth, smth_tube );
 }
 
 
 AimsSurfaceTriangle* 
 SurfaceGenerator::cylinder( const Point3df & p1, const Point3df & p2, 
-			    float size, float size2, unsigned nfacets, 
-			    bool closed, bool smooth )
+                            float size, float size2, unsigned nfacets,
+                            bool closed, bool smooth, bool smooth_tube )
 {
   if( nfacets == 0 )
     {
       nfacets = (unsigned) ( ( size + size2 + 10 ) * 0.25 );
       if( nfacets < 6 )
-	nfacets = 6;
+        nfacets = 6;
     }
 
   Point3df	dir = p2 - p1;
@@ -876,7 +888,7 @@ SurfaceGenerator::cylinder( const Point3df & p1, const Point3df & p2,
   vector<Point3df>		& norm = s.normal();
   vector< AimsVector<uint,3> >	& poly = s.polygon();
   unsigned			i, nf = nfacets - 1;
-  Point3df			plane1, plane2, d;
+  Point3df			plane1, plane2, d, d2;
   float				angle;
 
   plane1 = vectProduct( dir, Point3df( 0, 0, 1 ) );
@@ -887,33 +899,62 @@ SurfaceGenerator::cylinder( const Point3df & p1, const Point3df & p2,
   plane2.normalize();
 
   if( closed )
-    {
-      if( smooth )
-	{
-	  vert.reserve( nfacets * 2 + 2 );
-	  norm.reserve( nfacets * 2 + 2 );
-	  poly.reserve( nfacets * 4);
-	}
-      else
-	{
-	  vert.reserve( nfacets * 4 + 2 );
-	  norm.reserve( nfacets * 4 + 2 );
-	  poly.reserve( nfacets * 4);
-	}
-    }
+  {
+    int nv = nfacets * 2 + 2;
+    if( !smooth )
+      nv += nfacets * 2;
+    if( !smooth_tube )
+      nv += nfacets * 2;
+    vert.reserve( nv );
+    norm.reserve( nv );
+    poly.reserve( nfacets * 4);
+  }
   else
+  {
+    if( smooth_tube )
     {
       vert.reserve( nfacets * 2 );
       norm.reserve( nfacets * 2 );
       poly.reserve( nfacets * 2 );
     }
+    else
+    {
+      vert.reserve( nfacets * 4 );
+      norm.reserve( nfacets * 4 );
+      poly.reserve( nfacets * 2 );
+    }
+  }
 
-  vert.push_back( p1 + plane1 * size );
-  vert.push_back( p2 + plane1 * size2 );
-  norm.push_back( plane1 );
-  norm.push_back( plane1 );
+  if( smooth_tube )
+  {
+    vert.push_back( p1 + plane1 * size );
+    vert.push_back( p2 + plane1 * size2 );
+    norm.push_back( plane1 );
+    norm.push_back( plane1 );
+  }
+  else
+  {
+    vert.push_back( p1 + plane1 * size );
+    vert.push_back( p1 + plane1 * size );
+    vert.push_back( p2 + plane1 * size2 );
+    vert.push_back( p2 + plane1 * size2 );
+    angle = -M_PI / nfacets;
+    d = plane1 * (float) cos( angle ) + plane2 * (float) sin( angle );
+    angle = M_PI / nfacets;
+    d2 = plane1 * (float) cos( angle ) + plane2 * (float) sin( angle );
+    norm.push_back( d );
+    norm.push_back( d2 );
+    norm.push_back( d );
+    norm.push_back( d2 );
+  }
+
+  int stride = 1;
+  if( !smooth_tube )
+    stride = 2;
 
   for( i=0; i<nf; ++i )
+  {
+    if( smooth_tube )
     {
       angle = M_PI * (i+1) * 2 / nfacets;
       d = plane1 * (float) cos( angle ) + plane2 * (float) sin( angle );
@@ -921,51 +962,83 @@ SurfaceGenerator::cylinder( const Point3df & p1, const Point3df & p2,
       norm.push_back( d );
       vert.push_back( p1 + d * size );
       vert.push_back( p2 + d * size2 );
-      poly.push_back( AimsVector<uint,3>( i*2, i*2+2, i*2+1 ) );
-      poly.push_back( AimsVector<uint,3>( i*2+1, i*2+2, i*2+3 ) );
+      poly.push_back( AimsVector<uint,3>( i*2, (i*2+2), (i*2+1) ) );
+      poly.push_back( AimsVector<uint,3>( (i*2+1), (i*2+2), (i*2+3) ) );
     }
+    else
+    {
+      angle = M_PI * (i+1) * 2 / nfacets;
+      d = plane1 * (float) cos( angle ) + plane2 * (float) sin( angle );
+      vert.push_back( p1 + d * size );
+      vert.push_back( p1 + d * size );
+      vert.push_back( p2 + d * size2 );
+      vert.push_back( p2 + d * size2 );
+      angle = M_PI * (i+0.5) * 2 / nfacets;
+      d = plane1 * (float) cos( angle ) + plane2 * (float) sin( angle );
+      angle = M_PI * (i+1.5) * 2 / nfacets;
+      d2 = plane1 * (float) cos( angle ) + plane2 * (float) sin( angle );
+      norm.push_back( d );
+      norm.push_back( d2 );
+      norm.push_back( d );
+      norm.push_back( d2 );
+      poly.push_back( AimsVector<uint,3>( i*2*stride+1, (i*2+2)*stride,
+                                          (i*2+1)*stride+1 ) );
+      poly.push_back( AimsVector<uint,3>( (i*2+1)*stride+1, (i*2+2)*stride,
+                                          (i*2+3)*stride ) );
+    }
+  }
 
   // last facet
-  poly.push_back( AimsVector<uint,3>( nf*2, 0, nf*2+1 ) );
-  poly.push_back( AimsVector<uint,3>( nf*2+1, 0, 1 ) );
+  if( smooth_tube )
+  {
+    poly.push_back( AimsVector<uint,3>( nf*2, 0, nf*2+1 ) );
+    poly.push_back( AimsVector<uint,3>( nf*2+1, 0, 1 ) );
+  }
+  else
+  {
+    poly.push_back( AimsVector<uint,3>( nf*4+1, 0, nf*4+3 ) );
+    poly.push_back( AimsVector<uint,3>( nf*4+3, 0, 2 ) );
+  }
 
   if( closed )
+  {
+    // make ends
+    unsigned n = vert.size();
+    vert.push_back( p1 );
+    vert.push_back( p2 );
+    norm.push_back( -dir );
+    norm.push_back( dir );
+    if( smooth )
     {
-      // make ends
-      unsigned n = vert.size();
-      vert.push_back( p1 );
-      vert.push_back( p2 );
+      for( i=0; i<nf; ++i )
+        {
+          poly.push_back( AimsVector<uint,3>( i*2*stride, n,
+                                              (i*2+2)*stride ) );
+          poly.push_back( AimsVector<uint,3>( (i*2+1)*stride, (i*2+3)*stride,
+                                              n+1 ) );
+        }
+      poly.push_back( AimsVector<uint,3>( (nf*2)*stride, n, 0 ) );
+      poly.push_back( AimsVector<uint,3>( (nf*2+1)*stride, stride, n+1 ) );
+    }
+    else
+    {
+      for( i=0; i<nf; ++i )
+      {
+        vert.push_back( vert[(i*2)*stride] );
+        vert.push_back( vert[(i*2+1)*stride] );
+        norm.push_back( -dir );
+        norm.push_back( dir );
+        poly.push_back( AimsVector<uint,3>( n+i*2+2, n, n+i*2+4 ) );
+        poly.push_back( AimsVector<uint,3>( n+i*2+3, n+i*2+5, n+1 ) );
+      }
+      vert.push_back( vert[(nf*2)*stride] );
+      vert.push_back( vert[(nf*2+1)*stride] );
       norm.push_back( -dir );
       norm.push_back( dir );
-      if( smooth )
-	{
-	  for( i=0; i<nf; ++i )
-	    {
-	      poly.push_back( AimsVector<uint,3>( i*2, n, i*2+2 ) );
-	      poly.push_back( AimsVector<uint,3>( i*2+1, i*2+3, n+1 ) );
-	    }
-	  poly.push_back( AimsVector<uint,3>( nf*2, n, 0 ) );
-	  poly.push_back( AimsVector<uint,3>( nf*2+1, 1, n+1 ) );
-	}
-      else
-	{
-	  for( i=0; i<nf; ++i )
-	    {
-	      vert.push_back( vert[i*2] );
-	      vert.push_back( vert[i*2+1] );
-	      norm.push_back( -dir );
-	      norm.push_back( dir );
-	      poly.push_back( AimsVector<uint,3>( n+i*2+2, n, n+i*2+4 ) );
-	      poly.push_back( AimsVector<uint,3>( n+i*2+3, n+i*2+5, n+1 ) );
-	    }
-	  vert.push_back( vert[nf*2] );
-	  vert.push_back( vert[nf*2+1] );
-	  norm.push_back( -dir );
-	  norm.push_back( dir );
-	  poly.push_back( AimsVector<uint,3>( n+nf*2+2, n, n+2 ) );
-	  poly.push_back( AimsVector<uint,3>( n+nf*2+3, n+3, n+1 ) );
-	}
+      poly.push_back( AimsVector<uint,3>( n+nf*2+2, n, n+2 ) );
+      poly.push_back( AimsVector<uint,3>( n+nf*2+3, n+3, n+1 ) );
     }
+  }
 
   return mesh;
 }

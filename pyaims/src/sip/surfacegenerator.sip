@@ -54,7 +54,7 @@ See the description() and printDescription() methods for more information.
 
   static AimsSurfaceTriangle* cylinder( const Point3df &, const Point3df &, 
                                         float, float, unsigned, bool, 
-                                        bool=false ) /Factory/;
+                                        bool=false, bool=true ) /Factory/;
 %Docstring
 static cylinder( Point3df center1, Point3df center2, float radius1, float radius2, unsigned nfaces, bool closed, bool smooth=False )
 %End
