@@ -51,7 +51,7 @@ namespace carto
   inline void
   RawConverter<INP,AimsRGB>::convert( const INP &in, AimsRGB & out ) const
   {
-    out = AimsRGB( (byte) in, (byte) in, (byte) in );
+    out = AimsRGB( (::byte) in, (::byte) in, (::byte) in );
   }
 
   template <class INP>
@@ -65,7 +65,7 @@ namespace carto
   inline void
   RawConverter<INP,AimsRGBA>::convert( const INP &in, AimsRGBA & out ) const
   {
-    out = AimsRGBA( (byte) in, (byte) in, (byte) in, 255 );
+    out = AimsRGBA( (::byte) in, (::byte) in, (::byte) in, 255 );
   }
 
   template <class OUTP>
