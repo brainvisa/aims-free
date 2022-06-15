@@ -56,7 +56,7 @@ namespace carto
   template <class T> inline
   void rgbtohsv( const T &in, AimsHSV & out )
   {
-    byte rgb_min, rgb_max;
+    ::byte rgb_min, rgb_max;
     rgb_min = MIN3(in.red(), in.green(), in.blue());
     rgb_max = MAX3(in.red(), in.green(), in.blue());
 
@@ -105,9 +105,9 @@ namespace carto
     v = double( in.value() ) * r1;
     i = long( floor( h / 60 ) ) % 6;
     f = h / 60 - i;
-    p = byte( v * ( 1.0 - s ) * 255 );
-    q = byte( v * ( 1.0 - f * s ) * 255 );
-    t = byte( v * ( 1.0 - ( 1.0 - f ) * s ) * 255 );
+    p = ::byte( v * ( 1.0 - s ) * 255 );
+    q = ::byte( v * ( 1.0 - f * s ) * 255 );
+    t = ::byte( v * ( 1.0 - ( 1.0 - f ) * s ) * 255 );
     
     switch( i ) {
       case 0:
@@ -154,7 +154,7 @@ namespace carto
   inline void 
   RawConverter<INP,AimsHSV>::convert( const INP &in, AimsHSV & out ) const
   {
-    AimsRGB tmp( (byte) in, (byte) in, (byte) in );
+    AimsRGB tmp( (::byte) in, (::byte) in, (::byte) in );
     rgbtohsv<AimsRGB>( tmp, out );
   }
 
