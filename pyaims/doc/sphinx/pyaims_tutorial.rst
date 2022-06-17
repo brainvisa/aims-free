@@ -241,7 +241,7 @@ True
 >>> from soma import aims
 >>> vol = aims.read('data_for_anatomist/subject01/subject01.nii')
 >>> # allocate a new volume with half dimensions
->>> vol2 = aims.Volume(vol.getSizeX() / 2, vol.getSizeY() / 2, vol.getSizeZ() / 2, dtype='DOUBLE')
+>>> vol2 = aims.Volume(vol.getSizeX() // 2, vol.getSizeY() // 2, vol.getSizeZ() // 2, dtype='DOUBLE')
 >>> vol2.getSizeX()
 128
 >>> # set the voxel size to twice it was in vol
