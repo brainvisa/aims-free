@@ -191,7 +191,7 @@ Voxel-wise operations:
 ...             # get relative position to pos0, in voxels
 ...             p -= pos0
 ...             # distance: norm of vector p
-...             dist = p.norm()
+...             dist = int(round(p.norm()))
 ...             # set it into the volume
 ...             vol.setValue(dist, x, y, z)
 
