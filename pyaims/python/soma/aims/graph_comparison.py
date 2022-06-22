@@ -38,6 +38,11 @@ from soma import aims
 import six
 import sys
 
+
+rel_flx_max_diff = 1e-4
+''' max accepted relative difference of float numbers
+'''
+
 def same_graphs(ref_graph, test_graph, verbose=False):
     '''
     Compare two graphs and return if they are identical.
@@ -137,6 +142,24 @@ def _same_dictionary(ref_dict, test_dict, same_element_function, verbose=False):
     return same_dict
 
 
+def _same_value(ref_value, test_value):
+    if isinstance(ref_value, float):
+        if ref_value != test_value and \
+                abs(ref_value - test_value) / max(abs(ref_value),
+                                                  abs(test_value)) \
+                    > rel_flx_max_diff:
+            return False
+    elif not isinstance(ref_value, str) and hasattr(ref_value, '__len__'):
+        #print('comp lists', ref_value, '*/*', test_value)
+        if len(ref_value) != len(test_value):
+            return False
+        return len([1 for x, y in zip(ref_value, test_value)
+                    if not _same_value(x, y)]) == 0
+    elif str(ref_value) != str(test_value):
+        return False
+    return True
+
+
 def _same_vertice(ref_vertice, test_vertice, verbose):
     if not len(ref_vertice) == len(test_vertice):
         if verbose:
@@ -151,10 +174,11 @@ def _same_vertice(ref_vertice, test_vertice, verbose):
         if key not in ['aims_bottom', 'aims_other', 'aims_ss', 'aims_Tmtktri',
                        'bottom_label', 'other_label', 'ss_label',
                        'Tmtktri_label']:
-            # XXX ref_vertice and test_vertice should be compared directly
-            if str(ref_vertice[key]) != str(test_vertice[key]):
+            ref_value = ref_vertice[key]
+            test_value = test_vertice[key]
+            if not _same_value(ref_value, test_value):
                 if verbose:
-                    print("vertice " + repr(key) + " " + str(ref_vertice[key])
+                    print("vertex " + repr(key) + " " + str(ref_vertice[key])
                           + " != " + str(test_vertice[key]))
                 return False
     return True
@@ -176,8 +200,9 @@ def _same_edge(ref_edge, test_edge, verbose):
         if key not in ['aims_cortical', 'aims_junction', 'aims_plidepassage',
                        'cortical_label', 'junction_label',
                        'plidepassage_label']:
-            # XXX ref_edge and test_edge should be compared directly
-            if str(ref_edge[key]) != str(test_edge[key]):
+            ref_value = ref_edge[key]
+            test_value = test_edge[key]
+            if not _same_value(ref_value, test_value):
                 if verbose:
                     print("edge " + repr(key) + " " + str(ref_edge[key]) + " "
                           + str(test_edge[key]))
