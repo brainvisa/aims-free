@@ -227,9 +227,9 @@ def RCObject_del(self):
         # print('already deleted')
         return
     carto.RCObject._releaseRC(self)
-    if hasattr(self, '_dontdel'):
+    try:
         del self._dontdel
-    else:
+    except (AttributeError, RecursionError):
         if getattr(carto.RCObject, '__olddel__', None):
             carto.RCObject.__olddel__(self)
 
