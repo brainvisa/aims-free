@@ -100,7 +100,7 @@ namespace aims {
     Object labels_table;
     try
     {
-      vector<string> labels;
+      map<int, Object> labels;
       labels_table = header->getProperty( "GIFTI_labels_table" );
 
       // labels_table is a dictionary-like object with int keys.
@@ -116,7 +116,7 @@ namespace aims {
       int32_t tmin = *keys.begin();
       size_t i, j, n = *keys.rbegin() - tmin + 1;
       vol->reallocate( n );
-      labels.resize( n );
+      // labels.resize( n );
       for( il=keys.begin(); il!=el; ++il )
         try
         {
@@ -127,7 +127,8 @@ namespace aims {
 
           string label = label_map->getProperty( "Label" )->getString();
           Object color = label_map->getProperty( "RGB" );
-          labels[i - tmin] = label;
+          // labels[i - tmin] = label;
+          labels[i] = Object::value( label );
           AimsRGBA rgba;
           rgba[3] = 255;
           Object cit = color->objectIterator();
