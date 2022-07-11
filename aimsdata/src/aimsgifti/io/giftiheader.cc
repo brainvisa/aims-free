@@ -751,51 +751,77 @@ void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
 {
   if( hasProperty( "GIFTI_labels_table" ) )
   {
-    carto::IntDictionary lt;
-    getProperty( "GIFTI_labels_table", lt );
-    carto::IntDictionary::const_iterator it, et = lt.end();
+    Object lt = getProperty( "GIFTI_labels_table" );
+    if( !lt.isNull() )
+    {
+      Object it = lt->objectIterator();
+
+      giiLabelTable & glt = gim->labeltable;
+      glt.length = lt->size();
+      // cout << "len: " << glt.length << endl;
+      glt.key = (int *) malloc( glt.length * sizeof( int ) );
+      glt.label = (char **) malloc( glt.length * sizeof( char * ) );
+      glt.rgba = (float *) malloc( 4 * glt.length * sizeof( float ) );
+      int i = 0;
+
+      Object LabelTable;
+
+      for( ; it->isValid(); it->next(), ++i )
+        try
+        {
+          glt.key[i] = it->intKey();
+          // std::cout << glt.key[i] << "\n";
+
+          LabelTable = it->currentValue();
+
+          if( it.isNull() )
+            glt.label[i] = 0;
+          else
+          {
+            std::string label
+              = LabelTable->getProperty( "Label" )->getString();
+            glt.label[i] = strdup( label.c_str() );
+            // std::cout << glt.label[i] << "\n";
+            Object rgba = LabelTable->getProperty( "RGB" );
+            Object itrgb = rgba->objectIterator();
+            for( int j = 0; itrgb->isValid(); itrgb->next(), j++ )
+            {
+              glt.rgba[4*i + j] = float( itrgb->currentValue()->getScalar() );
+              // std::cout << itrgb->currentValue()->getScalar() << " ";
+            }
+          }
+        }
+        catch( ... )
+        {
+          glt.key[i] = 0;
+          glt.label[i] = 0;
+        }
+      //removeProperty( "GIFTI_labels_table" );
+    }
+  }
+  else if( hasProperty( "labels" ) )
+  {
+    Object labels_map = getProperty( "labels" );
+    Object li = labels_map->objectIterator();
+
     giiLabelTable & glt = gim->labeltable;
-    glt.length = lt.size();
+    glt.length = labels_map->size();
     glt.key = (int *) malloc( glt.length * sizeof( int ) );
     glt.label = (char **) malloc( glt.length * sizeof( char * ) );
     glt.rgba = (float *) malloc( 4 * glt.length * sizeof( float ) );
     int i = 0;
 
-    Object LabelTable = Object::value( Dictionary() );
+//     Object LabelTable = Object::value( Dictionary() );
 
-    for( it=lt.begin(); it!=et; ++it, ++i )
-      try
-      {
-        glt.key[i] = it->first;
-        //std::cout << glt.key[i] << "\n";
+    for( ; li->isValid(); li->next(), ++i )
+    {
+      int k = li->intKey();
+      string label = li->currentValue()->getString();
+//       cout << k << ": " << label << endl;
 
-        LabelTable = it->second;
-
-        if( it->second.isNone() )
-          glt.label[i] = 0;
-        else
-          {
-        	LabelTable = it->second;
-        	std::string label;
-        	LabelTable->getProperty( "Label", label );
-        	glt.label[i] = strdup( label.c_str() );
-        	//std::cout << glt.label[i] << "\n";
-        	std::vector<float> rgba;
-		    LabelTable->getProperty( "RGB", rgba );
-		    vector<float>::iterator itrgb = rgba.begin();
-		    for (int j = 0; itrgb != rgba.end();itrgb++,j++)
-			  {
-			  glt.rgba[4*i + j]=  *itrgb;
-			  //std::cout << (float)*itrgb << " ";
-			  }
-          }
-      }
-      catch( ... )
-      {
-        glt.key[i] = 0;
-        glt.label[i] = 0;
-      }
-    //removeProperty( "GIFTI_labels_table" );
+      glt.label[i] = strdup( label.c_str() );
+      // find RGB colors
+    }
   }
 }
 
