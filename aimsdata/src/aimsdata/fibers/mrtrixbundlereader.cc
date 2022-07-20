@@ -81,7 +81,8 @@ Object MRTrixBundleReader::readHeaderStream( istream & file )
   header = Object::value( Dictionary() );
 
   char c;
-  char buffer[256];
+  const int maxlen = 32000;
+  char buffer[maxlen];
   unsigned int i;
   bool ok = false;
 
@@ -110,7 +111,7 @@ Object MRTrixBundleReader::readHeaderStream( istream & file )
   types[ "unidirectional" ] = "BOOL";
   types[ "total_count" ] = "U64";
 
-  file.getline( buffer, 256 );
+  file.getline( buffer, maxlen );
   if( !file.good() )
   {
     throw wrong_format_error( _fileName );
@@ -120,7 +121,7 @@ Object MRTrixBundleReader::readHeaderStream( istream & file )
 
   while( !ok )
   {
-    file.getline( buffer, 256 );
+    file.getline( buffer, maxlen );
     if( !file.good() )
       throw wrong_format_error( _fileName );
     string line( StringUtil::strip( buffer ) );
