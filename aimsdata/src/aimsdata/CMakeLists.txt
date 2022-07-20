@@ -154,6 +154,8 @@ set( _headers
     io/wavefrontheader.h
     io/wavefrontmeshW.h
     io/wavefrontmeshR.h
+    io_soma/trm_header_formatchecker.h
+    io_soma/trm_header_formatreader.h
     math/dtitensor.h
     math/gausslu.h
     math/integrator.h
@@ -364,6 +366,8 @@ set(_aimsdata_sources
     io/writer_sparsematrix.cc
     io/writer_texture.cc
     io/writer_volume.cc
+    io_soma/trm_header_formatchecker.cc
+    io_soma/trm_header_formatreader.cc
     math/gausslu.cc
     math/mathelem.cc
     math/romberg.cc

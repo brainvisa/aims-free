@@ -30,63 +30,26 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+#ifndef AIMS_IO_SOMA_TRM_HEADER_FORMATCHECKER_H
+#define AIMS_IO_SOMA_TRM_HEADER_FORMATCHECKER_H
 
-// activate deprecation warning
-#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#endif
+#include <soma-io/checker/formatchecker.h>
+//----------------------------------------------------------------------------
 
-/*
- *  IO classes
- */
-
-/* this source is only here to force instanciation of some of the most useful 
-   Reader templates */
-
-#include <aims/io/fileFormat_d.h>
-#include <aims/io/baseFormats_motion.h>
-#include <aims/io_soma/trm_header_formatchecker.h>
-#include <soma-io/datasourceinfo/datasourceinfoloader.h>
-
-using namespace aims;
-using namespace soma;
-using namespace std;
-
-namespace aims
+namespace soma
 {
 
-#if defined( __APPLE__ ) && (__GNUC__-0) < 4
-template<> FileFormat<Motion>::~FileFormat() {}
-#endif
+  class TrmHeaderFormatChecker : public FormatChecker
+  {
+  public:
 
-template<> void 
-FileFormatDictionary<Motion>::registerBaseFormats()
-{
-  std::vector<std::string>	ext;
-  ext.push_back( "trm" );
-  TrmFormat	*fm = new TrmFormat;
-  registerFormat( "TRM", fm, ext );
+    virtual DataSourceInfo check( DataSourceInfo dsi,
+                                  DataSourceInfoLoader & f,
+                                  carto::Object options = carto::none() )
+                                  const;
+    virtual ~TrmHeaderFormatChecker() {}
+  };
+
 }
 
-
-template class FileFormatDictionary<Motion>;
-template class FileFormat<Motion>;
-
-} // namespace aims
-
-
-static bool _motiondic()
-{
-  FileFormatDictionary<Motion>::init();
-
-  // register soma-io checker for the TRMHEADER format
-  vector<string>  exts(1);
-  exts[0] = "trmhdr";
-  DataSourceInfoLoader::registerFormat( "TRMHEADER",
-                                        new TrmHeaderFormatChecker, exts );
-
-  return true;
-}
-
-static bool motiondic __attribute__((unused)) = _motiondic();
-
+#endif

@@ -31,62 +31,38 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-// activate deprecation warning
-#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#endif
+#ifndef AIMS_IO_SOMA_TRM_HEADER_FORMATREADER_H
+#define AIMS_IO_SOMA_TRM_HEADER_FORMATREADER_H
 
-/*
- *  IO classes
- */
-
-/* this source is only here to force instanciation of some of the most useful 
-   Reader templates */
-
-#include <aims/io/fileFormat_d.h>
-#include <aims/io/baseFormats_motion.h>
-#include <aims/io_soma/trm_header_formatchecker.h>
-#include <soma-io/datasourceinfo/datasourceinfoloader.h>
-
-using namespace aims;
-using namespace soma;
-using namespace std;
+#include <soma-io/reader/formatreader.h>
 
 namespace aims
 {
+  class AffineTransformation3d;
+}
 
-#if defined( __APPLE__ ) && (__GNUC__-0) < 4
-template<> FileFormat<Motion>::~FileFormat() {}
+namespace soma
+{
+
+  class TrmHeaderFormatReader
+    : public FormatReader<aims::AffineTransformation3d>
+  {
+  public:
+    //========================================================================
+    //   N E W   M E T H O D S
+    //========================================================================
+    virtual aims::AffineTransformation3d*
+    createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
+                   const AllocatorContext & context,
+                   carto::Object options );
+    virtual void read( aims::AffineTransformation3d & obj,
+                       carto::rc_ptr<DataSourceInfo> dsi,
+                       const AllocatorContext & context,
+                       carto::Object options );
+    virtual FormatReader<aims::AffineTransformation3d>* clone() const;
+    virtual std::string formatID() const { return "TRMHEADER"; }
+  };
+
+}
+
 #endif
-
-template<> void 
-FileFormatDictionary<Motion>::registerBaseFormats()
-{
-  std::vector<std::string>	ext;
-  ext.push_back( "trm" );
-  TrmFormat	*fm = new TrmFormat;
-  registerFormat( "TRM", fm, ext );
-}
-
-
-template class FileFormatDictionary<Motion>;
-template class FileFormat<Motion>;
-
-} // namespace aims
-
-
-static bool _motiondic()
-{
-  FileFormatDictionary<Motion>::init();
-
-  // register soma-io checker for the TRMHEADER format
-  vector<string>  exts(1);
-  exts[0] = "trmhdr";
-  DataSourceInfoLoader::registerFormat( "TRMHEADER",
-                                        new TrmHeaderFormatChecker, exts );
-
-  return true;
-}
-
-static bool motiondic __attribute__((unused)) = _motiondic();
-

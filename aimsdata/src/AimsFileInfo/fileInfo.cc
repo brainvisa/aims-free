@@ -126,7 +126,7 @@ template<> void outHelper<char>( const AttributedObject& object,
 
 
 template<typename T> void outVecHelper( const AttributedObject& object,
-					const string& semantic, ostream& os )
+                                        const string& semantic, ostream& os )
 {
   vector<T>	x;
   object.getProperty(semantic, x);
@@ -185,7 +185,7 @@ bool printHeader( const Finder & f )
 	ordering relation */
 template<class T>
 bool printExtrema ( VolumeRef<T> & vol, const string & filename, 
-		    const Finder & finder, bool verbose )
+                    const Finder & finder, bool verbose )
 {
   printHeader( finder );
   if( !verbose )
@@ -407,7 +407,7 @@ FileInfo::FileInfo( bool verb ) : Process(), verbose( verb )
   registerProcessType( "Texture", "POINT2DF", &header );
   registerProcessType( "Graph", "VOID", &header );
   registerProcessType( "Bundles", "any", &header );
-  registerProcessType( "Motion", "VOID", &printMotion );
+  registerProcessType( "AffineTransformation3d", "VOID", &printMotion );
   registerProcessType( "genericobject", "any", &printGenericObject );
 }
 
