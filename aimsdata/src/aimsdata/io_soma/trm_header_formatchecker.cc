@@ -125,11 +125,6 @@ DataSourceInfo TrmHeaderFormatChecker::check( DataSourceInfo dsi,
 
   Object hdr = Object::value( PropertySet() );  // header
 
-  hdr->setProperty( "format", "TRMHEADER" );
-  hdr->setProperty( "object_type", "AffineTransformation3d" );
-  hdr->setProperty( "data_type", "VOID" );
-  hdr->setProperty( "transformation", t.toVector() );
-
   if( !refs )
     try
     {
@@ -154,6 +149,38 @@ DataSourceInfo TrmHeaderFormatChecker::check( DataSourceInfo dsi,
   }
 
   dsi.header() = hdr;
+
+  try
+  {
+    Object oinv = options->getProperty( "inv" );
+    bool inv = bool( oinv->getScalar() );
+    if( inv )
+    {
+      t = t.inverse();
+      Object s;
+      if( hdr->hasProperty( "source_referential" ) )
+      {
+        s = hdr->getProperty( "source_referential" );
+        hdr->removeProperty( "source_referential" );
+      }
+      if( hdr->hasProperty( "destination_referential" ) )
+      {
+        hdr->setProperty( "source_referential",
+                          hdr->getProperty( "destination_referential" ) );
+        hdr->removeProperty( "destination_referential" );
+      }
+      if( s )
+        hdr->setProperty( "destination_referential", s );
+    }
+  }
+  catch( runtime_error & e )
+  {
+  }
+
+  hdr->setProperty( "format", "TRMHEADER" );
+  hdr->setProperty( "object_type", "AffineTransformation3d" );
+  hdr->setProperty( "data_type", "VOID" );
+  hdr->setProperty( "transformation", t.toVector() );
 
   bool docapa = !dsi.capabilities().isInit();
   if( docapa )

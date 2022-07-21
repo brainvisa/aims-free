@@ -39,7 +39,7 @@
 #include <soma-io/datasource/datasource.h>
 //--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
-#define localMsg( message ) cartoCondMsg( 4, message, "PYTHONFORMATREADER" )
+#define localMsg( message ) cartoCondMsg( 4, message, "TRMHEADERFORMATREADER" )
 // localMsg must be undef at end of file
 //----------------------------------------------------------------------------
 

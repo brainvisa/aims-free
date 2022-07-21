@@ -44,6 +44,18 @@ namespace aims
 namespace soma
 {
 
+  /** Read transformation in a file (nifti or other) file header
+
+      Reader options:
+
+      - index (int):
+          index of the transformation in the list (several may be available)
+      - target (string):
+          name of the target referential (in the header "referentials" field),
+          used to retreive the index
+      - inv (bool 0/1):
+          if true, invert the transformation
+   */
   class TrmHeaderFormatReader
     : public FormatReader<aims::AffineTransformation3d>
   {
