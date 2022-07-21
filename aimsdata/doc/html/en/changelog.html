@@ -53,7 +53,7 @@
 
 
 <!-- -->
-<h4> <a name="version-5.1.0"></a>May 6, 2021, Version 5.1.0</h4>
+<h4> <a name="version-5.1.0"></a>July 21, 2022, Version 5.1.0</h4>
 
 <ul>
   <li>Support Volume classes with strides on X axis. Strides were present in the volume structure but most functions assumed that voxels were contiguous on the first (X) axis. This forbid for instance bindings to numpy arrays which had a "C" ordering convention. This limitation is now gone in main Volume methods and operator. However many algorithms are still assuming that the first axis is contiguous (and use pointers with ++ incrementation), so these volumes should be reserved for specific and tested uses.</li>
@@ -62,6 +62,10 @@
   <li>Huge cleanup in Aimsdata library: the obsolete classes AimsData have been actually marked as obsolete, and their use in the libraries and commands have been drastically reduced (almost removed). A set of classes and functions originally working with AimsData have been moved to Volume API, thus many APIs have changed, normally in a way that is "as compatible as possible", but still require a few changes in client uses.
   </li>
   <li>Pyaims: AimsData classes have completely be wiped out. They are not needed any longer.
+  </li>
+  <li>Improved affine transformations readers: Aims can now read a transformation inside another object format header, using the fake extension ".trmhdr" and possibly options "index" or "target". The "inv" option may be used to invert the transformation (for all readers). Ex: "tutu.nii.trmhdr?index=1&amp;inv=1"
+  </li>
+  <li>Improved affine transformations readers: Aims can now read a series of affine transformations and compose them on-the-fly to be read as a single transformation. It uses the fake extension ".trmc", and the "*" composition operator (as in matrix math order). Ex: "toto.trm*tutu.nii.trmhdr.trmc".
   </li>
 </ul>
 
