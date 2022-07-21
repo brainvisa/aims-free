@@ -31,47 +31,44 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Bucket header class
- */
-#ifndef AIMS_IO_TRMHEADER_H
-#define AIMS_IO_TRMHEADER_H
+#ifndef AIMS_IO_SOMA_TRM_HEADER_FORMATREADER_H
+#define AIMS_IO_SOMA_TRM_HEADER_FORMATREADER_H
 
-
-#include <aims/config/aimsdata_config.h>
-#include <aims/data/pheader.h>
-#include <aims/def/general.h>
-
+#include <soma-io/reader/formatreader.h>
 
 namespace aims
 {
+  class AffineTransformation3d;
+}
 
-  /** Descriptor class for the .trm Motion file format header.
-  */
-  class TrmHeader : public PythonHeader
+namespace soma
+{
+
+  /** .trm format for a transformation file
+
+      Reader options:
+
+      - inv (bool 0/1):
+          if true, invert the transformation
+   */
+  class TrmFormatReader : public FormatReader<aims::AffineTransformation3d>
   {
   public:
-    TrmHeader( const std::string& name ) :
-      PythonHeader(), 
-      _name( name )
-    { }
-    virtual ~TrmHeader() { }
-
-    std::string name() const { return _name; }
-
-    std::string filename() const;
-    virtual std::string extension() const { return( ".trm" ); }
-    virtual std::set<std::string> extensions() const;
-
-    void read( size_t* offset = 0 );
-    void write();
-
-  private:
-    std::string	_name;
+    //========================================================================
+    //   N E W   M E T H O D S
+    //========================================================================
+    virtual aims::AffineTransformation3d*
+    createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
+                   const AllocatorContext & context,
+                   carto::Object options );
+    virtual void read( aims::AffineTransformation3d & obj,
+                       carto::rc_ptr<DataSourceInfo> dsi,
+                       const AllocatorContext & context,
+                       carto::Object options );
+    virtual FormatReader<aims::AffineTransformation3d>* clone() const;
+    virtual std::string formatID() const { return "TRM"; }
   };
 
 }
 
-
 #endif
-

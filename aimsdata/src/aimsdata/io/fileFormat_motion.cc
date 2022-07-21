@@ -45,6 +45,7 @@
 
 #include <aims/io/fileFormat_d.h>
 #include <aims/io/baseFormats_motion.h>
+#include <aims/io_soma/trmformatchecker.h>
 #include <aims/io_soma/trm_header_formatchecker.h>
 #include <aims/io_soma/trm_compose_formatchecker.h>
 #include <soma-io/datasourceinfo/datasourceinfoloader.h>
@@ -79,6 +80,14 @@ template class FileFormat<Motion>;
 static bool _motiondic()
 {
   FileFormatDictionary<Motion>::init();
+
+  // register soma-io checker for the TRM format
+  {
+    vector<string>  exts(1);
+    exts[0] = "trm";
+    DataSourceInfoLoader::registerFormat( "TRM",
+                                          new TrmFormatChecker, exts );
+  }
 
   // register soma-io checker for the TRMHEADER format
   {

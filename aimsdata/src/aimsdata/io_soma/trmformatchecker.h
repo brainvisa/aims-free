@@ -30,48 +30,33 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+#ifndef AIMS_IO_SOMA_TRM_FORMATCHECKER_H
+#define AIMS_IO_SOMA_TRM_FORMATCHECKER_H
 
-/*
- *  Bucket header class
- */
-#ifndef AIMS_IO_TRMHEADER_H
-#define AIMS_IO_TRMHEADER_H
+#include <soma-io/checker/formatchecker.h>
+//----------------------------------------------------------------------------
 
-
-#include <aims/config/aimsdata_config.h>
-#include <aims/data/pheader.h>
-#include <aims/def/general.h>
-
-
-namespace aims
+namespace soma
 {
 
-  /** Descriptor class for the .trm Motion file format header.
-  */
-  class TrmHeader : public PythonHeader
+  /** .trm format for a transformation file
+
+      Reader options:
+
+      - inv (bool 0/1):
+          if true, invert the transformation
+   */
+  class TrmFormatChecker : public FormatChecker
   {
   public:
-    TrmHeader( const std::string& name ) :
-      PythonHeader(), 
-      _name( name )
-    { }
-    virtual ~TrmHeader() { }
 
-    std::string name() const { return _name; }
-
-    std::string filename() const;
-    virtual std::string extension() const { return( ".trm" ); }
-    virtual std::set<std::string> extensions() const;
-
-    void read( size_t* offset = 0 );
-    void write();
-
-  private:
-    std::string	_name;
+    virtual DataSourceInfo check( DataSourceInfo dsi,
+                                  DataSourceInfoLoader & f,
+                                  carto::Object options = carto::none() )
+                                  const;
+    virtual ~TrmFormatChecker() {}
   };
 
 }
 
-
 #endif
-

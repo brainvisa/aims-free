@@ -38,8 +38,10 @@
 
 #include <aims/io/baseFormats_motion.h>
 #include <cartobase/exception/file.h>
-#include <aims/io/motionR.h>
 #include <aims/io/motionW.h>
+
+
+using namespace std;
 
 namespace aims
 {
@@ -50,17 +52,15 @@ namespace aims
 
 
   bool TrmFormat::read( const std::string & filename, 
-			Motion & obj, 
+                        Motion & obj,
                         const carto::AllocatorContext & /*context*/, 
                         carto::Object /*options*/ )
   {
-    MotionReader	r( filename );
-    r.read( obj );
-    return true;
+    throw runtime_error( "not supported any longer. Use the soma-io version" );
   }
 
   bool TrmFormat::write( const std::string & filename, 
-			 const Motion & obj, carto::Object )
+                         const Motion & obj, carto::Object )
   {
     MotionWriter	r( filename );
     r.write( obj );
