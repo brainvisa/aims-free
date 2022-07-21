@@ -309,6 +309,23 @@ AffineTransformation3d AffineTransformation3d::inverse() const
 
   AffineTransformation3d inv( AffineTransformation3dBase::inverse() );
   inv.header()->copy( *header() );
+
+  Object s;
+  PythonHeader *hdr = inv.header();
+  if( hdr->hasProperty( "source_referential" ) )
+  {
+    s = hdr->getProperty( "source_referential" );
+    hdr->removeProperty( "source_referential" );
+  }
+  if( hdr->hasProperty( "destination_referential" ) )
+  {
+    hdr->setProperty( "source_referential",
+                      hdr->getProperty( "destination_referential" ) );
+    hdr->removeProperty( "destination_referential" );
+  }
+  if( s )
+    hdr->setProperty( "destination_referential", s );
+
   return inv;
 }
 
