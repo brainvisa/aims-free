@@ -70,7 +70,6 @@ set( _headers
     io/baseFormats_hierarchy.h
     io/baseFormats_mesh.h
     io/baseFormats_mesh_d.h
-    io/baseFormats_motion.h
     io/baseFormats_sparsematrix.h
     io/baseFormats_syntax.h
     io/baseFormats_texture.h
@@ -155,6 +154,7 @@ set( _headers
     io/wavefrontmeshW.h
     io/wavefrontmeshR.h
     io_soma/trmformatchecker.h
+    io_soma/trmformatwriter.h
     io_soma/trmformatreader.h
     io_soma/trm_compose_formatchecker.h
     io_soma/trm_compose_formatreader.h
@@ -296,7 +296,6 @@ set(_aimsdata_sources
     io/baseFormats_graph.cc
     io/baseFormats_hierarchy.cc
     io/baseFormats_mesh.cc
-    io/baseFormats_motion.cc
     io/baseFormats_sparsematrix.cc
     io/baseFormats_syntax.cc
     io/bckheader.cc
@@ -372,6 +371,7 @@ set(_aimsdata_sources
     io/writer_volume.cc
     io_soma/trmformatchecker.cc
     io_soma/trmformatreader.cc
+    io_soma/trmformatwriter.cc
     io_soma/trm_compose_formatchecker.cc
     io_soma/trm_compose_formatreader.cc
     io_soma/trm_header_formatchecker.cc

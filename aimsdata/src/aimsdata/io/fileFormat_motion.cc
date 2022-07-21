@@ -44,7 +44,7 @@
    Reader templates */
 
 #include <aims/io/fileFormat_d.h>
-#include <aims/io/baseFormats_motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/io_soma/trmformatchecker.h>
 #include <aims/io_soma/trm_header_formatchecker.h>
 #include <aims/io_soma/trm_compose_formatchecker.h>
@@ -58,28 +58,24 @@ namespace aims
 {
 
 #if defined( __APPLE__ ) && (__GNUC__-0) < 4
-template<> FileFormat<Motion>::~FileFormat() {}
+template<> FileFormat<AffineTransformation3d>::~FileFormat() {}
 #endif
 
 template<> void 
-FileFormatDictionary<Motion>::registerBaseFormats()
+FileFormatDictionary<AffineTransformation3d>::registerBaseFormats()
 {
-  std::vector<std::string>	ext;
-  ext.push_back( "trm" );
-  TrmFormat	*fm = new TrmFormat;
-  registerFormat( "TRM", fm, ext );
 }
 
 
-template class FileFormatDictionary<Motion>;
-template class FileFormat<Motion>;
+template class FileFormatDictionary<AffineTransformation3d>;
+template class FileFormat<AffineTransformation3d>;
 
 } // namespace aims
 
 
 static bool _motiondic()
 {
-  FileFormatDictionary<Motion>::init();
+  FileFormatDictionary<AffineTransformation3d>::init();
 
   // register soma-io checker for the TRM format
   {

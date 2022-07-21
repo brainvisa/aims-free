@@ -36,6 +36,7 @@
 
 #include <soma-io/reader/formatreader.h>
 
+
 namespace aims
 {
   class AffineTransformation3d;

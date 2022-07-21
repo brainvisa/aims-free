@@ -31,42 +31,32 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-// activate deprecation warning
-#ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#undef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#endif
+#ifndef AIMS_IO_SOMA_TRM_HEADER_FORMATWRITER_H
+#define AIMS_IO_SOMA_TRM_HEADER_FORMATWRITER_H
 
-#include <aims/io/baseFormats_motion.h>
-#include <cartobase/exception/file.h>
-#include <aims/io/motionW.h>
+#include <soma-io/writer/formatwriter.h>
 
-
-using namespace std;
 
 namespace aims
 {
+  class AffineTransformation3d;
+}
 
-  TrmFormat::~TrmFormat()
+namespace soma
+{
+
+  class TrmFormatWriter : public FormatWriter<aims::AffineTransformation3d>
   {
-  }
+  public:
+    virtual bool filterProperties(carto::Object properties,
+                                  carto::Object options = carto::none());
 
-
-  bool TrmFormat::read( const std::string & filename, 
-                        Motion & obj,
-                        const carto::AllocatorContext & /*context*/, 
-                        carto::Object /*options*/ )
-  {
-    throw runtime_error( "not supported any longer. Use the soma-io version" );
-  }
-
-  bool TrmFormat::write( const std::string & filename, 
-                         const Motion & obj, carto::Object )
-  {
-    MotionWriter	r( filename );
-    r.write( obj );
-    return true;
-  }
+    virtual bool write( const aims::AffineTransformation3d & obj,
+                        carto::rc_ptr<DataSourceInfo> dsi,
+                        carto::Object options );
+  };
 
 }
 
+#endif
 

@@ -31,34 +31,58 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Data reader class
- */
-#ifndef AIMS_IO_BASEFORMATS_MOTION_H
-#define AIMS_IO_BASEFORMATS_MOTION_H
+#include <aims/io_soma/trmformatwriter.h>
+#include <aims/transformation/affinetransformation3d.h>
+#include <aims/io/motionW.h>
+#include <soma-io/io/formatdictionary.h>
+//--- debug ------------------------------------------------------------------
+#include <cartobase/config/verbose.h>
+#define localMsg( message ) cartoCondMsg( 4, message, "TRMFORMATWRITER" )
+// localMsg must be undef at end of file
+//----------------------------------------------------------------------------
 
-#include <aims/config/aimsdata_config.h>
-#include <aims/io/fileFormat.h>
-#include <aims/resampling/motion.h>
+using namespace aims;
+using namespace soma;
+using namespace carto;
+using namespace std;
+
+bool TrmFormatWriter::filterProperties( Object /* properties */,
+                                        Object /* options */ )
+{
+  // Nothing to filter here
+  return true;
+}
+
+bool TrmFormatWriter::write( const AffineTransformation3d & obj,
+                             rc_ptr<DataSourceInfo> dsi,
+                             Object /*options*/ )
+{
+  rc_ptr<DataSource> ds = dsi->list().dataSource();
+
+  localMsg( "write " + ds->url() );
+
+  MotionWriter mw( ds->url() );
+  mw.write( obj );
+
+  return true;
+}
 
 
-namespace aims
+namespace
 {
 
-  class TrmFormat : public FileFormat<Motion>
+  bool inittrmformat()
   {
-  public:
-    virtual ~TrmFormat();
+    TrmFormatWriter	*r = new TrmFormatWriter;
+    vector<string>	exts;
+    exts.push_back( "trm" );
+    FormatDictionary<AffineTransformation3d>::registerFormat( "TRM", r, exts );
+    return true;
+  }
 
-    virtual bool read( const std::string & filename, Motion & obj, 
-		       const carto::AllocatorContext & context, 
-                       carto::Object options );
-    virtual bool write( const std::string & filename, const Motion & vol, 
-                        carto::Object options = carto::none() );
-  };
+  bool dummy __attribute__((unused)) = inittrmformat();
 
 }
 
-#endif
 
-
+#undef localMsg
