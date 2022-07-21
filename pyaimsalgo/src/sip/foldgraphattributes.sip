@@ -11,7 +11,9 @@ class FoldGraphAttributes /NoDefaultCtors/
     FoldGraphAttributes( const rc_ptr_Volume_S16 & skel, Graph & graph,
                          const Motion *talairachMotion = 0,
                          int inside = 0, int outside = 11,
-                         bool withmeshes = true );
+                         bool withmeshes = true,
+                         const vector_S32 & graphversion
+                             = vector_S32() );
 
     void cleanup();
     void doAll();
