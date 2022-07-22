@@ -16,6 +16,8 @@ General
 
 * :cmds:`List of all executable programs with help <>`
 
+* :doc:`Input/Outputs: reading and writing objects, and options <aims_io>`
+
 Tutorial
 ========
 
@@ -62,7 +64,9 @@ Building sources and using AIMS for custom programs
 
 Projects are mainly in C++ and Python language. As BrainVISA is modular, it is made of multiple projects, which are separated by scope, aim, maintainers, language, and licence. To build the whole thing, we needed a tool to build an aggregation of the various projects. This tool is based on `CMake <http://cmake.org>`_ but needed a higher-level tool to glue the various projects. This is the role of the `brainvisa-cmake <https://github.com/brainvisa/brainvisa-cmake>`_ project of BrainVisa, and its main program, **bv_maker**.
 
-Instructions on how to use it are available on the BrainVISa web server:
+The easiest way to install it is using casa-distro containers - see info on https://dev.brainvisa.info.
+
+At lower level, instructions on how to use it are available on the BrainVISA web server:
 
   https://brainvisa.info/brainvisa-cmake/index.html
 
@@ -79,6 +83,7 @@ Miscelaneous
   changelog
   aims_config
   tutorial
+  aims_io
   formats
   spm_format
 
