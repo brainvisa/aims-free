@@ -59,7 +59,8 @@ public:
     filein(),
     fileout(),
     doInverse(false),
-    defaultval("0")
+    defaultval("0"),
+    masklabel("none")
   {
     registerProcessType( "Volume", "S8",     &doitMask<int8_t> );
     registerProcessType( "Volume", "U8",     &doitMask<uint8_t> );
@@ -75,6 +76,7 @@ public:
   string  fileout;
   bool    doInverse;
   string  defaultval;
+  string  masklabel;
 };
 
 // Process 2: read data
@@ -90,6 +92,7 @@ public:
     fileout(),
     doInverse(false),
     defaultval("0"),
+    masklabel("none"),
     vsData(1., 1., 1.),
     vsMask(1., 1., 1.),
     dimData(1, 1, 1),
@@ -112,6 +115,7 @@ public:
   string       fileout;
   bool         doInverse;
   string       defaultval;
+  string       masklabel;
 
   AimsData<M>  mask;
   Point3df     vsData;
@@ -129,6 +133,7 @@ bool doitMask( Process & p, const string & fname, Finder & /*f*/ )
   ip.fileout = mp.fileout;
   ip.doInverse = mp.doInverse;
   ip.defaultval = mp.defaultval;
+  ip.masklabel = mp.masklabel;
 
   Reader<AimsData<M> > maskReader( fname );
   cout << "reading mask..." << endl;
@@ -191,8 +196,20 @@ bool doitData( Process & p, const string & fname, Finder & f )
         ip.mask(x, y, z, t) = 0;
     }
   }
+  else if( ip.masklabel != "none" )
+  {
+    T label;
+    stringTo( ip.masklabel, label );
+    ForEach4d( ip.mask, x, y, z, t )
+    {
+      if ( ip.mask(x, y, z, t) == label )
+        ip.mask(x, y, z, t) = 1;
+      else
+        ip.mask(x, y, z, t) = 0;
+    }
+  }
 
-  // Maskage
+  // Masking
   aims::Progression progress(data.dimT() * data.dimZ() * data.dimY() * data.dimX() - 1);
 
   if (carto::verbose)
@@ -241,6 +258,8 @@ int main( int argc, const char **argv )
     app.addOption( filemask, "-m", "mask" );
     app.addOption( proc.doInverse, "--inv", "use inverse mask image (default=no)" , true);
     app.addOption( proc.defaultval, "-d", "Default values for masked pixels [default=0]", true );
+    app.addOption( proc.masklabel, "-l",
+                   "Voxel value of the mask label [default=non null]", true );
     app.initialize();
 
     if( !proc.execute( filemask ) )
