@@ -81,6 +81,7 @@ public:
   string  vfinterp;
   bool    mmap_fields;
   string  progress_file;
+  bool    volume_id;
 };
 
 
@@ -95,7 +96,8 @@ ApplyTransformProc::ApplyTransformProc()
     dx(0), dy(0), dz(0),
     sx(0.), sy(0.), sz(0.),
     vfinterp("linear"),
-    mmap_fields(false)
+    mmap_fields(false),
+    volume_id( false )
 {
   registerProcessType("Volume", "S8",      &doVolume<int8_t, int8_t>);
   registerProcessType("Volume", "U8",      &doVolume<uint8_t, uint8_t>);
@@ -568,7 +570,8 @@ load_transformation(const string &filename_arg,
 // FatalError is thrown if the transformations cannot be loaded properly.
 std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
 load_transformations(const ApplyTransformProc& proc,
-                     const DictionaryInterface* input_header = nullptr)
+                     const DictionaryInterface* input_header = nullptr,
+                     const Finder & finder = Finder())
 {
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > ret;
   rc_ptr<AffineTransformation3d> aims_to_input_space_transform; // null
@@ -756,7 +759,54 @@ load_transformations(const ApplyTransformProc& proc,
       clog << "No transformation provided, identity will be used." << endl;
       ret.first = const_ref<Transformation3d>(new TransformationChain3d);
       ret.second = const_ref<Transformation3d>(new TransformationChain3d);
-    } else {
+      // if --volume_id is specified, compensate the difference in voxel size
+      // between input and output origins
+      if( proc.volume_id )
+      {
+        cout << "VOLUME ID\n";
+        Point3df vs( 1., 1., 1. );
+        const PythonHeader *ph
+          = dynamic_cast<const PythonHeader *>( finder.header() );
+        if( ph )
+        {
+          try
+          {
+            Object ovs = ph->getProperty( "voxel_size" );
+            if( ovs )
+            {
+              if( ovs->size() >= 1 )
+              {
+                vs[0] = float( ovs->getArrayItem( 0 )->getScalar() );
+                {
+                  if( ovs->size() >= 2 )
+                  {
+                    vs[1] = float( ovs->getArrayItem( 1 )->getScalar() );
+                    if( ovs->size() >= 3 )
+                      vs[2] = float( ovs->getArrayItem( 2 )->getScalar() );
+                  }
+                }
+              }
+            }
+          }
+          catch( ... )
+          {
+          }
+        }
+        vs[0] = vs[0] - proc.sx;
+        vs[1] = vs[1] - proc.sy;
+        vs[2] = vs[2] - proc.sz;
+        cout << "translation: " << vs << endl;
+
+        AffineTransformation3d *t = new AffineTransformation3d;
+        rc_ptr<Transformation3d> tid( t );
+        t->setTranslation( vs / 2 );
+        ret.first = tid;
+        ret.second = rc_ptr<Transformation3d>(
+          new AffineTransformation3d( t->inverse() ) );
+      }
+    }
+    else
+    {
       TransformationChain3d direct_chain;
       direct_chain.push_back(aims_to_input_space_transform);
       ret.first = direct_chain.simplify();
@@ -776,7 +826,7 @@ load_transformations(const ApplyTransformProc& proc,
 
 
 template <class T, class C>
-bool doVolume(Process & process, const string & fileref, Finder &)
+bool doVolume(Process & process, const string & fileref, Finder & finder)
 {
   ApplyTransformProc & proc = (ApplyTransformProc &) process;
 
@@ -790,21 +840,21 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   T background_value;
   stringTo(proc.background_value, background_value);
 
+  // Compute dimensions of the output volume
+  const carto::Object reference_header = read_reference_header(proc.reference);
+  set_geometry(proc, reference_header, input_image.header(), true);
+
   // Load the transformation
   const_ref<Transformation3d> inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, &input_image.header());
+      = load_transformations(proc, &input_image.header(), finder);
     inverse_transform = transforms.second;
     if(inverse_transform.isNull()) {
       clog << "Error: no inverse transform provided" << endl;
       return false;
     }
   }
-
-  // Compute dimensions of the output volume
-  const carto::Object reference_header = read_reference_header(proc.reference);
-  set_geometry(proc, reference_header, input_image.header(), true);
 
   cout << "Output dimensions: "
        << proc.dx << ", " << proc.dy << ", " << proc.dz << endl;
@@ -863,7 +913,7 @@ bool doVolume(Process & process, const string & fileref, Finder &)
 
 
 template <int D>
-bool doMesh(Process & process, const string & fileref, Finder &)
+bool doMesh(Process & process, const string & fileref, Finder & finder)
 {
   ApplyTransformProc & proc = (ApplyTransformProc &) process;
   typedef AimsTimeSurface<D, Void> MeshType;
@@ -878,7 +928,7 @@ bool doMesh(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, &mesh.header());
+      = load_transformations(proc, &mesh.header(), finder);
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -911,7 +961,7 @@ bool doMesh(Process & process, const string & fileref, Finder &)
 }
 
 
-bool doBucket(Process & process, const string & fileref, Finder &)
+bool doBucket(Process & process, const string & fileref, Finder & finder)
 {
   ApplyTransformProc & proc = (ApplyTransformProc &) process;
 
@@ -932,7 +982,7 @@ bool doBucket(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, &input_bucket.header());
+      = load_transformations(proc, &input_bucket.header(), finder);
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -977,7 +1027,7 @@ bool doBucket(Process & process, const string & fileref, Finder &)
 }
 
 
-bool doBundles(Process & process, const string & fileref, Finder &)
+bool doBundles(Process & process, const string & fileref, Finder & finder)
 {
   ApplyTransformProc & proc = (ApplyTransformProc &) process;
 
@@ -988,7 +1038,7 @@ bool doBundles(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, bundle_reader.readHeader().get());
+      = load_transformations(proc, bundle_reader.readHeader().get(), finder);
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -1053,7 +1103,7 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, graph.get());
+      = load_transformations(proc, graph.get(), f);
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -1360,6 +1410,13 @@ int main(int argc, const char **argv)
                   "write progress info in this file. The file is opened in "
                   "append mode, so that it can be an existing file, "
                   "already opened by a monitoring application.", true );
+    app.addOption(proc.volume_id, "--vol_id",
+                  "When no tansform is specified (identity) and "
+                  "transformation applies between volumes, then add a "
+                  "translation to compensate the difference in voxel sizes "
+                  "between input and output geometries, and keep the same "
+                  "field of view instead of the same origin. This is normally "
+                  "what we do when just changing an image resolution.", true);
     app.alias("-i",             "--input");
     app.alias("-m",             "--direct-transform");
     app.alias("--motion",       "--direct-transform");
