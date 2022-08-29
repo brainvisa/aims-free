@@ -71,8 +71,8 @@ def graphTransform2(g, motions, tmpg):
                 cs = '"' + string.join(c, '" "') + '"'
                 print(cs)
                 os.system(cs)
-                c = ['AimsResample', '-i', thr, '-o', thr, '-m', mot, '-t',
-                     'n']
+                c = ['AimsApplyTransform', '-i', thr, '-o', thr, '-m', mot,
+                     '-t', 'n']
                 # ... unfinished ...
             finally:
                 os.unlink(thr)
@@ -205,7 +205,12 @@ def parseOpts(argv):
                           'no resampling is done (each voxel is transformed '
                           'with no more processing, which may result in holes '
                           'and/or unconnected regions if scaling factors are '
-                          'superior to 1.)')
+                          'superior to 1.)\n'
+                          'Note that now, AimsApplyTransform can resample '
+                          'graphs and other object, in a better way than this '
+                          'mainly unmaintained command - but without the '
+                          'label filtering, which is the reason we have not '
+                          'removed this command.')
     parser.add_option('-i', '--input', dest='input', help='input graph')
     parser.add_option('-o', '--output', dest='output',
                       help='output graph [default: <INPUT>]')
