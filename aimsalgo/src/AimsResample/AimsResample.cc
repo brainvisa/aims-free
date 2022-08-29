@@ -198,10 +198,16 @@ int main( int argc, const char **argv )
     ProcessInput	filein( proc );
     string 	referenceFile;
     string	defaultval = "0";
+    bool force = false;
     
-    AimsApplication	app( argc, argv, "Resampling. Applies a " 
-                         "transformation matrix to a volume. Performs " 
-                         "linear resampling by default." );
+    AimsApplication	app(
+      argc, argv,
+      "This command is obsolete. Please use AimsApplyTransform instead. The "
+      "same options and arguments will just work in most cases, except for "
+      "the \"-d\" option, which should be replaced with \"--bg\" instead. "
+      "This old command is now disabled, unless the \"--force\" option is "
+      "passed."
+    );
     app.addOption( filein, "-i", "source volume" );
     app.addOption( fileout, "-o", "destination volume" );
     app.addOption( motionfile, "-m", "motion file [default=identity]", true );
@@ -230,6 +236,9 @@ int main( int argc, const char **argv )
                    "--dy, --dz, --sx, --sy and --sz)",
                    true );
     app.addOption( defaultval, "-d", "Default value for borders [default=0]", true );
+    app.addOption( force, "--force",
+                   "force use of AimsResample despite its obsolescence (it "
+                   "will refuse to work otherwise)", true );
     app.alias( "--input", "-i" );
     app.alias( "--output", "-o" );
     app.alias( "--motion", "-m" );
@@ -237,6 +246,15 @@ int main( int argc, const char **argv )
     app.alias( "--reference", "-r" );
     app.alias( "--defaultvalue", "-d" );
     app.initialize();
+
+    if( !force )
+    {
+      cerr << "This command is obsolete and is disabled. Please use "
+           << "AimsApplyTransform instead. The \"--force\" option will run it "
+           << "anyway (thus re-enable it), you can use it if really needed "
+           << "but the command will be removed in a future version of AIMS\n";
+      return EXIT_FAILURE;
+    }
     
     if ( ! referenceFile.empty() ) {
       Finder f;
