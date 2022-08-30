@@ -59,6 +59,30 @@ namespace soma
     virtual ~TrmComposeFormatChecker() {}
   };
 
+
+  /** Read a transformation build from compising several transformation files
+
+      An artificial ".trmc" extension is used to recognize this format.
+
+      Files are separated with a "*" character. If some of them have options
+      ("?option=value"), then the final composition should also have an option
+      separator ("toto.trm?inv=1*tutu.nii.trmhdr.trmc?") in order to avoid the
+      URL parser to parse everything after the last "?" character as options.
+
+      The difference with TrmComposeFormatChecker is that TrmChainFormatChecker will allow non-affine 3D transforms, and avertize the resulting object type as a Transformation3d (probably a TransformationChain3d)
+   */
+  class TrmChainFormatChecker : public FormatChecker
+  {
+  public:
+
+    virtual DataSourceInfo check( DataSourceInfo dsi,
+                                  DataSourceInfoLoader & f,
+                                  carto::Object options = carto::none() )
+                                  const;
+    virtual ~TrmChainFormatChecker() {}
+  };
+
+
 }
 
 #endif

@@ -87,7 +87,7 @@ namespace soma
                        const AllocatorContext & context,
                        carto::Object options );
     virtual FormatReader<Transformation3d>* clone() const;
-    virtual std::string formatID() const { return "TRM"; }
+    virtual std::string formatID() const { return "AFFINETRANS"; }
   };
 
 }

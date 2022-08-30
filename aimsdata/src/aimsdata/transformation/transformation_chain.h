@@ -77,6 +77,7 @@ public:
   void push_front(const carto::const_ref<Transformation3d>& transformation);
   /** Remove the first transformation from the list */
   void pop_front();
+  size_t size() const;
 
   bool isIdentity() const CARTO_OVERRIDE;
   bool invertible() const CARTO_OVERRIDE;

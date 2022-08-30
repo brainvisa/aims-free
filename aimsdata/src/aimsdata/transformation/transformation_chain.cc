@@ -68,6 +68,13 @@ void aims::TransformationChain3d::pop_front()
   _transformations.pop_front();
 }
 
+
+size_t aims::TransformationChain3d::size() const
+{
+  return _transformations.size();
+}
+
+
 bool aims::TransformationChain3d::isIdentity() const
 {
   for(ListType::const_iterator it = _transformations.begin() ;

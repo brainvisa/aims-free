@@ -44,6 +44,8 @@ namespace aims
 namespace soma
 {
 
+  class Transformation3d;
+
   /** Read a transformation build from compising several transformation files
 
       An artificial ".trmc" extension is used to recognize this format.
@@ -71,6 +73,27 @@ namespace soma
     virtual FormatReader<aims::AffineTransformation3d>* clone() const;
     virtual std::string formatID() const { return "TRMCOMPOSE"; }
   };
+
+
+  class TrmChainFormatReader
+    : public FormatReader<Transformation3d>
+  {
+  public:
+    virtual Transformation3d*
+    createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
+                   const AllocatorContext & context,
+                   carto::Object options );
+    Transformation3d* create( carto::Object header,
+                              const AllocatorContext & context,
+                              carto::Object options );
+    virtual void read( Transformation3d & obj,
+                       carto::rc_ptr<DataSourceInfo> dsi,
+                       const AllocatorContext & context,
+                       carto::Object options );
+    virtual FormatReader<Transformation3d>* clone() const;
+    virtual std::string formatID() const { return "TRMCHAIN"; }
+  };
+
 
 }
 

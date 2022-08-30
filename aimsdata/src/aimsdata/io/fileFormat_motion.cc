@@ -136,6 +136,15 @@ static bool _motiondic()
                                           new TrmComposeFormatChecker, exts );
   }
 
+  // register soma-io checker for the TRMCOMPOSE format for non-affine
+  // transforms
+  {
+    vector<string>  exts(1);
+    exts[0] = "trmc";
+    DataSourceInfoLoader::registerFormat( "TRMCHAIN",
+                                          new TrmChainFormatChecker, exts );
+  }
+
   return true;
 }
 
