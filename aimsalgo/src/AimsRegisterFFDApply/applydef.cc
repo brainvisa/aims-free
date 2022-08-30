@@ -1008,8 +1008,14 @@ int main( int argc, const char **argv )
     //
     AimsApplication application(
       argc, argv,
-      "Apply FFD (vector field) transformation on an image, a mesh, a 'bucket' "
-      "(voxels list file), fiber tracts, a graph, or to points.\n"
+      "In most cases you should rather use AimsApplyTransform instead of "
+      "AimsRegisterFFDApply. This command has been mostly replaced with the "
+      "above one, except for the -g, -c and --old-mode options. So if you are "
+      "not using these options, use AimsApplyTransform preferably, which is "
+      "more powerful, and clearer to use.\n"
+      "\n\n"
+      "Apply FFD (vector field) transformation on an image, a mesh, a "
+      "'bucket' (voxels list file), fiber tracts, a graph, or to points.\n"
       "\n"
       "Note that when resampling an image, the transformations must represent "
       "the inverse direction (for a destination point we seek the source "
