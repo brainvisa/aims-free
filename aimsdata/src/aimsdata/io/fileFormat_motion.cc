@@ -44,6 +44,8 @@
    Reader templates */
 
 #include <aims/io/fileFormat_d.h>
+#include <aims/io/reader_d.h>
+#include <aims/io/writer_d.h>
 #include <aims/transformation/affinetransformation3d.h>
 #include <aims/io_soma/trmformatchecker.h>
 #include <aims/io_soma/trm_header_formatchecker.h>
@@ -67,8 +69,40 @@ FileFormatDictionary<AffineTransformation3d>::registerBaseFormats()
 }
 
 
+template<> void
+FileFormatDictionary<Transformation3d>::registerBaseFormats()
+{
+}
+
+
+template<> Transformation3d*
+FileFormat<Transformation3d>::read( const std::string & filename,
+                                    const carto::AllocatorContext & context,
+                                    carto::Object options )
+{
+  AffineTransformation3d	*object = new AffineTransformation3d;
+  try
+  {
+    if( read( filename, *object, context, options ) )
+      return object;
+  }
+  catch( std::exception & )
+  {
+    delete object;
+    throw;
+  }
+  delete object;
+  return 0;
+}
+
+
 template class FileFormatDictionary<AffineTransformation3d>;
 template class FileFormat<AffineTransformation3d>;
+
+template class FileFormatDictionary<Transformation3d>;
+template class FileFormat<Transformation3d>;
+template class Reader<Transformation3d>;
+template class Writer<Transformation3d>;
 
 } // namespace aims
 
@@ -76,6 +110,7 @@ template class FileFormat<AffineTransformation3d>;
 static bool _motiondic()
 {
   FileFormatDictionary<AffineTransformation3d>::init();
+  FileFormatDictionary<Transformation3d>::init();
 
   // register soma-io checker for the TRM format
   {
@@ -105,4 +140,16 @@ static bool _motiondic()
 }
 
 static bool motiondic __attribute__((unused)) = _motiondic();
+
+
+#include <soma-io/io/formatdictionary_d.h>
+#include <soma-io/io/reader_d.h>
+#include <soma-io/io/writer_d.h>
+
+namespace soma
+{
+  template class FormatDictionary<Transformation3d>;
+  template class Reader<Transformation3d>;
+  template class Writer<Transformation3d>;
+}
 

@@ -21,6 +21,7 @@
 #include <aims/graph/graphmanip.h>
 #include <graph/graph/graph.h>
 #include <cartobase/containers/nditerator.h>
+#include <soma-io/reader/formatreader.h>
 #include <cstdio>
 #include <cmath>
 #include <limits>
@@ -948,8 +949,164 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
   }
 
 
+  // ---
+
+  template<> FfdTransformation*
+  FileFormat<FfdTransformation>::read( const std::string & filename,
+                                       const carto::AllocatorContext & context,
+                                       carto::Object options )
+  {
+    TrilinearFfd	*object = new TrilinearFfd;
+    try
+    {
+      if( read( filename, *object, context, options ) )
+        return object;
+    }
+    catch( std::exception & )
+    {
+      delete object;
+      throw;
+    }
+    delete object;
+    return 0;
+  }
+
+
+  // ---
+
+  class FfdFormat : public FileFormat<FfdTransformation>
+  {
+    virtual bool read( const std::string & filename, FfdTransformation & obj,
+                       const carto::AllocatorContext & context,
+                       carto::Object options )
+    {
+      return false;
+    }
+    virtual bool write( const std::string & filename,
+                        const FfdTransformation & vol,
+                        carto::Object options = carto::none() )
+    {
+      return false;
+    }
+  };
+
+
+  template<> void
+  FileFormatDictionary<FfdTransformation>::registerBaseFormats()
+  {
+    vector<string>	ext;
+    ext.push_back( "ima" );
+    FfdFormat	*fm = new FfdFormat;
+    registerFormat( "FFD", fm, ext );
+  }
+
+} // namespace aims
+
+namespace soma
+{
+
+  class FfdFormatReader : public FormatReader<Transformation3d>
+  {
+  public:
+    virtual Transformation3d*
+    createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
+                   const AllocatorContext & context,
+                   carto::Object options );
+    Transformation3d* create( carto::Object header,
+                              const AllocatorContext & context,
+                              carto::Object options );
+    virtual void read( Transformation3d & obj,
+                       carto::rc_ptr<DataSourceInfo> dsi,
+                       const AllocatorContext & context,
+                       carto::Object options );
+    virtual FormatReader<Transformation3d>* clone() const;
+    virtual std::string formatID() const { return "FFD"; }
+  };
+
+
+template <>
+Transformation3d* FormatReader<Transformation3d>::create(
+  carto::Object header, const AllocatorContext & context,
+  carto::Object options )
+{
+  return new TrilinearFfd;
+}
+
+Transformation3d*
+FfdFormatReader::createAndRead( rc_ptr<DataSourceInfo> dsi,
+                                const AllocatorContext & context,
+                                Object options )
+{
+  aims::Reader<FfdTransformation> reader( dsi->url() );
+  reader.setAllocatorContext( context );
+  reader.setOptions( options );
+  return reader.read();
+}
+
+
+Transformation3d* FfdFormatReader::create( carto::Object header,
+                                           const AllocatorContext & context,
+                                           carto::Object options )
+{
+  return new TrilinearFfd;
+}
+
+
+void FfdFormatReader::read( Transformation3d & obj,
+                            rc_ptr<DataSourceInfo> dsi,
+                            const AllocatorContext & context,
+                            Object options )
+{
+  // cout << "FfdFormatReader::read\n";
+  FfdTransformation *affobj
+    = dynamic_cast<FfdTransformation *>( &obj );
+  if( !affobj )
+    throw wrong_format_error( "Not a FFD transformation" );
+
+  aims::Reader<FfdTransformation> reader( dsi->url() );
+  reader.setAllocatorContext( context );
+  reader.setOptions( options );
+  reader.read( *affobj );
+  // cout << "read FFD OK\n";
+}
+
+
+FormatReader<Transformation3d>* FfdFormatReader::clone() const
+{
+  return new FfdFormatReader;
+}
+
+} // namespace soma
+
 // templates
 
-template class Reader<FfdTransformation>;
+namespace aims
+{
+
+  template class Reader<FfdTransformation>;
+
+} // namespace aims
+
+
+static bool _ffdiodic()
+{
+  FileFormatDictionary<FfdTransformation>::init();
+
+  FfdFormatReader *r = new FfdFormatReader;
+  vector<string> exts;
+  exts.push_back( "ima" );
+  FormatDictionary<Transformation3d>::registerFormat( "FFD", r, exts );
+
+  return true;
+}
+
+static bool ffdiodic __attribute__((unused)) = _ffdiodic();
+
+
+#include <aims/io/fileFormat_d.h>
+
+namespace aims
+{
+template class FileFormatDictionary<FfdTransformation>;
 
 } // namespace aims

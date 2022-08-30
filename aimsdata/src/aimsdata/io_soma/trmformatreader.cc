@@ -38,6 +38,7 @@
 #include <aims/io/motionR.h>
 #include <soma-io/io/formatdictionary.h>
 #include <soma-io/datasource/datasource.h>
+#include <soma-io/io/reader.h>
 #include <cartobase/stream/fileutil.h>
 //--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
@@ -63,6 +64,13 @@ namespace
     vector<string>  exts;
     exts.push_back( "trm" );
     FormatDictionary<AffineTransformation3d>::registerFormat( "TRM", r, exts );
+
+    TrmT3DFormatReader *r2 = new TrmT3DFormatReader;
+    exts.push_back( "trmhdr" );
+    exts.push_back( "trmc" );
+    FormatDictionary<Transformation3d>::registerFormat( "AFFINETRANS", r2,
+                                                        exts );
+
     return true;
   }
 
@@ -128,10 +136,68 @@ FormatReader<AffineTransformation3d>* TrmFormatReader::clone() const
   return new TrmFormatReader;
 }
 
+
+// ---
+
+template <>
+Transformation3d* FormatReader<Transformation3d>::create(
+  carto::Object header, const AllocatorContext & context,
+  carto::Object options )
+{
+  return new AffineTransformation3d;
+}
+
+
+Transformation3d*
+TrmT3DFormatReader::createAndRead( rc_ptr<DataSourceInfo> dsi,
+                                   const AllocatorContext & context,
+                                   Object options )
+{
+  Reader<AffineTransformation3d> reader( dsi );
+  reader.setAllocatorContext( context );
+  reader.setOptions( options );
+  return reader.read();
+}
+
+
+Transformation3d* TrmT3DFormatReader::create( carto::Object header,
+                                              const AllocatorContext & context,
+                                              carto::Object options )
+{
+  return new AffineTransformation3d;
+}
+
+
+void TrmT3DFormatReader::read( Transformation3d & obj,
+                               rc_ptr<DataSourceInfo> dsi,
+                               const AllocatorContext & context,
+                               Object options )
+{
+  // cout << "TrmT3DFormatReader::read\n";
+  AffineTransformation3d *affobj
+    = dynamic_cast<AffineTransformation3d *>( &obj );
+  if( !affobj )
+    throw wrong_format_error( "Not an affine transformation" );
+
+  Reader<AffineTransformation3d> reader( dsi );
+  reader.setAllocatorContext( context );
+  reader.setOptions( options );
+  reader.read( *affobj );
+  // cout << "read TRM OK\n";
+}
+
+
+FormatReader<Transformation3d>* TrmT3DFormatReader::clone() const
+{
+  return new TrmT3DFormatReader;
+}
+
+
 #undef localMsg
 
 // instantiate FormatReader<AffineTransformation3d>
 #include <soma-io/reader/formatreader_d.h>
 
 template class FormatReader<AffineTransformation3d>;
+template class FormatReader<Transformation3d>;
 

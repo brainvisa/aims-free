@@ -27,6 +27,32 @@ field deformation to transform coordinates.
 Vector fields are stored in volumes rc_ptr_Volume_POINT3DF.
 %End
 
+%ConvertToSubClassCode
+  // std::cout << "ConvertToSubClassCode FFD " << sipCpp << " / " << typeid( *sipCpp ).name() << std::endl;
+
+  sipType = 0;
+  if( dynamic_cast<aims::FfdTransformation *>( sipCpp ) )
+  {
+    sipType = sipType_aims_FfdTransformation;
+    *sipCppRet = dynamic_cast<aims::FfdTransformation *>( sipCpp );
+    // std::cout << "I'm a FfdTransformation: " << sipCppRet << std::endl;
+
+    if( dynamic_cast<aims::SplineFfd *>( sipCpp ) )
+    {
+      sipType = sipType_aims_SplineFfd;
+      *sipCppRet = dynamic_cast<aims::SplineFfd *>( sipCpp );
+      // std::cout << "I'm a SplineFfd: " << sipCppRet << std::endl;
+    }
+    else if( dynamic_cast<aims::TrilinearFfd *>( sipCpp ) )
+    {
+      sipType = sipType_aims_TrilinearFfd;
+      *sipCppRet = dynamic_cast<aims::TrilinearFfd *>( sipCpp );
+      // std::cout << "I'm a TrilinearFfd: " << sipCppRet << std::endl;
+    }
+  }
+
+%End
+
    public:
     //--- Constructor --------------------------------------------------------
     FfdTransformation( int dimX = 0, int dimY = 1, int dimZ = 1,

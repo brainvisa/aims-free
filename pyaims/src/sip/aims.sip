@@ -274,6 +274,8 @@ typedef int int32_t;
 %Include rcptr_Transformation3d.sip
 %Include rcptr_AffineTransformation3d.sip
 %Include reader_AffineTransformation3d.sip
+%Include reader_Transformation3d.sip
+%Include fileformat_Transformation3d.sip
 
 %Include headered.sip
 %Include roi.sip

@@ -345,4 +345,31 @@ namespace aims {
 
 } // namespace aims
 
+
+// ---
+
+namespace soma
+{
+
+  template <> inline std::string
+  DataTypeCode<aims::FfdTransformation>::objectType()
+  {
+    return "FFDTransformation";
+  }
+
+  template <> inline std::string
+  DataTypeCode<aims::FfdTransformation>::dataType()
+  {
+    return "VOID";
+  }
+
+  template <> inline std::string
+  DataTypeCode<aims::FfdTransformation>::name()
+  {
+    return "FFDTransformation";
+  }
+
+}
+
+
 #endif

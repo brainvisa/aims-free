@@ -44,6 +44,7 @@ namespace aims
 
 namespace soma
 {
+  class Transformation3d;
 
   /** .trm format for a transformation file
 
@@ -67,6 +68,25 @@ namespace soma
                        const AllocatorContext & context,
                        carto::Object options );
     virtual FormatReader<aims::AffineTransformation3d>* clone() const;
+    virtual std::string formatID() const { return "TRM"; }
+  };
+
+
+  class TrmT3DFormatReader : public FormatReader<Transformation3d>
+  {
+  public:
+    virtual Transformation3d*
+    createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
+                   const AllocatorContext & context,
+                   carto::Object options );
+    Transformation3d* create( carto::Object header,
+                              const AllocatorContext & context,
+                              carto::Object options );
+    virtual void read( Transformation3d & obj,
+                       carto::rc_ptr<DataSourceInfo> dsi,
+                       const AllocatorContext & context,
+                       carto::Object options );
+    virtual FormatReader<Transformation3d>* clone() const;
     virtual std::string formatID() const { return "TRM"; }
   };
 

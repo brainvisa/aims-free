@@ -123,4 +123,31 @@ protected:
 
 } // namespace aims
 
+
+// ---
+
+namespace soma
+{
+
+  template <> inline std::string
+  DataTypeCode<aims::TransformationChain3d>::objectType()
+  {
+    return "TransformationChain3d";
+  }
+
+  template <> inline std::string
+  DataTypeCode<aims::TransformationChain3d>::dataType()
+  {
+    return "VOID";
+  }
+
+  template <> inline std::string
+  DataTypeCode<aims::TransformationChain3d>::name()
+  {
+    return "TransformationChain3d";
+  }
+
+}
+
+
 #endif // !defined(AIMS_TRANSFORMATION_TRANSFORMATION_CHAIN_H)
