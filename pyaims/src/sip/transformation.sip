@@ -207,6 +207,28 @@ public:
   sipRes = int( sipCpp->size() );
 %End
 
+  rc_ptr_Transformation3d __getitem__( int ) const;
+%MethodCode
+  if( a0 < 0 || a0 >= (long)sipCpp->size() )
+  {
+    sipRes = 0;
+    sipIsErr = 1;
+    PyErr_SetString( PyExc_IndexError, "std::list index out of range" );
+  }
+  else
+  {
+    aims::TransformationChain3d::const_iterator i, e = sipCpp->end();
+    int n = 0;
+    for( i=sipCpp->begin(); i!=e && n < a0; ++i, ++n )
+    {}
+    if( i != e )
+    {
+      sipRes = new carto::rc_ptr<soma::Transformation3d>(
+        const_cast<soma::Transformation3d *>( i->pointer() ) );
+    }
+  }
+%End
+
   bool isIdentity() const;
   bool invertible() const;
   rc_ptr_Transformation3d getInverse() const;
