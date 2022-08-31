@@ -65,7 +65,7 @@ namespace aims
   changed in Aims 4.0. Since Aims 4.7, most of the code is in soma-io where it
   is used to transform voxels coordinates in IO code. This additional layer
   mainly adds compatibility with older code which uses VolumeRef for rotation()
-  and Point3df for translation(), and the header.
+  and Point3df for translation().
 
   A new transformation classes tree has been setup to allow non-linear
   transformations: see Transformation and Transformation3d.
@@ -178,10 +178,6 @@ namespace aims
     AffineTransformation3d inverse() const;
     std::unique_ptr<Transformation3d> getInverse() const CARTO_OVERRIDE;
 
-    aims::PythonHeader* header() { return _header; }
-    const aims::PythonHeader* header() const { return _header; }
-    void setHeader( aims::PythonHeader* ph );
-
     inline Point3df translation();
     inline Point3df translation() const;
 
@@ -201,9 +197,6 @@ namespace aims
     static carto::VolumeRef<float> rotationaroundy(float ry) ;
     static carto::VolumeRef<float> rotationaroundz(float rz) ;
 
-
-  protected:
-    aims::PythonHeader  *_header;
   };
 
   // Compose AffineTransformation3d

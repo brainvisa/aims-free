@@ -61,6 +61,6 @@ void MotionWriter::write(const Motion& thing)
   ddeplacements.close();
 
   if( thing.header() )
-    thing.header()->writeMinf( _name + ".minf" );
+    PythonHeader::writeMinf( thing.header(), _name + ".minf" );
 }
 

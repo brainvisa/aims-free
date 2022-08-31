@@ -66,6 +66,7 @@ namespace aims
     virtual bool writeMinf( const std::string & filename ) const;
     virtual Header* cloneHeader( bool keepUuid = false ) const;
     virtual void copy( const PythonHeader &, bool keepUuid = false );
+    virtual void copy( const carto::Object &, bool keepUuid = false );
     virtual bool isScalar() const { return false; }
     virtual bool isString() const { return false; }
     virtual bool isArray() const { return false; }
@@ -74,6 +75,14 @@ namespace aims
     virtual bool isDictionaryIterator() const { return false; }
 
     static carto::SyntaxSet* syntax();
+    static bool writeMinf( const carto::Object & header,
+                           const std::string & filename );
+    static bool writeMinf( carto::Object & header,
+                           const std::string & filename );
+    static void copy( const carto::Object & src, carto::Object & dst,
+                      bool keepUuid = false );
+    static carto::Object cloneHeader( const carto::Object & src,
+                                      bool keepUuid = false );
   };
 
 } // namespace aims

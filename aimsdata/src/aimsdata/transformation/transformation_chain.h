@@ -66,8 +66,11 @@ class TransformationChain3d : public soma::Transformation3d
 {
 public:
   typedef std::list<carto::const_ref<Transformation3d> > ListType;
+  typedef ListType::iterator iterator;
+  typedef ListType::const_iterator const_iterator;
 
   TransformationChain3d();
+  virtual ~TransformationChain3d();
 
   /** Add a transformation to the back of the list (applied last) */
   void push_back(const carto::const_ref<Transformation3d>& transformation);
@@ -78,6 +81,10 @@ public:
   /** Remove the first transformation from the list */
   void pop_front();
   size_t size() const;
+  iterator begin() { return _transformations.begin(); }
+  const_iterator begin() const { return _transformations.begin(); }
+  iterator end() { return _transformations.end(); }
+  const_iterator end() const { return _transformations.end(); }
 
   bool isIdentity() const CARTO_OVERRIDE;
   bool invertible() const CARTO_OVERRIDE;
@@ -120,6 +127,7 @@ protected:
   Point3df transformFloat( float x, float y, float z ) const CARTO_OVERRIDE;
   Point3dd transformPoint3dd( const Point3dd & pos ) const CARTO_OVERRIDE;
   Point3df transformPoint3df( const Point3df & dir ) const CARTO_OVERRIDE;
+  void setReferentialsInHeader();
 };
 
 } // namespace aims

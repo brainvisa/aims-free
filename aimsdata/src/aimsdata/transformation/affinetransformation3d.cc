@@ -148,8 +148,7 @@ ostream& operator << ( ostream& os, const AffineTransformation3d& thing )
 
 //-----------------------------------------------------------------------------
 AffineTransformation3d::AffineTransformation3d()
-  : AffineTransformation3dBase(),
-    _header( new PythonHeader )
+  : AffineTransformation3dBase()
 {
 }
 
@@ -157,7 +156,6 @@ AffineTransformation3d::AffineTransformation3d()
 //-----------------------------------------------------------------------------
 AffineTransformation3d::~AffineTransformation3d()
 {
-  delete _header;
 }
 
 
@@ -165,9 +163,7 @@ AffineTransformation3d::~AffineTransformation3d()
 AffineTransformation3d::AffineTransformation3d(
   const AffineTransformation3d& other ) :
   RCObject(),
-  AffineTransformation3dBase( other ),
-  _header( other.header() ? new PythonHeader( *other.header() )
-    : new PythonHeader )
+  AffineTransformation3dBase( other )
 {
 }
 
@@ -176,29 +172,28 @@ AffineTransformation3d::AffineTransformation3d(
 AffineTransformation3d::AffineTransformation3d(
   const AffineTransformation3dBase& other ) :
   RCObject(),
-  AffineTransformation3dBase( other ),
-  _header( new PythonHeader )
+  AffineTransformation3dBase( other )
 {
 }
 
 
 //-----------------------------------------------------------------------------
 AffineTransformation3d::AffineTransformation3d( const vector<float> & mat ) :
-    AffineTransformation3dBase( mat ), _header( new PythonHeader )
+    AffineTransformation3dBase( mat )
 {
 }
 
 
 //-----------------------------------------------------------------------------
 AffineTransformation3d::AffineTransformation3d( const Object mat ) :
-    AffineTransformation3dBase( mat ), _header( new PythonHeader )
+    AffineTransformation3dBase( mat )
 {
 }
 
 
 //-----------------------------------------------------------------------------
 AffineTransformation3d::AffineTransformation3d( const Quaternion & quat ) :
-    AffineTransformation3dBase(), _header( new PythonHeader )
+    AffineTransformation3dBase()
 {
   *this = quat;
 }
@@ -211,11 +206,6 @@ AffineTransformation3d& AffineTransformation3d::operator = (
   if( &other == this )
     return *this;
   AffineTransformation3dBase::operator = ( other );
-  delete _header;
-  if( other.header() )
-    _header = new PythonHeader( *other.header() );
-  else
-    _header = new PythonHeader;
   return *this;
 }
 
@@ -277,17 +267,6 @@ bool AffineTransformation3d::operator != ( const AffineTransformation3d & other 
 
 
 //-----------------------------------------------------------------------------
-void AffineTransformation3d::setHeader( PythonHeader* ph )
-{
-  delete _header;
-  if( ph )
-    _header = ph;
-  else
-    _header = new PythonHeader;
-}
-
-
-//-----------------------------------------------------------------------------
 AffineTransformation3d AffineTransformation3d::inverse() const
 {
 //   AffineTransformation3d AffineTransformation3d;
@@ -308,10 +287,11 @@ AffineTransformation3d AffineTransformation3d::inverse() const
 //   return AffineTransformation3d;
 
   AffineTransformation3d inv( AffineTransformation3dBase::inverse() );
-  inv.header()->copy( *header() );
+  Object ihdr = inv.header();
+  PythonHeader::copy( header(), ihdr );
 
   Object s;
-  PythonHeader *hdr = inv.header();
+  Object hdr = inv.header();
   if( hdr->hasProperty( "source_referential" ) )
   {
     s = hdr->getProperty( "source_referential" );

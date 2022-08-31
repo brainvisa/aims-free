@@ -50,6 +50,9 @@ NOTE: Implementors of derived classes may choose to always return false if
 a test would be difficult to implement or expensive to run.
 %End
 
+    carto::Object header();
+    void setHeader( carto::Object ph );
+
   protected:
     Transformation();
   };

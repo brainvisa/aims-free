@@ -37,12 +37,18 @@
 #endif
 
 #include <aims/transformation/transformation_chain.h>
-
 #include <aims/transformation/affinetransformation3d.h>
+
+using namespace carto;
 
 
 aims::TransformationChain3d::TransformationChain3d()
-  : _transformations()
+  : Transformation3d(),
+  _transformations()
+{
+}
+
+aims::TransformationChain3d::~TransformationChain3d()
 {
 }
 
@@ -50,22 +56,26 @@ void aims::TransformationChain3d::
 push_back(const carto::const_ref<Transformation3d>& transformation)
 {
   _transformations.push_back(transformation);
+  setReferentialsInHeader();
 }
 
 void aims::TransformationChain3d::pop_back()
 {
   _transformations.pop_back();
+  setReferentialsInHeader();
 }
 
 void aims::TransformationChain3d::
 push_front(const carto::const_ref<Transformation3d>& transformation)
 {
   _transformations.push_front(transformation);
+  setReferentialsInHeader();
 }
 
 void aims::TransformationChain3d::pop_front()
 {
   _transformations.pop_front();
+  setReferentialsInHeader();
 }
 
 
@@ -229,3 +239,46 @@ aims::TransformationChain3d::simplify() const
 
   return new_chain;
 }
+
+
+void aims::TransformationChain3d::setReferentialsInHeader()
+{
+  Object hdr = header();
+
+  if( hdr->hasProperty( "source_referential" ) )
+    hdr->removeProperty( "source_referential" );
+  if( hdr->hasProperty( "destination_referential" ) )
+    hdr->removeProperty( "destination_referential" );
+
+  if( size() != 0 )
+  {
+    Object fh = _transformations.front()->header();
+    if( fh )
+    {
+      try
+      {
+        Object sref = fh->getProperty( "source_referential" );
+        if( sref )
+          hdr->setProperty( "source_referential", sref->getString() );
+      }
+      catch( ... )
+      {
+      }
+    }
+
+    fh = _transformations.back()->header();
+    if( fh )
+    {
+      try
+      {
+        Object dref = fh->getProperty( "destination_referential" );
+        if( dref )
+          hdr->setProperty( "destination_referential", dref->getString() );
+      }
+      catch( ... )
+      {
+      }
+    }
+  }
+}
+

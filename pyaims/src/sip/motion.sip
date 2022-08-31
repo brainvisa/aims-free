@@ -72,8 +72,6 @@ public:
   static rc_ptr_Volume_FLOAT rotationaroundy( float );
   static rc_ptr_Volume_FLOAT rotationaroundz( float );
 
-  carto::GenericObject* header();
-
 protected:
   virtual Point3dd transformDouble( double, double, double ) const;
 
