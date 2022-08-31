@@ -866,6 +866,10 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
     if( res )
     {
       obj.updateDimensions();
+      cout << "set FFD header\n";
+      VolumeRef<Point3df> rvol( (rc_ptr<Volume<Point3df> > ) obj );
+      cout << "hdr size: " << rvol->header().size() << endl;
+      obj.setHeader( Object::reference( rvol->header() ) );
     }
     return res;
   }
