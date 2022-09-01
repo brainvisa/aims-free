@@ -207,7 +207,8 @@ bool PythonHeader::writeMinf( const Object & header,
                               const string & filename )
 {
   // we need a local modifiable copy
-  Object	ph = Object::value( header->value<PropertySet>() );
+  Object	ph = Object::value( PropertySet() );
+  ph->copyProperties( header );
   if( ph->hasProperty( "byte_swapping" ) )
     ph->removeProperty( "byte_swapping" );
   if( ph->hasProperty( "possible_data_types" ) )
@@ -291,7 +292,8 @@ Object PythonHeader::cloneHeader( const Object & header, bool keepUuid )
 //        << ", props: " << &const_cast<PythonHeader *>(this)->getValue() 
 //        << endl;
 
-  Object ph = Object::value( header->value<PropertySet>() );
+  Object ph = Object::value( PropertySet() );
+  ph->copyProperties( header );
 //   cout << "PythonHeader::cloneHeader after cloning: " << ph << "," 
 //        << ", props: " << &ph->getValue() << endl;
        
