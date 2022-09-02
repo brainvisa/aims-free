@@ -1469,6 +1469,10 @@ class _proxy(object):
                     return getattr(cl, r.__name__)(obj, *args, **kwargs)
         return carto.GenericObject._proxy.retvalue(r(*args, **kwargs))
 
+    @property
+    def __doc__(self):
+        return self._x.__doc__
+
 
 def genobj__getattribute__(self, attr):
     ga = object.__getattribute__(self, '__oldgetattribute__')
