@@ -127,6 +127,33 @@ Base class for spatial transformations in 3D.
     }
 %End
 
+    // conversion from Object
+    static  rc_ptr_Transformation3d
+    fromObject( carto::GenericObject ) /Factory/;
+%MethodCode
+    try
+    {
+      carto::rc_ptr<soma::Transformation3d> & obj
+        = a0->value<carto::rc_ptr<soma::Transformation3d> >();
+      sipRes = new carto::rc_ptr<soma::Transformation3d>( obj );
+    }
+    catch( std::exception & e )
+    {
+      sipIsErr = 1;
+      PyErr_SetString( PyExc_RuntimeError, e.what() );
+      sipRes = 0;
+    }
+%End
+
+  // conversion to Object
+
+  carto::Object toObject();
+%MethodCode
+  sipRes = new carto::Object(
+    carto::Object::value(
+      carto::rc_ptr<soma::Transformation3d>( sipCpp ) ) );
+%End
+
   protected:
     Transformation3d();
     virtual Point3dd transformDouble( double x, double y, double z ) const = 0;
@@ -275,5 +302,123 @@ public:
   protected:
     virtual Point3dd transformDouble( double x, double y, double z ) const;
 };
+
+
+  class TransformationGraph3d : Graph
+  {
+%TypeHeaderCode
+#include <aims/transformation/transformationgraph3d.h>
+%End
+
+%Docstring
+    Manage transformations (affine and non-linear) transformations graph.
+
+    It maintains a graph of directed transformations (vertices are
+    referentials, edges are 3D transformations).
+
+    It can be populated from a dictionary (Object) which can be read from a
+    JSON or YAML file, and performs lazy-loading: transformations are actually
+    loaded when they are used, more precisely in getTransformation() and when
+    building a chain of composed transformations.
+
+    The graph is oriented, and does not manage inverse transforms. We could
+    thing this could be done automatically for affine or other inversible
+    transformations, but the lazy loading feature does not allow to know if a
+    not yet loaded transform will be inversible or not. So this has to be done
+    manually for now.
+
+    The graph populates with composed transforms when they are used: indirect
+    paths from a referential to another are generated when needed, and stored
+    in the graph as "deduced" transforms. Later access will thus use this cache
+    instead of reccomputing it.
+    A drawback, thus, is that the graph has to be used "statically": any
+    modification in the graph structure, or in any of its transformations,
+    should invalidate a number of deduced, cached ones, which we do not handle
+    for now (it's a quite difficult problem to manage it efficiently). To date
+    the only solution is to completely clear the cached transforms
+    (clearCache()) after any modification.
+
+    The TransformationGraph3d structure is a Graph, and its elements are Vertex
+    or Edge objects. To manipulate transformations, the API generally allows to
+    use identifiers (generally UUIDs) for elements, and the Transformation
+    objects are accessed through the "transformation" property of edges, or
+    using the transformation() convenience method:
+
+        ref1 = tgraph.referentialById("23df7ce8-e405-bc31-3863-d543e3cc89e5")
+        trans_edge = tgraph.getTransformation(
+            "23df7ce8-e405-bc31-3863-d543e3cc89e5",
+            "52929a27-6838-1d08-d6fc-7905ed9413a0")
+        if trans_edge:
+            trans = tgraph.transformation(trans_edge)
+
+    see also:
+    https://hbp-spatial-backend.apps.hbp.eu/swagger-ui#/api_v1/get_v1_transform_point
+ %End
+
+  public:
+    TransformationGraph3d();
+    virtual ~TransformationGraph3d();
+
+    void updateMaps();
+    Vertex* referentialById( const std::string & id ) const;
+    Edge* transformationById( const std::string & id ) const;
+    static rc_ptr_Transformation3d transformation( const Edge *edge );
+    rc_ptr_Transformation3d transformation( const std::string & id ) const;
+
+    Edge* getTransformation( const std::string & src_ref,
+                             const std::string dst_ref ) const;
+    Edge* getTransformation( const Vertex *src_ref,
+                             const Vertex *dst_ref ) const;
+    Edge* getTransformation( const std::string & src_ref,
+                             const std::string dst_ref,
+                             bool allow_compose );
+    Edge* getTransformation( Vertex *src_ref,
+                             Vertex *dst_ref,
+                             bool allow_compose );
+    rc_ptr_Transformation3d getTransformChain(
+      const Vertex *src_ref, const Vertex *dst_ref ) const;
+    rc_ptr_Transformation3d getTransformChain(
+      const std::string & src_ref, const std::string & dst_ref ) const;
+
+    Edge *registerTransformation(
+      const std::string & src_ref, const std::string & dst_ref,
+      rc_ptr_Transformation3d trans, bool deduced=false );
+%Docstring
+        Add (or register) the given transformation in the transformations
+        graph.
+
+        transform may be a filename, or a Transformation instance. a
+        Transformation is supposed to be a non-linear FFD (Free Form
+        Deformation), not a linear transformation. If transform is a string, it
+        may be:
+        - an empty string will be an identity transformation
+        - a .trm file will be an affine transformation, and will be passed to
+          the builtin Anatomist system
+        - another file (.ima) will be a FFD transformation file and will be
+          registered as its filename. Loading will happen only when the
+          transformation is used, in get_transformation().
+%End
+    Edge *registerTransformation(
+      Vertex *src_ref, Vertex *dst_ref, rc_ptr_Transformation3d trans,
+      bool deduced=false );
+    Edge *registerTransformation(
+      const std::string & src_ref, const std::string & dst_ref,
+      const std::string & filename );
+    Edge *registerTransformation(
+      Vertex *src_ref, Vertex *dst_ref, const std::string & filename );
+
+    void loadTransformationsGraph( carto::Object desc,
+                                   const std::string & dirname );
+    void clearCache();
+    void registerInverseTransformations();
+%Docstring
+        register inverse transformations when thay can be obtained.
+
+        This can be done only for loaded transformations. So the lazy loading
+        feature will prevent for it to work on not already loaded
+        transformations, since we cannot know if they are invertible before
+        they are loaded.
+%End
+  };
 
 };

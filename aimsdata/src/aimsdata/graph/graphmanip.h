@@ -42,6 +42,9 @@
 
 class Graph;
 class GraphObject;
+class Vertex;
+class Edge;
+
 namespace aims
 {
   class AffineTransformation3d;
@@ -234,6 +237,14 @@ namespace aims
     static std::string
       defaultExtensionForObjectType( const std::string & otype,
         const std::string & dtype );
+
+    /** Get edges path from a vertex to another one.
+        Adapted from Yann Leprince's code on:
+        https://github.com/HumanBrainProject/hbp-spatial-backend/blob/fc79a6adc5d71fe6a02021f0d36698c5fde86b43/hbp_spatial_backend/transform_graph.py#L36
+
+        TODO: detect ambiguities (multiple same-length chains)
+    */
+    static std::list<Edge *> getPath( const Vertex *from, const Vertex *to );
   };
 
 }

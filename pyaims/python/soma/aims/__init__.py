@@ -1267,6 +1267,7 @@ convertersObjectToPython = {
     'rc_ptr of texture of U32': TimeTexture_U32.fromObject,
     'rc_ptr of texture of FLOAT': TimeTexture_FLOAT.fromObject,
     'rc_ptr of texture of POINT2DF': TimeTexture_POINT2DF.fromObject,
+    'rc_ptr of Transformation3d': Transformation3d.fromObject,
     'POINT2DF': Point2df.fromObject,
     'POINT3DF': Point3df.fromObject,
     'POINT4DF': Point4df.fromObject,

@@ -177,6 +177,7 @@ public:
   bool isDirected() const;
   Vertex *addVertex( const std::string & = "" );
   Edge* addEdge( Vertex *vertex1, Vertex *vertex2, std::string s="" );
+  Edge* addDirectedEdge( Vertex *vertex1, Vertex *vertex2, std::string s="" );
   Vertex *cloneVertex( const Vertex * );
   bool hasVertex( const Vertex * ) const;
   void removeVertex( Vertex * );

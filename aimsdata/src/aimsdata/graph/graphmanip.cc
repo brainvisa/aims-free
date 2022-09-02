@@ -52,6 +52,7 @@
 #include <cartobase/containers/nditerator.h>
 #include <vector>
 #include <map>
+#include <deque>
 
 using namespace aims;
 using namespace carto;
@@ -1788,6 +1789,62 @@ string GraphManip::defaultExtensionForObjectType( const string & otype,
   return ext;
 }
 
+
+list<Edge *> GraphManip::getPath( const Vertex *from, const Vertex *to )
+{
+  deque<const Vertex *> to_visit;
+  to_visit.push_back( from );
+  set<const Vertex *> visited;
+  visited.insert( from );
+  map<const Vertex *, pair<const Vertex *, Edge *> > back_pointers;
+  back_pointers[from] = pair<const Vertex *, Edge *>( 0, 0 );
+  list<Edge *> chain;
+
+  // Breadth-first search on the spaces to find the shortest path
+  while( !to_visit.empty() )
+  {
+    const Vertex *space = to_visit.front();
+    to_visit.pop_front();
+
+    // TODO detect ambiguities (multiple same-length chains)
+    if( space == to )
+    {
+      while( back_pointers[space].first != 0 )
+      {
+        const Vertex *target_space = space;
+        pair<const Vertex*, Edge *> & bs = back_pointers[space];
+        space = bs.first;
+        Edge *transform = bs.second;
+        chain.push_front( transform );
+      }
+      return chain;
+    }
+
+    Vertex *target;
+    Edge *transform;
+    Vertex::const_iterator ie, ee = space->end();
+    for( ie=space->begin(); ie!=ee; ++ie )
+    {
+      transform = *ie;
+      if( transform->isDirected() && *transform->begin() != space )
+        continue;
+      target = *transform->rbegin();
+      if( target == space )
+        target = *transform->begin();
+      if( visited.find( target ) == visited.end() )
+      {
+        visited.insert( target );
+        to_visit.push_back( target );
+        back_pointers[target] = make_pair( space, transform );
+      }
+    }
+  }
+  // no path
+  return chain;
+}
+
+
+// --- templates instanciations ---
 
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
                                      rc_ptr<Volume<short> > );

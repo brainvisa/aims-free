@@ -119,6 +119,7 @@ typedef int int32_t;
 %Include list_vector_STRING.sip
 %Include list_vector_POINT3DF.sip
 %Include list_AimsTimeSurface_3_VOID.sip
+%Include list_EdgePtr.sip
 %Include map_STRING_STRING.sip
 %Include map_S32_STRING.sip
 %Include map_STRING_S32.sip

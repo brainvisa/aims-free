@@ -66,6 +66,9 @@ public:
                                  const vector_S32 & );
   vector_S32 attributeColor( const Graph & graph, const std::string & att );
   static void completeGraph( Graph & );
+
+  static list_EdgePtr getPath( const Vertex *from, const Vertex *to );
+
 };
 
 };
