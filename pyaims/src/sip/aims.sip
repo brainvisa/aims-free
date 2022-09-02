@@ -169,6 +169,8 @@ typedef int int32_t;
 %Include graph.sip
 %Include rcptr_Tree.sip
 %Include rcptr_Graph.sip
+%Include rcptr_Vertex.sip
+%Include rcptr_Edge.sip
 %Include graphmanip.sip
 %Include tree.sip
 %Include hierarchy.sip

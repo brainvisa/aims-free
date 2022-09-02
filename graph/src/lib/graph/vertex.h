@@ -206,6 +206,10 @@ public:
 
     //@}
 
+    // from GenericObject
+    virtual std::string type() const CARTO_OVERRIDE
+    { return "Vertex"; }
+
 protected:
 
     //---------------------------------------------------------------------

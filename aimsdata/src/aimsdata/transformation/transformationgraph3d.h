@@ -93,20 +93,31 @@ namespace aims
     TransformationGraph3d();
     virtual ~TransformationGraph3d();
 
-    void updateMaps();
+    /** Update the internal UUIDs cache. Needs to be done after changes in
+        elements UUIDs or insertion / deletions
+    */
+    void updateIds();
+    /// Get the vertex (referential) with given ID
     Vertex* referentialById( const std::string & id ) const;
+    /// Get the edge (transformation) with given ID
     Edge* transformationById( const std::string & id ) const;
+    /** Get the Transformation3d object inside an edge. The returned reference
+        counting pointer may contain a null pointer.
+    */
     static carto::rc_ptr<soma::Transformation3d> transformation(
       const Edge *edge );
+    /** Get the Transformation3d object for the given UUID.
+        The returned reference counting pointer may contain a null pointer.
+    */
     carto::rc_ptr<soma::Transformation3d> transformation(
       const std::string & id ) const;
 
-    /** Get the transformation between source_ref and des_ref. If it is not a
+    /** Get the transformation between source_ref and dst_ref. If it is not a
         registered transformation, return 0.
     */
     Edge* getTransformation( const std::string & src_ref,
                              const std::string dst_ref ) const;
-    /** Get the transformation between source_ref and des_ref. If it is not a
+    /** Get the transformation between source_ref and dst_ref. If it is not a
         registered transformation, return 0.
         If allow_compose is True and the transformation is not found, then a
         transformations chain path is looked for. If a matching one is found,
@@ -118,12 +129,12 @@ namespace aims
     Edge* getTransformation( const std::string & src_ref,
                              const std::string dst_ref,
                              bool allow_compose );
-    /** Get the transformation between source_ref and des_ref. If it is not a
+    /** Get the transformation between source_ref and dst_ref. If it is not a
         registered transformation, return 0.
     */
     Edge* getTransformation( const Vertex *src_ref,
                              const Vertex *dst_ref ) const;
-    /** Get the transformation between source_ref and des_ref. If it is not a
+    /** Get the transformation between source_ref and dst_ref. If it is not a
         registered transformation, return 0.
         If allow_compose is True and the transformation is not found, then a
         transformations chain path is looked for. If a matching one is found,
@@ -135,11 +146,6 @@ namespace aims
     Edge* getTransformation( Vertex *src_ref,
                              Vertex *dst_ref,
                              bool allow_compose );
-
-    carto::rc_ptr<soma::Transformation3d> getTransformChain(
-      const Vertex *src_ref, const Vertex *dst_ref ) const;
-    carto::rc_ptr<soma::Transformation3d> getTransformChain(
-      const std::string & src_ref, const std::string & dst_ref ) const;
 
     /** Add (or register) the given transformation in the transformations
         graph.
@@ -204,6 +210,19 @@ namespace aims
         they are loaded.
     */
     void registerInverseTransformations();
+
+    /** Get a transformation chain between two vertices.
+
+        You normally don't need to call this method directly, il is called
+        through getTransformation( src_ref, dst_ref, true ). This method
+        however does not modify the transformations graph and does not register
+        the combined transformation.
+        It will, however, load lazy-loading transformations.
+    */
+    carto::rc_ptr<soma::Transformation3d> getTransformChain(
+      const Vertex *src_ref, const Vertex *dst_ref ) const;
+    carto::rc_ptr<soma::Transformation3d> getTransformChain(
+      const std::string & src_ref, const std::string & dst_ref ) const;
 
   private:
     mutable std::map<std::string, Vertex *> _refs_by_id;

@@ -359,14 +359,51 @@ public:
     TransformationGraph3d();
     virtual ~TransformationGraph3d();
 
-    void updateMaps();
+    void updateIds();
+%Docstring
+    Update the internal UUIDs cache. Needs to be done after changes in
+    elements UUIDs or insertion / deletions
+%End
+
     Vertex* referentialById( const std::string & id ) const;
+%Docstring
+    Get the vertex (referential) with given ID
+%End
+
     Edge* transformationById( const std::string & id ) const;
+%Docstring
+    Get the edge (transformation) with given ID
+%End
+
     static rc_ptr_Transformation3d transformation( const Edge *edge );
+%Docstring
+    Get the Transformation3d object inside an edge. The returned reference
+    counting pointer may contain a null pointer.
+%End
+
     rc_ptr_Transformation3d transformation( const std::string & id ) const;
+%Docstring
+    Get the Transformation3d object for the given UUID.
+    The returned reference counting pointer may contain a null pointer.
+%End
 
     Edge* getTransformation( const std::string & src_ref,
                              const std::string dst_ref ) const;
+%Docstring
+        edge = tgraph.getTransformation(src_ref, dst_ref, allow_compose=False)
+
+        Get the transformation between source_ref and dst_ref. If it is not a
+        registered transformation, return None.
+        src_ref annd dst_ref may be string IDs or Vertex objects.
+
+        If allow_compose is True and the transformation is not found, then a
+        transformations chain path is looked for. If a matching one is found,
+        it is then registered in the graph to allow fast access later. The
+        drawback of this register operation is that it cannot react to changes
+        in the transformation chain (if a new transformation is added and could
+        make a shorter path, it will not be taken into account).
+%End
+
     Edge* getTransformation( const Vertex *src_ref,
                              const Vertex *dst_ref ) const;
     Edge* getTransformation( const std::string & src_ref,
@@ -377,6 +414,16 @@ public:
                              bool allow_compose );
     rc_ptr_Transformation3d getTransformChain(
       const Vertex *src_ref, const Vertex *dst_ref ) const;
+%Docstring
+        Get a transformation chain between two vertices.
+
+        You normally don't need to call this method directly, il is called
+        through getTransformation( src_ref, dst_ref, true ). This method
+        however does not modify the transformations graph and does not register
+        the combined transformation.
+        It will, however, load lazy-loading transformations.
+%End
+
     rc_ptr_Transformation3d getTransformChain(
       const std::string & src_ref, const std::string & dst_ref ) const;
 
@@ -398,6 +445,7 @@ public:
           registered as its filename. Loading will happen only when the
           transformation is used, in get_transformation().
 %End
+
     Edge *registerTransformation(
       Vertex *src_ref, Vertex *dst_ref, rc_ptr_Transformation3d trans,
       bool deduced=false );
@@ -409,7 +457,37 @@ public:
 
     void loadTransformationsGraph( carto::Object desc,
                                    const std::string & dirname );
+%Docstring
+        Load a full transformations graph from a dict-like object.
+
+        The description dict may typically be read from a .json or a .yaml
+        file.
+
+        The description is organized as a 2-level dictionary::
+
+            {
+                source_ref_id: {
+                    dest_ref_id1: transformation_filename1,
+                    dest_ref_id2: transformation_filename2,
+                },
+                ...
+            }
+
+        A referential ID is a string which may represent an UUID, or a name.
+
+        A transformatioon filename may be an affine (.trm) or non-linear (.ima)
+        transformation file, or an empty string to represent an identity
+        transformation.
+
+        The transformation files are found relatively to the directory given as
+        the dirname parameter.
+%End
+
     void clearCache();
+%Docstring
+    remove deduced transformations (built from composition)
+%End
+
     void registerInverseTransformations();
 %Docstring
         register inverse transformations when thay can be obtained.

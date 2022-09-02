@@ -206,6 +206,10 @@ public:
 
 	//@}
 
+    // from GenericObject
+    virtual std::string type() const CARTO_OVERRIDE
+    { return "Edge"; }
+
 protected:
 
 	//---------------------------------------------------------------------
@@ -282,6 +286,19 @@ private:
 
 	//@}
 };
+
+
+namespace carto
+{
+
+  template <> inline std::string DataTypeCode<Edge>::objectType()
+  { return "Edge"; }
+  template <> inline std::string DataTypeCode<Edge>::dataType()
+  { return "VOID"; }
+  template <> inline std::string DataTypeCode<Edge>::name()
+  { return "Edge"; }
+
+}
 
 
 //=============================================================================

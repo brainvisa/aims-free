@@ -999,7 +999,7 @@ typessub = {'bool':
                'testPyType': 'pyaimsHierarchy_Check',
             },
             'Graph':
-           {'typecode': 'Graph',
+            {'typecode': 'Graph',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -1021,6 +1021,54 @@ typessub = {'bool':
                '#endif',
                'module': 'aims',
                'testPyType': 'pyaimsGraph_Check',
+            },
+            'Vertex':
+            {'typecode': 'Vertex',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new Vertex',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'Vertex',
+               'sipClass': 'Vertex',
+               'typeinclude': '#include <graph/graph/vertex.h>',
+               'sipinclude': '#ifndef PYAIMS_VERTEX_DEFINED\n'
+               '#define PYAIMS_VERTEX_DEFINED\n'
+               'inline int pyaimsVertex_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Vertex" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsVertex_Check',
+            },
+            'Edge':
+            {'typecode': 'Edge',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new Edge',
+               'NumType': 'NPY_OBJECT',
+               'PyType': 'Edge',
+               'sipClass': 'Edge',
+               'typeinclude': '#include <graph/graph/edge.h>',
+               'sipinclude': '#ifndef PYAIMS_EDGE_DEFINED\n'
+               '#define PYAIMS_EDGE_DEFINED\n'
+               'inline int pyaimsEdge_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "Edge" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsEdge_Check',
             },
             'carto::Syntax':
             classInCartoNamespace('cartobase/object/syntax.h',

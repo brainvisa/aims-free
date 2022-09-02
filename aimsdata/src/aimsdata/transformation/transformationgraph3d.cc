@@ -127,7 +127,7 @@ TransformationGraph3d::~TransformationGraph3d()
 }
 
 
-void TransformationGraph3d::updateMaps()
+void TransformationGraph3d::updateIds()
 {
   _refs_by_id.clear();
   _tr_by_id.clear();
@@ -546,7 +546,7 @@ void TransformationGraph3d::clearCache()
     ++ie;
   }
 
-  updateMaps();
+  updateIds();
 }
 
 
@@ -602,7 +602,7 @@ void TransformationGraph3d::registerInverseTransformations()
   }
 
   if( modified )
-    updateMaps();
+    updateIds();
 }
 
 
