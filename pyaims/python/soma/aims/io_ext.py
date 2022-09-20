@@ -10,6 +10,7 @@ IO formats readers / writers written in python for aims.
 Currently:
 
 Numpy format for matrices
+YAML format for Object
 '''
 
 class NpyFormat(aims.FileFormat_SparseOrDenseMatrix):
@@ -58,15 +59,62 @@ class NpyFinderFormat(aims.FinderFormat):
             return True
         return False
 
-def remove_python_formats():
-    aims.Finder.unregisterFormat('NUMPY')
-    aims.FileFormatDictionary_SparseOrDenseMatrix.unregisterFormat('NUMPY')
-
 
 aims.Finder.registerFormat('NUMPY', NpyFinderFormat(), ['npy'])
 aims.FileFormatDictionary_SparseOrDenseMatrix.registerFormat(
     'NUMPY', NpyFormat(), ['npy'])
 
+
+# ---
+
+class YamlFormat(aims.FileFormat_Object):
+    def read(self, filename, obj, context, options=None):
+        import yaml
+        with open(filename) as f:
+            ydict = yaml.safe_load(f)
+
+        if isinstance(obj, aims.carto.AllocatorContext):
+            # return the object variant
+            options = context
+            context = obj
+            obj = aims.Object(ydict)
+            return obj
+
+        obj.update(ydict)
+
+        return True
+
+    def write(self, filename, obj, options):
+        with open(filaname, 'w') as f:
+            yaml.dump(obj)
+        return True
+
+
+class YamlFinderFormat(aims.FinderFormat):
+    def check(self, filename, finder):
+        if filename.endswith('.yaml'):
+            hdr = {
+                'file_type': 'YAML',
+                'object_type': 'genericobject',
+                'data_type': 'any',
+            }
+            finder.setHeader(hdr)
+            finder.setObjectType('genericobject')
+            finder.setDataType('any')
+            return True
+        return False
+
+
+aims.Finder.registerFormat('YAML', YamlFinderFormat(), ['yaml'])
+aims.FileFormatDictionary_Object.registerFormat(
+    'YAML', YamlFormat(), ['yaml'])
+
+
+def remove_python_formats():
+    aims.Finder.unregisterFormat('NUMPY')
+    aims.Finder.unregisterFormat('YAML')
+    aims.FileFormatDictionary_SparseOrDenseMatrix.unregisterFormat('NUMPY')
+    aims.FileFormatDictionary_Object.unregisterFormat('YAML')
+
+
 atexit.register(remove_python_formats)
-
-
