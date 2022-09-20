@@ -550,7 +550,7 @@ void TransformationGraph3d::clearCache()
 }
 
 
-void TransformationGraph3d::registerInverseTransformations()
+void TransformationGraph3d::registerInverseTransformations( bool loadAffines )
 {
   set<pair<Vertex*, Vertex*> > done;
   ESet::iterator ie = edges().begin(), ee = edges().end();
@@ -558,6 +558,9 @@ void TransformationGraph3d::registerInverseTransformations()
 
   // TODO clear only non-direct deduced transforms (chains)
   clearCache();
+
+  if( loadAffines )
+    loadAffineTransformations();
 
   while( ie != ee )
   {
@@ -603,6 +606,13 @@ void TransformationGraph3d::registerInverseTransformations()
 
   if( modified )
     updateIds();
+}
+
+
+void TransformationGraph3d::loadAffineTransformations()
+{
+  // TODO FIXME not finished...
+  ESet::iterator ie = edges().begin(), ee = edges().end();
 }
 
 

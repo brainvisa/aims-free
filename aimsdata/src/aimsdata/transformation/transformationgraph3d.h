@@ -202,14 +202,18 @@ namespace aims
                                    const std::string & dirname );
     /// remove deduced transformations (built from composition)
     void clearCache();
-    /** register inverse transformations when thay can be obtained.
+    /** register inverse transformations when they can be obtained.
 
         This can be done only for loaded transformations. So the lazy loading
         feature will prevent for it to work on not already loaded
         transformations, since we cannot know if they are invertible before
         they are loaded.
+
+        For this reason, the loadAffines parameter allows to load affine
+        transforms and register their inverses.
     */
-    void registerInverseTransformations();
+    void registerInverseTransformations( bool loadAffines = false );
+    void loadAffineTransformations();
 
     /** Get a transformation chain between two vertices.
 
@@ -237,6 +241,21 @@ namespace aims
 
 namespace carto
 {
+
+  template <> inline
+  std::string DataTypeCode<aims::TransformationGraph3d>::objectType()
+  { return "TransformationGraph3d"; }
+
+  template <> inline
+  std::string DataTypeCode<aims::TransformationGraph3d>::dataType()
+  { return "VOID"; }
+
+  template <> inline
+  std::string DataTypeCode<aims::TransformationGraph3d>::name()
+  {
+    return "TransformationGraph3d";
+  }
+
   DECLARE_GENERIC_OBJECT_TYPE( carto::rc_ptr<soma::Transformation3d> )
 }
 
