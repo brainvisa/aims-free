@@ -34,8 +34,7 @@ namespace soma
 
     virtual bool read( %Template1PyType% & obj,
         carto::Object header = carto::none(),
-        int passbegin = 1, int passend = 4 )
-    throw () /Factory/; //, ReleaseGIL/;
+        int passbegin = 1, int passend = 4 ) /Factory, ReleaseGIL/;
 %Docstring
     Read an object from source.
     Two main modes exist:
@@ -169,7 +168,7 @@ namespace soma
     virtual bool write( const %Template1PyType% & obj,
                         carto::Object options = carto::none(),
                         int passbegin = 1 , int passend = 4 )
-        throw () /Factory/; //, ReleaseGIL/;
+        /Factory, ReleaseGIL/;
 %Docstring
     Write the given object to the data source (generally files)
 

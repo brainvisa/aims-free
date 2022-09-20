@@ -1,5 +1,5 @@
 
-%Exception std::exception(SIP_Exception) /PyName=StdException/
+%Exception std::exception(SIP_Exception) /PyName=StdException, Default/
 {
 %TypeHeaderCode
 #include <exception>
