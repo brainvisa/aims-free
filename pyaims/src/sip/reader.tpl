@@ -14,11 +14,11 @@ public:
   virtual ~Reader_%Template1typecode%();
 
   virtual %Template1PyType% *read( int = 0, const std::string * = 0, int = -1 )
-    throw ( ) /Factory, ReleaseGIL/;
+    /Factory, ReleaseGIL/;
 
   virtual bool read( %Template1PyType% & obj, int border=0,
                      const std::string* format = 0, int frame = -1 )
-    throw ( ) /Factory, ReleaseGIL/;
+    /Factory, ReleaseGIL/;
 
   void setFileName( std::string & );
   const std::string & fileName() const;
@@ -46,7 +46,7 @@ public:
 
   virtual bool write( const %Template1PyType% &, bool = false, 
                       const std::string * = 0 )
-    throw ( ) /Factory/; //, ReleaseGIL/;
+    /Factory/; //, ReleaseGIL/;
 
   void setFileName( std::string & );
   const std::string & fileName() const;

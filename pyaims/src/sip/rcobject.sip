@@ -12,6 +12,9 @@ class RCObject
 %ConvertToSubClassCode
   // std::cout << "ConvertToSubClassCode RCObject " << sipCpp << " / " << typeid( *sipCpp ).name() << std::endl;
   sipType = 0;
+
+  PyErr_Clear(); // prevent "<class 'something'> returned a result with an exception set"
+
   if( dynamic_cast<carto::SharedObject *>( sipCpp ) )
   {
     sipType = sipType_carto_SharedObject;
@@ -171,6 +174,24 @@ class RCObject
   {
     sipType = sipType_BucketMap_DOUBLE;
     *sipCppRet = dynamic_cast<BucketMap_DOUBLE *>( sipCpp );
+  }
+  else if( dynamic_cast<carto::Transformation3d *>( sipCpp ) )
+  {
+    sipType = sipType_soma_Transformation3d;
+    *sipCppRet = dynamic_cast<soma::Transformation3d *>( sipCpp );
+    // std::cout << "I'm a Transformation3d: " << sipCppRet << std::endl;
+    if( dynamic_cast<aims::AffineTransformation3d *>( sipCpp ) )
+    {
+      sipType = sipType_aims_AffineTransformation3d;
+      *sipCppRet = dynamic_cast<aims::AffineTransformation3d *>( sipCpp );
+      // std::cout << "I'm an AffineTransformation3d: " << sipCppRet << std::endl;
+    }
+    else if( dynamic_cast<aims::TransformationChain3d *>( sipCpp ) )
+    {
+      sipType = sipType_aims_TransformationChain3d;
+      *sipCppRet = dynamic_cast<aims::TransformationChain3d *>( sipCpp );
+      std::cout << "I'm an TransformationChain3d: " << *sipCppRet << std::endl;
+    }
   }
 
 %End

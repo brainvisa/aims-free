@@ -278,7 +278,9 @@ typedef int int32_t;
 %Include rcptr_AffineTransformation3d.sip
 %Include reader_AffineTransformation3d.sip
 %Include reader_Transformation3d.sip
+%Include reader_TransformationGraph3d.sip
 %Include fileformat_Transformation3d.sip
+%Include fileformat_TransformationGraph3d.sip
 
 %Include headered.sip
 %Include roi.sip
@@ -322,6 +324,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 
 %Include reader_Object.sip
 %Include soma_reader_Object.sip
+%Include fileformat_Object.sip
 
 %Include rawconverter_bucket_S16.sip
 %Include rcptr_SparseMatrix.sip
