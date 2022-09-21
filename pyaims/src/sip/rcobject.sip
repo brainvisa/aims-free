@@ -190,7 +190,7 @@ class RCObject
     {
       sipType = sipType_aims_TransformationChain3d;
       *sipCppRet = dynamic_cast<aims::TransformationChain3d *>( sipCpp );
-      std::cout << "I'm an TransformationChain3d: " << *sipCppRet << std::endl;
+      // std::cout << "I'm an TransformationChain3d: " << *sipCppRet << std::endl;
     }
   }
 
