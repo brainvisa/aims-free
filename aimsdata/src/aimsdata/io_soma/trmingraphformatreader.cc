@@ -101,6 +101,8 @@ TrmInGraphFormatReader::createAndRead( rc_ptr<DataSourceInfo> dsi,
   string source = hdr->getProperty( "source_referential" )->getString();
   string dest = hdr->getProperty( "destination_referential" )->getString();
 
+  graph->registerInverseTransformations( true );
+
   Edge *edge = graph->getTransformation( source, dest, true );
   if( !edge )
     throw runtime_error( "transformation not found in graph" );

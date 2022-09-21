@@ -273,7 +273,7 @@ Edge* TransformationGraph3d::getTransformation(
 
 
 rc_ptr<Transformation3d>
-TransformationGraph3d::loadTransformation( Edge *edge ) const
+TransformationGraph3d::loadTransformation( Edge *edge, bool affine_only ) const
 {
   rc_ptr<Transformation3d> trans( 0 );
   TransformationEdge* tedge = dynamic_cast<TransformationEdge *>( edge );
@@ -294,9 +294,20 @@ TransformationGraph3d::loadTransformation( Edge *edge ) const
       }
       else
       {
-        // cout << "from file: " << filename << endl;
-        Reader<Transformation3d> r( filename );
-        trans.reset( r.read() );
+        if( affine_only )
+        {
+          // cout << "from file: " << filename << endl;
+          Reader<AffineTransformation3d> r( filename );
+          trans.reset( r.read() );
+          // cout << "loaded affine transform: " << filename << endl;
+        }
+        else
+        {
+          // cout << "from file: " << filename << endl;
+          Reader<Transformation3d> r( filename );
+          trans.reset( r.read() );
+          // cout << "loaded transform: " << filename << endl;
+        }
         tedge->transformation = trans;
         if( trans && trans->header()->hasProperty( "uuid" ) )
         {
@@ -511,13 +522,16 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
         trans = dirname + sep + trans;
 
       registerTransformation( sr, dest_id, trans );
+      // TODO: we could unregister any inverse trans here
+      // then clear only chained transforms cache at the end of this
+      // function.
     }
   }
   clearCache();
 }
 
 
-void TransformationGraph3d::clearCache()
+void TransformationGraph3d::clearCache( bool chain_only )
 {
   _disconnected.clear();
 
@@ -532,10 +546,23 @@ void TransformationGraph3d::clearCache()
         bool deduced = bool( (*ie)->getProperty( "deduced" )->getScalar() );
         if( deduced )
         {
-          ESet::iterator j = ie;
-          ++ie;
-          removeEdge( *j );
-          continue;
+          bool remove = true;
+          if( chain_only )
+          {
+            Edge *inv = getTransformation( *(*ie)->rbegin(), *(*ie)->begin() );
+            if( inv
+                && ( !inv->hasProperty( "deduced" )
+                     || !bool( inv->getProperty( "deduced" )->getScalar() ) ) )
+              // inverse is not a deduced transform: it's not a chain
+              remove = false;
+          }
+          if( remove )
+          {
+            ESet::iterator j = ie;
+            ++ie;
+            removeEdge( *j );
+            continue;
+          }
         }
       }
       catch( ... )
@@ -556,8 +583,8 @@ void TransformationGraph3d::registerInverseTransformations( bool loadAffines )
   ESet::iterator ie = edges().begin(), ee = edges().end();
   bool modified = false;
 
-  // TODO clear only non-direct deduced transforms (chains)
-  clearCache();
+  // clear only non-direct deduced transforms (chains)
+  clearCache( true );
 
   if( loadAffines )
     loadAffineTransformations();
@@ -611,8 +638,10 @@ void TransformationGraph3d::registerInverseTransformations( bool loadAffines )
 
 void TransformationGraph3d::loadAffineTransformations()
 {
-  // TODO FIXME not finished...
-  ESet::iterator ie = edges().begin(), ee = edges().end();
+  ESet::iterator ie, ee = edges().end();
+
+  for( ie=edges().begin(); ie!=ee; ++ie )
+    loadTransformation( *ie, true );
 }
 
 

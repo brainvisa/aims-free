@@ -458,20 +458,33 @@ public:
         the dirname parameter.
 %End
 
-    void clearCache();
+    void clearCache( bool chain_only=false );
 %Docstring
-    remove deduced transformations (built from composition)
+    clearCache(chain_only=False)
+
+    remove deduced transformations (built from composition).
+
+    If chain_only is true, then inverses of direct transforms are not
+    removed.
 %End
 
-    void registerInverseTransformations();
+    void registerInverseTransformations( bool loadAffines = false );
 %Docstring
-        register inverse transformations when thay can be obtained.
+        registerInverseTransformations(loadAffines=False)
+
+        register inverse transformations when they can be obtained.
 
         This can be done only for loaded transformations. So the lazy loading
         feature will prevent for it to work on not already loaded
         transformations, since we cannot know if they are invertible before
         they are loaded.
+
+        For this reason, the loadAffines parameter allows to load affine
+        transforms and register their inverses.
 %End
+
+    void loadAffineTransformations();
+
   };
 
 };

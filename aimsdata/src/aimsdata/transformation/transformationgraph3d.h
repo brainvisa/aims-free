@@ -200,8 +200,12 @@ namespace aims
     */
     void loadTransformationsGraph( carto::Object desc,
                                    const std::string & dirname );
-    /// remove deduced transformations (built from composition)
-    void clearCache();
+    /** remove deduced transformations (built from composition or inversion).
+
+        If chain_only is true, then inverses of direct transforms are not
+        removed.
+    */
+    void clearCache( bool chain_only=false );
     /** register inverse transformations when they can be obtained.
 
         This can be done only for loaded transformations. So the lazy loading
@@ -234,7 +238,7 @@ namespace aims
     std::set<std::pair<const Vertex *, const Vertex *> > _disconnected;
 
     carto::rc_ptr<soma::Transformation3d>
-      loadTransformation( Edge *edge ) const;
+      loadTransformation( Edge *edge, bool affine_only=false ) const;
   };
 
 }
