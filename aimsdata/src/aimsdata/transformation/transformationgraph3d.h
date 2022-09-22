@@ -101,6 +101,8 @@ namespace aims
     Vertex* referentialById( const std::string & id ) const;
     /// Get the edge (transformation) with given ID
     Edge* transformationById( const std::string & id ) const;
+    /// Get the referential ID in the Vertex (its uuid property)
+    static std::string referential( const Vertex *v );
     /** Get the Transformation3d object inside an edge. The returned reference
         counting pointer may contain a null pointer.
     */

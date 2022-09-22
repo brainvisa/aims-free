@@ -55,12 +55,16 @@ namespace
   public:
     ReferentialVertex( const string & s ) : Vertex( s )
     {
-      UUID uuid;
-      uuid.generate();
-      setProperty( "uuid", uuid.toString() );
+      UUID new_uuid;
+      new_uuid.generate();
+      uuid = new_uuid.toString();
+      PropertySet & self = getValue();
+      self.addBuiltinProperty( "uuid", uuid );
     }
 
     virtual ~ReferentialVertex() {}
+
+    string uuid;
 
   private:
     friend class TransformationGFactory;
@@ -172,6 +176,24 @@ Edge* TransformationGraph3d::transformationById( const std::string & id ) const
   if( i != _tr_by_id.end() )
     return i->second;
   return 0;
+}
+
+
+string TransformationGraph3d::referential( const Vertex *vertex )
+{
+  const ReferentialVertex *rvert
+    = dynamic_cast<const ReferentialVertex *>( vertex );
+  if( rvert )
+    return rvert->uuid;
+  string ref;
+  try
+  {
+    ref = vertex->getProperty( "uuid" )->getString();
+  }
+  catch( ... )
+  {
+  }
+  return ref;
 }
 
 
@@ -515,11 +537,13 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
       {
         inv = true;
         trans = trans.substr( 4, trans.length() - 4 );
-        sr = dest_id;
-        dest_id = source_id;
       }
       if( !trans.empty() )
+      {
         trans = dirname + sep + trans;
+        if( inv )
+          trans += "?inv=1";
+      }
 
       registerTransformation( sr, dest_id, trans );
       // TODO: we could unregister any inverse trans here
