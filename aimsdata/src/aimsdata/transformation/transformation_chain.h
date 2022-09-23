@@ -130,6 +130,14 @@ protected:
   void setReferentialsInHeader();
 };
 
+
+  // Compose Transformation3d using TransformationChain3d
+  carto::rc_ptr<soma::Transformation3d>
+      operator * ( const carto::rc_ptr<soma::Transformation3d> &
+                    transformation3d1,
+                   const carto::rc_ptr<soma::Transformation3d> &
+                    transformation3d2 );
+
 } // namespace aims
 
 

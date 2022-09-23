@@ -1,3 +1,9 @@
+
+%ModuleHeaderCode
+#include <aims/transformation/transformation_chain.h>
+%End
+
+
 namespace soma
 {
 
@@ -488,3 +494,30 @@ public:
   };
 
 };
+
+
+// Compose Transformation3d using TransformationChain3d
+rc_ptr_Transformation3d
+    operator * ( const rc_ptr_Transformation3d & transformation3d1,
+                 const rc_ptr_Transformation3d & transformation3d2 )
+        /ReleaseGIL/;
+%MethodCode
+    sipRes = new carto::rc_ptr<soma::Transformation3d>(
+      aims::operator * ( *a0, *a1 ) );
+%End
+
+soma::Transformation3d*
+    operator * ( const soma::Transformation3d & transformation3d1,
+                 const soma::Transformation3d & transformation3d2 )
+        /Factory, ReleaseGIL/;
+%MethodCode
+    carto::rc_ptr<soma::Transformation3d>
+      t1( const_cast<soma::Transformation3d *>( a0 ) ),
+      t2( const_cast<soma::Transformation3d *>( a1 ) );
+    carto::rc_ptr<soma::Transformation3d> t3 = aims::operator * ( t1, t2 );
+    sipRes = t3.get();
+    t1.release();
+    t2.release();
+    t3.release();
+%End
+
