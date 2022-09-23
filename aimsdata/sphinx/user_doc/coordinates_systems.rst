@@ -239,6 +239,43 @@ For affine transformations, the composition operator is the mathematical matrix 
     T23 = aims.read('transform_2_TO_3.trm')
     T13 = T23 * T12
 
+For any type of 3D transformation, combining them is possible via the operator ``*`` in AIMS / PyAIMS. In C++, this API uses reference-counters:
+
+.. code-block:: cpp
+
+    #include <aims/io/reader.h>
+    #include <aims/transformation/transformation_chain.h>
+    #include <aims/transformation/affinetransformation3d.h>
+
+    using namespace carto;
+    using namespace soma;
+    using namespace aims;
+
+    int main()
+    {
+      Reader<Transformation3d> r( "ffd.ima" ); // may be any type of transform
+      rc_ptr<Transformation3d> t1( r.read() );
+
+      affinetransformation3d *at2 = new affinetransformation3d;
+      at2->affine()( 0, 0 ) = -1.;  // flip x axis
+      at2->affine()( 0, 3 ) = 200.; // X translation
+      rc_ptr<Transformation3d> t2( at2 );
+
+      rc_ptr<Transformation3d> result = t1 * t2; // (t2 will apply first)
+    }
+
+Or, in python::
+
+    from soma import aims, aimsalgo  # aimsalgo is needed to read non-lin trans
+
+    t1 = aims.read('ffd.ima')
+    t2 = aims.AffineTransformation3d()
+    t2.affine()[0, 0, 0, 0] = -1.
+    t2.affine()[0, 3, 0, 0] = 200.
+    result = t1 * t2
+
+Note that in python especially, there is no difference between handling affine or non-affine transformations for the composition operator. Just the result has a different type (``AffineTransformation3d`` if both operands are affine, or ``TransformationChain3d`` otherwise).
+
 
 Resampling
 ==========
