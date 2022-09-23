@@ -778,6 +778,11 @@ void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
     //removeProperty( "GIFTI_labels_table" );
   }
 }
+      glt.key[i] = k;
+      glt.rgba[4*i] = float(i) / glt.length;
+      glt.rgba[4*i+1] = float(i) / glt.length;;
+      glt.rgba[4*i+2] = float(i) / glt.length;;
+      glt.rgba[4*i+3] = 1.;
 
 Object GiftiHeader::giftiFindHdrDA( int & nda, Object dainfo,
                                     const string & intent )
