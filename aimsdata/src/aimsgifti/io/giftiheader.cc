@@ -819,7 +819,12 @@ void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
       string label = li->currentValue()->getString();
 //       cout << k << ": " << label << endl;
 
+      glt.key[i] = k;
       glt.label[i] = strdup( label.c_str() );
+      glt.rgba[4*i] = float(i) / glt.length;
+      glt.rgba[4*i+1] = float(i) / glt.length;;
+      glt.rgba[4*i+2] = float(i) / glt.length;;
+      glt.rgba[4*i+3] = 1.;
       // find RGB colors
     }
   }

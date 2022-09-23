@@ -121,6 +121,9 @@ namespace aims {
         try
         {
           i = *il;
+          if( i < 0 || i >= labels_table->size() )
+            continue;
+
           Object label_map = labels_table->getArrayItem( i );
           if( label_map.isNull() )
             continue;
