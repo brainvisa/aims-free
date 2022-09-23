@@ -12,7 +12,7 @@ A few definitions
 
 **Coordinates**: 3D position: 3 floating point numbers.
 
-- Float coordinates
+- Float coordinates: generally in millimeters.
 - Voxel coordinates: In images or "buckets", it may be given as int coordinates, that is voxel indices in a voxels grid (array, image, bucket). To get the "real world" float mm coordinates, voxel int coords normally just need to be multiplied with the voxel sizes. This assumes the real world origin is in the center of the "first" voxel in the array. The array orientation however, may differ between different conventions and arrangements, thus additional coordinates transformations may be required. (see later)
 
 To be usable, coordinates must be associated with a coordinates system (a referential) which specifies where the origin is, and where the axes go.
@@ -73,6 +73,8 @@ AIMS is always loading data in memory in a constant orientation, namely a **"LPI
 
 **Note that this referential is indirect**.
 
+An example:
+
 .. figure:: images/voxels_refs.png
 
 Then there may exist transformations between the memory referential and other referentials.
@@ -85,7 +87,7 @@ Note that a volume is an array of voxels with given dimensions: int voxels coord
 AIMS conventions
 ----------------
 
-AIMS always load voxel data in a **"LPI" orientation**, as said above. This has pros and cons, but is consistent, format-independent, and allows to use simple operations like "imageA + imageB".
+AIMS always loads voxel data in a **"LPI" orientation**, as said above. This has pros and cons, but is consistent, format-independent, and allows to use simple operations like "imageA + imageB".
 
 Information in AIMS headers are normalized the following way in the following header properties:
 
@@ -221,4 +223,30 @@ Thus if you frequently work with the same referentials and data with the same tr
 
 Combining transformations
 =========================
+
+Transformations can be combined, or *composed* to get coordinates from a "source" coordinates system to a "target" one, passing through intermediate referentials.
+To correctly transform coordinates, transformations should be combined "in reverse order": transformations which should be applied first are on the "right" of the expression, and those which apply later are on the "left".
+
+.. figure:: images/transform_compose.png
+
+Affine transformations can be represented in matrix math shapes, as 4x4 matrices. Coordinates to be transformed are represented as colum vectors. The last line of an affine transformation matrix is normally (0, 0, 0, 1), the last column corresponds to the translation (origin shift) to be applied (the 4th coefficient of this column is 1, as it already appears on the last line). Coordinates vector are added a 4th component, which is 1.
+
+.. figure:: images/affine_matrix.png
+
+For affine transformations, the composition operator is the mathematical matrix ``×`` operator (or ``*`` in C++ or Python languages), used in the same order::
+
+    T12 = aims.read('transform_1_TO_2.trm')
+    T23 = aims.read('transform_2_TO_3.trm')
+    T13 = T23 * T12
+
+
+Resampling
+==========
+
+When resampling an image (a volume), what is actually used is the **inverse transformation**, because we need to find out, for each voxel of the destination image, where it comes from in the source image.
+That's why the command ``AimsApplyTransform`` takes the inverse transform (``-I`` option) to perform volumes resampling.
+
+Transforming a mesh, on the contrary, requires the **direct** transformation (each vertex is directly transformed).
+
+
 

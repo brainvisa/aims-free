@@ -326,6 +326,48 @@
          d="M 0,0 5,-5 -12.5,0 5,5 Z"
          id="path8229-3" />
     </marker>
+    <marker
+       style="overflow:visible"
+       id="marker7563-0"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Send"
+       inkscape:isstock="true">
+      <path
+         transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+         style="fill:#b54516;fill-opacity:1;fill-rule:evenodd;stroke:#b54516;stroke-width:1pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path7561-3" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker7563-0-1"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Send"
+       inkscape:isstock="true">
+      <path
+         transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+         style="fill:#b54516;fill-opacity:1;fill-rule:evenodd;stroke:#b54516;stroke-width:1pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path7561-3-7" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker7563-0-1-5"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Send"
+       inkscape:isstock="true">
+      <path
+         transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
+         style="fill:#b54516;fill-opacity:1;fill-rule:evenodd;stroke:#b54516;stroke-width:1pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path7561-3-7-4" />
+    </marker>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -334,9 +376,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="231.36928"
-     inkscape:cy="746.48015"
+     inkscape:zoom="2.8"
+     inkscape:cx="269.10701"
+     inkscape:cy="524.81074"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -359,7 +401,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -371,7 +413,7 @@
        style="fill:#c4b354;fill-opacity:0.112654;stroke:#714701;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
        id="rect3417-1"
        width="166.17026"
-       height="44.636616"
+       height="54.842697"
        x="12.643285"
        y="92.048996"
        ry="3.9488003" />
@@ -397,35 +439,35 @@
        width="166.1461"
        height="102.09389"
        x="12.675035"
-       y="141.98106"
+       y="151.56898"
        ry="3.9488003" />
     <image
-       sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/lhemi_indirect.jpg"
+       sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/schemas_sources/lhemi_indirect.jpg"
        xlink:href="lhemi_indirect.jpg"
-       y="19.238987"
-       x="19.951361"
-       id="image2705"
-       preserveAspectRatio="none"
+       width="59.526722"
        height="46.231419"
-       width="59.526722" />
+       preserveAspectRatio="none"
+       id="image2705"
+       x="19.951361"
+       y="19.238987" />
     <image
-       sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/lhemi_direct.jpg"
+       sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/schemas_sources/lhemi_direct.jpg"
        xlink:href="lhemi_direct.jpg"
-       y="18.473034"
-       x="99.619743"
-       id="image2771"
-       preserveAspectRatio="none"
+       width="68.621735"
        height="49.497646"
-       width="68.621735" />
-    <image
-       sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/lhemi_direct_ccw.jpg"
-       xlink:href="lhemi_direct_ccw.jpg"
-       y="159.9458"
-       x="98.896385"
-       id="image2935"
        preserveAspectRatio="none"
+       id="image2771"
+       x="99.619743"
+       y="18.473034" />
+    <image
+       sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/schemas_sources/lhemi_direct_ccw.jpg"
+       xlink:href="lhemi_direct_ccw.jpg"
+       width="68.621735"
        height="46.951714"
-       width="68.621735" />
+       preserveAspectRatio="none"
+       id="image2935"
+       x="98.896385"
+       y="169.53372" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
@@ -461,18 +503,18 @@
          id="tspan3015">with CW polygons orientation</tspan></text>
     <g
        id="g3021"
-       transform="translate(8.4297239,44.840517)">
+       transform="translate(8.4297239,54.428449)">
       <image
-         sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/mesh_rendering_settings.jpg"
+         sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/schemas_sources/mesh_rendering_settings.jpg"
          xlink:href="mesh_rendering_settings.jpg"
-         transform="matrix(0.51975271,0,0,0.51975271,4.1736771,47.717759)"
-         clip-path="url(#clipPath2949)"
-         y="93.915932"
-         x="3.5086253"
-         id="image2837"
-         preserveAspectRatio="none"
+         width="114.3"
          height="196.32083"
-         width="114.3" />
+         preserveAspectRatio="none"
+         id="image2837"
+         x="3.5086253"
+         y="93.915932"
+         clip-path="url(#clipPath2949)"
+         transform="matrix(0.51975271,0,0,0.51975271,4.1736771,47.717759)" />
       <rect
          style="fill:#be3939;fill-opacity:0.506688;stroke:#801802;stroke-width:0.264999;stop-color:#000000"
          id="rect3017"
@@ -485,41 +527,41 @@
     </g>
     <path
        style="fill:none;fill-opacity:0.506688;stroke:#4d0e01;stroke-width:0.765;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Lend);stop-color:#000000"
-       d="m 76.172077,148.21412 c 22.362939,-0.63239 27.874343,-0.83616 42.020693,8.71362"
+       d="m 76.172077,157.80206 c 22.362939,-0.63239 27.874343,-0.83616 42.020693,8.71362"
        id="path3023"
        sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="132.50978"
-       y="214.4749"
+       y="224.06282"
        id="text2973-2-4"><tspan
          sodipodi:role="line"
          id="tspan3375"
          x="132.50978"
-         y="214.4749">Using a CCW polygons orientation</tspan><tspan
+         y="224.06282">Using a CCW polygons orientation</tspan><tspan
          sodipodi:role="line"
          id="tspan3377"
          x="132.50978"
-         y="219.76656">fixes the interior/exterior display problem</tspan></text>
+         y="229.35448">fixes the interior/exterior display problem</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#9b0b0c;fill-opacity:1;stroke:none;stroke-width:0.265;stroke-miterlimit:4;stroke-dasharray:none"
        x="131.04489"
-       y="225.92332"
+       y="235.51125"
        id="text2973-2-4-9"><tspan
          sodipodi:role="line"
          id="tspan3411"
          x="131.04489"
-         y="225.92332">but the mesh still looks like</tspan><tspan
+         y="235.51125">but the mesh still looks like</tspan><tspan
          sodipodi:role="line"
          id="tspan3413"
          x="131.04489"
-         y="231.21498">a right hemishpere</tspan><tspan
+         y="240.8029">a right hemishpere</tspan><tspan
          sodipodi:role="line"
          id="tspan3415"
          x="131.04489"
-         y="236.50665">whereas it is actually a left one !</tspan></text>
+         y="246.09457">whereas it is actually a left one !</tspan></text>
     <rect
        style="fill:none;fill-opacity:0.112654;stroke:#6c3401;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
        id="rect3448"
@@ -542,7 +584,7 @@
        width="68.621735"
        height="46.951714"
        x="98.896385"
-       y="159.9458"
+       y="169.53372"
        ry="1.4356654" />
     <g
        id="g10340">
@@ -558,14 +600,14 @@
          id="g8121"
          transform="translate(13.163644,10.832346)">
         <image
-           sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/lhemi_indirect_polygons.jpg"
+           sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/schemas_sources/lhemi_indirect_polygons.jpg"
            xlink:href="lhemi_indirect_polygons.jpg"
-           y="87.946297"
-           x="27.553408"
-           id="image6023"
-           preserveAspectRatio="none"
+           width="38.252357"
            height="29.99645"
-           width="38.252357" />
+           preserveAspectRatio="none"
+           id="image6023"
+           x="27.553408"
+           y="87.946297" />
         <g
            id="g6269"
            transform="matrix(0.0586762,0,0,0.0586762,53.87285,88.891767)">
@@ -616,34 +658,35 @@
       </g>
     </g>
     <g
-       id="g8978"
-       transform="translate(4.5335985,8.0716349)">
+       id="g3965">
       <rect
          style="font-variation-settings:normal;vector-effect:none;fill:#ffffff;fill-opacity:0.99489;stroke:none;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000"
          id="rect10092-3"
          width="13.940806"
          height="27.908201"
-         x="99.173187"
-         y="91.684906"
+         x="103.70679"
+         y="99.756538"
          ry="1.5092633" />
       <g
-         id="g8177">
+         id="g8177"
+         transform="translate(4.5335985,8.0716349)">
         <image
-           sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/lhemi_direct_polygons.jpg"
+           sodipodi:absref="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/schemas_sources/lhemi_direct_polygons.jpg"
            xlink:href="lhemi_direct_polygons.jpg"
-           y="91.503983"
-           x="109.0787"
-           id="image6676"
-           preserveAspectRatio="none"
+           width="38.252357"
            height="28.046011"
-           width="38.252357" />
+           preserveAspectRatio="none"
+           id="image6676"
+           x="109.0787"
+           y="91.503983" />
         <g
            id="g6269-8"
            transform="matrix(-0.02047858,0.05498658,-0.05498658,-0.02047858,139.87319,110.05163)">
           <path
-             d="m -58.539447,639.44186 -10.9,-5.7 c -1.2,-1 -2.6,-1.8 -4,-2.5 -1.2,-0.4 -4.7,-4.5 -10.399997,-12.4 a 36,36 0 0 1 -7.4,-25.2 c 0.5,-3 1.2,-6 1.6,-6.4 0.4,-0.4 -0.1,-3.1 -1.2,-6 -3.5,-9 -3,-14.1 2,-24.3 2.5,-5 4.4,-10.5 4.3,-12.1 0,-2.9 0,-5.7 0.3,-8.6 0.6,-7.5 4.7,-12.1 13.799997,-15.5 l 6.3,-2.4 0.3,-5 c 0.3,-3.6 1.5,-7 3.4,-10.1 2.7,-4.6 3.7,-5.4 9.2,-7.69999 9.6,-4 35.4,3.99999 56.5000004,10.89999 2.2,0.7 19.0999996,9 23.9999996,10.4 5.3,1.4 8.4,0.2 10.4,-4 1.1,-2.4 3.7,-13 7.8,-32.49999 2.8,-13.6 5.4,-17 21.3,-28.3 9.5,-6.8 12.3,-8 17.9,-7.7 13.499997,0.5 18.999997,15.2 9.4,25 a 31.6,31.6 0 0 0 -7.5,19.4 c -0.1,3 -0.6,7.4 -1.2,9.89999 -1,5.2 -0.7,11.5 1.6,27.1 1.7,9.3 1.9,18.8 0.5,28.1 -1.5,7.8 0.3,30.9 3.4,45.8 1.1,5.2 3.5,11.7 8.099997,21.6 5.6,11.3 9.4,23.5 11.2,36 l -7.5,1.4 -2.6,-10.9 a 92,92 0 0 0 -8.199997,-22.5 c -3,-6 -5.4,-12.1 -7.6,-18.4 a 176.5,176.5 0 0 1 -4.6,-56.4 c 1,-8 0.4,-16.4 -2.2,-32.8 a 59,59 0 0 1 0,-21.39999 c 0.5,-3.2 1,-8.1 1,-10.9 0,-4.7 3.7,-12.8 10.6,-23.4 2.7,-4.1 1.2,-8.5 -3,-9.3 -4.5,-0.9 -5.3,-0.5 -14,5.5 -15.3,10.8 -16.2,12.3 -20.4,31.8 -4.8,22.69999 -6.1,26.89999 -9.2,30.29999 -4.3,4.8 -11,6.5 -17.7,4.5 a 290,290 0 0 1 -24.5999996,-10.6 c -12.7000004,-6 -41.7000004,-14.2 -46.8000004,-12.7 -4.8,1.4 -9,4.8 -10.2,8.2 -3.2,10.4 1,18.9 8,26.4 6.6,5.5 27.4,16.6 33.1,17.6 5.6000004,1 6.8000004,0.8 9.0000004,-1.4 1.3,-1.3 1.3,-2.6 0,-6.7 -1.2,-4.4 -2.8,-6.6 -10.0000004,-14.3 -9.4,-10 -13.9,-17.8 -10,-17.4 h 4.3 c 1.2,0 2.5,0.6 2.8,1.4 0.3,0.9 1.6,2.8 3,4.2 l 12.5000004,13.3 c 4.2,5.5 7.4,15.5 6.2,20 -0.5,1.9 -1.4,3.6 -2.7,5.1 -1.30000004,1.3 -1.60000004,2.4 -0.80000004,3.2 0.60000004,0.7 1.90000004,3.3 2.90000004,5.7 1.4,3.6 1.6,5.6 0.7,10.5 -1.4,8.3 -3.20000004,10.2 -11,11.8 l -6.0000004,1.3 2,5.8 c 3.6000004,10.4 -0.4,17.4 -11.7,20.7 -5.2,1.6 -6.4,2.2 -6,3.4 0.7,2.6 -1.1,9.8 -3.4,13.3 -1.4,2 -3.1,3.7 -5.2,4.9 l -3,1.5 8.9,9.8 c 9.2,8.2 15.7,9.8 27.7000004,14 19.2999996,6.7 29.1999996,3 34.5999996,10 2.4,3 12.2,9 12,9.3 l -2,2.3 c -0.5,0.6 -0.4,0.3 -2.4,3 0,0 -9.2,-4.6 -14,-10.1 -2.2,-2.6 -13.6,-1.7 -31.0999996,-6.7 -15.4000004,-4.3 -20.8000004,-8.7 -30.0000004,-15.5 -7.7,-5.8 -10,-10.1 -15.2,-13 l -6.9,-3.6 m 20.9,-12 c 3,-7 -0.4,-11.4 -12,-15.5 -9.5,-3.2 -18.4,-7.8 -26.5,-13.5 -4.099997,-2.8 -6.699997,-4 -7.099997,-3.3 -1.5,2.6 1.7,12.6 5.999997,18.7 6.2,9.2 8.8,11.5 17.3,15.4 10.7,5 19.6,4.3 22.3,-1.8 z m 19.3,-22.2 c 1.7,-3.2 0.2,-8.5 -4,-13 -2.5,-2.8 -4.7,-4 -10.3,-5.2 -4,-0.9 -7.5,-2 -8,-2.4 -0.5,-0.4 -4.6,-2 -9.1,-3.4 a 56.9,56.9 0 0 1 -26,-15.7 l -5.799997,-6.2 -1.9,4.8 c -1.7,4.4 -1.7,5.5 0,11.4 1.4,4.8 4.4,8.5 6.999997,12.7 3.8,3.8 19.8,12.8 28,15.6 4.9,1.6 11,3.9 13.6,5 4,1.6 5.5,1.7 9.9,0.4 4,-1.1 5.5,-2.1 6.6,-4 z m 14.3000004,-27.3 c 1.3,-4 0.5,-8.6 -2.2,-11.8 -1.7,-2.2 -4.3000004,-3.4 -9.9000004,-4.8 -5,-1.3 -12,-4.5 -21.1,-9.6 -13.8,-7.8 -19.6,-12.7 -22.9,-19.2 -2.6,-5 -4.5,-5.8 -9,-3.7 -7.3,3.5 -8.4,6.5 -6.8,18.7 0.8,6.6 0.8,6.6 6.8,13 6.8,7.2 9.5,8.7 26.3,14.6 13,4.5 18.9,6 27.4,6.4 7.3000004,0.4 10.3000004,-0.5 11.4000004,-3.6 z"
+             d="m -58.539447,639.44186 -10.9,-5.7 c -1.2,-1 -2.6,-1.8 -4,-2.5 -1.2,-0.4 -4.7,-4.5 -10.399997,-12.4 -5.552124,-7.16838 -8.194823,-16.16784 -7.4,-25.2 0.5,-3 1.2,-6 1.6,-6.4 0.4,-0.4 -0.1,-3.1 -1.2,-6 -3.5,-9 -3,-14.1 2,-24.3 2.5,-5 4.4,-10.5 4.3,-12.1 0,-2.9 0,-5.7 0.3,-8.6 0.6,-7.5 4.7,-12.1 13.799997,-15.5 l 6.3,-2.4 0.3,-5 c 0.3,-3.6 1.5,-7 3.4,-10.1 2.7,-4.6 3.7,-5.4 9.2,-7.69999 9.6,-4 26.487839,-12.39212 47.5878391,-5.49212 2.2,0.7 28.0121609,25.39211 32.9121609,26.79211 5.3,1.4 8.4,0.2 10.4,-4 1.1,-2.4 3.7,-13 7.8,-32.49999 2.8,-13.6 5.4,-17 21.3,-28.3 9.5,-6.8 12.3,-8 17.9,-7.7 13.499997,0.5 18.999997,15.2 9.4,25 -4.617544,5.43506 -7.260798,12.27228 -7.5,19.4 -0.1,3 -0.6,7.4 -1.2,9.89999 -1,5.2 -0.7,11.5 1.6,27.1 1.7,9.3 1.9,18.8 0.5,28.1 -1.5,7.8 0.3,30.9 3.4,45.8 1.1,5.2 3.5,11.7 8.099997,21.6 5.6,11.3 9.4,23.5 11.2,36 l -7.5,1.4 -2.6,-10.9 c -1.74136,-7.82523 -4.498043,-15.3893 -8.199997,-22.5 -3,-6 -5.4,-12.1 -7.6,-18.4 -4.556681,-18.43025 -6.109973,-37.47496 -4.6,-56.4 1,-8 0.4,-16.4 -2.2,-32.8 -1.304487,-7.07369 -1.304487,-14.3263 0,-21.39999 0.5,-3.2 1,-8.1 1,-10.9 0,-4.7 3.7,-12.8 10.6,-23.4 2.7,-4.1 1.2,-8.5 -3,-9.3 -4.5,-0.9 -5.3,-0.5 -14,5.5 -15.3,10.8 -16.2,12.3 -20.4,31.8 -4.8,22.69999 -6.1,26.89999 -9.2,30.29999 -4.3,4.8 -11,6.5 -17.7,4.5 -8.358892,-3.15254 -25.4798083,-23.08175 -33.5121609,-26.99211 -12.7000001,-6 -32.7878391,2.19211 -37.8878391,3.69211 -4.8,1.4 -9,4.8 -10.2,8.2 -3.2,10.4 14.293706,-1.14584 24.787839,2.60789 6.6,5.5 27.4000001,16.6 33.1000001,17.6 5.6000004,1 6.8000004,0.8 8.9999999,-1.4 1.3,-1.3 1.3,-2.6 0,-6.7 -1.2,-4.4 -2.7999995,-6.6 -9.9999999,-14.3 -9.4,-10 -13.9000001,-17.8 -10,-17.4 h 4.3 c 1.2,0 2.5,0.6 2.79999999,1.4 0.3,0.9 1.6,2.8 3.00000001,4.2 l 12.4999999,13.3 c 4.2,5.5 7.4,15.5 6.2,20 -0.5,1.9 -1.4,3.6 -2.7,5.1 -1.3,1.3 -1.6,2.4 -0.8,3.2 0.6,0.7 1.9,3.3 2.9,5.7 1.4,3.6 1.6,5.6 0.7,10.5 -1.4,8.3 -3.2,10.2 -10.9999995,11.8 l -6.0000004,1.3 2,5.8 c 3.6000004,10.4 -0.4,17.4 -11.7,20.7 -5.2000001,1.6 -6.4000001,2.2 -6.0000001,3.4 0.7,2.6 2.5308073,10.55993 -1.838015,13.97964 -3.480857,2.72464 -6.377366,4.55839 -10.787171,4.86444 -6.854619,0.47574 -16.894286,-2.32274 -26.443765,-3.12947 -9.253384,-0.78171 -17.818806,-4.76969 -17.818806,-4.76969 0,0 9.178681,0.59752 17.671448,-0.55065 9.200191,-1.24381 21.088494,5.09452 29.581681,1.34534 4.937061,-2.17938 6.291671,-10.94624 -0.539652,-14.62999 -9.5,-3.2 -19.553446,-6.78795 -31.143817,-6.17185 -9.233787,-0.28467 -25.667115,0.27089 -30.813818,7.28787 -1.77528,2.42041 2.344079,13.06647 6.644076,19.16647 6.2,9.2 8.455081,12.36234 17.3,15.4 0,0 6.800723,2.57132 10.089601,4.33624 3.40887,1.82931 9.710399,6.36376 9.710399,6.36376 l 8.9,9.8 c 9.2,8.2 15.7,9.8 27.7000004,14 19.2999996,6.7 29.1999996,3 34.5999996,10 2.4,3 12.2,9 12,9.3 l -2,2.3 c -0.5,0.6 -0.4,0.3 -2.4,3 0,0 -9.2,-4.6 -14,-10.1 -2.2,-2.6 -13.6,-1.7 -31.0999996,-6.7 -15.4000004,-4.3 -20.8000004,-8.7 -30.0000004,-15.5 -7.7,-5.8 -10,-10.1 -15.2,-13 l -6.9,-3.6 m 56.9878391,-57.99211 c 1.69999999,-3.2 0.2,-8.5 -4,-13 -2.5,-2.8 -4.7000001,-4 -10.3000001,-5.2 -4,-0.9 -7.5,-2 -8,-2.4 -0.5,-0.4 -11.415656,-2.86959 -15.915656,-4.26959 -9.929121,-2.78086 -18.386717,-0.86088 -26.360454,1.44199 l -11.998269,1.26347 -5.313457,4.85624 c -1.7,4.4 -1.7,5.5 0,11.4 1.4,4.8 4.405647,5.66593 7.465482,6.37746 10.69723,-2.31525 26.55478,-5.80817 34.75478,-3.00817 4.9,1.6 20.567574,5.0386 23.167574,6.1386 4,1.6 5.5,1.7 9.9000001,0.4 4,-1.1 5.5,-2.1 6.6,-4 z m 14.2999999,-27.3 c 1.3,-4 0.5,-8.6 -2.2,-11.8 -1.6999995,-2.2 -4.2999999,-3.4 -9.89999991,-4.8 -4.99999999,-1.3 -12.00000009,-4.5 -21.10000009,-9.6 -13.8,-7.8 -21.936548,-8.98243 -29.893831,-6.71531 -4.842454,1.35182 -14.294008,5.50742 -18.794008,7.60742 -7.3,3.5 -8.4,6.5 -6.8,18.7 0.8,6.6 17.712812,-2.56638 24.682881,-3.18446 7.278126,1.1658 8.404958,1.09235 25.204958,6.99235 13,4.5 18.9000001,6 27.4000001,6.4 7.3000004,0.4 10.2999999,-0.5 11.3999999,-3.6 z"
              id="path6249-3"
-             style="fill:#b54516;fill-opacity:1" />
+             style="fill:#b54516;fill-opacity:1"
+             sodipodi:nodetypes="cccccsccccccccccccccccccccccccccccccscccccccccccscccscccccccccccccssscssccscsscccccccccccccccsccccccccccccccccccccc" />
           <g
              fill="none"
              stroke="#000000"
@@ -665,7 +708,8 @@
         </g>
       </g>
       <g
-         id="g8953">
+         id="g8953"
+         transform="translate(4.5335985,8.0716349)">
         <path
            style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#f5f3e3;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
            d="m 147.5512,119.75177 0.01,-1.77707 c -0.0937,0.90264 -0.71013,1.41848 -1.57108,1.75342 z"
@@ -688,8 +732,104 @@
       </g>
     </g>
     <path
+       style="fill:none;fill-opacity:1;stroke:#ea9735;stroke-width:0.264583;stroke-opacity:1;stop-color:#000000;stroke-linecap:round"
+       d="m 74.18567,119.00407 2.736377,17.98563"
+       id="path3426"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ea9735;stroke-width:0.264583;stroke-opacity:1;stop-color:#000000;font-variation-settings:normal;opacity:1;vector-effect:none;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stop-opacity:1"
+       d="M 71.069347,116.12148 69.43321,132.0262"
+       id="path3428"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ea9735;stroke-width:0.264583;stroke-opacity:1;stop-color:#000000;font-variation-settings:normal;opacity:1;vector-effect:none;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stop-opacity:1"
+       d="m 67.941644,118.301 -4.390868,19.26108"
+       id="path3430"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#ea9735;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 124.49734,118.41327 -4.53785,16.38029"
+       id="path3432"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#ea9735;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 122.97501,114.57235 c -13.8476,12.43467 -14.45058,26.71654 2.59295,28.3883"
+       id="path3434"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#ea9735;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 130.65172,113.35216 2.14168,22.2044"
+       id="path3436"
+       sodipodi:nodetypes="cc" />
+    <path
        style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#6c3401;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.86, 0.93, 0.465, 0.93;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#Arrow1Lstart);marker-end:url(#marker9207);stop-color:#000000;stop-opacity:1"
        d="M 97.270323,95.556176 V 133.75019"
        id="path9016" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="76.940178"
+       y="141.77502"
+       id="text2973-5"><tspan
+         sodipodi:role="line"
+         id="tspan3476"
+         x="76.940178"
+         y="141.77502">1</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583;"
+       x="69.443787"
+       y="135.88722"
+       id="text2973-5-6"><tspan
+         sodipodi:role="line"
+         id="tspan4436">2</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="62.628098"
+       y="141.93066"
+       id="text2973-5-8"><tspan
+         sodipodi:role="line"
+         id="tspan4438"
+         x="62.628098"
+         y="141.93066">3</tspan></text>
+    <path
+       d="m 71.345806,140.79231 a 3.9899816,1.6429336 1.9077466 1 0 -2.603516,-0.0649"
+       id="path6251-2"
+       style="font-variation-settings:normal;vector-effect:none;fill:none;fill-opacity:1;stroke:#b54516;stroke-width:0.528;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker7563-0-1);stop-color:#000000" />
+    <path
+       d="m 128.05134,139.62226 a 3.9899816,1.6429336 1.9077466 1 0 -2.60352,-0.0649"
+       id="path6251-2-2"
+       style="font-variation-settings:normal;vector-effect:none;fill:none;fill-opacity:1;stroke:#b54516;stroke-width:0.528;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker7563-0-1-5);stop-color:#000000" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="119.4423"
+       y="139.23532"
+       id="text2973-5-2"><tspan
+         sodipodi:role="line"
+         id="tspan3476-1"
+         x="119.4423"
+         y="139.23532">1</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="127.47392"
+       y="144.09753"
+       id="text2973-5-6-7"><tspan
+         sodipodi:role="line"
+         id="tspan4436-2"
+         x="127.47392"
+         y="144.09753">2</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="133.08968"
+       y="139.69128"
+       id="text2973-5-8-4"><tspan
+         sodipodi:role="line"
+         id="tspan4438-1"
+         x="133.08968"
+         y="139.69128">3</tspan></text>
   </g>
 </svg>
