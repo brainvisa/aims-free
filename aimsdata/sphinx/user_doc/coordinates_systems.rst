@@ -233,7 +233,7 @@ Affine transformations can be represented in matrix math shapes, as 4x4 matrices
 
 .. figure:: images/affine_matrix.png
 
-For affine transformations, the composition operator is the mathematical matrix ``×`` operator (or ``*`` in C++ or Python languages), used in the same order::
+For affine transformations, the composition operator is the mathematical matrix ``×`` operator (or ``*`` in C++ or Python languages), used in the same order. The result is also an affine transformation::
 
     T12 = aims.read('transform_1_TO_2.trm')
     T23 = aims.read('transform_2_TO_3.trm')
