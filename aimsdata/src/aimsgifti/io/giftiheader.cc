@@ -182,7 +182,7 @@ bool GiftiHeader::read()
   {
     Object o = Object::value( IntDictionary() );
     for( i=0; i<gim->labeltable.length; ++i )
-      {
+    {
       vector<float> rgba;
       rgba.push_back( (float)(gim->labeltable.rgba[4*i]));
       rgba.push_back( (float)(gim->labeltable.rgba[4*i+1]));
@@ -191,9 +191,9 @@ bool GiftiHeader::read()
 
       Object LabelTable = Object::value( Dictionary() );
       LabelTable->setProperty( "RGB", rgba );
-      LabelTable->setProperty( "Label", Object::value( string( gim->labeltable.label[i])) );
+      LabelTable->setProperty( "Label", string( gim->labeltable.label[i] ) );
       o->setArrayItem( gim->labeltable.key[i], LabelTable );
-      }
+    }
 
     setProperty( "GIFTI_labels_table", o );
   }
@@ -779,9 +779,9 @@ void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
   }
 }
       glt.key[i] = k;
-      glt.rgba[4*i] = float(i) / glt.length;
-      glt.rgba[4*i+1] = float(i) / glt.length;;
-      glt.rgba[4*i+2] = float(i) / glt.length;;
+      glt.rgba[4*i] = float(i) / (glt.length - 1);
+      glt.rgba[4*i+1] = float(i) / (glt.length - 1);;
+      glt.rgba[4*i+2] = float(i) / (glt.length - 1);;
       glt.rgba[4*i+3] = 1.;
 
 Object GiftiHeader::giftiFindHdrDA( int & nda, Object dainfo,

@@ -111,12 +111,14 @@ namespace aims {
       int32_t tmin = *keys.begin();
       size_t i, j, n = *keys.rbegin() - tmin + 1;
       vol->reallocate( n );
-      labels.resize( n );
+      vol->fill( AimsRGBA( 0, 0, 0, 255 ) );
+
+      // labels.resize( n );
       for( il=keys.begin(); il!=el; ++il )
         try
         {
           i = *il;
-          if( i < 0 || i >= labels_table->size() )
+          if( i < 0 || i - tmin >= n )
             continue;
 
           Object label_map = labels_table->getArrayItem( i );
@@ -125,7 +127,8 @@ namespace aims {
 
           string label = label_map->getProperty( "Label" )->getString();
           Object color = label_map->getProperty( "RGB" );
-          labels[i - tmin] = label;
+          // labels[i - tmin] = label;
+          labels[i] = Object::value( label );
           AimsRGBA rgba;
           rgba[3] = 255;
           Object cit = color->objectIterator();
