@@ -116,12 +116,14 @@ namespace aims {
       int32_t tmin = *keys.begin();
       size_t i, j, n = *keys.rbegin() - tmin + 1;
       vol->reallocate( n );
+      vol->fill( AimsRGBA( 0, 0, 0, 255 ) );
+
       // labels.resize( n );
       for( il=keys.begin(); il!=el; ++il )
         try
         {
           i = *il;
-          if( i < 0 || i >= labels_table->size() )
+          if( i < 0 || i - tmin >= n )
             continue;
 
           Object label_map = labels_table->getArrayItem( i );
