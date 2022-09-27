@@ -286,4 +286,31 @@ That's why the command ``AimsApplyTransform`` takes the inverse transform (``-I`
 Transforming a mesh, on the contrary, requires the **direct** transformation (each vertex is directly transformed).
 
 
+FreeSurfer and AIMS coordinates systems
+=======================================
+
+**Use case:** use `Freesurfer <https://surfer.nmr.mgh.harvard.edu>`_ meshes in Aims tools and the contrary.
+
+`Freesurfer <https://surfer.nmr.mgh.harvard.edu>`_ uses (of course) different conventions and different coordinates systems from those used in AIMS...
+
+`Brainvisa <https://brainvisa.info>`_ proposes a "Freesurfer toolbox" which allows to read Freesurfer meshes and textures and to write them back in an "AIMS world" (in the Aims native coordinates system of the subject, like Morphologist meshes).
+
+Freesurfer performs several resampling and coordinates systems changes during its main ``recon-all`` pipeline:
+
+.. figure:: images/freesurfer.png
+
+    Freesurfer referentials and transformations
+
+- raw image: ``orig/001.mgz``
+- transform to "scanner based referential" (direct, RAS oriented)
+- resampling of T1 MRI to 1mm resolution: all processed images are in this shape: ``orig.mgz``, ``ribbon.mgz`` etc.
+- 1mm images also have a scanner-based referential and a transformation, which links to the ``orig/001.mgz`` image.
+- normalization information to Talairach space: scanner-based to MNI space: ``transforms/talairach.auto.xfm``
+- meshes referential (direct, RAS)
+- mesh to MNI transformation in meshes headers
+- T1 MRI to meshes: Anat -> scanner (in MRI); Scanner -> MNI (from normalization); inverse(mesh -> MNI)::
+
+      anat2mesh = mesh2mni.inverse() * sb2mni * anat2sb
+
+
 

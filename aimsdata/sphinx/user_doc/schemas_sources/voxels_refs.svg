@@ -14,7 +14,7 @@
    id="svg8"
    inkscape:version="1.0.2 (1.0.2+r75+1)"
    sodipodi:docname="voxels_refs.svg"
-   inkscape:export-filename="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/voxels_refs.png"
+   inkscape:export-filename="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/images/voxels_refs.png"
    inkscape:export-xdpi="150"
    inkscape:export-ydpi="150">
   <defs
@@ -180,18 +180,18 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="482.74163"
-     inkscape:cy="146.09804"
+     inkscape:zoom="2.0000001"
+     inkscape:cx="612.34608"
+     inkscape:cy="16.6264"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="false"
      inkscape:snap-grids="true"
      inkscape:window-width="1564"
-     inkscape:window-height="1080"
-     inkscape:window-x="2056"
-     inkscape:window-y="331"
+     inkscape:window-height="1021"
+     inkscape:window-x="-4"
+     inkscape:window-y="0"
      inkscape:window-maximized="0"
      inkscape:snap-global="true">
     <inkscape:grid
@@ -206,7 +206,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -214,6 +214,14 @@
      inkscape:label="Calque 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="fill:#f9f3cc;fill-opacity:0.519876;stroke:#907917;stroke-width:0.7;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="rect1141"
+       width="200.59061"
+       height="163.65959"
+       x="6.0466895"
+       y="2.1627331"
+       ry="6.8917742" />
     <rect
        style="fill:#be3939;fill-opacity:0.506688;stroke:#801802;stroke-width:0.264999;stop-color:#000000"
        id="rect833"
