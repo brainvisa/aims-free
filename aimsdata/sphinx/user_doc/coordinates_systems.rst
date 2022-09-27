@@ -286,6 +286,49 @@ That's why the command ``AimsApplyTransform`` takes the inverse transform (``-I`
 Transforming a mesh, on the contrary, requires the **direct** transformation (each vertex is directly transformed).
 
 
+Images normalized using SPM
+===========================
+
+SPM12 can perform normalization by either resampling the input volume to the template space, or by only writing (affine and non-linear) normalization information.
+
+
+.. _spm_normal_resampled:
+
+Volume resampled in target space
+--------------------------------
+
+It should be already in the same space and field of view as the template image (most of the time the template is the MNI ICBM152). **But:**
+
+* SPM12 does not write the correct referential ID in the normalized NIFTI files. It used the code for "coordinates aligned to another file" (generic code in NIFTI format) instead of "MNI ICCM". Thus **the info is wrong** and we must get the transformation to this unspecified referential, and *assume it's actually MNI*.
+
+* It may be resampled with a different field of view, if specified. As we have seen, AIMS works in a referential which origin is "almost" in the corner of the image, thus two images differing on the field of view are **not** in the same space for AIMS. However both contain transformation information to a common space, namely the template MNI ICBM152. For normalized images, the transformation should be only a translation, plus the axes inversions for AIMS. To get from the resampled image to the template, the transform to be applied is thus the combination of both transformations (one inverted)::
+
+    template = aims.read('T1.nii')
+    tr_index = template.header()['referentials'].index(
+        aims.StandardReferentials.mniTemplateReferential())
+    templ2icbm = template.header()['transformations'][tr_index]
+
+    normalized = aims.read('wmri.nii')
+    tr_index = -1  # assume the last transform is the one to ICBM (see above)
+    norm2icbm = normalized.header()['transformations'][tr_index]
+
+    norm2template = norm2icbm.inverse() * templ2icbm
+
+* For the same reason as the first point above (the referential ID is wrong in the normalized image), Anatomist will not apply the correct correspondance between images coordinates. It has to be specified manually, by telling him that the MNI ICBM referential and the "coordinates aligned to another file" for the normalized image are the same. This is done in the referentials window (menu "Settings / Referentials and transformations"), by "drawing" an arrow between these referentials, while holding the "Ctrl" key pressed (to tell that we want to add an "identity" transformation instead of loading a transformation file).
+
+.. figure:: images/spm_anatomist.png
+
+
+Normalization information not applied to an image
+-------------------------------------------------
+
+The affine part of the transformation is normally written back into the header of the source image by SPM (provided it is writable). Otherwise the transformation file is a matlab file with the suffix ``_sn.mat``, and contains both an affine part (the same found in the source image), and a non-linear part.
+
+Thus the source image is obviously not directly aligned to the template, but it has a transformation to the MNI space. So at the end, using it is exactly the same as the :ref:`resampled volume case <spm_normal_resampled>`, except that the transformation in the source volume is not only a translation and axes inversions, but may include rotation, scaling etc.
+
+The problems are exactly the same: **the destination referential is wrong**, and **you** have to know that the "coordinates aligned to another file" referential is the MNI ICBM, and thus *you* have to tell it to Anatomist to display them correctly.
+
+
 FreeSurfer and AIMS coordinates systems
 =======================================
 
