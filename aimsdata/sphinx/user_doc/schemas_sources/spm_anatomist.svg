@@ -1,0 +1,814 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   sodipodi:docname="spm_anatomist.svg"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   id="svg17514"
+   version="1.1"
+   viewBox="0 0 210 297"
+   height="297mm"
+   width="210mm"
+   inkscape:export-filename="/home/dr144257/casa_distro/brainvisa-master-ubuntu-18.04/src/aims/aims-free/master/aimsdata/sphinx/user_doc/images/spm_anatomist.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview17516"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="1.4984147"
+     inkscape:cx="147.48921"
+     inkscape:cy="1038.4308"
+     inkscape:window-width="1920"
+     inkscape:window-height="1021"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:snap-global="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid17575" />
+  </sodipodi:namedview>
+  <defs
+     id="defs17511">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient30420">
+      <stop
+         style="stop-color:#a1f3f1;stop-opacity:1"
+         offset="0"
+         id="stop30416" />
+      <stop
+         style="stop-color:#ebe370;stop-opacity:1"
+         offset="1"
+         id="stop30418" />
+    </linearGradient>
+    <marker
+       style="overflow:visible;"
+       id="Arrow1Mend"
+       refX="0.0"
+       refY="0.0"
+       orient="auto"
+       inkscape:stockid="Arrow1Mend"
+       inkscape:isstock="true">
+      <path
+         transform="scale(0.4) rotate(180) translate(10,0)"
+         style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt;"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         id="path25725" />
+    </marker>
+    <marker
+       style="overflow:visible;"
+       id="Arrow1Send"
+       refX="0.0"
+       refY="0.0"
+       orient="auto"
+       inkscape:stockid="Arrow1Send"
+       inkscape:isstock="true">
+      <path
+         transform="scale(0.2) rotate(180) translate(6,0)"
+         style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt;"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         id="path25731" />
+    </marker>
+    <marker
+       style="overflow:visible;"
+       id="Arrow1Lend"
+       refX="0.0"
+       refY="0.0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend"
+       inkscape:isstock="true">
+      <path
+         transform="scale(0.8) rotate(180) translate(12.5,0)"
+         style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt;"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         id="path25719" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient30420"
+       id="linearGradient30432"
+       gradientUnits="userSpaceOnUse"
+       x1="109.60209"
+       y1="29.765627"
+       x2="158.95001"
+       y2="29.765627" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#ebe0a7;fill-opacity:0.488673;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+       id="rect19900"
+       width="169.33333"
+       height="304.27084"
+       x="5.2916665"
+       y="0"
+       ry="0.52916932" />
+    <g
+       id="g23422"
+       transform="translate(-1.3229167,5.3960304)">
+      <g
+         id="g23269">
+        <rect
+           style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+           id="rect19686-9"
+           width="50.270832"
+           height="52.916668"
+           x="10.583333"
+           y="34.395832"
+           ry="0.52916932" />
+        <image
+           width="47.625"
+           height="50.16647"
+           preserveAspectRatio="none"
+           xlink:href="spm_native.jpg"
+           id="image18535"
+           x="11.90625"
+           y="35.71875" />
+      </g>
+      <g
+         id="g22931-2"
+         transform="translate(-22.489578,62.072721)">
+        <rect
+           style="fill:#a7ebeb;fill-opacity:0.662662;stroke:#23b7bc;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+           id="rect20402-7"
+           width="37.041664"
+           height="6.6145821"
+           x="39.687496"
+           y="26.458332"
+           ry="3.0975511" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="58.166344"
+           y="31.089937"
+           id="text4881-8-5-2"><tspan
+             sodipodi:role="line"
+             id="tspan23413"
+             x="58.166344"
+             y="31.089937">initial (or registered) image</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g23926"
+       transform="translate(2.1482245,11.90625)">
+      <g
+         id="g23917">
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+           id="rect19686-9-1"
+           width="34.39584"
+           height="39.687504"
+           x="70.114578"
+           y="37.041664"
+           ry="0.52916932" />
+        <image
+           width="30.924692"
+           height="37.041668"
+           preserveAspectRatio="none"
+           xlink:href="spm_mni_T1.jpg"
+           id="image18699"
+           x="71.4375"
+           y="38.364582" />
+      </g>
+      <g
+         id="g22931-2-6"
+         transform="translate(29.104174,51.593753)">
+        <rect
+           style="fill:#ebe48e;fill-opacity:1;stroke:#b3a947;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000;font-variation-settings:normal;opacity:1;vector-effect:none;stroke-dashoffset:0;-inkscape-stroke:none;stop-opacity:1"
+           id="rect20402-7-1"
+           width="34.395832"
+           height="6.614583"
+           x="41.01041"
+           y="26.458332"
+           ry="3.1749997" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="58.265121"
+           y="31.089937"
+           id="text4881-8-5-2-0"><tspan
+             sodipodi:role="line"
+             id="tspan23616"
+             x="58.265121"
+             y="31.089937">template image (SPM)</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g32165"
+       transform="translate(-7.9375,6.6145846)">
+      <g
+         id="g31085"
+         transform="translate(9.0947138)">
+        <rect
+           style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+           id="rect19686-9-5-3"
+           width="51.593739"
+           height="56.885422"
+           x="105.83334"
+           y="228.86458"
+           ry="0.52916932" />
+        <image
+           width="48.782211"
+           height="54.239582"
+           preserveAspectRatio="none"
+           xlink:href="spm_ana_overlay_reg.jpg"
+           id="image19640"
+           x="107.32195"
+           y="230.1875" />
+      </g>
+      <g
+         id="g23165-9-3-1-1"
+         transform="translate(5.2916565,260.61458)">
+        <rect
+           style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#e7e588;fill-opacity:0.580003;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+           id="rect20402-2-4-8-1-7"
+           width="51.59375"
+           height="6.6145859"
+           x="109.80209"
+           y="26.458334"
+           ry="0.52916932" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="134.27605"
+           y="31.069492"
+           id="text4881-8-5-6-9-5-5-5"><tspan
+             sodipodi:role="line"
+             id="tspan31427"
+             x="134.27605"
+             y="31.069492">registered overlayed images</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g25282">
+      <g
+         id="g25058"
+         transform="translate(-5.2916666,1.3044128)">
+        <rect
+           style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+           id="rect19686-9-5"
+           width="50.270832"
+           height="52.916668"
+           x="124.35416"
+           y="38.364582"
+           ry="0.52916932" />
+        <image
+           width="47.625"
+           height="50.289337"
+           preserveAspectRatio="none"
+           xlink:href="spm_overlay_noreg.jpg"
+           id="image18850"
+           x="125.67709"
+           y="39.6875" />
+      </g>
+      <g
+         id="g23165-9"
+         transform="translate(9.2604065,67.468749)">
+        <rect
+           style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#e7e588;fill-opacity:0.580003;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+           id="rect20402-2-4"
+           width="50.270832"
+           height="6.614584"
+           x="109.80209"
+           y="26.458334"
+           ry="0.52916932" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="134.97949"
+           y="31.017635"
+           id="text4881-8-5-6-9"><tspan
+             sodipodi:role="line"
+             id="tspan25273"
+             x="134.97949"
+             y="31.017635">overlay without registration</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g22945"
+       transform="translate(-8.0637487)">
+      <g
+         id="g22935">
+        <rect
+           style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+           id="rect19686"
+           width="60.854164"
+           height="22.489584"
+           x="33.072918"
+           y="3.96875"
+           ry="0.52916932" />
+        <image
+           width="58.460835"
+           height="20.307447"
+           preserveAspectRatio="none"
+           xlink:href="spm_anat1.jpg"
+           id="image17713"
+           x="34.269581"
+           y="5.2916665" />
+      </g>
+      <g
+         id="g22931"
+         transform="translate(0,1.3229192)">
+        <rect
+           style="fill:#e7e588;fill-opacity:0.580003;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+           id="rect20402"
+           width="60.854164"
+           height="6.614583"
+           x="33.072918"
+           y="26.458332"
+           ry="0.52916932" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="63.499996"
+           y="31.089937"
+           id="text4881-8-5"><tspan
+             sodipodi:role="line"
+             id="tspan20821"
+             x="63.499996"
+             y="31.089937">loaded images (no referential info)</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g23176"
+       transform="translate(-6.3809745)">
+      <g
+         id="g22965">
+        <rect
+           style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+           id="rect19686-8"
+           width="60.854164"
+           height="22.489584"
+           x="109.80209"
+           y="3.96875"
+           ry="0.52916932" />
+        <g
+           id="g18337"
+           transform="matrix(0.2834851,0,0,0.2834851,102.58746,-21.223977)">
+          <image
+             width="205.92636"
+             height="71.4375"
+             preserveAspectRatio="none"
+             xlink:href="spm_anat_sel.jpg"
+             id="image18008"
+             x="30.116371"
+             y="93.534523" />
+          <image
+             width="127"
+             height="25.4"
+             preserveAspectRatio="none"
+             xlink:href="spm_anat_menu.png"
+             id="image18331"
+             x="89.958336"
+             y="137.58333" />
+        </g>
+      </g>
+      <g
+         id="g23165"
+         transform="translate(0,1.3229154)">
+        <rect
+           style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#e7e588;fill-opacity:0.580003;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+           id="rect20402-2"
+           width="60.854164"
+           height="6.614583"
+           x="109.80209"
+           y="26.458334"
+           ry="0.52916932" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="140.17238"
+           y="31.615765"
+           id="text4881-8-5-6"><tspan
+             sodipodi:role="line"
+             id="tspan23160"
+             x="140.17238"
+             y="31.615765">loading referential info</tspan></text>
+      </g>
+    </g>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.665;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Mend)"
+       d="M 58.208332,19.84375 C 46.302083,21.166667 26.458333,25.135417 23.8125,38.364583"
+       id="path25619"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.665;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Mend)"
+       d="m 83.343749,22.489583 c 7.9375,6.614583 6.614583,15.875 6.614583,25.135416"
+       id="path26262" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.665;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Mend)"
+       d="m 83.34375,18.520833 c 13.22917,0 18.52083,29.104167 33.07292,34.395834"
+       id="path26264"
+       sodipodi:nodetypes="cc" />
+    <g
+       id="g32849">
+      <g
+         id="g31263"
+         transform="translate(-1.108475)">
+        <g
+           id="g25560">
+          <rect
+             style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect19686-9-9"
+             width="48.947918"
+             height="39.687489"
+             x="9.260417"
+             y="109.80209"
+             ry="0.52916932" />
+          <image
+             width="46.516525"
+             height="37.213223"
+             preserveAspectRatio="none"
+             xlink:href="spm_ana_ref1.jpg"
+             id="image19390"
+             x="10.368892"
+             y="110.95345" />
+        </g>
+        <g
+           id="g22931-2-6-6-5"
+           transform="translate(-25.13541,124.35417)">
+          <rect
+             style="fill:#b7bceb;fill-opacity:1;stroke:#6659bc;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect20402-7-1-7-6"
+             width="34.395832"
+             height="6.614583"
+             x="41.01041"
+             y="26.458332"
+             ry="3.1749997" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             x="58.200916"
+             y="31.479418"
+             id="text4881-8-5-2-0-3-3"><tspan
+               sodipodi:role="line"
+               id="tspan27004"
+               x="58.200916"
+               y="31.479418">MNI ICBM referential</tspan></text>
+        </g>
+      </g>
+      <ellipse
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#c74622;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.4, 0.8;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+         id="path32556"
+         cx="15.714302"
+         cy="132.34663"
+         rx="6.614583"
+         ry="4.6302085" />
+    </g>
+    <g
+       id="g32860">
+      <g
+         id="g31254"
+         transform="translate(-1.108475)">
+        <g
+           id="g22931-2-6-6"
+           transform="translate(33.072924,124.35417)">
+          <rect
+             style="fill:#ebe48e;fill-opacity:1;stroke:#b3a947;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect20402-7-1-7"
+             width="34.395832"
+             height="6.614583"
+             x="41.01041"
+             y="26.458332"
+             ry="3.1749997" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             x="58.265121"
+             y="31.089937"
+             id="text4881-8-5-2-0-3"><tspan
+               sodipodi:role="line"
+               id="tspan23616-6"
+               x="58.265121"
+               y="31.089937">template image (SPM)</tspan></text>
+        </g>
+        <g
+           id="g25564"
+           transform="translate(-2.5431315e-6,-2.6458435)">
+          <rect
+             style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect19686-9-9-1"
+             width="48.947918"
+             height="39.687489"
+             x="66.145836"
+             y="112.44791"
+             ry="0.52916932" />
+          <image
+             width="46.516525"
+             height="37.120186"
+             preserveAspectRatio="none"
+             xlink:href="spm_ana_ref2.jpg"
+             id="image19402"
+             x="67.254311"
+             y="113.77084" />
+        </g>
+      </g>
+      <ellipse
+         style="fill:none;fill-opacity:1;stroke:#c74622;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.4, 0.8;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+         id="path32556-6"
+         cx="76.987152"
+         cy="143.42627"
+         rx="6.614583"
+         ry="4.6302085" />
+    </g>
+    <g
+       id="g32871">
+      <g
+         id="g31245"
+         transform="translate(-1.108475)">
+        <g
+           id="g25568">
+          <rect
+             style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect19686-9-9-7"
+             width="48.947918"
+             height="39.687489"
+             x="123.03125"
+             y="109.80209"
+             ry="0.52916932" />
+          <image
+             width="46.423489"
+             height="37.213223"
+             preserveAspectRatio="none"
+             xlink:href="spm_ana_ref3.jpg"
+             id="image19414"
+             x="124.35416"
+             y="110.95345" />
+        </g>
+        <g
+           id="g22931-2-9"
+           transform="translate(89.958336,124.35417)">
+          <rect
+             style="fill:#a7ebeb;fill-opacity:0.662662;stroke:#23b7bc;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect20402-7-3"
+             width="37.041668"
+             height="6.6145821"
+             x="39.687496"
+             y="26.458332"
+             ry="3.2702446" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             x="58.166344"
+             y="31.089937"
+             id="text4881-8-5-2-9"><tspan
+               sodipodi:role="line"
+               id="tspan23413-0"
+               x="58.166344"
+               y="31.089937">initial (or registered) image</tspan></text>
+        </g>
+      </g>
+      <ellipse
+         style="fill:none;fill-opacity:1;stroke:#c74622;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.4, 0.8;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+         id="path32556-2"
+         cx="162.97339"
+         cy="127.82348"
+         rx="6.614583"
+         ry="4.6302085" />
+    </g>
+    <g
+       id="g32882">
+      <g
+         id="g31227"
+         transform="translate(-1.108475)">
+        <g
+           id="g22931-2-9-5"
+           transform="translate(-23.8125,185.20834)">
+          <rect
+             style="fill:#6f71ff;fill-opacity:1;stroke:#2421b1;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect20402-7-3-0"
+             width="34.395832"
+             height="6.6145821"
+             x="41.010414"
+             y="26.458332"
+             ry="3.1664889" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             x="58.166344"
+             y="31.089937"
+             id="text4881-8-5-2-9-9"><tspan
+               sodipodi:role="line"
+               id="tspan27465"
+               x="58.166344"
+               y="31.089937">referential used by SPM</tspan></text>
+        </g>
+        <g
+           id="g25572"
+           transform="translate(-1.1084744,20.015299)">
+          <rect
+             style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect19686-9-9-71"
+             width="48.947918"
+             height="39.687489"
+             x="10.583333"
+             y="150.8125"
+             ry="0.52916932" />
+          <image
+             width="46.516525"
+             height="37.213223"
+             preserveAspectRatio="none"
+             xlink:href="spm_ana_ref4.jpg"
+             id="image19426"
+             x="11.691808"
+             y="151.96387" />
+        </g>
+      </g>
+      <ellipse
+         style="fill:none;fill-opacity:1;stroke:#c74622;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.4, 0.8;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+         id="path32556-1"
+         cx="47.908619"
+         cy="176.85779"
+         rx="6.614583"
+         ry="4.6302085" />
+    </g>
+    <g
+       id="g32894">
+      <g
+         id="g31218"
+         transform="translate(-1.108475)">
+        <g
+           id="g25576"
+           transform="translate(-1.1084747,17.462504)">
+          <rect
+             style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect19686-9-9-15"
+             width="48.947918"
+             height="39.687489"
+             x="67.46875"
+             y="153.45833"
+             ry="0.52916932" />
+          <image
+             width="46.516525"
+             height="37.306255"
+             preserveAspectRatio="none"
+             xlink:href="spm_ana_ref5.jpg"
+             id="image19438"
+             x="68.577225"
+             y="154.51666" />
+        </g>
+        <g
+           id="g23165-9-3"
+           transform="translate(-43.65626,185.20834)">
+          <rect
+             style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#e7e588;fill-opacity:0.580003;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+             id="rect20402-2-4-8"
+             width="48.947918"
+             height="13.229163"
+             x="109.80209"
+             y="26.458334"
+             ry="0.52916932" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             x="134.27112"
+             y="31.151688"
+             id="text4881-8-5-6-9-5"><tspan
+               sodipodi:role="line"
+               id="tspan28708"
+               x="134.27112"
+               y="31.151688">drawing ID link</tspan><tspan
+               sodipodi:role="line"
+               id="tspan28710"
+               x="134.27112"
+               y="37.325298">(while holding CTRL key pressed)</tspan></text>
+        </g>
+      </g>
+      <ellipse
+         style="fill:none;fill-opacity:1;stroke:#c74622;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.4, 0.8;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+         id="path32556-7"
+         cx="83.183052"
+         cy="190.55496"
+         rx="6.614583"
+         ry="4.6302085" />
+    </g>
+    <g
+       id="g32905">
+      <g
+         id="g31236"
+         transform="translate(-1.108475)">
+        <g
+           id="g23165-9-3-1"
+           transform="translate(13.229156,185.20833)">
+          <rect
+             style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#e7e588;fill-opacity:0.580003;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+             id="rect20402-2-4-8-1"
+             width="48.947918"
+             height="6.614584"
+             x="109.80209"
+             y="26.458334"
+             ry="0.52916932" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             x="134.27605"
+             y="31.069492"
+             id="text4881-8-5-6-9-5-5"><tspan
+               sodipodi:role="line"
+               id="tspan28928"
+               x="134.27605"
+               y="31.069492">link in place (ID matrix)</tspan></text>
+        </g>
+        <g
+           id="g25580"
+           transform="translate(1.3229167,16.046549)">
+          <rect
+             style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect19686-9-9-9"
+             width="48.947918"
+             height="39.687489"
+             x="121.70834"
+             y="154.78125"
+             ry="0.52916932" />
+          <image
+             width="46.516525"
+             height="37.213223"
+             preserveAspectRatio="none"
+             xlink:href="spm_ana_ref6.jpg"
+             id="image19450"
+             x="123.03125"
+             y="155.93262" />
+        </g>
+      </g>
+      <ellipse
+         style="fill:none;fill-opacity:1;stroke:#c74622;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.4, 0.8;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+         id="path32556-8"
+         cx="148.00597"
+         cy="183.94038"
+         rx="6.614583"
+         ry="4.6302085" />
+    </g>
+    <g
+       id="g32916">
+      <g
+         id="g31208"
+         transform="translate(-2.8602753,11.734694)">
+        <g
+           id="g23165-9-3-1-0"
+           transform="translate(-72.760427,244.73958)">
+          <rect
+             style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:url(#linearGradient30432);fill-opacity:1;stroke:#928956;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+             id="rect20402-2-4-8-1-4"
+             width="48.947918"
+             height="6.614584"
+             x="109.80209"
+             y="26.458334"
+             ry="1.3229194" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:125%;font-family:LMSansUltraCond10;-inkscape-font-specification:'LMSansUltraCond10, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             x="134.31557"
+             y="31.091719"
+             id="text4881-8-5-6-9-5-5-4"><tspan
+               sodipodi:role="line"
+               id="tspan30260"
+               x="134.31557"
+               y="31.091719">source to template transformation</tspan></text>
+        </g>
+        <g
+           id="g25584"
+           transform="translate(-2.6458346,43.656245)">
+          <rect
+             style="fill:#62511d;fill-opacity:1;stroke:#bc8d23;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+             id="rect19686-9-9-77"
+             width="48.947918"
+             height="39.687489"
+             x="39.687504"
+             y="186.53127"
+             ry="0.52916932" />
+          <image
+             width="46.516525"
+             height="37.213223"
+             preserveAspectRatio="none"
+             xlink:href="spm_ana_ref7.jpg"
+             id="image19462"
+             x="41.010418"
+             y="187.85417" />
+        </g>
+      </g>
+      <ellipse
+         style="fill:none;fill-opacity:1;stroke:#c74622;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.4, 0.8;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000"
+         id="path32556-5"
+         cx="64.654228"
+         cy="267.70529"
+         rx="6.614583"
+         ry="4.6302085" />
+    </g>
+  </g>
+</svg>
