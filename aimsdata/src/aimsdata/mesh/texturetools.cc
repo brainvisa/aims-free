@@ -134,7 +134,7 @@ namespace aims {
           Object cit = color->objectIterator();
           for( j=0; cit->isValid() && j<4; ++j, cit->next() )
             rgba[j] = uint8_t( rint( cit->currentValue()->getScalar()
-                                    * 255.9 ) );
+                                    * 255.0 ) );
           vol->at( i - tmin ) = rgba;
         }
         catch( ... )
