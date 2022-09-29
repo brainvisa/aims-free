@@ -86,8 +86,11 @@ TrmComposeFormatReader::createAndRead( rc_ptr<DataSourceInfo> dsi,
                                        const AllocatorContext & context,
                                        Object options )
 {
-  AffineTransformation3d *result = new AffineTransformation3d;
-  read( *result, dsi, context, options );
+  // cout << "TrmComposeFormatReader::createAndRead\n";
+  rc_ptr<AffineTransformation3d> r( new AffineTransformation3d );
+  read( *r, dsi, context, options );
+  AffineTransformation3d *result = r.get();
+  r.release();
 
   return result;
 }
@@ -98,7 +101,10 @@ void TrmComposeFormatReader::read( AffineTransformation3d & result,
                                    const AllocatorContext & /* context */,
                                    Object /* options */ )
 {
+  // cout << "TrmComposeFormatReader::read\n";
   int i, n = dsi->list().size( "trm_chain" );
+  if( n == 0 )
+    throw wrong_format_error( "not a transformations chain\n" );
   for( i=0; i<n; ++i )
   {
     rc_ptr<DataSource> ds = dsi->list().dataSource( "trm_chain", i );
@@ -152,8 +158,10 @@ TrmChainFormatReader::createAndRead( rc_ptr<DataSourceInfo> dsi,
                                      const AllocatorContext & context,
                                      Object options )
 {
-  TransformationChain3d *result = new TransformationChain3d;
-  read( *result, dsi, context, options );
+  rc_ptr<TransformationChain3d> r( new TransformationChain3d );
+  read( *r, dsi, context, options );
+  TransformationChain3d *result = r.get();
+  r.release();
 
   rc_ptr<Transformation3d> rsimple;
   {
@@ -187,6 +195,9 @@ void TrmChainFormatReader::read( Transformation3d & result,
     throw wrong_format_error( "Not an transformation chain" );
 
   int i, n = dsi->list().size( "trm_chain" );
+  if( n == 0 )
+    throw wrong_format_error( "Not an transformation chain" );
+
   for( i=0; i<n; ++i )
   {
     rc_ptr<DataSource> ds = dsi->list().dataSource( "trm_chain", i );

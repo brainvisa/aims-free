@@ -282,3 +282,22 @@ void aims::TransformationChain3d::setReferentialsInHeader()
   }
 }
 
+
+//-----------------------------------------------------------------------------
+namespace aims
+{
+
+  rc_ptr<Transformation3d> operator * (
+    const rc_ptr<Transformation3d> & transformation3d1,
+    const rc_ptr<Transformation3d> & transformation3d2 )
+  {
+    TransformationChain3d chain;
+    chain.push_back( transformation3d2 );
+    chain.push_back( transformation3d1 );
+
+    return rc_ptr<Transformation3d>(
+      const_cast<Transformation3d *>( chain.simplify().pointer() ) );
+  }
+
+}
+

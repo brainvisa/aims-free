@@ -1,3 +1,9 @@
+
+%ModuleHeaderCode
+#include <aims/transformation/transformation_chain.h>
+%End
+
+
 namespace soma
 {
 
@@ -8,31 +14,6 @@ namespace soma
 %End
 %Docstring
 Base class for spatial transformations.
-%End
-
-%ConvertToSubClassCode
-  // std::cout << "ConvertToSubClassCode Transformation " << sipCpp << " / " << typeid( *sipCpp ).name() << std::endl;
-
-  sipType = 0;
-  if( dynamic_cast<carto::Transformation3d *>( sipCpp ) )
-  {
-    sipType = sipType_soma_Transformation3d;
-    *sipCppRet = dynamic_cast<soma::Transformation3d *>( sipCpp );
-    // std::cout << "I'm a Transformation3d: " << sipCppRet << std::endl;
-    if( dynamic_cast<aims::AffineTransformation3d *>( sipCpp ) )
-    {
-      sipType = sipType_aims_AffineTransformation3d;
-      *sipCppRet = dynamic_cast<aims::AffineTransformation3d *>( sipCpp );
-      // std::cout << "I'm an AffineTransformation3d: " << sipCppRet << std::endl;
-    }
-    else if( dynamic_cast<aims::TransformationChain3d *>( sipCpp ) )
-    {
-      sipType = sipType_aims_TransformationChain3d;
-      *sipCppRet = dynamic_cast<aims::TransformationChain3d *>( sipCpp );
-      // std::cout << "I'm an TransformationChain3d: " << sipCppRet << std::endl;
-    }
-  }
-
 %End
 
   public:
@@ -483,20 +464,60 @@ public:
         the dirname parameter.
 %End
 
-    void clearCache();
+    void clearCache( bool chain_only=false );
 %Docstring
-    remove deduced transformations (built from composition)
+    clearCache(chain_only=False)
+
+    remove deduced transformations (built from composition).
+
+    If chain_only is true, then inverses of direct transforms are not
+    removed.
 %End
 
-    void registerInverseTransformations();
+    void registerInverseTransformations( bool loadAffines = false );
 %Docstring
-        register inverse transformations when thay can be obtained.
+        registerInverseTransformations(loadAffines=False)
+
+        register inverse transformations when they can be obtained.
 
         This can be done only for loaded transformations. So the lazy loading
         feature will prevent for it to work on not already loaded
         transformations, since we cannot know if they are invertible before
         they are loaded.
+
+        For this reason, the loadAffines parameter allows to load affine
+        transforms and register their inverses.
 %End
+
+    void loadAffineTransformations();
+
   };
 
 };
+
+
+// Compose Transformation3d using TransformationChain3d
+rc_ptr_Transformation3d
+    operator * ( const rc_ptr_Transformation3d & transformation3d1,
+                 const rc_ptr_Transformation3d & transformation3d2 )
+        /ReleaseGIL/;
+%MethodCode
+    sipRes = new carto::rc_ptr<soma::Transformation3d>(
+      aims::operator * ( *a0, *a1 ) );
+%End
+
+soma::Transformation3d*
+    operator * ( const soma::Transformation3d & transformation3d1,
+                 const soma::Transformation3d & transformation3d2 )
+        /Factory, ReleaseGIL/;
+%MethodCode
+    carto::rc_ptr<soma::Transformation3d>
+      t1( const_cast<soma::Transformation3d *>( a0 ) ),
+      t2( const_cast<soma::Transformation3d *>( a1 ) );
+    carto::rc_ptr<soma::Transformation3d> t3 = aims::operator * ( t1, t2 );
+    sipRes = t3.get();
+    t1.release();
+    t2.release();
+    t3.release();
+%End
+

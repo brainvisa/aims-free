@@ -122,8 +122,7 @@ distance_map: rc_ptr_Volume_FLOAT
     resulting distance map
 %End
 
-    rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const
-      throw ( );
+    rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const;
 %Docstring
 midInterfaceVol(label1, label2)
 
@@ -339,8 +338,7 @@ distance_map: rc_ptr_Volume_FLOAT
     resulting distance map
 %End
 
-    rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const
-      throw ( );
+    rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const;
 %Docstring
 midInterfaceVol(label1, label2)
 

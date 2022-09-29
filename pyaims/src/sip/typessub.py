@@ -2654,34 +2654,18 @@ typessub = {'bool':
 
             'aims::AffineTransformation3d':
             classInAimsNamespace(
-                'aims/resampling/motion.h', 'AffineTransformation3d'),
-            #{ 'typecode' : 'Motion',
-            #'pyFromC' : '',
-            #'CFromPy' : '',
-            #'castFromSip' : '',
-            #'deref' : '*',
-            #'pyderef' : '*',
-            #'address' : '&',
-            #'pyaddress' : '&',
-            #'defScalar' : '',
-            #'new' : 'new Motion',
-            #'NumType' : 'NPY_OBJECT',
-            #'PyType' : 'Motion',
-            #'sipClass' : 'Motion',
-            #'typeinclude' :
-            # '#include <aims/resampling/motion.h>',
-            # 'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-            # '#include "sipaimssipMotion.h"\n'
-            # '#endif\n'
-            # '#ifndef PYAIMS_MOTION_DEFINED\n'
-            # '#define PYAIMS_MOTION_DEFINED\n'
-            #'inline int pyaimsMotion_Check( PyObject* o )\n'
-            #'{ return sipCanConvertToType( o, sipFindType( "Motion" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
-            # '#endif',
-            #'module' : 'aims',
-            #'testPyType' : 'pyaimsMotion_Check',
-            #'compareElement' : '',
-            #},
+                'aims/transformation/affinetransformation3d.h',
+                'AffineTransformation3d'),
+
+            'aims::TransformationChain3d':
+            classInAimsNamespace(
+                'aims/transformation/transformationchain3d.h',
+                'TransformationChain3d'),
+
+            'aims::TransformationGraph3d':
+            classInAimsNamespace(
+                'aims/transformation/transformationgraph3d.h',
+                'TransformationGraph3d'),
 
             'carto::Site':
             classInCartoNamespace('cartodata/wip/roi/siteIterator.h',

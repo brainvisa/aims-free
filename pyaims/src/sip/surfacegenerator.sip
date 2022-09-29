@@ -9,24 +9,16 @@ class SurfaceGenerator
 %End
 
 public:
-%If (SIPTHROW_BUG)
-  static AimsSurfaceTriangle* generate( carto::Object )
-    throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
-%End
-%If (!SIPTHROW_BUG)
-  static AimsSurfaceTriangle* generate( carto::Object )
-    throw( std::runtime_error, std::invalid_argument ) /Factory/;
-%End
+  static AimsSurfaceTriangle* generate( carto::Object ) /Factory/;
 
   static AimsSurfaceTriangle* generate( const carto::GenericObject & )
-    throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
+    /Factory/;
 
   static AimsTimeSurface_2_VOID* generate_wireframe( carto::Object )
-    throw( std::runtime_error, std::invalid_argument ) /Factory/;
+    /Factory/;
 
   static AimsTimeSurface_2_VOID* generate_wireframe(
-    const carto::GenericObject & )
-    throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
+    const carto::GenericObject & ) /Factory/;
 
   static carto::Object description();
   static void printDescription();

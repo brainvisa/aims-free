@@ -116,11 +116,16 @@ namespace aims {
       int32_t tmin = *keys.begin();
       size_t i, j, n = *keys.rbegin() - tmin + 1;
       vol->reallocate( n );
+      vol->fill( AimsRGBA( 0, 0, 0, 255 ) );
+
       // labels.resize( n );
       for( il=keys.begin(); il!=el; ++il )
         try
         {
           i = *il;
+          if( i < 0 || i - tmin >= n )
+            continue;
+
           Object label_map = labels_table->getArrayItem( i );
           if( label_map.isNull() )
             continue;
@@ -134,7 +139,7 @@ namespace aims {
           Object cit = color->objectIterator();
           for( j=0; cit->isValid() && j<4; ++j, cit->next() )
             rgba[j] = uint8_t( rint( cit->currentValue()->getScalar()
-                                    * 255.9 ) );
+                                    * 255.0 ) );
           vol->at( i - tmin ) = rgba;
         }
         catch( ... )

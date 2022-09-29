@@ -55,12 +55,16 @@ namespace
   public:
     ReferentialVertex( const string & s ) : Vertex( s )
     {
-      UUID uuid;
-      uuid.generate();
-      setProperty( "uuid", uuid.toString() );
+      UUID new_uuid;
+      new_uuid.generate();
+      uuid = new_uuid.toString();
+      PropertySet & self = getValue();
+      self.addBuiltinProperty( "uuid", uuid );
     }
 
     virtual ~ReferentialVertex() {}
+
+    string uuid;
 
   private:
     friend class TransformationGFactory;
@@ -175,6 +179,24 @@ Edge* TransformationGraph3d::transformationById( const std::string & id ) const
 }
 
 
+string TransformationGraph3d::referential( const Vertex *vertex )
+{
+  const ReferentialVertex *rvert
+    = dynamic_cast<const ReferentialVertex *>( vertex );
+  if( rvert )
+    return rvert->uuid;
+  string ref;
+  try
+  {
+    ref = vertex->getProperty( "uuid" )->getString();
+  }
+  catch( ... )
+  {
+  }
+  return ref;
+}
+
+
 rc_ptr<Transformation3d>
 TransformationGraph3d::transformation( const Edge *edge )
 {
@@ -273,7 +295,7 @@ Edge* TransformationGraph3d::getTransformation(
 
 
 rc_ptr<Transformation3d>
-TransformationGraph3d::loadTransformation( Edge *edge ) const
+TransformationGraph3d::loadTransformation( Edge *edge, bool affine_only ) const
 {
   rc_ptr<Transformation3d> trans( 0 );
   TransformationEdge* tedge = dynamic_cast<TransformationEdge *>( edge );
@@ -294,9 +316,20 @@ TransformationGraph3d::loadTransformation( Edge *edge ) const
       }
       else
       {
-        // cout << "from file: " << filename << endl;
-        Reader<Transformation3d> r( filename );
-        trans.reset( r.read() );
+        if( affine_only )
+        {
+          // cout << "from file: " << filename << endl;
+          Reader<AffineTransformation3d> r( filename );
+          trans.reset( r.read() );
+          // cout << "loaded affine transform: " << filename << endl;
+        }
+        else
+        {
+          // cout << "from file: " << filename << endl;
+          Reader<Transformation3d> r( filename );
+          trans.reset( r.read() );
+          // cout << "loaded transform: " << filename << endl;
+        }
         tedge->transformation = trans;
         if( trans && trans->header()->hasProperty( "uuid" ) )
         {
@@ -504,20 +537,25 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
       {
         inv = true;
         trans = trans.substr( 4, trans.length() - 4 );
-        sr = dest_id;
-        dest_id = source_id;
       }
       if( !trans.empty() )
+      {
         trans = dirname + sep + trans;
+        if( inv )
+          trans += "?inv=1";
+      }
 
       registerTransformation( sr, dest_id, trans );
+      // TODO: we could unregister any inverse trans here
+      // then clear only chained transforms cache at the end of this
+      // function.
     }
   }
   clearCache();
 }
 
 
-void TransformationGraph3d::clearCache()
+void TransformationGraph3d::clearCache( bool chain_only )
 {
   _disconnected.clear();
 
@@ -532,10 +570,23 @@ void TransformationGraph3d::clearCache()
         bool deduced = bool( (*ie)->getProperty( "deduced" )->getScalar() );
         if( deduced )
         {
-          ESet::iterator j = ie;
-          ++ie;
-          removeEdge( *j );
-          continue;
+          bool remove = true;
+          if( chain_only )
+          {
+            Edge *inv = getTransformation( *(*ie)->rbegin(), *(*ie)->begin() );
+            if( inv
+                && ( !inv->hasProperty( "deduced" )
+                     || !bool( inv->getProperty( "deduced" )->getScalar() ) ) )
+              // inverse is not a deduced transform: it's not a chain
+              remove = false;
+          }
+          if( remove )
+          {
+            ESet::iterator j = ie;
+            ++ie;
+            removeEdge( *j );
+            continue;
+          }
         }
       }
       catch( ... )
@@ -550,14 +601,17 @@ void TransformationGraph3d::clearCache()
 }
 
 
-void TransformationGraph3d::registerInverseTransformations()
+void TransformationGraph3d::registerInverseTransformations( bool loadAffines )
 {
   set<pair<Vertex*, Vertex*> > done;
   ESet::iterator ie = edges().begin(), ee = edges().end();
   bool modified = false;
 
-  // TODO clear only non-direct deduced transforms (chains)
-  clearCache();
+  // clear only non-direct deduced transforms (chains)
+  clearCache( true );
+
+  if( loadAffines )
+    loadAffineTransformations();
 
   while( ie != ee )
   {
@@ -603,6 +657,15 @@ void TransformationGraph3d::registerInverseTransformations()
 
   if( modified )
     updateIds();
+}
+
+
+void TransformationGraph3d::loadAffineTransformations()
+{
+  ESet::iterator ie, ee = edges().end();
+
+  for( ie=edges().begin(); ie!=ee; ++ie )
+    loadTransformation( *ie, true );
 }
 
 

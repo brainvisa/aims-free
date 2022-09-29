@@ -530,6 +530,11 @@ load_transformation(const string &filename_arg,
     throw FatalError(s.str());
   }
 
+  // FIXME
+  // Denis 2022/09/21 this if.. block should not be needed any longer
+  // now that we have a Reader<Transformation3d> (used only as a fallback at
+  // the end, up to now)
+
   if(finder.objectType() == "Volume" && finder.dataType() == "POINT3DF")
   {
     if(invert) {
@@ -560,10 +565,38 @@ load_transformation(const string &filename_arg,
     return rc_ptr<Transformation3d>(affine.release());
   }
 
-  ostringstream s;
-  s << "Unsupported object type " << finder.objectType()
-    << "(of " << finder.dataType() << ") passed in " << filename;
-  throw FatalError(s.str());
+  try
+  {
+    Reader<Transformation3d> r( filename );
+    rc_ptr<Transformation3d> tr( r.read() );
+    if( !tr )
+    {
+      ostringstream s;
+      s << "Failed to load 3D transformation from " << filename
+        << ", aborting.";
+      throw FatalError(s.str());
+    }
+    if( invert )
+    {
+      if( !tr->invertible() )
+      {
+        ostringstream s;
+        s << "3D transformation from " << filename
+          << " is not invertible, aborting.";
+        throw FatalError(s.str());
+      }
+      return tr->getInverse();
+    }
+    return tr;
+  }
+  catch( io_error & )
+  {
+    ostringstream s;
+    s << "cannot read file " << filename
+      << " as a 3D transformation (object type: " << finder.objectType()
+      << "(of " << finder.dataType() << "))";
+    throw FatalError(s.str());
+  }
 }
 
 

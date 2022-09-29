@@ -156,6 +156,10 @@ set( _headers
     io_soma/trmformatchecker.h
     io_soma/trmformatwriter.h
     io_soma/trmformatreader.h
+    io_soma/trmgraphformatchecker.h
+    io_soma/trmgraphformatreader.h
+    io_soma/trmingraphformatchecker.h
+    io_soma/trmingraphformatreader.h
     io_soma/trm_compose_formatchecker.h
     io_soma/trm_compose_formatreader.h
     io_soma/trm_header_formatchecker.h
@@ -373,6 +377,10 @@ set(_aimsdata_sources
     io_soma/trmformatchecker.cc
     io_soma/trmformatreader.cc
     io_soma/trmformatwriter.cc
+    io_soma/trmgraphformatchecker.cc
+    io_soma/trmgraphformatreader.cc
+    io_soma/trmingraphformatchecker.cc
+    io_soma/trmingraphformatreader.cc
     io_soma/trm_compose_formatchecker.cc
     io_soma/trm_compose_formatreader.cc
     io_soma/trm_header_formatchecker.cc

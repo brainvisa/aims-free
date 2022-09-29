@@ -18,6 +18,8 @@ General
 
 * :doc:`Input/Outputs: reading and writing objects, and options <aims_io>`
 
+* :doc:`Coordinates systems in Aims and Anatomist <coordinates_systems>`
+
 Tutorial
 ========
 
@@ -86,4 +88,5 @@ Miscelaneous
   aims_io
   formats
   spm_format
+  coordinates_systems
 

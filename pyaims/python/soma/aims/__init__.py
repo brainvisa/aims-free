@@ -405,6 +405,10 @@ class Reader(object):
                         finaltype = otype + '_' + dtype
         rdr = 'Reader_' + finaltype
         r = getattr(aimssip, rdr, None)
+        if r is None and f.dataType() == 'VOID' and f.objectType() != '':
+            finaltype = f.objectType()
+            rdr = 'Reader_' + finaltype
+            r = getattr(aimssip, rdr, None)
         if r is None:
             raise IOError('Unsupported object type: ' + finaltype)
         r = r(filename)

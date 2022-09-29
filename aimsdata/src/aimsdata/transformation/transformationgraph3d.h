@@ -101,6 +101,8 @@ namespace aims
     Vertex* referentialById( const std::string & id ) const;
     /// Get the edge (transformation) with given ID
     Edge* transformationById( const std::string & id ) const;
+    /// Get the referential ID in the Vertex (its uuid property)
+    static std::string referential( const Vertex *v );
     /** Get the Transformation3d object inside an edge. The returned reference
         counting pointer may contain a null pointer.
     */
@@ -200,16 +202,24 @@ namespace aims
     */
     void loadTransformationsGraph( carto::Object desc,
                                    const std::string & dirname );
-    /// remove deduced transformations (built from composition)
-    void clearCache();
-    /** register inverse transformations when thay can be obtained.
+    /** remove deduced transformations (built from composition or inversion).
+
+        If chain_only is true, then inverses of direct transforms are not
+        removed.
+    */
+    void clearCache( bool chain_only=false );
+    /** register inverse transformations when they can be obtained.
 
         This can be done only for loaded transformations. So the lazy loading
         feature will prevent for it to work on not already loaded
         transformations, since we cannot know if they are invertible before
         they are loaded.
+
+        For this reason, the loadAffines parameter allows to load affine
+        transforms and register their inverses.
     */
-    void registerInverseTransformations();
+    void registerInverseTransformations( bool loadAffines = false );
+    void loadAffineTransformations();
 
     /** Get a transformation chain between two vertices.
 
@@ -230,13 +240,28 @@ namespace aims
     std::set<std::pair<const Vertex *, const Vertex *> > _disconnected;
 
     carto::rc_ptr<soma::Transformation3d>
-      loadTransformation( Edge *edge ) const;
+      loadTransformation( Edge *edge, bool affine_only=false ) const;
   };
 
 }
 
 namespace carto
 {
+
+  template <> inline
+  std::string DataTypeCode<aims::TransformationGraph3d>::objectType()
+  { return "TransformationGraph3d"; }
+
+  template <> inline
+  std::string DataTypeCode<aims::TransformationGraph3d>::dataType()
+  { return "VOID"; }
+
+  template <> inline
+  std::string DataTypeCode<aims::TransformationGraph3d>::name()
+  {
+    return "TransformationGraph3d";
+  }
+
   DECLARE_GENERIC_OBJECT_TYPE( carto::rc_ptr<soma::Transformation3d> )
 }
 

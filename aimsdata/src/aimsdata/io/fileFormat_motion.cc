@@ -47,9 +47,12 @@
 #include <aims/io/reader_d.h>
 #include <aims/io/writer_d.h>
 #include <aims/transformation/affinetransformation3d.h>
+#include <aims/transformation/transformationgraph3d.h>
 #include <aims/io_soma/trmformatchecker.h>
 #include <aims/io_soma/trm_header_formatchecker.h>
 #include <aims/io_soma/trm_compose_formatchecker.h>
+#include <aims/io_soma/trmingraphformatchecker.h>
+#include <aims/io_soma/trmgraphformatchecker.h>
 #include <soma-io/datasourceinfo/datasourceinfoloader.h>
 
 using namespace aims;
@@ -59,10 +62,6 @@ using namespace std;
 namespace aims
 {
 
-#if defined( __APPLE__ ) && (__GNUC__-0) < 4
-template<> FileFormat<AffineTransformation3d>::~FileFormat() {}
-#endif
-
 template<> void 
 FileFormatDictionary<AffineTransformation3d>::registerBaseFormats()
 {
@@ -71,6 +70,12 @@ FileFormatDictionary<AffineTransformation3d>::registerBaseFormats()
 
 template<> void
 FileFormatDictionary<Transformation3d>::registerBaseFormats()
+{
+}
+
+
+template<> void
+FileFormatDictionary<TransformationGraph3d>::registerBaseFormats()
 {
 }
 
@@ -104,6 +109,11 @@ template class FileFormat<Transformation3d>;
 template class Reader<Transformation3d>;
 template class Writer<Transformation3d>;
 
+template class FileFormatDictionary<TransformationGraph3d>;
+template class FileFormat<TransformationGraph3d>;
+template class Reader<TransformationGraph3d>;
+template class Writer<TransformationGraph3d>;
+
 } // namespace aims
 
 
@@ -111,6 +121,7 @@ static bool _motiondic()
 {
   FileFormatDictionary<AffineTransformation3d>::init();
   FileFormatDictionary<Transformation3d>::init();
+  FileFormatDictionary<TransformationGraph3d>::init();
 
   // register soma-io checker for the TRM format
   {
@@ -145,6 +156,22 @@ static bool _motiondic()
                                           new TrmChainFormatChecker, exts );
   }
 
+  // register soma-io checker for the TRMINGRAPH format
+  {
+    vector<string>  exts(1);
+    exts[0] = "yaml";
+    DataSourceInfoLoader::registerFormat( "TRMINGRAPH",
+                                          new TrmInGraphFormatChecker, exts );
+  }
+
+  // register soma-io checker for the TRMGRAPH format
+  {
+    vector<string>  exts(1);
+    exts[0] = "yaml";
+    DataSourceInfoLoader::registerFormat( "TRMGRAPH",
+                                          new TrmGraphFormatChecker, exts );
+  }
+
   return true;
 }
 
@@ -160,5 +187,9 @@ namespace soma
   template class FormatDictionary<Transformation3d>;
   template class Reader<Transformation3d>;
   template class Writer<Transformation3d>;
+
+  template class FormatDictionary<TransformationGraph3d>;
+  template class Reader<TransformationGraph3d>;
+  template class Writer<TransformationGraph3d>;
 }
 
