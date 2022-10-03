@@ -136,7 +136,7 @@ def graph_to_vol(graph, nomenclature, item_attribute):
             #ovalue = labels_int_map[value]
             color = colors.get(name)
             if not color:
-                color = [0, 0, 0, 255]
+                color = [128, 128, 128, 255]
             item['RGB'] = [float(c) / 255 for c in color] \
                 + [1.] * (4 - len(color))
             labels[value] = item
