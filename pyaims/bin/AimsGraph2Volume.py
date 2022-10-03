@@ -28,7 +28,7 @@ def labels_from_graph(graph, nomenclature):
     taken = set([0])
     labels_int_map = {0: 0}
     labels_names = {0: 'unknown'}
-    colors = {0: [0, 0, 0, 255]}
+    colors = {'unknown': [0, 0, 0, 255]}
     new_labels = {}
 
     # get labels table
@@ -136,6 +136,7 @@ def graph_to_vol(graph, nomenclature, item_attribute):
             #ovalue = labels_int_map[value]
             color = colors.get(name)
             if not color:
+                print('no name: %s, setting it to gray' % name)
                 color = [128, 128, 128, 255]
             item['RGB'] = [float(c) / 255 for c in color] \
                 + [1.] * (4 - len(color))
