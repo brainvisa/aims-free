@@ -69,6 +69,115 @@ public:
 
   static list_EdgePtr getPath( const Vertex *from, const Vertex *to );
 
+  static SIP_PYOBJECT get_element_table( const Graph & graph ) /Factory/;
+%Docstring
+  Get the GraphElementTable as a dict. The dict has the following shape::
+
+      {
+          syntax_name: {
+              id_name: GraphElementCode_object
+          }
+      }
+
+  GraphElementCode objects are given as dicts (str, str)::
+
+    {
+        'id': <same_as_key: filename (globals) or attribute for filename (locals)>,
+        'attribute': <attribute_name_in_graph_element>,
+        'objectType': <type of object>,
+        'dataType': <data type of object>,
+        'storageType': <'Global', 'Local', or 'GlobalPacked'>,
+        'local_file_attribute': <attribute giving the filename for local storage in each graph elememt>,
+        'global_index_attribute': <attribute giving the index for global storage in each graph elememt>,
+        'global_filename': <filename for global storage>,
+        'global_attribute': <attribute>,
+        'syntax': <syntax_name>
+    }
+%End
+%MethodCode
+  carto::rc_ptr<aims::GraphElementTable> get( new aims::GraphElementTable );
+  a0->getProperty( "aims_objects_table", get );
+  PyObject *map = PyDict_New();
+  sipRes = map;
+  char errors[] = "strict";
+  aims::GraphElementTable::const_iterator it, et = get->end();
+  for( it=get->begin(); it!=et; ++it )
+  {
+    const std::string & key = it->first;
+    PyObject *item = PyDict_New();
+
+    std::map<std::string, aims::GraphElementCode>::const_iterator
+      ic, ec = it->second.end();
+    for( ic=it->second.begin(); ic!=ec; ++ic )
+    {
+      const std::string & ckey = ic->first;
+      PyObject *citem = PyDict_New();
+
+      PyDict_SetItemString( citem, "id",
+                              PyUnicode_DecodeUTF8(
+                                ic->second.id.c_str(), ic->second.id.length(),
+                                errors ) );
+      PyDict_SetItemString( citem, "attribute",
+                              PyUnicode_DecodeUTF8(
+                                ic->second.attribute.c_str(),
+                                ic->second.attribute.length(), errors ) );
+      PyDict_SetItemString( citem, "objectType",
+                              PyUnicode_DecodeUTF8(
+                                ic->second.objectType.c_str(),
+                                ic->second.objectType.length(), errors ) );
+      PyDict_SetItemString( citem, "dataType",
+                              PyUnicode_DecodeUTF8(
+                                ic->second.dataType.c_str(),
+                                ic->second.dataType.length(), errors ) );
+
+      std::string storage;
+      switch( ic->second.storageType )
+      {
+      case aims::GraphElementCode::Local:
+        storage = "Local";
+        break;
+      case aims::GraphElementCode::GlobalPacked:
+        storage = "GlobalPacked";
+        break;
+      default:
+        storage = "Global";
+      }
+      PyDict_SetItemString( citem, "storageType",
+                              PyUnicode_DecodeUTF8(
+                                storage.c_str(), storage.length(), errors ) );
+
+      PyDict_SetItemString( citem, "local_file_attribute",
+                              PyUnicode_DecodeUTF8(
+                                ic->second.local_file_attribute.c_str(),
+                                ic->second.local_file_attribute.length(),
+                                errors ) );
+      PyDict_SetItemString( citem, "global_index_attribute",
+                              PyUnicode_DecodeUTF8(
+                                ic->second.global_index_attribute.c_str(),
+                                ic->second.global_index_attribute.length(),
+                                errors ) );
+      PyDict_SetItemString( citem, "global_filename",
+                              PyUnicode_DecodeUTF8(
+                                ic->second.global_filename.c_str(),
+                                ic->second.global_filename.length(),
+                                errors ) );
+      PyDict_SetItemString( citem, "global_attribute",
+                              PyUnicode_DecodeUTF8(
+                                ic->second.global_attribute.c_str(),
+                                ic->second.global_attribute.length(),
+                                errors ) );
+      PyDict_SetItemString( citem, "syntax",
+                              PyUnicode_DecodeUTF8(
+                                ic->second.syntax.c_str(),
+                                ic->second.syntax.length(), errors ) );
+
+      PyDict_SetItemString( item, ckey.c_str(), citem );
+    }
+
+    PyDict_SetItemString( map, key.c_str(), item );
+  }
+%End
+
 };
 
 };
