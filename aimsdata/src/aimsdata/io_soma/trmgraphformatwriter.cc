@@ -31,14 +31,16 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <aims/io_soma/trmformatwriter.h>
-#include <aims/transformation/affinetransformation3d.h>
-#include <aims/io/motionW.h>
+#include <aims/io_soma/trmgraphformatwriter.h>
+#include <aims/transformation/transformationgraph3d.h>
+#include <soma-io/transformation/transformation.h>
 #include <aims/io/writer.h>
 #include <soma-io/io/formatdictionary.h>
+#include <soma-io/datasourceinfo/datasourceinfo.h>
+#include <cartobase/stream/fileutil.h>
 //--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
-#define localMsg( message ) cartoCondMsg( 4, message, "TRMFORMATWRITER" )
+#define localMsg( message ) cartoCondMsg( 4, message, "TRMGRAPHFORMATWRITER" )
 // localMsg must be undef at end of file
 //----------------------------------------------------------------------------
 
@@ -47,69 +49,70 @@ using namespace soma;
 using namespace carto;
 using namespace std;
 
-bool TrmFormatWriter::filterProperties( Object /* properties */,
-                                        Object /* options */ )
+bool TrmGraphFormatWriter::filterProperties( Object /* properties */,
+                                             Object /* options */ )
 {
   // Nothing to filter here
   return true;
 }
 
-bool TrmFormatWriter::write( const AffineTransformation3d & obj,
-                             rc_ptr<DataSourceInfo> dsi,
-                             Object /*options*/ )
+bool TrmGraphFormatWriter::write( const TransformationGraph3d & obj,
+                                  rc_ptr<DataSourceInfo> dsi,
+                                  Object /*options*/ )
 {
   rc_ptr<DataSource> ds = dsi->list().dataSource();
 
   localMsg( "write " + ds->url() );
 
-  MotionWriter mw( ds->url() );
-  mw.write( obj );
+  Object gobj = obj.asDict();
+  Writer<Object> w( ds->url() );
+  w.write( gobj );
+
+  // write each individual transform
+  string dirname = FileUtil::dirname( dsi->url() );
+
+  Object sit = gobj->objectIterator();
+  for( ; sit->isValid(); sit->next() )
+  {
+    string sid = sit->key();
+    Object dit = sit->currentValue()->objectIterator();
+    for( ; dit->isValid(); dit->next() )
+    {
+      string did = dit->key();
+      Edge *etr = obj.getTransformation( sid, did );
+      if( etr )
+      {
+        rc_ptr<Transformation3d> tr( obj.transformation( etr ) );
+        if( tr )
+        {
+          string filename = dit->currentValue()->getString();
+          filename = dirname + FileUtil::separator() + filename;
+          Writer<Transformation3d> w( filename );
+          w.write( *tr );
+        }
+      }
+    }
+  }
 
   return true;
 }
-
-
-bool Trm3DFormatWriter::filterProperties( Object /* properties */,
-                                          Object /* options */ )
-{
-  // Nothing to filter here
-  return true;
-}
-
-bool Trm3DFormatWriter::write( const Transformation3d & obj,
-                               rc_ptr<DataSourceInfo> dsi,
-                               Object options )
-{
-  const AffineTransformation3d *affobj
-    = dynamic_cast<const AffineTransformation3d *>( &obj );
-  if( !affobj )
-    throw wrong_format_error( "Not an affine transformation" );
-
-  Writer<AffineTransformation3d> writer( dsi->url() );
-  writer.setOptions( options );
-  return writer.write( *affobj );
-}
-
 
 
 namespace
 {
 
-  bool inittrmformat()
+  bool inittrmgformat()
   {
-    TrmFormatWriter	*r = new TrmFormatWriter;
+    TrmGraphFormatWriter	*w = new TrmGraphFormatWriter;
     vector<string>	exts;
-    exts.push_back( "trm" );
-    FormatDictionary<AffineTransformation3d>::registerFormat( "TRM", r, exts );
-
-    Trm3DFormatWriter *r2 = new Trm3DFormatWriter;
-    FormatDictionary<Transformation3d>::registerFormat( "AFFINETRANS", r2,
-                                                        exts );
-
+    exts.push_back( "yaml" );
+    exts.push_back( "trmg" );
+    FormatDictionary<TransformationGraph3d>::registerFormat( "TRMGRAPH", w,
+                                                             exts );
     return true;
   }
 
-  bool dummy __attribute__((unused)) = inittrmformat();
+  bool dummy __attribute__((unused)) = inittrmgformat();
 
 }
 

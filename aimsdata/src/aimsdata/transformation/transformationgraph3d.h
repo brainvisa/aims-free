@@ -202,6 +202,10 @@ namespace aims
     */
     void loadTransformationsGraph( carto::Object desc,
                                    const std::string & dirname );
+    /** convert to a dict-like structure compatible with
+        loadTransformationsGraph()
+    */
+    carto::Object asDict() const;
     /** remove deduced transformations (built from composition or inversion).
 
         If chain_only is true, then inverses of direct transforms are not

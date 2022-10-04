@@ -38,6 +38,7 @@
 #include <aims/io/reader.h>
 #include <graph/graph/dedge.h>
 #include <cartobase/uuid/uuid.h>
+#include <cartobase/stream/fileutil.h>
 
 using namespace aims;
 using namespace carto;
@@ -552,6 +553,53 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
     }
   }
   clearCache();
+}
+
+
+Object TransformationGraph3d::asDict() const
+{
+  Object dict = Object::value( Dictionary() );
+  Vertex::const_iterator ie, ee = edges().end();
+
+  for( ie=edges().begin(); ie!=ee; ++ie )
+  {
+    Edge *e = *ie;
+    if( e->hasProperty( "deduced" )
+        && bool( e->getProperty( "deduced" )->getScalar() ) )
+      continue;
+    string uuid = e->getProperty( "uuid" )->getString();
+    Vertex *srcv = *e->begin();
+    Vertex *dstv = *e->rbegin();
+    string suid = referential( srcv );
+    string duid = referential( dstv );
+    Object sdict;
+    if( dict->hasProperty( suid ) )
+      sdict = dict->getProperty( suid );
+    else
+    {
+      sdict = Object::value( Dictionary() );
+      dict->setProperty( suid, sdict );
+    }
+    string filename;
+    if( e->hasProperty( "filename" ) )
+    {
+      filename
+        = FileUtil::basename( e->getProperty( "filename" )->getString() );
+      size_t p = filename.rfind( '?' );
+      if( p != string::npos )
+      {
+        filename.clear();
+//         if( filename.find( "?inv=1", p ) != string::npos
+//             || filename.find( "&inv=1", p+1 ) != string::npos )
+//           filename.clear();
+      }
+    }
+    if( filename.empty() )
+      filename = suid + "_TO_" + duid + ".trm";
+    sdict->setProperty( duid, filename );
+  }
+
+  return dict;
 }
 
 

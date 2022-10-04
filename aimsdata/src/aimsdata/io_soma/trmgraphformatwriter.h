@@ -31,42 +31,30 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef AIMS_IO_SOMA_TRM_HEADER_FORMATWRITER_H
-#define AIMS_IO_SOMA_TRM_HEADER_FORMATWRITER_H
+#ifndef AIMS_IO_SOMA_TRMGRAPH_FORMATWRITER_H
+#define AIMS_IO_SOMA_TRMGRAPH_FORMATWRITER_H
 
 #include <soma-io/writer/formatwriter.h>
 
-
 namespace aims
 {
-  class AffineTransformation3d;
+  class TransformationGraph3d;
 }
 
 namespace soma
 {
 
-  class Transformation3d;
+  /** Write transformation graph in files
 
-
-  class TrmFormatWriter : public FormatWriter<aims::AffineTransformation3d>
+   */
+  class TrmGraphFormatWriter
+    : public FormatWriter<aims::TransformationGraph3d>
   {
   public:
     virtual bool filterProperties(carto::Object properties,
                                   carto::Object options = carto::none());
 
-    virtual bool write( const aims::AffineTransformation3d & obj,
-                        carto::rc_ptr<DataSourceInfo> dsi,
-                        carto::Object options );
-  };
-
-
-  class Trm3DFormatWriter : public FormatWriter<Transformation3d>
-  {
-  public:
-    virtual bool filterProperties(carto::Object properties,
-                                  carto::Object options = carto::none());
-
-    virtual bool write( const Transformation3d & obj,
+    virtual bool write( const aims::TransformationGraph3d & obj,
                         carto::rc_ptr<DataSourceInfo> dsi,
                         carto::Object options );
   };
@@ -74,4 +62,3 @@ namespace soma
 }
 
 #endif
-

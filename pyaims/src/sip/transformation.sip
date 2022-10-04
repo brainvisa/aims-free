@@ -490,6 +490,15 @@ public:
 %End
 
     void loadAffineTransformations();
+%Docstring
+        Load all affine transformations and their inverses.
+%End
+
+    carto::Object asDict() const;
+%Docstring
+        convert to a dict-like structure compatible with
+        loadTransformationsGraph()
+%End
 
   };
 

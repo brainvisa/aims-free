@@ -22,6 +22,7 @@
 #include <graph/graph/graph.h>
 #include <cartobase/containers/nditerator.h>
 #include <soma-io/reader/formatreader.h>
+#include <soma-io/writer/formatwriter.h>
 #include <cstdio>
 #include <cmath>
 #include <limits>
@@ -1026,6 +1027,18 @@ namespace soma
   };
 
 
+  class FfdFormatWriter : public FormatWriter<Transformation3d>
+  {
+  public:
+    virtual bool filterProperties(carto::Object properties,
+                                  carto::Object options = carto::none());
+
+    virtual bool write( const Transformation3d & obj,
+                        carto::rc_ptr<DataSourceInfo> dsi,
+                        carto::Object options );
+  };
+
+
 template <>
 Transformation3d* FormatReader<Transformation3d>::create(
   carto::Object header, const AllocatorContext & context,
@@ -1078,6 +1091,31 @@ FormatReader<Transformation3d>* FfdFormatReader::clone() const
   return new FfdFormatReader;
 }
 
+
+bool FfdFormatWriter::filterProperties( Object /* properties */,
+                                        Object /* options */ )
+{
+  // Nothing to filter here
+  return true;
+}
+
+bool FfdFormatWriter::write( const Transformation3d & obj,
+                             rc_ptr<DataSourceInfo> dsi,
+                             Object options )
+{
+  const FfdTransformation *affobj
+    = dynamic_cast<const FfdTransformation *>( &obj );
+  if( !affobj )
+    throw wrong_format_error( "Not a FFD transformation" );
+
+  aims::Writer<FfdTransformation> writer( dsi->url() );
+  writer.setOptions( options );
+  return writer.write( *affobj );
+}
+
+
+
+
 } // namespace soma
 
 // templates
@@ -1098,6 +1136,9 @@ static bool _ffdiodic()
   vector<string> exts;
   exts.push_back( "ima" );
   FormatDictionary<Transformation3d>::registerFormat( "FFD", r, exts );
+
+  FfdFormatWriter *w = new FfdFormatWriter;
+  FormatDictionary<Transformation3d>::registerFormat( "FFD", w, exts );
 
   return true;
 }
