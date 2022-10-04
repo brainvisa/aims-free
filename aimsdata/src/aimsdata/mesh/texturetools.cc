@@ -95,7 +95,7 @@ namespace aims {
     Object labels_table;
     try
     {
-      vector<string> labels;
+      map<int, Object> labels;
       labels_table = header->getProperty( "GIFTI_labels_table" );
 
       // labels_table is a dictionary-like object with int keys.
