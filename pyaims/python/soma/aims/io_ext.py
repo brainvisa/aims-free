@@ -85,8 +85,23 @@ class YamlFormat(aims.FileFormat_Object):
         return True
 
     def write(self, filename, obj, options):
-        with open(filaname, 'w') as f:
-            yaml.dump(obj)
+        import yaml
+
+        # yaml cannot automatically represent aims.Object instances
+        class MyDumper(yaml.Dumper):
+            def represent_data(self, data):
+                if isinstance(data, (aims.Object, aims.carto.GenericObject)):
+                    try:
+                        if data.keys():
+                            data = dict(data)
+                        else:
+                            data = list(data)
+                    except:
+                        pass
+                return super().represent_data(data)
+
+        with open(filename, 'w') as f:
+            yaml.dump(obj, f, Dumper=MyDumper)
         return True
 
 
