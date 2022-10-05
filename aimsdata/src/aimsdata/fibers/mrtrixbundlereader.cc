@@ -263,11 +263,14 @@ void MRTrixBundleReader::read()
 //   AffineTransformation3d s2m( s2m_v );
 
   FiberPoint pos;
-  int i = 0;
+  long i = 0, curves_count = 0;
   BundleInfo currentBundle( i, "mrtrix_bundle" );
   startBundle( currentBundle );
+  if( header->hasProperty( "curves_count" ) )
+    curves_count = long( header->getProperty( "curves_count" )->getScalar() );
 
-  while( file.good() && !file.eof() )
+  while( ( curves_count <= 0 || i < curves_count )
+         && file.good() && !file.eof() )
   {
     FiberInfo fiberInfo( i );
     startFiber( currentBundle, fiberInfo );
