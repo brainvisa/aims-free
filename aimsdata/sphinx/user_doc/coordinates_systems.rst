@@ -239,13 +239,13 @@ By default the graph is saved in a file, and each transformation is also saved i
 
 It is possible to specify write options:
 
-allow_read: bool (default: true)
+``allow_read``: bool (default: true)
     transformations not already loaded will be loaded before saving, which mean  they will actually be saved. Otherwise only those already loaded will be saved.
-affine_only: bool (default: false)
+``affine_only``: bool (default: false)
     save only affine transformations
-release_loaded: bool (default: false)
+``release_loaded``: bool (default: false)
     if allow_read is true, transformations will be released (unloaded) after they are saved, in order to avoid using memory (useful for non-linear vector fields)
-embed_affines: bool (default: false)
+``embed_affines``: bool (default: false)
     do not write affine transformations in separate ``.trm`` files, but embedded in the graph file, with their matrix inside.
 
 Ex::
