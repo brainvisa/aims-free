@@ -100,7 +100,7 @@ bool TrmGraphFormatWriter::write( const TransformationGraph3d & obj,
     for( ; dit->isValid(); dit->next() )
     {
       string did = dit->key();
-      if( dit->currentValue()->type() == DataTypeCode<vector<float> >::name() )
+      if( dit->currentValue()->type() != DataTypeCode<string>::name() )
         continue;  // embedded affine matrix: don't save it
 
       Edge *etr = obj.getTransformation_raw( sid, did );

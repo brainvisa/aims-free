@@ -226,6 +226,25 @@ namespace aims
                 },
                 ...
             }
+
+        Or, a transformation may be a more complete description as a
+        dictionary, containing an affine matrix as above, and possibly a
+        header:
+
+            {
+                "source_ref": {
+                    "dest_ref": {
+                        "affine": [1, 0, 0, 0,
+                                   0, 1, 0, 0,
+                                   0, 0, 1, 0,
+                                   0, 0, 0, 1],
+                        "header": {
+                            "free_field": "free value"
+                        }
+                    }
+                }
+            }
+
     */
     void loadTransformationsGraph( carto::Object desc,
                                    const std::string & dirname );

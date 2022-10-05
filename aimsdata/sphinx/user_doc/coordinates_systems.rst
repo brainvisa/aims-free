@@ -189,10 +189,40 @@ The graph structure is a dictionary-like object, which can be read from a JSON o
 
     {
         source_ref_id: {
-            dest_ref_id1: transformation_filename1,
-            dest_ref_id2: transformation_filename2,
+            dest_ref_id1: transformation1,
+            dest_ref_id2: transformation2,
         },
         ...
+    }
+
+Transformations (here ``transformation1`` and ``transformation2``) may be either:
+
+- file names (``.trm`` for affine transformations, or ``.ima`` for vector fields, for instance, or ``.trmhdr`` or ``.trmc``, see above)
+- affine matrix written in a line vector, ex::
+
+    {
+        "source_ref": {
+            "dest_ref": [1, 0, 0, 0,
+                         0, 1, 0, 0,
+                         0, 0, 1, 0,
+                         0, 0, 0, 1]
+        }
+    }
+
+- a transformation more complete description as a dictionary, containing an affine matrix as above, and possibly a header::
+
+    {
+        "source_ref": {
+            "dest_ref": {
+                "affine": [1, 0, 0, 0,
+                           0, 1, 0, 0,
+                           0, 0, 1, 0,
+                           0, 0, 0, 1],
+                "header": {
+                    "free_field": "free value"
+                }
+            }
+        }
     }
 
 See the :aimsdox:`C++ API <classaims_1_1TransformationGraph3d.html>`, or the :pyaimsdev:`Python API <pyaims_api_aims.html#soma.aims.TransformationGraph3d>`.
@@ -200,6 +230,28 @@ See the :aimsdox:`C++ API <classaims_1_1TransformationGraph3d.html>`, or the :py
 It can be loaded using the usual API::
 
     graph = aims.read('graph.yaml')
+
+Graphs may be saved also, using the API::
+
+    aims.write(graph, 'graph.yaml')
+
+By default the graph is saved in a file, and each transformation is also saved in a separate file in the same directory. So it's better to write in a new directory. Transformations with an existing file name (read previously) and saved at the same place wil overwrite older ones.
+
+It is possible to specify write options:
+
+allow_read: bool (default: true)
+    transformations not already loaded will be loaded before saving, which mean  they will actually be saved. Otherwise only those already loaded will be saved.
+affine_only: bool (default: false)
+    save only affine transformations
+release_loaded: bool (default: false)
+    if allow_read is true, transformations will be released (unloaded) after they are saved, in order to avoid using memory (useful for non-linear vector fields)
+embed_affines: bool (default: false)
+    do not write affine transformations in separate ``.trm`` files, but embedded in the graph file, with their matrix inside.
+
+Ex::
+
+    aims.write(graph, 'graph.yaml',
+               options={'embed_affines': True, 'allow_read': True})
 
 
 Transformation

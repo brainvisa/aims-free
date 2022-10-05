@@ -565,11 +565,37 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
       }
       catch( ... )
       {
-        // vector matrix for affine
-        rc_ptr<Transformation3d> aff(
-          new AffineTransformation3d( dst_it->currentValue() ) );
-        if( aff )
-          registerTransformation( source_id, dest_id, aff );
+        try
+        {
+          // affine with header dict
+          Object amat = dst_it->currentValue()->getProperty( "affine" );
+
+          rc_ptr<Transformation3d> aff(
+            new AffineTransformation3d( amat ) );
+          if( aff )
+          {
+            try
+            {
+              Object ahdr = dst_it->currentValue()->getProperty( "header" );
+              if( ahdr )
+                aff->header()->copyProperties( ahdr );
+            }
+            catch( ... )
+            {
+            }
+
+            registerTransformation( source_id, dest_id, aff );
+          }
+          continue;
+        }
+        catch( ... )
+        {
+          // vector matrix for affine
+          rc_ptr<Transformation3d> aff(
+            new AffineTransformation3d( dst_it->currentValue() ) );
+          if( aff )
+            registerTransformation( source_id, dest_id, aff );
+        }
         continue;
       }
       // cout << source_id << " -> " << dest_id << ": " << trans << endl;
@@ -633,7 +659,28 @@ Object TransformationGraph3d::asDict( bool affine_only, bool allow_read,
     {
       AffineTransformation3d *aff
         = dynamic_cast<AffineTransformation3d *>( tr.get() );
-      sdict->setProperty( duid, aff->toVector() );
+      Object header = Object::value( Dictionary() );
+      header->copyProperties( aff->header() );
+      // remove src/dst from header as it is already in the graph
+      if( header->hasProperty( "source_referential" ) )
+        header->removeProperty( "source_referential" );
+      if( header->hasProperty( "destination_referential" ) )
+        header->removeProperty( "destination_referential" );
+      if( header->hasProperty( "object_type" ) )
+        header->removeProperty( "object_type" );
+      if( header->hasProperty( "data_type" ) )
+        header->removeProperty( "data_type" );
+      if( header->hasProperty( "format" ) )
+        header->removeProperty( "format" );
+      if( header->size() != 0 )
+      {
+        Object atr = Object::value( Dictionary() );
+        atr->setProperty( "header", header );
+        atr->setProperty( "affine", aff->toVector() );
+        sdict->setProperty( duid, atr );
+      }
+      else  // no header left
+        sdict->setProperty( duid, aff->toVector() );
     }
     else
     {
