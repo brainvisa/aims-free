@@ -369,7 +369,7 @@ public:
 %End
 
     Edge* getTransformation( const std::string & src_ref,
-                             const std::string dst_ref ) const;
+                             const std::string & dst_ref ) const;
 %Docstring
         edge = tgraph.getTransformation(src_ref, dst_ref, allow_compose=False)
 
@@ -388,11 +388,23 @@ public:
     Edge* getTransformation( const Vertex *src_ref,
                              const Vertex *dst_ref ) const;
     Edge* getTransformation( const std::string & src_ref,
-                             const std::string dst_ref,
+                             const std::string & dst_ref,
                              bool allow_compose );
     Edge* getTransformation( Vertex *src_ref,
                              Vertex *dst_ref,
                              bool allow_compose );
+
+    Edge* getTransformation_raw( const Vertex *src_ref,
+                                 const Vertex *dst_ref ) const;
+%Docstring
+    getTransformation_raw(src_ref, dst_ref)
+
+    same as getTransformation(), but do not perform lazy loading
+%End
+
+    Edge* getTransformation_raw( const std::string & src_ref,
+                                 const std::string & dst_ref ) const;
+
     rc_ptr_Transformation3d getTransformChain(
       const Vertex *src_ref, const Vertex *dst_ref ) const;
 %Docstring
@@ -462,6 +474,20 @@ public:
 
         The transformation files are found relatively to the directory given as
         the dirname parameter.
+
+        Alternatively to file names, an affine transformation may be given
+        directly as its 4x4 matrix, written as a line vector (all 16
+        coefficients in a vecotr, describing the matrix horizontally). Ex::
+
+            {
+                source_ref_id: {
+                    dest_ref_id1: [1, 0, 0, 0,
+                                   0, 1, 0, 0,
+                                   0, 0, 1, 0,
+                                   0, 0, 0, 1],
+                },
+                ...
+            }
 %End
 
     void clearCache( bool chain_only=false );
@@ -491,13 +517,29 @@ public:
 
     void loadAffineTransformations();
 %Docstring
-        Load all affine transformations and their inverses.
+        Load all affine transformations.
 %End
 
-    carto::Object asDict() const;
+    carto::Object asDict( bool affine_only = false, bool allow_read = false,
+                          bool embed_affines = false ) const;
 %Docstring
         convert to a dict-like structure compatible with
         loadTransformationsGraph()
+
+        Parameters
+        ----------
+        affine_only: bool
+            if true, inclue only affine transformations
+        allow_read: bool
+            if true, and if affine_only or embed_affines is also
+            true, all affine transformations will be read in order to determine
+            which are affine.
+            Otherwise only those already loaded in memory (via the lazy
+            reading mechanism) will be known to be affine. This parameter has
+            no effect on non-affine transformations.
+        embed_affines: bool
+            if true, affine transformations are not recorded as a
+              file name (.trm format), but as an embedded 4x4 matrix.
 %End
 
   };

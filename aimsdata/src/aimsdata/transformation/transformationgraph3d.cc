@@ -228,8 +228,38 @@ TransformationGraph3d::transformation( const std::string & id ) const
 }
 
 
+Edge* TransformationGraph3d::getTransformation_raw(
+  const Vertex *src_ref, const Vertex *dst_ref ) const
+{
+  Vertex::const_iterator ie, ee = src_ref->end();
+  Edge *edge;
+  for( ie=src_ref->begin(); ie!=ee; ++ie )
+  {
+    edge = *ie;
+    if( edge->isDirected()
+        && *edge->begin() == src_ref && *edge->rbegin() == dst_ref )
+      return edge;
+  }
+  return 0;
+}
+
+
+Edge* TransformationGraph3d::getTransformation_raw(
+  const std::string & src_ref, const std::string & dst_ref ) const
+{
+  Vertex *v1, *v2;
+  v1 = referentialById( src_ref );
+  if( !v1 )
+    return 0;
+  v2 = referentialById( dst_ref );
+  if( !v2 )
+    return 0;
+  return getTransformation_raw( v1, v2 );
+}
+
+
 Edge* TransformationGraph3d::getTransformation(
-  const std::string & src_ref, const std::string dst_ref ) const
+  const std::string & src_ref, const std::string & dst_ref ) const
 {
   Vertex *v1, *v2;
   v1 = referentialById( src_ref );
@@ -245,24 +275,16 @@ Edge* TransformationGraph3d::getTransformation(
 Edge* TransformationGraph3d::getTransformation( const Vertex *src_ref,
                                                 const Vertex *dst_ref ) const
 {
-  Vertex::const_iterator ie, ee = src_ref->end();
-  Edge *edge;
-  for( ie=src_ref->begin(); ie!=ee; ++ie )
-  {
-    edge = *ie;
-    if( edge->isDirected()
-        && *edge->begin() == src_ref && *edge->rbegin() == dst_ref )
-    {
-      loadTransformation( edge );
-      return edge;
-    }
-  }
-  return 0;
+  Edge *edge = getTransformation_raw( src_ref, dst_ref );
+  if( edge )
+    loadTransformation( edge );
+  return edge;
 }
 
 
 Edge* TransformationGraph3d::getTransformation(
-  const std::string & src_ref, const std::string dst_ref, bool allow_compose )
+  const std::string & src_ref, const std::string & dst_ref,
+  bool allow_compose )
 {
   Vertex *v1, *v2;
   v1 = referentialById( src_ref );
@@ -453,7 +475,10 @@ Edge * TransformationGraph3d::registerTransformation(
     return 0;
   }
 
-  Edge *edge = addDirectedEdge( src_ref, dst_ref, "transformation" );
+  Edge *edge = getTransformation_raw( src_ref, dst_ref );
+  if( edge )
+    removeEdge( edge );
+  edge = addDirectedEdge( src_ref, dst_ref, "transformation" );
   edge->setProperty( "transformation", trans );
   if( trans.get() )
   {
@@ -501,7 +526,10 @@ Edge * TransformationGraph3d::registerTransformation(
 Edge * TransformationGraph3d::registerTransformation(
   Vertex *src_ref, Vertex *dst_ref, const string & filename )
 {
-  Edge *edge = addDirectedEdge( src_ref, dst_ref, "transformation" );
+  Edge *edge = getTransformation_raw( src_ref, dst_ref );
+  if( edge )
+    removeEdge( edge );
+  edge = addDirectedEdge( src_ref, dst_ref, "transformation" );
   edge->setProperty( "filename", filename );
   return edge;
 }
@@ -530,10 +558,22 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
          dst_it->next() )
     {
       string dest_id = dst_it->key();
-      string trans = dst_it->currentValue()->getString();
+      string trans;
+      try
+      {
+        trans = dst_it->currentValue()->getString();
+      }
+      catch( ... )
+      {
+        // vector matrix for affine
+        rc_ptr<Transformation3d> aff(
+          new AffineTransformation3d( dst_it->currentValue() ) );
+        if( aff )
+          registerTransformation( source_id, dest_id, aff );
+        continue;
+      }
       // cout << source_id << " -> " << dest_id << ": " << trans << endl;
       bool inv = false;
-      string sr = source_id;
       if( trans.compare( 0, 4, "inv:" ) == 0 )
       {
         inv = true;
@@ -546,7 +586,7 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
           trans += "?inv=1";
       }
 
-      registerTransformation( sr, dest_id, trans );
+      registerTransformation( source_id, dest_id, trans );
       // TODO: we could unregister any inverse trans here
       // then clear only chained transforms cache at the end of this
       // function.
@@ -556,10 +596,14 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
 }
 
 
-Object TransformationGraph3d::asDict() const
+Object TransformationGraph3d::asDict( bool affine_only, bool allow_read,
+                                      bool embed_affines ) const
 {
   Object dict = Object::value( Dictionary() );
   Vertex::const_iterator ie, ee = edges().end();
+
+  if( ( affine_only || embed_affines ) && allow_read )
+    const_cast<TransformationGraph3d *>( this )->loadAffineTransformations();
 
   for( ie=edges().begin(); ie!=ee; ++ie )
   {
@@ -567,6 +611,10 @@ Object TransformationGraph3d::asDict() const
     if( e->hasProperty( "deduced" )
         && bool( e->getProperty( "deduced" )->getScalar() ) )
       continue;
+    rc_ptr<Transformation3d> tr = transformation( e );
+    if( affine_only && !tr )
+      continue; // not a loaded affine
+
     string uuid = e->getProperty( "uuid" )->getString();
     Vertex *srcv = *e->begin();
     Vertex *dstv = *e->rbegin();
@@ -580,23 +628,33 @@ Object TransformationGraph3d::asDict() const
       sdict = Object::value( Dictionary() );
       dict->setProperty( suid, sdict );
     }
-    string filename;
-    if( e->hasProperty( "filename" ) )
+    if( embed_affines && tr
+        && dynamic_cast<AffineTransformation3d *>( tr.get() ) )
     {
-      filename
-        = FileUtil::basename( e->getProperty( "filename" )->getString() );
-      size_t p = filename.rfind( '?' );
-      if( p != string::npos )
-      {
-        filename.clear();
-//         if( filename.find( "?inv=1", p ) != string::npos
-//             || filename.find( "&inv=1", p+1 ) != string::npos )
-//           filename.clear();
-      }
+      AffineTransformation3d *aff
+        = dynamic_cast<AffineTransformation3d *>( tr.get() );
+      sdict->setProperty( duid, aff->toVector() );
     }
-    if( filename.empty() )
-      filename = suid + "_TO_" + duid + ".trm";
-    sdict->setProperty( duid, filename );
+    else
+    {
+      string filename;
+      if( e->hasProperty( "filename" ) )
+      {
+        filename
+          = FileUtil::basename( e->getProperty( "filename" )->getString() );
+        size_t p = filename.rfind( '?' );
+        if( p != string::npos )
+        {
+          filename.clear();
+  //         if( filename.find( "?inv=1", p ) != string::npos
+  //             || filename.find( "&inv=1", p+1 ) != string::npos )
+  //           filename.clear();
+        }
+      }
+      if( filename.empty() )
+        filename = suid + "_TO_" + duid + ".trm";
+      sdict->setProperty( duid, filename );
+    }
   }
 
   return dict;
@@ -708,12 +766,22 @@ void TransformationGraph3d::registerInverseTransformations( bool loadAffines )
 }
 
 
-void TransformationGraph3d::loadAffineTransformations()
+list<Edge *> TransformationGraph3d::loadAffineTransformations()
 {
+  list<Edge *> loaded;
   ESet::iterator ie, ee = edges().end();
 
   for( ie=edges().begin(); ie!=ee; ++ie )
-    loadTransformation( *ie, true );
+  {
+    if( !transformation( *ie ) )
+    {
+      rc_ptr<Transformation3d> tr = loadTransformation( *ie, true );
+      if( tr )
+        loaded.push_back( *ie );
+    }
+  }
+
+  return loaded;
 }
 
 
