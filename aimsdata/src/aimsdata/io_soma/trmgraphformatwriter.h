@@ -46,6 +46,13 @@ namespace soma
 
   /** Write transformation graph in files
 
+      Writing options:
+
+      - allow_read: true
+      - affine_only: false
+      - release_loaded: false
+      - embed_affines: false
+
    */
   class TrmGraphFormatWriter
     : public FormatWriter<aims::TransformationGraph3d>

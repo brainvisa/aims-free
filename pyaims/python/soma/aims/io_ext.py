@@ -98,6 +98,9 @@ class YamlFormat(aims.FileFormat_Object):
                             data = list(data)
                     except:
                         pass
+                elif type(data).__module__.startswith('soma.aims') \
+                        and hasattr(type(data), '__getitem__'):
+                    data = list(data)
                 return super().represent_data(data)
 
         with open(filename, 'w') as f:

@@ -103,24 +103,29 @@ namespace aims
     Edge* transformationById( const std::string & id ) const;
     /// Get the referential ID in the Vertex (its uuid property)
     static std::string referential( const Vertex *v );
-    /** Get the Transformation3d object inside an edge. The returned reference
-        counting pointer may contain a null pointer.
+    /** Get the Transformation3d object inside an edge.
+        The returned reference counting pointer may contain a null pointer
+        (lazy loading is *not* performed in transformaton(), contrarily to
+        getTransformation()).
     */
     static carto::rc_ptr<soma::Transformation3d> transformation(
       const Edge *edge );
     /** Get the Transformation3d object for the given UUID.
-        The returned reference counting pointer may contain a null pointer.
+        The returned reference counting pointer may contain a null pointer
+        (lazy loading is *not* performed in transformaton(), contrarily to
+        getTransformation()).
     */
     carto::rc_ptr<soma::Transformation3d> transformation(
       const std::string & id ) const;
 
     /** Get the transformation between source_ref and dst_ref. If it is not a
-        registered transformation, return 0.
+        registered transformation, return 0. Lazy loading will take place,
+        however.
     */
     Edge* getTransformation( const std::string & src_ref,
-                             const std::string dst_ref ) const;
+                             const std::string & dst_ref ) const;
     /** Get the transformation between source_ref and dst_ref. If it is not a
-        registered transformation, return 0.
+        registered transformation, return 0. Lazy loading will take place.
         If allow_compose is True and the transformation is not found, then a
         transformations chain path is looked for. If a matching one is found,
         it is then registered in the graph to allow fast access later. The
@@ -129,15 +134,16 @@ namespace aims
         make a shorter path, it will not be taken into account).
     */
     Edge* getTransformation( const std::string & src_ref,
-                             const std::string dst_ref,
+                             const std::string & dst_ref,
                              bool allow_compose );
     /** Get the transformation between source_ref and dst_ref. If it is not a
-        registered transformation, return 0.
+        registered transformation, return 0. Lazy loading will take place,
+        however.
     */
     Edge* getTransformation( const Vertex *src_ref,
                              const Vertex *dst_ref ) const;
     /** Get the transformation between source_ref and dst_ref. If it is not a
-        registered transformation, return 0.
+        registered transformation, return 0. Lazy loading will take place.
         If allow_compose is True and the transformation is not found, then a
         transformations chain path is looked for. If a matching one is found,
         it is then registered in the graph to allow fast access later. The
@@ -148,6 +154,13 @@ namespace aims
     Edge* getTransformation( Vertex *src_ref,
                              Vertex *dst_ref,
                              bool allow_compose );
+
+    /// same as getTransformation() but don't perform lazy loading.
+    Edge *getTransformation_raw( const Vertex *src_ref,
+                                 const Vertex *dst_ref ) const;
+    /// same as getTransformation() but don't perform lazy loading.
+    Edge *getTransformation_raw( const std::string & src_ref,
+                                 const std::string & dst_ref ) const;
 
     /** Add (or register) the given transformation in the transformations
         graph.
@@ -199,13 +212,58 @@ namespace aims
 
         The transformation files are found relatively to the directory given as
         the dirname parameter.
+
+        Alternatively to file names, an affine transformation may be given
+        directly as its 4x4 matrix, written as a line vector (all 16
+        coefficients in a vecotr, describing the matrix horizontally). Ex:
+
+            {
+                source_ref_id: {
+                    dest_ref_id1: [1, 0, 0, 0,
+                                   0, 1, 0, 0,
+                                   0, 0, 1, 0,
+                                   0, 0, 0, 1],
+                },
+                ...
+            }
+
+        Or, a transformation may be a more complete description as a
+        dictionary, containing an affine matrix as above, and possibly a
+        header:
+
+            {
+                "source_ref": {
+                    "dest_ref": {
+                        "affine": [1, 0, 0, 0,
+                                   0, 1, 0, 0,
+                                   0, 0, 1, 0,
+                                   0, 0, 0, 1],
+                        "header": {
+                            "free_field": "free value"
+                        }
+                    }
+                }
+            }
+
     */
     void loadTransformationsGraph( carto::Object desc,
                                    const std::string & dirname );
     /** convert to a dict-like structure compatible with
         loadTransformationsGraph()
+
+        Options:
+        - affine_only: if true, inclue only affine transformations
+        - allow_read: if true, and if affine_only or embed_affines is also
+          true, all affine transformations will be read in order to determine
+          which are affine.
+          Otherwise only those already loaded in memory (via the lazy reading
+          mechanism) will be known to be affine. This parameter has no effect
+          on non-affine transformations.
+        - embed_affines: if true, affine transformations are not recorded as a
+          file name (.trm format), but as an embedded 4x4 matrix.
     */
-    carto::Object asDict() const;
+    carto::Object asDict( bool affine_only = false, bool allow_read = false,
+                          bool embed_affines = false ) const;
     /** remove deduced transformations (built from composition or inversion).
 
         If chain_only is true, then inverses of direct transforms are not
@@ -223,7 +281,7 @@ namespace aims
         transforms and register their inverses.
     */
     void registerInverseTransformations( bool loadAffines = false );
-    void loadAffineTransformations();
+    std::list<Edge *> loadAffineTransformations();
 
     /** Get a transformation chain between two vertices.
 
@@ -238,13 +296,14 @@ namespace aims
     carto::rc_ptr<soma::Transformation3d> getTransformChain(
       const std::string & src_ref, const std::string & dst_ref ) const;
 
+    carto::rc_ptr<soma::Transformation3d>
+      loadTransformation( Edge *edge, bool affine_only=false ) const;
+
   private:
     mutable std::map<std::string, Vertex *> _refs_by_id;
     mutable std::map<std::string, Edge *> _tr_by_id;
     std::set<std::pair<const Vertex *, const Vertex *> > _disconnected;
 
-    carto::rc_ptr<soma::Transformation3d>
-      loadTransformation( Edge *edge, bool affine_only=false ) const;
   };
 
 }

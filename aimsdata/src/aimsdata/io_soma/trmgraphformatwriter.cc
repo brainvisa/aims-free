@@ -58,13 +58,34 @@ bool TrmGraphFormatWriter::filterProperties( Object /* properties */,
 
 bool TrmGraphFormatWriter::write( const TransformationGraph3d & obj,
                                   rc_ptr<DataSourceInfo> dsi,
-                                  Object /*options*/ )
+                                  Object options )
 {
   rc_ptr<DataSource> ds = dsi->list().dataSource();
 
   localMsg( "write " + ds->url() );
 
-  Object gobj = obj.asDict();
+  bool allow_read = true;
+  bool affine_only = false;
+  bool release_loaded = false;
+  bool embed_affines = false;
+
+  if( options && options->hasProperty( "allow_read" ) )
+    allow_read = bool( options->getProperty( "allow_read" )->getScalar() );
+  if( options && options->hasProperty( "affine_only" ) )
+    affine_only = bool( options->getProperty( "affine_only" )->getScalar() );
+  if( options && options->hasProperty( "release_loaded" ) )
+    release_loaded
+      = bool( options->getProperty( "release_loaded" )->getScalar() );
+  if( options && options->hasProperty( "embed_affines" ) )
+    embed_affines
+      = bool( options->getProperty( "embed_affines" )->getScalar() );
+
+  list<Edge *> loaded;
+  if( release_loaded && allow_read )
+    loaded = const_cast<TransformationGraph3d &>(
+      obj ).loadAffineTransformations();
+
+  Object gobj = obj.asDict( affine_only, allow_read, embed_affines );
   Writer<Object> w( ds->url() );
   w.write( gobj );
 
@@ -79,19 +100,38 @@ bool TrmGraphFormatWriter::write( const TransformationGraph3d & obj,
     for( ; dit->isValid(); dit->next() )
     {
       string did = dit->key();
-      Edge *etr = obj.getTransformation( sid, did );
+      if( dit->currentValue()->type() != DataTypeCode<string>::name() )
+        continue;  // embedded affine matrix: don't save it
+
+      Edge *etr = obj.getTransformation_raw( sid, did );
       if( etr )
       {
+        bool release = false;
         rc_ptr<Transformation3d> tr( obj.transformation( etr ) );
+        if( !tr && allow_read )
+        {
+          tr = obj.loadTransformation( etr, affine_only );
+          if( release_loaded )
+            release = true;
+        }
         if( tr )
         {
           string filename = dit->currentValue()->getString();
           filename = dirname + FileUtil::separator() + filename;
           Writer<Transformation3d> w( filename );
           w.write( *tr );
+          if( release )
+            etr->setProperty( "transformation", rc_ptr<Transformation3d>() );
         }
       }
     }
+  }
+
+  if( release_loaded )
+  {
+    list<Edge *>::iterator il, el = loaded.end();
+    for( il=loaded.begin(); il!=el; ++il )
+      (*il)->setProperty( "transformation", rc_ptr<Transformation3d>() );
   }
 
   return true;
