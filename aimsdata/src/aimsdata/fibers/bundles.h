@@ -99,14 +99,14 @@ public:
   
   inline FiberInfo();
   inline FiberInfo( int id );
-  inline FiberInfo( int id, float weight );
+  inline FiberInfo( int id, double weight );
   inline int id() const;
-  inline float weight() const;
+  inline double weight() const;
 
 protected:
 
   int _id;
-  float _weight;
+  double _weight;
 };
 
 
@@ -625,18 +625,18 @@ private:
 
 //-----------------------------------------------------------------------------
 inline FiberInfo::FiberInfo()
-  : _id( 0 ), _weight( 1.f )
+  : _id( 0 ), _weight( 1.0 )
 {}
 
 
 //-----------------------------------------------------------------------------
 inline FiberInfo::FiberInfo( int id ) :
-  _id( id ), _weight( 1.0f )
+  _id( id ), _weight( 1.0 )
 {}
 
 
 //-----------------------------------------------------------------------------
-inline FiberInfo::FiberInfo( int id, float weight ) :
+inline FiberInfo::FiberInfo( int id, double weight ) :
   _id( id ), _weight( weight )
 {}
 
@@ -648,7 +648,7 @@ inline int FiberInfo::id() const
 }
 
 //-----------------------------------------------------------------------------
-inline float FiberInfo::weight() const
+inline double FiberInfo::weight() const
 { 
   return _weight; 
 }
