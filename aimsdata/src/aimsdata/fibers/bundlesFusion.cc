@@ -83,6 +83,8 @@ void BundlesFusion::bundleTerminated( const BundleProducer &,
     // **if it's a new name, create a new bundle in memory.**
     int ind = _bundles_name.size();
     _bundlesSet.push_back(_bundle);
+    _bundleInfoSet.push_back( bundle );
+    _bundlesFiberInfo.push_back( _fiberInfoSet );
     _bundles_name[ bundle.name() ] = ind;
   }
   else
@@ -93,8 +95,13 @@ void BundlesFusion::bundleTerminated( const BundleProducer &,
     // add fibers to bundle.
     Bundle & b = _bundlesSet[ ind ];
     b.insert( b.end(), _bundle.begin(), _bundle.end() );
+    // _bundleInfoSet has already been set.
+    FiberInfoSet & fiberInfoSet = _bundlesFiberInfo[ ind ];
+    fiberInfoSet.insert( fiberInfoSet.end(), _fiberInfoSet.begin(),
+                         _fiberInfoSet.end() );
   }
   _bundle.clear();
+  _fiberInfoSet.clear();
 }
 
 
@@ -104,17 +111,21 @@ void BundlesFusion::fiberStarted( const BundleProducer &,
                                   const FiberInfo & )
 {
   _fiber.clear();
+  _fiberInfoSet.clear();
 }
 
 
 //-----------------------------------------------------------------------------
 void BundlesFusion::fiberTerminated( const BundleProducer &,
                                      const BundleInfo &,
-                                     const FiberInfo & )
+                                     const FiberInfo & fiberInfo )
 {
   if( !_fiber.empty() )
   {
     _bundle.push_back(_fiber);
+    _fiberInfoSet.push_back( fiberInfo );
+    // set correct ID on fiber info
+    _fiberInfoSet.rbegin()->setId( _fiberInfoSet.size() - 1 );
     _fiber.clear();
   }
 }
@@ -154,12 +165,15 @@ void BundlesFusion::noMoreBundle( const BundleProducer & )
     for( ; names!=en; ++names )
     {
       const Bundle & bundle = _bundlesSet[ names->second ];
-      BundleInfo bundle_tmp(names->first);
+      const BundleInfo & bundle_tmp = _bundleInfoSet[ names->second ];
       count += bundle.size();
       startBundle( bundle_tmp );
-      for(Bundle::const_iterator fib=bundle.begin();fib!=bundle.end();++fib)
+      const FiberInfoSet & fiberInfoSet = _bundlesFiberInfo[ names->second ];
+      int i = 0;
+      for( Bundle::const_iterator fib=bundle.begin(); fib!=bundle.end();
+           ++fib, ++i )
       {
-        FiberInfo fiber_tmp(1);
+        const FiberInfo & fiber_tmp = fiberInfoSet[i];
         startFiber( bundle_tmp, fiber_tmp );
         for(Fiber::const_iterator pt=(*fib).begin();pt!=(*fib).end();++pt)
           addFiberPoint( bundle_tmp, fiber_tmp,*pt);
@@ -171,6 +185,8 @@ void BundlesFusion::noMoreBundle( const BundleProducer & )
     cout << endl << "BundlesFusion processing end, total fibers: " << count
       << endl << flush;
     _bundlesSet.clear();
+    _bundleInfoSet.clear();
+    _bundlesFiberInfo.clear();
   }
 }
 

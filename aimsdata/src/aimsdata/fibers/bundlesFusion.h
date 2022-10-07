@@ -57,8 +57,11 @@ namespace aims
   {
   public:
     typedef std::vector< aims::FiberPoint > Fiber;
-    typedef std::vector< Fiber >      Bundle;
-    typedef std::vector< Bundle >     BundlesSet;
+    typedef std::vector< Fiber >        Bundle;
+    typedef std::vector< Bundle >       BundlesSet;
+    typedef std::vector< FiberInfo >    FiberInfoSet;
+    typedef std::vector< BundleInfo >   BundleInfoSet;
+    typedef std::vector< FiberInfoSet > BundlesFiberInfo;
 
     BundlesFusion( int, const Fiber & = Fiber(), const Bundle & = Bundle(),
                    const BundlesSet & = BundlesSet() );
@@ -88,8 +91,11 @@ namespace aims
     int _nb_bundles,_num;
     Fiber _fiber;
     Bundle _bundle;
+    BundleInfoSet _bundleInfoSet;
     BundlesSet _bundlesSet;
     std::map<std::string, int> _bundles_name;
+    FiberInfoSet _fiberInfoSet;
+    BundlesFiberInfo _bundlesFiberInfo;
   };
 
 }

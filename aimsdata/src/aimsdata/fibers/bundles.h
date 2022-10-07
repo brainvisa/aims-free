@@ -100,8 +100,10 @@ public:
   inline FiberInfo();
   inline FiberInfo( int id );
   inline FiberInfo( int id, double weight );
+  inline FiberInfo( const FiberInfo & fiber );
   inline int id() const;
   inline double weight() const;
+  inline void setId( int id );
 
 protected:
 
@@ -642,15 +644,27 @@ inline FiberInfo::FiberInfo( int id, double weight ) :
 
 
 //-----------------------------------------------------------------------------
+inline FiberInfo::FiberInfo( const FiberInfo & fiber )
+  : _id( fiber.id() ), _weight( fiber.weight() )
+{}
+
+
+//-----------------------------------------------------------------------------
 inline int FiberInfo::id() const 
 { 
-  return _id; 
+  return _id;
 }
 
 //-----------------------------------------------------------------------------
 inline double FiberInfo::weight() const
 { 
-  return _weight; 
+  return _weight;
+}
+
+//-----------------------------------------------------------------------------
+inline void FiberInfo::setId( int id )
+{
+  _id = id;
 }
 
 
