@@ -105,6 +105,8 @@ public:
   inline double weight() const;
   inline void setId( int id );
 
+  inline FiberInfo & operator = ( const FiberInfo & fiber );
+
 protected:
 
   int _id;
@@ -124,8 +126,11 @@ public:
   inline BundleInfo( const std::string &name );
   inline BundleInfo( int id );
   inline BundleInfo( int id, const std::string &name );
+  inline BundleInfo( const BundleInfo & bundle );
   inline int id() const;
   inline std::string name() const;
+
+  inline BundleInfo & operator = ( const BundleInfo & bundle );
 
 protected:
 
@@ -667,6 +672,15 @@ inline void FiberInfo::setId( int id )
   _id = id;
 }
 
+//-----------------------------------------------------------------------------
+inline FiberInfo & FiberInfo::operator = ( const FiberInfo & fiber )
+{
+  _id = fiber.id();
+  _weight = fiber.weight();
+
+  return *this;
+}
+
 
   //--------------//
  //  BundleInfo  //
@@ -696,6 +710,12 @@ inline BundleInfo::BundleInfo( int id, const std::string &name ) :
 
 
 //-----------------------------------------------------------------------------
+inline BundleInfo::BundleInfo( const BundleInfo & bundle ) :
+  _id( bundle.id() ), _name( bundle.name() )
+{}
+
+
+//-----------------------------------------------------------------------------
 inline std::string BundleInfo::name() const 
 { 
   return _name; 
@@ -708,7 +728,14 @@ inline int BundleInfo::id() const
   return _id; 
 }
 
+//-----------------------------------------------------------------------------
+inline BundleInfo & BundleInfo::operator = ( const BundleInfo & bundle )
+{
+  _id = bundle.id();
+  _name = bundle.name();
 
+  return *this;
+}
 
   //-----------------//
  //  BundleToGraph  //
