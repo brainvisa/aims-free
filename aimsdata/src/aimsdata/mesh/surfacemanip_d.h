@@ -715,6 +715,77 @@ namespace aims
   }
 
 
+  template <int D, typename T>
+  std::pair<carto::rc_ptr< AimsTimeSurface<D, Void> >,
+            carto::rc_ptr<TimeTexture<T> > >
+  SurfaceManip::splitTexturedMesh( const AimsTimeSurface<D, T> & texmesh )
+  {
+    carto::rc_ptr< AimsTimeSurface<D, Void> > mesh(
+      new AimsTimeSurface<D, Void> );
+    carto::rc_ptr< TimeTexture<T> > tex( new TimeTexture<T> );
+
+    typename AimsTimeSurface<D, T>::const_iterator im, em = texmesh.end();
+    for( im=texmesh.begin(); im!=em; ++im )
+    {
+      AimsSurface<D> & m = (*mesh)[im->first];
+      Texture<T> & t = (*tex)[im->first];
+      m.vertex() = im->second.vertex();
+      m.normal() = im->second.normal();
+      m.polygon() = im->second.polygon();
+      t.data() = im->second.texture();
+    }
+
+    mesh->header().copyProperties(
+      carto::Object::reference( texmesh.header() ) );
+    tex->header().copyProperties(
+      carto::Object::reference( texmesh.header() ) );
+
+    return std::make_pair( mesh, tex );
+  }
+
+
+  template <int D, typename T>
+  carto::rc_ptr<AimsTimeSurface<D, T> >
+  SurfaceManip::joinTexturedMesh( const AimsTimeSurface<D, Void> & mesh,
+                                  const TimeTexture<T> & texture )
+  {
+    carto::rc_ptr< AimsTimeSurface<D, T> > texmesh(
+      new AimsTimeSurface<D, T> );
+
+    typename AimsTimeSurface<D, Void>::const_iterator im, em = mesh.end();
+    typename TimeTexture<T>::const_iterator it, et = texture.end();
+
+    std::set<int> timesteps;
+    for( im=mesh.begin(); im!=em; ++im )
+      timesteps.insert( im->first );
+    for( it=texture.begin(); it!=et; ++it )
+      timesteps.insert( it->first );
+    std::set<int>::iterator is, es = timesteps.end();
+
+    for( is=timesteps.begin(); is!=es; ++is )
+    {
+      im = mesh.lower_bound( *is );
+      if( im == em )
+        break;
+      it = texture.lower_bound( *is );
+
+      AimsSurface<D, T> & m = (*texmesh)[*is];
+      m.vertex() = im->second.vertex();
+      m.normal() = im->second.normal();
+      m.polygon() = im->second.polygon();
+      if( it != et )
+        m.texture() = it->second.data();
+    }
+
+    texmesh->header().copyProperties(
+      carto::Object::reference( mesh.header() ) );
+    texmesh->header().copyProperties(
+      carto::Object::reference( texture.header() ) );
+
+    return texmesh;
+  }
+
+
 }
 
 #endif

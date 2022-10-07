@@ -1,3 +1,4 @@
+
 namespace aims
 {
 
@@ -18,6 +19,10 @@ typedef AimsTimeSurface<2,Void> AimsTimeSurface_2_VOID;
 #define PYAIMS_TIMETEXTURE_S16_DEFINED
 typedef TimeTexture<int16_t> TimeTexture_S16;
 #endif
+%End
+
+%TypeCode
+#include <cartobase/smart/rcptrtrick.h>
 %End
 
 public:
@@ -369,6 +374,110 @@ volume: Volume_S16
 value: int
     label value used to write the mesh imprint in the volume
 %End
+
+    static SIP_PYOBJECT
+    splitTexturedMesh( const AimsTimeSurface_2_FLOAT & texmesh )
+    /ReleaseGIL, Factory/;
+%Docstring
+    Split a textured mesh into a mesh and a texture
+%End
+%MethodCode
+    PyObject *tuple = PyTuple_New( 2 );
+    std::pair< carto::rc_ptr<AimsTimeSurface<2, Void> >,
+               carto::rc_ptr<TimeTexture<float> > > res
+      = aims::SurfaceManip::splitTexturedMesh( *a0 );
+    PyObject *m = sipConvertFromType(
+      new carto::rc_ptr<AimsTimeSurface<2, Void> >( res.first ),
+      sipFindType( "rc_ptr_AimsTimeSurface_2_VOID" ), Py_None );
+    PyObject *t = sipConvertFromType(
+      new carto::rc_ptr<TimeTexture<float> >( res.second ),
+      sipFindType( "rc_ptr_TimeTexture_FLOAT" ), Py_None );
+
+    PyTuple_SetItem( tuple, 0, m );
+    PyTuple_SetItem( tuple, 1, t );
+
+    sipRes = tuple;
+%End
+
+    static SIP_PYOBJECT
+    splitTexturedMesh( const AimsTimeSurface_2_POINT2DF & texmesh )
+    /ReleaseGIL, Factory/;
+%MethodCode
+    PyObject *tuple = PyTuple_New( 2 );
+    std::pair< carto::rc_ptr<AimsTimeSurface<2, Void> >,
+               carto::rc_ptr<TimeTexture<Point2df> > > res
+      = aims::SurfaceManip::splitTexturedMesh( *a0 );
+    PyObject *m = sipConvertFromType(
+      new carto::rc_ptr<AimsTimeSurface<2, Void> >( res.first ),
+      sipFindType( "rc_ptr_AimsTimeSurface_2_VOID" ), Py_None );
+    PyObject *t = sipConvertFromType(
+      new carto::rc_ptr<TimeTexture<Point2df> >( res.second ),
+      sipFindType( "rc_ptr_TimeTexture_POINT2DF" ), Py_None );
+
+    PyTuple_SetItem( tuple, 0, m );
+    PyTuple_SetItem( tuple, 1, t );
+
+    sipRes = tuple;
+%End
+
+    static SIP_PYOBJECT
+    splitTexturedMesh( const AimsTimeSurface_3_FLOAT & texmesh )
+    /ReleaseGIL, Factory/;
+%MethodCode
+    PyObject *tuple = PyTuple_New( 2 );
+    std::pair< carto::rc_ptr<AimsTimeSurface<3, Void> >,
+               carto::rc_ptr<TimeTexture<float> > > res
+      = aims::SurfaceManip::splitTexturedMesh( *a0 );
+    PyObject *m = sipConvertFromType(
+      new carto::rc_ptr<AimsTimeSurface<3, Void> >( res.first ),
+      sipFindType( "rc_ptr_AimsTimeSurface_3_VOID" ), Py_None );
+    PyObject *t = sipConvertFromType(
+      new carto::rc_ptr<TimeTexture<float> >( res.second ),
+      sipFindType( "rc_ptr_TimeTexture_FLOAT" ), Py_None );
+
+    PyTuple_SetItem( tuple, 0, m );
+    PyTuple_SetItem( tuple, 1, t );
+
+    sipRes = tuple;
+%End
+
+    static SIP_PYOBJECT
+    splitTexturedMesh( const AimsTimeSurface_3_POINT2DF & texmesh )
+    /ReleaseGIL, Factory/;
+%MethodCode
+    PyObject *tuple = PyTuple_New( 2 );
+    std::pair< carto::rc_ptr<AimsTimeSurface<3, Void> >,
+               carto::rc_ptr<TimeTexture<Point2df> > > res
+      = aims::SurfaceManip::splitTexturedMesh( *a0 );
+    PyObject *m = sipConvertFromType(
+      new carto::rc_ptr<AimsTimeSurface<3, Void> >( res.first ),
+      sipFindType( "rc_ptr_AimsTimeSurface_3_VOID" ), Py_None );
+    PyObject *t = sipConvertFromType(
+      new carto::rc_ptr<TimeTexture<Point2df> >( res.second ),
+      sipFindType( "rc_ptr_TimeTexture_POINT2DF" ), Py_None );
+
+    PyTuple_SetItem( tuple, 0, m );
+    PyTuple_SetItem( tuple, 1, t );
+
+    sipRes = tuple;
+%End
+
+    static rc_ptr_AimsTimeSurface_3_FLOAT
+    joinTexturedMesh( const AimsTimeSurface_3_VOID & mesh,
+                      const TimeTexture_FLOAT & texture );
+    static rc_ptr_AimsTimeSurface_2_POINT2DF
+    joinTexturedMesh( const AimsTimeSurface_2_VOID & mesh,
+                      const TimeTexture_POINT2DF & texture );
+    static rc_ptr_AimsTimeSurface_2_FLOAT
+    joinTexturedMesh( const AimsTimeSurface_2_VOID & mesh,
+                      const TimeTexture_FLOAT & texture );
+    static rc_ptr_AimsTimeSurface_3_POINT2DF
+    joinTexturedMesh( const AimsTimeSurface_3_VOID & mesh,
+                      const TimeTexture_POINT2DF & texture );
+%Docstring
+    Join a mesh and a texture into a textured mesh
+%End
+
 
 };
 

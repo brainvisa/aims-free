@@ -3036,18 +3036,18 @@ vector<Point3df>* SurfaceManip::lineDirections(
 // ---
 
 template void SurfaceManip::meshMerge( AimsTimeSurface<2, Void> &,
-				       const AimsTimeSurface<2, Void> & );
+                                       const AimsTimeSurface<2, Void> & );
 template void 
 SurfaceManip::meshMerge( AimsTimeSurface<2, Void> &, 
                          const list<AimsTimeSurface<2, Void> > & );
 template void SurfaceManip::meshMerge( AimsSurfaceTriangle &, 
-				       const AimsSurfaceTriangle & );
+                                       const AimsSurfaceTriangle & );
 template void SurfaceManip::meshMerge( AimsSurfaceTriangle &, 
-				       const list<AimsSurfaceTriangle> & );
+                                       const list<AimsSurfaceTriangle> & );
 template void SurfaceManip::meshMerge( AimsSurfaceFacet &, 
-				       const AimsSurfaceFacet & );
+                                       const AimsSurfaceFacet & );
 template void SurfaceManip::meshMerge( AimsSurfaceFacet &, 
-				       const list<AimsSurfaceFacet> & );
+                                       const list<AimsSurfaceFacet> & );
 
 template void SurfaceManip::meshTransform( AimsTimeSurface<2,Void> &, 
                                            const Motion & );
@@ -3085,4 +3085,48 @@ template AimsSurface<2,Void> *
 template AimsTimeSurface<2,Void> *
   SurfaceManip::meshTextureBoundary( const AimsSurfaceTriangle & mesh,
     const TimeTexture<float> & tex, float region );
+
+template
+  pair<rc_ptr<AimsTimeSurface<2, Void> >, rc_ptr<TimeTexture<float> > >
+  SurfaceManip::splitTexturedMesh( const AimsTimeSurface<2, float> & texmesh );
+template
+  pair<rc_ptr<AimsTimeSurface<2, Void> >, rc_ptr<TimeTexture<double> > >
+  SurfaceManip::splitTexturedMesh(
+    const AimsTimeSurface<2, double> & texmesh );
+template
+  pair<rc_ptr<AimsTimeSurface<2, Void> >, rc_ptr<TimeTexture<Point2df> > >
+  SurfaceManip::splitTexturedMesh(
+    const AimsTimeSurface<2, Point2df> & texmesh );
+
+template
+  pair<rc_ptr<AimsTimeSurface<3, Void> >, rc_ptr<TimeTexture<float> > >
+  SurfaceManip::splitTexturedMesh( const AimsTimeSurface<3, float> & texmesh );
+template
+  pair<rc_ptr<AimsTimeSurface<3, Void> >, rc_ptr<TimeTexture<double> > >
+  SurfaceManip::splitTexturedMesh(
+    const AimsTimeSurface<3, double> & texmesh );
+template
+  pair<rc_ptr<AimsTimeSurface<3, Void> >, rc_ptr<TimeTexture<Point2df> > >
+  SurfaceManip::splitTexturedMesh(
+    const AimsTimeSurface<3, Point2df> & texmesh );
+
+template rc_ptr<AimsTimeSurface<2, float> >
+  SurfaceManip::joinTexturedMesh( const AimsTimeSurface<2, Void> & mesh,
+                                  const TimeTexture<float> & texture );
+template rc_ptr<AimsTimeSurface<2, double> >
+  SurfaceManip::joinTexturedMesh( const AimsTimeSurface<2, Void> & mesh,
+                                  const TimeTexture<double> & texture );
+template rc_ptr<AimsTimeSurface<2, Point2df> >
+  SurfaceManip::joinTexturedMesh( const AimsTimeSurface<2, Void> & mesh,
+                                  const TimeTexture<Point2df> & texture );
+
+template rc_ptr<AimsTimeSurface<3, float> >
+  SurfaceManip::joinTexturedMesh( const AimsTimeSurface<3, Void> & mesh,
+                                  const TimeTexture<float> & texture );
+template rc_ptr<AimsTimeSurface<3, double> >
+  SurfaceManip::joinTexturedMesh( const AimsTimeSurface<3, Void> & mesh,
+                                  const TimeTexture<double> & texture );
+template rc_ptr<AimsTimeSurface<3, Point2df> >
+  SurfaceManip::joinTexturedMesh( const AimsTimeSurface<3, Void> & mesh,
+                                  const TimeTexture<Point2df> & texture );
 

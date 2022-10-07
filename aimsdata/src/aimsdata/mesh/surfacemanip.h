@@ -251,6 +251,18 @@ namespace aims
       const Point3df & p0, const Point3df & direction, float lmax,
       T & volume, int value );
 
+    /// Split a textured mesh into a mesh and a texture
+    template <int D, typename T>
+    static std::pair<carto::rc_ptr<AimsTimeSurface<D, Void> >,
+                     carto::rc_ptr<TimeTexture<T> > >
+    splitTexturedMesh( const AimsTimeSurface<D, T> & texmesh );
+
+    /// Join a mesh and a texture into a textured mesh
+    template <int D, typename T>
+    static carto::rc_ptr<AimsTimeSurface<D, T> >
+    joinTexturedMesh( const AimsTimeSurface<D, Void> & mesh,
+                      const TimeTexture<T> & texture );
+
   };
 
 }
