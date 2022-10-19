@@ -18,8 +18,8 @@ if(NOT rpc_headers_present)
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(libtirpc REQUIRED libtirpc)
   set_target_properties( vidaIO PROPERTIES
-    COMPILE_FLAGS ${libtirpc_CFLAGS}
-    LINK_FLAGS ${libtirpc_LDFLAGS}
+    COMPILE_FLAGS "${libtirpc_CFLAGS}"
+    LINK_FLAGS "${libtirpc_LDFLAGS}"
     )
   # TODO BrainVISA packaging for libtirpc
 endif()
