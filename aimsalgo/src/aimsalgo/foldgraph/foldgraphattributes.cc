@@ -598,7 +598,7 @@ public:
   }
 
   FoldGraphAttributes & foldatt;
-  const VolumeRef<int16_t> & thresh;
+  const rc_ptr<Volume<int16_t> > & thresh;
 };
 
 
