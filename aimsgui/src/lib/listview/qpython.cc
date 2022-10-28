@@ -219,7 +219,7 @@ namespace
 
     QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
-    if( attype == QString::null )
+    if( attype == QString() )
       item->setText( p.typeColumn(), "dictionary" );
     else
       item->setText( p.typeColumn(), attype );
@@ -246,7 +246,7 @@ namespace
   {
     QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
-    if( attype == QString::null )
+    if( attype == QString() )
       item->setText( p.typeColumn(), "dictionary" );
     else
       item->setText( p.typeColumn(), attype );
@@ -273,7 +273,7 @@ namespace
 
     QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
-    if( attype == QString::null )
+    if( attype == QString() )
       item->setText( p.typeColumn(), "dictionary" );
     else
       item->setText( p.typeColumn(), attype );
@@ -301,7 +301,7 @@ namespace
 
     QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
-    if( attype == QString::null )
+    if( attype == QString() )
       item->setText( p.typeColumn(), "list" );
     else
       item->setText( p.typeColumn(), attype );
@@ -533,7 +533,7 @@ void QPythonPrinter::write( const GenericObject & object,
   HelperSet::const_iterator     ih = _helpers.find( type );
   if( ih != _helpers.end() )
     {
-      QString   t = QString::null;
+      QString   t;
       if( spectype )
         t = type.c_str();
       else
