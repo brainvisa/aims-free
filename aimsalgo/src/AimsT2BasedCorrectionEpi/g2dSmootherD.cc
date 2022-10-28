@@ -68,16 +68,16 @@ DiscreteGaussian2dSmoother::~DiscreteGaussian2dSmoother()
 void DiscreteGaussian2dSmoother::doIt( float* p12linear )
 {
 
-  register float* in = p12linear;
-  register float* out = _tmp;
+  float* in = p12linear;
+  float* out = _tmp;
 
-  register float* pIn = 0;
-  register float* pOut = 0;
+  float* pIn = 0;
+  float* pOut = 0;
 
-  register int finalIndex = 0;
-  register int l = 0;
-  register int m = 0;
-  register float coef;
+  int finalIndex = 0;
+  int l = 0;
+  int m = 0;
+  float coef;
 
   // smoothing of lines
   for ( int line = 0; line < _levels; line++ )

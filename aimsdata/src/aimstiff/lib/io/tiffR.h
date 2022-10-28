@@ -356,7 +356,7 @@ namespace aims
             == carto::DataTypeCode<AimsRGBA>().dataType() )
           {
             // Indexed images can only be read as RGBA data
-            uint32 * rgba_data = (uint32 *)&data(0, 0, z, tframe);
+            uint32_t * rgba_data = (uint32_t *)&data(0, 0, z, tframe);
             TIFFReadRGBAImageOriented(tif, dx, data.dimY(),
                                       rgba_data, ORIENTATION_TOPLEFT);
           }
