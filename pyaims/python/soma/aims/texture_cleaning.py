@@ -178,10 +178,10 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
         # 1. erode to eliminate small crap
         dtex = aims.meshdistance.MeshErosion(mesh, ntex, 0, 1, ero, True)
         # 2. dilate to grow back, and over to connect disconnected parts
-        dtex = aims.meshdistance.MeshDilation(mesh, dtex, 0, 1, ero + dil,
+        dtex = aims.meshdistance.MeshDilation(mesh, dtex, 0, 1, ero + dilation,
                                               True)
         # 3. re-erode back to original size
-        dtex = aims.meshdistance.MeshErosion(mesh, dtex, 0, 1, dil, True)
+        dtex = aims.meshdistance.MeshErosion(mesh, dtex, 0, 1, dilation, True)
         #aims.write(dtex, '/tmp/dil_%s_%d.gii' % (label, lvalue))
         #raise RuntimeError('DEBUG STOP')
 
@@ -200,12 +200,12 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
         if lvalue not in used:
             continue
         ftex = aimsalgo.AimsMeshFilterConnectedComponent(
-            mesh, otex, lvalue, -1, 0, 0, min_size)
+            mesh, otex, lvalue, -1, 0, 0, min_cc_size)
         # check that all components have not been erased
         if not np.any(ftex[0].np == lvalue):
             # try with smaller limit
             ftex = aimsalgo.AimsMeshFilterConnectedComponent(
-                mesh, otex, lvalue, -1, 0, 0, min_size / 5)
+                mesh, otex, lvalue, -1, 0, 0, min_cc_size / 5)
             if not np.any(ftex[0].np == lvalue):
                 # last trial: keep only the biggest component
                 ftex = aimsalgo.AimsMeshFilterConnectedComponent(
@@ -302,7 +302,7 @@ def main(argv=sys.argv):
                         type=json.loads,
                         help='erosion distances dict to remove small parts. Default: %s' % repr(default_ero_dist))
     parser.add_argument('-d', '--dilation', default=default_dil, type=float,
-                        help='dilation distance to connect disconnected '
+                        help='dilation distance (mm) to connect disconnected '
                         'regions. Default: %f' % default_dil)
     parser.add_argument('-s', '--minsize', default=default_min_cc_size,
                         type=float,
