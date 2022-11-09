@@ -217,12 +217,18 @@ void Finder::registerFormat( const string & fmtid, FinderFormat* format,
 
 void Finder::unregisterFormat( const string & fmtid )
 {
-  initPrivate();
+  if( !pd )
+    return;
 
   map<string, FinderFormat *>::const_iterator	i
     = pd->formats.find( fmtid );
   if( i != pd->formats.end() )
+  {
+    FinderFormat *fmt = i->second;
     pd->formats.erase( i );
+    // and actually delete it
+    delete fmt;
+  }
   map<string, list<string> >::iterator ie = pd->extensions.begin(),
     je, ee = pd->extensions.end();
   list<string>::iterator il, jl, el;
@@ -238,7 +244,7 @@ void Finder::unregisterFormat( const string & fmtid )
       {
         jl = il;
         ++il;
-        ie->second.erase( jl );
+        je->second.erase( jl );
       }
       else
         ++il;
