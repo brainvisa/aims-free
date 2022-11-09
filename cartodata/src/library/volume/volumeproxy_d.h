@@ -66,10 +66,10 @@ namespace carto
     : Headered(),
       _size( size )
   {
-    while( _size.size() < 4 )
+    if( _size.size() < 4 )
     {
       _size.reserve( 4 );
-      _size.push_back( 1 );
+      _size.insert( _size.end(), 4 - _size.size(), 1 );
     }
     header().addBuiltinProperty( "volume_dimension", _size );
     header().addBuiltinProperty( "sizeX", _size[0] );

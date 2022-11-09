@@ -1152,10 +1152,14 @@ namespace carto
     {
       for( i=0; i<nn; ++i )
         bstrides[i] = strides[i];
+      int n;
       for( ; i<Volume<T>::DIM_MAX; ++i )
       {
-        bstrides[i] = ( i == 0 ? VolumeProxy<T>::_size[0]
-                      : VolumeProxy<T>::_size[i] * stride_max );
+        if( i < nn )
+          n = VolumeProxy<T>::_size[i];
+        else
+          n = 1;
+        bstrides[i] = ( i == 0 ? n : n * stride_max );
         if( strides[i] > stride_max )
           stride_max = bstrides[i];
       }
