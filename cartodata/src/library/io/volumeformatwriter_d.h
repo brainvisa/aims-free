@@ -165,8 +165,10 @@ namespace soma
       localMsg( " -> from parent2" )
       size = parent2->getSize();
       position = obj.posInRefVolume();
-      size_t i, ndim = parent1->posInRefVolume().size();
-      for( i=0; i<ndim; ++i )
+      size_t i, rndim = parent1->posInRefVolume().size();
+      if( position.size() < rndim )
+        position.resize( rndim, 0 );
+      for( i=0; i<rndim; ++i )
         position[ i ] += parent1->posInRefVolume()[ i ];
     } else {
       localMsg( " -> from self" )
