@@ -196,7 +196,7 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
         labels map, normally obtained using :func:`read_labels`
     ero_dist: dict
     dilation: float
-    min_cc_size: int
+    min_cc_size: float
     max_threads: int
         0: all CPU cores
         1: mono-core
@@ -271,39 +271,40 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
                                           True)
 
     # 5. filter out small disconnected parts
-    workers = mpfork.allocate_workers(q, max_threads)
-    res = [None] * len(labels)
-    i = 0
-    for lvalue, label_def in labels.items():
-        label = label_def['Label']
-        if lvalue not in used:
-            continue
-        job = (i, _filter_cc, (mesh, otex, lvalue, min_cc_size),
-               {}, res)
-        q.put(job)
-        i += 1
-    njobs = i
+    if min_cc_size > 0:
+        workers = mpfork.allocate_workers(q, max_threads)
+        res = [None] * len(labels)
+        i = 0
+        for lvalue, label_def in labels.items():
+            label = label_def['Label']
+            if lvalue not in used:
+                continue
+            job = (i, _filter_cc, (mesh, otex, lvalue, min_cc_size),
+                   {}, res)
+            q.put(job)
+            i += 1
+        njobs = i
 
-    for i in range(len(workers)):
-        q.put(None)
-    # wait for every job to complete
-    q.join()
-    # terminate all threads
-    for w in workers:
-        w.join()
+        for i in range(len(workers)):
+            q.put(None)
+        # wait for every job to complete
+        q.join()
+        # terminate all threads
+        for w in workers:
+            w.join()
 
-    changed = False
-    for resval in res[:njobs]:
-        c, onp, lvalue = resval
-        if not c:
-            continue
-        otex[0].np[onp!=lvalue and otex[0].np == lvalue] = -1
-        changed = True
+        changed = False
+        for resval in res[:njobs]:
+            c, onp, lvalue = resval
+            if not c:
+                continue
+            otex[0].np[onp!=lvalue and otex[0].np == lvalue] = -1
+            changed = True
 
-    if changed:
-        # perform another voronoi to fill the new holes
-        otex = aims.meshdistance.MeshVoronoi(mesh, otex, -1, -2, 10000,
-                                              True, True)
+        if changed:
+            # perform another voronoi to fill the new holes
+            otex = aims.meshdistance.MeshVoronoi(mesh, otex, -1, -2, 10000,
+                                                 True, True)
 
     # write result
     otex.header()['GIFTI_labels_table'] = labels
