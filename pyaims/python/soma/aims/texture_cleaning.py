@@ -153,7 +153,13 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
     used = np.unique(tex[0].np)
     i = 0
 
-    for lvalue, label_def in labels.items():
+    # make unkonwn the 1st region so that others grow over it, not the
+    # contrary
+    lvalues = [l for l, lv in labels.items() if lv['Label'] == 'unknown'] \
+        + [l for l, lv in labels.items() if lv['Label'] != 'unknown']
+
+    for lvalue in lvalues:
+        label_def = labels[lvalue]
         label = label_def['Label']
         color = label_def.get('RGB')
         #if color is None:
@@ -175,6 +181,7 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
         ntex[0].resize(len(tex[0]))
         ntex[0].np[tex[0].np != lvalue] = 0
         ntex[0].np[tex[0].np == lvalue] = 12
+        # print('dirty:', len(np.where(ntex[0].np != 0)[0]), ero)
         # 1. erode to eliminate small crap
         dtex = aims.meshdistance.MeshErosion(mesh, ntex, 0, 1, ero, True)
         # 2. dilate to grow back, and over to connect disconnected parts
@@ -182,6 +189,7 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
                                               True)
         # 3. re-erode back to original size
         dtex = aims.meshdistance.MeshErosion(mesh, dtex, 0, 1, dilation, True)
+        # print('clean1:', len(np.where(dtex[0].np != 0)[0]))
         #aims.write(dtex, '/tmp/dil_%s_%d.gii' % (label, lvalue))
         #raise RuntimeError('DEBUG STOP')
 
@@ -325,7 +333,8 @@ def main(argv=sys.argv):
             'same number of values')
 
     for mname, tname, otex_name in zip(mesh_names, tex_names, otex_names):
-        otex = clean_texture(mname, tname, nomenclature)
+        otex = clean_texture(mname, tname, nomenclature, ero_dist=ero_dist,
+                             dilation=dil, min_cc_size=min_size)
         aims.write(otex, otex_name)
 
 
