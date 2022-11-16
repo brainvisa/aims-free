@@ -298,7 +298,8 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
             c, onp, lvalue = resval
             if not c:
                 continue
-            otex[0].np[onp!=lvalue and otex[0].np == lvalue] = -1
+            otex[0].np[otex[0].np == lvalue] = -1
+            otex[0].np[onp==lvalue] = lvalue
             changed = True
 
         if changed:
