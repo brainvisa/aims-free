@@ -4,6 +4,9 @@ from soma import aims, aimsalgo
 import numpy as np
 import json
 import sys
+import queue
+from soma import mpfork
+
 
 # constants (or default values)*
 
@@ -111,8 +114,69 @@ def read_labels(nomenclature):
     return labels
 
 
+def _clean_one_tex(tex, mesh, otex, lvalue, label, ero_dist, dilation):
+    print('region:', label, lvalue)
+    if label.endswith('(GapMap)'):
+        ero_label = 'GapMap'
+    else:
+        ero_label = 'other'
+    if label in ero_dist:
+        ero_label = label
+    ero = ero_dist[ero_label]
+    ntex = aims.TimeTexture_S16()
+    ntex[0].resize(len(tex[0]))
+    ntex[0].np[tex[0].np != lvalue] = 0
+    ntex[0].np[tex[0].np == lvalue] = 12
+    # print('dirty:', len(np.where(ntex[0].np != 0)[0]), ero)
+    # 1. erode to eliminate small crap
+    dtex = aims.meshdistance.MeshErosion(mesh, ntex, 0, 1, ero, True)
+    # 2. dilate to grow back, and over to connect disconnected parts
+    dtex = aims.meshdistance.MeshDilation(mesh, dtex, 0, 1, ero + dilation,
+                                          True)
+    # 3. re-erode back to original size
+    dtex = aims.meshdistance.MeshErosion(mesh, dtex, 0, 1, dilation, True)
+    # print('clean1:', len(np.where(dtex[0].np != 0)[0]))
+    #aims.write(dtex, '/tmp/dil_%s_%d.gii' % (label, lvalue))
+    #raise RuntimeError('DEBUG STOP')
+
+    #with lock:
+    #otex[0].np[otex[0].np == lvalue] = -1
+    #otex[0].np[dtex[0].np != 0] = lvalue
+    #return otex
+    otex = np.zeros(tex[0].np.shape, dtype=np.int16) - 32000
+    otex[tex[0].np == lvalue] = -1
+    otex[dtex[0].np != 0] = lvalue
+    #print(label, 'done.')
+    return otex
+
+
+def _filter_cc(mesh, otex, lvalue, min_cc_size):
+    ftex = aimsalgo.AimsMeshFilterConnectedComponent(
+        mesh, otex, lvalue, -1, 0, 0, min_cc_size)
+    # check that all components have not been erased
+    if not np.any(ftex[0].np == lvalue):
+        # try with smaller limit
+        ftex = aimsalgo.AimsMeshFilterConnectedComponent(
+            mesh, otex, lvalue, -1, 0, 0, min_cc_size / 5)
+        if not np.any(ftex[0].np == lvalue):
+            # last trial: keep only the biggest component
+            ftex = aimsalgo.AimsMeshFilterConnectedComponent(
+                mesh, otex, lvalue, -1, 1, 0, 0)
+    # has anything changed ?
+    ootex = None
+    changed = False
+    if len(np.where(ftex[0].np == lvalue)[0]) \
+            != len(np.where(otex[0].np == lvalue)[0]):
+        # replace dtex with filtered texture
+        ootex = ftex[0].np
+        changed = True
+
+    return changed, ootex, lvalue
+
+
 def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
-                  dilation=default_dil, min_cc_size=default_min_cc_size):
+                  dilation=default_dil, min_cc_size=default_min_cc_size,
+                  max_threads=0):
     ''' Clean labels texture:
 
     - for each label in the nomenclature:
@@ -130,6 +194,14 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
     tex: Aims texture
     labels: dict
         labels map, normally obtained using :func:`read_labels`
+    ero_dist: dict
+    dilation: float
+    min_cc_size: int
+    max_threads: int
+        0: all CPU cores
+        1: mono-core
+        2+: that number of worker threads
+        -n: all but n cores
 
     Returns
     -------
@@ -151,17 +223,23 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
     side = 0
     # aims.write(otex, '/tmp/otex_%s_init.gii' % sides[side])
     used = np.unique(tex[0].np)
-    i = 0
 
     # make unkonwn the 1st region so that others grow over it, not the
     # contrary
     lvalues = [l for l, lv in labels.items() if lv['Label'] == 'unknown'] \
         + [l for l, lv in labels.items() if lv['Label'] != 'unknown']
 
+    # handle parallel processing
+    q = queue.Queue()
+    workers = mpfork.allocate_workers(q, max_threads)
+    print('n workers:', len(workers))
+
+    res = [None] * len(lvalues)
+    i = 0
     for lvalue in lvalues:
         label_def = labels[lvalue]
         label = label_def['Label']
-        color = label_def.get('RGB')
+        # color = label_def.get('RGB')
         #if color is None:
             #color = [float(i) / (len(labels) - 1) for x in range(3)] + [1.]
             #print('modify color for', label, ':', color)
@@ -169,61 +247,59 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
 
         if lvalue not in used:
             continue
-        print('region:', label, lvalue)
-        if label.endswith('(GapMap)'):
-            ero_label = 'GapMap'
-        else:
-            ero_label = 'other'
-        if label in ero_dist:
-            ero_label = label
-        ero = ero_dist[ero_label]
-        ntex = aims.TimeTexture_S16()
-        ntex[0].resize(len(tex[0]))
-        ntex[0].np[tex[0].np != lvalue] = 0
-        ntex[0].np[tex[0].np == lvalue] = 12
-        # print('dirty:', len(np.where(ntex[0].np != 0)[0]), ero)
-        # 1. erode to eliminate small crap
-        dtex = aims.meshdistance.MeshErosion(mesh, ntex, 0, 1, ero, True)
-        # 2. dilate to grow back, and over to connect disconnected parts
-        dtex = aims.meshdistance.MeshDilation(mesh, dtex, 0, 1, ero + dilation,
-                                              True)
-        # 3. re-erode back to original size
-        dtex = aims.meshdistance.MeshErosion(mesh, dtex, 0, 1, dilation, True)
-        # print('clean1:', len(np.where(dtex[0].np != 0)[0]))
-        #aims.write(dtex, '/tmp/dil_%s_%d.gii' % (label, lvalue))
-        #raise RuntimeError('DEBUG STOP')
 
-        otex[0].np[otex[0].np == lvalue] = -1
-        otex[0].np[dtex[0].np != 0] = lvalue
+        job = (i, _clean_one_tex,
+               (tex, mesh, otex, lvalue, label, ero_dist, dilation),
+               {}, res)
+        q.put(job)
         i += 1
+
+    for i in range(len(workers)):
+        q.put(None)
+    # wait for every job to complete
+    q.join()
+    # terminate all threads
+    for w in workers:
+        w.join()
+    for onp in res:
+        if onp is None:
+            continue
+        otex[0].np[onp!=-32000] = onp[onp!=-32000]
 
     # 4. Voronoi for all regions
     otex = aims.meshdistance.MeshVoronoi(mesh, otex, -1, -2, 10000, True,
                                           True)
 
     # 5. filter out small disconnected parts
-    changed = False
+    workers = mpfork.allocate_workers(q, max_threads)
+    res = [None] * len(labels)
+    i = 0
     for lvalue, label_def in labels.items():
         label = label_def['Label']
         if lvalue not in used:
             continue
-        ftex = aimsalgo.AimsMeshFilterConnectedComponent(
-            mesh, otex, lvalue, -1, 0, 0, min_cc_size)
-        # check that all components have not been erased
-        if not np.any(ftex[0].np == lvalue):
-            # try with smaller limit
-            ftex = aimsalgo.AimsMeshFilterConnectedComponent(
-                mesh, otex, lvalue, -1, 0, 0, min_cc_size / 5)
-            if not np.any(ftex[0].np == lvalue):
-                # last trial: keep only the biggest component
-                ftex = aimsalgo.AimsMeshFilterConnectedComponent(
-                    mesh, otex, lvalue, -1, 1, 0, 0)
-        # has anything changed ?
-        if len(np.where(ftex[0].np == lvalue)[0]) \
-                != len(np.where(otex[0].np == lvalue)[0]):
-            # replace dtex with filtered texture
-            otex = ftex
-            changed = True
+        job = (i, _filter_cc, (mesh, otex, lvalue, min_cc_size),
+               {}, res)
+        q.put(job)
+        i += 1
+    njobs = i
+
+    for i in range(len(workers)):
+        q.put(None)
+    # wait for every job to complete
+    q.join()
+    # terminate all threads
+    for w in workers:
+        w.join()
+
+    changed = False
+    for resval in res[:njobs]:
+        c, onp, lvalue = resval
+        if not c:
+            continue
+        otex[0].np[onp!=lvalue and otex[0].np == lvalue] = -1
+        changed = True
+
     if changed:
         # perform another voronoi to fill the new holes
         otex = aims.meshdistance.MeshVoronoi(mesh, otex, -1, -2, 10000,
@@ -250,7 +326,8 @@ def clean_texture(mesh, tex, labels, ero_dist=default_ero_dist,
                 col = '1;35'  # light purple
             else:
                 col = '0;32'  # green
-            print(lvalue, ':', label, ', size:\033[%sm' % col, s1, '->', s2, '\033[0m')
+            print(lvalue, ':', label, ', size:\033[%sm' % col,
+                  s1, '->', s2, '\033[0m')
 
     return otex
 
@@ -317,6 +394,11 @@ def main(argv=sys.argv):
                         help='minimum disconnected component size (in mm2) '
                         'under which remaining small parts are removed. '
                         'Default: %f' % default_min_cc_size)
+    parser.add_argument('-p', '--proc', default=0, type=int,
+                        help='Use parallel computing using this number of '
+                        'processors (cores). 0=all in the machine, positive '
+                        'number=this number of cores, negative number=all but '
+                        'this number. Default: 0 (all)')
 
     options = parser.parse_args(argv[1:])
     tex_names = options.texture
@@ -326,6 +408,7 @@ def main(argv=sys.argv):
     ero_dist = options.erosion
     dil = options.dilation
     min_size = options.minsize
+    nproc = options.proc
 
     if not mesh_names or not tex_names or not otex_names or len(mesh_names) != len(tex_names) or len(mesh_names) != len(otex_names):
         raise ValueError(
@@ -334,7 +417,8 @@ def main(argv=sys.argv):
 
     for mname, tname, otex_name in zip(mesh_names, tex_names, otex_names):
         otex = clean_texture(mname, tname, nomenclature, ero_dist=ero_dist,
-                             dilation=dil, min_cc_size=min_size)
+                             dilation=dil, min_cc_size=min_size,
+                             max_threads=nproc)
         aims.write(otex, otex_name)
 
 
