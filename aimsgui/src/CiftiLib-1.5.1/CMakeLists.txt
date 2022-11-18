@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 #UseDoxygen trips over a policy change in cmake 3, suppress the warning
 IF(CMAKE_MAJOR_VERSION GREATER 2)
@@ -45,7 +45,7 @@ IF (NOT IGNORE_QT)
         #for pkg-config file
         SET(CIFTILIB_PKGCONFIG_REQUIRES_LINE "Requires: QtCore >= 4.8.0 QtXml")
         SET(CIFTILIB_PKGCONFIG_DEFINE "-DCIFTILIB_USE_QT")
-    ELSE ()
+    ELSEIF ( ${DESIRED_QT_VERSION} EQUAL 5 AND QT_FOUND )
 #         FIND_PACKAGE(Qt5Core)
         IF (Qt5Core_FOUND)
             SET(QT_FOUND TRUE)
@@ -56,6 +56,18 @@ IF (NOT IGNORE_QT)
             SET(CIFTILIB_PKGCONFIG_REQUIRES_LINE "Requires: Qt5Core Qt5Xml")
             SET(CIFTILIB_PKGCONFIG_DEFINE "-DCIFTILIB_USE_QT")
         ENDIF (Qt5Core_FOUND)
+    ELSEIF ( ${DESIRED_QT_VERSION} EQUAL 6 AND QT_FOUND )
+#         FIND_PACKAGE(Qt5Core)
+        IF (Qt6Core_FOUND)
+            SET(QT_FOUND TRUE)
+            INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS}
+                                ${Qt5Core5Compat_INCLUDE_DIRS})
+            SET(LIBS ${LIBS} Qt6::Core Qt6::Core5Compat)
+            #whatever that means
+            ADD_DEFINITIONS(-DCIFTILIB_USE_QT)
+            SET(CIFTILIB_PKGCONFIG_REQUIRES_LINE "Requires: Qt6Core Qt6Xml")
+            SET(CIFTILIB_PKGCONFIG_DEFINE "-DCIFTILIB_USE_QT")
+        ENDIF ()
     ENDIF ()
 ENDIF (NOT IGNORE_QT)
 

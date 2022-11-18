@@ -67,7 +67,11 @@ namespace cifti
 namespace cifti
 {
     typedef QMutex CiftiMutex;
+#if QT_VERSION >= 0x060000
+    typedef QMutexLocker<QMutex> CiftiMutexLocker;
+#else
     typedef QMutexLocker CiftiMutexLocker;
+#endif
 }
 
 #endif //CIFTILIB_USE_QT

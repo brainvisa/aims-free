@@ -34,6 +34,10 @@
 #include <iostream>
 #include <set>
 
+#ifdef CIFTILIB_USE_QT
+#include <QStringRef>
+#endif
+
 using namespace std;
 using namespace boost;
 using namespace cifti;

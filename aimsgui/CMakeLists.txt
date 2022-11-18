@@ -19,10 +19,14 @@ BRAINVISA_DEPENDENCY( DEV DEPENDS "${BRAINVISA_PACKAGE_NAME}" RUN "= ${${BRAINVI
 
 if( DESIRED_QT_VERSION LESS 5 )
   include( "${QT_USE_FILE}" )
-else()
+elseif( DESIRED_QT_VERSION EQUAL 5 )
   add_definitions(${Qt5Widgets_DEFINITIONS} ${Qt5Sql_DEFINITIONS})
   include_directories(${Qt5Widgets_INCLUDE_DIRS} ${Qt5Sql_INCLUDE_DIRS})
   set( QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Sql_LIBRARIES} )
+elseif( DESIRED_QT_VERSION EQUAL 6 )
+  add_definitions(${Qt6Widgets_DEFINITIONS} ${Qt6Sql_DEFINITIONS})
+  include_directories(${Qt6Widgets_INCLUDE_DIRS} ${Qt6Sql_INCLUDE_DIRS})
+  set( QT_LIBRARIES ${Qt6Widgets_LIBRARIES} ${Qt6Sql_LIBRARIES} )
 endif()
 
 add_subdirectory( src )
