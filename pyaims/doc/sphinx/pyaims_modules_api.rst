@@ -109,6 +109,14 @@ SubModule: ``aimsalgo.mesh_coordinates_sphere_resampling``
     :show-inheritance:
 
 
+SubModule: ``aimsalgo.mesh_skeleton``
+=====================================
+
+.. automodule:: soma.aimsalgo.mesh_skeleton
+    :members:
+    :show-inheritance:
+
+
 SubModule: ``aimsalgo.meshwatershedtools``
 ==========================================
 
@@ -129,6 +137,14 @@ SubModule: ``aimsalgo.t1mapping``
 =================================
 
 .. automodule:: soma.aimsalgo.t1mapping
+    :members:
+    :show-inheritance:
+
+
+SubModule: ``aimsalgo.texture_cleaning``
+========================================
+
+.. automodule:: soma.aimsalgo.texture_cleaning
     :members:
     :show-inheritance:
 
