@@ -45,6 +45,14 @@ SubModule: ``graph_comparison``
     :show-inheritance:
 
 
+SubModule: ``io_ext``
+=====================
+
+.. automodule:: soma.aims.io_ext
+    :members:
+    :show-inheritance:
+
+
 SubModule: ``lazy_read_data``
 =============================
 
@@ -57,14 +65,6 @@ SubModule: ``meshSplit``
 ========================
 
 .. automodule:: soma.aims.meshSplit
-    :members:
-    :show-inheritance:
-
-
-SubModule: ``pandas``
-=====================
-
-.. automodule:: soma.aims.pandas
     :members:
     :show-inheritance:
 
