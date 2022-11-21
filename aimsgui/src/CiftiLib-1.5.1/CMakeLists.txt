@@ -1,9 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 #UseDoxygen trips over a policy change in cmake 3, suppress the warning
-IF(CMAKE_MAJOR_VERSION GREATER 2)
-  CMAKE_POLICY(VERSION 2.8.7)
-ENDIF()
+CMAKE_POLICY(VERSION 3.10)
 #the suggested version-type policy command doesn't shut this warning up, so set it manually
 IF (POLICY CMP0045)
     CMAKE_POLICY(SET CMP0045 OLD)
