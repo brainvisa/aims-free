@@ -487,13 +487,13 @@ LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal,
   presel->setLayout( vlay );
   tabs->addTab( presel, tr( "Pre-selections" ) );
   vlay->setSpacing( 10 );
-  vlay->setMargin( 10 );
+  vlay->setContentsMargins( 10, 10, 10, 10 );
   QWidget *hb = new QWidget( presel );
   vlay->addWidget( hb );
   QHBoxLayout *hlay = new QHBoxLayout( hb );
   hb->setLayout( hlay );
   hlay->setSpacing( 10 );
-  hlay->setMargin( 0 );
+  hlay->setContentsMargins( 0, 0, 0, 0 );
   d->presels = new QComboBox( hb );
   hlay->addWidget( d->presels );
   QPushButton	*pb = new QPushButton( "...", hb );
@@ -520,13 +520,13 @@ LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal,
   vlay = new QVBoxLayout( hier );
   hier->setLayout( vlay );
   vlay->setSpacing( 10 );
-  vlay->setMargin( 10 );
+  vlay->setContentsMargins( 10, 10, 10, 10 );
   QWidget *hhb = new QWidget( hier );
   vlay->addWidget( hhb );
   hlay = new QHBoxLayout( hhb );
   hhb->setLayout( hlay );
   hlay->setSpacing( 10 );
-  hlay->setMargin( 0 );
+  hlay->setContentsMargins( 0, 0, 0, 0 );
   QLabel	*hl = new QLabel( tr( "Hierarchy :" ), hhb );
   hlay->addWidget( hl );
   hl->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
@@ -568,13 +568,13 @@ LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal,
   vlay = new QVBoxLayout( model );
   model->setLayout( vlay );
   vlay->setSpacing( 10 );
-  vlay->setMargin( 10 );
+  vlay->setContentsMargins( 10, 10, 10, 10 );
   hb = new QWidget( model );
   vlay->addWidget( hb );
   hlay = new QHBoxLayout( hb );
   hb->setLayout( hlay );
   hlay->setSpacing( 10 );
-  hlay->setMargin( 0 );
+  hlay->setContentsMargins( 0, 0, 0, 0 );
   d->modellabel = new QLabel( hb );
   hlay->addWidget( d->modellabel );
   d->modellabel->setFrameStyle( QFrame::Panel | QFrame::Sunken );
@@ -587,7 +587,7 @@ LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal,
   hlay = new QHBoxLayout( hb );
   hb->setLayout( hlay );
   hlay->setSpacing( 10 );
-  hlay->setMargin( 0 );
+  hlay->setContentsMargins( 0, 0, 0, 0 );
   pb = new QPushButton( tr( "Select (model + hierarchy)" ), hb );
   hlay->addWidget( pb );
   pb->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
@@ -619,7 +619,7 @@ LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal,
   vlay = new QVBoxLayout( hsel );
   hsel->setLayout( vlay );
   vlay->setSpacing( 10 );
-  vlay->setMargin( 10 );
+  vlay->setContentsMargins( 10, 10, 10, 10 );
   vlay->addWidget( new QLabel( tr( "Selection :" ), hsel ) );
   vlay->addWidget(
     new QLabel( tr( "If you don't understand what all this is about, just " 
@@ -634,7 +634,7 @@ LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal,
   lay->addWidget( dial );
   hlay = new QHBoxLayout( dial );
   dial->setLayout( hlay );
-  hlay->setMargin( 10 );
+  hlay->setContentsMargins( 10, 10, 10, 10 );
   hlay->setSpacing( 10 );
   QPushButton	*acc = new QPushButton( tr( "Accept" ), dial );
   hlay->addWidget( acc );

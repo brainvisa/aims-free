@@ -52,7 +52,7 @@ QOrderingListWidget::QOrderingListWidget( QWidget* parent, const char* name,
 {
   QHBoxLayout *lay = new QHBoxLayout( this );
   setLayout( lay );
-  lay->setMargin( 0 );
+  lay->setContentsMargins( 0, 0, 0, 0 );
   lay->setSpacing( 10 );
   setObjectName( name );
   d->listwidget = new QListWidget( this );
@@ -62,7 +62,7 @@ QOrderingListWidget::QOrderingListWidget( QWidget* parent, const char* name,
   lay->addWidget( vb );
   QVBoxLayout *vlay = new QVBoxLayout( vb );
   vb->setLayout( vlay );
-  vlay->setMargin( 0 );
+  vlay->setContentsMargins( 0, 0, 0, 0 );
   QPushButton	*pbu = new QPushButton( tr( "Up" ), vb );
   vlay->addWidget( pbu );
   QPushButton	*pbd = new QPushButton( tr( "Down" ), vb );
