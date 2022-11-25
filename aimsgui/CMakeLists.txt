@@ -26,8 +26,6 @@ elseif( DESIRED_QT_VERSION EQUAL 5 )
 elseif( DESIRED_QT_VERSION EQUAL 6 )
   add_definitions(${Qt6Widgets_DEFINITIONS} ${Qt6Sql_DEFINITIONS})
   include_directories(${Qt6Widgets_INCLUDE_DIRS} ${Qt6Sql_INCLUDE_DIRS})
-  message( "**** aimsgui Qt include: ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Sql_INCLUDE_DIRS}" )
-  message( "**** aimsgui Qt libs: ${Qt6Widgets_LIBRARIES} ${Qt6Sql_LIBRARIES}" )
   set( QT_LIBRARIES ${Qt6Widgets_LIBRARIES} ${Qt6Sql_LIBRARIES} )
 endif()
 
