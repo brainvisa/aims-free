@@ -125,7 +125,7 @@ void CiftiLabelsMap::readXML1(XmlReader& xml)
         {
             case QXmlStreamReader::StartElement:
             {
-                if (xml.name() != "NamedMap")
+                if (xml.name().toString() != "NamedMap")
                 {
                     throw CiftiException("unexpected element in labels map: " + xml.name().toString());
                 }
@@ -183,7 +183,7 @@ void CiftiLabelsMap::readXML2(XmlReader& xml)
         {
             case QXmlStreamReader::StartElement:
             {
-                if (xml.name() != "NamedMap")
+                if (xml.name().toString() != "NamedMap")
                 {
                     throw CiftiException("unexpected element in labels mapping type: " + xml.name().toString());
                 }
@@ -241,7 +241,7 @@ void CiftiLabelsMap::LabelMap::readXML1(XmlReader& xml)
         {
             case QXmlStreamReader::StartElement:
             {
-                QStringRef name = xml.name();
+                QString name = xml.name().toString();
                 if (name == "MetaData")
                 {
                     if (haveMetaData)
@@ -268,7 +268,7 @@ void CiftiLabelsMap::LabelMap::readXML1(XmlReader& xml)
                     if (xml.hasError()) return;
                     haveName = true;
                 } else {
-                    throw CiftiException("unexpected element in NamedMap: " + name.toString());
+                    throw CiftiException("unexpected element in NamedMap: " + name);
                 }
                 break;
             }
@@ -345,7 +345,7 @@ void CiftiLabelsMap::LabelMap::readXML2(XmlReader& xml)
         {
             case QXmlStreamReader::StartElement:
             {
-                QStringRef name = xml.name();
+                QString name = xml.name().toString();
                 if (name == "MetaData")
                 {
                     if (haveMetaData)
@@ -372,7 +372,7 @@ void CiftiLabelsMap::LabelMap::readXML2(XmlReader& xml)
                     if (xml.hasError()) return;
                     haveName = true;
                 } else {
-                    throw CiftiException("unexpected element in NamedMap: " + name.toString());
+                    throw CiftiException("unexpected element in NamedMap: " + name);
                 }
                 break;
             }

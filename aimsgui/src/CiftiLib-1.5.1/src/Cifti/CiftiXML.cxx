@@ -309,7 +309,7 @@ void CiftiXML::readXML(XmlReader& xml)
         {
             if (xml.isStartElement())
             {
-                QStringRef name = xml.name();
+                QString name = xml.name().toString();
                 if (name == "CIFTI")
                 {
                     if (haveCifti)
@@ -335,7 +335,7 @@ void CiftiXML::readXML(XmlReader& xml)
                     }
                     haveCifti = true;
                 } else {
-                    throw CiftiException("unexpected root element in Cifti XML: " + name.toString());
+                    throw CiftiException("unexpected root element in Cifti XML: " + name);
                 }
             }
         }
@@ -403,7 +403,7 @@ void CiftiXML::parseCIFTI1(XmlReader& xml)
     QXmlStreamAttributes attributes = xml.attributes();
     if (attributes.hasAttribute("NumberOfMatrices"))
     {
-        if (attributes.value("NumberOfMatrices") != "1")
+        if (attributes.value("NumberOfMatrices") != QString("1"))
         {
             throw CiftiException("attribute NumberOfMatrices in CIFTI is required to be 1 for CIFTI-1");
         }
@@ -415,7 +415,7 @@ void CiftiXML::parseCIFTI1(XmlReader& xml)
         xml.readNext();
         if (xml.isStartElement())
         {
-            QStringRef name = xml.name();
+            QString name = xml.name().toString();
             if (name == "Matrix")
             {
                 if (haveMatrix)
@@ -426,7 +426,7 @@ void CiftiXML::parseCIFTI1(XmlReader& xml)
                 if (xml.hasError()) return;
                 haveMatrix = true;
             } else {
-                throw CiftiException("unexpected element in CIFTI: " + name.toString());
+                throw CiftiException("unexpected element in CIFTI: " + name);
             }
         } else if (xml.isEndElement()) {
             break;
@@ -490,7 +490,7 @@ void CiftiXML::parseCIFTI2(XmlReader& xml)//yes, these will often have largely s
         if (xml.hasError()) return;
         if (xml.isStartElement())
         {
-            QStringRef name = xml.name();
+            QString name = xml.name().toString();
             if (name == "Matrix")
             {
                 if (haveMatrix)
@@ -501,7 +501,7 @@ void CiftiXML::parseCIFTI2(XmlReader& xml)//yes, these will often have largely s
                 if (xml.hasError()) return;
                 haveMatrix = true;
             } else {
-                throw CiftiException("unexpected element in CIFTI: " + name.toString());
+                throw CiftiException("unexpected element in CIFTI: " + name);
             }
         } else if (xml.isEndElement()) {
             break;
@@ -559,7 +559,7 @@ void CiftiXML::parseMatrix1(XmlReader& xml)
         if (xml.hasError()) return;
         if (xml.isStartElement())
         {
-            QStringRef name = xml.name();
+            QString name = xml.name().toString();
             if (name == "MetaData")
             {
                 if (haveMetadata)
@@ -583,7 +583,7 @@ void CiftiXML::parseMatrix1(XmlReader& xml)
             } else if (name == "LabelTable") {
                 xml.readElementText(XmlReader::SkipChildElements);
             } else {
-                throw CiftiException("unexpected element in Matrix: " + name.toString());
+                throw CiftiException("unexpected element in Matrix: " + name);
             }
         } else if (xml.isEndElement()) {
             break;
@@ -696,7 +696,7 @@ void CiftiXML::parseMatrix2(XmlReader& xml)
         if (xml.hasError()) return;
         if (xml.isStartElement())
         {
-            QStringRef name = xml.name();
+            QString name = xml.name().toString();
             if (name == "MetaData")
             {
                 if (haveMetadata)
@@ -710,7 +710,7 @@ void CiftiXML::parseMatrix2(XmlReader& xml)
                 parseMatrixIndicesMap2(xml);
                 if (xml.hasError()) return;
             } else {
-                throw CiftiException("unexpected element in Matrix: " + name.toString());
+                throw CiftiException("unexpected element in Matrix: " + name);
             }
         } else if (xml.isEndElement()) {
             break;

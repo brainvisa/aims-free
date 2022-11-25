@@ -29,6 +29,7 @@
 
 #ifdef CIFTILIB_USE_QT
 #include <QStringList>
+#include <QRegularExpression>
 #endif
 
 #ifdef CIFTILIB_USE_XMLPP
@@ -71,7 +72,7 @@ vector<AString> cifti::AString_split_whitespace(const AString& input)
 {
     vector<AString> ret;
 #ifdef CIFTILIB_USE_QT
-    QStringList temp = input.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    QStringList temp = input.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
     int listSize = temp.size();//yes, QT uses int...
     ret.resize(listSize);
     for (int i = 0; i < listSize; ++i)

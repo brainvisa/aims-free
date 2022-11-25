@@ -772,13 +772,13 @@ void LabelTable::readXml(XmlReader& xml)
 {
     clear();
 #ifdef CIFTILIB_USE_QT
-    if (!xml.isStartElement() || xml.name() != "LabelTable")
+    if (!xml.isStartElement() || xml.name().toString() != "LabelTable")
     {
         throw CiftiException("tried to read LabelTable when current element is not LabelTable");
     }
     while (xml.readNextStartElement() && !xml.atEnd())
     {
-        if (xml.name() != "Label")
+        if (xml.name().toString() != "Label")
         {
             throw CiftiException("unexpected element '" + xml.name().toString() + "' encountered in Label");
         }

@@ -343,12 +343,12 @@ void MetaData::readCiftiXML1(XmlReader& xml)
         xml.readNext();
         if (xml.isStartElement())
         {
-            QStringRef name = xml.name();
+            QString name = xml.name().toString();
             if (name == "MD")
             {
                 readEntry(xml);
             } else {
-                throw CiftiException("unexpected tag name in MetaData: " + name.toString());
+                throw CiftiException("unexpected tag name in MetaData: " + name);
             }
         } else if (xml.isEndElement()) {
             break;
@@ -401,7 +401,7 @@ void MetaData::readEntry(XmlReader& xml)
         xml.readNext();
         if (xml.isStartElement())
         {
-            QStringRef name = xml.name();
+            QString name = xml.name().toString();
             if (name == "Name")
             {
                 if (haveKey) throw CiftiException("MD element has multiple Name elements");
@@ -412,7 +412,7 @@ void MetaData::readEntry(XmlReader& xml)
                 value = xml.readElementText();
                 haveValue = true;
             } else {
-                throw CiftiException("unexpected element name in MD: " + name.toString());
+                throw CiftiException("unexpected element name in MD: " + name);
             }
         } else if (xml.isEndElement()) {
             break;

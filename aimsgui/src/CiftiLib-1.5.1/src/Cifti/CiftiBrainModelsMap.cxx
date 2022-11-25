@@ -517,10 +517,10 @@ void CiftiBrainModelsMap::readXML1(XmlReader& xml)
         {
             case QXmlStreamReader::StartElement:
             {
-                QStringRef name = xml.name();
+                QString name = xml.name().toString();
                 if (name != "BrainModel")
                 {
-                    throw CiftiException("unexpected element in brain models map: " + name.toString());
+                    throw CiftiException("unexpected element in brain models map: " + name);
                 }
                 ParseHelperModel thisModel;
                 thisModel.parseBrainModel1(xml);
@@ -607,7 +607,7 @@ void CiftiBrainModelsMap::readXML2(XmlReader& xml)
         {
             case QXmlStreamReader::StartElement:
             {
-                QStringRef name = xml.name();
+                QString name = xml.name().toString();
                 if (name == "BrainModel")
                 {
                     ParseHelperModel thisModel;
@@ -624,7 +624,7 @@ void CiftiBrainModelsMap::readXML2(XmlReader& xml)
                         m_haveVolumeSpace = true;
                     }
                 } else {
-                    throw CiftiException("unexpected element in brain models map: " + name.toString());
+                    throw CiftiException("unexpected element in brain models map: " + name);
                 }
                 break;//the readNext in the for will remove the BrainModel or Volume end element
             }
@@ -755,7 +755,7 @@ void CiftiBrainModelsMap::ParseHelperModel::parseBrainModel1(XmlReader& xml)
                 m_nodeIndices[i] = i;
             }
         } else {
-            if (xml.name() != "NodeIndices")
+            if (xml.name().toString() != "NodeIndices")
             {
                 throw CiftiException("unexpected element in BrainModel of SURFACE type: " + xml.name().toString());
             }
@@ -815,7 +815,7 @@ void CiftiBrainModelsMap::ParseHelperModel::parseBrainModel1(XmlReader& xml)
         {
             throw CiftiException("BrainModel requires a child element");
         }
-        if (xml.name() != "VoxelIndicesIJK")
+        if (xml.name().toString() != "VoxelIndicesIJK")
         {
             throw CiftiException("unexpected element in BrainModel of VOXELS type: " + xml.name().toString());
         }
@@ -932,7 +932,7 @@ void CiftiBrainModelsMap::ParseHelperModel::parseBrainModel2(XmlReader& xml)
         {
             throw CiftiException("BrainModel requires a child element");
         }
-        if (xml.name() != "VertexIndices")
+        if (xml.name() != QString("VertexIndices"))
         {
             throw CiftiException("unexpected element in BrainModel of SURFACE type: " + xml.name().toString());
         }
@@ -984,7 +984,7 @@ void CiftiBrainModelsMap::ParseHelperModel::parseBrainModel2(XmlReader& xml)
         {
             throw CiftiException("BrainModel requires a child element");
         }
-        if (xml.name() != "VoxelIndicesIJK")
+        if (xml.name().toString() != "VoxelIndicesIJK")
         {
             throw CiftiException("unexpected element in BrainModel of VOXELS type: " + xml.name().toString());
         }

@@ -361,7 +361,7 @@ void CiftiParcelsMap::readXML1(XmlReader& xml)
 #ifdef CIFTILIB_USE_QT
     while (xml.readNextStartElement())
     {
-        QStringRef name = xml.name();
+        QString name = xml.name().toString();
         if (name == "Surface")
         {
             QXmlStreamAttributes attrs = xml.attributes();
@@ -392,7 +392,7 @@ void CiftiParcelsMap::readXML1(XmlReader& xml)
         } else if (name == "Parcel") {
             myParcels.push_back(readParcel1(xml));
         } else {
-            throw CiftiException("unexpected element in parcels map: " + name.toString());
+            throw CiftiException("unexpected element in parcels map: " + name);
         }
     }
 #else
@@ -457,7 +457,7 @@ void CiftiParcelsMap::readXML2(XmlReader& xml)
 #ifdef CIFTILIB_USE_QT
     while (xml.readNextStartElement())
     {
-        QStringRef name = xml.name();
+        QString name = xml.name().toString();
         if (name == "Surface")
         {
             QXmlStreamAttributes attrs = xml.attributes();
@@ -498,7 +498,7 @@ void CiftiParcelsMap::readXML2(XmlReader& xml)
                 m_haveVolumeSpace = true;
             }
         } else {
-            throw CiftiException("unexpected element in parcels map: " + name.toString());
+            throw CiftiException("unexpected element in parcels map: " + name);
         }
     }
 #else
@@ -573,7 +573,7 @@ CiftiParcelsMap::Parcel CiftiParcelsMap::readParcel1(XmlReader& xml)
 #ifdef CIFTILIB_USE_QT
     while (xml.readNextStartElement())
     {
-        QStringRef name = xml.name();
+        QString name = xml.name().toString();
         if (name == "Nodes")
         {
             QXmlStreamAttributes attrs1 = xml.attributes();
@@ -626,7 +626,7 @@ CiftiParcelsMap::Parcel CiftiParcelsMap::readParcel1(XmlReader& xml)
             }
             haveVoxels = true;
         } else {
-            throw CiftiException("unexpected element in Parcel: " + name.toString());
+            throw CiftiException("unexpected element in Parcel: " + name);
         }
     }
 #else
@@ -715,7 +715,7 @@ CiftiParcelsMap::Parcel CiftiParcelsMap::readParcel2(XmlReader& xml)
 #ifdef CIFTILIB_USE_QT
     while (xml.readNextStartElement())
     {
-        QStringRef name = xml.name();
+        QString name = xml.name().toString();
         if (name == "Vertices")
         {
             QXmlStreamAttributes attrs1 = xml.attributes();
@@ -768,7 +768,7 @@ CiftiParcelsMap::Parcel CiftiParcelsMap::readParcel2(XmlReader& xml)
             }
             haveVoxels = true;
         } else {
-            throw CiftiException("unexpected element in Parcel: " + name.toString());
+            throw CiftiException("unexpected element in Parcel: " + name);
         }
     }
 #else
