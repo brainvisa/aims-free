@@ -193,7 +193,7 @@ add_subdirectory( aimsalgo )
 if( QT_FOUND )
   add_subdirectory( aimsgui )
 endif()
-if( PYTHON_FOUND AND NUMPY_FOUND AND SIP_FOUND )
+if( PYTHON_FOUND AND NUMPY_FOUND AND SIP_FOUND AND NOT DESIRED_QT_VERSION EQUAL 6 )
   set( AIMS_RELATIVE_SIP_DIRECTORY
        "share/aims-${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}/sip" )
   add_subdirectory( pyaims )
