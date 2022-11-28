@@ -72,7 +72,11 @@ vector<AString> cifti::AString_split_whitespace(const AString& input)
 {
     vector<AString> ret;
 #ifdef CIFTILIB_USE_QT
+#if QT_VERSION >= 0x050e00
     QStringList temp = input.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+#else
+    QStringList temp = input.split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
+#endif
     int listSize = temp.size();//yes, QT uses int...
     ret.resize(listSize);
     for (int i = 0; i < listSize; ++i)
