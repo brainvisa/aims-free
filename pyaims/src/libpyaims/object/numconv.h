@@ -110,8 +110,8 @@ namespace carto
       return z;
 //     if( PyFloat_Check( x ) )
 //       return PyFloat_AsDouble( x );
-    long y;
 #if PY_VERSION_HEX <= 0x03000000
+    long y;
     y = PyInt_AsLong( x );
     if( y != -1 || !PyErr_Occurred() )
       return double( y );
