@@ -10,6 +10,7 @@ class RCObject
 %End
 
 %ConvertToSubClassCode
+#if 0
   // std::cout << "ConvertToSubClassCode RCObject " << sipCpp << " / " << typeid( *sipCpp ).name() << std::endl;
   sipType = 0;
 
@@ -193,7 +194,7 @@ class RCObject
       // std::cout << "I'm an TransformationChain3d: " << *sipCppRet << std::endl;
     }
   }
-
+#endif
 %End
 
 public:
@@ -236,7 +237,7 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
   }
 %End
 
-  long __hash__() const /AutoGen/;
+  Py_hash_t __hash__() const;
 %MethodCode
   sipRes = static_cast<long>( reinterpret_cast<unsigned long long>(sipCpp) );
 %End

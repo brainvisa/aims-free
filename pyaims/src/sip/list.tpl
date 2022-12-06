@@ -254,12 +254,12 @@ public:
   size_t size() const;
 
 
-  int __len__() const /AutoGen/;
+  int __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End
 
-  int __contains__( %Template1PyType%%Template1deref% ) const /AutoGen/;
+  int __contains__( %Template1PyType%%Template1deref% ) const;
 %MethodCode
   std::list<%Template1% >::iterator i, e = sipCpp->end();
   sipRes = 0;
@@ -360,7 +360,7 @@ public:
 
 
   // __iter__ isn't called by python iter() function when defined in SIP
-  list_%Template1typecode%_iterator* __objiter__() /Factory, AutoGen/;
+  list_%Template1typecode%_iterator* __objiter__() /Factory/;
 %MethodCode
   std::list<%Template1% >::iterator i = sipCpp->begin();
   sipRes = new list_%Template1typecode%_iterator( i, sipCpp, sipSelf );

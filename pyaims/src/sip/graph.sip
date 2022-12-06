@@ -21,29 +21,29 @@ protected :
   GraphObject(const std::string &);
 
 public:
-    virtual std::string type() const /AutoGen/;
-    virtual size_t size() const /AutoGen/;
+    virtual std::string type() const;
+    virtual size_t size() const;
     virtual bool isScalar() const;
-    virtual double getScalar() const /AutoGen/;
+    virtual double getScalar() const;
     virtual bool isString() const;
-    virtual std::string getString() const /AutoGen/;
+    virtual std::string getString() const;
     virtual bool isNone() const;
-    virtual bool isArray() const /AutoGen/;
-    virtual bool isDynArray() const /AutoGen/;
-    virtual bool isDictionary() const /AutoGen/;
-    virtual bool isIterable() const /AutoGen/;
-    /*virtual*/ carto::Object objectIterator() const /AutoGen/;
+    virtual bool isArray() const;
+    virtual bool isDynArray() const;
+    virtual bool isDictionary() const;
+    virtual bool isIterable() const;
+    /*virtual*/ carto::Object objectIterator() const;
     virtual bool hasProperty( const std::string & ) const
-      /PyName=has_key, AutoGen/;
-    virtual bool isIterator() const /AutoGen/;
-    virtual bool isDictionaryIterator() const /AutoGen/;
-    virtual bool isValid() const /AutoGen/;
-    /*virtual*/ carto::Object currentValue() const  /Factory, AutoGen/;
-    virtual std::string key() const  /Factory, AutoGen/;
-    virtual long intKey() const /AutoGen/;
+      /PyName=has_key/;
+    virtual bool isIterator() const;
+    virtual bool isDictionaryIterator() const;
+    virtual bool isValid() const;
+    /*virtual*/ carto::Object currentValue() const  /Factory/;
+    virtual std::string key() const  /Factory/;
+    virtual long intKey() const;
 
 private:
-    virtual carto::GenericObject* clone() const /AutoGen/;
+    virtual carto::GenericObject* clone() const;
 
 };
 

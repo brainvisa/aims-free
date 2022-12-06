@@ -344,7 +344,7 @@ public:
   *sipCpp = *a0;
 %End
 
-  int __contains__( %Template1%%Template1deref% ) const /AutoGen/;
+  int __contains__( %Template1%%Template1deref% ) const;
 %MethodCode
   unsigned i;
   sipRes = 0;

@@ -90,36 +90,36 @@ Inherited classes may inherit both BundleListener and BundleProducer, if they ar
 %End
 protected:
 
-  virtual void bundleStarted( const aims::BundleProducer &, const aims::BundleInfo & ) /AutoGen/;
+  virtual void bundleStarted( const aims::BundleProducer &, const aims::BundleInfo & );
 %Docstring
 bundleStarted(producer, bundle_info)
 %End
 
-  virtual void bundleTerminated( const aims::BundleProducer &, const aims::BundleInfo & ) /AutoGen/;
+  virtual void bundleTerminated( const aims::BundleProducer &, const aims::BundleInfo & );
 %Docstring
 bundleTerminated(producer, bundle_info)
 %End
 
   virtual void fiberStarted( const aims::BundleProducer &,
                              const aims::BundleInfo &,
-                             const aims::FiberInfo & ) /AutoGen/;
+                             const aims::FiberInfo & );
 %Docstring
 fiberStarted(producer, bundle_info, fiber_info)
 %End
 
   virtual void fiberTerminated( const aims::BundleProducer &, const aims::BundleInfo &,
-                                const aims::FiberInfo & ) /AutoGen/;
+                                const aims::FiberInfo & );
 %Docstring
 fiberTerminated(producer, bundle_info, fiber_info)
 %End
 
   virtual void newFiberPoint( const aims::BundleProducer &, const aims::BundleInfo &,
-                              const aims::FiberInfo &, const aims::FiberPoint & ) /AutoGen/;
+                              const aims::FiberInfo &, const aims::FiberPoint & );
 %Docstring
 newFiberPoint(producer, bundle_info, fiber_info, point)
 %End
 
-  virtual void noMoreBundle( const aims::BundleProducer & ) /AutoGen/;
+  virtual void noMoreBundle( const aims::BundleProducer & );
 %Docstring
 noMoreBundle(producer)
 %End

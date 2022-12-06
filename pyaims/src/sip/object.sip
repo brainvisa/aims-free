@@ -553,7 +553,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 
 
     carto::Object __getitem__( const std::string & )
-      /Factory, AutoGen, ReleaseGIL/;
+      /Factory, ReleaseGIL/;
 %MethodCode
     try
       {
@@ -587,7 +587,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %End
 
 
-    void __setitem__( int, const SIP_PYOBJECT ) /AutoGen/;
+    void __setitem__( int, const SIP_PYOBJECT );
 %MethodCode
     // std::cout << "setitem(int)\n";
     int state;
@@ -689,7 +689,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     }
 %End
 
-    void __setitem__( const std::string &, const SIP_PYOBJECT ) /AutoGen/;
+    void __setitem__( const std::string &, const SIP_PYOBJECT );
 %MethodCode
     // std::cout << "setitem\n";
     int state;
@@ -787,7 +787,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %End
 
 
-    void __delitem__( const std::string & ) /AutoGen/;
+    void __delitem__( const std::string & );
 %MethodCode
     try
     {
@@ -803,7 +803,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     }
 %End
 
-    void __delitem__( int ) /AutoGen/;
+    void __delitem__( int );
 %MethodCode
     try
     {
@@ -840,7 +840,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 
     // printing
 
-    SIP_PYOBJECT __str__() /AutoGen, ReleaseGIL/;
+    SIP_PYOBJECT __str__() /ReleaseGIL/;
 %MethodCode
     try
       {
@@ -868,7 +868,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 
     // Syntaxed API
 
-    virtual bool hasSyntax() const /AutoGen/;
+    virtual bool hasSyntax() const;
 %MethodCode
     const carto::SyntaxedInterface 
       *si = sipCpp->getInterface<carto::SyntaxedInterface>();
@@ -905,7 +905,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       }
 %End
 
-    void setSyntax( const std::string & ) /AutoGen/;
+    void setSyntax( const std::string & );
 %MethodCode
     try
       {
@@ -936,7 +936,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     /*virtual*/ carto::Object objectIterator() const = 0;
 
     // __iter__ isn't called by python iter() function when defined in SIP
-    carto::Object __objiter__() /Factory, AutoGen/;
+    carto::Object __objiter__() /Factory/;
 %MethodCode
     // std::cout << "__iter__ " << sipCpp->type() << std::endl;
     try
@@ -956,7 +956,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     }
 %End
 
-    int __contains__( const std::string & ) const /AutoGen, ReleaseGIL/;
+    int __contains__( const std::string & ) const /ReleaseGIL/;
 %MethodCode
     carto::Object i = sipCpp->objectIterator();
     if( i->isValid() && i->isDictionaryIterator() )
@@ -989,7 +989,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       }
 %End
 
-    int __contains__( carto::Object ) const /AutoGen, ReleaseGIL/;
+    int __contains__( carto::Object ) const /ReleaseGIL/;
 %MethodCode
     carto::Object i = sipCpp->objectIterator();
     if( i->isValid() && i->isDictionaryIterator() )
@@ -1050,7 +1050,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     virtual bool isValid() const = 0;
     /*virtual*/ carto::Object currentValue() const = 0;
 
-    SIP_PYOBJECT __objnext__() /AutoGen/;
+    SIP_PYOBJECT __objnext__();
 %MethodCode
     //std::cout << "it next\n";
     if( !sipCpp->isIterator() )
