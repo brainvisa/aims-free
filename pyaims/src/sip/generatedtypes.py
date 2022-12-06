@@ -46,6 +46,7 @@ for x in basetypes:
     matrix += [(x, y) for y in basetypes]
 
 todo = {'system': ['Void'],
+        'system2': ['Void'],
         'volume': basetypes + ['cfloat', 'cdouble', 'Point3df'],
         'vector': ['unsigned char', 'short', 'unsigned short', 'int',
                    'unsigned', 'unsigned long', 'unsigned long long',

@@ -154,6 +154,9 @@ typedef int int32_t;
 %Include rcobject.sip
 %Include sharedobject.sip
 %Include object.sip
+
+%Include system2_VOID.sip
+
 %Include rcptr_GenericObject.sip
 %Include property.sip
 
