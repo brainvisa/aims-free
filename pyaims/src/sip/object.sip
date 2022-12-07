@@ -79,21 +79,21 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       else if( PyUnicode_Check( sipPy ) )
         *sipCppPtr = new sipcarto_Object( carto::Object::value
                             ( carto::PyString_AsStdString( sipPy ) ) );
-      else if( sipCanConvertToInstance( sipPy, sipClass_carto_Object,
+      else if( sipCanConvertToType( sipPy, sipType_carto_Object,
                SIP_NO_CONVERTORS ) )
       {
-        obj = sipConvertToInstance( sipPy, sipClass_carto_Object,
+        obj = sipConvertToType( sipPy, sipType_carto_Object,
                                     sipTransferObj,
                                     SIP_NO_CONVERTORS, &state, sipIsErr );
         carto::Object       *o = (carto::Object *) obj;
-        sipReleaseInstance( obj, sipClass_carto_Object, state );
+        sipReleaseType( obj, sipType_carto_Object, state );
         *sipCppPtr = new carto::Object( *o ); //sipcarto_Object( *o );
         return sipGetState( sipTransferObj );
       }
-      else if( sipCanConvertToInstance( sipPy, sipClass_carto_GenericObject,
+      else if( sipCanConvertToType( sipPy, sipType_carto_GenericObject,
                SIP_NO_CONVERTORS ) )
       {
-        obj = sipConvertToInstance( sipPy, sipClass_carto_GenericObject,
+        obj = sipConvertToType( sipPy, sipType_carto_GenericObject,
                                     sipTransferObj,
                                     SIP_NO_CONVERTORS, &state, sipIsErr );
         carto::GenericObject        *o = (carto::GenericObject *) obj;
@@ -109,7 +109,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
           /* std::cout << "refcount: "
             << carto::rc_ptr_trick::refCount( **sipCppPtr ) << std::endl; */
         }
-        sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+        sipReleaseType( obj, sipType_carto_GenericObject, state );
         return sipGetState(sipTransferObj);
       }
       else
@@ -118,7 +118,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         if( PyObject_HasAttrString( sipPy, "__genericobject__" ) )
         {
           PyObject *gobj = PyObject_GetAttrString( sipPy, "__genericobject__" );
-          obj = sipConvertToInstance( gobj, sipClass_carto_GenericObject,
+          obj = sipConvertToType( gobj, sipType_carto_GenericObject,
                                       sipTransferObj, SIP_NO_CONVERTORS, &state,
                                       sipIsErr );
           carto::GenericObject        *o = (carto::GenericObject *) obj;
@@ -130,7 +130,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
             delete *sipCppPtr;
             *sipCppPtr = new carto::Object( o, true );
           }
-          sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+          sipReleaseType( obj, sipType_carto_GenericObject, state );
           Py_DECREF( gobj );
           return sipGetState(sipTransferObj);
         }
@@ -141,15 +141,15 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
           PyObject *restoobj = PyObject_CallFunctionObjArgs( toobj, 0 );
           if( restoobj )
           {
-            if( sipCanConvertToInstance( restoobj, sipClass_carto_Object,
+            if( sipCanConvertToType( restoobj, sipType_carto_Object,
                SIP_NO_CONVERTORS ) )
             {
-              obj = sipConvertToInstance( restoobj, sipClass_carto_Object,
+              obj = sipConvertToType( restoobj, sipType_carto_Object,
                                           sipTransferObj, SIP_NO_CONVERTORS,
                                           &state, sipIsErr );
               carto::Object       *o = (carto::Object *) obj;
               *sipCppPtr = new carto::Object( *o );
-              sipReleaseInstance( obj, sipClass_carto_Object, state );
+              sipReleaseType( obj, sipType_carto_Object, state );
             }
             Py_DECREF( restoobj );
             if( *sipCppPtr )
@@ -199,16 +199,16 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %MethodCode
   // std::cout << "Object( GenericObject* )\n";
   if( !a0 )
-    sipCpp = new sipcarto_Object;
+    sipCpp = new Object;
   else
   {
-    sipCpp = new sipcarto_Object( a0, false );
+    sipCpp = new Object( a0, false );
     // if there is no rc_ptr on this object yet, make it inactive
     if( carto::rc_ptr_trick::refCount( *sipCpp ) == 1 )
     {
       sipCpp->release();
       delete sipCpp;
-      sipCpp = new sipcarto_Object( a0, true );
+      sipCpp = new Object( a0, true );
     }
   }
 %End
