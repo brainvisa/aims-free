@@ -32,14 +32,14 @@ namespace carto
   if( !sipIsErr )
   {
     return ( sipPy == Py_None )
-      || sipCanConvertToInstance( sipPy, sipClass_carto_GenericObject,
+      || sipCanConvertToType( sipPy, sipType_carto_GenericObject,
            SIP_NO_CONVERTORS )
-      || sipCanConvertToInstance( sipPy, sipClass_carto_Object, 0 );
+      || sipCanConvertToType( sipPy, sipType_carto_Object, 0 );
   }
 
   // std::cout << "ConvertToTypeCode GenericObject\n";
   *sipCppPtr = pyaims::fromT<carto::GenericObject>( sipPy,
-    sipClass_carto_GenericObject, sipTransferObj );
+    sipType_carto_GenericObject, sipTransferObj );
   /*
   if( *sipCppPtr ) std::cout << "is GenericObject: " << *sipCppPtr << ", "
     << (*sipCppPtr)->type() << ", rc: "
@@ -52,7 +52,7 @@ namespace carto
   {
     // std::cout << "fromRcptr...\n";
     *sipCppPtr = pyaims::fromRcptr<carto::GenericObject, carto::Object>
-      ( sipPy, sipClass_carto_Object, 0 /*sipTransferObj*/ );
+      ( sipPy, sipType_carto_Object, 0 /*sipTransferObj*/ );
     /*
     std::cout << "rcptr? : " << *sipCppPtr << std::endl;
     if( *sipCppPtr ) std::cout << "is Object: " << *sipCppPtr << ", "
@@ -267,9 +267,9 @@ namespace carto
           {
             PyTuple_SetItem( pi, 0, PyLong_FromLong( i->intKey() ) );
           }
-          PyObject* pitem = sipConvertFromInstance(
+          PyObject* pitem = sipConvertFromType(
             new carto::Object( i->currentValue() ),
-            sipClass_carto_Object, Py_None );
+            sipType_carto_Object, Py_None );
           if( PyObject_HasAttrString( pitem, "getPython" ) )
           {
             // pitem is a wrapper to Object, but may be able to be converted
@@ -313,9 +313,9 @@ namespace carto
         c = 0;
         for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c )
         {
-          PyObject* pitem = sipConvertFromInstance(
+          PyObject* pitem = sipConvertFromType(
             new carto::Object( i->currentValue() ),
-            sipClass_carto_Object, Py_None );
+            sipType_carto_Object, Py_None );
           if( PyObject_HasAttrString( pitem, "getPython" ) )
           {
             // pitem is a wrapper to Object, but may be able to be converted
@@ -368,8 +368,8 @@ namespace carto
     try
     {
       carto::Object o = sipCpp->getProperty( *a0 );
-      sipRes = sipConvertFromInstance( new carto::Object( o ),
-                                       sipClass_carto_Object, Py_None );
+      sipRes = sipConvertFromType( new carto::Object( o ),
+                                       sipType_carto_Object, Py_None );
     }
     catch( ... )
     {
@@ -413,23 +413,23 @@ namespace carto
                 carto::Object::value
                 ( carto::PyString_AsStdString( a1 ) ) );
           }
-        else if( sipCanConvertToInstance( a1, sipClass_carto_Object,
+        else if( sipCanConvertToType( a1, sipType_carto_Object,
                    SIP_NO_CONVERTORS ) )
         {
-          obj = sipForceConvertToInstance( a1, sipClass_carto_Object,
+          obj = sipForceConvertToType( a1, sipType_carto_Object,
             0, 0, &state, &sipIsErr );
           carto::Object	*o = (carto::Object *) obj;
           sipCpp->setArrayItem( a0, *o );
-          sipReleaseInstance( obj, sipClass_carto_Object, state );
+          sipReleaseType( obj, sipType_carto_Object, state );
         }
-        else if( sipCanConvertToInstance( a1, sipClass_carto_GenericObject,
+        else if( sipCanConvertToType( a1, sipType_carto_GenericObject,
                    SIP_NO_CONVERTORS ) )
         {
-          obj = sipForceConvertToInstance( a1,
-            sipClass_carto_GenericObject, 0, 0, &state, &sipIsErr );
+          obj = sipForceConvertToType( a1,
+            sipType_carto_GenericObject, 0, 0, &state, &sipIsErr );
           carto::GenericObject	*o = (carto::GenericObject *) obj;
           sipCpp->setArrayItem( a0, carto::Object( o ) );
-          sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+          sipReleaseType( obj, sipType_carto_GenericObject, state );
         }
         else
         {
@@ -453,22 +453,22 @@ namespace carto
       {
         void *obj;
 
-        if( sipCanConvertToInstance( a1, sipClass_carto_Object, 0 ) )
+        if( sipCanConvertToType( a1, sipType_carto_Object, 0 ) )
         {
-          obj = sipForceConvertToInstance( a1, sipClass_carto_Object,
+          obj = sipForceConvertToType( a1, sipType_carto_Object,
             0, 0, &state, &sipIsErr );
           carto::Object	*o = (carto::Object *) obj;
           sipCpp->setArrayItem( a0, *o );
-          sipReleaseInstance( obj, sipClass_carto_Object, state );
+          sipReleaseType( obj, sipType_carto_Object, state );
         }
-        else if( sipCanConvertToInstance( a1, sipClass_carto_GenericObject,
+        else if( sipCanConvertToType( a1, sipType_carto_GenericObject,
                  0 ) )
         {
-          obj = sipForceConvertToInstance( a1,
-            sipClass_carto_GenericObject, 0, 0, &state, &sipIsErr );
+          obj = sipForceConvertToType( a1,
+            sipType_carto_GenericObject, 0, 0, &state, &sipIsErr );
           carto::GenericObject	*o = (carto::GenericObject *) obj;
           sipCpp->setArrayItem( a0, carto::Object( o ) );
-          sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+          sipReleaseType( obj, sipType_carto_GenericObject, state );
         }
       }
       catch( std::exception & e )
@@ -514,19 +514,19 @@ namespace carto
               ( *a0, 
                 carto::Object::value( carto::PyString_AsStdString( a1 ) ) );
           }
-        else if( ( obj = sipForceConvertToInstance( a1, sipClass_carto_Object,
+        else if( ( obj = sipForceConvertToType( a1, sipType_carto_Object,
           0, 0, &state, &sipIsErr ) ) )
           {
             carto::Object       *o = (carto::Object *) obj;
             sipCpp->setProperty( *a0, *o );
-            sipReleaseInstance( obj, sipClass_carto_Object, state );
+            sipReleaseType( obj, sipType_carto_Object, state );
           }
-        else if( ( obj = sipForceConvertToInstance( a1,
-          sipClass_carto_GenericObject, 0, 0, &state, &sipIsErr ) ) )
+        else if( ( obj = sipForceConvertToType( a1,
+          sipType_carto_GenericObject, 0, 0, &state, &sipIsErr ) ) )
           {
             carto::GenericObject        *o = (carto::GenericObject *) obj;
             sipCpp->setProperty( *a0, carto::Object( o ) );
-            sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+            sipReleaseType( obj, sipType_carto_GenericObject, state );
           }
         else
           {
@@ -550,22 +550,22 @@ namespace carto
       {
         void *obj;
 
-        if( sipCanConvertToInstance( a1, sipClass_carto_Object, 0 ) )
+        if( sipCanConvertToType( a1, sipType_carto_Object, 0 ) )
         {
-          obj = sipForceConvertToInstance( a1, sipClass_carto_Object,
+          obj = sipForceConvertToType( a1, sipType_carto_Object,
             0, 0, &state, &sipIsErr );
           carto::Object	*o = (carto::Object *) obj;
           sipCpp->setProperty( *a0, *o );
-          sipReleaseInstance( obj, sipClass_carto_Object, state );
+          sipReleaseType( obj, sipType_carto_Object, state );
         }
-        else if( sipCanConvertToInstance( a1, sipClass_carto_GenericObject,
+        else if( sipCanConvertToType( a1, sipType_carto_GenericObject,
                  0 ) )
         {
-          obj = sipForceConvertToInstance( a1,
-            sipClass_carto_GenericObject, 0, 0, &state, &sipIsErr );
+          obj = sipForceConvertToType( a1,
+            sipType_carto_GenericObject, 0, 0, &state, &sipIsErr );
           carto::GenericObject	*o = (carto::GenericObject *) obj;
           sipCpp->setProperty( *a0, carto::Object( o ) );
-          sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+          sipReleaseType( obj, sipType_carto_GenericObject, state );
         }
       }
       catch( std::exception & e )
@@ -875,9 +875,9 @@ namespace carto
           }
         }
         else
-          sipRes = sipConvertFromInstance
+          sipRes = sipConvertFromType
             ( new carto::Object( sipCpp->currentValue() ), 
-              sipClass_carto_Object, 0 );
+              sipType_carto_Object, 0 );
         sipCpp->next();
       }
 %End

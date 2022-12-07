@@ -12,7 +12,7 @@ class MaskIterator : carto::RCObject /Abstract/
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_aims_MaskIterator,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_aims_MaskIterator,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -64,13 +64,8 @@ public:
   sipRes = sipCpp->get();
   if( sipRes )
     {
-#if SIP_VERSION >= 0x040400
       PyObject *po = 
-        sipConvertFromInstance( sipCpp->get(), sipClass_aims_MaskIterator, 0 );
-#else
-      PyObject *po = sipMapCppToSelfSubClass( sipCpp->get(),
-                                      sipClass_aims_MaskIterator );
-#endif
+        sipConvertFromType( sipCpp->get(), sipType_aims_MaskIterator, 0 );
       PyObject_SetAttrString( po, "_rc", sipSelf );
     }
   else
@@ -98,7 +93,7 @@ class RoiIterator : carto::RCObject /Abstract/
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_aims_RoiIterator,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_aims_RoiIterator,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -156,10 +151,10 @@ public:
   if( sipRes ) {
 #if SIP_VERSION >= 0x040400
     PyObject *po = 
-      sipConvertFromInstance( sipCpp->get(), sipClass_aims_RoiIterator, 0 );
+      sipConvertFromType( sipCpp->get(), sipType_aims_RoiIterator, 0 );
 #else
     PyObject *po = sipMapCppToSelfSubClass( sipCpp->get(),
-                                    sipClass_aims_RoiIterator );
+                                    sipType_aims_RoiIterator );
 #endif
     PyObject_SetAttrString( po, "_rc", sipSelf );
   } else {
@@ -206,7 +201,7 @@ class Site /Abstract/
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_carto_Site,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_carto_Site,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -239,7 +234,7 @@ typedef carto::rc_ptr< carto::Site > rc_ptr_Site;
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_carto_SiteIterator,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_carto_SiteIterator,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 

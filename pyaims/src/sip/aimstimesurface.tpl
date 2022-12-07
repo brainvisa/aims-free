@@ -15,7 +15,7 @@ typedef AimsTimeSurface<%Template1%, %Template2% > AimsTimeSurface_%Template1typ
 
 %ConvertToTypeCode
   return pyaims::standardConvertToTypeCode( sipPy,
-    sipClass_AimsTimeSurface_%Template1typecode%_%Template2typecode%,
+    sipType_AimsTimeSurface_%Template1typecode%_%Template2typecode%,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 

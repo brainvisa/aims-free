@@ -10,7 +10,7 @@ class Tree : carto::GenericObject
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_Tree,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_Tree,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -57,11 +57,7 @@ public:
   {
     t = dynamic_cast<Tree *>( *i );
     if( t )
-#if SIP_VERSION >= 0x040400
-      PyTuple_SetItem( l, c, sipConvertFromInstance( t, sipClass_Tree, 0 ) );
-#else
-      PyTuple_SetItem( l, c, sipMapCppToSelfSubClass( t, sipClass_Tree ) );
-#endif
+      PyTuple_SetItem( l, c, sipConvertFromType( t, sipType_Tree, 0 ) );
   }
   sipRes = l;
 %End

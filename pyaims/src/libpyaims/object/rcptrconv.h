@@ -41,10 +41,10 @@ namespace pyaims
 {
 
   template <typename T> inline
-  T* fromT( PyObject * sipPy, sipWrapperType* tclass, PyObject *transferObj );
+  T* fromT( PyObject * sipPy, sipTypeDef* tclass, PyObject *transferObj );
 
   template <typename T, typename RcT> inline
-  T* fromRcptr( PyObject * sipPy, sipWrapperType* rcclass,
+  T* fromRcptr( PyObject * sipPy, sipTypeDef* rcclass,
                 PyObject *transferObj );
 
   template <typename T> inline
@@ -52,18 +52,18 @@ namespace pyaims
                  PyObject* wsclass, PyObject* wkclass, PyObject *transferObj );
 
   inline PyObject* extractPyObjectFromProxy( PyObject* sipPy );
-  inline int canConvertFromProxy( PyObject *sipPy, sipWrapperType* tclass );
+  inline int canConvertFromProxy( PyObject *sipPy, sipTypeDef* tclass );
   inline int canConvertFromProxy( PyObject *sipPy, const sipTypeDef* tclass );
 
   template <typename T> inline
-  T* fromProxy( PyObject * sipPy, sipWrapperType* tclass,
+  T* fromProxy( PyObject * sipPy, sipTypeDef* tclass,
                 PyObject *transferObj, int *state, int *iserr );
   template <typename T> inline
   T* fromProxy( PyObject * sipPy, const sipTypeDef* tclass,
                 PyObject *transferObj, int *state, int *iserr );
 
   template <typename T> inline
-  int standardConvertToTypeCode( PyObject* sipPy, sipWrapperType* tclass,
+  int standardConvertToTypeCode( PyObject* sipPy, sipTypeDef* tclass,
                                  PyObject *sipTransferObj, int *sipIsErr,
                                  T** sipCppPtr );
 
@@ -75,17 +75,17 @@ namespace pyaims
   // ---
 
   template <typename T> inline
-  T* fromT( PyObject * sipPy, sipWrapperType* tclass, PyObject *transferObj )
+  T* fromT( PyObject * sipPy, sipTypeDef* tclass, PyObject *transferObj )
   {
-    if( sipCanConvertToInstance( sipPy, tclass, SIP_NO_CONVERTORS ) )
+    if( sipCanConvertToType( sipPy, tclass, SIP_NO_CONVERTORS ) )
     {
       int state = 0;
       int sipIsErr = 0;
-      void *obj = sipConvertToInstance( sipPy, tclass, transferObj,
-                                        SIP_NO_CONVERTORS, &state,
-                                        &sipIsErr );
-      /* *don't* call sipReleaseInstance here because we are not done
-      with the object. But sipReleaseInstance should be called later on it
+      void *obj = sipConvertToType( sipPy, tclass, transferObj,
+                                    SIP_NO_CONVERTORS, &state,
+                                    &sipIsErr );
+      /* *don't* call sipReleaseType here because we are not done
+      with the object. But sipReleaseType should be called later on it
       (normally internally by sip).
       */
       return reinterpret_cast<T *>( obj );
@@ -94,24 +94,24 @@ namespace pyaims
   }
 
   template <typename T, typename RcT> inline 
-  T* fromRcptr( PyObject * sipPy, sipWrapperType* rcclass,
+  T* fromRcptr( PyObject * sipPy, sipTypeDef* rcclass,
                 PyObject *transferObj )
   {
-    if( sipCanConvertToInstance( sipPy, rcclass, SIP_NO_CONVERTORS ) )
+    if( sipCanConvertToType( sipPy, rcclass, SIP_NO_CONVERTORS ) )
     {
       int state = 0;
       int sipIsErr = 0;
-      void *obj = sipConvertToInstance( sipPy, rcclass, transferObj,
-                                        SIP_NO_CONVERTORS, &state, &sipIsErr );
+      void *obj = sipConvertToType( sipPy, rcclass, transferObj,
+                                    SIP_NO_CONVERTORS, &state, &sipIsErr );
       RcT *robj = reinterpret_cast<RcT *>( obj );
-      /* release rc_ptr instance after using sipConvertToInstance: allow it
+      /* release rc_ptr instance after using sipConvertToType: allow it
       to be deleted later.
       We don't need the rc_ptr instance any longer, but its reference count
       must not go down to 0 otherwise the contained T is deleted.
       However it should not be such if we get an existing rc_ptr.
       So we *must* use SIP_NO_CONVERTORS here.
       */
-      sipReleaseInstance( obj, rcclass, state );
+      sipReleaseType( obj, rcclass, state );
       return robj->get();
     }
     return 0;
@@ -144,12 +144,12 @@ namespace pyaims
   }
 
 
-  inline int canConvertFromProxy( PyObject *sipPy, sipWrapperType* tclass )
+  inline int canConvertFromProxy( PyObject *sipPy, sipTypeDef* tclass )
   {
     PyObject *inside = extractPyObjectFromProxy( sipPy );
     if( !inside )
       return 0;
-    int res = sipCanConvertToInstance( inside, tclass, SIP_NOT_NONE );
+    int res = sipCanConvertToType( inside, tclass, SIP_NOT_NONE );
     Py_DECREF( inside );
     return res;
   }
@@ -167,24 +167,24 @@ namespace pyaims
 
 
   template <typename T> inline
-  T* fromProxy( PyObject * sipPy, sipWrapperType* tclass,
+  T* fromProxy( PyObject * sipPy, sipTypeDef* tclass,
                 PyObject *transferObj, int *state, int *iserr )
   {
     PyObject *inside = extractPyObjectFromProxy( sipPy );
     if( !inside )
       return 0;
-    int res = sipCanConvertToInstance( inside, tclass, SIP_NOT_NONE );
+    int res = sipCanConvertToType( inside, tclass, SIP_NOT_NONE );
     if( !res )
     {
       Py_DECREF( inside );
       return 0;
     }
-    T *sipRes = (T*) sipConvertToInstance( inside, tclass, transferObj,
+    T *sipRes = (T*) sipConvertToType( inside, tclass, transferObj,
                                            SIP_NOT_NONE, state, iserr );
     Py_DECREF( inside );
     if( *iserr )
     {
-      sipReleaseInstance( sipRes, tclass, *state );
+      sipReleaseType( sipRes, tclass, *state );
       sipRes = 0;
     }
     return sipRes;
@@ -217,12 +217,12 @@ namespace pyaims
 
 
   template <typename T> inline
-  int standardConvertToTypeCode( PyObject* sipPy, sipWrapperType* tclass,
+  int standardConvertToTypeCode( PyObject* sipPy, sipTypeDef* tclass,
                                  PyObject *sipTransferObj, int *sipIsErr,
                                  T** sipCppPtr )
   {
     if( !sipIsErr )
-      return sipCanConvertToInstance( sipPy, tclass,
+      return sipCanConvertToType( sipPy, tclass,
                                       SIP_NOT_NONE | SIP_NO_CONVERTORS )
         || pyaims::canConvertFromProxy( sipPy, tclass );
 
@@ -234,12 +234,12 @@ namespace pyaims
 
     int state = 0;
 
-    T * dat = (T *) sipForceConvertToInstance( sipPy, tclass, sipTransferObj,
-                                               SIP_NO_CONVERTORS, &state,
-                                               sipIsErr );
+    T * dat = (T *) sipForceConvertToType( sipPy, tclass, sipTransferObj,
+                                           SIP_NO_CONVERTORS, &state,
+                                           sipIsErr );
     if( dat && *sipIsErr )
     {
-      sipReleaseInstance( dat, tclass, state );
+      sipReleaseType( dat, tclass, state );
       dat = 0;
     }
     else if( dat )

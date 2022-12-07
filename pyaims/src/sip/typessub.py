@@ -1150,7 +1150,7 @@ typessub = {'bool':
                '#ifndef PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
                'inline int pyaimsVolume_BOOL_Check( PyObject* o )\n'
-               '{ return sipCanConvertToInstance( o, sipClass_Volume_BOOL, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '{ return sipCanConvertToType( o, sipType_Volume_BOOL, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
                'testPyType': 'pyaimsVolume_BOOL_Check',

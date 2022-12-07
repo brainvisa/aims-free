@@ -21,7 +21,7 @@ class AffineTransformation3d : soma::Transformation3d
 
 %ConvertToTypeCode
   return pyaims::standardConvertToTypeCode( sipPy,
-    sipClass_aims_AffineTransformation3d,
+    sipType_aims_AffineTransformation3d,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 

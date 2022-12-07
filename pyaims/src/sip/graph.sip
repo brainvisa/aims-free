@@ -9,7 +9,7 @@ class GraphObject : carto::GenericObject
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_GraphObject,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_GraphObject,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -44,6 +44,7 @@ public:
 
 private:
     virtual carto::GenericObject* clone() const;
+    GraphObject& operator = ( const GraphObject & );
 
 };
 
@@ -61,7 +62,7 @@ class Vertex : GraphObject
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_Vertex,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_Vertex,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -78,9 +79,9 @@ public:
   int			c = 0;
   for( ; it != et; ++it, ++c )
 #if SIP_VERSION >= 0x040400
-    PyTuple_SetItem( l, c, sipConvertFromInstance( *it, sipClass_Vertex, 0 ) );
+    PyTuple_SetItem( l, c, sipConvertFromType( *it, sipType_Vertex, 0 ) );
 #else
-    PyTuple_SetItem( l, c, sipMapCppToSelfSubClass( *it, sipClass_Vertex ) );
+    PyTuple_SetItem( l, c, sipMapCppToSelfSubClass( *it, sipType_Vertex ) );
 #endif
   sipRes = l;
 %End
@@ -93,9 +94,9 @@ public:
   int			c = 0;
   for( i=sipCpp->begin(); i!=e; ++i, ++c )
 #if SIP_VERSION >= 0x040400
-    PyTuple_SetItem( l, c, sipConvertFromInstance( *i, sipClass_Edge, 0 ) );
+    PyTuple_SetItem( l, c, sipConvertFromType( *i, sipType_Edge, 0 ) );
 #else
-    PyTuple_SetItem( l, c, sipMapCppToSelfSubClass( *i, sipClass_Edge ) );
+    PyTuple_SetItem( l, c, sipMapCppToSelfSubClass( *i, sipType_Edge ) );
 #endif
   sipRes = l;
 %End
@@ -119,7 +120,7 @@ class Edge : GraphObject
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_Edge,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_Edge,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -133,17 +134,17 @@ public:
   Edge::const_iterator i, e = sipCpp->end();
   int			c = 0;
   for( i=sipCpp->begin(); i!=e; ++i, ++c )
-#if SIP_VERSION >= 0x040400
-    PyTuple_SetItem( l, c, sipConvertFromInstance( *i, sipClass_Vertex, 0 ) );
-#else
-    PyTuple_SetItem( l, c, sipMapCppToSelfSubClass( *i, sipClass_Vertex ) );
-#endif
+    PyTuple_SetItem( l, c, sipConvertFromType( *i, sipType_Vertex, 0 ) );
   sipRes = l;
 %End
 
 private:
   Edge( const Edge & );
 };
+
+
+%Include set_VertexPtr.sip
+%Include set_EdgePtr.sip
 
 
 class Graph : GraphObject
@@ -161,7 +162,7 @@ class Graph : GraphObject
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_Graph,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_Graph,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -206,10 +207,10 @@ public:
     PyObject  *p;
     while( ( p = PyIter_Next( iter ) ) )
     {
-      if( sipCanConvertToInstance( p, sipClass_Vertex, SIP_NOT_NONE ) )
+      if( sipCanConvertToType( p, sipType_Vertex, SIP_NOT_NONE ) )
       {
         v = static_cast<Vertex *>(
-          sipConvertToInstance( p, sipClass_Vertex, 0, SIP_NOT_NONE, 0,
+          sipConvertToType( p, sipType_Vertex, 0, SIP_NOT_NONE, 0,
             &sipIsErr ) );
         vert.insert( v );
       }

@@ -11,7 +11,7 @@ build-backend = "sipbuild.api"
 name = "aimssip"
 
 # Specify each set of bindings.
-[tool.sip.bindings.aimsLight]
+[tool.sip.bindings.aims]
 include-dirs= ["/casa/host/build/include", "/usr/include/sigc++-2.0", "/usr/lib/x86_64-linux-gnu/sigc++-2.0/include"]
 libraries = ["pyaims"]
 library-dirs = ["/casa/host/build/lib"]

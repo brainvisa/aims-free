@@ -26,6 +26,7 @@ carto::pyaims_init();
 %Include soma_VOID.sip
 %Include set_STRING.sip
 %Include vector_S32.sip
+%Include vector_STRING.sip
 
 %Include datasource.sip
 %Include rcptr_DataSource.sip
@@ -49,46 +50,44 @@ carto::pyaims_init();
 
 %Include list_S32.sip
 %Include list_FLOAT.sip
-/*
 %Include map_STRING_STRING.sip
 %Include map_S32_STRING.sip
-*/
 %Include rcobject.sip
 %Include genericobjectLight.sip
-// %Include object.sip
+// %Include genericobject.sip
 
-/*
 %Include vector_ULONG.sip
-
 %Include system2_VOID.sip
-*/
 
 %Include rcptr_GenericObject.sip
 
 %Include objectLight.sip
+%Include property.sip
 
-/*
 %Include aimsrgb.sip
 %Include getopt.sip
 %Include finder.sip
+%Include graph.sip
 
-%Include quaternion.sip
-
-%Include motion.sip
-%Include rcptr_AffineTransformation3d.sip
-%Include reader_AffineTransformation3d.sip
+%Include transformation.sip
 
 %If ( CARTODATA )
 
+%Include volume_BOOL.sip
 %Include volume_S16.sip
 %Include volume_FLOAT.sip
 
+%Include rcptr_Volume_BOOL.sip
 %Include rcptr_Volume_S16.sip
 %Include rcptr_Volume_FLOAT.sip
 
 %End
 
+%Include motion.sip
+%Include quaternion.sip
+%Include rcptr_AffineTransformation3d.sip
+%Include reader_AffineTransformation3d.sip
+
 %Include headered.sip
-*/
 
 
