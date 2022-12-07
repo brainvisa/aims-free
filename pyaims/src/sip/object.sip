@@ -52,32 +52,32 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       int state = 0;
       // std::cout << "convert to Object_n";
       if( sipPy == Py_None )
-        *sipCppPtr = new sipcarto_Object;
+        *sipCppPtr = new carto::Object;
       if( PyBool_Check( sipPy ) )
       {
         if( sipPy == Py_False )
-          *sipCppPtr = new sipcarto_Object( carto::Object::value( false ) );
+          *sipCppPtr = new carto::Object( carto::Object::value( false ) );
         else
-          *sipCppPtr = new sipcarto_Object( carto::Object::value( true ) );
+          *sipCppPtr = new carto::Object( carto::Object::value( true ) );
       }
 #if PY_VERSION_HEX < 0x03000000
       else if( PyInt_Check( sipPy ) )
-        *sipCppPtr = new sipcarto_Object( carto::Object::value
+        *sipCppPtr = new carto::Object( carto::Object::value
                                         ( (int) PyInt_AsLong( sipPy ) ) );
 #endif
       else if( PyLong_Check( sipPy ) )
-        *sipCppPtr = new sipcarto_Object( carto::Object::value
+        *sipCppPtr = new carto::Object( carto::Object::value
                                         ( PyLong_AsLong( sipPy ) ) );
       else if( PyFloat_Check( sipPy ) )
-        *sipCppPtr = new sipcarto_Object( carto::Object::value
+        *sipCppPtr = new carto::Object( carto::Object::value
                                         ( PyFloat_AsDouble( sipPy ) ) );
 #if PY_VERSION_HEX < 0x03000000
       else if( PyString_Check( sipPy ) )
-        *sipCppPtr = new sipcarto_Object( carto::Object::value
+        *sipCppPtr = new carto::Object( carto::Object::value
                               ( std::string( PyString_AsString( sipPy ) ) ) );
 #endif
       else if( PyUnicode_Check( sipPy ) )
-        *sipCppPtr = new sipcarto_Object( carto::Object::value
+        *sipCppPtr = new carto::Object( carto::Object::value
                             ( carto::PyString_AsStdString( sipPy ) ) );
       else if( sipCanConvertToType( sipPy, sipType_carto_Object,
                SIP_NO_CONVERTORS ) )
