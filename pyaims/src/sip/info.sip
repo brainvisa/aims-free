@@ -93,8 +93,8 @@ Static method. Get a list of Info objects, each library may provide one (or seve
     unsigned i, n = inf.size();
     sipRes = PyTuple_New( n );
     for( i=0; i<n; ++i )
-      PyTuple_SetItem( sipRes, i, sipConvertFromInstance( inf[i],
-        sipClass_carto_Info, 0 ) );
+      PyTuple_SetItem( sipRes, i, sipConvertFromType( inf[i],
+        sipType_carto_Info, 0 ) );
 %End
 
     static void print() /PyName=printInfos/;
