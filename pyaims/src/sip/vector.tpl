@@ -118,8 +118,11 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
 
       %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
       (*sipCppPtr)->push_back( %Template1deref%item );
+%%Template1defScalar%%
+%#ifndef PYAIMS_SCALAR%
       if( conv )
         delete & %Template1deref% item;
+%#endif%
       Py_DECREF( pyitem );
     }
     return sipGetState( sipTransferObj );
@@ -185,9 +188,12 @@ public:
 
       %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
       sipCpp->push_back( %Template1deref%item );
+%%Template1defScalar%%
+%#ifndef PYAIMS_SCALAR%
       if( conv )
         delete & %Template1deref% item;
       Py_DECREF( pyitem );
+%#endif%
     }
   }
 %End

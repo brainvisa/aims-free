@@ -113,9 +113,12 @@ typedef std::list<%Template1% > list_%Template1typecode%;
 
       %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
       (*sipCppPtr)->push_back( %Template1deref%item );
+%%Template1defScalar%%
+%#ifndef PYAIMS_SCALAR%
       if( conv )
         delete & %Template1deref% item;
       Py_DECREF( pyitem );
+%#endif%
     }
     return sipGetState( sipTransferObj );
   }
@@ -178,8 +181,11 @@ public:
 
       %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
       sipCpp->push_back( %Template1deref%item );
+%%Template1defScalar%%
+%#ifndef PYAIMS_SCALAR%
       if( conv )
         delete & %Template1deref% item;
+%#endif%
       Py_DECREF( pyitem );
     }
   }
