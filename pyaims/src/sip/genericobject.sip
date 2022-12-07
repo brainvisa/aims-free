@@ -86,7 +86,7 @@ namespace carto
 
     // Size API
     virtual size_t size() const = 0;
-    int __len__() const;
+    Py_ssize_t __len__() const;
 %MethodCode
     try
     {

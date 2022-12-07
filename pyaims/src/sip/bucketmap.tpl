@@ -67,7 +67,7 @@ The header contains all meta-data.
   }
 %End
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End
@@ -100,7 +100,7 @@ The header contains all meta-data.
   public:
     Bucket();
     unsigned size() const;
-    int __len__() const;
+    Py_ssize_t __len__() const;
 %MethodCode
   sipRes = (int) sipCpp->size();
 %End
