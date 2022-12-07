@@ -17,8 +17,8 @@ typedef std::list<%Template1% > list_%Template1typecode%;
 %ConvertToTypeCode
   if (sipIsErr == NULL)
   {
-    if( sipCanConvertToInstance( sipPy,
-        sipClass_list_%Template1typecode%, SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
+    if( sipCanConvertToType( sipPy,
+        sipType_list_%Template1typecode%, SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
       return 1;
     if( !PySequence_Check( sipPy ) )
       return 0;
@@ -49,19 +49,19 @@ typedef std::list<%Template1% > list_%Template1typecode%;
       return 0;
   }
 
-  if( sipCanConvertToInstance( sipPy, sipClass_list_%Template1typecode%,
+  if( sipCanConvertToType( sipPy, sipType_list_%Template1typecode%,
       SIP_NO_CONVERTORS ) )
   {
     int state = 0;
 
     list_%Template1typecode% * dat
       = (list_%Template1typecode% *)
-        sipConvertToInstance( sipPy,
-          sipClass_list_%Template1typecode%,
+        sipConvertToType( sipPy,
+          sipType_list_%Template1typecode%,
           sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
     if( *sipIsErr && dat )
     {
-      sipReleaseInstance( dat, sipClass_list_%Template1typecode%, state );
+      sipReleaseType( dat, sipType_list_%Template1typecode%, state );
       dat = 0;
     }
     else if( dat )
@@ -120,7 +120,7 @@ typedef std::list<%Template1% > list_%Template1typecode%;
     return sipGetState( sipTransferObj );
   }
   *sipCppPtr = (list_%Template1typecode% *)
-  sipConvertToInstance( sipPy, sipClass_list_%Template1typecode%,
+  sipConvertToType( sipPy, sipType_list_%Template1typecode%,
                            0, SIP_NO_CONVERTORS, 0, sipIsErr );
   return 0;
 %End
@@ -254,7 +254,7 @@ public:
   size_t size() const;
 
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End
@@ -557,8 +557,8 @@ class list_%Template1typecode%_iterator
   SIP_PYOBJECT __iter__();
 %MethodCode
   sipRes = 
-    sipConvertFromInstance( sipCpp, 
-                            sipClass_list_%Template1typecode%_iterator, 0 );
+    sipConvertFromType( sipCpp,
+                        sipType_list_%Template1typecode%_iterator, 0 );
 %End
 };
 

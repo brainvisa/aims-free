@@ -20,15 +20,15 @@ typedef carto::rc_ptr<%Template1% > rc_ptr_%Template1typecode%;
   if (!sipIsErr)
   {
     // check type
-    int x = sipCanConvertToInstance( sipPy,
-      sipClass_rc_ptr_%Template1typecode%,
+    int x = sipCanConvertToType( sipPy,
+      sipType_rc_ptr_%Template1typecode%,
       SIP_NOT_NONE | SIP_NO_CONVERTORS );
     if( x )
       return x;
     if( SUPERSUBCLASS( carto::RCObject, %Template1PyType% ) )
-      return sipCanConvertToInstance( sipPy, sipClass_%Template1sipClass%,
+      return sipCanConvertToType( sipPy, sipType_%Template1sipClass%,
       SIP_NOT_NONE | SIP_NO_CONVERTORS )
-      || sipCanConvertToInstance( sipPy, sipClass_%Template1sipClass%,
+      || sipCanConvertToType( sipPy, sipType_%Template1sipClass%,
       SIP_NOT_NONE);
     return 0;
   }
@@ -43,12 +43,12 @@ typedef carto::rc_ptr<%Template1% > rc_ptr_%Template1typecode%;
 
   carto::rc_ptr<%Template1% > * dat
     = (carto::rc_ptr<%Template1% > *)
-      sipForceConvertToInstance( sipPy,
-        sipClass_rc_ptr_%Template1typecode%,
+      sipForceConvertToType( sipPy,
+        sipType_rc_ptr_%Template1typecode%,
         sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
   if( *sipIsErr && dat )
   {
-    sipReleaseInstance( dat, sipClass_rc_ptr_%Template1typecode%,
+    sipReleaseType( dat, sipType_rc_ptr_%Template1typecode%,
                         state );
     dat = 0;
     *sipIsErr = 0;
@@ -56,7 +56,7 @@ typedef carto::rc_ptr<%Template1% > rc_ptr_%Template1typecode%;
   else if( dat )
   {
     *sipCppPtr = new carto::rc_ptr< %Template1% >( *dat );
-    sipReleaseInstance( dat, sipClass_rc_ptr_%Template1typecode%,
+    sipReleaseType( dat, sipType_rc_ptr_%Template1typecode%,
                         state );
     return sipGetState(sipTransferObj);
   }
@@ -66,18 +66,18 @@ typedef carto::rc_ptr<%Template1% > rc_ptr_%Template1typecode%;
     // %Template1% %Template1deref% obj = %Template1CFromPy%( sipPy );
     %Template1% %Template1deref% obj
       = (%Template1% %Template1deref%)
-        sipForceConvertToInstance( sipPy, sipClass_%Template1sipClass%,
+        sipForceConvertToType( sipPy, sipType_%Template1sipClass%,
           sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
     if( *sipIsErr && obj )
     {
-      sipReleaseInstance( obj, sipClass_%Template1sipClass%, state );
+      sipReleaseType( obj, sipType_%Template1sipClass%, state );
       obj = 0;
     }
     if( !obj )
     {
       *sipIsErr = 0;
       obj = (%Template1% %Template1deref%)
-        sipForceConvertToInstance( sipPy, sipClass_%Template1sipClass%,
+        sipForceConvertToType( sipPy, sipType_%Template1sipClass%,
           sipTransferObj, 0, &state, sipIsErr );
     }
     if( obj )
@@ -92,7 +92,7 @@ typedef carto::rc_ptr<%Template1% > rc_ptr_%Template1typecode%;
         delete *sipCppPtr;
         *sipCppPtr = new carto::rc_ptr< %Template1% >( obj, true );
       }
-      sipReleaseInstance( obj, sipClass_%Template1sipClass%, state );
+      sipReleaseType( obj, sipType_%Template1sipClass%, state );
       PyErr_Clear();
       return sipGetState(sipTransferObj);
     }
@@ -144,7 +144,7 @@ public:
            the C++ object, so there is a leak.
         */
         PyObject *po =
-          sipConvertFromInstance( sipCpp->get(), sipClass_%Template1sipClass%, 
+          sipConvertFromType( sipCpp->get(), sipType_%Template1sipClass%,
                                   0 );
         PyObject_SetAttrString( po, "_rc", sipSelf );
       }
@@ -159,7 +159,7 @@ public:
   bool operator == ( const rc_ptr_%Template1typecode% & x ) const;
   bool operator != ( const rc_ptr_%Template1typecode% & x ) const;
   bool operator < ( const rc_ptr_%Template1typecode% & x ) const;
-  long __hash__() const;
+  Py_hash_t __hash__() const;
 %MethodCode
   sipRes = 
 #if defined( _WIN64 )
