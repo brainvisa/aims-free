@@ -464,7 +464,7 @@ namespace carto {
       = _blitz.stride();
 
     size_t offset = 0;
-    for( int i=0; i!=index.size(); ++i )
+    for( size_t i=0; i!=index.size(); ++i )
       offset += index[i] * strides[i];
     return _blitz.dataZero()[ offset ];
 #  endif
