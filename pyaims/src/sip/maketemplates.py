@@ -33,8 +33,8 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 from __future__ import print_function
-
 from __future__ import absolute_import
+
 import sys
 import os
 import types
@@ -109,7 +109,6 @@ sys.path.insert(0, '.')
 sys.path.insert(1, pyaimssip)
 from maketemplate import makeTemplate
 import maketemplate
-
 
 def convert_string_to_int(s):
     '''
