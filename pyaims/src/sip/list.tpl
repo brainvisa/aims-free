@@ -406,7 +406,7 @@ public:
   std::ostringstream  ss;
   ss << "[";
   unsigned i, n = sipCpp->size(), n0 = n;
-  std::list<%Template1% >::iterator il, e = sipCpp->end();
+  std::list<%Template1% >::iterator il;
   if( n > 200 )
     n = 200;
   for( i=0, il=sipCpp->begin(); i<n; ++i, ++il )
@@ -424,7 +424,7 @@ public:
   std::ostringstream  ss;
   ss << "[";
   unsigned i, n = sipCpp->size(), n0 = n;
-  std::list<%Template1% >::iterator il, e = sipCpp->end();
+  std::list<%Template1% >::iterator il;
   PyObject *po, *str;
   if( n > 200 )
     n = 200;
