@@ -53,23 +53,23 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       else if( PyUnicode_Check( sipPy ) )
         *sipCppPtr = new sipcarto_Object( carto::Object::value
                               ( carto:: PyString_AsStdString( sipPy ) ) );
-      else if( sipCanConvertToInstance( sipPy, sipType_carto_Object,
+      else if( sipCanConvertToType( sipPy, sipType_carto_Object,
                SIP_NO_CONVERTORS ) )
       {
-        obj = sipConvertToInstance( sipPy, sipType_carto_Object,
-                                    sipTransferObj,
-                                    SIP_NO_CONVERTORS, &state, sipIsErr );
+        obj = sipConvertToType( sipPy, sipType_carto_Object,
+                                sipTransferObj,
+                                SIP_NO_CONVERTORS, &state, sipIsErr );
         carto::Object       *o = (carto::Object *) obj;
         sipReleaseType( obj, sipType_carto_Object, state );
         *sipCppPtr = new carto::Object( *o ); //sipcarto_Object( *o );
         return sipGetState( sipTransferObj );
       }
-      else if( sipCanConvertToInstance( sipPy, sipType_carto_GenericObject,
+      else if( sipCanConvertToType( sipPy, sipType_carto_GenericObject,
                SIP_NO_CONVERTORS ) )
       {
-        obj = sipConvertToInstance( sipPy, sipType_carto_GenericObject,
-                                    sipTransferObj,
-                                    SIP_NO_CONVERTORS, &state, sipIsErr );
+        obj = sipConvertToType( sipPy, sipType_carto_GenericObject,
+                                sipTransferObj,
+                                SIP_NO_CONVERTORS, &state, sipIsErr );
         carto::GenericObject        *o = (carto::GenericObject *) obj;
         *sipCppPtr = new carto::Object( o ); //sipcarto_Object( o );
         // if there is no rc_ptr on this object yet, make it inactive

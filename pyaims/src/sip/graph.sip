@@ -78,11 +78,7 @@ public:
   PyObject *l = PyTuple_New( s.size() );
   int			c = 0;
   for( ; it != et; ++it, ++c )
-#if SIP_VERSION >= 0x040400
     PyTuple_SetItem( l, c, sipConvertFromType( *it, sipType_Vertex, 0 ) );
-#else
-    PyTuple_SetItem( l, c, sipMapCppToSelfSubClass( *it, sipType_Vertex ) );
-#endif
   sipRes = l;
 %End
 
@@ -93,11 +89,7 @@ public:
   Vertex::const_iterator i, e = sipCpp->end();
   int			c = 0;
   for( i=sipCpp->begin(); i!=e; ++i, ++c )
-#if SIP_VERSION >= 0x040400
     PyTuple_SetItem( l, c, sipConvertFromType( *i, sipType_Edge, 0 ) );
-#else
-    PyTuple_SetItem( l, c, sipMapCppToSelfSubClass( *i, sipType_Edge ) );
-#endif
   sipRes = l;
 %End
 

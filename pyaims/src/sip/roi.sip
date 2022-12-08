@@ -149,13 +149,8 @@ public:
 %MethodCode
   sipRes = sipCpp->get();
   if( sipRes ) {
-#if SIP_VERSION >= 0x040400
     PyObject *po = 
       sipConvertFromType( sipCpp->get(), sipType_aims_RoiIterator, 0 );
-#else
-    PyObject *po = sipMapCppToSelfSubClass( sipCpp->get(),
-                                    sipType_aims_RoiIterator );
-#endif
     PyObject_SetAttrString( po, "_rc", sipSelf );
   } else {
     sipIsErr = 1;

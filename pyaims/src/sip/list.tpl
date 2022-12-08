@@ -124,7 +124,7 @@ typedef std::list<%Template1% > list_%Template1typecode%;
   }
   *sipCppPtr = (list_%Template1typecode% *)
   sipConvertToType( sipPy, sipType_list_%Template1typecode%,
-                           0, SIP_NO_CONVERTORS, 0, sipIsErr );
+                    0, SIP_NO_CONVERTORS, 0, sipIsErr );
   return 0;
 %End
 
