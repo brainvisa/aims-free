@@ -16,7 +16,7 @@ include-dirs= ["/casa/host/build/include", "/usr/include/sigc++-2.0", "/usr/lib/
 libraries = ["pyaims"]
 library-dirs = ["/casa/host/build/lib"]
 exceptions = true
-concatenate = 32
+concatenate = 16
 
 # Configure the project itself.
 [tool.sip.project]
