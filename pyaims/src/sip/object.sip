@@ -199,16 +199,28 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %MethodCode
   // std::cout << "Object( GenericObject* )\n";
   if( !a0 )
+#if SIP_VERSION >= 0x060000
     sipCpp = new carto::Object;
+#else
+    sipCpp = new sipcarto_Object;
+#endif
   else
   {
+#if SIP_VERSION >= 0x060000
     sipCpp = new carto::Object( a0, false );
+#else
+    sipCpp = new sipcarto_Object( a0, false );
+#endif
     // if there is no rc_ptr on this object yet, make it inactive
     if( carto::rc_ptr_trick::refCount( *sipCpp ) == 1 )
     {
       sipCpp->release();
       delete sipCpp;
+#if SIP_VERSION >= 0x060000
       sipCpp = new carto::Object( a0, true );
+#else
+      sipCpp = new sipcarto_Object( a0, true );
+#endif
     }
   }
 %End
