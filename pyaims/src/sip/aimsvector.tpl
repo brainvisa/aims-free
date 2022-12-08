@@ -43,8 +43,10 @@ typedef AimsVector<%Template1%, %Template2%>
     return 0;
   }
 
-  if( PyObject_IsInstance( sipPy, (PyObject *) 
-      sipType_AimsVector_%Template1typecode%_%Template2typecode% ) )
+  if( PyObject_IsInstance( sipPy,
+                           reinterpret_cast<PyObject *>(
+                             sipTypeAsPyTypeObject(
+                               sipType_AimsVector_%Template1typecode%_%Template2typecode% ) ) ) )
     {
       *sipCppPtr =
         (AimsVector_%Template1typecode%_%Template2typecode% *)
