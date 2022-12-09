@@ -172,6 +172,20 @@ Transformation3d = soma.Transformation3d
 
 del ExtendedImporter
 
+def _export_enum(class_type, enum):
+    ''' Export enum members to its parent class
+
+    Sip6 keeps enum members inside the enum type: Klass.Enum.Value, whereas C++
+    and sip4 used to set them in the parent class: Klass.Value. This function
+    duplicates values from sip6 enums in the parent class like in sip4 so that
+    code is reusable with all sip versions.
+    '''
+    for key, value in enum.__dict__.items():
+        if not key.startswith('_') and type(value) is enum \
+                and not hasattr(class_type, key):
+            setattr(class_type, key, value)
+
+
 # move functions
 my_mod = sys.modules[__name__]
 for n, f in aimssip.aims.__dict__.items():
@@ -2688,3 +2702,13 @@ del x, private
 # add IO formats defined in python
 from . import io_ext
 
+# export sip6 enums
+_export_enum(carto.AllocatorStrategy, carto.AllocatorStrategy.DataAccess)
+_export_enum(carto.AllocatorStrategy, carto.AllocatorStrategy.DataAccess)
+_export_enum(soma.DataSource, soma.DataSource.Mode)
+_export_enum(soma.DataSource, soma.DataSource.IterateMode)
+_export_enum(soma.DataSourceInfoLoader, soma.DataSourceInfoLoader.State)
+_export_enum(sys.modules[__name__], merge_t)
+_export_enum(sys.modules[__name__], threshold_t)
+_export_enum(Connectivity, Connectivity.Type)
+_export_enum(AimsGraphWriter, AimsGraphWriter.SavingMode)
