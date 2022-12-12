@@ -695,19 +695,23 @@ def parcels_surface_features(mesh, texture, tex_index=-1, as_csv_table=False):
                 result,
                 {'timestep': {'areas': {'parcel': 'area'},
                               'lengths': {'parcel': 'length'}}})
+        else:
+            return result
     tex = texture[tex_index]
     if len(texture) != 1:
         texture = type(texture)()
         texture[0] = tex
-    parcels = numpy.unique(tex)
+    # print('tex:', len(texture), ', mesh:', len(mesh))
     areas = aims.SurfaceManip.meshArea(mesh, texture)
+    areas = {int(k): float(v) for k, v in areas.items()}
     lengths = {}
+    parcels = numpy.unique(tex)
     for parcel in parcels:
         boundary = aims.SurfaceManip.meshTextureBoundary(mesh, texture, parcel)
         p = boundary.vertex().np[boundary.polygon()]
         d2 = p[:, 1] - p[:, 0]
         length = np.sum(np.sqrt(np.sum(np.square(d2), axis=1)))
-        lengths[parcel] = length
+        lengths[int(parcel)] = float(length)
 
     result = {'areas': areas, 'lengths': lengths}
     if as_csv_table:

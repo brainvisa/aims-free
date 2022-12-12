@@ -2421,6 +2421,7 @@ map<int, float> SurfaceManip::meshArea( const AimsSurface<3, Void> & surf,
         area += a;
     }
   }
+
   if( !tex )
     areas[0] = area;
   return areas;
@@ -2431,7 +2432,7 @@ map<int, float> SurfaceManip::meshArea( const AimsSurfaceTriangle & surf,
                                         const TimeTexture<int16_t> & tex )
 {
   map<int, float> areas;
-  if( surf.size() == 0 )
+  if( surf.size() == 0 || tex.size() == 0 )
     return areas;
 
   const AimsSurface<3, Void> & mesh = surf.begin()->second;
