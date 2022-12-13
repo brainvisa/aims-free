@@ -5,7 +5,9 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 from soma import aims, aimsalgo
+from soma.utils.csv_utils import dict_to_table
 import numpy
+import numpy as np
 import os
 import six
 import sys
@@ -672,4 +674,50 @@ def set_texture_labels(texture, labels, tex_index=0):
     tprop.update({'interpolation': 'rgb'})
     header['labels'] = labels
 
+
+def parcels_surface_features(mesh, texture, tex_index=-1, as_csv_table=False):
+    ''' Record area and boundary length features on a set of parcels (in a
+    texture).
+
+    The mesh should be a single one (single timestep), the texture may have
+    several timesteps. The timestep index can be specified, or all timesteps
+    will be recorded, and the result will be a dict.
+
+    The result is a dict, unless as_csv_table is set. In that case it will be
+    a CSV-shaped array.
+    '''
+    if tex_index < 0:
+        # do all parcels in a dict
+        result =  {t: parcels_surface_features(mesh, texture, t)
+                   for t in texture.keys()}
+        if as_csv_table:
+            return dict_to_table(
+                result,
+                {'timestep': {'areas': {'parcel': 'area'},
+                              'lengths': {'parcel': 'length'}}})
+        else:
+            return result
+    tex = texture[tex_index]
+    if len(texture) != 1:
+        texture = type(texture)()
+        texture[0] = tex
+    # print('tex:', len(texture), ', mesh:', len(mesh))
+    areas = aims.SurfaceManip.meshArea(mesh, texture)
+    areas = {int(k): float(v) for k, v in areas.items()}
+    lengths = {}
+    parcels = numpy.unique(tex)
+    for parcel in parcels:
+        boundary = aims.SurfaceManip.meshTextureBoundary(mesh, texture, parcel)
+        p = boundary.vertex().np[boundary.polygon()]
+        d2 = p[:, 1] - p[:, 0]
+        length = np.sum(np.sqrt(np.sum(np.square(d2), axis=1)))
+        lengths[int(parcel)] = float(length)
+
+    result = {'areas': areas, 'lengths': lengths}
+    if as_csv_table:
+        return dict_to_table(result,
+                             {'areas': {'parcel': 'area'},
+                              'lengths': {'parcel': 'length'}})
+    else:
+        return result
 
