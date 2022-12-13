@@ -17,6 +17,7 @@
 #include <aims/mesh/texture.h>
 #include <aims/connectivity/connectivity.h>
 #include <aims/utility/converter_volume.h>
+#include <aims/transform/transform_objects.h>
 
 #include <iostream>
 #include <cartobase/config/verbose.h>
@@ -44,7 +45,8 @@ public:
                    const string & outexfile,
                    float radius, float height, float int_height, int mode,
                    int vmode, const string & projtexfile, float bg,
-                   int16_t mbg, const string & apply_to );
+                   int16_t mbg, const string & apply_to,
+                   const string & mesh_to_volf );
   
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
@@ -60,6 +62,7 @@ private:
   string       projtexfile;
   float        bg;
   int16_t      mbg;
+  string       mesh_to_volf;
 };
 
 LabelMapTexture::LabelMapTexture( const string & meshfile,
@@ -68,11 +71,12 @@ LabelMapTexture::LabelMapTexture( const string & meshfile,
                                   float rad, float hei, float int_height,
                                   int mod, int vmode,
                                   const string & projtexfile, float bg,
-                                  int16_t mbg, const string & apply_to )
+                                  int16_t mbg, const string & apply_to,
+                                  const string & mesh_to_volf )
     : Process(), meshf( meshfile ), brainf(brainfile), otexf( outexfile ),
       radius( rad ), height( hei ), int_height( int_height ), mode( mod ),
       vmode( vmode ), projtexfile( projtexfile ), bg( bg ), mbg( mbg ),
-      apply_tof( apply_to )
+      apply_tof( apply_to ), mesh_to_volf( mesh_to_volf )
 {
     registerProcessType( "Volume", "S8", &doit<int8_t> );
     registerProcessType( "Volume", "U8", &doit<uint8_t> );
@@ -322,6 +326,14 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
     return( false );
   if(verbose)
   	cout << "done.\n";
+
+  if( !mesh_to_volf.empty() )
+  {
+    Reader<Transformation3d> rt( mesh_to_volf );
+    rc_ptr<Transformation3d> t( rt.read() );
+    if( t )
+      transformMesh( mesh, *t );
+  }
 
   rc_ptr<Volume<short> > brainData;
   if( !brainf.empty() )
@@ -587,6 +599,7 @@ int main( int argc, const char** argv )
 {
   string                       volumefile, outexfile, apply_to;
   Reader<AimsSurfaceTriangle>  meshfile;
+  Reader<Transformation3d>     mesh_to_volf;
   float                        radius = 1., height = 1., int_height = 0;
   int                          mode = 3;
   int                          vmode = 0;
@@ -644,10 +657,15 @@ int main( int argc, const char** argv )
                  "The apply_to volume is converted into the same data type as "
                  "the main input volume.",
                  true );
+  app.addOption( mesh_to_volf, "-t",
+                 "Optional transformation between the mesh and the volume "
+                 "(mesh to volume) - any 3D transform is accepted including "
+                 "non-linear vector fields" );
   app.alias( "--mesh", "-m" );
   app.alias( "--input", "-i" );
   app.alias( "--output", "-o" );
   app.alias( "--apply_to", "-a" );
+  app.alias( "--transform", "-t" );
 
   try
   {
@@ -657,7 +675,8 @@ int main( int argc, const char** argv )
     LabelMapTexture	proc( meshfile.fileName(), brainfile.fileName(),
                             outexfile,
                             radius, height, int_height, mode, vmode,
-                            projtexfile.fileName(), bg, mbg, apply_to );
+                            projtexfile.fileName(), bg, mbg, apply_to,
+                            mesh_to_volf.fileName() );
     if( verbose )
       cout << "Starting program.." << endl;
     if( !proc.execute( volumefile ) )
