@@ -45,8 +45,8 @@ typedef int int32_t;
 %Include info.sip
 
 %Include mutex.sip
-%Include system_VOID.sip
 %Include std.sip
+%Include system_VOID.sip
 %Include complex.sip
 %Include cartobasetypes.sip
 %Include exception.sip

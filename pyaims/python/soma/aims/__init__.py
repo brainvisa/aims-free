@@ -109,12 +109,12 @@ from six.moves import range
 import collections
 import functools
 import types
-import sip
 import os
 import six
 import sys
 import numbers
 import inspect
+import importlib
 
 
 __docformat__ = 'restructuredtext en'
@@ -151,6 +151,22 @@ except ImportError as exc:
             exc
         )
     raise  # other import errors are re-raised
+
+sip = None
+try:
+    aimssip.sip_module()
+except Exception as e:
+    print('warning: aimssip.sip_module() is not defined. We will use a '
+          'default sip module, which may be the wrong one.')
+    print('error:', e)
+else:
+    try:
+        sip = importlib.import_module(aimssip.sip_module())
+        sys.modules['sip'] = sip
+    except:
+        print('could not import sip module as %s' % aimssip.sip_module())
+if sip is None:
+    import sip
 
 from soma.importer import ExtendedImporter, GenericHandlers, __namespaces__
 

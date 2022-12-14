@@ -88,6 +88,9 @@ parser.add_option("-T", "--target-platform", dest='target_platform',
                   help="Target platform [default: %s]" % 
                   '-'.join([platform.system().lower(), 
                             platform.architecture()[0][:2]]))
+parser.add_option("-D", "--define", dest='extra_defs', action='append',
+                  default=[],
+                  help="additional preprocessor definitions")
 
 (options, args) = parser.parse_args()
 if args:
@@ -95,6 +98,7 @@ if args:
 
 cpp = options.preprocess
 cppc = options.preprocessor
+extra_defs = ['-D%s' % d for d in options.extra_defs]
 if cpp and not cppc:
     cppc = 'cpp -C'
 elif not cpp:
@@ -225,7 +229,8 @@ for file, tps in todo.items():
                     sys.stdout.write('generating ' + ofile)
                 makeTemplate(
                     infile, otmpfile, typessub, templates, cpp=cppc,
-                    moc=options.moc, quiet=options.listFilesOnly)
+                    moc=options.moc, quiet=options.listFilesOnly,
+                    extra_defs=extra_defs)
                 if ofile != otmpfile:
                     if not filecmp.cmp(ofile, otmpfile):
                         shutil.copyfile(otmpfile, ofile)

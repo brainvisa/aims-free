@@ -23,6 +23,16 @@ typedef unsigned size_t;
 
 %#endif%
 
+int sip_module_version();
+%MethodCode
+  sipRes = SIP_VERSION;
+%End
+
+std::string sip_module();
+%MethodCode
+  sipRes = new std::string( SIP_MODULE );
+%End
+
 %#if SIP_VERSION < 0x060000%
 
 typedef long Py_hash_t;

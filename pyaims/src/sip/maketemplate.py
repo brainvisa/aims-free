@@ -71,7 +71,7 @@ def get_sip_version(qt_version=0x050000):
 
 
 def makeTemplate(infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
-                 quiet=0):
+                 quiet=0, extra_defs=None):
     # print('input :', infile)
     # print('output:', outfile)
     # print('types :', types)
@@ -111,6 +111,8 @@ def makeTemplate(infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
         sipver = get_sip_version(qver)
         cppcmd = cpp.split() + ['-DSIP_VERSION=' + '0x%06x' % sipver]
         cppcmd.append('-DQT_VERSION=' + hex(qver))
+        if extra_defs:
+            cppcmd += extra_defs
         if not quiet:
             print(' '.join(cppcmd))
         if platform.system() == 'Windows':
