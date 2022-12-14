@@ -68,10 +68,10 @@ class Knn /Abstract/
     std::vector<unsigned int> *ind = new std::vector<unsigned int>(res.first);
     std::vector<double> *dist = new std::vector<double>(res.second);
     PyObject *tuple = PyTuple_New(2);
-    PyTuple_SetItem(tuple, 0, sipConvertFromInstance(ind,
-		sipClass_vector_U32, Py_None));
-    PyTuple_SetItem(tuple, 1, sipConvertFromInstance(dist,
-		sipClass_vector_DOUBLE, Py_None));
+    PyTuple_SetItem(tuple, 0, sipConvertFromType(ind,
+		sipType_vector_U32, Py_None));
+    PyTuple_SetItem(tuple, 1, sipConvertFromType(dist,
+		sipType_vector_DOUBLE, Py_None));
     sipRes = tuple;
 %End
 
