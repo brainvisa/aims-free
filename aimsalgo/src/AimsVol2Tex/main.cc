@@ -660,7 +660,7 @@ int main( int argc, const char** argv )
   app.addOption( mesh_to_volf, "-t",
                  "Optional transformation between the mesh and the volume "
                  "(mesh to volume) - any 3D transform is accepted including "
-                 "non-linear vector fields" );
+                 "non-linear vector fields", true );
   app.alias( "--mesh", "-m" );
   app.alias( "--input", "-i" );
   app.alias( "--output", "-o" );
