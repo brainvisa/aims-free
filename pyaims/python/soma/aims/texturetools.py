@@ -708,7 +708,7 @@ def parcels_surface_features(mesh, texture, tex_index=-1, as_csv_table=False):
     parcels = numpy.unique(tex)
     for parcel in parcels:
         boundary = aims.SurfaceManip.meshTextureBoundary(mesh, texture, parcel)
-        p = boundary.vertex().np[boundary.polygon()]
+        p = boundary.vertex().np[boundary.polygon().np]
         d2 = p[:, 1] - p[:, 0]
         length = np.sum(np.sqrt(np.sum(np.square(d2), axis=1)))
         lengths[int(parcel)] = float(length)

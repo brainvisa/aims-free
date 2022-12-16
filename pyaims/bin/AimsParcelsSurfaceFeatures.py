@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-i', '--input', action='append', help='input textures')
 parser.add_argument('-o', '--output', help='output features (.json or .csv)')
 parser.add_argument('-m', '--mesh', action='append', help='input meshes')
-parser.add_argument('-a', '--attribute', action='append',
+parser.add_argument('-a', '--attribute', action='append', default=[],
                     help='item attributes. Each -a item corresponds to an '
                     'input texture. Attributes will be stored in the features '
                     'file as index keys. A value here is parsed as a JSON '
@@ -30,12 +30,13 @@ options = parser.parse_args()
 tex_names = options.input
 mesh_names = options.mesh
 out_features_name = options.output
+#print('attrib:', options.attribute)
 attribs = [json.loads(x) for x in options.attribute]
 
-print(tex_names)
-print(mesh_names)
-print(attribs)
-print(out_features_name)
+#print(tex_names)
+#print(mesh_names)
+#print(attribs)
+#print(out_features_name)
 
 mesh = None
 init_tex_index = -1
@@ -59,14 +60,15 @@ for i, tex_name in enumerate(tex_names):
     if 'index' in sattribs:
         tex_index = sattribs['index']
         sattribs = dict(sattribs)
-        del sattrib['index']
+        del sattribs['index']
     else:
         tex_index = init_tex_index
 
     texture = aims.read(tex_name)
     tfeat = texturetools.parcels_surface_features(
         mesh, texture, tex_index=tex_index, as_csv_table=False)
-    # tfeat.update(sattribs)
+    if sattribs:
+        tfeat['fixed_attributes'] = sattribs
     features[i] = tfeat
 
 shape_subdict = {'areas': {'parcel': 'area'},
