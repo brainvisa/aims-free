@@ -53,7 +53,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_MOMENT_VOID_DEFINED\n'
         '#define PYAIMSALGO_MOMENT_VOID_DEFINED\n'
         'inline int pyaimsalgoMoment_VOID_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, sipClass_Moment_VOID, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_Moment_VOID, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoMoment_VOID_Check',
@@ -80,7 +80,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_SAMPLABLE_FLOAT_3_DEFINED\n'
         '#define PYAIMSALGO_SAMPLABLE_FLOAT_3_DEFINED\n'
         'inline int pyaimsalgoSamplable_FLOAT_3_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, Samplable_FLOAT_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_Samplable_FLOAT_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoSamplable_FLOAT_3_Check',
@@ -107,7 +107,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_BUCKETMAPSAMPLER_FLOAT_3_DEFINED\n'
         '#define PYAIMSALGO_BUCKETMAPSAMPLER_FLOAT_3_DEFINED\n'
         'inline int pyaimsalgoBucketMapSampler_FLOAT_3_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, BucketMapSampler_FLOAT_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_BucketMapSampler_FLOAT_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoBucketMapSampler_FLOAT_3_Check',
@@ -134,7 +134,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_GENERALSAMPLER_FLOAT_3_DEFINED\n'
         '#define PYAIMSALGO_GENERALSAMPLER_FLOAT_3_DEFINED\n'
         'inline int pyaimsalgoGeneralSampler_FLOAT_3_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, GeneralSampler_FLOAT_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_GeneralSampler_FLOAT_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoGeneralSampler_FLOAT_3_Check',
@@ -161,7 +161,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_POLYNOMIAL_FLOAT_3_DEFINED\n'
         '#define PYAIMSALGO_POLYNOMIAL_FLOAT_3_DEFINED\n'
         'inline int pyaimsalgoPolynomial_FLOAT_3_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, Polynomial_FLOAT_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_Polynomial_FLOAT_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoPolynomial_FLOAT_3_Check',
@@ -188,7 +188,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_RESAMPLER_S16_DEFINED\n'
         '#define PYAIMSALGO_RESAMPLER_S16_DEFINED\n'
         'inline int pyaimsalgoResampler_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, Resampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_Resampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoResampler_S16_Check',
@@ -215,7 +215,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_SPLINERESAMPLER_S16_DEFINED\n'
         '#define PYAIMSALGO_SPLINERESAMPLER_S16_DEFINED\n'
         'inline int pyaimsalgoSplineResampler_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, SplineResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_SplineResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoSplineResampler_S16_Check',
@@ -242,7 +242,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_MASKLINEARRESAMPLER_S16_DEFINED\n'
         '#define PYAIMSALGO_MASKLINEARRESAMPLER_S16_DEFINED\n'
         'inline int pyaimsalgoMaskLinearResampler_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, MaskLinearResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_MaskLinearResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoMaskLinearResampler_S16_Check',
@@ -269,7 +269,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_NEARESTNEIGHBORRESAMPLER_S16_DEFINED\n'
         '#define PYAIMSALGO_NEARESTNEIGHBORRESAMPLER_S16_DEFINED\n'
         'inline int pyaimsalgoNearestNeighborResampler_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, NearestNeighborResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_NearestNeighborResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoNearestNeighborResampler_S16_Check',
@@ -296,7 +296,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_CUBICRESAMPLER_S16_DEFINED\n'
         '#define PYAIMSALGO_CUBICRESAMPLER_S16_DEFINED\n'
         'inline int pyaimsalgoCubicResampler_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, CubicResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_CubicResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoCubicResampler_S16_Check',
@@ -323,7 +323,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_QUINTICRESAMPLER_S16_DEFINED\n'
         '#define PYAIMSALGO_QUINTICRESAMPLER_S16_DEFINED\n'
         'inline int pyaimsalgoQuinticResampler_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, QuinticResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_QuinticResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoQuinticResampler_S16_Check',
@@ -350,7 +350,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_SIXTHORDERRESAMPLER_S16_DEFINED\n'
         '#define PYAIMSALGO_SIXTHORDERRESAMPLER_S16_DEFINED\n'
         'inline int pyaimsalgoSixthOrderResampler_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, SixthOrderResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_SixthOrderResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoSixthOrderResampler_S16_Check',
@@ -377,7 +377,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_SEVENTHORDERRESAMPLER_S16_DEFINED\n'
         '#define PYAIMSALGO_SEVENTHORDERRESAMPLER_S16_DEFINED\n'
         'inline int pyaimsalgoSeventhOrderResampler_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, SeventhOrderResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_SeventhOrderResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoSeventhOrderResampler_S16_Check',
@@ -404,7 +404,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_LINEARRESAMPLER_S16_DEFINED\n'
         '#define PYAIMSALGO_LINEARRESAMPLER_S16_DEFINED\n'
         'inline int pyaimsalgoLinearResampler_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, LinearResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_LinearResampler_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoLinearResampler_S16_Check',
@@ -431,7 +431,7 @@ typessub.update(
         '#ifndef PYAIMSALGO_RESAMPLERFACTORY_S16_DEFINED\n'
         '#define PYAIMSALGO_RESAMPLERFACTORY_S16_DEFINED\n'
         'inline int pyaimsalgoResamplerFactory_S16_Check( PyObject* o )\n'
-        '{ return sipCanConvertToInstance( o, ResamplerFactory_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+        '{ return sipCanConvertToType( o, sipType_ResamplerFactory_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
         '#endif',
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoResamplerFactory_S16_Check',

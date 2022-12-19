@@ -26,7 +26,7 @@ This file is currently not used...
   {
     // check type
     //return %Template1testPyType%( sipPy );
-    return sipCanConvertToInstance( sipPy, sipClass_%Template1sipClass%,
+    return sipCanConvertToType( sipPy, sipType_%Template1sipClass%,
       SIP_NOT_NONE);
   }
 
