@@ -34,6 +34,8 @@
 from __future__ import absolute_import
 import six
 from soma.importer import ExtendedImporter
+import sys
+
 
 ExtendedImporter().importInModule( '', globals(), locals(), 'aimsalgosip' )
 ExtendedImporter().importInModule( '', globals(), locals(), 'aimsalgosip', ['aimsalgosip.aimsalgo'] )
@@ -68,4 +70,9 @@ def ResamplerFactory(volume):
         dtype = aims.typeCode(volume)
     rfac = getattr(aims, 'ResamplerFactory_%s' % dtype)
     return rfac
+
+# export sip6 enums
+from soma.utils.sip_compat import sip_export_enums
+
+sip_export_enums(sys.modules[__name__])
 
