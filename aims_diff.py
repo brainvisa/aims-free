@@ -506,7 +506,7 @@ def diff_files_AIMS(reference_file_name, test_file_name,
     elif type(reference_data) is aims.AffineTransformation3d:
         data_difference_found = diff_trm(reference_data, test_data)
     else:
-        print("Comparison of data is not implemented")
+        print("Comparison of {} is not implemented".format(type(reference_data)))
 
     if data_difference_found is not None and not data_difference_found:
         print("Data are identical")
