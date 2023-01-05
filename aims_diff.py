@@ -390,10 +390,6 @@ def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name,
     reference_arr = numpy.asarray(reference_vec)
     test_arr = numpy.asarray(test_vec)
 
-    bool_diff = numpy.any(reference_arr != test_arr, axis=1)
-    print("  {0} / {1} lines differ"
-          .format(numpy.count_nonzero(bool_diff), len(bool_diff)))
-
     if reference_name == test_name:
         vector_name = reference_name
     else:
