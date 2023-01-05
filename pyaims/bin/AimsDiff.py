@@ -1,14 +1,10 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright CEA (2018-2023).
 # Copyright Forschungszentrum Jülich GmbH (2017).
 #
-# Contributor: Yann Leprince <yann.leprince@ylep.fr>.
-#
-# This file is part of highres-cortex, a collection of software designed
-# to process high-resolution magnetic resonance images of the cerebral
-# cortex.
+# Author: Yann Leprince <yann.leprince@ylep.fr>.
 #
 # This software is governed by the CeCILL licence under French law and
 # abiding by the rules of distribution of free software. You can use,
@@ -35,9 +31,6 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL licence and that you accept its terms.
-
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
 
 import argparse
 import sys
@@ -519,14 +512,20 @@ def parse_command_line(argv=sys.argv):
     """Parse the script's command line."""
     parser = argparse.ArgumentParser(
         description="""\
-Compare two files read by AIMS and summarize the differences""")
+Compare two files read by AIMS and summarize the differences.
+
+Please note that this program is intended for interactive use. The formatting
+of the output should not be considered stable, it may be modified or extended
+in the future.
+""")
     parser.add_argument("reference_file",
                         help="reference data file")
     parser.add_argument("test_file",
                         help="test data file")
     parser.add_argument("--reader", default="AIMS",
                         choices=("AIMS", "nibabel"),
-                        help="library used for reading the data")
+                        help="library used for reading the data (nibabel "
+                             "is experimental)")
     parser.add_argument("--min-value", type=float, default=None,
                         help="minimum value to be taken into account in "
                         "comparisons (smaller values are replaced by NaN "
