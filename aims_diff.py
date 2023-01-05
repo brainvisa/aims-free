@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright CEA (2018-2021).
+# Copyright CEA (2018-2023).
 # Copyright Forschungszentrum Jülich GmbH (2017).
 #
 # Contributor: Yann Leprince <yann.leprince@ylep.fr>.
@@ -401,7 +401,7 @@ def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name,
                        text_bits={
         'array': 'vector {0}'.format(vector_name),
         'Arrays': 'Vectors {0}'.format(vector_name),
-        'indent': '  ',
+        'indent': '',
     })
 
 
