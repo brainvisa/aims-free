@@ -210,7 +210,7 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS,
 
     print("{indent}  {0} value(s) differ ({2:.02%} of {1})"
           .format(total_diff_count,
-                  bool_diff.size,
+                  '×'.join(str(n) for n in bool_diff.shape),
                   total_diff_count / bool_diff.size,
                   **text_bits))
     if has_nans:
