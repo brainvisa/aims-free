@@ -138,15 +138,6 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS,
               .format(reference_arr.shape, test_arr.shape, **text_bits))
         return True
 
-    try:
-        common_dtype = numpy.promote_types(reference_arr.dtype, test_arr.dtype)
-    except TypeError:
-        print("{indent}{Arrays} have incompatible data types:\n"
-              "{indent}  Data type of reference: {0}\n"
-              "{indent}  Data type of test: {1}"
-              .format(reference_arr.dtype, test_arr.dtype, **text_bits))
-        return True
-
     # Only arrays with numeric dtypes can be compared. Return right away if
     # one array has a non-numeric dtype (dtypes with unsupported conversion to
     # NumPy, like Point3df before AIMS 4.7, are converted to Object).
@@ -166,6 +157,18 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS,
         print("{indent}A detailed data comparison cannot be done, because the "
               "NumPy data type for the test {array} ({0}) is not numeric."
               .format(test_arr.dtype, **text_bits))
+        return True
+
+    try:
+        common_dtype = numpy.promote_types(reference_arr.dtype, test_arr.dtype)
+    except TypeError:
+        common_dtype = numpy.void
+
+    if common_dtype == numpy.void:
+        print("{indent}{Arrays} have incompatible data types:\n"
+              "{indent}  Data type of reference: {0}\n"
+              "{indent}  Data type of test: {1}"
+              .format(reference_arr.dtype, test_arr.dtype, **text_bits))
         return True
 
     if numpy.array_equiv(reference_arr, test_arr):
