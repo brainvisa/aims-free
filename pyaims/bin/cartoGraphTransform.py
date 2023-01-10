@@ -68,7 +68,7 @@ def graphTransform2(g, motions, tmpg):
             try:
                 c = ['AimsThreshold', '-i', vol, '-o', thr, '-m', 'eq',
                     '-t', str(i), '-b']
-                cs = '"' + string.join(c, '" "') + '"'
+                cs = '"' + '" "'.join(c) + '"'
                 print(cs)
                 os.system(cs)
                 c = ['AimsApplyTransform', '-i', thr, '-o', thr, '-m', mot,
@@ -254,7 +254,7 @@ if __name__ == '__main__':
     gname, outname, motnames = parseOpts(sys.argv)
     # gvol = '/tmp/roivol.arg'
     # c = [ 'AimsGraphConvert', '-i', gname, '-o', gvol, '--volume' ]
-    # cs = '"' + string.join( c, '" "' ) + '"'
+    # cs = '"' + '" "'.join( c ) + '"'
     # print(cs)
     # os.system( cs )
 
