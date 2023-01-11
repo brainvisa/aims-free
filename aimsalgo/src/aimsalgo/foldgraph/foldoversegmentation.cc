@@ -534,7 +534,6 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
   {
     cout << "ss in many pieces - re-aggregating...\n";
     // determine bits correspondance before/after split
-    Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
     map<int, set<int> > corr;
     float match, maxmatch = 0;
     int i;
@@ -553,6 +552,9 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
           i = ibm2->first;
         }
       }
+      if( maxmatch == 0 )
+        cerr << "warning: assign bucket part to a disconnected one "
+             << "(at random)\n";
       corr[i].insert( ibm->first );
     }
     // cout << "correspondance map done\n";
@@ -619,6 +621,8 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
             i = ibm2->first;
           }
         }
+      if( maxmatch == 0 )
+        cerr << "warning: aggregation with disconnected parts !\n";
       ibm2 = sssplit->find( i );
       if( ibm2 == ebm )
       {
