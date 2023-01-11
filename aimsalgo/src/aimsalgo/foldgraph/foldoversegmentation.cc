@@ -651,7 +651,7 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
 
       maxmatch = 0;
       i = 0;
-      int dil = 0;
+      int dil = -1;
       while( maxmatch == 0 && dil < 5 )
       {
         ++dil;
