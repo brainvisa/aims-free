@@ -1500,6 +1500,124 @@ BucketMap<T> *FoldArgOverSegment::dilateBucket( const BucketMap<T> & in )
 }
 
 
+void FoldArgOverSegment::mergeVertices( Vertex *v1, Vertex *v2 )
+{
+  set<Edge *> edges = v1->edgesTo( v2 );
+  set<Edge *>::iterator ie, ee = edges.end();
+  list<Edge *> junctions;
+
+  for( ie=edges.begin(); ie!=ee; ++ie )
+    if( (*ie)->getSyntax() == "junction" )
+      junctions.push_back( *ie );
+
+  if( junctions.empty() )
+    // no junction between v1 and v2: vertices are disconnected, don't merge
+    return;
+  // cout << "merge with junctions: " << junctions.size() << endl;
+  rc_ptr<BucketMap<Void> >
+    ss1, ss2, bottom1, bottom2, other1, other2, junction;
+
+  if( !v1->getProperty( "aims_ss", ss1 ) )
+    ss1.reset( new BucketMap<Void> );
+  if( v2->getProperty( "aims_ss", ss2 ) )
+    (*ss1)[0].insert( (*ss2)[0].begin(), (*ss2)[0].end() );
+
+  // add junctions in main ss
+  list<Edge *>::iterator ij, ej = junctions.end();
+  for( ij=junctions.begin(); ij!=ej; ++ij )
+  {
+    if( (*ij)->getProperty( "aims_junction", junction ) )
+      (*ss1)[0].insert( (*junction)[0].begin(), (*junction)[0].end() );
+  }
+
+  GraphManip::storeAims( *_graph, v1, "aims_ss", ss1 );
+
+  if( !v1->getProperty( "aims_bottom", bottom1 ) )
+    bottom1.reset( new BucketMap<Void> );
+  if( v2->getProperty( "aims_bottom", bottom2 ) )
+    (*bottom1)[0].insert( (*bottom2)[0].begin(), (*bottom2)[0].end() );
+  if( !bottom1->empty() && !(*bottom1)[0].empty() )
+    GraphManip::storeAims( *_graph, v1, "aims_bottom", bottom1 );
+
+  if( !v1->getProperty( "aims_other", other1 ) )
+    other1.reset( new BucketMap<Void> );
+  if( v2->getProperty( "aims_other", other2 ) )
+    (*other1)[0].insert( (*other2)[0].begin(), (*other2)[0].end() );
+  if( !other1->empty() && !(*other1)[0].empty() )
+    GraphManip::storeAims( *_graph, v1, "aims_other", other1 );
+
+  // merge edges
+  Vertex::iterator ie1, ee1 = v1->end();
+  Edge *match;
+  Vertex *otherv, *otherv1;
+  list<string> edge_bk_list;
+  edge_bk_list.push_back( "junction" );
+  edge_bk_list.push_back( "cortical" );
+  edge_bk_list.push_back( "plidepassage" );
+  list<string>::const_iterator iet, eet = edge_bk_list.end();
+  int pn, pn1;
+
+  for( ie=v2->begin(), ee=v2->end(); ie!=ee; ++ie )
+  {
+    otherv = *(*ie)->begin();
+    if( otherv == v2 )
+      otherv = *(*ie)->rbegin();
+
+    if( (*ie)->getSyntax() == "junction" && otherv == v1 )
+      continue;  // junctions between v1 and v2 are already done
+
+    // find if a matching one exists in v1
+    match = 0;
+
+    for( ie1=v1->begin(); ie1!=ee1; ++ie1 )
+    {
+      otherv1 = *(*ie1)->begin();
+      if( otherv1 == v1 )
+        otherv1 = *(*ie1)->rbegin();
+      if( (*ie1)->getSyntax() == (*ie)->getSyntax() && otherv == otherv1 )
+      {
+        match = *ie1;
+        break;
+      }
+    }
+
+    if( match )
+    {
+      // merge relations
+      pn = 0;
+      for(iet=edge_bk_list.begin(); iet!=eet; ++iet )
+        if( (*ie)->getProperty( string( "aims_" ) + *iet, junction ) )
+        {
+          pn += (*junction)[0].size();
+          if( !match->getProperty( string( "aims_" ) + *iet, ss1 ) )
+            ss1.reset( new BucketMap<Void> );
+          (*ss1)[0].insert( (*junction)[0].begin(), (*junction)[0].end() );
+          GraphManip::storeAims( *_graph, match, string( "aims_" ) + *iet,
+                                 ss1 );
+          pn1 = 0;
+          try
+          {
+            pn1 = match->getProperty( "point_number" )->getScalar();
+          }
+          catch( ... )
+          {
+          }
+          pn1 += pn;
+          match->setProperty( "point_number", pn1 );
+        }
+    }
+    else
+    {
+      // transfer relation to v1
+      Edge *edge = _graph->addEdge( v1, otherv, (*ie)->getSyntax() );
+      edge->copyProperties( *ie );
+    }
+  }
+
+  _graph->removeVertex( v2 );
+}
+
+
 template BucketMap<Void> *
 FoldArgOverSegment::dilateBucket( const BucketMap<Void> & in );
 template BucketMap<int16_t> *
