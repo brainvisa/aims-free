@@ -120,6 +120,13 @@ namespace aims
     template <typename T>
     static BucketMap<T> *dilateBucket( const BucketMap<T> & in );
 
+    /** merge vertices into v1.
+
+        v2 is removed from the graph, and actually deleted if its ref counter
+        reaches 0.
+    */
+    void mergeVertices( Vertex *v1, Vertex *v2 );
+
 
   private:
     Graph *_graph;
