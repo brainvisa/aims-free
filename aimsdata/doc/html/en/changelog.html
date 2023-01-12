@@ -53,7 +53,7 @@
 
 
 <!-- -->
-<h4> <a name="version-5.1.0"></a>Jan. 09, 2023, Version 5.1.0</h4>
+<h4> <a name="version-5.1.0"></a>Jan. 12, 2023, Version 5.1.0</h4>
 
 <ul>
   <li>Support Volume classes with strides on X axis. Strides were present in the volume structure but most functions assumed that voxels were contiguous on the first (X) axis. This forbid for instance bindings to numpy arrays which had a "C" ordering convention. This limitation is now gone in main Volume methods and operator. However many algorithms are still assuming that the first axis is contiguous (and use pointers with ++ incrementation), so these volumes should be reserved for specific and tested uses.</li>
@@ -84,6 +84,8 @@
   <li>Added option to pass a transformation in <tt>AimsVol2Tex</tt> command.
   </li>
   <li>New command <tt>AimsDiff.py</tt> which compares several types of neuroimaging files for equality.
+  </li>
+  <li>Fixes (significant rework) of sulci split algorithm, which could fail and produce vertices with disconnected voxels when the cut line was very scattered. The new algorithm ensures connected parts. A sulci vertices merge function was also added.
   </li>
 
   <li>Multipe other bug fixes...</li>
