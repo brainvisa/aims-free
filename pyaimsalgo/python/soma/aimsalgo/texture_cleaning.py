@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from soma import aims, aimsalgo
+from soma.aims.labelstools import read_labels
 import numpy as np
 import json
 import sys
@@ -15,103 +16,6 @@ default_ero_dist = {'unknown': 7.,
                     'other': 0.5}
 default_dil = 1.5
 default_min_cc_size = 100.  # mm2
-
-
-def read_labels_hie(nomenclature):
-    ''' Read a nomenclature as labels dict. Used by :func:`read_labels`, does
-    not need to be called directly.
-    '''
-    # print('READ .hie labels')
-    hie = aims.read(nomenclature)
-    labels = {}
-    todo = [hie]
-    while todo:
-        tree = todo.pop(0)
-        todo += tree.children()
-        if 'label' in tree and 'name' in tree:
-            num = int(tree['label'])
-            if 'color' in tree:
-                color = [float(c)/255 for c in tree['color']]
-                color += [1.] * (4 - len(color))
-            else:
-                color = [.5, .5, .5, 1.]
-            labels[num] = {'Label': tree['name'], 'RGB': color}
-    if 0 not in labels:
-        labels[0] = {'Label': 'unknown', 'RGB': [0., 0., 0., 1.]}
-
-    # print('labels:', len(labels))
-    # delete thingsin correct order to avoid crash
-    del tree, todo
-    del hie
-
-    return labels
-
-
-def read_labels(nomenclature):
-    ''' Read a nomenclature file, which may be in several formats:
-
-    - JSON (JulichBrain nomenclature):
-
-        {"properties": {"regions": [<region_def>, ...]}}
-
-        region_def:
-        {
-            "labelIndex": "12",
-            "name": "rototo",
-            "color": [255, 255, 0],
-            "children": [<region_def>, ...]
-        }
-
-    - CSV (JulichBrain nomenclature):
-
-        12, rototo
-
-        (all colors will be black)
-
-    - HIE (AIMS Hierarchical nomenclature)
-
-    Returns
-    -------
-    labels: dict
-        {12: {"Label": "rototo", "RGB": [1., 1., 0., 1.]}, ...}
-    '''
-
-    if nomenclature.endswith('.json'):
-        # json format (v 2.9+)
-        labels = {}
-        # process void also
-        labels[0] = {'Label': 'unknown', 'RGB': [0., 0., 0., 1.]}
-        with open(nomenclature) as f:
-            labels_map = json.load(f)
-        todo = list(labels_map['properties']['regions'])
-        while todo:
-            item = todo.pop(0)
-            index = item.get('labelIndex')
-            name = item['name']
-            if index is not None:
-                index = int(index)
-                if index in labels and labels[index]['Label'] != name:
-                    print('multiple index', index, ':', labels[index]['Label'],
-                          'and:', name)
-                    continue
-                labels[index] = {'Label': name}
-                color = item.get('color')
-                if color is not None:
-                    color = [float(c.strip()) / 255
-                             for c in color.split(',')] + [1.]
-                    labels[index]['RGB'] = color
-            todo += item.get('children', [])
-    elif nomenclature.endswith('.hie'):
-        return read_labels_hie(nomenclature)
-    else:
-        with open(nomenclature) as f:
-            labels = f.read().strip().split('\n')
-        labels = [l.strip().split() for l in labels]
-        labels = {int(l[0]): {'Label': l[1]} for l in labels}
-        # process void also
-        labels[0] = {'Label': 'unknown', 'RGB': [0., 0., 0., 1.]}
-
-    return labels
 
 
 def _clean_one_tex(tex, mesh, otex, lvalue, label, ero_dist, dilation):
