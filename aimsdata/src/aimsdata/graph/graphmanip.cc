@@ -1054,7 +1054,7 @@ bool GraphManip::volume2Buckets( Graph & g, CreateBucketFunc createfunc )
       cs.vol2Bucket( *ie );
   }
 
-  // fill in buckets, voume by volume
+  // fill in buckets, volume by volume
   //cout << "filling buckets...\n";
   map<rc_ptr<Volume<short> >, map<int, BucketMap<Void>::Bucket *> >::iterator
     ibm, ebm = cs.buckets.end();
@@ -1198,7 +1198,7 @@ GraphManip::graphElementCodeByAtt( Graph & g, const string & syntax,
 
 
 template <typename T>
-Graph* GraphManip::graphFromVolume( const VolumeRef<T> & vol,
+Graph* GraphManip::graphFromVolume( const rc_ptr<Volume<T> > & vol,
                                     T background, map<T, string> *trans )
 {
   Graph	*g = new Graph( "RoiArg" );
@@ -1208,7 +1208,7 @@ Graph* GraphManip::graphFromVolume( const VolumeRef<T> & vol,
 
 
 template <typename T>
-void GraphManip::graphFromVolume( const VolumeRef<T> & vol, Graph & g,
+void GraphManip::graphFromVolume( const rc_ptr<Volume<T> > & vol, Graph & g,
                                   T background,  map<T, string> *trans,
                                   bool automaticBackgroundSearch )
 {
@@ -1254,7 +1254,7 @@ void GraphManip::graphFromVolume( const VolumeRef<T> & vol, Graph & g,
   gec.global_index_attribute = "roi_label";
   gec.syntax = "roi";
 
-  VolumeRef<T>	volume( vol );
+  rc_ptr<Volume<T> > volume( vol );
 //   volume->header().copyProperties( vol->header() );
   g.setProperty( gec.global_attribute, volume );
   typename map<T, string>::iterator im, em ;
@@ -1857,27 +1857,27 @@ template void GraphManip::storeAims( Graph &, GraphObject*, const string &,
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
                                      rc_ptr<BucketMap<Void> > );
 template Graph*
-GraphManip::graphFromVolume( const VolumeRef<int16_t> & vol,
+GraphManip::graphFromVolume( const rc_ptr<Volume<int16_t> > & vol,
                              int16_t background = 0,
                              map<int16_t, string> *trans = 0 );
 template void
-GraphManip::graphFromVolume( const VolumeRef<int16_t> & vol,
+GraphManip::graphFromVolume( const rc_ptr<Volume<int16_t> > & vol,
                              Graph & g,
                              int16_t background = 0,
                              map<int16_t, string> *trans = 0,
                              bool automaticBackgroundSearch = true );
 template Graph*
-GraphManip::graphFromVolume( const VolumeRef<int32_t> & vol,
+GraphManip::graphFromVolume( const rc_ptr<Volume<int32_t> > & vol,
                              int32_t background = 0,
                              map<int32_t, string> *trans = 0 );
 template void
-GraphManip::graphFromVolume( const VolumeRef<int32_t> & vol,
+GraphManip::graphFromVolume( const rc_ptr<Volume<int32_t> > & vol,
                              Graph & g,
                              int32_t background = 0,
                              map<int32_t, string> *trans = 0,
                              bool automaticBackgroundSearch = true );
 
 
-  #define _TMP_ rc_ptr<std::map<std::string,std::map<std::string,aims::GraphElementCode> > > 
+#define _TMP_ rc_ptr<std::map<std::string,std::map<std::string,aims::GraphElementCode> > >
 INSTANTIATE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
