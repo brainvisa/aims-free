@@ -43,6 +43,8 @@
 #include <cartobase/object/sreader.h>
 #include <cartobase/stream/fileutil.h>
 #include <soma-io/reader/pythonreader.h>
+#include <aims/roi/hie.h>
+
 
 using namespace carto;
 using namespace aims;
@@ -53,53 +55,53 @@ void copy( carto::AttributedObject *ao, const string & attfrom,
            const string & attto, bool chk, const Semantic & sem, 
            const SyntaxSet & syntax )
 {
-  const Semantic	*sm = &sem;
+  const Semantic *sm = &sem;
   if( !chk )
-    {
-      SyntaxSet::const_iterator	is = syntax.find( ao->getSyntax() );
-      if( is == syntax.end() )
-	return;
-      Syntax::const_iterator	iss = is->second.find( attfrom );
-      if( iss == is->second.end() )
-	return;
-      sm = &iss->second;
-    }
-  const string	& type = sm->type;
+  {
+    SyntaxSet::const_iterator is = syntax.find( ao->getSyntax() );
+    if( is == syntax.end() )
+      return;
+    Syntax::const_iterator iss = is->second.find( attfrom );
+    if( iss == is->second.end() )
+      return;
+    sm = &iss->second;
+  }
+  const string & type = sm->type;
   if( type == "string" )
-    {
-      string	x;
-      if( ao->getProperty( attfrom, x ) )
-	ao->setProperty( attto, x );
-    }
+  {
+    string x;
+    if( ao->getProperty( attfrom, x ) )
+      ao->setProperty( attto, x );
+  }
   else if( type == "int" )
     {
-      int	x;
+      int x;
       if( ao->getProperty( attfrom, x ) )
-	ao->setProperty( attto, x );
+        ao->setProperty( attto, x );
     }
   else if( type == "float" )
     {
-      float	x;
+      float x;
       if( ao->getProperty( attfrom, x ) )
-	ao->setProperty( attto, x );
+        ao->setProperty( attto, x );
     }
   else if( type == "int_vector" )
     {
-      vector<int>	x;
+      vector<int> x;
       if( ao->getProperty( attfrom, x ) )
-	ao->setProperty( attto, x );
+        ao->setProperty( attto, x );
     }
   else if( type == "float_vector" )
     {
-      vector<float>	x;
+      vector<float> x;
       if( ao->getProperty( attfrom, x ) )
-	ao->setProperty( attto, x );
+        ao->setProperty( attto, x );
     }
 }
 
 void remaneRoiNodes( Graph& g )
 {
-  Graph::iterator		iv, ev = g.end();
+  Graph::iterator iv, ev = g.end();
   
   int roiLabel ;
   string roiName ;
@@ -107,8 +109,8 @@ void remaneRoiNodes( Graph& g )
   for( iv=g.begin(); iv!=ev; ++iv )
     if( (*iv)->getProperty("name", roiName ) )
       if( roiName == "Unknown" || roiName == "unknown" )
-       	if( (*iv)->getProperty("roi_label", roiLabel ) )
- 	  (*iv)->setProperty("name", carto::toString<int>(roiLabel) ) ;
+        if( (*iv)->getProperty("roi_label", roiLabel ) )
+          (*iv)->setProperty("name", carto::toString<int>(roiLabel) ) ;
   
 }
 
@@ -129,22 +131,22 @@ void substitute( Graph& graph,
 
     Dictionary syntaxSubstitutions;
     if ( !dictionary.getProperty( "syntax_substitutions",
-                                   syntaxSubstitutions ) )
+                                  syntaxSubstitutions ) )
     {
 
       throw runtime_error(
-                      std::string( "'syntax_substitutions' not present in '" ) +
-                      filename + "' substitution file" );
+        std::string( "'syntax_substitutions' not present in '" ) +
+        filename + "' substitution file" );
 
     }
     IntDictionary labelSubstitutions;
     if ( !dictionary.getProperty( "label_substitutions",
-                                   labelSubstitutions ) )
+                                  labelSubstitutions ) )
     {
 
       throw runtime_error(
-                      std::string( "'label_substitutions' not present in '" ) +
-                      filename + "' substitution file" );
+        std::string( "'label_substitutions' not present in '" ) +
+        filename + "' substitution file" );
 
     }
 
@@ -230,7 +232,7 @@ void substitute( Graph& graph,
 
       int actualLabel;
       if ( ( *i )->getProperty( cc->second.global_index_attribute,
-                                 actualLabel ) )
+                                actualLabel ) )
       {
 
         try
@@ -269,7 +271,7 @@ void substitute( Graph& graph,
   {
 
     throw runtime_error(
-        string( "void renameCustomNodes( Graph& g, const string& filename )" ) +
+      string( "void renameCustomNodes( Graph& g, const string& filename )" ) +
         " : " + e.what() );
 
   }
@@ -277,7 +279,89 @@ void substitute( Graph& graph,
 }
 
 
-void substituteLabelsName( Graph& graph, const string& filename )
+void get_labels_dict( Object gifti_labels, map<int, string> & labels_dict,
+                      Hierarchy & hie )
+{
+  Object it = gifti_labels->objectIterator();
+
+  map<string, string> hie_syntax;
+  hie_syntax[ "RoiArg" ] = "bloblabel_name";
+  hie_syntax[ "CorticalFoldArg" ] = "fold_name";
+
+  string hsynt = "fold_name";
+  map<string, string>::const_iterator
+    in = hie_syntax.find( hie.getProperty( "graph_syntax" )->getString() );
+  if( in != hie_syntax.end() )
+    hsynt = in->second;
+
+  for( ; it->isValid(); it->next() )
+  {
+    try
+    {
+      int num = it->intKey();
+      string label = it->currentValue()->getProperty( "Label" )->getString();
+      labels_dict[ num ] = label;
+      vector<int> color;
+      try
+      {
+        Object rgb = it->currentValue()->getProperty( "RGB" );
+        Object rgb_it = rgb->objectIterator();
+        for( ; rgb_it->isValid(); rgb_it->next() )
+        {
+          int c = int( round( rgb_it->currentValue()->getScalar() * 255.99 ) );
+          color.push_back( c );
+        }
+      }
+      catch( ... )
+      {
+      }
+      Tree *t = new Tree( true, hsynt );
+      t->setProperty( "name", label );
+      t->setProperty( "label", Object::value( num )->getString() );
+      if( !color.empty() )
+        t->setProperty( "color", color );
+      hie.insert( t );
+    }
+    catch( ... )
+    {
+    }
+  }
+}
+
+
+void substituteLabelsName( Graph& graph, const map<int, string> & lut )
+{
+  try
+  {
+    Graph::iterator iv, ev = graph.end();
+    int roiLabel;
+
+    for( iv=graph.begin(); iv!=ev; ++iv )
+      if( (*iv)->getProperty("roi_label", roiLabel ) )
+      {
+        map< int, string >::const_iterator m = lut.find( roiLabel );
+        if ( m != lut.end() )
+        {
+          (*iv)->setProperty("name", m->second ) ;
+        }
+      }
+
+  }
+  catch ( exception& e )
+  {
+
+    throw runtime_error(
+      string( "void substituteLabelsName( Graph& g, "
+              "const map<int, string> & filename )" ) +
+              " : " + e.what() );
+
+  }
+
+}
+
+
+void substituteLabelsName( Graph& graph, const string& filename,
+                           Hierarchy & hie )
 {
 
   try
@@ -289,6 +373,17 @@ void substituteLabelsName( Graph& graph, const string& filename )
 
     reader.read( dictionary );
 
+    map< int, string > lut;
+
+    if( dictionary.hasProperty( "GIFTI_labels_table" ) )
+    {
+      // volume/texture minf format
+      Object gifti_labels = dictionary.getProperty( "GIFTI_labels_table" );
+      get_labels_dict( gifti_labels, lut, hie );
+      substituteLabelsName( graph, lut );
+      return;
+    }
+
     ObjectVector labels;
     ObjectVector names;
 
@@ -296,16 +391,16 @@ void substituteLabelsName( Graph& graph, const string& filename )
     {
 
       throw runtime_error(
-                      std::string( "'labels' not present in '" ) +
-                      filename + "' substitution file" );
+        std::string( "'labels' not present in '" ) +
+                     filename + "' substitution file" );
 
     }
     if ( !dictionary.getProperty( "names", names ) )
     {
 
       throw runtime_error(
-                      std::string( "'names' not present in '" ) +
-                      filename + "' substitution file" );
+        std::string( "'names' not present in '" ) +
+                     filename + "' substitution file" );
 
     }
 
@@ -313,13 +408,12 @@ void substituteLabelsName( Graph& graph, const string& filename )
     {
 
       throw runtime_error(
-                      std::string( "'labels' and 'names' does not have the "
-                                   "same length in '" ) +
-                      filename + "' substitution file" );
+        std::string( "'labels' and 'names' does not have the "
+                     "same length in '" ) +
+                     filename + "' substitution file" );
 
     }
 
-    map< int, string > lut;
     ObjectVector::const_iterator
       l = labels.begin(),
       le = labels.end();
@@ -334,59 +428,45 @@ void substituteLabelsName( Graph& graph, const string& filename )
       ++n;
 
     }
-
-    Graph::iterator iv, ev = graph.end();
-    int roiLabel;
-  
-    for( iv=graph.begin(); iv!=ev; ++iv )
-      if( (*iv)->getProperty("roi_label", roiLabel ) )
-      {
-        map< int, string >::iterator m = lut.find( roiLabel );
-        if ( m != lut.end() )
-        {
- 	  (*iv)->setProperty("name", m->second ) ;
-        }
-      }
-
+    substituteLabelsName( graph, lut );
   }
   catch ( exception& e )
   {
 
     throw runtime_error(
-        string( "void substituteLabelsName( Graph& g, "
-                "const string& filename )" ) +
-        " : " + e.what() );
+      string( "void substituteLabelsName( Graph& g, "
+              "const string& filename )" ) +
+              " : " + e.what() );
 
   }
-
 }
 
 
-void copyatt( Graph & g, const string & attfrom, const string & attto, 
-	      const string & stx, const SyntaxSet & syntax  )
+void copyatt( Graph & g, const string & attfrom, const string & attto,
+              const string & stx, const SyntaxSet & syntax  )
 {
-  Graph::iterator		iv, ev = g.end();
-  const set<Edge *>		& edges = g.edges();
-  set<Edge *>::const_iterator	ie, ee = edges.end();
-  bool				chk = !stx.empty();
+  Graph::iterator iv, ev = g.end();
+  const set<Edge *> & edges = g.edges();
+  set<Edge *>::const_iterator ie, ee = edges.end();
+  bool chk = !stx.empty();
 
-  Semantic			sem;
+  Semantic sem;
   if( chk )
     {
-      SyntaxSet::const_iterator	is = syntax.find( stx );
+      SyntaxSet::const_iterator is = syntax.find( stx );
       if( is == syntax.end() )
-	{
-	  cerr << "Element syntax " << stx << " is not known - " 
-	       << "can't perform copy\n";
-	  exit( EXIT_FAILURE );
-	}
-      Syntax::const_iterator	iss = is->second.find( attfrom );
+      {
+        cerr << "Element syntax " << stx << " is not known - "
+             << "can't perform copy\n";
+        exit( EXIT_FAILURE );
+      }
+      Syntax::const_iterator iss = is->second.find( attfrom );
       if( iss == is->second.end() )
-	{
-	  cerr << "Element attrinute " << stx << " / " << attfrom 
-	       << " isn't in the syntax - can't perform copy\n";
-	  exit( EXIT_FAILURE );
-	}
+      {
+        cerr << "Element attrinute " << stx << " / " << attfrom
+             << " isn't in the syntax - can't perform copy\n";
+        exit( EXIT_FAILURE );
+      }
       sem = iss->second;
     }
 
@@ -402,47 +482,49 @@ void copyatt( Graph & g, const string & attfrom, const string & attto,
 
 int main( int argc, const char **argv )
 {
-  string	filein, fileout, basename, attfrom, attto, stx;
-  bool		global = false;
-  bool		local = false;
-  bool		volume = false, bucket = false, roi = false;
-  string        substitutionFileName;
-  string	labelFileName;
-  AimsApplication	app( argc, argv, "Performs graph storage conversion " 
-			     "or volume-S16 labels volume to graph conversion" 
-			     );
+  string filein, fileout, basename, attfrom, attto, stx;
+  bool   global = false;
+  bool   local = false;
+  bool   volume = false, bucket = false, roi = false;
+  string substitutionFileName;
+  string labelFileName;
+  string hieFileName;
+
+  AimsApplication app( argc, argv, "Performs graph storage conversion "
+                       "or volume-S16 labels volume to graph conversion"
+                     );
 
   app.addOption( filein, "-i", "input data graph" );
   app.alias( "-input", "-i" );
   app.addOption( fileout, "-o", "output data graph (default: same as input)", 
-		 true );
+                 true );
   app.alias( "-output", "-o" );
   app.addOption( basename, "-b", "directory where to put sub-data in "
-		 "(default: <input>.data)", true );
+                 "(default: <input>.data)", true );
   app.alias( "-basename", "-b" );
   app.addOption( global, "-g", "save sub-objects in 'global' mode "
-		 "(1 file for all objects of same type)", true );
+                 "(1 file for all objects of same type)", true );
   app.alias( "-global", "-g" );
   app.addOption( local, "-l", "save sub-objects in 'local' mode "
-		 "(each object with a specific file) (contradictory with -g)", 
-		 true );
+                 "(each object with a specific file) (contradictory with -g)",
+                 true );
   app.alias( "-local", "-l" );
   app.addOption( attfrom, "-c", "copy attribute (use with -d)", true );
   app.addOption( attto, "-d", "destination attribute (for use with -c)", 
-		 true );
+                 true );
   app.alias( "-copy", "-c" );
   app.alias( "-dest", "-d" );
   app.addOption( stx, "-s", "syntax of elements involved by copy operations "
-		 "(use with -c and -d) [default: no filtering]", true );
+                 "(use with -c and -d) [default: no filtering]", true );
   app.alias( "-syntax", "-s" );
   app.addOption( volume, "--volume", "convert buckets to volume of labels", 
-		 true );
+                 true );
   app.addOption( bucket, "--bucket", "convert volumes of labels to buckets", 
-		 true );
+                 true );
 
   app.addOption( roi, "--roi", "Output graph will be a roi graph, and all " 
                  "unnamed regions will be named by their roi label", 
-		 true );
+                 true );
 
   app.addOption( substitutionFileName, "--substitution",
                  "Graph substitution file for syntax and label", 
@@ -450,113 +532,142 @@ int main( int argc, const char **argv )
   app.addOption( labelFileName, "--labels",
                  "Substitution file for label's name", 
                  true );
+  app.addOption( hieFileName, "-n",
+                 "Output nomenclature (.hie) filename, converted from volume "
+                 "header labels/colors table (GIFTI_labels_table)",
+                 true );
 
-  Graph		g( "ClusterArg" );
-  SyntaxSet	syntax;
+  Graph     g( "ClusterArg" );
+  SyntaxSet syntax;
 
   try
     {
       app.initialize();
 
       if( global && local )
-	{
-	  cerr << "cant't use both -g and -l options\n";
-	  return EXIT_FAILURE;
-	}
+      {
+        cerr << "cant't use both -g and -l options\n";
+        return EXIT_FAILURE;
+      }
       if( volume && bucket )
-	{
-	  cerr << "can't use both --volume and --bucket options" << endl;
-	  return EXIT_FAILURE;
-	}
+      {
+        cerr << "can't use both --volume and --bucket options" << endl;
+        return EXIT_FAILURE;
+      }
 
       if( !substitutionFileName.empty() && roi )
-	{
-	  cerr << "can't use both --roi and --substitution options" << endl;
-	  return EXIT_FAILURE;
-	}
+      {
+        cerr << "can't use both --roi and --substitution options" << endl;
+        return EXIT_FAILURE;
+      }
 
 
       if( fileout.empty() )
-	fileout = filein;
+        fileout = filein;
 
-      char	sep = FileUtil::separator();
+      char sep = FileUtil::separator();
       // syntax
-      SyntaxReader	sr( Paths::findResourceFile(
+      SyntaxReader sr( Paths::findResourceFile(
         "nomenclature/syntax/graph.stx", "aims" ) );
       sr >> syntax;
 
       // read
-      Reader<Graph>	grd( filein );
+      Reader<Graph> grd( filein );
       grd.read( g );
 
       // conversions
       if( volume )
-	GraphManip::buckets2Volume( g );
+        GraphManip::buckets2Volume( g );
       if( bucket )
-	GraphManip::volume2Buckets( g );
+        GraphManip::volume2Buckets( g );
 
-      string		base;
+      string base;
 
       if( !basename.empty() )
-	base = basename;
+        base = basename;
       else
-	{
-	  base = fileout;
-	  string::size_type pos = base.rfind( '.' );
-	  if( pos != string::npos )
-	    base.erase( pos, base.length() - pos );
-	  pos = base.rfind( sep );
-	  if( pos != string::npos )
-	    base.erase( 0, pos + 1 );
-	  base += ".data";
-	}
+      {
+        base = fileout;
+        string::size_type pos = base.rfind( '.' );
+        if( pos != string::npos )
+          base.erase( pos, base.length() - pos );
+        pos = base.rfind( sep );
+        if( pos != string::npos )
+          base.erase( 0, pos + 1 );
+        base += ".data";
+      }
       //cout << "filename_base : " << base << endl;
       if( !base.empty() )
-	g.setProperty( "filename_base", base );
+        g.setProperty( "filename_base", base );
       else g.setProperty( "filename_base", string( "*" ) );
 
-      bool	cp = false;
+      bool cp = false;
       if( !attfrom.empty() )
-	{
-	  if( attto.empty() )
-	    {
-	      cerr << "No destination attribute specified for copy (use -d)\n";
-	      return( EXIT_FAILURE );
-	    }
-	  copyatt( g, attfrom, attto, stx, syntax );
-	  cp = true;
-	}
+      {
+        if( attto.empty() )
+        {
+          cerr << "No destination attribute specified for copy (use -d)\n";
+          return( EXIT_FAILURE );
+        }
+        copyatt( g, attfrom, attto, stx, syntax );
+        cp = true;
+      }
       else if( !attto.empty() )
-	{
-	  cerr << "No source attribute specified for copy (use -c)\n";
-	  return( EXIT_FAILURE );
-	}
+      {
+        cerr << "No source attribute specified for copy (use -c)\n";
+        return( EXIT_FAILURE );
+      }
       if( !cp && !stx.empty() )
-	{
-	  cerr << "-s option must be used with -c and -d\n";
-	  return( EXIT_FAILURE );
-	}
+      {
+        cerr << "-s option must be used with -c and -d\n";
+        return( EXIT_FAILURE );
+      }
       
-     if( roi )
-	remaneRoiNodes( g ) ;
-	
+      if( roi )
+        remaneRoiNodes( g ) ;
 
-     if ( !substitutionFileName.empty() )
-     {
 
-        substitute( g, substitutionFileName );        
+      if ( !substitutionFileName.empty() )
+      {
+        substitute( g, substitutionFileName );
+      }
 
-     }
+      Hierarchy hie;
+      hie.setSyntax( "hierarchy" );
+      hie.setProperty( "graph_syntax", g.getSyntax() );
 
-     if ( !labelFileName.empty() )
-     {
+      if ( !labelFileName.empty() )
+      {
+        substituteLabelsName( g, labelFileName, hie );
+      }
+      else
+      {
+        map<int, string> gifti_labels;
 
-        substituteLabelsName( g, labelFileName );        
+        try
+        {
+          Object header = g.getProperty( "header" );
+          Object gifti_labels_o = header->getProperty( "GIFTI_labels_table" );
+          get_labels_dict( gifti_labels_o, gifti_labels, hie );
+        }
+        catch( ... )
+        {
+        }
+        if( !gifti_labels.empty() )
+        {
+          substituteLabelsName( g, gifti_labels );
+        }
 
-     }
+      }
+
+      if( hie.childrenSize() != 0 && !hieFileName.empty() )
+      {
+        Writer<Hierarchy> wh( hieFileName );
+        wh.write( hie );
+      }
 
       // write
-      AimsGraphWriter	agw( fileout );
+      AimsGraphWriter agw( fileout );
       string mode;
       if( global )
         mode = "global";
