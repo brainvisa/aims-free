@@ -43,6 +43,7 @@
 #include <aims/distancemap/meshvoronoi.h>
 #include <aims/morphology/operatormorpho.h>
 
+
 using namespace aims::meshdistance;
 using namespace aims;
 using namespace carto;
@@ -320,7 +321,7 @@ aims::meshdistance::SulcusVolume2Texture(
   cout << "Closing Sulcal lines  \n";
   for( ilab=sulci_labels.begin(),elab=sulci_labels.end();ilab != elab;
         ++ilab )
-    if (trans.find(*ilab)->second != "INSULA")
+    if( trans.find(*ilab)->second.substr(0, 6) != "INSULA" )
     {
       cout << "Label: " << trans.find(*ilab)->second << endl;
       for( z=0; z<bvdim[2]; ++z )
@@ -381,7 +382,7 @@ aims::meshdistance::SulcusVolume2Texture(
           svol(x,y,z)=sulcvol(x,y,z);
       }
 
-  //bottom volume for INSULA : 
+  //bottom volume for INSULA :
   //bottom pt projected in the direction of the tangent plane
   //+ pt of the surface projected on the direction of the normal of the tgt plane 
   short label_insula_left=0,label_insula_right=0;
@@ -426,7 +427,7 @@ aims::meshdistance::SulcusVolume2Texture(
 
  
   cout << "Extracting connex components (with at least " << MINCC << " points in each components)" << endl;
-  *ccvol = *sulcvol;
+  ccvol = sulcvol.deepcopy();
   AimsConnectedComponent<short>( ccvol,
                                  aims::Connectivity::CONNECTIVITY_26_XYZ,
                                  short(0), false, MINCC );
@@ -441,7 +442,8 @@ aims::meshdistance::SulcusVolume2Texture(
     ccvol, sulcvol, mesh, cc_sulci_labels,
     tri_sulci,neigh,cc_sulci_coord,initend,demin,dpmin,label_insula_left,
     label_insula_right,CA );
- 
+
+
   //-----------------------------------------------------------------------------------------------------
   //                                      Estimation of affine projection
   //-----------------------------------------------------------------------------------------------------
