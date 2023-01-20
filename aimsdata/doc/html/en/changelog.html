@@ -53,7 +53,7 @@
 
 
 <!-- -->
-<h4> <a name="version-5.1.0"></a>Jan. 12, 2023, Version 5.1.0</h4>
+<h4> <a name="version-5.1.0"></a>Jan. 20, 2023, Version 5.1.0</h4>
 
 <ul>
   <li>Support Volume classes with strides on X axis. Strides were present in the volume structure but most functions assumed that voxels were contiguous on the first (X) axis. This forbid for instance bindings to numpy arrays which had a "C" ordering convention. This limitation is now gone in main Volume methods and operator. However many algorithms are still assuming that the first axis is contiguous (and use pointers with ++ incrementation), so these volumes should be reserved for specific and tested uses.</li>
@@ -70,7 +70,7 @@
   <li>Transformations graph: TransformGraph3d class and IO, allows to load a complete referentials/transformatons graph with automatic composition and path search. Also allows to get a given transformation from a graph via transformations readers.
   </li>
   <li>General Transformation3d IO (supporting both affine and non-linear transformations).</li>
-  <li>New doc explaoining coordinates systems.</li>
+  <li>New doc explaining coordinates systems.</li>
   <li>Colormaps and labels tables tools improvements for GIFTI textures.</li>
   <li>Fibers / bundles support weighted fibers (MRTrix).</li>
   <li>New command: <tt>AimsGraph2Volume.py</tt>: convert a graph to a volume according to a nomenclature, with colormap.
@@ -86,6 +86,8 @@
   <li>New command <tt>AimsDiff.py</tt> which compares several types of neuroimaging files for equality.
   </li>
   <li>Fixes (significant rework) of sulci split algorithm, which could fail and produce vertices with disconnected voxels when the cut line was very scattered. The new algorithm ensures connected parts. A sulci vertices merge function was also added.
+  </li>
+  <li>AimsGraphConvert: when converting a volume to graph, can use a labels table (GIFTI-like) in the volume header, and can also write a custom hierarchy with colors for it.
   </li>
 
   <li>Multipe other bug fixes...</li>
