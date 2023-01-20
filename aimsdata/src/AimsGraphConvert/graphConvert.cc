@@ -586,16 +586,7 @@ int main( int argc, const char **argv )
       if( !basename.empty() )
         base = basename;
       else
-      {
-        base = fileout;
-        string::size_type pos = base.rfind( '.' );
-        if( pos != string::npos )
-          base.erase( pos, base.length() - pos );
-        pos = base.rfind( sep );
-        if( pos != string::npos )
-          base.erase( 0, pos + 1 );
-        base += ".data";
-      }
+        base = "*";
       //cout << "filename_base : " << base << endl;
       if( !base.empty() )
         g.setProperty( "filename_base", base );
