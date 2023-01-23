@@ -183,19 +183,32 @@ bool GiftiHeader::read()
   // read labels table
   //gifti_disp_LabelTable("gim->labeltable", &gim->labeltable);
 
-  if( gim->labeltable.length > 0 && gim->labeltable.rgba )
+  if( gim->labeltable.length > 0 )
   {
     Object o = Object::value( IntDictionary() );
     for( i=0; i < gim->labeltable.length; ++i )
     {
-      vector<float> rgba;
-      rgba.push_back( (float)(gim->labeltable.rgba[4*i]));
-      rgba.push_back( (float)(gim->labeltable.rgba[4*i+1]));
-      rgba.push_back( (float)(gim->labeltable.rgba[4*i+2]));
-      rgba.push_back( (float)(gim->labeltable.rgba[4*i+3]));
-
       Object LabelTable = Object::value( Dictionary() );
-      LabelTable->setProperty( "RGB", rgba );
+      vector<float> rgba;
+      if( gim->labeltable.rgba )
+      {
+        rgba.push_back( (float)(gim->labeltable.rgba[4*i]));
+        rgba.push_back( (float)(gim->labeltable.rgba[4*i+1]));
+        rgba.push_back( (float)(gim->labeltable.rgba[4*i+2]));
+        rgba.push_back( (float)(gim->labeltable.rgba[4*i+3]));
+        LabelTable->setProperty( "RGB", rgba );
+      }
+//       else
+//       {
+//         float v = 0.;
+//         if( gim->labeltable.length > 1 )
+//           v = float( i ) / (gim->labeltable.length - 1 );
+//         rgba.push_back( v );
+//         rgba.push_back( v );
+//         rgba.push_back( v ;
+//         rgba.push_back( 1.f );
+//       }
+
       LabelTable->setProperty( "Label", string( gim->labeltable.label[i] ) );
       o->setArrayItem( gim->labeltable.key[i], LabelTable );
     }
