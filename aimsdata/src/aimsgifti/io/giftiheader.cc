@@ -105,7 +105,7 @@ namespace
 
 bool GiftiHeader::read()
 {
-  //cout << "GiftiHeader::read\n";
+  // cout << "GiftiHeader::read\n";
 
   gifti_image   *gim = 0;
   string fname = _name;
@@ -183,10 +183,10 @@ bool GiftiHeader::read()
   // read labels table
   //gifti_disp_LabelTable("gim->labeltable", &gim->labeltable);
 
-  if( gim->labeltable.length > 0 )
+  if( gim->labeltable.length > 0 && gim->labeltable.rgba )
   {
     Object o = Object::value( IntDictionary() );
-    for( i=0; i<gim->labeltable.length; ++i )
+    for( i=0; i < gim->labeltable.length; ++i )
     {
       vector<float> rgba;
       rgba.push_back( (float)(gim->labeltable.rgba[4*i]));
