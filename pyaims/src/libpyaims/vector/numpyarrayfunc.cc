@@ -155,6 +155,7 @@ namespace aims
             "_arrayDestroyedCallback" );
         if( !cbk )
         {
+          PyErr_Clear();
           std::cerr << "warning: callback method _arrayDestroyedCallback "
               "not found" << std::endl;
         }
