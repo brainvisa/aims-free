@@ -102,9 +102,4 @@ int write_1D_file    (giiDataArray **, int, char *, int);
 int write_as_asc     (gifti_image *, char *);
 int write_surf_file  (giiDataArray *, giiDataArray *, char *, int);
 
-//ARN 7_04_10
-int gifti_tools( int argc, char * argv[] );
-
-static int init_opts(gt_opts * opts);
-
 #endif /* GIFTI_TOOL_H */

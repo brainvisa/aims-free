@@ -1,6 +1,3 @@
-// Have stdlib.h define atoll()
-#define _POSIX_C_SOURCE 200112L
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -130,9 +127,11 @@ static char * gifti_history[] =
   "     - gifti_xml.h: made NITRC gifti.dtd link that will not change\n"
   "1.08 08 March, 2010: GIfTI LabelTable format change: Index to Key\n",
   "     - both Index and Key work on read, Key is written out\n"
+  "1.09 28 June, 2010: verify that num_dim is not too big\n",
+  "     - the most significant dimension cannot be 1 (req by N Schmansky)\n"
 };
 
-static char gifti_version[] = "gifti library version 1.08, 8 March, 2010";
+static char gifti_version[] = "gifti library version 1.09, 28 June, 2010";
 
 /* ---------------------------------------------------------------------- */
 /*! global lists of XML strings */
@@ -899,7 +898,7 @@ int gifti_valid_nbyper(int nbyper, int whine)
  *      - num_dim is in range
  *      - each dims[c] is postive (c < num_dim)
  *      - nvals is product of dims
- *      - datatype is valie (required to check nbyper)
+ *      - datatype is valid (required to check nbyper)
  *      - nbyper is correct
 *//*-------------------------------------------------------------------*/
 int gifti_valid_dims(const giiDataArray * da, int whine)
@@ -939,6 +938,16 @@ int gifti_valid_dims(const giiDataArray * da, int whine)
     if( nbyper != da->nbyper ) {
         fprintf(stderr,"** nbyper %d not correct for type %s\n",
                 da->nbyper, gifti_datatype2str(da->datatype));
+        return 0;
+    }
+
+    /* verify that num_dim is not too big, the most significant dimension
+     * is not allowed to be 1
+     * (requested by N Schmansky)                       11 Mar 2010 */
+    if( da->num_dim > 1 && da->dims[da->num_dim-1] < 2 ) {
+        fprintf(stderr,"** num_dim violation: num_dim = %d, yet dim[%d] = %d\n",
+                       da->num_dim, da->num_dim-1, da->dims[da->num_dim-1]);
+        return 0;
     }
 
     return 1;
@@ -3079,7 +3088,7 @@ int gifti_compare_nvpairs(const nvpairs * p1, const nvpairs * p2, int verb)
 {
     char * value;
     int    lverb = verb;        /* possibly override passed verb */
-    int    c, /*len,*/ diffs = 0;
+    int    c, len, diffs = 0;
 
     if( G.verb > lverb ) lverb = G.verb;
 
@@ -3104,7 +3113,7 @@ int gifti_compare_nvpairs(const nvpairs * p1, const nvpairs * p2, int verb)
 
     /* search for mis-matches or non-existence from list 1 into list 2  */
     /* assume Names are unique (each that is not will show a mis-match) */
-    //len = p1->length < p2->length ? p1->length : p2->length;
+    len = p1->length < p2->length ? p1->length : p2->length;
     for( c = 0; c < p1->length; c++ ) {
         if( ! p1->value[c] ) continue;  /* skip anything that doesn't exist */
         value = gifti_get_meta_value(p2, p1->name[c]);
@@ -3174,7 +3183,7 @@ static int compare_labeltables(const giiLabelTable *t1, const giiLabelTable *t2,
                                int verb, int approx)
 {
     int lverb = verb;        /* possibly override passed verb */
-    int c, offset, diffs = 0;
+    int c, roff, offset, diffs = 0;
 
     if( G.verb > lverb ) lverb = G.verb;
 
@@ -3212,6 +3221,7 @@ static int compare_labeltables(const giiLabelTable *t1, const giiLabelTable *t2,
     }
 
     /* walk through list to compare labels */
+    roff = 0;
     for( c = 0; c < t1->length; c++ ) {
         if( gifti_strdiff(t1->label[c], t2->label[c]) ) {
             if(lverb>2)printf("-- labeltable Label diff at index %d\n", c);
@@ -3344,7 +3354,7 @@ long long gifti_compare_raw_data(const void * p1, const void * p2,
 
 /* make a local definition for this symmetric fractional difference */
 #undef GIFTI_SFD
-#define GIFTI_SFD(a,b) (fabs((a)-(double)(b))/(fabs((double)a)+fabs((double)b)))
+#define GIFTI_SFD(a,b) (fabs((a)-(double)(b))/(fabs(a)+fabs(b)))
 
 /*---------------------------------------------------------------------*/
 /*! approximate comparison of raw data, returing the first location difference
@@ -4080,7 +4090,7 @@ int gifti_clear_gifti_image(gifti_image * gim)
     if( G.verb > 5 ) fprintf(stderr,"-- clearing gifti_image\n");
 
     /* set the version and clear all pointers */
-    memset(gim, 0, sizeof(gifti_image));
+    memset(gim, 0, sizeof(gim));
 
     gim->version = NULL;
     gifti_clear_nvpairs(&gim->meta);
