@@ -2057,7 +2057,6 @@ static int decode_b64(gxml_data * xd, char * cdata, int cdlen,
         GII_B64_decode4(din[0],din[1],din[2],din[3], a, b, c);
         if( *needed >= 1 ) dout[0] = a;
         if( *needed >= 2 ) dout[1] = b;
-        c = c; // compilation warning...
         assigned += *needed;
         *needed = 0;
     }
@@ -2811,8 +2810,6 @@ static int ewrite_data_line(void * data, int type, long long row,
     int c;
     if( !data || row < 0 || cols <= 0 || !fp ) return 1;
 
-    //printf("type = %d %d\n",type,NIFTI_TYPE_FLOAT32);
-
     fprintf(fp, "%*s", space, "");
     switch( type ) {
         default : 
@@ -2834,11 +2831,8 @@ static int ewrite_data_line(void * data, int type, long long row,
             break;
         }
         case NIFTI_TYPE_FLOAT32: {
-        	//printf("NIFTI_TYPE_FLOAT32\n");
             float * ptr = (float *)data + row * cols;
             for( c = 0; c < cols; c++ ) fprintf(fp, "%f ", ptr[c]);
-            //for( c = 0; c < cols; c++ ) std::cout << "cout " << ptr[c] << std::endl ;
-            //for( c = 0; c < cols; c++ ) printf("%.2f %f\n", (double)ptr[c],3.14);
             break;
         }
         case NIFTI_TYPE_COMPLEX64: {
