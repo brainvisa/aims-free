@@ -130,7 +130,8 @@ def filter_header_for_cmp(hdr):
     Removed uuid and referential properties from the given header, in order to
     be compared with another file wich may differ only in thoses identifiers
     '''
-    for prop in ('uuid', 'referential', 'GIFTI_dataarrays_info'):
+    for prop in ('uuid', 'referential', 'GIFTI_dataarrays_info',
+                 'GIFTI_metadata', 'file_type', 'format', 'GIFTI_version'):
         if prop in hdr:
             del hdr[prop]
     # gifti-specific
