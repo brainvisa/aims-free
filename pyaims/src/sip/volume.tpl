@@ -177,16 +177,12 @@ at(posx, posy=0, posz=0, post=0)
 Returns the volume value for the selected voxel.
 %End
 
-%#ifdef CARTO_USE_BLITZ%
-
   %Template1PyType% at( long, long, long, long, long, long=0, long=0, long=0 ) const;
 %Docstring
 at(posx1, posx2, posx3, posx4, posx5, posx6=0, posx7=0, posx8=0)
 
 Returns the volume value for the selected voxel.
 %End
-
-%#endif%
 
   %Template1PyType% at( const vector_S32 & ) const;
 %Docstring
