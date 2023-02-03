@@ -105,10 +105,6 @@ BRAINVISA_DEPENDENCY( DEV RECOMMENDS zlib DEV )
 find_package( LibKDTree QUIET )
 
 
-if( BLITZ_FOUND )
-  set( CARTO_USE_BLITZ "True" )
-endif()
-
 set( AIMS_INCLUDE_DIRS 
      ${SOMA-IO_INCLUDE_DIRS} )
 if( BLITZ_FOUND )

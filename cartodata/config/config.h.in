@@ -41,10 +41,6 @@
 
 #include <soma-io/config/config.h>
 
-#ifndef CARTO_USE_BLITZ
-#cmakedefine CARTO_USE_BLITZ
-#endif
-
 #endif
 
 
