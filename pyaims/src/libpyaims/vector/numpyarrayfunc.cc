@@ -39,28 +39,38 @@ using namespace std;
 namespace
 {
 
-  PyObject* transposeNumpyArray( PyObject* a, bool xyzorder )
+  PyObject* transposeNumpyArray( PyObject* a, bool xyzorder,
+                                 int current_x_first = -1 )
   {
     PyArrayObject *arr = (PyArrayObject *) a;
     int i, ndim = PyArray_NDIM( arr );
     if( ndim < 2 )
       return a;
-    bool firstindexinc = xyzorder;
-    for( i=0; i<ndim - 1; ++i )
+    bool transpose = false;
+    if( current_x_first >= 0 )  // order is given
+      transpose = ( bool( current_x_first ) != xyzorder );
+    else
     {
-      if( PyArray_STRIDES( arr )[i] < PyArray_STRIDES( arr )[i + 1] )
+      bool firstindexinc = xyzorder;
+      for( i=0; i<ndim - 1; ++i )
       {
-        firstindexinc = true;
-        break;
+        if( PyArray_STRIDES( arr )[i] < PyArray_STRIDES( arr )[i + 1] )
+        {
+          firstindexinc = true;
+          break;
+        }
+        else if( PyArray_STRIDES( arr )[i] > PyArray_STRIDES( arr )[i + 1] )
+        {
+          firstindexinc = false;
+          break;
+        }
+        // otherwise equal, check next dim
       }
-      else if( PyArray_STRIDES( arr )[i] > PyArray_STRIDES( arr )[i + 1] )
-      {
-        firstindexinc = false;
-        break;
-      }
-      // otherwise equal, check next dim
+      if( xyzorder != firstindexinc )
+        transpose = true;
     }
-    if( xyzorder == firstindexinc )
+
+    if( !transpose )
       return a;
     PyArray_Dims  adims;
     vector<npy_intp> dims( ndim );
@@ -91,7 +101,16 @@ namespace aims
     {
       PyObject *arr = PyObject_GetAttrString( sipSelf, "_arrayext" );
       if( arr )
-        sipRes = transposeNumpyArray( arr, xyzorder );
+      {
+        int current_x_first = -1;
+        if( PyObject_HasAttrString( sipSelf, "_array_x_is_first" ) )
+        {
+          PyObject *x = PyObject_GetAttrString( sipSelf, "_array_x_is_first" );
+          if( x )
+            current_x_first = int( bool( PyLong_AsLong( x ) ) );
+        }
+        sipRes = transposeNumpyArray( arr, xyzorder, current_x_first );
+      }
     }
     // else look if an array has already been built on the object
     else if( PyObject_HasAttrString( sipSelf, "_arrayref" ) )
@@ -103,7 +122,15 @@ namespace aims
         if( arr )
         {
           Py_INCREF( arr );
-          sipRes = transposeNumpyArray( arr, xyzorder );
+          int current_x_first = -1;
+          if( PyObject_HasAttrString( sipSelf, "_array_x_is_first" ) )
+          {
+            PyObject *x = PyObject_GetAttrString( sipSelf,
+                                                  "_array_x_is_first" );
+            if( x )
+              current_x_first = int( bool( PyLong_AsLong( x ) ) );
+          }
+          sipRes = transposeNumpyArray( arr, xyzorder, current_x_first );
         }
         else
         {

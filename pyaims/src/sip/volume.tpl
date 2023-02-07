@@ -715,20 +715,20 @@ The header contains all meta-data.
     int nd = PyArray_NDIM( arr );
     if( nd < 4 )
       nd = 4;
+    bool xyzorder = false;
     std::vector<int> dims( nd, 1 );
     int inc = 1, start = 0;
-    /*
     // TODO: retreive exact strides and react accordingly
     if( PyArray_NDIM( arr ) >= 2 )
     {
       if( PyArray_STRIDES( arr )[1] < PyArray_STRIDES( arr )[0] )
       {
+        xyzorder = true;
         // increments higher index first
-        inc = -1;
-        start = PyArray_NDIM( arr )-1;
+        //  inc = -1;
+        // start = PyArray_NDIM( arr )-1;
       }
     }
-    */
 
     std::vector<size_t> strides( nd, 1 );
 
@@ -748,6 +748,10 @@ The header contains all meta-data.
        is still living.
     */
     PyObject_SetAttrString( (PyObject *) sipSelf, "_arrayext", a0 );
+    PyObject *xfirst = PyBool_FromLong( long( xyzorder ) );
+    Py_DECREF( xfirst );
+    PyObject_SetAttrString( (PyObject *) sipSelf, "_array_x_is_first",
+                            xfirst );
   }
   else
   {
