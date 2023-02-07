@@ -42,7 +42,7 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-void carto::setOrientationInformation( Object hdr, const string & orient )
+void carto::setOrientationInformation( Object hdr, const string & orient_ )
 {
   if( hdr.isNull() )
     return;
@@ -77,6 +77,68 @@ void carto::setOrientationInformation( Object hdr, const string & orient )
       }
     }
   }
+
+  // orientation names aliases
+  map<string, string> aliases;
+  aliases["RAS"] = "abs: -1 -1 -1";
+  aliases["LAS"] = "abs: 1 -1 -1";
+  aliases["RPS"] = "abs: -1 1 -1";
+  aliases["LPS"] = "abs: 1 1 -1";
+  aliases["RAI"] = "abs: -1 -1 1";
+  aliases["LAI"] = "abs: 1 -1 1";
+  aliases["RPI"] = "abs: -1 1 1";
+  aliases["LPI"] = "abs: 1 1 1";
+
+  aliases["ARS"] = "abs: 0 -1 0  -1 0 0  0 0 -1";
+  aliases["PRS"] = "abs: 0 -1 0  1 0 0  0 0 -1";
+  aliases["ALS"] = "abs: 0 1 0  -1 0 0  0 0 -1";
+  aliases["PLS"] = "abs: 0 1 0  1 0 0  0 0 -1";
+  aliases["ARI"] = "abs: 0 -1 0  -1 0 0  0 0 1";
+  aliases["PRI"] = "abs: 0 -1 0  1 0 0  0 0 1";
+  aliases["ALI"] = "abs: 0 1 0  -1 0 0  0 0 1";
+  aliases["PLI"] = "abs: 0 1 0  1 0 0  0 0 1";
+
+  aliases["RSA"] = "abs: -1 0 0  0 0 -1  0 -1 0";
+  aliases["RIA"] = "abs: -1 0 0  0 0 1  0 -1 0";
+  aliases["RSP"] = "abs: -1 0 0  0 0 -1  0 1 0";
+  aliases["RIP"] = "abs: -1 0 0  0 0 1  0 1 0";
+  aliases["LSA"] = "abs: 1 0 0  0 0 -1  0 -1 0";
+  aliases["LIA"] = "abs: 1 0 0  0 0 1  0 -1 0";
+  aliases["LSP"] = "abs: 1 0 0  0 0 -1  0 1 0";
+  aliases["LIP"] = "abs: 1 0 0  0 0 1  0 1 0";
+
+  aliases["SAR"] = "abs: 0 0 -1  0 -1 0  -1 0 0";
+  aliases["IAR"] = "abs: 0 0 1  0 -1 0  -1 0 0";
+  aliases["SAL"] = "abs: 0 0 -1  0 -1 0  1 0 0";
+  aliases["IAL"] = "abs: 0 0 1  0 -1 0  1 0 0";
+  aliases["SPR"] = "abs: 0 0 -1  0 1 0  -1 0 0";
+  aliases["IPR"] = "abs: 0 0 1  0 1 0  -1 0 0";
+  aliases["SPL"] = "abs: 0 0 -1  0 1 0  1 0 0";
+  aliases["IPL"] = "abs: 0 0 1  0 1 0  1 0 0";
+
+  aliases["ASR"] = "abs: 0 0 -1  -1 0 0  0 -1 0";
+  aliases["PSR"] = "abs: 0 0 -1  1 0 0  0 -1 0";
+  aliases["AIR"] = "abs: 0 0 -1  -1 0 0  0 1 0";
+  aliases["PIR"] = "abs: 0 0 -1  1 0 0  0 1 0";
+  aliases["ASL"] = "abs: 0 0 1  -1 0 0  0 -1 0";
+  aliases["PSL"] = "abs: 0 0 1  1 0 0  0 -1 0";
+  aliases["AIL"] = "abs: 0 0 1  -1 0 0  0 1 0";
+  aliases["PIL"] = "abs: 0 0 1  1 0 0  0 1 0";
+
+  aliases["SRA"] = "abs: 0 -1 0  0 0 -1  -1 0 0";
+  aliases["IRA"] = "abs: 0 -1 0  0 0 -1  1 0 0";
+  aliases["SLA"] = "abs: 0 1 0  0 0 -1  -1 0 0";
+  aliases["ILA"] = "abs: 0 1 0  0 0 -1  1 0 0";
+  aliases["SRP"] = "abs: 0 -1 0  0 0 1  -1 0 0";
+  aliases["IRP"] = "abs: 0 -1 0  0 0 1  1 0 0";
+  aliases["SLP"] = "abs: 0 1 0  0 0 1  -1 0 0";
+  aliases["ILP"] = "abs: 0 1 0  0 0 1  1 0 0";
+
+  string orient = orient_;
+
+  map<string, string>::const_iterator im = aliases.find( orient_ );
+  if( im != aliases.end() )
+    orient = im->second;
 
   // retreive existing storage_to_memory matrix, or setup a more or less
   // default one

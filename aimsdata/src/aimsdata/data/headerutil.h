@@ -58,6 +58,13 @@ namespace carto
   - "abs: -1 1 -1"
   - "abs: -1 0 0 255  0 1 0 0  0 0 -1 123  0 0 0 1"
 
+  Absolute orientations can also be given in the 3 letters conventions ("RAS",
+  "LPI", etc, with L: axis toward Left side, R: right, A: anterior, P:
+  posterior, S: superior, I: inferior. Thus "RAS" is equivalent to "abs: -1 -1
+  -1", "LPI" is equivalent to "abs: 1 1 1" etc.
+
+  See: https://brainvisa.info/aimsdata/user_doc/coordinates_systems.html
+
   */
   void setOrientationInformation( carto::Object hdr,
                                   const std::string & orient );
