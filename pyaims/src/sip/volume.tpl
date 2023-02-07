@@ -765,8 +765,16 @@ The header contains all meta-data.
 %Docstring
 .. note::
 
-    *arraydata()* returns a numpy array to the internal memory block, without strides. Given the internal ordering of Aims Volumes, the resulting numpy array is indexed as [t][z][y][x]. This order corresponds to the numpy "fortran" order: ``order='F'``
+    *arraydata()* returns a numpy array to the internal memory block, without strides.
+
+    **WARNING:** this is a *raw* array, without strides. Most of the time you need `numpy.asarray(volume)`, or more simply: `volume.np`, which actually manages strides to provide an array with the same indices ordering.
+
+    Given the internal ordering of Aims Volumes, the resulting numpy array is indexed as [t][z][y][x]. This order corresponds to the numpy "fortran" order: ``order='F'``
     If you need the inverse, more natural, [x][y][z][t] ordering, use the following:
+
+    >>> volarray = volume.np
+
+    or:
 
     >>> volarray = numpy.array(volume, copy=False)
 
@@ -774,9 +782,11 @@ The header contains all meta-data.
 
     >>> volarray = numpy.asarray(volume)
 
-.. note::
+    Using arraydata(), as the indices are reversed, if you do something like::
 
-    The array conversion is currently only supported for scalar volumes, and is not present on volumes of types RGB or RGBA.
+        vol2 = aims.Volume(vol.arraydata())
+
+    You will likely build a transposed volume (but it may depend on the strides in the initial volume).
 %End
 
 %MethodCode
