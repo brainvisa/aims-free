@@ -13,8 +13,7 @@ IF ( DOXYGEN_FOUND )
   get_filename_component(component_name ${cur_dir} NAME)
   # generate docs in a "standard config", where blitz and kdtree are used.
   set( DOXYFILE_PREDEFINED
-    ${AIMS-FREE_DEFINITIONS} ${SOMA-IO_DEFINITIONS} CARTO_USE_KDTREE
-    CARTO_USE_BLITZ )
+    ${AIMS-FREE_DEFINITIONS} ${SOMA-IO_DEFINITIONS} CARTO_USE_KDTREE )
   set(aims_version
     "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}")
   set(_somaio_version "${soma-io_VERSION_MAJOR}.${soma-io_VERSION_MINOR}")
