@@ -53,7 +53,7 @@ namespace
         firstindexinc = true;
         break;
       }
-      else if( PyArray_STRIDES( arr )[i] < PyArray_STRIDES( arr )[i +1] )
+      else if( PyArray_STRIDES( arr )[i] > PyArray_STRIDES( arr )[i + 1] )
       {
         firstindexinc = false;
         break;
