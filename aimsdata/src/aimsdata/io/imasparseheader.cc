@@ -72,7 +72,6 @@ namespace
       io_error::launchErrnoExcept( fname );
     is.unsetf( ios::skipws );
 
-
     static DefaultItemReader<uint32_t> itemR1;
 
     uint32_t size1 = 0U;
