@@ -40,6 +40,7 @@
 #include <aims/sparsematrix/sparseMatrixItemR.h>
 #include <aims/sparsematrix/sparseMatrixItemW.h>
 #include <cartobase/object/object_d.h>
+#include <cartobase/exception/file.h>
 #include <fstream>
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -1064,6 +1065,8 @@ void aims::SparseMatrix::read( const std::string& filename,
   {
     
     std::ifstream is( filename.c_str() );
+    if( !is.good() )
+      throw file_error( "could not open input file", filename );
 
     aims::DefaultItemReader<aims::SparseMatrix> 
         defaultItemR;
@@ -1071,10 +1074,15 @@ void aims::SparseMatrix::read( const std::string& filename,
         sparseMatrixItemR = defaultItemR.reader( openmode, bswap );
 
     sparseMatrixItemR->read( is, *this );
+    if( !is.good() )
+    {
+      delete sparseMatrixItemR;
+      throw file_error( "read error", filename );
+    }
     is.close();
 
     delete sparseMatrixItemR;
-    
+
   }
   catch (std::exception & e )
   {
@@ -1096,6 +1104,8 @@ void aims::SparseMatrix::write( const std::string& filename,
   {
     
     std::ofstream os( filename.c_str() );
+    if( !os.good() )
+      throw file_error( "could not open output file", filename );
 
     aims::DefaultItemWriter<aims::SparseMatrix> 
         defaultItemW;
@@ -1103,10 +1113,15 @@ void aims::SparseMatrix::write( const std::string& filename,
         sparseMatrixItemW = defaultItemW.writer( openmode, bswap );
 
     sparseMatrixItemW->write( os, *this );
+    if( !os.good() )
+    {
+      delete sparseMatrixItemW;
+      throw file_error( "write error", filename );
+    }
     os.close();
 
     delete sparseMatrixItemW;
-    
+
   }
   catch (std::exception & e )
   {
