@@ -64,6 +64,17 @@ namespace carto
     /// It allows to keep the loops in one place and to specialize for non
     /// arithmetic types
 
+    /// test if two volumes sizes vectors actually represent the same
+    /// size (extending missing dimensions to 1)
+    inline bool sameSize( const std::vector<int> & s1,
+                          const std::vector<int> & s2 );
+    /// return the largest dimensions between s1 and s2
+    inline std::vector<int> maxSize( const std::vector<int> & s1,
+                                     const std::vector<int> & s2 );
+    /// return the smallest dimensions between s1 and s2
+    inline std::vector<int> minSize( const std::vector<int> & s1,
+                                     const std::vector<int> & s2 );
+
     /// Apply a function to all the elements of a volume
     /// (create output version)
     /// @{
@@ -102,9 +113,15 @@ namespace carto
     template <typename T, typename OUTP, typename UnaryFunction>
     Volume<OUTP> &
     applyTowards( const Volume<T> & vol, Volume<OUTP> & dst, UnaryFunction func );
+    template <typename T, typename OUTP, typename UnaryFunction>
+    Volume<OUTP> &
+    applyTowards( const T & cst, Volume<OUTP> & dst, UnaryFunction func );
     template <typename T, typename U, typename OUTP, typename BinaryFunction>
     Volume<OUTP> &
     applyTowards( const Volume<T> & vol1, const Volume<U> & vol2, Volume<OUTP> & dst, BinaryFunction func );
+    template <typename T, typename U, typename OUTP, typename BinaryFunction>
+    Volume<OUTP> &
+    applyTowards( const Volume<T> & vol1, const U & cst2, Volume<OUTP> & dst, BinaryFunction func );
     /// @}
 
     /// Accumulation over a volume
@@ -149,13 +166,19 @@ namespace carto
   /// The whole view hierarchy is fully duplicated
   /// @{
   template <typename T>
-  Volume<T> deepcopy( const Volume<T> & src );
+  Volume<T> deepcopy( const Volume<T> & src,
+                      const std::vector<int> & size = std::vector<int>() );
   template <typename T>
-  rc_ptr<Volume<T> > deepcopy( const rc_ptr<Volume<T> > & src );
+  rc_ptr<Volume<T> > deepcopy(
+    const rc_ptr<Volume<T> > & src,
+    const std::vector<int> & size = std::vector<int>() );
   template <typename OUTP, typename INP>
-  Volume<OUTP> deepcopy( const Volume<INP> & src );
+  Volume<OUTP> deepcopy( const Volume<INP> & src,
+                         const std::vector<int> & size = std::vector<int>() );
   template <typename OUTP, typename INP>
-  rc_ptr<Volume<OUTP> > deepcopy( const rc_ptr<Volume<INP> > & src );
+  rc_ptr<Volume<OUTP> > deepcopy(
+    const rc_ptr<Volume<INP> > & src,
+    const std::vector<int> & size = std::vector<int>() );
   /// @}
 
   /// Performs a copy of the data (not only a reference copy)
@@ -434,6 +457,59 @@ namespace carto
     //   Generic operators
     //========================================================================
 
+    bool sameSize( const std::vector<int> & s1, const std::vector<int> & s2 )
+    {
+      int s0 = s1.size();
+      int i;
+      if( s2.size() < s0 )
+        s0 = s2.size();
+      for( i=0; i<s0; ++i )
+        if( s1[i] != s2[i] )
+          return false;
+      for( ; i<s1.size(); ++i )
+        if( s1[i] != 1 )
+          return false;
+      for( ; i<s2.size(); ++i )
+        if( s2[i] != 1 )
+          return false;
+      return true;
+    }
+
+
+    std::vector<int> maxSize( const std::vector<int> & s1,
+                              const std::vector<int> & s2 )
+    {
+      std::vector<int> dim( std::max( s1.size(), s2.size() ), 1 );
+      int s0 = s1.size();
+      int i;
+      if( s2.size() < s0 )
+        s0 = s2.size();
+      for( i=0; i<s0; ++i )
+        dim[i] = std::max( s1[i], s2[i] );
+      for( ; i<s1.size(); ++i )
+        dim[i] = s1[i];
+      for( ; i<s2.size(); ++i )
+        dim[i] = s2[i];
+      return dim;
+    }
+
+
+    std::vector<int> minSize( const std::vector<int> & s1,
+                              const std::vector<int> & s2 )
+    {
+      std::vector<int> dim( std::min( s1.size(), s2.size() ), 1 );
+      int s0 = s1.size();
+      int i;
+      if( s2.size() < s0 )
+        s0 = s2.size();
+      for( i=0; i<s0; ++i )
+        dim[i] = std::min( s1[i], s2[i] );
+      for( ; i<dim.size(); ++i )
+        dim[i] = 1;
+      return dim;
+    }
+
+
     //--- Volume [op] other --------------------------------------------------
 
     template <typename T, typename UnaryFunction>
@@ -453,7 +529,8 @@ namespace carto
     apply( const Volume<T> & vol1, const Volume<U> & vol2, BinaryFunction func )
     {
       typedef typename BinaryFunction::result_type OUTP;
-      Volume<OUTP> output = deepcopy<OUTP,T>(vol1);
+      Volume<OUTP> output = deepcopy<OUTP,T>(
+        vol1, maxSize( vol1.getSize(), vol2.getSize() ) );
       applyTowards( vol1, vol2, output, func );
       return output;
     }
@@ -477,7 +554,8 @@ namespace carto
     apply( const rc_ptr<Volume<T> > & vol1, const Volume<U> & vol2, BinaryFunction func )
     {
       typedef typename BinaryFunction::result_type OUTP;
-      rc_ptr<Volume<OUTP> > output = deepcopy<OUTP,T>(vol1);
+      rc_ptr<Volume<OUTP> > output = deepcopy<OUTP,T>(
+        vol1, maxSize( vol1->getSize(), vol2.getSize()) );
       applyTowards( *vol1, vol2, *output, func );
       return output;
     }
@@ -525,6 +603,27 @@ namespace carto
     applyTowards( const Volume<T> & vol, Volume<OUTP> & dst,
                   UnaryFunction func )
     {
+      std::vector<int> size = minSize( vol.getSize(), dst.getSize() );
+      if( !sameSize( size, vol.getSize() )
+          || !sameSize( size, dst.getSize() ) )
+      {
+        // build views
+        carto::rc_ptr<Volume<T> > invvol(
+          const_cast<carto::Volume<T> *>( &vol ) );
+        std::vector<int> pos( size.size(), 0 );
+        carto::VolumeRef<T> invol( invvol, pos, size );
+        carto::rc_ptr<Volume<OUTP> > outvvol( &dst );
+        carto::VolumeRef<OUTP> outvol( outvvol, pos, size );
+        // applyTowards on views of the same size
+        applyTowards( *invol, *outvol, func );
+        // release views and restore refcount on initial volumes
+        invol.reset( 0 );
+        invvol.release();
+        outvol.reset( 0 );
+        outvvol.release();
+        // FIXME TODO: handle parts outside of the intersection
+        return dst;
+      }
       carto::const_line_NDIterator<T> it( &vol.at( 0 ), vol.getSize(),
                                           vol.getStrides() );
       carto::line_NDIterator<OUTP> dit( &dst.at( 0 ), dst.getSize(),
@@ -542,11 +641,60 @@ namespace carto
       return dst;
     }
 
+    template <typename T, typename OUTP, typename UnaryFunction>
+    inline
+    Volume<OUTP> &
+    applyTowards( const T & cst, Volume<OUTP> & dst,
+                  UnaryFunction func )
+    {
+      carto::line_NDIterator<OUTP> dit( &dst.at( 0 ), dst.getSize(),
+                                        dst.getStrides() );
+      OUTP *d, *dd;
+      OUTP value = func( cst );
+      for( ; !dit.ended(); ++dit )
+      {
+        d = &*dit;
+        for( dd=d + dit.line_length(); d!=dd; dit.inc_line_ptr( d ) )
+          *d = value;
+      }
+      return dst;
+    }
+
     template <typename T, typename U, typename OUTP, typename BinaryFunction>
     inline
     Volume<OUTP> &
-    applyTowards( const Volume<T> & vol1, const Volume<U> & vol2, Volume<OUTP> & dst, BinaryFunction func )
+    applyTowards( const Volume<T> & vol1, const Volume<U> & vol2,
+                  Volume<OUTP> & dst, BinaryFunction func )
     {
+      std::vector<int> sizei = minSize( vol1.getSize(), vol2.getSize() );
+      std::vector<int> size = minSize( sizei, dst.getSize() );
+      if( !sameSize( size, vol1.getSize() )
+          || !sameSize( size, vol2.getSize() )
+          || !sameSize( size, dst.getSize() ) )
+      {
+        // build views
+        carto::rc_ptr<Volume<T> > invvol1(
+          const_cast<carto::Volume<T> *>( &vol1 ) );
+        std::vector<int> pos( size.size(), 0 );
+        carto::VolumeRef<T> invol1( invvol1, pos, size );
+        carto::rc_ptr<Volume<T> > invvol2(
+          const_cast<carto::Volume<T> *>( &vol2 ) );
+        carto::VolumeRef<T> invol2( invvol2, pos, size );
+        carto::rc_ptr<Volume<OUTP> > outvvol( &dst );
+        carto::VolumeRef<OUTP> outvol( outvvol, pos, size );
+        // applyTowards on views of the same size
+        applyTowards( *invol1, *invol2, *outvol, func );
+        // release views and restore refcount on initial volumes
+        invol1.reset( 0 );
+        invvol1.release();
+        invol2.reset( 0 );
+        invvol2.release();
+        outvol.reset( 0 );
+        outvvol.release();
+        // FIXME TODO: handle parts outside of the intersection
+        return dst;
+      }
+
       carto::const_line_NDIterator<T> it1( &vol1.at( 0 ), vol1.getSize(),
                                            vol1.getStrides() );
       carto::const_line_NDIterator<U> it2( &vol2.at( 0 ), vol2.getSize(),
@@ -565,6 +713,96 @@ namespace carto
              it1.inc_line_ptr( p ), it2.inc_line_ptr( p2 ),
              dit.inc_line_ptr( d ) )
           *d = func( *p, *p2 );
+      }
+      return dst;
+    }
+
+    template <typename T, typename U, typename OUTP, typename BinaryFunction>
+    inline
+    Volume<OUTP> &
+    applyTowards( const T & cst1, const Volume<U> & vol2,
+                  Volume<OUTP> & dst, BinaryFunction func )
+    {
+      std::vector<int> size = minSize( vol2.getSize(), dst.getSize() );
+      if( !sameSize( size, vol2.getSize() )
+          || !sameSize( size, dst.getSize() ) )
+      {
+        // build views
+        std::vector<int> pos( size.size(), 0 );
+        carto::rc_ptr<Volume<T> > invvol2(
+          const_cast<carto::Volume<T> *>( &vol2 ) );
+        carto::VolumeRef<T> invol2( invvol2, pos, size );
+        carto::rc_ptr<Volume<OUTP> > outvvol( &dst );
+        carto::VolumeRef<OUTP> outvol( outvvol, pos, size );
+        // applyTowards on views of the same size
+        applyTowards( cst1, *invol2, *outvol, func );
+        // release views and restore refcount on initial volumes
+        invol2.reset( 0 );
+        invvol2.release();
+        outvol.reset( 0 );
+        outvvol.release();
+        // FIXME TODO: handle parts outside of the intersection
+        return dst;
+      }
+
+      carto::const_line_NDIterator<U> it2( &vol2.at( 0 ), vol2.getSize(),
+                                           vol2.getStrides() );
+      carto::line_NDIterator<OUTP> dit( &dst.at( 0 ), dst.getSize(),
+                                        dst.getStrides() );
+      const U *p2, *pp;
+      OUTP *d;
+      for( ; !it2.ended(); ++it2, ++dit )
+      {
+        p2 = &*it2;
+        d = &*dit;
+        for( pp=p2+ it2.line_length(); p2!=pp;
+             it2.inc_line_ptr( p2 ), dit.inc_line_ptr( d ) )
+          *d = func( cst1, *p2 );
+      }
+      return dst;
+    }
+
+    template <typename T, typename U, typename OUTP, typename BinaryFunction>
+    inline
+    Volume<OUTP> &
+    applyTowards( const Volume<T> & vol1, const U & cst2,
+                  Volume<OUTP> & dst, BinaryFunction func )
+    {
+      std::vector<int> size = minSize( vol1.getSize(), dst.getSize() );
+      if( !sameSize( size, vol1.getSize() )
+          || !sameSize( size, dst.getSize() ) )
+      {
+        // build views
+        carto::rc_ptr<Volume<T> > invvol1(
+          const_cast<carto::Volume<T> *>( &vol1 ) );
+        std::vector<int> pos( size.size(), 0 );
+        carto::VolumeRef<T> invol1( invvol1, pos, size );
+        carto::rc_ptr<Volume<OUTP> > outvvol( &dst );
+        carto::VolumeRef<OUTP> outvol( outvvol, pos, size );
+        // applyTowards on views of the same size
+        applyTowards( *invol1, cst2, *outvol, func );
+        // release views and restore refcount on initial volumes
+        invol1.reset( 0 );
+        invvol1.release();
+        outvol.reset( 0 );
+        outvvol.release();
+        // FIXME TODO: handle parts outside of the intersection
+        return dst;
+      }
+
+      carto::const_line_NDIterator<T> it1( &vol1.at( 0 ), vol1.getSize(),
+                                           vol1.getStrides() );
+      carto::line_NDIterator<OUTP> dit( &dst.at( 0 ), dst.getSize(),
+                                        dst.getStrides() );
+      const T *p, *pp;
+      OUTP *d;
+      for( ; !it1.ended(); ++it1, ++dit )
+      {
+        p = &*it1;
+        d = &*dit;
+        for( pp=p + it1.line_length(); p!=pp;
+             it1.inc_line_ptr( p ), dit.inc_line_ptr( d ) )
+          *d = func( *p, cst2 );
       }
       return dst;
     }
@@ -636,23 +874,28 @@ namespace carto
 
   template <typename T>
   inline
-  Volume<T> deepcopy( const Volume<T> & src )
+  Volume<T> deepcopy( const Volume<T> & src, const std::vector<int> & size )
   {
-    return deepcopy<T,T>( src );
+    return deepcopy<T,T>( src, size );
   }
 
   template <typename T>
   inline
-  rc_ptr<Volume<T> > deepcopy( const rc_ptr<Volume<T> > & src )
+  rc_ptr<Volume<T> > deepcopy( const rc_ptr<Volume<T> > & src,
+                               const std::vector<int> & size )
   {
-    return deepcopy<T,T>( src );
+    return deepcopy<T,T>( src, size );
   }
 
   template <typename OUTP, typename INP>
   inline
-  Volume<OUTP> deepcopy( const Volume<INP> & src )
+  Volume<OUTP> deepcopy( const Volume<INP> & src,
+                         const std::vector<int> & size )
   {
-    Volume<OUTP> dst( src.getSize(),
+    std::vector<int> nsize = size;
+    if( nsize.empty() )
+      nsize = src.getSize();
+    Volume<OUTP> dst( nsize,
                       src.allocatorContext(),
                       src.allocatorContext().isAllocated() );
     dst.copyHeaderFrom( src.header() );
@@ -702,10 +945,14 @@ namespace carto
 
   template <typename OUTP, typename INP>
   inline
-  rc_ptr<Volume<OUTP> > deepcopy( const rc_ptr<Volume<INP> > & src )
+  rc_ptr<Volume<OUTP> > deepcopy( const rc_ptr<Volume<INP> > & src,
+                                  const std::vector<int> & size )
   {
+    std::vector<int> nsize = size;
+    if( nsize.empty() )
+      nsize = src->getSize();
     rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>(
-        src->getSize(),
+        nsize,
         src->allocatorContext(),
         src->allocatorContext().isAllocated() ) );
     dst->copyHeaderFrom( src->header() );
@@ -1411,9 +1658,9 @@ namespace carto
     template <class UnaryFunction> static
     VolumeRef<T> apply( UnaryFunction f, const VolumeRef<T> & o );
     /// applies a binary function to each voxel of a pair of volumes
-    template <class BinaryFunction> static
-    VolumeRef<T> apply( BinaryFunction f, const VolumeRef<T> & o1,
-                        const VolumeRef<T> & o2 );
+//     template <class BinaryFunction> static
+//     VolumeRef<T> apply( BinaryFunction f, const VolumeRef<T> & o1,
+//                         const VolumeRef<T> & o2 );
     /** same as apply() except that the input volume is used to store the
         result */
     template <class UnaryFunction> static

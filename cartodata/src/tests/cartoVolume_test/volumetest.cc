@@ -730,6 +730,55 @@ int main( int /*argc*/, const char** /*argv*/ )
   }
 
 
+  cout << "-- Test " << ntest++ << ": operators +/- test --" << endl;
+  {
+    VolumeRef<float> v1( 10, 10, 10 );
+    VolumeRef<float> v2( 12, 12, 12 );
+
+    v1->fill(0);
+    v2->fill(0);
+    v1->at( 3, 4, 5 ) = 10;
+    v1->at( 4, 4, 5 ) = 11;
+    v1->at( 5, 4, 5 ) = 12;
+    v1->at( 3, 5, 5 ) = 20;
+    v1->at( 4, 5, 5 ) = 21;
+    v2->at( 3, 4, 5 ) = 0.1;
+    v2->at( 4, 4, 5 ) = 0.11;
+    v2->at( 5, 4, 5 ) = 0.12;
+    v2->at( 3, 5, 5 ) = 0.2;
+    v2->at( 5, 5, 5 ) = 0.5;
+    v2->at( 11, 11, 11 ) = 45.23;
+
+    VolumeRef<float> v3 = v1 + v2;
+    if( v3->getSize()[0] != 12 || v3->getSize()[1] != 12
+        || v3->getSize()[2] != 12 )
+    {
+      cerr << "operator + does not allocate the right size: "
+           << v3->getSize()[0] << ", " << v3->getSize()[1] << ", "
+           << v3->getSize()[2] << ", should be 12, 12, 12\n";
+      result = EXIT_FAILURE;
+    }
+    if( fabs( v3->at( 3, 4, 5 ) - 10.1 ) > 1e-5
+        || fabs( v3->at( 4, 4, 5 ) - 11.11 ) > 1e-5
+        || fabs( v3->at( 4, 5, 5 ) - 21 ) > 1e-5 )
+    {
+      cerr << "erroneous addition.\n";
+      cerr << v3->at( 3, 4, 5 ) << ", " << v3->at( 4, 4, 5 ) << ", "
+           << v3->at( 4, 5, 5 ) << endl;
+      result = EXIT_FAILURE;
+    }
+    /* TODO: fix this test
+    if( v3->at( 11, 11, 11 ) != 45.23 )
+    {
+      cerr << "addition does not preserve the region outside of volumes "
+           << "intersection.\n";
+      cerr << v3->at( 11, 11, 11 ) << endl;
+      result = EXIT_FAILURE;
+    }
+    */
+  }
+
+
   cout << "-- Test " << ntest++ << ": speed test --" << endl;
   // allocate a 16 MB volume
   VolumeRef<int16_t>	vol6( 256, 256, 128 );

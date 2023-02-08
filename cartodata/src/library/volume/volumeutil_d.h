@@ -144,12 +144,26 @@ namespace carto
 
   }
 
-
+#if 0
   template <typename T> template <class BinaryFunction>
   VolumeRef<T> VolumeUtil<T>::apply( BinaryFunction f,
                                      const VolumeRef<T> & o1,
                                      const VolumeRef<T> & o2 )
   {
+    std::cout << "VolumeUtil::apply(BinaryFunction)\n";
+    std::vector<int> ns = o1->getSize(), s1 = ns, s2 = o2->getSize();
+    while( ns.size() < s2.size() )
+      ns.push_back( s2[ ns.size() ] );
+
+    for( int i=0; i<s2.size(); ++i )
+    {
+      if( ns[i] < s2[i] )
+        ns[i] = s2[i];
+      std::cout << "size " << i << ": " << ns[i] << std::endl;
+    }
+
+
+
     int	x, nx = o1->getSizeX(), y, ny = o1->getSizeY(),
       z, nz = o1->getSizeZ(), t, nt = o1->getSizeT(), nx2, ny2, nz2, nt2, nx3;
     if( o2->getSizeX() < nx )
@@ -181,8 +195,8 @@ namespace carto
     else
       nt2 = o2->getSizeT();
 
-    VolumeRef<T>	res( new Volume<T>( nx2, ny2, nz2, nt2 ) );
-    res->header() = o1->header();
+    VolumeRef<T>	res( new Volume<T>( ns ) );
+    res->copyHeaderFrom( o1->header() );
 
     bool	x1, y1, z1, x2, y2, z2;
     T	*o1p, *o2p, *rp;
@@ -279,7 +293,7 @@ namespace carto
       }
     return res;
   }
-
+#endif
 
   template <typename T> template <class UnaryFunction>
   void VolumeUtil<T>::selfApply( UnaryFunction f, VolumeRef<T> & o )
