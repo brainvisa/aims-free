@@ -677,9 +677,9 @@ namespace carto
           const_cast<carto::Volume<T> *>( &vol1 ) );
         std::vector<int> pos( size.size(), 0 );
         carto::VolumeRef<T> invol1( invvol1, pos, size );
-        carto::rc_ptr<Volume<T> > invvol2(
-          const_cast<carto::Volume<T> *>( &vol2 ) );
-        carto::VolumeRef<T> invol2( invvol2, pos, size );
+        carto::rc_ptr<Volume<U> > invvol2(
+          const_cast<carto::Volume<U> *>( &vol2 ) );
+        carto::VolumeRef<U> invol2( invvol2, pos, size );
         carto::rc_ptr<Volume<OUTP> > outvvol( &dst );
         carto::VolumeRef<OUTP> outvol( outvvol, pos, size );
         // applyTowards on views of the same size
@@ -729,9 +729,9 @@ namespace carto
       {
         // build views
         std::vector<int> pos( size.size(), 0 );
-        carto::rc_ptr<Volume<T> > invvol2(
-          const_cast<carto::Volume<T> *>( &vol2 ) );
-        carto::VolumeRef<T> invol2( invvol2, pos, size );
+        carto::rc_ptr<Volume<U> > invvol2(
+          const_cast<carto::Volume<U> *>( &vol2 ) );
+        carto::VolumeRef<U> invol2( invvol2, pos, size );
         carto::rc_ptr<Volume<OUTP> > outvvol( &dst );
         carto::VolumeRef<OUTP> outvol( outvvol, pos, size );
         // applyTowards on views of the same size
