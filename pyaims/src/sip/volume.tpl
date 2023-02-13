@@ -761,7 +761,7 @@ The header contains all meta-data.
 
 %End
 
-  SIP_PYOBJECT arraydata() /Factory/;
+  SIP_PYOBJECT arraydata() /Deprecated,Factory/;
 %Docstring
 .. note::
 
