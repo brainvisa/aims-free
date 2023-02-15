@@ -68,7 +68,7 @@ print('voxel_size:', h['voxel_size'])
 
 # array min/max
 
-arr = vol.arraydata()
+arr = vol.np
 # print('array min/max:', Numeric.minimum( arr ), '-', Numeric.maximum( arr ))
 
 print('setting value 1618 at pos (125, 63, 12 )')
