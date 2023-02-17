@@ -17,7 +17,7 @@ def vec_to_bytes(vector):
 
 
 def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
-                            textures=[], teximage=None, name=None, gltf={}):
+                            textures=[], teximages=[], name=None, gltf={}):
     ''' Export a mesh with optional texture to a GLTF JSON dictionary.
 
     The gltf dict may already contain a scene with meshes, the new mesh will be
@@ -37,7 +37,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
         An optional transformation matrix may be passed (column major vector).
     textures: list (optional)
         texture coords arrays list
-    teximage: RGBA Volume (optional)
+    teximages: list(RGBA Volume) (optional)
         only if textures are used, the teture image as an aims Volume. If
         textures are used, this parameter is mandatory.
     name: str (optional)
@@ -210,7 +210,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     gmat = {
         'pbrMetallicRoughness': {
             'baseColorFactor': [1., 0.8, 0.8, 1.],
-            'metallicFactor': 0.5,
+            'metallicFactor': 0.,
             'roughnessFactor': 0.5
         }
     }
@@ -235,17 +235,18 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     if len(textures) != 0:
         print('textures:', len(textures))
         tcmap = tempfile.mkdtemp(prefix='anat_export')
-        cmapname = osp.join(tcmap, 'texture_0000.png')
-        aims.write(teximage, cmapname)
-        with open(cmapname, 'rb') as f:
-            b = f.read()
-        shutil.rmtree(tcmap)
-        image_bytes = "data:image/png;base64," \
-            + base64.encodebytes(b).decode().replace('\n', '')
-        images.append({
-            'uri': image_bytes,
-        })
-        del b
+        for teximage in teximages:
+            cmapname = osp.join(tcmap, 'texture_0000.png')
+            aims.write(teximage, cmapname)
+            with open(cmapname, 'rb') as f:
+                b = f.read()
+            shutil.rmtree(tcmap)
+            image_bytes = "data:image/png;base64," \
+                + base64.encodebytes(b).decode().replace('\n', '')
+            images.append({
+                'uri': image_bytes,
+            })
+            del b
 
         for tex, tc in enumerate(textures):
             buffers.append({
@@ -289,7 +290,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
             }
             ntex += 1
 
-        nimages += 1
+            nimages += 1
 
     nodes.append(node)
     if 'children' in nodes[0]:
