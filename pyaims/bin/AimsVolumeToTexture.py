@@ -70,7 +70,7 @@ vol = aims.read(options.input)
 mesh = aims.read(options.mesh)
 trans = None
 
-tex = aims.TimeTexture(str(vol.arraydata().dtype))
+tex = aims.TimeTexture(str(vol.np.dtype))
 
 if options.transform:
     trans = aims.read(options.transform)

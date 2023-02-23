@@ -74,7 +74,7 @@ def checkVolume(vol):
     def _unique(vol):
         hg = getattr(aims, 'RegularBinnedHistogram_' + dtype)()
         # abort if more than 100000 values (this will not be labels)
-        return hg.unique(vol, 100000).arraydata()
+        return numpy.asarray(hg.unique(vol, 100000))
 
     if aimsalgo is not None:
         # aims histogram is 15 times faster than numpy...

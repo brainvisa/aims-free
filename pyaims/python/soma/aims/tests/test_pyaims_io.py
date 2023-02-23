@@ -74,9 +74,7 @@ class TestPyaimsIO(unittest.TestCase):
         vol.header()['voxel_size'] = [0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.1, 1.2]
         view = ((2, 3, 2, 1, 1, 1, 1, 1), (7, 5, 2, 2, 3, 2, 2, 2),
                 (1, 2, 3, 3, 2, 0, 0, 0), (7, 5, 2, 2, 3, 2, 2, 2))
-        vol.arraydata()[:] \
-            = np.ogrid[0:vol.arraydata().ravel().shape[0]].reshape(
-                vol.arraydata().shape)
+        vol[:] = np.ogrid[0:vol.np.size].reshape(vol.shape)
         failing_files = set()
         for format in formats:
             options = {}
