@@ -718,17 +718,6 @@ The header contains all meta-data.
     bool xyzorder = false;
     std::vector<int> dims( nd, 1 );
     int inc = 1, start = 0;
-    // TODO: retreive exact strides and react accordingly
-    if( PyArray_NDIM( arr ) >= 2 )
-    {
-      if( PyArray_STRIDES( arr )[1] < PyArray_STRIDES( arr )[0] )
-      {
-        xyzorder = true;
-        // increments higher index first
-        //  inc = -1;
-        // start = PyArray_NDIM( arr )-1;
-      }
-    }
 
     std::vector<size_t> strides( nd, 1 );
 
@@ -748,10 +737,6 @@ The header contains all meta-data.
        is still living.
     */
     PyObject_SetAttrString( (PyObject *) sipSelf, "_arrayext", a0 );
-    PyObject *xfirst = PyBool_FromLong( long( xyzorder ) );
-    Py_DECREF( xfirst );
-    PyObject_SetAttrString( (PyObject *) sipSelf, "_array_x_is_first",
-                            xfirst );
   }
   else
   {
@@ -765,9 +750,9 @@ The header contains all meta-data.
 %Docstring
 .. note::
 
-    *arraydata()* returns a numpy array to the internal memory block, without strides.
+    *arraydata()* returns a numpy array to the internal memory block, with "inverted" shape and strides.
 
-    **WARNING:** this is a *raw* array, without strides. Most of the time you need `numpy.asarray(volume)`, or more simply: `volume.np`, which actually manages strides to provide an array with the same indices ordering.
+    **WARNING:** this is an obsolete method, which behaviour has changed. Most of the time you need `numpy.asarray(volume)`, or more simply: `volume.np`, which actually provides an array with the same indices ordering. Here it is a transposed one.
 
     Given the internal ordering of Aims Volumes, the resulting numpy array is indexed as [t][z][y][x]. This order corresponds to the numpy "fortran" order: ``order='F'``
     If you need the inverse, more natural, [x][y][z][t] ordering, use the following:
@@ -786,12 +771,11 @@ The header contains all meta-data.
 
         vol2 = aims.Volume(vol.arraydata())
 
-    You will likely build a transposed volume (but it may depend on the strides in the initial volume).
+    You will build a transposed volume.
 %End
 
 %MethodCode
   std::vector<int> vdims = sipCpp->getSize();
-
   int i, n= vdims.size();
   std::vector<size_t> vstrides, strides( n );
   std::vector<int> dims( n );
@@ -801,14 +785,14 @@ The header contains all meta-data.
 
   for( i=0; i<n; ++i )
   {
-    dims[n - 1 - i] = vdims[i];
-    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
+    dims[i] = vdims[i];
+    strides[i] = vstrides[i] * sizeof( %Template1% );
   }
 
   std::vector<int> added_dims = %Template1NumDims%;
   dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
   for( i=0; i<added_dims.size(); ++i )
-    strides.push_back( sizeof( %Template1% ) / added_dims[i] ); // FIXME
+    strides.insert( strides.end(), sizeof( %Template1% ) / added_dims[i] ); // FIXME
 
   PyArray_Descr *descr = %Template1NumType_Descr%;
   if( !descr )
