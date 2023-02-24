@@ -69,6 +69,12 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     nsamplers = len(samplers)
 
     poly = np.asarray(poly)
+    # gltf doesn't handle quads, we have to transform
+    if poly.shape[1] == 4:
+        poly2 = poly[:, :3]
+        poly3 = poly[:, (0, 2, 3)]
+        poly = np.vstack((poly2, poly3))
+
     ps = poly.shape[1]
 
     hasnorm = True
@@ -164,12 +170,6 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
         2: 1,
         3: 4,
     }
-
-    # gltf doesn't handle quads, we have to transform
-    if poly.shape[1] == 4:
-        poly2 = poly[:, :3]
-        poly3 = poly[:, (0, 2, 3)]
-        poly = np.vstack((poly2, poly3))
 
     mesh = {
         "primitives": [
