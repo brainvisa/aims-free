@@ -39,36 +39,15 @@ using namespace std;
 namespace
 {
 
-  PyObject* transposeNumpyArray( PyObject* a, bool xyzorder,
-                                 int current_x_first = -1 )
+  // transpose if xyzorder is false
+  PyObject* transposeNumpyArray( PyObject* a, bool xyzorder )
   {
     PyArrayObject *arr = (PyArrayObject *) a;
     int i, ndim = PyArray_NDIM( arr );
     if( ndim < 2 )
       return a;
-    bool transpose = false;
-    if( current_x_first >= 0 )  // order is given
-      transpose = ( bool( current_x_first ) != xyzorder );
-    else
-    {
-      bool firstindexinc = xyzorder;
-      for( i=0; i<ndim - 1; ++i )
-      {
-        if( PyArray_STRIDES( arr )[i] < PyArray_STRIDES( arr )[i + 1] )
-        {
-          firstindexinc = true;
-          break;
-        }
-        else if( PyArray_STRIDES( arr )[i] > PyArray_STRIDES( arr )[i + 1] )
-        {
-          firstindexinc = false;
-          break;
-        }
-        // otherwise equal, check next dim
-      }
-      if( xyzorder != firstindexinc )
-        transpose = true;
-    }
+
+    bool transpose = !xyzorder;
 
     if( !transpose )
       return a;
@@ -102,14 +81,7 @@ namespace aims
       PyObject *arr = PyObject_GetAttrString( sipSelf, "_arrayext" );
       if( arr )
       {
-        int current_x_first = -1;
-        if( PyObject_HasAttrString( sipSelf, "_array_x_is_first" ) )
-        {
-          PyObject *x = PyObject_GetAttrString( sipSelf, "_array_x_is_first" );
-          if( x )
-            current_x_first = int( bool( PyLong_AsLong( x ) ) );
-        }
-        sipRes = transposeNumpyArray( arr, xyzorder, current_x_first );
+        sipRes = transposeNumpyArray( arr, xyzorder );
       }
     }
     // else look if an array has already been built on the object
@@ -122,19 +94,11 @@ namespace aims
         if( arr )
         {
           Py_INCREF( arr );
-          int current_x_first = -1;
-          if( PyObject_HasAttrString( sipSelf, "_array_x_is_first" ) )
-          {
-            PyObject *x = PyObject_GetAttrString( sipSelf,
-                                                  "_array_x_is_first" );
-            if( x )
-              current_x_first = int( bool( PyLong_AsLong( x ) ) );
-          }
-          sipRes = transposeNumpyArray( arr, xyzorder, current_x_first );
+          sipRes = transposeNumpyArray( arr, xyzorder );
         }
         else
         {
-          std::cerr << "weakref on deleted object" << std::endl;
+          // std::cerr << "weakref on deleted object" << std::endl;
           PyObject_DelAttrString( sipSelf, "_arrayref" );
         }
         Py_DECREF( wr );
@@ -168,14 +132,6 @@ namespace aims
       }
       else
       {
-//         if( strides )
-//         {
-//           // if strides are specified, force them (volume views...)
-//           int dim;
-//           for( dim=0; dim<ndim; ++dim )
-//             PyArray_STRIDES( reinterpret_cast<PyArrayObject *>( sipRes ) )[dim]
-//               = strides[dim];
-//         }
         sipRes = PyArray_Return( (PyArrayObject *) sipRes );
         // make a weakref to the array with a deletion callback
         PyObject *cbk = PyObject_GetAttrString( sipSelf,
@@ -188,8 +144,6 @@ namespace aims
         }
         else
         {
-          sipRes = transposeNumpyArray( sipRes, xyzorder );
-
           PyObject *wr = PyWeakref_NewRef( sipRes, cbk );
           if( wr )
           {
@@ -209,6 +163,8 @@ namespace aims
             std::cerr << "could not make a weakref to the array"
                 << std::endl;
           Py_DECREF( cbk );
+
+          sipRes = transposeNumpyArray( sipRes, xyzorder );
         }
       }
     }
