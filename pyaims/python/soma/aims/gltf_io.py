@@ -4,6 +4,7 @@ import os
 import os.path as osp
 import tempfile
 import shutil
+import uuid
 from soma import aims
 
 
@@ -233,20 +234,25 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     textures = [tc for tc in textures if tc is not None]
 
     if len(textures) != 0:
-        print('textures:', len(textures))
         tcmap = tempfile.mkdtemp(prefix='anat_export')
-        for teximage in teximages:
-            cmapname = osp.join(tcmap, 'texture_0000.png')
-            aims.write(teximage, cmapname)
-            with open(cmapname, 'rb') as f:
-                b = f.read()
+        try:
+            for teximage in teximages:
+                cmapname = osp.join(tcmap, 'texture_0000.png')
+                aims.write(teximage, cmapname)
+                with open(cmapname, 'rb') as f:
+                    b = f.read()
+                image_bytes = "data:image/png;base64," \
+                    + base64.encodebytes(b).decode().replace('\n', '')
+                images.append({
+                    'uri': image_bytes,
+                })
+                del b
+        finally:
             shutil.rmtree(tcmap)
-            image_bytes = "data:image/png;base64," \
-                + base64.encodebytes(b).decode().replace('\n', '')
-            images.append({
-                'uri': image_bytes,
-            })
-            del b
+
+        # note: only one baseColorTexture is allowed.
+        texnames = ['pbrMetallicRoughness.baseColorTexture',
+                    'emissiveTexture']
 
         for tex, tc in enumerate(textures):
             buffers.append({
@@ -284,10 +290,16 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                 'sampler': nsamplers
             })
             nsamplers += 1
-            gmat['pbrMetallicRoughness']['baseColorTexture'] = {
-                'index': ntex,
-                'texCoord': tex
-            }
+            # note: only one baseColorTexture is allowed.
+            if len(texnames) > tex:
+                mat_id = texnames[tex]
+                gm = gmat
+                for tn in mat_id.split('.'):
+                    gm = gm.setdefault(tn, {})
+                gm.update({
+                    'index': ntex,
+                    'texCoord': tex
+                })
             ntex += 1
 
             nimages += 1
@@ -364,3 +376,384 @@ def default_gltf_scene(matrix=None, gltf={}):
     return gltf
 
 
+class BufferView:
+    def __init__(self, gltf, bufferview, arrays):
+        self.gltf = gltf
+        self.arrays = arrays
+        self.ddef = bufferview
+        self._data = None
+
+    @staticmethod
+    def get_buffer(buff_i, gltf, arrays):
+        buffs = arrays.setdefault('buffers', [])
+        if len(buffs) > buff_i:
+            buff = buffs[buff_i]
+            if buff is not None:
+                return buff
+        if len(buffs) <= buff_i:
+            buffs += [None] * (buff_i + 1 - len(buffs))
+        cbuff = gltf['buffers'][buff_i]
+        uri = cbuff.get('uri')
+        binbuf = 'data:application/octet-stream;base64,'
+        if uri is None or not uri.startswith(binbuf):
+            raise ValueError('uri in buffer %d is not supported' % buff_i)
+
+        bdata = base64.decodebytes(uri[len(binbuf):].encode())
+        buffs[buff_i] = bdata
+
+        return bdata
+
+    def data(self):
+        if self._data is not None:
+            return self._data
+        buff = self.get_buffer(self.ddef['buffer'], self.gltf, self.arrays)
+        bo = self.ddef.get('byteOffset', 0)
+        bl = self.ddef['byteLength']
+        bs = self.ddef.get('byteStride', 1)
+        self._data = buff[bo:bo + bl:bs]
+        return self._data
+
+
+class Accessor:
+    def __init__(self, gltf, accessor, arrays):
+        self.gltf = gltf
+        self.arrays = arrays
+        self.ddef = accessor
+        self._data = None
+
+    def data(self):
+        if self._data is not None:
+            return self.data
+        bv = self.gltf['bufferViews'][self.ddef.get('bufferView', 0)]
+        bufferview = BufferView(self.gltf, bv, self.arrays)
+        bvdata = bufferview.data()
+        bo = self.ddef.get('byteOffset', 0)
+        ctype = self.ddef['componentType']
+        if ctype == 5120:
+            nptype = np.int8
+        elif ctype == 5121:
+            nptype = np.uint8
+        elif ctype == 5122:
+            nptype = np.int16
+        elif ctype == 5123:
+            nptype = np.uint16
+        if ctype == 5125:
+            nptype = np.uint32
+        elif ctype == 5126:
+            nptype = np.float32
+        else:
+            raise ValueError('unsupported component type: %d in accessor'
+                              % ctype)
+        atype = self.ddef['type']
+        if atype == 'SCALAR':
+            nc = 1
+        elif atype == 'VEC2':
+            nc = 2
+        elif atype == 'VEC3':
+            nc = 3
+        elif atype == 'VEC4':
+            nc = 4
+        else:
+            raise ValueError('unsupported accessor type: %d' % atype)
+        n = self.ddef['count']
+        ba = np.frombuffer(bvdata, dtype=nptype, offset=bo, count=n * nc)
+        if nc != 1:
+            ba = ba.reshape((n, nc))
+        self._data = ba
+
+        return self._data
+
+
+class GLTFParser:
+    def __init__(self, base_uri=''):
+        self.base_uri = base_uri
+
+    def parse(self, gltf, mesh, arrays=None):
+        pmesh = {}
+        if 'name' in mesh:
+            pmesh['name'] = mesh['name']
+        pmeshes = []
+        pmesh['meshes'] = pmeshes
+        primitives = mesh.get('primitives', {})
+        for prim in primitives:
+            mat_i = prim.get('material')
+            mode = prim.get('mode', 4)
+            indices_i = prim.get('indices')
+            attrib = prim.get('attributes', {})
+            pos_i = attrib.get('POSITION')
+            normal_i = attrib.get('NORMAL')
+            texcoords_i = {}
+            for k, v in attrib.items():
+                if k.startswith('TEXCOORD_'):
+                    texcoords_i[int(k[9:])] = v
+            mesh_def = {}
+            pmeshes.append(mesh_def)
+            if indices_i is not None:
+                acc = gltf['accessors'][indices_i]
+                accessor = Accessor(gltf, acc, arrays)
+                indices = accessor.data()
+                ns = 1
+                if mode == 1:
+                    ns = 2
+                elif mode == 4:
+                    ns = 3
+                if ns != 1:
+                    indices = indices.reshape((int(indices.shape[0]/ns), ns))
+                mesh_def['polygons'] = indices
+            if pos_i:
+                acc = gltf['accessors'][pos_i]
+                accessor = Accessor(gltf, acc, arrays)
+                vert = accessor.data()
+                mesh_def['vertices'] = vert
+            if normal_i:
+                acc = gltf['accessors'][normal_i]
+                accessor = Accessor(gltf, acc, arrays)
+                norm = accessor.data()
+                mesh_def['normals'] = norm
+            if texcoords_i:
+                texcoords = {}
+                for tex, tci in texcoords_i.items():
+                    acc = gltf['accessors'][tci]
+                    accessor = Accessor(gltf, acc, arrays)
+                    tc = accessor.data()
+                    texcoords[tex] = tc
+                mesh_def['texcoords'] = texcoords
+            if mat_i is not None:
+                material = gltf.get('materials', [])[mat_i]
+                mat = {}
+                col = material.get('pbrMetallicRoughness',
+                                   {}).get('baseColorFactor')
+                if col is not None:
+                    mat['diffuse'] = col
+                if texcoords_i:
+                    mattex = {}
+                    coltex = material.get('pbrMetallicRoughness',
+                                          {}).get('baseColorTexture')
+                    if coltex:
+                        mattex0 = self.get_texture(coltex, gltf, arrays)
+                        mattex.update(mattex0)
+                    emtex = material.get('emissiveTexture')
+                    if emtex:
+                        mattex0 = self.get_texture(emtex, gltf, arrays)
+                        mattex.update(mattex0)
+
+                    if mattex:
+                        mat['textures'] = mattex
+
+                mesh_def['material'] = mat
+
+        return pmesh
+
+    def get_texture(self, coltex, gltf, arrays):
+        mattex = {}
+        tnum = coltex['index']
+        tcoord = coltex.get('texCoord', 0)
+        texdef = gltf.get('textures', [])[tnum]
+        tsamp = texdef.get('sampler')
+        mtc = {}
+        mattex[tcoord] = mtc
+        if tsamp is not None:
+            sampler = gltf.get('samplers', [])[tsamp]
+            mtc['sampler'] = sampler
+        teximage_i = texdef.get('source')
+        if teximage_i is not None:
+            teximage = self.get_teximage(teximage_i, gltf,
+                                          arrays)
+            mtc['teximage'] = teximage
+        return mattex
+
+
+    def get_teximage(self, texnum, gltf, arrays):
+        if arrays is not None:
+            images = arrays.get('images', [])
+            if len(images) > texnum:
+                teximage = images[texnum]
+                if teximage is not None:
+                    return teximage
+
+        texdef = gltf.get('images', [])[texnum]
+        uri = texdef.get('uri')
+        if uri is not None:
+            if uri.startswith('data:image/'):
+                start = uri.find(',') + 1
+                data = base64.decodebytes(uri[start:].encode())
+                tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
+                endf = uri.find(';', 11)
+                format = uri[11: endf]
+                try:
+                    tmpf = osp.join(tmpd, 'image.%s' % format)
+                    with open(tmpf, 'wb') as f:
+                        f.write(data)
+                    teximage = aims.read(tmpf)
+                finally:
+                    # print('tmpd:', tmpd)
+                    shutil.rmtree(tmpd)
+            else:
+                url = osp.join(self.base_uri, uri)
+                teximage = aims.read(url)
+            if arrays is None:
+                arrays = {}
+            images = arrays.setdefault('images', [])
+            if len(images) <= texnum:
+                images += [None] * (texnum + 1 - len(images))
+            return teximage
+
+    def set_object_referential(self, obj, ref):
+        obj['referential'] = ref
+        return obj
+
+    def polish_result(self, mesh_dict):
+        # do nothing
+        return mesh_dict
+
+
+class AimsGLTFParser(GLTFParser):
+    def __init__(self):
+        self.refs = {}
+
+    def aims_trans(self, matrix):
+        return aims.AffineTransformation3d(matrix)
+
+    def parse(self, gltf, mesh, arrays={}):
+        pmeshes = super().parse(gltf, mesh, arrays=arrays)
+
+        name = pmeshes.get('name')
+        objects = []
+        for obj in pmeshes['meshes']:
+            aimsobj = self.parse_object(obj, name)
+            objects.append(aimsobj)
+
+        return objects
+
+    def parse_object(self, mesh, name):
+        aimsobj = {}
+        poly = mesh.get('polygons')
+        pdim = poly.shape[1]
+        amesh = aims.AimsTimeSurface(pdim)
+        amesh.vertex().assign(mesh.get('vertices'))
+        amesh.polygon().assign(poly)
+        norm = mesh.get('normals')
+        if norm is not None:
+            amesh.normal().assign(norm)
+        aimsobj['mesh'] = amesh
+        if name:
+            amesh.header()['name'] = name
+        textures = mesh.get('texcoords')
+        mat = mesh.get('material')
+        if mat:
+            amesh.header()['material'] = {k: v for k, v in mat.items()
+                                          if k != 'textures'}
+        if textures:
+            dt = {
+                np.dtype('float32'): 'F',
+                np.dtype('float64'): 'D',
+                np.dtype('int16'): '',
+                np.dtype('uint32'): 'U',
+                np.dtype('int64'): 'L'
+            }
+            atexs = []
+            aimsobj['textures'] = atexs
+            for tex in sorted(textures.keys()):
+                texture = textures[tex]
+                ttype = texture.dtype
+                if len(texture.shape) > 1 and texture.shape[1] > 1:
+                    ttype = 'POINT%dD%s' % (texture.shape[1], dt[ttype])
+                else:
+                    ttype = aims.typeCode(ttype)
+                atex = aims.TimeTexture(ttype)
+                atex[0].data().assign(texture)
+                mattex = mat.get('textures', {}).get(tex, {})
+                if mattex:
+                    atex.header()['gltf_texture'] = mattex
+                atexs.append(atex)
+        return aimsobj
+
+    def aims_transforms(self, trans):
+        aimstrans = {}
+        refs = self.refs
+        refs.update({r: str(uuid.uuid4()) for r in trans if r not in refs})
+        for r, tdef in trans.items():
+            for r2, t in tdef.items():
+                s = refs[r]
+                d = refs.get(r2)
+                if d is None:
+                    d = str(uuid.uuid4())
+                    refs[r2] = d
+                aimstrans.setdefault(s, {})[d] = self.aims_trans(t)
+
+        return refs, aimstrans
+
+    def get_aims_referential(self, ref):
+        aimsref = self.refs.get(ref)
+        if aimsref:
+            return aimsref
+        aimsref = str(uuid.uuid4())
+        self.refs[ref] = aimsref
+        return aimsref
+
+    def set_object_referential(self, obj, ref):
+        aimsref = self.get_aims_referential(ref)
+        for sobj in obj:
+            sobj['mesh'].header()['referential'] = aimsref
+        return obj
+
+    def polish_result(self, mesh_dict):
+        refs, aimstrans = \
+            self.aims_transforms(mesh_dict.get('transformation_graph', {}))
+        objects = mesh_dict['objects']
+
+        aims_meshes = {
+            'objects': objects,
+            'transformation_graph': aimstrans
+        }
+        return aims_meshes
+
+
+def gltf_to_meshes(gltf, object_parser=AimsGLTFParser()):
+    scene_i = gltf.get('scene', 0)
+    scene = gltf.get('scenes', [])[scene_i]
+    sc_nodes = scene.get('nodes', [0])
+    objects = []
+    all_nodes = gltf.get('nodes', [])
+
+    root_ref = object()
+    trans = {}
+    todo = [(objects, sc_nodes, root_ref)]
+    arrays = {}  # decrypted buffers, images
+
+    while todo:
+        objects, nodes, nref = todo.pop(0)
+        for node_i in nodes:
+            if isinstance(node_i, list):
+                sub_obj = []
+                objects.append(sub_obj)
+                todo.append((sub_obj, node_i, nref))
+                continue
+
+            node = all_nodes[node_i]
+            ref = nref
+            matrix = node.get('matrix')
+            if matrix is not None:
+                ref = object()
+                trans.setdefault(nref, {})[ref] = matrix
+            children = node.get('children')
+            if children:
+                sub_obj = []
+                objects.append(sub_obj)
+                todo.append((sub_obj, children, ref))
+
+            mesh_i = node.get('mesh')
+            if mesh_i is not None:
+                mesh = gltf['meshes'][mesh_i]
+                obj = object_parser.parse(gltf, mesh, arrays=arrays)
+                obj = object_parser.set_object_referential(obj, ref)
+                objects.append(obj)
+
+    result = {
+        'objects': objects,
+        'transformation_graph': trans
+    }
+
+    result = object_parser.polish_result(result)
+
+    return result
