@@ -5,7 +5,12 @@ import os.path as osp
 import tempfile
 import shutil
 import uuid
+from functools import partial
 from soma import aims
+try:
+    import DracoPy
+except ImportError:
+    DracoPy = None
 
 
 def vec_to_bytes(vector):
@@ -424,9 +429,6 @@ class Accessor:
     def data(self):
         if self._data is not None:
             return self.data
-        bv = self.gltf['bufferViews'][self.ddef.get('bufferView', 0)]
-        bufferview = BufferView(self.gltf, bv, self.arrays)
-        bvdata = bufferview.data()
         bo = self.ddef.get('byteOffset', 0)
         ctype = self.ddef['componentType']
         if ctype == 5120:
@@ -437,7 +439,7 @@ class Accessor:
             nptype = np.int16
         elif ctype == 5123:
             nptype = np.uint16
-        if ctype == 5125:
+        elif ctype == 5125:
             nptype = np.uint32
         elif ctype == 5126:
             nptype = np.float32
@@ -456,10 +458,18 @@ class Accessor:
         else:
             raise ValueError('unsupported accessor type: %d' % atype)
         n = self.ddef['count']
-        ba = np.frombuffer(bvdata, dtype=nptype, offset=bo, count=n * nc)
-        if nc != 1:
-            ba = ba.reshape((n, nc))
-        self._data = ba
+
+        bvn = self.ddef.get('bufferView')
+        if bvn is None:
+            self._data = np.zeros((n, nc), dtype=nptype)
+        else:
+            bv = self.gltf['bufferViews'][bvn]
+            bufferview = BufferView(self.gltf, bv, self.arrays)
+            bvdata = bufferview.data()
+            ba = np.frombuffer(bvdata, dtype=nptype, offset=bo, count=n * nc)
+            if nc != 1:
+                ba = ba.reshape((n, nc))
+            self._data = ba
 
         return self._data
 
@@ -475,41 +485,63 @@ class GLTFParser:
         pmeshes = []
         pmesh['meshes'] = pmeshes
         primitives = mesh.get('primitives', {})
+        global DracoPy
         for prim in primitives:
             mat_i = prim.get('material')
-            mode = prim.get('mode', 4)
-            indices_i = prim.get('indices')
-            attrib = prim.get('attributes', {})
-            pos_i = attrib.get('POSITION')
-            normal_i = attrib.get('NORMAL')
-            texcoords_i = {}
-            for k, v in attrib.items():
-                if k.startswith('TEXCOORD_'):
-                    texcoords_i[int(k[9:])] = v
+            ext = prim.get('extensions', {})
             mesh_def = {}
             pmeshes.append(mesh_def)
-            if indices_i is not None:
-                acc = gltf['accessors'][indices_i]
-                accessor = Accessor(gltf, acc, arrays)
-                indices = accessor.data()
-                ns = 1
-                if mode == 1:
-                    ns = 2
-                elif mode == 4:
-                    ns = 3
-                if ns != 1:
-                    indices = indices.reshape((int(indices.shape[0]/ns), ns))
-                mesh_def['polygons'] = indices
-            if pos_i:
-                acc = gltf['accessors'][pos_i]
-                accessor = Accessor(gltf, acc, arrays)
-                vert = accessor.data()
-                mesh_def['vertices'] = vert
-            if normal_i:
-                acc = gltf['accessors'][normal_i]
-                accessor = Accessor(gltf, acc, arrays)
-                norm = accessor.data()
-                mesh_def['normals'] = norm
+            attrib = prim.get('attributes', {})
+            # attrib may be an Attributes instance in pygltflib
+            attget = getattr(attrib, 'get', partial(getattr, attrib))
+            attdict = getattr(attrib, '__dict__', attrib)
+
+            if 'KHR_draco_mesh_compression' in ext:
+                # Draco-compressed mesh
+                if DracoPy is None:
+                    # raise an ImportError
+                    import DracoPy
+                draco = ext['KHR_draco_mesh_compression']
+                bv = gltf['bufferViews'][draco['bufferView']]
+                bv = BufferView(gltf, bv, arrays)
+                draco_mesh = DracoPy.decode(bv.data())
+                mesh_def['polygons'] = draco_mesh.faces
+                mesh_def['vertices'] = draco_mesh.points
+                mesh_def['normals'] = draco_mesh.normals
+                # tex coords ??
+            else:
+                mode = prim.get('mode', 4)
+                indices_i = prim.get('indices')
+                pos_i = attget('POSITION')
+                normal_i = attget('NORMAL')
+                if indices_i is not None:
+                    acc = gltf['accessors'][indices_i]
+                    accessor = Accessor(gltf, acc, arrays)
+                    indices = accessor.data()
+                    ns = 1
+                    if mode == 1:
+                        ns = 2
+                    elif mode == 4:
+                        ns = 3
+                    if ns != 1:
+                        indices = indices.reshape((int(indices.shape[0]/ns),
+                                                   ns))
+                    mesh_def['polygons'] = indices
+                if pos_i:
+                    acc = gltf['accessors'][pos_i]
+                    accessor = Accessor(gltf, acc, arrays)
+                    vert = accessor.data()
+                    mesh_def['vertices'] = vert
+                if normal_i:
+                    acc = gltf['accessors'][normal_i]
+                    accessor = Accessor(gltf, acc, arrays)
+                    norm = accessor.data()
+                    mesh_def['normals'] = norm
+
+            texcoords_i = {}
+            for k, v in attdict.items():
+                if k.startswith('TEXCOORD_') and v is not None:
+                    texcoords_i[int(k[9:])] = v
             if texcoords_i:
                 texcoords = {}
                 for tex, tci in texcoords_i.items():
@@ -555,10 +587,15 @@ class GLTFParser:
         if tsamp is not None:
             sampler = gltf.get('samplers', [])[tsamp]
             mtc['sampler'] = sampler
-        teximage_i = texdef.get('source')
+        ext = texdef.get('extensions', {})
+        teximage_i = None
+        if 'EXT_texture_webp' in ext:
+            ext_w = ext['EXT_texture_webp']
+            teximage_i = ext_w.get('source')
+        else:
+            teximage_i = texdef.get('source')
         if teximage_i is not None:
-            teximage = self.get_teximage(teximage_i, gltf,
-                                          arrays)
+            teximage = self.get_teximage(teximage_i, gltf, arrays)
             mtc['teximage'] = teximage
         return mattex
 
@@ -597,6 +634,18 @@ class GLTFParser:
             if len(images) <= texnum:
                 images += [None] * (texnum + 1 - len(images))
             return teximage
+        else: # uri is None
+            bv = gltf['bufferViews'][texdef['bufferView']]
+            bv = BufferView(gltf, bv, arrays)
+            data = bv.data()
+            mtype = texdef.get('mimeType')
+            if mtype == 'image/webp':
+                import webp
+                webp_data = webp.WebPData.from_buffer(data)
+                arr = webp_data.decode(color_mode=webp.WebPColorMode.RGBA)
+                teximage = aims.Volume_RGBA(arr.shape[:2])
+                teximage.np['v'][:, :, 0, 0, :] = arr
+                return teximage
 
     def set_object_referential(self, obj, ref):
         obj['referential'] = ref
