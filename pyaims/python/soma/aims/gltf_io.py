@@ -11,6 +11,10 @@ try:
     import DracoPy
 except ImportError:
     DracoPy = None
+try:
+    import webp
+except ImportError:
+    webp = None
 
 
 def vec_to_bytes(vector):
@@ -22,8 +26,33 @@ def vec_to_bytes(vector):
     return vector.tobytes(order='C')
 
 
+def image_as_buffer(image, format):
+    if format == 'webp':
+        if webp is not None:
+            arr = np.asarray(image.np['v'][:,:,0,0,:], order='C')
+            webp_data = webp.WebPPicture.from_numpy(arr)
+            webp_data = webp_data.encode()
+            data = bytes(webp_data.buffer())
+            return data
+        else:
+            format = 'png'
+
+    tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
+    try:
+        tmpf = osp.join(tmpd, 'image.%s' % format)
+        aims.write(image, tmpf)
+        with open(tmpf, 'rb') as f:
+            data = f.read()
+        return data
+    finally:
+        # print('tmpd:', tmpd)
+        shutil.rmtree(tmpd)
+
+
 def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
-                            textures=[], teximages=[], name=None, gltf={}):
+                            textures=[], teximages=[], name=None, gltf={},
+                            tex_format='webp', images_as_buffers=True,
+                            single_buffer=True):
     ''' Export a mesh with optional texture to a GLTF JSON dictionary.
 
     The gltf dict may already contain a scene with meshes, the new mesh will be
@@ -51,9 +80,32 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     gltf: dict (optional)
         The GLTF dictionary. It will be updated and returned by the function.
         If it is not provided, a new one will be created.
+    tex_format: str (optional)
+        image format for textures. Default: "webp", supported only if the webp
+        module is installed. Otherwise it will fallback to "png".
+    images_as_buffers: bool (optional)
+        if True, texture images will be stored in buffers instead of images
+    single_buffer: bool (optional)
+        if True, all binary data are appended in the same buffer object,
+        instead of each having a separate buffer. The binary GLB format is
+        better optimized for this situation. If this option is used, the buffer
+        will not be base64-encoded on-the-fly, the function
+        gltf_encode_buffers() should be called when the scene is finished in
+        order to avoid many encoding/decoding overheads.
     '''
     if vert is None:
         return gltf
+
+    if tex_format == 'webp' and webp is None:
+        tex_format = 'png'
+    if tex_format == 'webp':
+        images_as_buffers = True
+        extused = gltf.setdefault('extensionsUsed', [])
+        if 'EXT_texture_webp' not in extused:
+            extused.append('EXT_texture_webp')
+        extreq = gltf.setdefault('extensionsRequired', [])
+        if 'EXT_texture_webp' not in extreq:
+            extreq.append('EXT_texture_webp')
 
     meshes = gltf.setdefault('meshes', [])
     nmesh = len(meshes)
@@ -73,6 +125,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     nimages = len(images)
     samplers = gltf.setdefault('samplers', [])
     nsamplers = len(samplers)
+    buf_offset = 0
 
     poly = np.asarray(poly)
     # gltf doesn't handle quads, we have to transform
@@ -89,35 +142,34 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
         hasnorm = False
 
     if hasnorm:
-        buffers.append(
-            {
-                # base64 should not contain "\n"
-                "uri" :
-                    ("data:application/octet-stream;base64,"
-                      + base64.encodebytes(vec_to_bytes(vert)).decode()
-                      + base64.encodebytes(vec_to_bytes(norm)).decode()
-                      + base64.encodebytes(vec_to_bytes(poly)).decode()
-                    ).replace('\n', ''),
-                "byteLength" :
-                    len(vert) * 12 + len(norm) * 12 + len(poly) * 4 * ps
-            })
+        data = vec_to_bytes(vert) + vec_to_bytes(norm) + vec_to_bytes(poly)
+    else:
+        data = vec_to_bytes(vert) + vec_to_bytes(poly)
+    if single_buffer:
+        if len(buffers) == 0:
+            buf = {'data': b''}
+            buffers.append(buf)
+        else:
+            buf = buffers[-1]
+            nbuff -= 1
+        buf_offset = len(buf.get('data', b'')) + buf.get('byteLength', 0)
+        buf['data'] += data
     else:
         buffers.append(
             {
                 # base64 should not contain "\n"
-                "uri" :
+                "uri":
                     ("data:application/octet-stream;base64,"
-                      + base64.encodebytes(vec_to_bytes(vert)).decode()
-                      + base64.encodebytes(vec_to_bytes(poly)).decode()
+                      + base64.encodebytes(data).decode()
                     ).replace('\n', ''),
-                "byteLength" : len(vert) * 12 + len(poly) * 4 * ps
+                "byteLength": len(data)
             })
 
     # polygons
     buffviews.append(
         {
             "buffer": nbuff,
-            "byteOffset": len(vert) * 3 * 4 + len(norm) * 3 * 4,
+            "byteOffset": buf_offset + len(vert) * 3 * 4 + len(norm) * 3 * 4,
             "byteLength": len(poly) * ps * 4
         })
 
@@ -125,7 +177,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     buffviews.append(
         {
             "buffer": nbuff,
-            "byteOffset": 0,
+            "byteOffset": buf_offset,
             "byteLength": len(vert) * 3 * 4
         })
 
@@ -134,9 +186,10 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
         buffviews.append(
             {
                 "buffer": nbuff,
-                "byteOffset": len(vert) * 3 * 4,
+                "byteOffset": buf_offset + len(vert) * 3 * 4,
                 "byteLength": len(norm) * 3 * 4
             })
+    buf_offset += len(data)
 
     accessors.append(
         {
@@ -195,7 +248,8 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     else:
         naccess += 2
         nbuffv += 2
-    nbuff += 1
+    if not single_buffer:
+        nbuff += 1
 
     node = {
             "mesh": nmesh,
@@ -239,39 +293,65 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     textures = [tc for tc in textures if tc is not None]
 
     if len(textures) != 0:
-        tcmap = tempfile.mkdtemp(prefix='anat_export')
-        try:
-            for teximage in teximages:
-                cmapname = osp.join(tcmap, 'texture_0000.png')
-                aims.write(teximage, cmapname)
-                with open(cmapname, 'rb') as f:
-                    b = f.read()
-                image_bytes = "data:image/png;base64," \
-                    + base64.encodebytes(b).decode().replace('\n', '')
+        if images_as_buffers:
+            nimages_bv = nbuffv
+        for tex, teximage in enumerate(teximages):
+            b = image_as_buffer(teximage, tex_format)
+            if images_as_buffers:
+                if single_buffer:
+                    buffers[-1]['data'] += b
+                else:
+                    image_bytes = base64.encodebytes(b).decode().replace(
+                        '\n', '')
+                    buffers.append({
+                        "uri" :
+                            "data:application/octet-stream;base64,"
+                            + image_bytes,
+                        "byteLength" : len(b)
+                    })
+                buffviews.append({
+                    "buffer": nbuff,
+                    "byteOffset": buf_offset,
+                    "byteLength": len(b)
+                })
+                images.append({
+                    'mimeType': 'image/%s' % tex_format,
+                    'bufferView': nimages_bv + tex
+                })
+                buf_offset += len(b)
+                if not single_buffer:
+                    nbuff += 1
+                nbuffv += 1
+            else:
+                image_bytes = "data:image/%s;base64," % tex_format \
+                    + image_bytes
                 images.append({
                     'uri': image_bytes,
                 })
-                del b
-        finally:
-            shutil.rmtree(tcmap)
+            del b
 
         # note: only one baseColorTexture is allowed.
         texnames = ['pbrMetallicRoughness.baseColorTexture',
                     'emissiveTexture']
 
         for tex, tc in enumerate(textures):
-            buffers.append({
-                "uri" :
-                    ("data:application/octet-stream;base64,"
-                     + base64.encodebytes(vec_to_bytes(tc)).decode()
-                    ).replace('\n', ''),
-                "byteLength" : int(np.prod(tc.shape) * 4)
-            })
+            b = vec_to_bytes(tc)
+            if single_buffer:
+                buffers[-1]['data'] += b
+            else:
+                buffers.append({
+                    "uri" :
+                        ("data:application/octet-stream;base64,"
+                        + base64.encodebytes(b).decode()
+                        ).replace('\n', ''),
+                    "byteLength" : int(np.prod(tc.shape) * 4)
+                })
             buffviews.append({
                 "buffer": nbuff,
-                "byteOffset": 0,
+                "byteOffset": buf_offset,
                 "byteLength": int(np.prod(tc.shape) * 4)
             })
+            buf_offset += len(b)
             accessors.append({
                 "bufferView" : nbuffv,
                 "componentType" : 5126,
@@ -280,7 +360,8 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
             })
             mesh['primitives'][0]['attributes']['TEXCOORD_%s' % tex] \
                 = naccess
-            nbuff += 1
+            if not single_buffer:
+                nbuff += 1
             nbuffv += 1
             naccess += 1
 
@@ -290,10 +371,20 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                 "wrapS" : 33648,
                 "wrapT" : 33648
             })
-            gtextures.append({
-                'source': nimages,
-                'sampler': nsamplers
-            })
+
+            if tex_format == 'webp':
+                gtextures.append({
+                    'extensions': {
+                        'EXT_texture_webp': {'source': nimages}
+                    },
+                    'sampler': nsamplers,
+                    'source': None
+                })
+            else:
+                gtextures.append({
+                    'source': nimages,
+                    'sampler': nsamplers
+                })
             nsamplers += 1
             # note: only one baseColorTexture is allowed.
             if len(texnames) > tex:
@@ -306,7 +397,6 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                     'texCoord': tex
                 })
             ntex += 1
-
             nimages += 1
 
     nodes.append(node)
@@ -316,7 +406,8 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     return gltf
 
 
-def mesh_to_gltf(mesh, matrix=None, name=None, gltf={}):
+def mesh_to_gltf(mesh, matrix=None, name=None, gltf={}, tex_format='webp',
+                 images_as_buffers=True, single_buffer=True):
     ''' Export a mesh to a GLTF JSON dictionary.
 
     The gltf dict may already contain a scene with meshes, the new mesh will be
@@ -333,13 +424,43 @@ def mesh_to_gltf(mesh, matrix=None, name=None, gltf={}):
     gltf: dict (optional)
         The GLTF dictionary. It will be updated and returned by the function.
         If it is not provided, a new one will be created.
+    tex_format: str (optional)
+        image format for textures. Default: "webp", supported only if the webp
+        module is installed. Otherwise it will fallback to "png".
+    images_as_buffers: bool (optional)
+        if True, texture images will be stored in buffers instead of images
+    single_buffer: bool (optional)
+        if True, all binary data are appended in the same buffer object,
+        instead of each having a separate buffer. The binary GLB format is
+        better optimized for this situation. If this option is used, the buffer
+        will not be base64-encoded on-the-fly, the function
+        gltf_encode_buffers() should be called when the scene is finished in
+        order to avoid many encoding/decoding overheads.
     '''
     vert = mesh.vertex()
     norm = mesh.normal()
     poly = mesh.polygon()
     material = mesh.header().get('material')
     return add_object_to_gltf_dict(vert, norm, poly, material=material,
-                                   name=name, gltf=gltf)
+                                   name=name, gltf=gltf, tex_format=tex_format,
+                                   images_as_buffers=images_as_buffers)
+
+def gltf_encode_buffers(gltf):
+    ''' Replace raw binary data buffers with base64-encoded URIs
+    '''
+    for buf in gltf.get('buffers', []):
+        data = buf.get('data')
+        # if an existing URI is present, contcatenate it
+        uri = buf.get('uri')
+        if uri is not None:
+            old_data = base64.decodebytes(uri[uri.find(','):].encode())
+            data = old_data + data
+        if data is not None:
+            uri = 'data:application/octet-stream;base64,' \
+                + base64.encodebytes(data).decode().replace('\n', '')
+            buf['uri'] = uri
+            buf['byteLength'] = len(data)
+            del buf['data']
 
 
 def default_gltf_scene(matrix=None, gltf={}):
@@ -600,6 +721,28 @@ class GLTFParser:
         return mattex
 
 
+    def image_from_buffer(self, data, format):
+        if format == 'webp':
+            global webp
+            if webp is None:
+                import webp  # raise an ImportError
+            webp_data = webp.WebPData.from_buffer(data)
+            arr = webp_data.decode(color_mode=webp.WebPColorMode.RGBA)
+            teximage = aims.Volume_RGBA(arr.shape[:2])
+            teximage.np['v'][:, :, 0, 0, :] = arr
+            return teximage
+
+        tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
+        try:
+            tmpf = osp.join(tmpd, 'image.%s' % format)
+            with open(tmpf, 'wb') as f:
+                f.write(data)
+            teximage = aims.read(tmpf)
+            return teximage
+        finally:
+            # print('tmpd:', tmpd)
+            shutil.rmtree(tmpd)
+
     def get_teximage(self, texnum, gltf, arrays):
         if arrays is not None:
             images = arrays.get('images', [])
@@ -617,14 +760,7 @@ class GLTFParser:
                 tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
                 endf = uri.find(';', 11)
                 format = uri[11: endf]
-                try:
-                    tmpf = osp.join(tmpd, 'image.%s' % format)
-                    with open(tmpf, 'wb') as f:
-                        f.write(data)
-                    teximage = aims.read(tmpf)
-                finally:
-                    # print('tmpd:', tmpd)
-                    shutil.rmtree(tmpd)
+                teximage = self.image_from_buffer(data, format)
             else:
                 url = osp.join(self.base_uri, uri)
                 teximage = aims.read(url)
@@ -633,19 +769,18 @@ class GLTFParser:
             images = arrays.setdefault('images', [])
             if len(images) <= texnum:
                 images += [None] * (texnum + 1 - len(images))
-            return teximage
+
         else: # uri is None
             bv = gltf['bufferViews'][texdef['bufferView']]
             bv = BufferView(gltf, bv, arrays)
             data = bv.data()
             mtype = texdef.get('mimeType')
-            if mtype == 'image/webp':
-                import webp
-                webp_data = webp.WebPData.from_buffer(data)
-                arr = webp_data.decode(color_mode=webp.WebPColorMode.RGBA)
-                teximage = aims.Volume_RGBA(arr.shape[:2])
-                teximage.np['v'][:, :, 0, 0, :] = arr
-                return teximage
+            # image in buffer in any format
+            # mtype should be 'image/<format>'
+            format = mtype[6:]
+            teximage = self.image_from_buffer(data, format)
+
+        return teximage
 
     def set_object_referential(self, obj, ref):
         obj['referential'] = ref
