@@ -50,7 +50,7 @@ def image_as_buffer(image, format):
 
 
 def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
-                            textures=[], teximages=[], name=None, gltf={},
+                            textures=[], teximages=[], name=None, gltf=None,
                             tex_format='webp', images_as_buffers=True,
                             single_buffer=True):
     ''' Export a mesh with optional texture to a GLTF JSON dictionary.
@@ -93,6 +93,8 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
         gltf_encode_buffers() should be called when the scene is finished in
         order to avoid many encoding/decoding overheads.
     '''
+    if gltf is None:
+        gltf = {}
     if vert is None:
         return gltf
 
@@ -152,7 +154,9 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
         else:
             buf = buffers[-1]
             nbuff -= 1
-        buf_offset = len(buf.get('data', b'')) + buf.get('byteLength', 0)
+            if 'data' not in buf:
+                buf['data'] = b''
+        buf_offset = len(buf['data']) + buf.get('byteLength', 0)
         buf['data'] += data
     else:
         buffers.append(
@@ -275,11 +279,26 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
         }
     }
     if material is not None:
-        if 'diffuse' in material:
+        diffuse = material.get('diffuse')
+        if diffuse is not None:
             gmat['pbrMetallicRoughness']['baseColorFactor'] \
-                = list(material['diffuse'])
+                = list(diffuse)
+            if len(diffuse) >= 4 and diffuse[3] < 1.:
+                gmat['alphaMode'] = 'BLEND'
         if not material.get('face_culling', True):
             gmat['doubleSided'] = True
+        sh = material.get('shininess', 20.)
+        # we use a split curve which matches 20 shininess to 0.4 metal
+        if sh <= 20.:
+            shininess = 1. - sh / 33.33
+        else:
+            shininess = 0.4 - (sh - 20.) / 270.
+        gmat['pbrMetallicRoughness']['metallicFactor'] = shininess
+        spec = material.get('specular')
+        if spec:
+            spec = np.sqrt(spec[0] * spec[0] + spec[1] * spec[1]
+                           + spec[2] * spec[2]) / np.sqrt(3.)
+            gmat['pbrMetallicRoughness']['roughnessFactor'] = 1. - spec
     materials.append(gmat)
     mesh['primitives'][0]['material'] = nmat
 
@@ -406,7 +425,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     return gltf
 
 
-def mesh_to_gltf(mesh, matrix=None, name=None, gltf={}, tex_format='webp',
+def mesh_to_gltf(mesh, matrix=None, name=None, gltf=None, tex_format='webp',
                  images_as_buffers=True, single_buffer=True):
     ''' Export a mesh to a GLTF JSON dictionary.
 
@@ -437,6 +456,8 @@ def mesh_to_gltf(mesh, matrix=None, name=None, gltf={}, tex_format='webp',
         gltf_encode_buffers() should be called when the scene is finished in
         order to avoid many encoding/decoding overheads.
     '''
+    if gltf is None:
+        gltf = {}
     vert = mesh.vertex()
     norm = mesh.normal()
     poly = mesh.polygon()
@@ -463,9 +484,11 @@ def gltf_encode_buffers(gltf):
             del buf['data']
 
 
-def default_gltf_scene(matrix=None, gltf={}):
+def default_gltf_scene(matrix=None, gltf=None):
     ''' Create a default GLTF dics scene
     '''
+    if gltf is None:
+        gltf = {}
     gltf.update({
         "asset": {
             "version": "2.0"
@@ -536,7 +559,10 @@ class BufferView:
         bo = self.ddef.get('byteOffset', 0)
         bl = self.ddef['byteLength']
         bs = self.ddef.get('byteStride', 1)
-        self._data = buff[bo:bo + bl:bs]
+        # self._data = buff[bo:bo + bl:bs]
+        # strides are between elements, not between bytes - but we don't
+        # know elements size for now.
+        self._data = buff[bo:bo + bl]
         return self._data
 
 
@@ -554,16 +580,22 @@ class Accessor:
         ctype = self.ddef['componentType']
         if ctype == 5120:
             nptype = np.int8
+            itsize = 1
         elif ctype == 5121:
             nptype = np.uint8
+            itsize = 1
         elif ctype == 5122:
             nptype = np.int16
+            itsize = 2
         elif ctype == 5123:
             nptype = np.uint16
+            itsize = 2
         elif ctype == 5125:
             nptype = np.uint32
+            itsize = 4
         elif ctype == 5126:
             nptype = np.float32
+            itsize = 4
         else:
             raise ValueError('unsupported component type: %d in accessor'
                               % ctype)
@@ -587,6 +619,23 @@ class Accessor:
             bv = self.gltf['bufferViews'][bvn]
             bufferview = BufferView(self.gltf, bv, self.arrays)
             bvdata = bufferview.data()
+            size = len(bvdata) - bo
+            if n == 0:
+                n = int(size / itsize / nc)
+                print('null count in accessor - fixing it to:', n)
+                self.ddef['count'] = n
+            if size < n * nc * itsize:
+                print('size error on bufferView', bvn, ': buffer is:', size,
+                      ', expecting:', n * nc, '(%d x %d)' % (n, nc))
+                if size == n:
+                    print('count seems to be in bytes')
+                # fix bufferView
+                # print('bv strides:', bv.get('byteStride'))
+                bv['byteLength'] = n * nc * itsize
+                print('fixed len:', n * nc * itsize)
+                bufferview._data = None
+                bvdata = bufferview.data()
+                # print('fixed bv is:', len(bvdata), ', offset:', bo)
             ba = np.frombuffer(bvdata, dtype=nptype, offset=bo, count=n * nc)
             if nc != 1:
                 ba = ba.reshape((n, nc))
@@ -674,10 +723,31 @@ class GLTFParser:
             if mat_i is not None:
                 material = gltf.get('materials', [])[mat_i]
                 mat = {}
+                if material.get('doubleSided', False):
+                    mat['face_culling'] = 0
+                emiss = material.get('emissiveFactor')
+                if emiss:
+                    mat['emission'] = emiss
                 col = material.get('pbrMetallicRoughness',
                                    {}).get('baseColorFactor')
                 if col is not None:
                     mat['diffuse'] = col
+                shininess = material.get('pbrMetallicRoughness',
+                                         {}).get('metallicFactor')
+                if shininess is not None:
+                    # we use a split curve which matches 20 shininess to 0.4
+                    # metal
+                    if shininess <= 0.4:
+                        sh = 128. - shininess * 270.
+                    else:
+                        sh = 33.33 - shininess * 33.33
+                    mat['shininess'] = sh
+                roughness = material.get('pbrMetallicRoughness',
+                                         {}).get('roughnessFactor')
+                if roughness is not None:
+                    spec = 1. - roughness
+                    mat['specular'] = [spec, spec, spec, 1.]
+
                 if texcoords_i:
                     mattex = {}
                     coltex = material.get('pbrMetallicRoughness',
@@ -798,7 +868,9 @@ class AimsGLTFParser(GLTFParser):
     def aims_trans(self, matrix):
         return aims.AffineTransformation3d(matrix)
 
-    def parse(self, gltf, mesh, arrays={}):
+    def parse(self, gltf, mesh, arrays=None):
+        if arrays is None:
+            arrays = {}
         pmeshes = super().parse(gltf, mesh, arrays=arrays)
 
         name = pmeshes.get('name')
