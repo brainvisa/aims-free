@@ -679,6 +679,13 @@ class GLTFParser:
                 mesh_def['vertices'] = draco_mesh.points
                 mesh_def['normals'] = draco_mesh.normals
                 # tex coords ??
+                texcoord = getattr(draco_mesh, 'tex_coord', None)
+                if texcoord is not None and len(texcoord) != 0:
+                    # coords seem to be switched (!)
+                    texcoord = texcoord[:, -1::-1]
+                    print('texcoord:', texcoord)
+                    #texcoord *= 1.5
+                    mesh_def['texcoords'] = {0: texcoord.astype(np.float32)}
             else:
                 mode = prim.get('mode', 4)
                 indices_i = prim.get('indices')
@@ -707,19 +714,19 @@ class GLTFParser:
                     accessor = Accessor(gltf, acc, arrays)
                     norm = accessor.data()
                     mesh_def['normals'] = norm
+                texcoords_i = {}
+                for k, v in attdict.items():
+                    if k.startswith('TEXCOORD_') and v is not None:
+                        texcoords_i[int(k[9:])] = v
+                if texcoords_i:
+                    texcoords = {}
+                    for tex, tci in texcoords_i.items():
+                        acc = gltf['accessors'][tci]
+                        accessor = Accessor(gltf, acc, arrays)
+                        tc = accessor.data()
+                        texcoords[tex] = tc
+                    mesh_def['texcoords'] = texcoords
 
-            texcoords_i = {}
-            for k, v in attdict.items():
-                if k.startswith('TEXCOORD_') and v is not None:
-                    texcoords_i[int(k[9:])] = v
-            if texcoords_i:
-                texcoords = {}
-                for tex, tci in texcoords_i.items():
-                    acc = gltf['accessors'][tci]
-                    accessor = Accessor(gltf, acc, arrays)
-                    tc = accessor.data()
-                    texcoords[tex] = tc
-                mesh_def['texcoords'] = texcoords
             if mat_i is not None:
                 material = gltf.get('materials', [])[mat_i]
                 mat = {}
@@ -748,7 +755,7 @@ class GLTFParser:
                     spec = 1. - roughness
                     mat['specular'] = [spec, spec, spec, 1.]
 
-                if texcoords_i:
+                if mesh_def.get('texcoords'):
                     mattex = {}
                     coltex = material.get('pbrMetallicRoughness',
                                           {}).get('baseColorTexture')
