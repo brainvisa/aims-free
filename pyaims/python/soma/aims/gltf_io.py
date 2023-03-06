@@ -471,12 +471,12 @@ def gltf_encode_buffers(gltf):
     '''
     for buf in gltf.get('buffers', []):
         data = buf.get('data')
-        # if an existing URI is present, contcatenate it
-        uri = buf.get('uri')
-        if uri is not None:
-            old_data = base64.decodebytes(uri[uri.find(','):].encode())
-            data = old_data + data
         if data is not None:
+            # if an existing URI is present, contcatenate it
+            uri = buf.get('uri')
+            if uri is not None:
+                old_data = base64.decodebytes(uri[uri.find(','):].encode())
+                data = old_data + data
             uri = 'data:application/octet-stream;base64,' \
                 + base64.encodebytes(data).decode().replace('\n', '')
             buf['uri'] = uri
@@ -681,8 +681,8 @@ class GLTFParser:
                 # tex coords ??
                 texcoord = getattr(draco_mesh, 'tex_coord', None)
                 if texcoord is not None and len(texcoord) != 0:
-                    # coords seem to be switched (!)
-                    texcoord = texcoord[:, -1::-1]
+                    ## coords seem to be switched (!)
+                    #texcoord = texcoord[:, -1::-1]
                     print('texcoord:', texcoord)
                     #texcoord *= 1.5
                     mesh_def['texcoords'] = {0: texcoord.astype(np.float32)}
