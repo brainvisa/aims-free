@@ -578,7 +578,7 @@ def save_gltf(gltf, filename, use_draco=True):
 
 def gltf_convert_draco(infilename, outfilename=None, fail=True):
     # compress meshes using Draco
-    # gltf-transform optimize Couloirs.gltf Couloirs.glb --texture-compress webp
+    # gltf-transform optimize <filename>.gltf <filename>.glb --texture-compress webp
     # gltf-transform draco filename filename
     gltf_trans = shutil.which('gltf-transform')
     if not gltf_trans:
@@ -589,6 +589,9 @@ def gltf_convert_draco(infilename, outfilename=None, fail=True):
         outfilename = infilename
     cmd = [gltf_trans, 'draco', infilename, outfilename]
     if 'LD_PRELOAD' in os.environ:
+        # in VirtualGL processes (anatomist headless for instance), LD_PRELOAD
+        # is used, and this causes a warning when running gltf-transform.
+        # So we remove it.
         del os.environ['LD_PRELOAD']
     subprocess.check_call(cmd)
     if infilename != outfilename:
@@ -1047,6 +1050,45 @@ class AimsGLTFParser(GLTFParser):
 
 
 def gltf_to_meshes(gltf, object_parser=AimsGLTFParser()):
+    ''' Parse a GLTF dict (from a JSON file) and build Aims meshes from it
+
+    Parameters
+    ----------
+    gltf: dict
+        GLTF dictionary
+    object_parser: :class:`GLTFParser` instance
+        The parser will build mesh objects. It can be inherited to produce
+        other kinds of mesh objects (like Anatomist objects). The default parser is an :class:`AimsGLTFParser` instance.
+
+    Returns
+    -------
+    meshes: dict
+        The meshes dict will have the following structure::
+
+            {
+              "objects": [object1, object2, ...],
+              "transformation_graph": <transform_dict>
+            }
+
+        Objects will be the result of object_parser.parse_object() for each
+        mesh in the GLTF dict.
+
+        `<transform_dict>` is a dictionary with referentials / transformations
+        description, with the stucture::
+
+            {
+                source_ref1: {
+                    dest_ref2: trans_ref1_to_ref2,
+                    dest_ref3: trans_ref1_to_ref2,
+                    ...
+                },
+                source_ref2: {...},
+                ...
+            }
+
+        The shape of referentials and transformation objects also depends on
+        the parser.
+    '''
     scene_i = gltf.get('scene', 0)
     scene = gltf.get('scenes', [])[scene_i]
     sc_nodes = scene.get('nodes', [0])
@@ -1094,3 +1136,31 @@ def gltf_to_meshes(gltf, object_parser=AimsGLTFParser()):
     result = object_parser.polish_result(result)
 
     return result
+
+
+def load_gltf(filename, object_parser=AimsGLTFParser()):
+    ''' Load a GLTF or GLB file, and parse it to produce meshes.
+
+    GLB files are open using the pygltflib module, which should be present in
+    order to enable this format.
+
+    Parsing is done using :func:`gltf_to_meshes`.
+    '''
+    try:
+        from pygltflib import GLTF2, BufferFormat
+    except ImportError:
+        GLTF2 = None  # no GLTF/GLB conversion support
+
+    if GLTF2 is not None:
+        gltf_o = GLTF2().load(filename)
+        # convert buffers from GLB blobs or Draco compressed
+        gltf_o.convert_buffers(BufferFormat.DATAURI)
+        gltf = gltf_o.to_dict()
+        del gltf_o
+    else:
+        with open(filename) as f:
+            gltf = json.load(f)
+
+    meshes = gltf_to_meshes(gltf, object_parser=object_parser)
+    return meshes
+
