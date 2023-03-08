@@ -158,6 +158,65 @@ class GLTFFormat(aims.FileFormat_Object):
 
         return True
 
+class GLTFMeshFormat_3(aims.FileFormat_AimsTimeSurface_3_VOID):
+    def read(self, filename, obj, context, options=None):
+        meshes = gltf_io.load_gltf(filename)
+        mesh = meshes['objects'][0]
+        while isinstance(mesh, list):
+            mesh = mesh[0]
+        mesh = mesh['mesh']
+
+        if isinstance(obj, aims.carto.AllocatorContext):
+            # return the object variant
+            options = context
+            context = obj
+            obj = mesh
+            return obj
+
+        obj.vertex().assign(mesh.vertex())
+        obj.normal().assign(mesh.normal())
+        obj.polygon().assign(mesh.polygon())
+        h = obj.header()
+        for k in h:
+            del h[k]
+        h.update(mesh.header())
+
+        return True
+
+    def write(self, filename, obj, options):
+        meshes = {'objects': [{'mesh': obj}]}
+        return GLTFFormat().write(filename, meshes, options)
+
+
+class GLTFMeshFormat_2(aims.FileFormat_AimsTimeSurface_2_VOID):
+    def read(self, filename, obj, context, options=None):
+        meshes = gltf_io.load_gltf(filename)
+        mesh = meshes['objects'][0]
+        while isinstance(mesh, list):
+            mesh = mesh[0]
+        mesh = mesh['mesh']
+
+        if isinstance(obj, aims.carto.AllocatorContext):
+            # return the object variant
+            options = context
+            context = obj
+            obj = mesh
+            return obj
+
+        obj.vertex().assign(mesh.vertex())
+        obj.normal().assign(mesh.normal())
+        obj.polygon().assign(mesh.polygon())
+        h = obj.header()
+        for k in h:
+            del h[k]
+        h.update(mesh.header())
+
+        return True
+
+    def write(self, filename, obj, options):
+        meshes = {'objects': [{'mesh': obj}]}
+        return GLTFFormat().write(filename, meshes, options)
+
 
 class GLTFFinderFormat(aims.FinderFormat):
     def check(self, filename, finder):
@@ -176,7 +235,11 @@ class GLTFFinderFormat(aims.FinderFormat):
 
 aims.Finder.registerFormat('GLTF', GLTFFinderFormat(), ['gltf', 'glb'])
 aims.FileFormatDictionary_Object.registerFormat(
-    'GLTF', GLTFFormat(), ['gltf'])
+    'GLTF', GLTFFormat(), ['gltf', 'glb'])
+aims.FileFormatDictionary_AimsTimeSurface_3_VOID.registerFormat(
+    'GLTF', GLTFMeshFormat_3(), ['gltf', 'glb'])
+aims.FileFormatDictionary_AimsTimeSurface_2_VOID.registerFormat(
+    'GLTF', GLTFMeshFormat_2(), ['gltf', 'glb'])
 
 
 def remove_python_formats():
