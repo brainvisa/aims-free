@@ -7,6 +7,7 @@ import shutil
 import uuid
 from functools import partial
 from soma import aims
+import json
 import subprocess
 try:
     import DracoPy
@@ -30,7 +31,8 @@ def vec_to_bytes(vector):
 def image_as_buffer(image, format):
     if format == 'webp':
         if webp is not None:
-            arr = np.asarray(image.np['v'][:,:,0,0,:], order='C')
+            arr = np.asarray(image.np['v'][:,:,0,0,:].transpose(1, 0, 2),
+                             order='C')
             webp_data = webp.WebPPicture.from_numpy(arr)
             webp_data = webp_data.encode()
             data = bytes(webp_data.buffer())
@@ -468,6 +470,38 @@ def mesh_to_gltf(mesh, matrix=None, name=None, gltf=None, tex_format='webp',
                                    name=name, gltf=gltf, tex_format=tex_format,
                                    images_as_buffers=images_as_buffers)
 
+
+def tex_mesh_to_gltf(mesh, textures, matrix=None, name=None, gltf=None,
+                     tex_format='webp', images_as_buffers=True,
+                     single_buffer=True):
+    ''' Same as :func:`mesh_to_gltf`, but with textures.
+
+    textures should be a list of aims TimeTexture objects. Each texture must
+    have in its header a dict named `gltf_texture` which contains at least a
+    `teximage` field which is a texture image as an aims RGBA volume::
+
+        texture.header()['gltf_texture'] = {
+            'teximage': aims.Volume_RGBA(256, 256)
+        }
+    '''
+    if gltf is None:
+        gltf = {}
+    vert = mesh.vertex()
+    norm = mesh.normal()
+    poly = mesh.polygon()
+    tex_coords = []
+    teximages = []
+    for tex in textures:
+        tex_coords.append(tex[0].np)
+        teximage = tex.header().get('gltf_texture', {}).get('teximage')
+        teximages.append(teximage)
+    material = mesh.header().get('material')
+    return add_object_to_gltf_dict(vert, norm, poly, textures=tex_coords,
+                                   teximages=teximages, material=material,
+                                   name=name, gltf=gltf, tex_format=tex_format,
+                                   images_as_buffers=images_as_buffers)
+
+
 def gltf_encode_buffers(gltf):
     ''' Replace raw binary data buffers with base64-encoded URIs
     '''
@@ -519,6 +553,8 @@ def default_gltf_scene(matrix=None, gltf=None):
                 matrix = list(matrix.affine().np.transpose().ravel())
         elif isinstance(matrix, np.ndarray):
             matrix = list(matrix.transpose().ravel())
+        elif not isinstance(matrix, list):
+            matrix = list(matrix)
 
         if matrix is not None \
                 and not aims.AffineTransformation3d(matrix).isIdentity():
@@ -561,7 +597,7 @@ def save_gltf(gltf, filename, use_draco=True):
 
     if not glb_saved:
         with open(filename, 'w') as f:
-            json.dump(gltf_d, f, indent=4)
+            json.dump(gltf, f, indent=4)
 
     if use_draco:
         try:
@@ -574,6 +610,45 @@ def save_gltf(gltf, filename, use_draco=True):
             print('draco compression failed for', filename)
 
     return filename
+
+
+def meshes_dict_to_gltf(meshes, gltf=None, matrix=None, tex_format='webp',
+                        images_as_buffers=True, single_buffer=True):
+    if gltf is None:
+        gltf = default_gltf_scene(matrix)
+    root_ref = meshes.get('root_referential')
+    trans_dict = meshes.get('transformation_graph', {})
+
+    todo = [(obj, root_ref) for obj in meshes['objects']]
+
+    while todo:
+        obj, parent_ref = todo.pop(0)
+        if isinstance(obj, list):
+            todo += [(o, parent_ref) for o in obj]
+            continue
+        mesh = obj['mesh']  # mesh is mandatory
+        tex = obj.get('textures')
+        ref = mesh.header().get('referential')
+        tr = None
+        if ref is not None:
+            tr = trans_dict.get(parent_ref, {}).get(ref)
+            if tr is None:
+                refs = mesh.header().get('referentials', [])
+                if parent_ref in refs:
+                    ri = refs.index(parent_ref)
+                    tl = mesh.header().get('transformations', [])
+                    tr = aims.AffineTransformation3d(tl[ri])
+        if tex:
+            tex_mesh_to_gltf(mesh, tex, matrix=tr, name=None, gltf=gltf,
+                      tex_format=tex_format, images_as_buffers=images_as_buffers,
+                      single_buffer=single_buffer)
+        else:
+            mesh_to_gltf(mesh, matrix=tr, name=None, gltf=gltf,
+                        tex_format=tex_format,
+                        images_as_buffers=images_as_buffers,
+                        single_buffer=single_buffer)
+
+    return gltf
 
 
 def gltf_convert_draco(infilename, outfilename=None, fail=True):
@@ -908,7 +983,7 @@ class GLTFParser:
         texdef = gltf.get('images', [])[texnum]
         uri = texdef.get('uri')
         if uri is not None:
-            if uri.startswith('data:image/'):
+            if uri.startswith('data:'):
                 start = uri.find(',') + 1
                 data = base64.decodebytes(uri[start:].encode())
                 tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
@@ -946,7 +1021,8 @@ class GLTFParser:
 
 
 class AimsGLTFParser(GLTFParser):
-    def __init__(self):
+    def __init__(self, base_uri=''):
+        super().__init__(base_uri=base_uri)
         self.refs = {}
 
     def aims_trans(self, matrix):
@@ -1147,7 +1223,7 @@ def load_gltf(filename, object_parser=AimsGLTFParser()):
     Parsing is done using :func:`gltf_to_meshes`.
     '''
     try:
-        from pygltflib import GLTF2, BufferFormat
+        from pygltflib import GLTF2, BufferFormat, ImageFormat
     except ImportError:
         GLTF2 = None  # no GLTF/GLB conversion support
 
