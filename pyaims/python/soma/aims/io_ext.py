@@ -151,8 +151,6 @@ class GLTFFormat(aims.FileFormat_Object):
             if opt in options:
                 opts[opt] = options[opt]
 
-        print('options:', options)
-        print('opts:', opts)
         gltf = gltf_io.meshes_dict_to_gltf(obj, **opts)
         save_opt = {}
         use_draco = options.get('use_draco', True)
