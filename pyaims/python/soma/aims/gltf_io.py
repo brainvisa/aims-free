@@ -7,6 +7,7 @@ import shutil
 import uuid
 from functools import partial
 from soma import aims
+import subprocess
 try:
     import DracoPy
 except ImportError:
@@ -102,12 +103,6 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
         tex_format = 'png'
     if tex_format == 'webp':
         images_as_buffers = True
-        extused = gltf.setdefault('extensionsUsed', [])
-        if 'EXT_texture_webp' not in extused:
-            extused.append('EXT_texture_webp')
-        extreq = gltf.setdefault('extensionsRequired', [])
-        if 'EXT_texture_webp' not in extreq:
-            extreq.append('EXT_texture_webp')
 
     meshes = gltf.setdefault('meshes', [])
     nmesh = len(meshes)
@@ -348,6 +343,13 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                     'uri': image_bytes,
                 })
             del b
+        if tex_format == 'webp' and len(teximages) != 0:
+            extused = gltf.setdefault('extensionsUsed', [])
+            if 'EXT_texture_webp' not in extused:
+                extused.append('EXT_texture_webp')
+            extreq = gltf.setdefault('extensionsRequired', [])
+            if 'EXT_texture_webp' not in extreq:
+                extreq.append('EXT_texture_webp')
 
         # note: only one baseColorTexture is allowed.
         texnames = ['pbrMetallicRoughness.baseColorTexture',
@@ -525,6 +527,75 @@ def default_gltf_scene(matrix=None, gltf=None):
     return gltf
 
 
+def save_gltf(gltf, filename, use_draco=True):
+    ''' Save the GLTF dict as a .gltf or .glb file, optionally using Draco
+    compression.
+
+    Returns
+    -------
+    filename: str
+        the actually saved filename: it may have changed from .glb to .gltf if
+        binary save is not supported by modules and extenal commands.
+    '''
+    try:
+        from pygltflib import GLTF2, BufferFormat, ImageFormat
+    except ImportError:
+        GLTF2 = None  # no GLTF/GLB conversion support
+
+    # ensure all buffers are encoded in base64
+    gltf_encode_buffers(gltf)
+
+    glb_saved = False
+    gltf_filename = filename
+    if filename.endswith('.glb'):
+        if GLTF2 is None:
+            print('warning: pygltflib is not found. Cannot save binary GLB. '
+                  'Falling back to GLTF.')
+            filename = filename[:-4] + '.gltf'
+        else:
+            gltf2 = GLTF2().from_dict(gltf)
+            gltf2.convert_images(ImageFormat.BUFFERVIEW)
+            gltf2.convert_buffers(BufferFormat.BINARYBLOB)
+            gltf2.save(filename)
+        glb_saved = True
+
+    if not glb_saved:
+        with open(filename, 'w') as f:
+            json.dump(gltf_d, f, indent=4)
+
+    if use_draco:
+        try:
+            if not gltf_convert_draco(filename, gltf_filename, fail=False):
+                print('warning: gltf-transform is not found. Cannot compress '
+                      'using Draco.')
+            else:
+                filename = gltf_filename
+        except subprocess.CalledProcessError:
+            print('draco compression failed for', filename)
+
+    return filename
+
+
+def gltf_convert_draco(infilename, outfilename=None, fail=True):
+    # compress meshes using Draco
+    # gltf-transform optimize Couloirs.gltf Couloirs.glb --texture-compress webp
+    # gltf-transform draco filename filename
+    gltf_trans = shutil.which('gltf-transform')
+    if not gltf_trans:
+        if fail:
+            raise ValueError('gltf-transform command is not found')
+        return
+    if outfilename is None:
+        outfilename = infilename
+    cmd = [gltf_trans, 'draco', infilename, outfilename]
+    if 'LD_PRELOAD' in os.environ:
+        del os.environ['LD_PRELOAD']
+    subprocess.check_call(cmd)
+    if infilename != outfilename:
+        os.unlink(infilename)
+    return True
+
+
 class BufferView:
     def __init__(self, gltf, bufferview, arrays):
         self.gltf = gltf
@@ -620,25 +691,32 @@ class Accessor:
             bufferview = BufferView(self.gltf, bv, self.arrays)
             bvdata = bufferview.data()
             size = len(bvdata) - bo
+            stride = bv.get('byteStride')
+            if stride is None:
+                stride = itsize * nc
             if n == 0:
-                n = int(size / itsize / nc)
+                n = int(size / stride)
                 print('null count in accessor - fixing it to:', n)
                 self.ddef['count'] = n
-            if size < n * nc * itsize:
+            if size < (n-1) * stride + nc * itsize:
                 print('size error on bufferView', bvn, ': buffer is:', size,
-                      ', expecting:', n * nc, '(%d x %d)' % (n, nc))
+                      ', expecting:', n * stride, '(%d x %d)' % (n, stride))
                 if size == n:
                     print('count seems to be in bytes')
                 # fix bufferView
-                # print('bv strides:', bv.get('byteStride'))
-                bv['byteLength'] = n * nc * itsize
-                print('fixed len:', n * nc * itsize)
+                bv['byteLength'] = n * stride
+                print('fixed len:', n * stride)
                 bufferview._data = None
                 bvdata = bufferview.data()
-                # print('fixed bv is:', len(bvdata), ', offset:', bo)
-            ba = np.frombuffer(bvdata, dtype=nptype, offset=bo, count=n * nc)
-            if nc != 1:
-                ba = ba.reshape((n, nc))
+            if size < n * stride:
+                # add missing part of stride to rebuild the array
+                bvdata += b'\0' * (n * stride - size)
+                size = len(bvdata) - bo
+            ncs = stride // itsize
+            ba = np.frombuffer(bvdata, dtype=nptype, offset=bo, count=n * ncs)
+            ba = ba.reshape((n, ncs))[:, :nc]
+            if nc == 1:
+                ba = ba.reshape((n, ))
             self._data = ba
 
         return self._data
@@ -681,10 +759,6 @@ class GLTFParser:
                 # tex coords ??
                 texcoord = getattr(draco_mesh, 'tex_coord', None)
                 if texcoord is not None and len(texcoord) != 0:
-                    ## coords seem to be switched (!)
-                    #texcoord = texcoord[:, -1::-1]
-                    print('texcoord:', texcoord)
-                    #texcoord *= 1.5
                     mesh_def['texcoords'] = {0: texcoord.astype(np.float32)}
             else:
                 mode = prim.get('mode', 4)
@@ -806,7 +880,7 @@ class GLTFParser:
             webp_data = webp.WebPData.from_buffer(data)
             arr = webp_data.decode(color_mode=webp.WebPColorMode.RGBA)
             teximage = aims.Volume_RGBA(arr.shape[:2])
-            teximage.np['v'][:, :, 0, 0, :] = arr
+            teximage.np['v'][:, :, 0, 0, :] = arr.transpose((1, 0, 2))
             return teximage
 
         tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
