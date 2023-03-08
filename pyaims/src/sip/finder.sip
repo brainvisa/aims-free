@@ -50,6 +50,7 @@ public:
   void setObjectType( const std::string & obj );
   void setDataType( const std::string & dat );
   void setPossibleDataTypes( const vector_STRING & dt );
+  void setFormat( const std::string & format );
 
   static void registerFormat( const std::string & fmtid,
                               aims::FinderFormat* format /Transfer/,
