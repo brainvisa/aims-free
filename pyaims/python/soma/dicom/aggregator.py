@@ -68,7 +68,7 @@ class DicomAggregator( object ):
         positions_and_orientations = []
         for f in self._dicom_sources:
             try:
-                ds = dicom.read_file( f )
+                ds = dicom.read_file( f, stop_before_pixels=True )
             except Exception as e:
                 print(e)
                 continue
@@ -96,13 +96,9 @@ class DicomAggregator( object ):
                 self._aggregate_sources[ serie_uid ] = []
                 serie_sop_uids[ serie_uid ] = []
 
-            try:
-                position_and_orientation = ( ds.ImagePositionPatient,
-                                             ds.ImageOrientationPatient,
-                                             ds.FrameReferenceTime )
-            except Exception as e:
-                print(e)
-                position_and_orientation = None
+            position_and_orientation=[]
+            for tag in ("ImagePositionPatient","ImageOrientationPatient","FrameReferenceTime"):
+                position_and_orientation.append(ds.get(tag) if tag in ds else None)
             
             sop_uid = ds.SOPInstanceUID
             if not sop_uid in serie_sop_uids[ serie_uid ] and \
@@ -110,5 +106,5 @@ class DicomAggregator( object ):
                 serie_sop_uids[ serie_uid ].append( sop_uid )
                 self._aggregate_sources[ serie_uid ].append( f )
                 
-#                if position_and_orientation is not None:
-#                    positions_and_orientations.append( position_and_orientation )
+                if all(x is not None for x in position_and_orientation):
+                    positions_and_orientations.append( position_and_orientation )
