@@ -2,6 +2,7 @@
 import numpy as np
 import atexit
 import sys
+from . import gltf_io
 aims = sys.modules['soma.aims']
 
 '''
@@ -128,11 +129,126 @@ aims.FileFormatDictionary_Object.registerFormat(
     'YAML', YamlFormat(), ['yaml'])
 
 
+class GLTFFormat(aims.FileFormat_Object):
+    def read(self, filename, obj, context, options=None):
+        meshes = gltf_io.load_gltf(filename)
+
+        if isinstance(obj, aims.carto.AllocatorContext):
+            # return the object variant
+            options = context
+            context = obj
+            obj = aims.Object(meshes)
+            return obj
+
+        obj.update(meshes)
+
+        return True
+
+    def write(self, filename, obj, options):
+        opts = {}
+        for opt in ('matrix', 'tex_format', 'images_as_buffers',
+                    'single_buffer'):
+            if opt in options:
+                opts[opt] = options[opt]
+
+        gltf = gltf_io.meshes_dict_to_gltf(obj, **opts)
+        save_opt = {}
+        use_draco = options.get('use_draco', True)
+        gltf_io.save_gltf(gltf, filename, use_draco=use_draco)
+
+        return True
+
+class GLTFMeshFormat_3(aims.FileFormat_AimsTimeSurface_3_VOID):
+    def read(self, filename, obj, context, options=None):
+        meshes = gltf_io.load_gltf(filename)
+        mesh = meshes['objects'][0]
+        while isinstance(mesh, list):
+            mesh = mesh[0]
+        mesh = mesh['mesh']
+
+        if isinstance(obj, aims.carto.AllocatorContext):
+            # return the object variant
+            options = context
+            context = obj
+            obj = mesh
+            return obj
+
+        obj.vertex().assign(mesh.vertex())
+        obj.normal().assign(mesh.normal())
+        obj.polygon().assign(mesh.polygon())
+        h = obj.header()
+        for k in h:
+            del h[k]
+        h.update(mesh.header())
+
+        return True
+
+    def write(self, filename, obj, options):
+        meshes = {'objects': [{'mesh': obj}]}
+        return GLTFFormat().write(filename, meshes, options)
+
+
+class GLTFMeshFormat_2(aims.FileFormat_AimsTimeSurface_2_VOID):
+    def read(self, filename, obj, context, options=None):
+        meshes = gltf_io.load_gltf(filename)
+        mesh = meshes['objects'][0]
+        while isinstance(mesh, list):
+            mesh = mesh[0]
+        mesh = mesh['mesh']
+
+        if isinstance(obj, aims.carto.AllocatorContext):
+            # return the object variant
+            options = context
+            context = obj
+            obj = mesh
+            return obj
+
+        obj.vertex().assign(mesh.vertex())
+        obj.normal().assign(mesh.normal())
+        obj.polygon().assign(mesh.polygon())
+        h = obj.header()
+        for k in h:
+            del h[k]
+        h.update(mesh.header())
+
+        return True
+
+    def write(self, filename, obj, options):
+        meshes = {'objects': [{'mesh': obj}]}
+        return GLTFFormat().write(filename, meshes, options)
+
+
+class GLTFFinderFormat(aims.FinderFormat):
+    def check(self, filename, finder):
+        if filename.endswith('.gltf') or filename.endswith('.glb'):
+            hdr = {
+                'file_type': 'GLTF',
+                'object_type': 'genericobject',
+                'data_type': 'any',
+            }
+            finder.setHeader(hdr)
+            finder.setObjectType('genericobject')
+            finder.setDataType('any')
+            finder.setFormat('GLTF')
+            return True
+        return False
+
+aims.Finder.registerFormat('GLTF', GLTFFinderFormat(), ['gltf', 'glb'])
+aims.FileFormatDictionary_Object.registerFormat(
+    'GLTF', GLTFFormat(), ['gltf', 'glb'])
+aims.FileFormatDictionary_AimsTimeSurface_3_VOID.registerFormat(
+    'GLTF', GLTFMeshFormat_3(), ['gltf', 'glb'])
+aims.FileFormatDictionary_AimsTimeSurface_2_VOID.registerFormat(
+    'GLTF', GLTFMeshFormat_2(), ['gltf', 'glb'])
+
+
 def remove_python_formats():
     aims.Finder.unregisterFormat('NUMPY')
     aims.Finder.unregisterFormat('YAML')
+    aims.Finder.unregisterFormat('GLTF')
     aims.FileFormatDictionary_SparseOrDenseMatrix.unregisterFormat('NUMPY')
     aims.FileFormatDictionary_Object.unregisterFormat('YAML')
+    aims.FileFormatDictionary_Object.unregisterFormat('GLTF')
 
 
 atexit.register(remove_python_formats)

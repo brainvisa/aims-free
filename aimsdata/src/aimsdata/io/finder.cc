@@ -309,19 +309,47 @@ bool Finder::check( const string& filename_uri )
     Carto2AimsHeaderTranslator	t;
     t.translate( h );
 
-    string	x;
-    h->getProperty( "object_type", x );
-    setObjectType( x );
-    x.clear();
-    h->getProperty( "data_type", x );
-    setDataType( x );
+    Object x;
+    try
+    {
+      x = h->getProperty( "object_type" );
+      setObjectType( x->getString() );
+    }
+    catch( ... )
+    {
+    }
+    x.reset( 0 );
     vector<string>	vt;
-    vt.push_back( x );
-    h->getProperty( "possible_data_types", vt );
+    try
+    {
+      x = h->getProperty( "data_type" );
+      string dt = x->getString();
+      setDataType( dt );
+      vt.push_back( dt );
+    }
+    catch( ... )
+    {
+    }
+    try
+    {
+      x = h->getProperty( "possible_data_types" );
+      Object it = x->objectIterator();
+      for( it=x->objectIterator(); it->isValid(); it->next() )
+        vt.push_back( it->currentValue()->getString() );
+    }
+    catch( ... )
+    {
+    }
     setPossibleDataTypes( vt );
-    x.clear();
-    h->getProperty( "file_type", x );
-    setFormat( x );
+    x.reset( 0 );
+    try
+    {
+      x = h->getProperty( "file_type" );
+      setFormat( x->getString() );
+    }
+    catch( ... )
+    {
+    }
 
     PythonHeader	*ph = new PythonHeader;
     ph->copyProperties( h );

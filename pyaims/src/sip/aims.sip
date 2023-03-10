@@ -336,6 +336,8 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include reader_SparseMatrix.sip
 %Include reader_SparseOrDenseMatrix.sip
 %Include fileformat_SparseOrDenseMatrix.sip
+%Include fileformat_AimsTimeSurface_2_VOID.sip
+%Include fileformat_AimsTimeSurface_3_VOID.sip
 
 %Include aimsgraphreader.sip
 %Include iotypes.sip
