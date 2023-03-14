@@ -73,9 +73,9 @@ vol = aims.Volume_S16( vol_grey_white.getSizeX(), vol_grey_white.getSizeY(),
 
 vol.header()[ 'voxel_size' ] = vol_cortex.header()[ 'voxel_size' ]
 
-dvolgw = vol_grey_white.arraydata()
-dvolc = vol_cortex.arraydata()
-dvol = vol.arraydata()
+dvolgw = numpy.asarray(vol_grey_white)
+dvolc = numpy.asarray(vol_cortex)
+dvol = numpy.asarray(vol)
 dvol.fill( 0 )
 dvol[numpy.where(dvolc==255)] = 255 # LCR & GM = 255
 dvol[numpy.where(dvolgw==100)] = 100 # GM = 100
