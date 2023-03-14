@@ -244,6 +244,7 @@ def build_split_graph(graph, data, roots, skel=None):
 
     # fusion pass: in each split group, merge vertices which share the same
     # label and are adjacent
+    merged_vertices = set()
     for split_group in split_groups.values():
         labels = {}
         for v in split_group:
@@ -252,7 +253,11 @@ def build_split_graph(graph, data, roots, skel=None):
             # all vertices have different labels: skip this step
             continue
         for label, vertices in labels.items():
-            vertices = set(vertices)  # copy set
+            # vertices that have been merged in a previous step should not be
+            # considered (they are dangling pointers on the C++ level, and
+            # calling v.edges() on them can trigger a segmentation fault, see
+            # https://github.com/brainvisa/aims-free/issues/96)
+            vertices = set(vertices) - merged_vertices
             while len(vertices) >= 2:
                 v = next(iter(vertices))
                 # check junctions
@@ -268,6 +273,7 @@ def build_split_graph(graph, data, roots, skel=None):
                           if v3 is not v][0]
                     # v2 will disappear
                     vertices.remove(v2)
+                    merged_vertices.add(v2)
                     aims.FoldArgOverSegment(graph).mergeVertices(v, v2)
                     del v2
                     # do v again next time since it may have other edges
