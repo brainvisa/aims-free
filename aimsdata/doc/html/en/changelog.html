@@ -16,6 +16,7 @@
 
 <hr width="100%"> <br>
 
+ <b><a href="#version-5.1.1">Version 5.1.1</a></b><br>
  <b><a href="#version-5.1.0">Version 5.1.0</a></b><br>
  <b><a href="#version-5.0.4">Version 5.0.4</a></b><br>
  <b><a href="#version-5.0.3">Version 5.0.3</a></b><br>
@@ -53,7 +54,19 @@
 
 
 <!-- -->
-<h4> <a name="version-5.1.0"></a>Sep. 22, 2022, Version 5.1.0</h4>
+<h4> <a name="version-5.1.1"></a>Mar. 21, 2023, Version 5.1.1</h4>
+
+<ul>
+  <li>Partial support for GLTF mesh scenes format. Needs additional libraries for full support, which are not included in casa-distro images yet.</li>
+  <li>Python bindings and docs complements in image orientation manipulations for image orientations (support "LPI" and similar syntax).</li>
+  <li>Fixes in voxels orientations in python bindings and numpy arrays conversions.</li>
+  <li>Fix in sparse matrix reading.</li>
+  <li>Deprecated pyaims Volume.arraydata().</li>
+  <li>Crash in sulci split and deep CNN recognition fixed.</li>
+</ul>
+
+<!-- -->
+<h4> <a name="version-5.1.0"></a>Jan. 20, 2023, Version 5.1.0</h4>
 
 <ul>
   <li>Support Volume classes with strides on X axis. Strides were present in the volume structure but most functions assumed that voxels were contiguous on the first (X) axis. This forbid for instance bindings to numpy arrays which had a "C" ordering convention. This limitation is now gone in main Volume methods and operator. However many algorithms are still assuming that the first axis is contiguous (and use pointers with ++ incrementation), so these volumes should be reserved for specific and tested uses.</li>
@@ -69,6 +82,28 @@
   </li>
   <li>Transformations graph: TransformGraph3d class and IO, allows to load a complete referentials/transformatons graph with automatic composition and path search. Also allows to get a given transformation from a graph via transformations readers.
   </li>
+  <li>General Transformation3d IO (supporting both affine and non-linear transformations).</li>
+  <li>New doc explaining coordinates systems.</li>
+  <li>Colormaps and labels tables tools improvements for GIFTI textures.</li>
+  <li>Fibers / bundles support weighted fibers (MRTrix).</li>
+  <li>New command: <tt>AimsGraph2Volume.py</tt>: convert a graph to a volume according to a nomenclature, with colormap.
+  </li>
+  <li>Pyhthon IO plugin in Aims (loaded from C++) allowing python extensions in C++ programs.
+  </li>
+  <li>Pyaims functions for label texture cleaning + command <tt>AimsTextureCleaning.py</tt>.</li>
+  <li>Prepare for Qt6 and PyQt6 (not finished in this released).</tt>
+  <li>Pyaims <tt>texturetools.parcels_surface_features()</tt>, record area and bouldary length features for surface parcels. New command <tt>AimsParcelsSurfaceFeatures.py</tt>.
+  </li>
+  <li>Added option to pass a transformation in <tt>AimsVol2Tex</tt> command.
+  </li>
+  <li>New command <tt>AimsDiff.py</tt> which compares several types of neuroimaging files for equality.
+  </li>
+  <li>Fixes (significant rework) of sulci split algorithm, which could fail and produce vertices with disconnected voxels when the cut line was very scattered. The new algorithm ensures connected parts. A sulci vertices merge function was also added.
+  </li>
+  <li>AimsGraphConvert: when converting a volume to graph, can use a labels table (GIFTI-like) in the volume header, and can also write a custom hierarchy with colors for it.
+  </li>
+
+  <li>Multipe other bug fixes...</li>
 </ul>
 
 <!-- -->

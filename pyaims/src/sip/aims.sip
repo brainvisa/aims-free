@@ -133,6 +133,7 @@ typedef int int32_t;
 %Include map_S16_ULONG.sip
 %Include map_S16_ULONGLONG.sip
 %Include map_S16_U32.sip
+%Include map_S16_STRING.sip
 %Include map_U16_ULONG.sip
 %Include map_U16_ULONGLONG.sip
 %Include map_U16_U32.sip
@@ -333,9 +334,12 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include reader_SparseMatrix.sip
 %Include reader_SparseOrDenseMatrix.sip
 %Include fileformat_SparseOrDenseMatrix.sip
+%Include fileformat_AimsTimeSurface_2_VOID.sip
+%Include fileformat_AimsTimeSurface_3_VOID.sip
 
 %Include aimsgraphreader.sip
 %Include iotypes.sip
+%Include headerutil.sip
 
 %If ( CARTODATA )
  

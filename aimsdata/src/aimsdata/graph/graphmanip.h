@@ -58,31 +58,31 @@ namespace aims
 
   /**	Describe how Aims objects are stored in graph objects.
 
-	These codes are built by AimsGraphReader and stored in the graph 
-	global tables. They must be maintained otherwise Aims objects 
-	stored in graphs won't be saved correctly
-	\sa AimsGraphReader, GraphManip
+        These codes are built by AimsGraphReader and stored in the graph
+        global tables. They must be maintained otherwise Aims objects
+        stored in graphs won't be saved correctly
+        \sa AimsGraphReader, GraphManip
    */
   struct GraphElementCode
   {
     enum StorageType
-      {
-	Local,
-	Global,
-	GlobalPacked
-      };
+    {
+      Local,
+      Global,
+      GlobalPacked
+    };
 
     GraphElementCode() {}
     GraphElementCode( const GraphElementCode & x );
     GraphElementCode( const std::string & attrib, const std::string & ot, 
-		      const std::string & dt, StorageType st );
+                      const std::string & dt, StorageType st );
     GraphElementCode & operator = ( const GraphElementCode & x );
 
     /// ID for object: filename (globals) or attribute for filename (locals)
     std::string	id;
     /** attribute found in graph objects, this attribute is a
-	reference-counting pointer (carto::rc_ptr<T>) to the correct aims 
-	object type */
+        reference-counting pointer (carto::rc_ptr<T>) to the correct aims
+        object type */
     std::string	attribute;
     /// object type as in aims Finder: "Volume", "Bucket", "Mesh", ...
     std::string	objectType;
@@ -107,11 +107,11 @@ namespace aims
   {
 
     /** utility function to copy voxel sizes from an object to another 
-	(if applicable) */
+        (if applicable) */
     template <typename T> void adjustVoxelSize( T &, const T & );
 
     /** insert a sub-element in a container data (time bucket/mesh/texture, 
-	or volume of labels...) */
+        or volume of labels...) */
     template <typename T> 
     void insertElement( T & dest, int index, const T & src );
     template <typename T>
@@ -188,10 +188,10 @@ namespace aims
     static bool volume2Buckets( Graph & g, CreateBucketFunc f = 0 );
     static GraphElementCode & 
     graphElementCode( Graph &, const std::string & syntax, 
-		      const std::string & id );
+                      const std::string & id );
     static GraphElementCode & 
     graphElementCodeByAtt( Graph &, const std::string & syntax, 
-			   const std::string & attrib );
+                           const std::string & attrib );
     /** This template function stores the given object in the given 
         Vertex / Edge of the graph and takes care of IO information to 
         maintain in the graph.
@@ -203,12 +203,14 @@ namespace aims
                            carto::rc_ptr<T> obj );
     /// builds a ROI graph from a volume of labels
     template <typename T>
-    static Graph* graphFromVolume( const carto::VolumeRef<T> & vol,
-                                   T background = 0,
-                                   std::map<T, std::string> *trans = 0 );
+    static Graph* graphFromVolume(
+      const carto::rc_ptr<carto::Volume<T> > & vol,
+      T background = 0,
+      std::map<T, std::string> *trans = 0 );
     /// builds a ROI graph from a volume of labels
     template <typename T>
-    static void graphFromVolume( const carto::VolumeRef<T> & vol , Graph & g,
+    static void graphFromVolume( const carto::rc_ptr<carto::Volume<T> > & vol ,
+                                 Graph & g,
                                  T background = 0,
                                  std::map<T,std::string> *trans = 0,
                                  bool automaticBackgroundSearch = true );
@@ -221,7 +223,7 @@ namespace aims
     std::vector<int> attributeColor( const Graph & graph,
                                      const std::string & att );
     /** Completes folds graph information.
-	Adds missing information to sulcal nodes, like meshes surface...
+        Adds missing information to sulcal nodes, like meshes surface...
     */
     static void completeGraph( Graph & );
 
@@ -231,7 +233,7 @@ namespace aims
     //or just copied
     //invNormal enable to inverse the mesh normal
     static Graph* mergeGraph( const std::string &,  Graph &,  Graph &,
-			       bool mergeMesh = true, bool invNormal = false);
+                              bool mergeMesh = true, bool invNormal = false);
     static void printGraphElementTable( const Graph &,
                                         std::ostream & ostr = std::cout );
     static std::string

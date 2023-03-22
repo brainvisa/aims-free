@@ -368,6 +368,56 @@ namespace
   }
 
 
+  rc_ptr<BucketMap<Void> > bucket_int_to_void( const BucketMap<int16_t> & src )
+  {
+    rc_ptr<BucketMap<Void> > dst( new BucketMap<Void> );
+    BucketMap<int16_t>::Bucket::const_iterator
+      ib, eb = src.begin()->second.end();
+    for( ib=src.begin()->second.begin(); ib!=eb; ++ib )
+      (*dst)[ib->second][ib->first] = Void();
+
+    return dst;
+  }
+
+
+  rc_ptr<BucketMap<Void> > voronoi_ss_comps(
+    const rc_ptr<BucketMap<Void> > ss,
+    const rc_ptr<BucketMap<Void> > seeds )
+  {
+    rc_ptr<BucketMap<int16_t> > bck( new BucketMap<int16_t> );
+    BucketMap<int16_t>::Bucket & ibk = (*bck)[0];
+
+    BucketMap<Void>::Bucket::const_iterator
+      ibb, ebb = ss->begin()->second.end();
+    int bg = seeds->rbegin()->first + 1;
+
+    for( ibb=ss->begin()->second.begin(); ibb!=ebb; ++ibb )
+      ibk[ibb->first] = bg;
+
+    set<int16_t> seedv, work;
+    work.insert( bg );
+
+    BucketMap<Void>::const_iterator ib, eb = seeds->end();
+    for( ib=seeds->begin(); ib!=eb; ++ib )
+    {
+      seedv.insert( ib->first );
+      for( ibb=ib->second.begin(), ebb=ib->second.end(); ibb!=ebb; ++ibb )
+        ibk[ibb->first] = ib->first;
+    }
+
+    FastMarching<BucketMap<int16_t> > fm( Connectivity::CONNECTIVITY_26_XYZ,
+                                          true );
+    // dilate because the fast marching expects 6-connectivity
+    bck.reset( FoldArgOverSegment::dilateBucket( *bck ) );
+    fm.doit( bck, work, seedv );
+    rc_ptr<BucketMap<int16_t> > voro_int = fm.voronoiVol();
+    rc_ptr<BucketMap<Void> > voro = bucket_int_to_void( *voro_int );
+    voro.reset( mask( *voro, *ss ) );
+
+    return voro;
+  }
+
+
   /* interface line in the same way Vip junctions were defined:
      this will build a 2-voxels thick line
   */
@@ -474,6 +524,9 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
   rc_ptr<BucketMap<Void> > sscomp( new BucketMap<Void>( sssplb ) );
   sscomp->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
   // cout << "initial ss components: " << ncss << endl;
+  if( ncss > 1 )
+    cout << "warning: the initial vertex is made of " << ncss
+         << " disconnected parts !\n";
 
   /* try to break ss into more than its initial number of connected
     components, by masking it with an increaslingly dilated splitline
@@ -484,7 +537,7 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
       dilline.reset( dilateBucket( *splitline ) );
     else
     {
-      // cout << "Dilating split line a bit more...\n";
+      cout << "Dilating split line a bit more...\n";
       dilline.reset( dilateBucket( *dilline ) );
     }
     if( sssplb.size() <= ncss )
@@ -534,7 +587,6 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
   {
     cout << "ss in many pieces - re-aggregating...\n";
     // determine bits correspondance before/after split
-    Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
     map<int, set<int> > corr;
     float match, maxmatch = 0;
     int i;
@@ -553,94 +605,88 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
           i = ibm2->first;
         }
       }
+      if( maxmatch == 0 )
+        cerr << "warning: assign bucket part to a disconnected one "
+             << "(at random)\n";
       corr[i].insert( ibm->first );
     }
     // cout << "correspondance map done\n";
-    i = 0;
+
+    // voronoi to fill split line
+    rc_ptr<BucketMap<Void> > voro = voronoi_ss_comps( ss, sssplit );
+
     map<int, set<int> >::iterator ic, ec = corr.end();
+    multimap<int, int> ccsizes;  // sort cc by increasing size
+    map<int, int> revcor;  // split_cc -> cc map
     for( ic=corr.begin(); ic!=ec; ++ic )
       if( ic->second.size() > 1 )
       {
-        i = ic->first;
-        break;
-      }
-    set<int> & nums = ic->second;
-    set<int>::iterator  is, es = nums.end();
-    if( nums.size() > 2 )
-    { // keep only the 2 biggest bits
-      // cout << "more than 2 parts in the same split\n";
-      unsigned sbig1 = 0, sbig2 = 0, s;
-      int big1 = 0, big2 = 0;
-      for( is=nums.begin(); is!=es; ++is )
-      {
-        s = (*sssplit)[*is].size();
-        if( s > sbig1 )
+        // handle only cc with several splitted parts
+        set<int>::iterator icc, ecc = ic->second.end();
+        for( icc=ic->second.begin(); icc!=ecc; ++icc )
         {
-          sbig2 = sbig1;
-          big2 = big1;
-          sbig1 = s;
-          big1 = *is;
-        }
-        else if( s > sbig2 )
-        {
-          sbig2 = s;
-          big2 = *is;
+          ccsizes.insert( pair<int, int>( (*voro)[ *icc ].size(), *icc ) );
+          revcor[ *icc ] = ic->first;
         }
       }
-      nums.clear();
-      nums.insert( big1 );
-      nums.insert( big2 );
-      // cout << "kept " << big1 << " and " << big2 << endl;
-    }
+    // cout << "size map done\n";
 
-    // aggregate remaining bits
-    ebm2 = ebm;
-    ibm = sssplit->begin();
-    while( ibm != ebm )
+    multimap<int, int>::iterator iccs, eccs = ccsizes.end();
+    int cc, i_bit;
+    // iterate over parts, smallest first
+    for( iccs=ccsizes.begin(); iccs!=eccs; ++iccs )
     {
-      // cout << "aggregate " << ibm->first << "...\n";
-      if( nums.find( ibm->first ) != nums.end() )
-      {
-        // cout << "   is a target bit : continue\n";
-        ++ibm;
+      i_bit = iccs->second;  // index in sssplit
+      cc = revcor[i];    // cc num in sscomp
+      // cout << "bit: " << i_bit << ", cc: " << cc << ", bit size: " << iccs->first << endl;
+
+      // find best bit in same cc
+      set<int> & ccs = corr[cc];
+      if( ccs.size() < 2 )
+        // cc has become only 1 bit: cannot reconnect any longer.
         continue;
-      }
+
+      set<int>::iterator icc, ecc = ccs.end();
+      BucketMap<Void>::Bucket & bit_b = (*voro)[i_bit];
+
       maxmatch = 0;
       i = 0;
-      for( ibm2 = sssplit->begin(); ibm2!=ebm; ++ibm2 )
-        if( ibm2 != ibm )
-        {
-          match = bucketMatch( ibm->second, ibm2->second, 2 );
-          // cout << "test " << ibm2->first << ", match = " << match << endl;
-          if( match >= maxmatch )
+      int dil = -1;
+      while( maxmatch == 0 && dil < 5 )
+      {
+        ++dil;
+        for( icc=ccs.begin(); icc!=ecc; ++icc )
+          if( *icc != i_bit )
           {
-            // cout << "increase max\n";
-            maxmatch = match;
-            i = ibm2->first;
+            match = bucketMatch( bit_b, (*voro)[*icc], dil );
+            // cout << "test " << *icc << ", match = " << match << endl;
+            if( match >= maxmatch )
+            {
+              // cout << "increase max\n";
+              maxmatch = match;
+              i = *icc;
+            }
           }
-        }
+      }
+      // cout << "maxmatch: " << maxmatch << " for bit " << i << ", dil:" << dil << ", cc size: " << ccs.size() << endl;
+      if( maxmatch == 0 || i == i_bit )
+      {
+        cerr << "warning: aggregation with disconnected parts !\n";
+        continue;
+      }
       ibm2 = sssplit->find( i );
-      if( ibm2 == ebm )
-      {
-        cerr << "error: no match found\n";
-        return false;
-      }
-      // cout << "  -> to bit " << ibm2->first << endl;
-      if( ibm == ibm2 )
-      {
-        cerr << "error: ibm == ibm2\n";
-        return false;
-      }
-      // add ibm to ibm2 (best matching)
-      ibm2->second.insert( ibm->second.begin(), ibm->second.end() );
+
+      // add bit to ibm2 (best matching)
+      ibm2->second.insert( bit_b.begin(), bit_b.end() );
       // cout << "   ... inserted\n";
-      ibm2 = ibm;
-      ++ibm;
       // delete current item
-      sssplit->map<int, std::map<Point3d,Void,BucketMapLess> >::erase(
-        ibm2 );
+      sssplit->erase( i_bit );
+      ccs.erase( i_bit );
       // cout << "   ... erased\n";
+      if( sssplit->size() <= ncss + 1 )
+        break;
     }
+
     cout << "ss aggregation done: " << sssplit->size() << " bits at end\n";
 
     // copy both final bits
@@ -1497,6 +1543,124 @@ BucketMap<T> *FoldArgOverSegment::dilateBucket( const BucketMap<T> & in )
     }
   }
   return res;
+}
+
+
+void FoldArgOverSegment::mergeVertices( Vertex *v1, Vertex *v2 )
+{
+  set<Edge *> edges = v1->edgesTo( v2 );
+  set<Edge *>::iterator ie, ee = edges.end();
+  list<Edge *> junctions;
+
+  for( ie=edges.begin(); ie!=ee; ++ie )
+    if( (*ie)->getSyntax() == "junction" )
+      junctions.push_back( *ie );
+
+  if( junctions.empty() )
+    // no junction between v1 and v2: vertices are disconnected, don't merge
+    return;
+  // cout << "merge with junctions: " << junctions.size() << endl;
+  rc_ptr<BucketMap<Void> >
+    ss1, ss2, bottom1, bottom2, other1, other2, junction;
+
+  if( !v1->getProperty( "aims_ss", ss1 ) )
+    ss1.reset( new BucketMap<Void> );
+  if( v2->getProperty( "aims_ss", ss2 ) )
+    (*ss1)[0].insert( (*ss2)[0].begin(), (*ss2)[0].end() );
+
+  // add junctions in main ss
+  list<Edge *>::iterator ij, ej = junctions.end();
+  for( ij=junctions.begin(); ij!=ej; ++ij )
+  {
+    if( (*ij)->getProperty( "aims_junction", junction ) )
+      (*ss1)[0].insert( (*junction)[0].begin(), (*junction)[0].end() );
+  }
+
+  GraphManip::storeAims( *_graph, v1, "aims_ss", ss1 );
+
+  if( !v1->getProperty( "aims_bottom", bottom1 ) )
+    bottom1.reset( new BucketMap<Void> );
+  if( v2->getProperty( "aims_bottom", bottom2 ) )
+    (*bottom1)[0].insert( (*bottom2)[0].begin(), (*bottom2)[0].end() );
+  if( !bottom1->empty() && !(*bottom1)[0].empty() )
+    GraphManip::storeAims( *_graph, v1, "aims_bottom", bottom1 );
+
+  if( !v1->getProperty( "aims_other", other1 ) )
+    other1.reset( new BucketMap<Void> );
+  if( v2->getProperty( "aims_other", other2 ) )
+    (*other1)[0].insert( (*other2)[0].begin(), (*other2)[0].end() );
+  if( !other1->empty() && !(*other1)[0].empty() )
+    GraphManip::storeAims( *_graph, v1, "aims_other", other1 );
+
+  // merge edges
+  Vertex::iterator ie1, ee1 = v1->end();
+  Edge *match;
+  Vertex *otherv, *otherv1;
+  list<string> edge_bk_list;
+  edge_bk_list.push_back( "junction" );
+  edge_bk_list.push_back( "cortical" );
+  edge_bk_list.push_back( "plidepassage" );
+  list<string>::const_iterator iet, eet = edge_bk_list.end();
+  int pn, pn1;
+
+  for( ie=v2->begin(), ee=v2->end(); ie!=ee; ++ie )
+  {
+    otherv = *(*ie)->begin();
+    if( otherv == v2 )
+      otherv = *(*ie)->rbegin();
+
+    if( (*ie)->getSyntax() == "junction" && otherv == v1 )
+      continue;  // junctions between v1 and v2 are already done
+
+    // find if a matching one exists in v1
+    match = 0;
+
+    for( ie1=v1->begin(); ie1!=ee1; ++ie1 )
+    {
+      otherv1 = *(*ie1)->begin();
+      if( otherv1 == v1 )
+        otherv1 = *(*ie1)->rbegin();
+      if( (*ie1)->getSyntax() == (*ie)->getSyntax() && otherv == otherv1 )
+      {
+        match = *ie1;
+        break;
+      }
+    }
+
+    if( match )
+    {
+      // merge relations
+      pn = 0;
+      for(iet=edge_bk_list.begin(); iet!=eet; ++iet )
+        if( (*ie)->getProperty( string( "aims_" ) + *iet, junction ) )
+        {
+          pn += (*junction)[0].size();
+          if( !match->getProperty( string( "aims_" ) + *iet, ss1 ) )
+            ss1.reset( new BucketMap<Void> );
+          (*ss1)[0].insert( (*junction)[0].begin(), (*junction)[0].end() );
+          GraphManip::storeAims( *_graph, match, string( "aims_" ) + *iet,
+                                 ss1 );
+          pn1 = 0;
+          try
+          {
+            pn1 = match->getProperty( "point_number" )->getScalar();
+          }
+          catch( ... )
+          {
+          }
+          pn1 += pn;
+          match->setProperty( "point_number", pn1 );
+        }
+    }
+    else
+    {
+      // transfer relation to v1
+      Edge *edge = _graph->addEdge( v1, otherv, (*ie)->getSyntax() );
+      edge->copyProperties( *ie );
+    }
+  }
+
+  _graph->removeVertex( v2 );
 }
 
 

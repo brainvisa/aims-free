@@ -113,6 +113,12 @@ public:
 %End
 
   static BucketMap_S16 *dilateBucket( const BucketMap_S16 & in );
+  void mergeVertices( Vertex *v1, Vertex *v2 );
+%Docstring
+    mergeVertices(v1, v2)
+
+    merge vertices into v1. v2 is removed from the graph.
+%End
 };
 
 };

@@ -58,6 +58,30 @@ public:
   static void storeAims( Graph & graph, GraphObject* vertex,
                          const std::string & attribute,
                          rc_ptr_BucketMap_VOID obj );
+
+  static Graph* graphFromVolume( const rc_ptr_Volume_S16 & vol,
+                                 int16_t background = 0,
+                                 std::map<int16_t, std::string> *trans = 0 );
+%Docstring
+  graph = graphFromVolume(vol, background=0, trans=None)
+  graphFromVolume(vol, graph, background=0, trans=None,
+                  automaticBackgroundSearch=True)
+
+  builds a ROI graph from a volume of labels
+%End
+
+  static Graph* graphFromVolume( const rc_ptr_Volume_S32 & vol,
+                                 int32_t background = 0,
+                                 std::map<int32_t, std::string> *trans = 0 );
+  static void graphFromVolume( const rc_ptr_Volume_S16 & vol , Graph & g,
+                               int16_t background = 0,
+                               std::map<int16_t, std::string> *trans = 0,
+                               bool automaticBackgroundSearch = true );
+  static void graphFromVolume( const rc_ptr_Volume_S32 & vol , Graph & g,
+                               int32_t background = 0,
+                               std::map<int32_t, std::string> *trans = 0,
+                               bool automaticBackgroundSearch = true );
+
   static void setAttributeColor( Graph & graph, const std::string & att,
                                  const AimsRGB & );
   static void setAttributeColor( Graph & graph, const std::string & att,
@@ -68,6 +92,8 @@ public:
   static void completeGraph( Graph & );
 
   static list_EdgePtr getPath( const Vertex *from, const Vertex *to );
+
+  static void printGraphElementTable( const Graph & );
 
   static SIP_PYOBJECT get_element_table( const Graph & graph ) /Factory/;
 %Docstring

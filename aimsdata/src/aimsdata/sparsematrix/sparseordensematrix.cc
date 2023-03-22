@@ -289,7 +289,7 @@ void SparseOrDenseMatrix::read( const std::string& filename )
     if( nz * sizeof( double ) * 8 < static_cast<size_t>( dims[0] ) * dims[1] )
     {
       // use sparse
-      cout << "read SparseOrDenseMatrix as sparse\n";
+      // cout << "read SparseOrDenseMatrix as sparse\n";
       Reader<SparseMatrix> r( filename );
       SparseMatrix* sp = r.read();
       if( sp )
@@ -307,7 +307,7 @@ void SparseOrDenseMatrix::read( const std::string& filename )
   Volume<double> *dense = r.read( 0, &format );
   if( dense )
   {
-    cout << "read SparseOrDenseMatrix as dense\n";
+    // cout << "read SparseOrDenseMatrix as dense\n";
     setMatrix( VolumeRef<double>( dense ) );
     dense->header().setProperty( "storage_mode", string( "dense" ) );
   }

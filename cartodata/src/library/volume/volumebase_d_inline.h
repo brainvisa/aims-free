@@ -47,7 +47,6 @@ namespace carto {
   inline
   const T& Volume< T >::at( long x, long y, long z, long t ) const
   {
-#ifdef CARTO_USE_BLITZ
     /* using clang, blitz++ is about 2 times more efficient than our
        implementation and achieves performances similar to pointer iterators.
        Using gcc on the contrary it's our implementation which is about twice
@@ -61,10 +60,6 @@ namespace carto {
     return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
                    + t * bstrides[3] ];
 #  endif
-#else
-    return _items[ x + y * _lineoffset + z * _sliceoffset
-                   + t * _volumeoffset ];
-#endif
   }
 
 
@@ -80,7 +75,6 @@ namespace carto {
   inline
   T& Volume< T >::at( long x, long y, long z, long t )
   {
-#ifdef CARTO_USE_BLITZ
     /* using clang, blitz++ is about 2 times more efficient than our
        implementation and achieves performances similar to pointer iterators.
        Using gcc on the contrary it's our implementation which is about twice
@@ -108,10 +102,6 @@ namespace carto {
     return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
                    + t * bstrides[3] ];
 #  endif
-#else
-    return _items[ x + y * _lineoffset + z * _sliceoffset
-                   + t * _volumeoffset ];
-#endif
   }
 
 
@@ -158,7 +148,6 @@ namespace carto {
   template < typename T > inline
   const T & Volume< T >::at( const std::vector<int> & index ) const
   {
-#ifdef CARTO_USE_BLITZ
     /* the blitz vector implementation with copy into a blitz TinyVector
        seems always slower than direct use of index / strides
      */
@@ -306,22 +295,11 @@ namespace carto {
       offset += index[i] * strides[i];
     return _blitz.dataZero()[ offset ];
 #  endif
-#else
-    if( index.size() >= 4 )
-      return at( index[0], index[1], index[2], index[3] );
-    else if( index.size() >= 3 )
-      return at( index[0], index[1], index[2] );
-    else if( index.size() >= 2 )
-      return at( index[0], index[1] );
-    else
-      return at( index[0] );
-#endif
   }
 
   template < typename T > inline
   T & Volume< T >::at( const std::vector<int> & index )
   {
-#ifdef CARTO_USE_BLITZ
     /* the blitz vector implementation with copy into a blitz TinyVector
        seems always slower than direct use of index / strides
      */
@@ -468,16 +446,6 @@ namespace carto {
       offset += index[i] * strides[i];
     return _blitz.dataZero()[ offset ];
 #  endif
-#else
-    if( index.size() >= 4 )
-      return at( index[0], index[1], index[2], index[3] );
-    else if( index.size() >= 3 )
-      return at( index[0], index[1], index[2] );
-    else if( index.size() >= 2 )
-      return at( index[0], index[1] );
-    else
-      return at( index[0] );
-#endif
   }
 
   template < typename T > inline
@@ -493,7 +461,6 @@ namespace carto {
     return at( position );
   }
 
-#ifdef CARTO_USE_BLITZ
   template < typename T > inline
   const T & Volume< T >::at( const blitz::TinyVector<int,1> & index ) const
   {
@@ -632,7 +599,6 @@ namespace carto {
   {
     return at( x1, x2, x3, x4, x5, x6, x7, x8 );
   }
-#endif
 
 
   template <typename T>

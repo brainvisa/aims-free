@@ -211,7 +211,7 @@ def compare_images(vol, vol2, vol1_name='input', vol2_name='output',
         nvol2 = nvol2['v']
     if np.max(np.abs(nvol - nvol2)) >= thresh:
         raise RuntimeError(msg + ', max diff: %f, max allowed: %f'
-                            % (np.max(np.abs(vol - vol2)), thresh))
+                           % (np.max(np.abs(nvol - nvol2)), thresh))
     
     return True
 

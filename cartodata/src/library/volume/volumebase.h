@@ -44,7 +44,6 @@
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/type/datatypetraits.h>
 //--- blitz ------------------------------------------------------------------
-#ifdef CARTO_USE_BLITZ
   #ifdef _WIN32
     // disable thread-safe operations in blitz++ on windows since it uses pthread
     #ifdef _REENTRANT
@@ -63,7 +62,6 @@ namespace carto {
   typedef ptrdiff_t BlitzStridesType;
 }
 
-#endif
 
 //--- std --------------------------------------------------------------------
 #include <vector>
@@ -137,17 +135,11 @@ namespace carto
     /// they go from the first voxel linerarly in memory, not taking care of
     /// offsets when in a Volume view. Taking care of splitting loops
     /// line-by-line is the responsability of programmers using such
-#ifdef CARTO_USE_BLITZ
     // static const int DIM_MAX = 8; leads to build issues on old GCC versions
     // so we need to use enum to be able to declare DIM_MAX in carto::Volume
     enum { DIM_MAX = 8 };
     typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::iterator iterator;
     typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::const_iterator const_iterator;
-#else
-    enum { DIM_MAX = 4 }; // still limited to 4D in this case.
-    typedef typename AllocatedVector<T>::iterator iterator;
-    typedef typename AllocatedVector<T>::const_iterator const_iterator;
-#endif
 
     //========================================================================
     //   CONSTRUCTORS
@@ -306,7 +298,6 @@ namespace carto
     const T& operator() ( const std::vector<int> & position ) const;
     T& operator() ( const std::vector<int> & position );
 
-#ifdef CARTO_USE_BLITZ
     const T & at( const blitz::TinyVector<int,1> & ) const;
     T & at( const blitz::TinyVector<int,1> & );
     const T & at( const blitz::TinyVector<int,2> & ) const;
@@ -340,7 +331,6 @@ namespace carto
                          long x6=0, long x7=0, long x8=0 ) const;
     T& operator() ( long x1, long x2, long x3, long x4, long x5, long x6=0,
                     long x7=0, long x8=0 );
-#endif
 
     //========================================================================
     //   INIT / ALLOCATION
@@ -540,13 +530,7 @@ namespace carto
                            bool allocated );
 
     AllocatedVector<T> _items;
-#ifdef CARTO_USE_BLITZ
     blitz::Array<T, Volume<T>::DIM_MAX>  _blitz;
-#else
-    size_t  _lineoffset;
-    size_t  _sliceoffset;
-    size_t  _volumeoffset;
-#endif
     rc_ptr<Volume<T> >  _refvol;
     std::vector<int>    _pos;
   };
@@ -767,11 +751,9 @@ namespace carto
 } // namespace carto:
 
 
-#  ifdef CARTO_USE_BLITZ
 // the CT macro defined in blitz++ interferes with QColor::CT in Qt
 #    ifdef CT
 #      undef CT
 #    endif
-#  endif
 
 #endif // CARTODATA_VOLUME_VOLUMEBASE_H

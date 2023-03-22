@@ -133,6 +133,8 @@ def build_split_graph(graph, data, roots, skel=None):
     failed_cuts = 0
 
     changed_vertices = len(todo)
+    # split groups (vertices split from the same initial one)
+    split_groups = {}
 
     # split each selected vertex
     while todo:
@@ -187,6 +189,13 @@ def build_split_graph(graph, data, roots, skel=None):
             mislabeled += loc_mis
         else:
             cuts += 1
+
+            # update split groups (vertices split from the same initial one)
+            split_group = split_groups.setdefault(v, set())
+            split_groups[v2] = split_group
+            split_group.add(v)
+            split_group.add(v2)
+
             apts = get_vertex_points(v)
             apts2 = get_vertex_points(v2)
             pts = tuple(apts)
@@ -232,6 +241,42 @@ def build_split_graph(graph, data, roots, skel=None):
             aroots[avor==roots_new + 1] = roots_val
 
             roots_new += 1
+
+    # fusion pass: in each split group, merge vertices which share the same
+    # label and are adjacent
+    merged_vertices = set()
+    for split_group in split_groups.values():
+        labels = {}
+        for v in split_group:
+            labels.setdefault(v['label'], []).append(v)
+        if len(labels) == len(split_group):
+            # all vertices have different labels: skip this step
+            continue
+        for label, vertices in labels.items():
+            # vertices that have been merged in a previous step should not be
+            # considered (they are dangling pointers on the C++ level, and
+            # calling v.edges() on them can trigger a segmentation fault, see
+            # https://github.com/brainvisa/aims-free/issues/96)
+            vertices = set(vertices) - merged_vertices
+            while len(vertices) >= 2:
+                v = next(iter(vertices))
+                # check junctions
+                junctions = [j for j in v.edges()
+                              if j.getSyntax() == 'junction'
+                                and all(v2 in vertices
+                                        for v2 in j.vertices())]
+                if len(junctions) == 0:
+                    vertices.remove(v)
+                else:
+                    # merge v and 1st connected other vertex
+                    v2 = [v3 for v3 in junctions[0].vertices()
+                          if v3 is not v][0]
+                    # v2 will disappear
+                    vertices.remove(v2)
+                    merged_vertices.add(v2)
+                    aims.FoldArgOverSegment(graph).mergeVertices(v, v2)
+                    del v2
+                    # do v again next time since it may have other edges
 
     print('mislabeled points:', mislabeled)
     print()

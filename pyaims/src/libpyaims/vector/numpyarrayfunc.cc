@@ -39,28 +39,17 @@ using namespace std;
 namespace
 {
 
+  // transpose if xyzorder is false
   PyObject* transposeNumpyArray( PyObject* a, bool xyzorder )
   {
     PyArrayObject *arr = (PyArrayObject *) a;
     int i, ndim = PyArray_NDIM( arr );
     if( ndim < 2 )
       return a;
-    bool firstindexinc = xyzorder;
-    for( i=0; i<ndim - 1; ++i )
-    {
-      if( PyArray_STRIDES( arr )[i] < PyArray_STRIDES( arr )[i + 1] )
-      {
-        firstindexinc = true;
-        break;
-      }
-      else if( PyArray_STRIDES( arr )[i] < PyArray_STRIDES( arr )[i +1] )
-      {
-        firstindexinc = false;
-        break;
-      }
-      // otherwise equal, check next dim
-    }
-    if( xyzorder == firstindexinc )
+
+    bool transpose = !xyzorder;
+
+    if( !transpose )
       return a;
     PyArray_Dims  adims;
     vector<npy_intp> dims( ndim );
@@ -91,7 +80,9 @@ namespace aims
     {
       PyObject *arr = PyObject_GetAttrString( sipSelf, "_arrayext" );
       if( arr )
+      {
         sipRes = transposeNumpyArray( arr, xyzorder );
+      }
     }
     // else look if an array has already been built on the object
     else if( PyObject_HasAttrString( sipSelf, "_arrayref" ) )
@@ -107,7 +98,7 @@ namespace aims
         }
         else
         {
-          std::cerr << "weakref on deleted object" << std::endl;
+          // std::cerr << "weakref on deleted object" << std::endl;
           PyObject_DelAttrString( sipSelf, "_arrayref" );
         }
         Py_DECREF( wr );
@@ -141,27 +132,18 @@ namespace aims
       }
       else
       {
-//         if( strides )
-//         {
-//           // if strides are specified, force them (volume views...)
-//           int dim;
-//           for( dim=0; dim<ndim; ++dim )
-//             PyArray_STRIDES( reinterpret_cast<PyArrayObject *>( sipRes ) )[dim]
-//               = strides[dim];
-//         }
         sipRes = PyArray_Return( (PyArrayObject *) sipRes );
         // make a weakref to the array with a deletion callback
         PyObject *cbk = PyObject_GetAttrString( sipSelf,
             "_arrayDestroyedCallback" );
         if( !cbk )
         {
+          PyErr_Clear();
           std::cerr << "warning: callback method _arrayDestroyedCallback "
               "not found" << std::endl;
         }
         else
         {
-          sipRes = transposeNumpyArray( sipRes, xyzorder );
-
           PyObject *wr = PyWeakref_NewRef( sipRes, cbk );
           if( wr )
           {
@@ -181,6 +163,8 @@ namespace aims
             std::cerr << "could not make a weakref to the array"
                 << std::endl;
           Py_DECREF( cbk );
+
+          sipRes = transposeNumpyArray( sipRes, xyzorder );
         }
       }
     }

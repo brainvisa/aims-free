@@ -41,7 +41,7 @@ namespace aims
 {
   PyObject* initNumpyArray( PyObject*, PyArray_Descr *numType, int ndim,
                             int* dims,
-                            char* buffer, bool xyzorder = false,
+                            char* buffer, bool xyzorder = true,
                             size_t *strides = 0 );
   void resizeNumpyArray( PyObject*, int ndim, int* dims, char* buffer,
                          size_t *strides = 0 );

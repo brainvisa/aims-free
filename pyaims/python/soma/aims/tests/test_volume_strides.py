@@ -7,7 +7,42 @@ from soma import aims
 import numpy as np
 import sys
 
+
 class TestVolumeStrides(unittest.TestCase):
+
+    def _test_numpy_conversion(self, vol):
+        arr = vol.arraydata()
+        test_vol = aims.Volume(arr)
+        dims = tuple(vol.getSize())
+        rdims = tuple(reversed(dims))
+        self.assertEqual(rdims, arr.shape)
+        self.assertEqual((36499400, 125860, 434, 2), arr.strides)
+        self.assertEqual(rdims, test_vol.getSize())
+        # Here, vol and test_vol are *NOT* equal: test_vol is transposed
+
+        arr = np.asarray(vol)
+        test_vol = aims.Volume(arr)
+        self.assertEqual(dims, arr.shape)
+        self.assertEqual((2, 434, 125860, 36499400), arr.strides)
+        self.assertEqual(dims, test_vol.getSize())
+        dif = (vol == test_vol)
+        self.assertTrue(np.all((dif).np))
+
+        arr = np.asfortranarray(vol)
+        test_vol = aims.Volume(arr)
+        self.assertEqual(dims, arr.shape)
+        self.assertEqual((2, 434, 125860, 36499400), arr.strides)
+        self.assertEqual(dims, test_vol.getSize())
+        dif = (vol == test_vol)
+        self.assertTrue(np.all((dif).np))
+
+        arr = np.ascontiguousarray(vol)
+        test_vol = aims.Volume(arr)
+        self.assertEqual(dims, arr.shape)
+        self.assertEqual((168200, 580, 2, 2), arr.strides)
+        self.assertEqual(dims, test_vol.getSize())
+        dif = (vol == test_vol)
+        self.assertTrue(np.all((dif).np))
 
     def test_volume_strides(self):
         vol = aims.Volume(4, 5, 6, dtype='S16')
@@ -28,6 +63,12 @@ class TestVolumeStrides(unittest.TestCase):
         vol3 = vol + vol2 * 2
         self.assertEqual(vol3.shape, (4, 5, 6, 1))
         self.assertTrue(np.all(vol3.np == vol.np * 5))
+
+    def test_numpy_conversion(self):
+        vol = aims.Volume((217, 290, 290, 1), dtype='S16')
+        vol.np[:] = np.arange(vol.np.size).reshape(vol.np.shape)
+        self._test_numpy_conversion(vol)
+
 
 def test():
     suite = unittest.TestLoader().loadTestsFromTestCase(TestVolumeStrides)

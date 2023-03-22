@@ -41,7 +41,7 @@ def meshSplit(mesh, tex, graph, tex_time_step=0):
 
     The graph must preexist, and nodes will be inserted into it.
     '''
-    labels = numpy.unique(tex[tex_time_step].arraydata())
+    labels = numpy.unique(tex[tex_time_step])
     labels = labels.tolist()
     labels.remove(0)
     num_labels = len(labels)

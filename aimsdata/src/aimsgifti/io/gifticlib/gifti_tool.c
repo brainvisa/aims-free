@@ -58,8 +58,7 @@ static int process_opts(int argc, char *argv[], gt_opts * opts);
 static int show_version(void);
 
 /* the main event */
-//ARN 7_04_10
-int gifti_tools( int argc, char * argv[] )
+int main( int argc, char * argv[] )
 {
     gt_opts       opts;
     int           rv = 0;

@@ -115,8 +115,8 @@ def compare_nii_files(file1, file2, thresh=50, out_stream=sys.stdout):
     # Check the voxels
     a_1 = aims.read(file1)
     a_2 = aims.read(file2)
-    if a_1.arraydata().shape == a_2.arraydata().shape:
-        d = a_1.arraydata() - a_2.arraydata()
+    if a_1.np.shape == a_2.np.shape:
+        d = a_1.np - a_2.np
         if abs(np.max(d) - np.min(d)) < thresh:
             print('WARNING, use aims, absolute difference value:'
                   ' %s' % abs(np.max(d) - np.min(d)), file=out_stream)
@@ -130,7 +130,8 @@ def filter_header_for_cmp(hdr):
     Removed uuid and referential properties from the given header, in order to
     be compared with another file wich may differ only in thoses identifiers
     '''
-    for prop in ('uuid', 'referential', 'GIFTI_dataarrays_info'):
+    for prop in ('uuid', 'referential', 'GIFTI_dataarrays_info',
+                 'GIFTI_metadata', 'file_type', 'format', 'GIFTI_version'):
         if prop in hdr:
             del hdr[prop]
     # gifti-specific

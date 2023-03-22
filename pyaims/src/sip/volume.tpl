@@ -189,16 +189,12 @@ at(posx, posy=0, posz=0, post=0)
 Returns the volume value for the selected voxel.
 %End
 
-%#ifdef CARTO_USE_BLITZ%
-
   %Template1PyType% at( long, long, long, long, long, long=0, long=0, long=0 ) const;
 %Docstring
 at(posx1, posx2, posx3, posx4, posx5, posx6=0, posx7=0, posx8=0)
 
 Returns the volume value for the selected voxel.
 %End
-
-%#endif%
 
   %Template1PyType% at( const vector_S32 & ) const;
 %Docstring
@@ -731,20 +727,9 @@ The header contains all meta-data.
     int nd = PyArray_NDIM( arr );
     if( nd < 4 )
       nd = 4;
+    bool xyzorder = false;
     std::vector<int> dims( nd, 1 );
     int inc = 1, start = 0;
-    /*
-    // TODO: retreive exact strides and react accordingly
-    if( PyArray_NDIM( arr ) >= 2 )
-    {
-      if( PyArray_STRIDES( arr )[1] < PyArray_STRIDES( arr )[0] )
-      {
-        // increments higher index first
-        inc = -1;
-        start = PyArray_NDIM( arr )-1;
-      }
-    }
-    */
 
     std::vector<size_t> strides( nd, 1 );
 
@@ -773,12 +758,20 @@ The header contains all meta-data.
 
 %End
 
-  SIP_PYOBJECT arraydata() /Factory/;
+  SIP_PYOBJECT arraydata() /Deprecated,Factory/;
 %Docstring
 .. note::
 
-    *arraydata()* returns a numpy array to the internal memory block, without strides. Given the internal ordering of Aims Volumes, the resulting numpy array is indexed as [t][z][y][x]. This order corresponds to the numpy "fortran" order: ``order='F'``
+    *arraydata()* returns a numpy array to the internal memory block, with "inverted" shape and strides.
+
+    **WARNING:** this is an obsolete method, which behaviour has changed. Most of the time you need `numpy.asarray(volume)`, or more simply: `volume.np`, which actually provides an array with the same indices ordering. Here it is a transposed one.
+
+    Given the internal ordering of Aims Volumes, the resulting numpy array is indexed as [t][z][y][x]. This order corresponds to the numpy "fortran" order: ``order='F'``
     If you need the inverse, more natural, [x][y][z][t] ordering, use the following:
+
+    >>> volarray = volume.np
+
+    or:
 
     >>> volarray = numpy.array(volume, copy=False)
 
@@ -786,14 +779,15 @@ The header contains all meta-data.
 
     >>> volarray = numpy.asarray(volume)
 
-.. note::
+    Using arraydata(), as the indices are reversed, if you do something like::
 
-    The array conversion is currently only supported for scalar volumes, and is not present on volumes of types RGB or RGBA.
+        vol2 = aims.Volume(vol.arraydata())
+
+    You will build a transposed volume.
 %End
 
 %MethodCode
   std::vector<int> vdims = sipCpp->getSize();
-
   int i, n= vdims.size();
   std::vector<size_t> vstrides, strides( n );
   std::vector<int> dims( n );
@@ -803,14 +797,14 @@ The header contains all meta-data.
 
   for( i=0; i<n; ++i )
   {
-    dims[n - 1 - i] = vdims[i];
-    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
+    dims[i] = vdims[i];
+    strides[i] = vstrides[i] * sizeof( %Template1% );
   }
 
   std::vector<int> added_dims = %Template1NumDims%;
   dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
   for( i=0; i<added_dims.size(); ++i )
-    strides.push_back( sizeof( %Template1% ) / added_dims[i] ); // FIXME
+    strides.insert( strides.end(), sizeof( %Template1% ) / added_dims[i] ); // FIXME
 
   PyArray_Descr *descr = %Template1NumType_Descr%;
   if( !descr )
