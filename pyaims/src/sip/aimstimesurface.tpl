@@ -15,7 +15,7 @@ typedef AimsTimeSurface<%Template1%, %Template2% > AimsTimeSurface_%Template1typ
 
 %ConvertToTypeCode
   return pyaims::standardConvertToTypeCode( sipPy,
-    sipClass_AimsTimeSurface_%Template1typecode%_%Template2typecode%,
+    sipType_AimsTimeSurface_%Template1typecode%_%Template2typecode%,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -92,7 +92,7 @@ The header contains all meta-data.
 %End
 
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End

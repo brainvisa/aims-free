@@ -12,13 +12,14 @@ typedef AimsVector<%Template1%, %Template2%>
 
 %TypeCode
 #include <pyaims/vector/numpyarrayfunc.h>
+%Template1sipinclude%
 %End
 
 %ConvertToTypeCode
   if (sipIsErr == NULL)
   {
-    if( sipCanConvertToInstance( sipPy,
-         sipClass_AimsVector_%Template1typecode%_%Template2typecode%,
+    if( sipCanConvertToType( sipPy,
+         sipType_AimsVector_%Template1typecode%_%Template2typecode%,
          SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
       return 1;
     if( PySequence_Check( sipPy ) && PySequence_Size( sipPy ) == %Template2% )
@@ -42,13 +43,15 @@ typedef AimsVector<%Template1%, %Template2%>
     return 0;
   }
 
-  if( PyObject_IsInstance( sipPy, (PyObject *) 
-      sipClass_AimsVector_%Template1typecode%_%Template2typecode% ) )
+  if( PyObject_IsInstance( sipPy,
+                           reinterpret_cast<PyObject *>(
+                             sipTypeAsPyTypeObject(
+                               sipType_AimsVector_%Template1typecode%_%Template2typecode% ) ) ) )
     {
       *sipCppPtr =
         (AimsVector_%Template1typecode%_%Template2typecode% *)
-        sipConvertToInstance( sipPy,
-          sipClass_AimsVector_%Template1typecode%_%Template2typecode%,
+        sipConvertToType( sipPy,
+          sipType_AimsVector_%Template1typecode%_%Template2typecode%,
           0, SIP_NO_CONVERTORS, 0, sipIsErr );
       return 0;
     }
@@ -122,8 +125,8 @@ typedef AimsVector<%Template1%, %Template2%>
   }
   *sipCppPtr = 
     (AimsVector_%Template1typecode%_%Template2typecode% *) 
-    sipConvertToInstance( sipPy,
-      sipClass_AimsVector_%Template1typecode%_%Template2typecode%, 
+    sipConvertToType( sipPy,
+      sipType_AimsVector_%Template1typecode%_%Template2typecode%,
       0, SIP_NO_CONVERTORS, 0, sipIsErr );
   return 0;
 %End
@@ -309,7 +312,7 @@ public:
   (*sipCpp)[ a0 ] = %Template1deref%a1;
 %End
 
-  int __len__();
+  Py_ssize_t __len__();
 %MethodCode
   sipRes = %Template2%;
 %End
@@ -344,7 +347,7 @@ public:
   *sipCpp = *a0;
 %End
 
-  int __contains__( %Template1%%Template1deref% ) const /AutoGen/;
+  int __contains__( %Template1%%Template1deref% ) const;
 %MethodCode
   unsigned i;
   sipRes = 0;

@@ -109,12 +109,12 @@ from six.moves import range
 import collections
 import functools
 import types
-import sip
 import os
 import six
 import sys
 import numbers
 import inspect
+import importlib
 
 
 __docformat__ = 'restructuredtext en'
@@ -151,6 +151,22 @@ except ImportError as exc:
             exc
         )
     raise  # other import errors are re-raised
+
+sip = None
+try:
+    aimssip.sip_module()
+except Exception as e:
+    print('warning: aimssip.sip_module() is not defined. We will use a '
+          'default sip module, which may be the wrong one.')
+    print('error:', e)
+else:
+    try:
+        sip = importlib.import_module(aimssip.sip_module())
+        sys.modules['sip'] = sip
+    except:
+        print('could not import sip module as %s' % aimssip.sip_module())
+if sip is None:
+    import sip
 
 from soma.importer import ExtendedImporter, GenericHandlers, __namespaces__
 
@@ -1763,11 +1779,11 @@ def VolumeView(volume, position, size):
         raise TypeError('incompatible or wrong volume type: %s'
             % volclass.__name__)
 
-        if len(size) < 4:
-            size = list(size) + [1] * (4 - len(size))
-        for i in range(4):
-            if size[i] == 0:
-                size[i] = 1
+    if len(size) < 4:
+        size = list(size) + [1] * (4 - len(size))
+    for i in range(4):
+        if size[i] == 0:
+            size[i] = 1
     return volclass(vol, position, size)
 
 def TimeTexture(*args, **kwargs):
@@ -2687,4 +2703,9 @@ del x, private
 
 # add IO formats defined in python
 from . import io_ext
+
+# export sip6 enums
+from soma.utils.sip_compat import sip_export_enums
+
+sip_export_enums(sys.modules[__name__])
 

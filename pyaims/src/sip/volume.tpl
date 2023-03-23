@@ -6,11 +6,23 @@ class Volume_%Template1typecode% : carto::RCObject
 %TypeHeaderCode
 #include <cartodata/volume/volume.h>
 %Template1typeinclude%
+#ifndef PYAIMS_VOLUME_%Template1typecode%_DEFINED
+#define PYAIMS_VOLUME_%Template1typecode%_DEFINED
 typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
+#endif
+#include <cartobase/smart/rcptr.h>
+#ifndef PYAIMS_RCPTR_Volume_%Template1typecode%_DEFINED
+#define PYAIMS_RCPTR_Volume_%Template1typecode%_DEFINED
+typedef carto::rc_ptr<carto::Volume<%Template1% > > rc_ptr_Volume_%Template1typecode%;
+#endif
 #include <cartodata/volume/volumeoperators.h>
 #include <weakrefobject.h>
 #define PY_ARRAY_TYPES_PREFIX PyAIMSTypes
 #include <pyaims/vector/stdvector.h>
+#ifndef PYAIMS_VOLUME_BOOL_DEFINED
+#define PYAIMS_VOLUME_BOOL_DEFINED
+typedef carto::Volume<bool> Volume_BOOL;
+#endif
 %End
 
 %TypeCode
@@ -22,7 +34,7 @@ typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
 
 %ConvertToTypeCode
   return pyaims::standardConvertToTypeCode( sipPy,
-    sipClass_Volume_%Template1typecode%,
+    sipType_Volume_%Template1typecode%,
     sipTransferObj, sipIsErr, sipCppPtr );
 
 %End
@@ -39,7 +51,7 @@ public:
       Position4Di( const Volume_%Template1typecode%::Position4Di & );
       ~Position4Di();
       int operator [] ( int coord ) const;
-      int __len__() const;
+      Py_ssize_t __len__() const;
 %MethodCode
       sipRes = 4;
 %End

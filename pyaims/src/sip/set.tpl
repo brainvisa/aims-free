@@ -15,9 +15,9 @@ typedef std::set<%Template1% > set_%Template1typecode%;
 %ConvertToTypeCode
   if (sipIsErr == NULL)
   {
-    if( sipCanConvertToInstance( sipPy,
-                                       sipClass_set_%Template1typecode%,
-                                       SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
+    if( sipCanConvertToType( sipPy,
+                             sipType_set_%Template1typecode%,
+                             SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
       return true;
 
     PyObject *iter = PyObject_GetIter( sipPy );
@@ -30,19 +30,19 @@ typedef std::set<%Template1% > set_%Template1typecode%;
     return false;
   }
 
-  if( sipCanConvertToInstance( sipPy, sipClass_set_%Template1typecode%,
-      SIP_NO_CONVERTORS ) )
+  if( sipCanConvertToType( sipPy, sipType_set_%Template1typecode%,
+                           SIP_NO_CONVERTORS ) )
   {
     int state = 0;
 
     set_%Template1typecode% * dat
       = (set_%Template1typecode% *)
-        sipConvertToInstance( sipPy,
-          sipClass_set_%Template1typecode%,
+        sipConvertToType( sipPy,
+          sipType_set_%Template1typecode%,
           sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
     if( *sipIsErr && dat )
     {
-      sipReleaseInstance( dat, sipClass_set_%Template1typecode%, state );
+      sipReleaseType( dat, sipType_set_%Template1typecode%, state );
       dat = 0;
     }
     else if( dat )
@@ -83,7 +83,7 @@ typedef std::set<%Template1% > set_%Template1typecode%;
   }
   *sipCppPtr = 
      (set_%Template1typecode% *)
-  sipConvertToInstance( sipPy, sipClass_set_%Template1typecode%,
+  sipConvertToType( sipPy, sipType_set_%Template1typecode%,
                            sipTransferObj, SIP_NO_CONVERTORS, 0, sipIsErr );
   return sipGetState( sipTransferObj );
 %End
@@ -133,17 +133,17 @@ public:
 
   size_t size() const;
 
-  int __len__() const /AutoGen/;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End
 
-  int __contains__( %Template1PyType%%Template1deref% ) const /AutoGen/;
+  int __contains__( %Template1PyType%%Template1deref% ) const;
 %MethodCode
   sipRes = sipCpp->find( %Template1deref% a0 ) != sipCpp->end();
 %End
 
-  void __delitem__( %Template1PyType%%Template1deref% ) const /AutoGen/;
+  void __delitem__( %Template1PyType%%Template1deref% ) const;
 %MethodCode
   sipCpp->erase( %Template1deref% a0 );
 %End
@@ -194,7 +194,7 @@ public:
 
 
   // __iter__ isn't called by python iter() function when defined in SIP
-  set_%Template1typecode%_iterator* __objiter__() /Factory, AutoGen/;
+  set_%Template1typecode%_iterator* __objiter__() /Factory/;
 %MethodCode
   std::set<%Template1% >::iterator i = sipCpp->begin();
   sipRes = new set_%Template1typecode%_iterator( i, sipCpp, sipSelf );
@@ -395,8 +395,8 @@ public:
   SIP_PYOBJECT __iter__();
 %MethodCode
   sipRes =
-    sipConvertFromInstance( sipCpp, 
-                            sipClass_set_%Template1typecode%_iterator, 0 );
+    sipConvertFromType( sipCpp,
+                        sipType_set_%Template1typecode%_iterator, 0 );
 %End
 };
 

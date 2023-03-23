@@ -45,8 +45,8 @@ typedef int int32_t;
 %Include info.sip
 
 %Include mutex.sip
-%Include system_VOID.sip
 %Include std.sip
+%Include system_VOID.sip
 %Include complex.sip
 %Include cartobasetypes.sip
 %Include exception.sip
@@ -104,8 +104,6 @@ typedef int int32_t;
 %Include set_FLOAT.sip
 %Include set_DOUBLE.sip
 %Include set_STRING.sip
-%Include set_VertexPtr.sip
-%Include set_EdgePtr.sip
 %Include list_S32.sip
 %Include list_U32.sip
 %Include list_FLOAT.sip
@@ -154,11 +152,12 @@ typedef int int32_t;
 
 %Include rcobject.sip
 %Include sharedobject.sip
-%Include object.sip
+%Include genericobject.sip
 
 %Include system2_VOID.sip
 
 %Include rcptr_GenericObject.sip
+%Include object.sip
 %Include property.sip
 
 %Include aimsrgb.sip
@@ -278,7 +277,6 @@ typedef int int32_t;
 
 %Include motion.sip
 %Include transformation.sip
-%Include rcptr_Transformation3d.sip
 %Include rcptr_AffineTransformation3d.sip
 %Include reader_AffineTransformation3d.sip
 %Include reader_Transformation3d.sip

@@ -1,5 +1,21 @@
 
+/*
 %Exception std::exception(SIP_Exception) /PyName=StdException, Default/
+{
+%TypeHeaderCode
+#include <exception>
+%End
+%RaiseCode
+        const char *detail = sipExceptionRef.what();
+
+        SIP_BLOCK_THREADS
+        PyErr_SetString(PyExc_Exception, detail);
+        SIP_UNBLOCK_THREADS
+%End
+};
+*/
+
+%Exception std::exception
 {
 %TypeHeaderCode
 #include <exception>
@@ -14,7 +30,7 @@
 };
 
 
-%Exception std::runtime_error(std::exception) /PyName=RuntimeError/
+%Exception std::runtime_error
 {
 %TypeHeaderCode
 #include <stdexcept>
@@ -28,7 +44,7 @@
 };
 
 
-%Exception std::invalid_argument(std::exception) /PyName=ValueError/
+%Exception std::invalid_argument
 {
 %TypeHeaderCode
 #include <stdexcept>
@@ -42,7 +58,7 @@
 };
 
 
-%Exception std::out_of_range(std::exception) /PyName=IndexError/
+%Exception std::out_of_range
 {
 %TypeHeaderCode
 #include <stdexcept>
@@ -56,7 +72,7 @@
 };
 
 
-%Exception carto::io_error(std::runtime_error) /PyName=IOError/
+%Exception carto::io_error
 {
 %TypeHeaderCode
 #include <cartobase/exception/ioexcept.h>
@@ -70,7 +86,7 @@
 };
 
 
-%Exception carto::assert_error(std::exception) /PyName=AssertionError/
+%Exception carto::assert_error
 {
 %TypeHeaderCode
 #include <cartobase/exception/assert.h>
@@ -87,7 +103,7 @@
 };
 
 
-%Exception carto::errno_error(std::runtime_error) /PyName=ErrnoError/
+%Exception carto::errno_error
 {
 %TypeHeaderCode
 #include <cartobase/exception/errno.h>
@@ -111,7 +127,7 @@
 };
 
 
-%Exception carto::file_error(std::runtime_error) /PyName=FileError/
+%Exception carto::file_error
 {
 %TypeHeaderCode
   #include <cartobase/exception/file.h>

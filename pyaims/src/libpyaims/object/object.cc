@@ -898,7 +898,7 @@ namespace carto
         }
         if( !po )
         {
-          //sipConvertFromInstance( &value, sipClass_carto_Object, 0 );
+          //sipConvertFromType( &value, sipType_carto_Object, 0 );
           /* The following does not work because sipFindType() is only defined
            * in sip-generated modules (sipAPIaimssip.h) which are not built
            * yet and need this library. It could be done via a small

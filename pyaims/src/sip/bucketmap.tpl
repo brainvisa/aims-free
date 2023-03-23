@@ -16,7 +16,7 @@ typedef aims::BucketMap< %Template1% > BucketMap_%Template1typecode%;
 
 %ConvertToTypeCode
   return pyaims::standardConvertToTypeCode( sipPy,
-    sipClass_BucketMap_%Template1typecode%,
+    sipType_BucketMap_%Template1typecode%,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -67,7 +67,7 @@ The header contains all meta-data.
   }
 %End
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End
@@ -100,7 +100,7 @@ The header contains all meta-data.
   public:
     Bucket();
     unsigned size() const;
-    int __len__() const;
+    Py_ssize_t __len__() const;
 %MethodCode
   sipRes = (int) sipCpp->size();
 %End
@@ -142,14 +142,9 @@ The header contains all meta-data.
     std::map< Point3d,%Template1% >::const_iterator i, e = sipCpp->end();
     int n = 0;
     for( i=sipCpp->begin(); i!=e; ++i, ++n )
-#if SIP_VERSION >= 0x040400
       PyTuple_SetItem( l, n, 
-                       sipConvertFromNewInstance( new Point3d( i->first ), 
-                                              sipClass_AimsVector_S16_3, 0 ) );
-#else
-      PyTuple_SetItem( l, n, sipMapCppToSelfSubClass( new Point3d( i->first ), 
-                                              sipClass_AimsVector_S16_3 ) );
-#endif
+                       sipConvertFromNewType( new Point3d( i->first ),
+                                              sipType_AimsVector_S16_3, 0 ) );
 %End
 
     void clear();

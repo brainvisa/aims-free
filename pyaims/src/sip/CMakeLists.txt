@@ -20,6 +20,10 @@ file( GLOB _sipSources "${CMAKE_CURRENT_SOURCE_DIR}/*.sip" )
 
 file( MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}" )
 
+if( SIP_MODULE )
+  set( extra_defs "-D" "SIP_MODULE=\"${SIP_MODULE}\"" )
+endif()
+
 set(__command "${PYTHON_HOST_EXECUTABLE}"
         "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}/maketemplates.py"
         -i "${_generatedtypes_py}"
@@ -28,14 +32,18 @@ set(__command "${PYTHON_HOST_EXECUTABLE}"
         -t "${CMAKE_CURRENT_SOURCE_DIR}/typessub.py"
         -l
         -m "${QT_MOC_EXECUTABLE}"
-        -P "${CMAKE_C_PREPROCESSOR}")
+        -P "${CMAKE_C_PREPROCESSOR}"
+        ${extra_defs} )
 if(CMAKE_CROSSCOMPILING AND WIN64)
     list(APPEND __command -T "windows-64")
 endif()
+message("RUN MAKETEMPLATES: ${__command}")
 execute_process( COMMAND ${__command}
   OUTPUT_VARIABLE _generatedSipFileList 
   RESULT_VARIABLE _returnValue )
-  
+string( STRIP "${_generatedSipFileList}" _generatedSipFileList )
+# message("output: ${_generatedSipFileList}")
+
 if( NOT _returnValue EQUAL 0 )
   message( SEND_ERROR "The sip generation from pyaims templates failed. Command:\n${_command}\nreturned output:\n${_generatedSipFileList}\n========================")
 # else( NOT _returnValue EQUAL 0 )

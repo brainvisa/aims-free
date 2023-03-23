@@ -38,7 +38,7 @@ public:
   sipRes = ( (*sipCpp) != a0 );
 %End
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = 3;
 %End
@@ -101,7 +101,7 @@ public:
   sipRes = ( (*sipCpp) != a0 );
 %End
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = 4;
 %End
@@ -171,7 +171,7 @@ public:
   sipRes = ( (*sipCpp) != a0 );
 %End
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = 3;
 %End

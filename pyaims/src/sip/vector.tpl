@@ -21,8 +21,8 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
 %ConvertToTypeCode
   if (sipIsErr == NULL)
   {
-    if( sipCanConvertToInstance( sipPy,
-        sipClass_vector_%Template1typecode%, SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
+    if( sipCanConvertToType( sipPy,
+        sipType_vector_%Template1typecode%, SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
       return 1;
     if( !PySequence_Check( sipPy ) )
       return 0;
@@ -53,19 +53,19 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
       return 0;
   }
 
-  if( sipCanConvertToInstance( sipPy, sipClass_vector_%Template1typecode%,
-      SIP_NO_CONVERTORS ) )
+  if( sipCanConvertToType( sipPy, sipType_vector_%Template1typecode%,
+                           SIP_NO_CONVERTORS ) )
   {
     int state = 0;
 
     vector_%Template1typecode% * dat
       = (vector_%Template1typecode% *)
-        sipConvertToInstance( sipPy,
-          sipClass_vector_%Template1typecode%,
+        sipConvertToType( sipPy,
+          sipType_vector_%Template1typecode%,
           sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
     if( *sipIsErr && dat )
     {
-      sipReleaseInstance( dat, sipClass_vector_%Template1typecode%, state );
+      sipReleaseType( dat, sipType_vector_%Template1typecode%, state );
       dat = 0;
     }
     else if( dat )
@@ -118,15 +118,18 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
 
       %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
       (*sipCppPtr)->push_back( %Template1deref%item );
+%%Template1defScalar%%
+%#ifndef PYAIMS_SCALAR%
       if( conv )
         delete & %Template1deref% item;
+%#endif%
       Py_DECREF( pyitem );
     }
     return sipGetState( sipTransferObj );
   }
   *sipCppPtr = 
      (vector_%Template1typecode% *) 
-     sipConvertToInstance( sipPy, sipClass_vector_%Template1typecode%,
+     sipConvertToType( sipPy, sipType_vector_%Template1typecode%,
                            0, SIP_NO_CONVERTORS, 0, sipIsErr );
   return 0;
 %End
@@ -185,9 +188,12 @@ public:
 
       %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
       sipCpp->push_back( %Template1deref%item );
+%%Template1defScalar%%
+%#ifndef PYAIMS_SCALAR%
       if( conv )
         delete & %Template1deref% item;
       Py_DECREF( pyitem );
+%#endif%
     }
   }
 %End
@@ -245,12 +251,12 @@ public:
   size_t size() const;
 
 
-  int __len__() const /AutoGen/;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End
 
-  int __contains__( %Template1PyType%%Template1deref% ) const /AutoGen/;
+  int __contains__( %Template1PyType%%Template1deref% ) const;
 %MethodCode
   std::vector<%Template1% >::const_iterator i, e = sipCpp->end();
   sipRes = 0;
@@ -392,7 +398,7 @@ public:
 
 
   // __iter__ isn't called by python iter() function when defined in SIP
-  vector_%Template1typecode%_iterator* __objiter__() /Factory, AutoGen/;
+  vector_%Template1typecode%_iterator* __objiter__() /Factory/;
 %MethodCode
   std::vector<%Template1% >::iterator i = sipCpp->begin();
   sipRes = new vector_%Template1typecode%_iterator( i, sipCpp, sipSelf );
@@ -698,8 +704,8 @@ public:
   SIP_PYOBJECT __iter__();
 %MethodCode
   sipRes = 
-    sipConvertFromInstance( sipCpp, 
-                            sipClass_vector_%Template1typecode%_iterator, 0 );
+    sipConvertFromType( sipCpp,
+                        sipType_vector_%Template1typecode%_iterator, 0 );
 %End
 };
 

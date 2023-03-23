@@ -13,7 +13,7 @@ class Interpolator : carto::RCObject /Abstract/
 %End
 
 %ConvertToTypeCode
-  return pyaims::standardConvertToTypeCode( sipPy, sipClass_aims_Interpolator,
+  return pyaims::standardConvertToTypeCode( sipPy, sipType_aims_Interpolator,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 

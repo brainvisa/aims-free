@@ -90,7 +90,7 @@ public:
   sipRes = sipCpp->nItem();
 %End
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = (int) sipCpp->nItem();
 %End
@@ -365,7 +365,7 @@ public:
   sipRes = ( sipCpp->find( a0 ) != sipCpp->end() );
 %End
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End

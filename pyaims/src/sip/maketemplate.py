@@ -39,7 +39,6 @@ from __future__ import absolute_import
 import sys
 import os
 import re
-import sipconfig
 from optparse import OptionParser
 import subprocess
 import platform
@@ -60,19 +59,30 @@ def convert_string_to_int(s):
     return int(s)
 
 
-def makeTemplate(
-    infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
-        quiet=0):
+def get_sip_version(qt_version=0x050000):
+    if qt_version >= 0x060000:
+        import sipbuild
+        return sipbuild.version.SIP_VERSION
+
+    else:
+        import sipconfig
+        c = sipconfig.Configuration()
+        return c.sip_version
+
+
+def makeTemplate(infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
+                 quiet=0, extra_defs=None):
     # print('input :', infile)
     # print('output:', outfile)
     # print('types :', types)
+    if not moc:
+        print('makeTemplate, without moc:', moc, file=sys.stderr)
 
     fi = open(infile)
     fo = open(outfile, 'w')
     if cpp:
-        c = sipconfig.Configuration()
-        cppcmd = cpp.split() + ['-DSIP_VERSION=' + '0x%06x' % c.sip_version]
         # determine Qt version
+        qver = 0x50000
         try:
             qtdir = os.getenv('QTDIR')
             if not moc:
@@ -87,18 +97,22 @@ def makeTemplate(
                 stderr=subprocess.PIPE).communicate()
             l = moc_out[1].decode()
             if l == '':
-                l = moc_out[0].decode() # moc 5
+                l = moc_out[0].decode() # moc 5/6
                 x = re.search(r'^.*moc ([0-9\.]+).*$', l).group(1)
             else:
                 x = re.search(r'^.*\(Qt ([^\)]*)\).*$', l).group(1)
             qv = [convert_string_to_int(k) for k in x.split('.')]
             qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
-            cppcmd.append('-DQT_VERSION=' + hex(qver))
-            # print('Qt version:', hex( qver ), file=sys.stderr)
+            # print('Qt version:', hex(qver))
         except Exception as e:
             if not quiet:
-                print(e)
+                print(e, file=sys.stderr)
             pass  # Qt not available ?
+        sipver = get_sip_version(qver)
+        cppcmd = cpp.split() + ['-DSIP_VERSION=' + '0x%06x' % sipver]
+        cppcmd.append('-DQT_VERSION=' + hex(qver))
+        if extra_defs:
+            cppcmd += extra_defs
         if not quiet:
             print(' '.join(cppcmd))
         if platform.system() == 'Windows':

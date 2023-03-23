@@ -38,6 +38,12 @@ a test would be difficult to implement or expensive to run.
     Transformation();
   };
 
+};
+
+%Include rcptr_Transformation3d.sip
+
+namespace soma
+{
 
   class Transformation3d : soma::Transformation
   {
@@ -210,7 +216,7 @@ public:
 
   size_t size() const;
 
-  int __len__() const;
+  Py_ssize_t __len__() const;
 %MethodCode
   sipRes = int( sipCpp->size() );
 %End

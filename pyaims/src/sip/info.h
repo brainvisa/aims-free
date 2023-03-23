@@ -36,21 +36,21 @@
 
 inline PyObject* pyaimsConvertFrom_InfoP( void * a )
 {
-  return sipConvertFromInstance( a, sipClass_carto_Info, 0 );
+  return sipConvertFromType( a, sipType_carto_Info, 0 );
 }
 
 
 inline void* pyaimsConvertTo_InfoP( PyObject * o )
 {
   int isErr = 0;
-  return sipConvertToInstance( o, sipClass_carto_Info, 0, 0, 0, &isErr );
+  return sipConvertToType( o, sipType_carto_Info, 0, 0, 0, &isErr );
 }
 
 
 inline int pyaimsInfoP_Check( PyObject* o )
 {
-  return sipCanConvertToInstance( o, sipClass_carto_Info,
-                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+  return sipCanConvertToType( o, sipType_carto_Info,
+                              SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 #endif
