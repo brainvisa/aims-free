@@ -7,6 +7,7 @@ set( _headers
      io/volumeformatwriter_d.h
      io/volumeutilio.h
      io/volumeutilio_d.h
+     transformation/lightresampler.h
      volume/functional.h
      volume/volume.h
      volume/volume_d.h

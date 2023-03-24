@@ -341,7 +341,8 @@ todo = {'system': ['Void'],
         'connected_component': ['short', 'int', 'unsigned char',
                                 'unsigned short', 'unsigned'],
         'borderfiller': ['bool', 'unsigned char', 'short', 'unsigned short',
-                         'int', 'unsigned', 'float', 'double', 'AimsRGB', 'AimsRGBA', 'AimsHSV']
+                         'int', 'unsigned', 'float', 'double', 'AimsRGB', 'AimsRGBA', 'AimsHSV'],
+        'lightresampler': basetypes + ['cfloat', 'cdouble', 'Point3df'],
         }
 
 if sip.SIP_VERSION >= 0x04130d:

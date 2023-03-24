@@ -50,6 +50,33 @@ class TestTransform(unittest.TestCase):
         tr *= tr2
         self.assertEqual( tr, tr3 )
 
+    def test_lightresampler(self):
+      dims = (10, 15, 20)
+      vs = (0.8, 1.3, 2.1)
+      vol = aims.Volume(dims, dtype='S16')
+      vol.setVoxelSize(vs)
+      vol.np.ravel(order='K')[:] = np.arange(vol.np.size, dtype=np.int16)
+
+      tr = aims.AffineTransformation3d()
+      tr.affine()[:3, :4, 0, 0] = [[0, -1, 0, (dims[1] - 1) * vs[1]],
+                                   [0, 0, -1, (dims[2] - 1) * vs[2]],
+                                   [-1, 0, 0, (dims[0] - 1) * vs[0]]]
+
+      odim = aims.LightResampler_S16.getTransformedDims(vol.shape, tr)
+      self.assertEqual(odim, [15, 20, 10, 1])
+      ovol = aims.LightResampler_S16.allocateResampledVolume(vol, tr)
+      self.assertEqual(ovol.shape, (15, 20, 10, 1))
+      self.assertTrue(np.max(np.abs(ovol.getVoxelSize().np
+                                    - (1.3, 2.1, 0.8, 1.))) < 1e-5)
+
+      aims.LightResampler_S16.resampleVolume(vol, ovol, tr)
+      self.assertEqual(list(vol.np[:, 0, 0, 0]),
+                       list(ovol.np[-1, -1, ::-1, 0]))
+      self.assertEqual(list(vol.np[0, :, 0, 0]),
+                       list(ovol.np[::-1, -1, -1, 0]))
+      self.assertEqual(list(vol.np[0, 0, :, 0]),
+                       list(ovol.np[-1, ::-1, -1, 0]))
+
 
 def test():
     suite = unittest.TestLoader().loadTestsFromTestCase(TestTransform)

@@ -617,6 +617,21 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include borderfiller_RGB.sip
 %Include borderfiller_RGBA.sip
 
+%Include lightresampler_BOOL.sip
+%Include lightresampler_U8.sip
+%Include lightresampler_S16.sip
+%Include lightresampler_U16.sip
+%Include lightresampler_S32.sip
+%Include lightresampler_U32.sip
+%Include lightresampler_FLOAT.sip
+%Include lightresampler_DOUBLE.sip
+%Include lightresampler_RGB.sip
+%Include lightresampler_RGBA.sip
+%Include lightresampler_HSV.sip
+%Include lightresampler_CFLOAT.sip
+%Include lightresampler_CDOUBLE.sip
+%Include lightresampler_POINT3DF.sip
+
 %Include fill.sip
 
 %End
