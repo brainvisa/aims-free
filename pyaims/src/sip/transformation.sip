@@ -150,6 +150,54 @@ Base class for spatial transformations in 3D.
     virtual Point3df transformFloat( float x, float y, float z ) const;
   };
 
+
+  class AffineTransformation3dBase : soma::Transformation3d
+  {
+%TypeHeaderCode
+#include <soma-io/transformation/affinetransformation3d_base.h>
+%End
+
+  public:
+    AffineTransformation3dBase();
+    AffineTransformation3dBase( const soma::AffineTransformation3dBase& other );
+    AffineTransformation3dBase( const vector_FLOAT & mat );
+    AffineTransformation3dBase( const carto::Object mat );
+    virtual ~AffineTransformation3dBase();
+
+    virtual bool operator == ( const soma::AffineTransformation3dBase & ) const;
+
+    soma::AffineTransformation3dBase & operator *= (
+      const soma::AffineTransformation3dBase & trans );
+    // soma::AffineTransformation3dBase operator - () const;
+
+    Point3dd transformVector( const Point3dd & vec ) const;
+    Point3df transformVector( const Point3df & dir ) const;
+    Point3dd transformVector( double x, double y, double z ) const;
+    // Point3df transformVector( float x, float y, float z ) const;
+    Point3dd transformNormal( const Point3dd & dir ) const;
+    Point3df transformNormal( const Point3df & dir ) const;
+    Point3dd transformNormal( double x, double y, double z ) const;
+    // Point3df transformNormal( float x, float y, float z ) const;
+    Point3dd transformUnitNormal( const Point3dd & dir ) const;
+    Point3df transformUnitNormal( const Point3df & dir ) const;
+    Point3dd transformUnitNormal( double x, double y, double z ) const;
+    // Point3df transformUnitNormal( float x, float y, float z ) const;
+
+    bool isIdentity() const;
+    virtual void setToIdentity();
+
+    // soma::AffineTransformation3dBase inverse() const;
+    bool invertible() const;
+    rc_ptr_Transformation3d getInverse() const;
+    virtual void scale( const Point3df& sizeFrom, const Point3df& sizeTo );
+    bool isDirect() const;
+
+    void setTranslation(Point3df trans);
+    vector_FLOAT toVector() const;
+    vector_FLOAT toColumnVector() const;
+    void fromColumnVector( const vector_FLOAT & vec );
+  };
+
 };
 
 
