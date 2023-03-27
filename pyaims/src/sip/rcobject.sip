@@ -180,11 +180,16 @@ class RCObject
     sipType = sipType_soma_Transformation3d;
     *sipCppRet = dynamic_cast<soma::Transformation3d *>( sipCpp );
     // std::cout << "I'm a Transformation3d: " << sipCppRet << std::endl;
-    if( dynamic_cast<aims::AffineTransformation3d *>( sipCpp ) )
+    if( dynamic_cast<soma::AffineTransformation3dBase *>( sipCpp ) )
     {
-      sipType = sipType_aims_AffineTransformation3d;
-      *sipCppRet = dynamic_cast<aims::AffineTransformation3d *>( sipCpp );
-      // std::cout << "I'm an AffineTransformation3d: " << sipCppRet << std::endl;
+      sipType = sipType_soma_AffineTransformation3dBase;
+      *sipCppRet = dynamic_cast<soma::AffineTransformation3dBase *>( sipCpp );
+      if( dynamic_cast<aims::AffineTransformation3d *>( sipCpp ) )
+      {
+        sipType = sipType_aims_AffineTransformation3d;
+        *sipCppRet = dynamic_cast<aims::AffineTransformation3d *>( sipCpp );
+        // std::cout << "I'm an AffineTransformation3d: " << sipCppRet << std::endl;
+      }
     }
     else if( dynamic_cast<aims::TransformationChain3d *>( sipCpp ) )
     {

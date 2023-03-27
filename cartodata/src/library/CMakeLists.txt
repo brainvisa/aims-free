@@ -8,6 +8,7 @@ set( _headers
      io/volumeutilio.h
      io/volumeutilio_d.h
      transformation/lightresampler.h
+     transformation/referential.h
      volume/functional.h
      volume/volume.h
      volume/volume_d.h
@@ -37,6 +38,7 @@ set ( _sources
       io/carto2aimsheadertranslator.cc
       io/somaio_declare.cc
       io/volumeutilio.cc
+      transformation/referential.cc
       volume/volume.cc
       volume/volume_vector.cc
       wip/roi/siteIterator.cc

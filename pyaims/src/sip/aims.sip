@@ -633,5 +633,6 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include lightresampler_POINT3DF.sip
 
 %Include fill.sip
+%Include referential.sip
 
 %End
