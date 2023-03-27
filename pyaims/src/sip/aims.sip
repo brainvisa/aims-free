@@ -76,6 +76,7 @@ typedef int int32_t;
 %Include vector_S16.sip
 %Include vector_U16.sip
 %Include vector_S32.sip
+%Include vector_S64.sip
 %Include vector_U32.sip
 %Include vector_ULONG.sip
 %Include vector_ULONGLONG.sip

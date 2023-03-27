@@ -70,7 +70,7 @@ namespace aims
   PyObject* initNumpyArray( PyObject* sipSelf, PyArray_Descr *numType,
                             int ndim,
                             int* dims, char* buffer, bool xyzorder,
-                            size_t *strides )
+                            long *strides )
   {
     // std::cout << "initNumpyArray from descr: " << numType << std::endl;
 
@@ -174,7 +174,7 @@ namespace aims
 
 
   void resizeNumpyArray( PyObject* sipSelf, int ndim, int* dims, char* buffer,
-    size_t *strides )
+    long *strides )
   {
     if( !PyObject_HasAttrString( sipSelf, "_arrayref" ) )
       return;

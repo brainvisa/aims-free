@@ -153,7 +153,7 @@ VolumeRef<int16_t> Mesher::reshapedVolume( const VolumeRef<int16_t> in_vol )
 
   nvol->fillBorder( -1 );
 
-  vector<size_t> sstrides = in_vol->getStrides();
+  vector<long> sstrides = in_vol->getStrides();
   vector<int> in_strides;
   in_strides.insert( in_strides.end(), sstrides.begin(), sstrides.end() );
   sstrides = nvol->getStrides();

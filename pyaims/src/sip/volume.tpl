@@ -256,7 +256,7 @@ Set a voxel value at given position
 %End
 %#endif%
 
-  vector_SIZE_T getStrides() const;
+  vector_S64 getStrides() const;
   vector_S32 getBorders() const;
 
   SIP_PYOBJECT header() /Factory/;
@@ -273,6 +273,32 @@ The header contains all meta-data.
   {
     std::cerr << "cannot set header ._volref" << std::endl;
   }
+%End
+
+  carto::Referential & referential();
+
+  void flipToOrientation( const std::string & orient );
+  void flipToOrientation( const std::string & orient,
+                          const std::string & force_memory_layout );
+%Docstring
+  volume.flipToOrientation(orient, force_memory_layout="")
+
+  Flip the volume to a given orientation
+
+  The volume voxels will be reordered to match the given orientation.
+
+  If ``force_memory_layout`` is not given, then only the strides will be
+  changed,  and the data block will remain preserverd.
+
+  Orientation is given as a 3 char string: "LPI" (the default orientation
+  in AIMS), "RAS", and combinations of these 6 letters. See
+  https://brainvisa.info/aimsdata/user_doc/coordinates_systems.html and
+  http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm.
+
+  If ``force_memory_layout`` is used, on the contrary, the voxels data block
+  will be reallocated and flipped to match the given orientation. It is
+  also given as a 3 char string, thus it may specify a different memory
+  layout from the one used for indices.
 %End
 
   Volume_%Template1typecode%* operator + ( Volume_%Template1typecode% & )
@@ -573,7 +599,7 @@ The header contains all meta-data.
 %#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS) %
 
   Volume_%Template1typecode%( SIP_PYOBJECT )
-    [(vector_S32, %Template1% *, const vector_SIZE_T *)];
+    [(vector_S32, %Template1% *, const vector_S64 *)];
 %MethodCode
   PyArrayObject *arr = 0;
   if( !PyArray_Check( a0 ) )
@@ -731,7 +757,7 @@ The header contains all meta-data.
     std::vector<int> dims( nd, 1 );
     int inc = 1, start = 0;
 
-    std::vector<size_t> strides( nd, 1 );
+    std::vector<long> strides( nd, 1 );
 
     for( int i=0; i<PyArray_NDIM( arr ); ++i )
     {
@@ -789,7 +815,7 @@ The header contains all meta-data.
 %MethodCode
   std::vector<int> vdims = sipCpp->getSize();
   int i, n= vdims.size();
-  std::vector<size_t> vstrides, strides( n );
+  std::vector<long> vstrides, strides( n );
   std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
 
@@ -820,7 +846,7 @@ The header contains all meta-data.
 %MethodCode
   std::vector<int> vdims = sipCpp->getSize();
   int i, n= vdims.size();
-  std::vector<size_t> vstrides, strides( n );
+  std::vector<long> vstrides, strides( n );
   std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
 
@@ -851,7 +877,7 @@ The header contains all meta-data.
 %MethodCode
   std::vector<int> vdims = sipCpp->getSize();
   int i, n= vdims.size();
-  std::vector<size_t> vstrides, strides( n );
+  std::vector<long> vstrides, strides( n );
   std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
 

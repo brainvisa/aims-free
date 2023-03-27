@@ -762,6 +762,20 @@ namespace carto {
     }
   }
 
+
+  template <typename T>
+  const Referential & Volume<T>::referential() const
+  {
+    return _referential;
+  }
+
+
+  template <typename T>
+  Referential & Volume<T>::referential()
+  {
+    return _referential;
+  }
+
 } // namespace carto
 
 #endif // CARTODATA_VOLUME_VOLUMEBASE_D_INLINE_H

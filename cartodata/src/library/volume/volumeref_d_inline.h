@@ -450,7 +450,7 @@ namespace carto {
 
   template <typename T>
   inline
-  std::vector<size_t> VolumeRef<T>::getStrides() const
+  std::vector<long> VolumeRef<T>::getStrides() const
   {
       return (*this)->getStrides();
   }

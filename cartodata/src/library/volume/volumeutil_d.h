@@ -459,7 +459,7 @@ namespace carto
       size1[0] = size1[1];
       size1[1] = s0;
 
-      std::vector<size_t> strides = v->getStrides();
+      std::vector<long> strides = v->getStrides();
       size_t st0 = strides[0];
       strides[0] = strides[1];
       strides[1] = st0;

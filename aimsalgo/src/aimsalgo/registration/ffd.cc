@@ -845,7 +845,7 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
       rvol->copyHeaderFrom( fvol->header() );
 
       // copy and convert contents
-      vector<size_t> sstrides = rvol->getStrides();
+      vector<long> sstrides = rvol->getStrides();
       vector<int> strides;
       strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
       int x, y, z;
@@ -928,7 +928,7 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
     def.copyHeaderFrom( rvol->header() );
 
     // copy and convert contents
-    vector<size_t> sstrides = rvol->getStrides();
+    vector<long> sstrides = rvol->getStrides();
     vector<int> strides;
     strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
     vector<int> pos;

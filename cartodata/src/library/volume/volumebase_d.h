@@ -48,6 +48,7 @@
 #include <cartobase/object/property.h>
 #include <cartobase/object/propertyfilter.h>
 #include <cartobase/containers/nditerator.h>
+#include <cartobase/uuid/uuid.h>
 //--- soma-io ----------------------------------------------------------------
 #include <soma-io/allocator/allocator.h>
 //--- std --------------------------------------------------------------------
@@ -250,7 +251,7 @@ namespace carto
    **************************************************************************/
   template < typename T >
   Volume< T >::Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer,
-                       const std::vector<size_t> *strides )
+                       const std::vector<long> *strides )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
       _items( sizeX * sizeY * sizeZ * sizeT, buffer ),
       _pos( 4, 0 )
@@ -261,7 +262,7 @@ namespace carto
 
   template < typename T >
   Volume< T >::Volume( const Position4Di & size, T* buffer,
-                       const std::vector<size_t> *strides ):
+                       const std::vector<long> *strides ):
     VolumeProxy< T >( size[0] > 0 ? size[0] : 1,
                       size[1] > 0 ? size[1] : 1,
                       size[2] > 0 ? size[2] : 1,
@@ -278,7 +279,7 @@ namespace carto
 
   template < typename T >
   Volume< T >::Volume( const std::vector<int> & size, T* buffer,
-                       const std::vector<size_t> *strides ):
+                       const std::vector<long> *strides ):
     VolumeProxy< T >( size ),
     _items( (long) Position4Di::size_num_elements( size ), buffer ),
     _pos( 4, 0 )
@@ -304,8 +305,14 @@ namespace carto
           other->allocatorContext().isAllocated() ? other->getSizeT() : 1 ),
       _items( 0U, allocContext ),
       _refvol( other ),
-      _pos( pos.toVector() )
+      _pos( pos.toVector() ),
+      _referential( other->referential() )
   {
+    // use a unique referential UUID, but keep orientation information
+    UUID uuid;
+    uuid.generate();
+    _referential.setUuid( uuid.toString() );
+
     if( other->allocatorContext().isAllocated() )
     {
       size_t bsize = sizeof(T);
@@ -375,8 +382,14 @@ namespace carto
     : VolumeProxy<T>( Position4Di::fixed_size( size ) ),
       _items( 0U, allocContext ),
       _refvol( other ),
-      _pos( Position4Di::fixed_position( pos ) )
+      _pos( Position4Di::fixed_position( pos ) ),
+      _referential( other->referential() )
   {
+    // use a unique referential UUID, but keep orientation information
+    UUID uuid;
+    uuid.generate();
+    _referential.setUuid( uuid.toString() );
+
     if( other->allocatorContext().isAllocated() )
     {
       size_t bsize = sizeof(T);
@@ -445,12 +458,18 @@ namespace carto
   template < typename T >
   Volume< T >::Volume( rc_ptr<Volume<T> > other, const Position & pos,
                        const Position & size, T* buffer,
-                       const std::vector<size_t> & strides )
+                       const std::vector<long> & strides )
     : VolumeProxy<T>( size ),
       _items( (long) Position4Di::size_num_elements( size ), buffer ),
       _refvol( other ),
-      _pos( pos )
+      _pos( pos ),
+      _referential( other->referential() )
   {
+    // use a unique referential UUID, but keep orientation information
+    UUID uuid;
+    uuid.generate();
+    _referential.setUuid( uuid.toString() );
+
     allocate( -1, -1, -1, -1, true, allocatorContext(), &strides );
   }
 
@@ -473,7 +492,8 @@ namespace carto
               ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ),
       _refvol( other.refVolume().get() ?
         new Volume<T>( *other.refVolume() ) : 0 ),
-      _pos( other.posInRefVolume() )
+      _pos( other.posInRefVolume() ),
+      _referential( other.referential() )
   {
     if( _refvol.get() ) // view case: the underlying volume is copied.
     {
@@ -723,12 +743,12 @@ namespace carto
   }
 
   template <typename T> inline
-  std::vector<size_t> Volume<T>::getStrides() const
+  std::vector<long> Volume<T>::getStrides() const
   {
 
     const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& bstrides = _blitz.stride();
     int d, n = VolumeProxy<T>::_size.size();
-    std::vector<size_t> strides( n );
+    std::vector<long> strides( n );
     for (d = 0; d < n; ++d)
         strides[d] = bstrides[d];
 
@@ -883,7 +903,7 @@ namespace carto
                               int oldSizeT,
                               bool allocate,
                               const AllocatorContext& ac,
-                              const std::vector<size_t> *strides )
+                              const std::vector<long> *strides )
   {
     std::vector<int> oldSize(4);
     oldSize[0] = oldSizeX;
@@ -898,7 +918,7 @@ namespace carto
   void Volume< T >::allocate( const std::vector<int> & oldSize,
                               bool allocate,
                               const AllocatorContext& ac,
-                              const std::vector<size_t> *nstrides )
+                              const std::vector<long> *nstrides )
   {
     std::vector<unsigned long long int> strides(Volume<T>::DIM_MAX, 0);
     int i = 0, n = oldSize.size(), nn = VolumeProxy<T>::_size.size();
@@ -1102,7 +1122,7 @@ namespace carto
   {
     if( !allocatorContext().isAllocated() )
     {
-      std::vector<size_t> strides = getStrides();
+      std::vector<long> strides = getStrides();
       allocate( VolumeProxy<T>::getSize(), true, allocatorContext(),
                 &strides );
     }
@@ -1169,7 +1189,7 @@ namespace carto
                                 bool keepcontents,
                                 const AllocatorContext & ac,
                                 bool alloc,
-                                const std::vector<size_t> *strides )
+                                const std::vector<long> *strides )
   {
     int oldx = VolumeProxy<T>::_size[0];
     int oldy = VolumeProxy<T>::_size[1];
@@ -1193,7 +1213,7 @@ namespace carto
                                 bool keepcontents,
                                 const AllocatorContext & ac,
                                 bool alloc,
-                                const std::vector<size_t> *strides )
+                                const std::vector<long> *strides )
   {
     return reallocate( size[0] > 0 ? size[0] : 1,
                        size[1] > 0 ? size[1] : 1,
@@ -1207,7 +1227,7 @@ namespace carto
                                 bool keepcontents,
                                 const AllocatorContext & ac,
                                 bool alloc,
-                                const std::vector<size_t> *strides )
+                                const std::vector<long> *strides )
   {
     std::vector<int> old = VolumeProxy<T>::_size;
 
@@ -1229,6 +1249,51 @@ namespace carto
     else
       allocate( std::vector<int>(1, -1), alloc, ac, strides );
     // emit a signal ?
+  }
+
+
+  template < typename T >
+  void Volume< T >::flipToOrientation( const std::string & orient )
+  {
+    std::cerr << "NOT IMPLEMENTED YET.\n";
+    std::vector<float>transl( 3, 0.f );
+    std::vector<int> dims = this->getSize();
+    std::vector<float> vs = this->getVoxelSize();
+    std::vector<long> strides = this->getStrides();
+    int i;
+    for( i=0; i<3; ++i )
+      transl[i] = dims[i] - 1;
+    carto::rc_ptr<Transformation3d> flipt
+      = referential().toOrientation( orient, transl );
+    soma::AffineTransformation3dBase & flip
+      = static_cast<soma::AffineTransformation3dBase &>( *flipt );
+    AffineTransformation3dBase iflip = flip.inverse();
+    std::vector<long> new_strides = strides;
+    for( i=0; i<3; ++i )
+    {
+      Point3df p( 0.f, 0.f, 0.f );
+      p[i] = 1.;
+      Point3df p1 = iflip.transformVector( p );
+      strides[i] = &at( int( rint( p1[0] ) ), int( rint( p1[1] ) ),
+                        int( rint( p1[2] ) ) )
+        - &at( 0 );
+      std::cout << p1 << ": " << strides[i] << std::endl;
+    }
+    Point3df ndim = flip.transformVector( float( dims[0] ), float( dims[1] ),
+                                          float( dims[2] ) );
+    std::vector<int> new_dims = dims;
+    new_dims[0] = int( rint( fabs( ndim[0] ) ) );
+    new_dims[1] = int( rint( fabs( ndim[1] ) ) );
+    new_dims[2] = int( rint( fabs( ndim[2] ) ) );
+    std::cout << "new dims: " << new_dims[0] << ", " << new_dims[1] << ", " << new_dims[2] << std::endl;
+  }
+
+
+  template < typename T >
+  void Volume< T >::flipToOrientation(
+      const std::string & orient, const std::string & force_memory_layout )
+  {
+    std::cerr << "NOT IMPLEMENTED YET.\n";
   }
 
 //============================================================================

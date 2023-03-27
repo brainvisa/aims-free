@@ -520,7 +520,7 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
                                  comb->getStrides() );
     const_NDIterator<short>  it1( &data1->at( 0 ), data1->getSize(),
                                   data1->getStrides() );
-    vector<unsigned long> n2str = data2->getStrides();
+    vector<long> n2str = data2->getStrides();
     short *n2ptr;
 
     float                    tmp;

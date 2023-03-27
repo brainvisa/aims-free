@@ -226,7 +226,7 @@ namespace carto {
     void setPosInRefVolume(const typename Volume<T>::Position & pos);
     
     std::vector<int> getBorders() const;
-    std::vector<size_t> getStrides() const;
+    std::vector<long> getStrides() const;
 
     //========================================================================
     //   BOOL

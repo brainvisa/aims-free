@@ -36,6 +36,7 @@
 //--- cartodata --------------------------------------------------------------
 #include <cartodata/config/config.h>
 #include <cartodata/volume/volumeproxy.h>
+#include <cartodata/transformation/referential.h>
 //--- soma-io ----------------------------------------------------------------
 #include <soma-io/utilities/allocatedvector.h>
 #include <soma-io/utilities/creator.h>
@@ -223,14 +224,14 @@ namespace carto
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
     Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer,
-            const std::vector<size_t> *strides = 0 );
+            const std::vector<long> *strides = 0 );
     /// Position4Di version
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
     Volume( const Position4Di & size, T* buffer,
-            const std::vector<size_t> *strides = 0 );
+            const std::vector<long> *strides = 0 );
     Volume( const std::vector<int> & size, T* buffer,
-            const std::vector<size_t> *strides = 0 );
+            const std::vector<long> *strides = 0 );
     /// This is the volume view constructor.
     /// Beware not to mix it up with the copy constructor ( it takes a pointer
     /// to volume instead of a volume )
@@ -254,7 +255,7 @@ namespace carto
     Volume( rc_ptr<Volume<T> > other,
             const Position & pos,
             const Position & size,
-            T* buffer, const std::vector<size_t> & strides );
+            T* buffer, const std::vector<long> & strides );
     /// Copy constructor
     /// The copy constructors actually duplicates data buffers. In the case
     /// of a volume view, the underlying volume is also duplicated, so the
@@ -351,17 +352,17 @@ namespace carto
                              int sizeT = 1, bool keepcontents = false,
                              const AllocatorContext& allocatorContext
                              = AllocatorContext(), bool allocate = true,
-                             const std::vector<size_t> *strides = 0 );
+                             const std::vector<long> *strides = 0 );
     virtual void reallocate( const Position4Di & size,
                              bool keepcontents = false,
                              const AllocatorContext& allocatorContext
                              = AllocatorContext(), bool allocate = true,
-                             const std::vector<size_t> *strides = 0 );
+                             const std::vector<long> *strides = 0 );
     virtual void reallocate( const std::vector<int> & size,
                              bool keepcontents = false,
                              const AllocatorContext& allocatorContext
                              = AllocatorContext(), bool allocate = true,
-                             const std::vector<size_t> *strides = 0 );
+                             const std::vector<long> *strides = 0 );
 
     //========================================================================
     //   COPY / VIEW
@@ -457,17 +458,7 @@ namespace carto
 
     /// Get strides for the volume. Strides contain the number of voxels for \n
     /// each dimension including.
-    /// \return std::vector<uint16_t> that contains the borders availables for
-    ///                               the volume.
-    ///         vector[0]: number of voxels for the 0 dimension. Value is
-    ///                    always 1 as no border is defined around each voxel.
-    ///         vector[1]: number of voxels for the 1st dimension, i.e. in a
-    ///                    line including its borders.
-    ///         vector[2]: number of voxels for the 2nde dimension, i.e. in a
-    ///                    slice including its borders.
-    ///         vector[3]: number of voxels for the 3rd dimension, i.e. in a
-    ///                    volume including its borders.
-    std::vector<size_t> getStrides() const;
+    std::vector<long> getStrides() const;
 
     //========================================================================
     //   BOOLEANS / ACCUMULATED VALUES
@@ -496,6 +487,12 @@ namespace carto
         reference volume (if any) using the given value.
     */
     void fillBorder( const T & value );
+
+    /// Referential and orientation information
+    const Referential & referential() const;
+    /// Referential and orientation information
+    Referential & referential();
+
     /** Copy operator.
         Care should be taken regarding the behavior of the copy operator:
         depending on the allocation mode of the copied volume, and whether it
@@ -512,16 +509,40 @@ namespace carto
     */
     Volume<T> & operator= ( const T & value );
 
+    /** Flip the volume to a given orientation
+
+        The volume voxels will be reordered to match the given orientation.
+        Using this method, only the strides will be changed, and the data block
+        will remain preserverd. This is different with the other
+        flipToOrientation() method and the additional force_memory_layout
+        argument.
+
+        Orientation is given as a 3 char string: "LPI" (the default orientation
+        in AIMS), "RAS", and combinations of these 6 letters. See
+        https://brainvisa.info/aimsdata/user_doc/coordinates_systems.html and
+        http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm.
+    */
+    void flipToOrientation( const std::string & orient );
+    /** Flip the volume to a given orientation
+
+        The volume voxels will be reordered to match the given orientation. Contrarily to the other flipToOrientation method, the voxels data block
+        will be reallocated and flipped to match the given orientation. It is
+        also given as a 3 char string, thus it may specify a different memory
+        layout from the one used for indices.
+    */
+    void flipToOrientation( const std::string & orient,
+                            const std::string & force_memory_layout );
+
   protected:
     //========================================================================
     //   PRIVATE UTILS
     //========================================================================
     void allocate( int oldSizeX, int oldSizeY, int oldSizeZ, int oldSizeT,
                    bool allocate, const AllocatorContext& allocatorContext,
-                   const std::vector<size_t> *strides = 0 );
+                   const std::vector<long> *strides = 0 );
     void allocate( const std::vector<int> & oldSize,
                    bool allocate, const AllocatorContext& allocatorContext,
-                   const std::vector<size_t> *strides = 0 );
+                   const std::vector<long> *strides = 0 );
     void slotSizeChanged( const PropertyFilter& propertyFilter );
     void updateItemsBuffer();
 
@@ -533,6 +554,7 @@ namespace carto
     blitz::Array<T, Volume<T>::DIM_MAX>  _blitz;
     rc_ptr<Volume<T> >  _refvol;
     std::vector<int>    _pos;
+    Referential         _referential;
   };
 
 //============================================================================

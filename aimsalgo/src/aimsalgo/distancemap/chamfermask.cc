@@ -470,7 +470,7 @@ static void AimsFillMaskOffset(AimsDistmapMask& mask,
   ASSERT( vol->getSizeT() == 1 );
 
   AimsDistmapMaskPoint *ptr;
-  vector<size_t> strides = vol->getStrides();
+  vector<long> strides = vol->getStrides();
 
   ptr = mask.FirstPoint;
   for (int l=mask.Length;l>0;l--)

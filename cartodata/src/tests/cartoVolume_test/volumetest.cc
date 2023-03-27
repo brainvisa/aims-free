@@ -104,7 +104,7 @@ bool equal( const T & t1, const T & t2 )
 #if 0
 template <typename T>
 inline
-T & volume_at( T* data, const vector<size_t> & strides,
+T & volume_at( T* data, const vector<long> & strides,
                long x, long y, long z, long t )
 {
   return data[ x + y * strides[1] + z * strides[2] + t * strides[3] ];
@@ -112,7 +112,7 @@ T & volume_at( T* data, const vector<size_t> & strides,
 
 template <typename T>
 inline
-T & volume_at( T* data, const vector<size_t> & strides,
+T & volume_at( T* data, const vector<long> & strides,
                const vector<int> & pos )
 {
   size_t offset = 0;
@@ -378,7 +378,7 @@ int main( int /*argc*/, const char** /*argv*/ )
   dims9[0] = 3;
   dims9[1] = 4;
   dims9[2] = 5;
-  vector<size_t> strides9( 3 );
+  vector<long> strides9( 3 );
   strides9[0] = 4 * 5; // stored as z, y, x
   strides9[1] = 5;
   strides9[2] = 1;
@@ -595,7 +595,7 @@ int main( int /*argc*/, const char** /*argv*/ )
     cerr << endl;
   }
   size_t dim, ndim = vol7->getSize().size();
-  vector<size_t> strides = vol7->getStrides();
+  vector<long> strides = vol7->getStrides();
   NDIterator<int16_t> it( &vol7->at( 0 ), vol7->getSize(), strides );
   size_t cnt = 0;
   for( ; !it.ended(); ++it, ++cnt )
@@ -836,7 +836,7 @@ int main( int /*argc*/, const char** /*argv*/ )
   cout << "eumlated builtin accessors (no blitz++) : " << flush;
   cout << "value before: " << vol6->at( 200, 200, 100 ) << endl;
   ck = clock();
-  vector<size_t> strides6 = vol6->getStrides();
+  vector<long> strides6 = vol6->getStrides();
   int16_t *data6 = &vol6->at( 0 );
   VolumeAccessor<int16_t> acc( *vol6 );
 //   for( n=0; n<nn; ++n )

@@ -217,9 +217,9 @@ void Referential::setAxisTransform( AffineTransformation3dBase & tr,
       break;
   }
   mul = from_or * to_or;
-  tr.matrix()( to_ax, from_ax ) = mul;
+  tr.matrix()( from_ax, to_ax ) = mul;
   if( mul < 0 )
-    tr.matrix()( to_ax, 3 ) = tsl;
+    tr.matrix()( from_ax, 3 ) = tsl;
 }
 
 
