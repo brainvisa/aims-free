@@ -779,6 +779,41 @@ int main( int /*argc*/, const char** /*argv*/ )
   }
 
 
+  cout << "-- Test " << ntest++ << ": negative strides test --" << endl;
+  {
+    VolumeRef<float> v1( 10, 15, 20 );
+    v1->fill(0);
+    v1->at( 3, 4, 5 ) = 10;
+    v1->at( 4, 4, 5 ) = 11;
+    v1->at( 5, 4, 5 ) = 12;
+    v1->at( 3, 5, 5 ) = 20;
+    v1->at( 4, 5, 5 ) = 21;
+    vector<long> strides1 = v1->getStrides();
+    long s0 = strides1[0];
+    strides1[0] = -strides1[1];  // x2 = -y1
+    strides1[1] = -strides1[2];  // y2 = -z1
+    strides1[2] = -s0;           // z2 = -x1
+
+    VolumeRef<float> v2(
+      new Volume<float>( 15, 20, 10, 1, &v1->at( 0 ), &strides1 ) );
+
+    if( v1->at( 3, 4, 5 ) != v2->at( 14-4, 19-5, 9-3 ) )
+    {
+      cerr << "negatives strides are erroneous\n";
+      cerr << "v2(" << 14-4 << ", " << 19-5 << ", " << 9-3 << ") is: "
+          << v2->at( 14-4, 19-5, 9-3 ) << ", should be: "
+          << v1->at( 3, 4, 5 ) << endl;
+      result = EXIT_FAILURE;
+    }
+    if( v1->at( 4, 4, 5 ) != v2->at( 14-4, 19-5, 9-4 )
+        || v1->at( 5, 4, 5 ) != v2->at( 14-4, 19-5, 9-5 )
+        || v1->at( 3, 5, 5 ) != v2->at( 14-5, 19-5, 9-3 ))
+    {
+      cerr << "negatives strides are erroneous\n";
+      result = EXIT_FAILURE;
+    }
+  }
+
   cout << "-- Test " << ntest++ << ": speed test --" << endl;
   // allocate a 16 MB volume
   VolumeRef<int16_t>	vol6( 256, 256, 128 );

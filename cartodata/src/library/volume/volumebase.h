@@ -551,6 +551,8 @@ namespace carto
                            bool allocated );
 
     AllocatedVector<T> _items;
+    // in case of negative strides, _start adds an offset to _items 1st element
+    T *_start;
     blitz::Array<T, Volume<T>::DIM_MAX>  _blitz;
     rc_ptr<Volume<T> >  _refvol;
     std::vector<int>    _pos;

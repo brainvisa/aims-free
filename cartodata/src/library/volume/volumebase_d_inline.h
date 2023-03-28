@@ -57,7 +57,7 @@ namespace carto {
 #  else
     const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& bstrides
       = _blitz.stride();
-    return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
+    return _start[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
                    + t * bstrides[3] ];
 #  endif
   }
@@ -99,7 +99,7 @@ namespace carto {
 //                    x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
 //                    + t * bstrides[3])
 //               << std::endl << std::flush;
-    return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
+    return _start[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
                    + t * bstrides[3] ];
 #  endif
   }

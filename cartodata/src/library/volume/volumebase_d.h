@@ -74,6 +74,7 @@ namespace carto
                        bool allocated )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
       _items( 0U, allocatorContext ),
+      _start( &_items[0] ),
       _pos( 4, 0 )
   {
     allocate( -1, -1, -1, -1, allocated, allocatorContext );
@@ -88,6 +89,7 @@ namespace carto
                       size[2] > 0 ? size[2] : 1,
                       size[3] > 0 ? size[3] : 1 ),
     _items( 0U, allocatorContext ),
+    _start( &_items[0] ),
     _pos( 4, 0 )
   {
     allocate( -1, -1, -1, -1, allocated, allocatorContext );
@@ -136,7 +138,7 @@ namespace carto
           dims[i] = 1;
         _blitz.reference
           ( blitz::Array<T,8>
-            ( &_items[0],
+            ( _start,
               dims,
               _refvol->_blitz.stride(),
               blitz::GeneralArrayStorage<8>
@@ -157,6 +159,7 @@ namespace carto
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
       _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
         DataSource::none() ) ),
+      _start( &_items[0] ),
       _pos( bordersize.toVector() )
   {
     constructBorders( bordersize.toVector(), allocatorContext, allocated );
@@ -173,6 +176,7 @@ namespace carto
                       size[3] > 0 ? size[3] : 1 ),
     _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
             DataSource::none() ) ),
+    _start( &_items[0] ),
     _pos( bordersize.toVector() )
   {
     constructBorders( bordersize.toVector(), allocatorContext, allocated );
@@ -186,6 +190,7 @@ namespace carto
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
       _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
         DataSource::none() ) ),
+      _start( &_items[0] ),
       _pos( 4, 0 )
   {
     _pos[0] = bordersize;
@@ -208,6 +213,7 @@ namespace carto
                       size[3] > 0 ? size[3] : 1 ),
     _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
             DataSource::none() ) ),
+    _start( &_items[0] ),
     _pos( 4, 0 )
   {
     _pos[0] = bordersize;
@@ -225,6 +231,7 @@ namespace carto
                        bool allocated ):
     VolumeProxy< T >( size ),
     _items( 0U, allocatorContext ),
+    _start( &_items[0] ),
     _pos( 4, 0 )
   {
     allocate( std::vector<int>( 1, -1 ), allocated, allocatorContext );
@@ -239,6 +246,7 @@ namespace carto
     VolumeProxy< T >( size ),
     _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
             DataSource::none() ) ),
+    _start( &_items[0] ),
     _pos( bordersize )
   {
     while( _pos.size() < 4 )
@@ -254,6 +262,7 @@ namespace carto
                        const std::vector<long> *strides )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
       _items( sizeX * sizeY * sizeZ * sizeT, buffer ),
+      _start( &_items[0] ),
       _pos( 4, 0 )
   {
     allocate( -1, -1, -1, -1, true, allocatorContext(), strides );
@@ -334,7 +343,7 @@ namespace carto
         dims[i] = 1;
       _blitz.reference
         ( blitz::Array<T,Volume<T>::DIM_MAX>
-          ( &_items[0],
+          ( _start,
             dims,
             other->_blitz.stride(),
             blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
@@ -412,7 +421,7 @@ namespace carto
         dims[i] = 1;
       _blitz.reference
         ( blitz::Array<T,Volume<T>::DIM_MAX>
-          ( &_items[0],
+          ( _start,
             dims,
             other->_blitz.stride(),
             blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
@@ -482,10 +491,11 @@ namespace carto
     : RCObject(),
       VolumeProxy< T >( other ),
       _items( other._items ),
+      _start( &_items[0] + ( other._start - &other._items[0] ) ),
 
       // TODO: test blitz ownership / strides
       // _blitz = other.blitz;
-      _blitz( &_items[0],
+      _blitz( _start,
               other._blitz.shape(),
               other._blitz.stride(),
               blitz::GeneralArrayStorage<8>
@@ -519,7 +529,7 @@ namespace carto
           dims[i] = 1;
         _blitz.reference
           ( blitz::Array<T,Volume<T>::DIM_MAX>
-            ( &_items[0],
+            ( _start,
               dims,
               other._blitz.stride(),
               blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
@@ -652,6 +662,7 @@ namespace carto
         }
         else
           _items.allocate( 0U, allocatorContext() );
+        _start = &_items[0];
 
         if ( _refvol->allocatorContext().isAllocated() )
         {
@@ -664,7 +675,7 @@ namespace carto
             dims[i] = 1;
           _blitz.reference
             ( blitz::Array<T,Volume<T>::DIM_MAX>
-              ( &_items[0],
+              ( _start,
                 dims,
                 _refvol->_blitz.stride(),
                 blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
@@ -767,6 +778,7 @@ namespace carto
     this->VolumeProxy< T >::operator=( other );
     // copy buffer, preserving allocator
     _items.copy( other._items, other.allocatorContext() );
+    _start = &_items[0] + ( other._start - &other._items[0] );
 
     // TODO: test blitz ownership / strides
     // _blitz.reference( other.blitz );
@@ -778,7 +790,7 @@ namespace carto
       dims[i] = 1;
     _blitz.reference
         ( blitz::Array<T,Volume<T>::DIM_MAX>
-        ( &_items[0],
+        ( _start,
             dims,
             other._blitz.stride(),
             blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
@@ -920,21 +932,26 @@ namespace carto
                               const AllocatorContext& ac,
                               const std::vector<long> *nstrides )
   {
-    std::vector<unsigned long long int> strides(Volume<T>::DIM_MAX, 0);
+    std::vector<long long int> strides(Volume<T>::DIM_MAX, 0);
     int i = 0, n = oldSize.size(), nn = VolumeProxy<T>::_size.size();
 
     unsigned long long int stride_max = 0;
     unsigned long long int total_len = 0;
+    unsigned long long absstride = 0;
+    unsigned long long int offset = 0;
 
     if( nstrides )
     {
       for( ; i<std::min(nstrides->size(), size_t(nn)); ++i )
       {
         strides[i] = (*nstrides)[i];
-        if( strides[i] > stride_max )
-          stride_max = strides[i];
-        if( strides[i] * VolumeProxy<T>::_size[i] > total_len )
-          total_len = strides[i] * VolumeProxy<T>::_size[i];
+        absstride = std::abs( strides[i] );
+        if( absstride > stride_max )
+          stride_max = absstride;
+        if( absstride * VolumeProxy<T>::_size[i] > total_len )
+          total_len = absstride * VolumeProxy<T>::_size[i];
+        if( strides[i] < 0 )
+          offset += absstride * ( VolumeProxy<T>::_size[i] - 1 );
       }
     }
 
@@ -1051,6 +1068,8 @@ namespace carto
 
     if( allocate )
     {
+      _start = &_items[0] + offset;
+
       // TODO: test blitz ownership / strides
       /*
       std::cout << "alloc blitz: " << VolumeProxy<T>::_size[0] << ", "
@@ -1065,7 +1084,7 @@ namespace carto
         dims[i] = 1;
       if( nstrides)
         _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
-                          ( &_items[0],
+                          ( _start,
                             dims,
                             bstrides,
                             blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
@@ -1073,7 +1092,7 @@ namespace carto
                               true ) ) );
       else
         _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
-                          ( &_items[0],
+                          ( _start,
                             dims,
                             blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
                             ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ),
@@ -1092,6 +1111,7 @@ namespace carto
     }
     else
     {
+      _start = (T*)( 0 ) + offset;
       blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
       for( i=0; i<nn; ++i )
         dims[i] = VolumeProxy<T>::_size[i];
@@ -1255,11 +1275,12 @@ namespace carto
   template < typename T >
   void Volume< T >::flipToOrientation( const std::string & orient )
   {
-    std::cerr << "NOT IMPLEMENTED YET.\n";
     std::vector<float>transl( 3, 0.f );
-    std::vector<int> dims = this->getSize();
+    blitz::TinyVector<int, Volume<T>::DIM_MAX> dims = _blitz.shape();
     std::vector<float> vs = this->getVoxelSize();
-    std::vector<long> strides = this->getStrides();
+    blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>
+      strides = _blitz.stride();
+
     int i;
     for( i=0; i<3; ++i )
       transl[i] = dims[i] - 1;
@@ -1268,24 +1289,44 @@ namespace carto
     soma::AffineTransformation3dBase & flip
       = static_cast<soma::AffineTransformation3dBase &>( *flipt );
     AffineTransformation3dBase iflip = flip.inverse();
-    std::vector<long> new_strides = strides;
+    blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>
+      new_strides = strides;
+    long long offset = 0;
     for( i=0; i<3; ++i )
     {
       Point3df p( 0.f, 0.f, 0.f );
       p[i] = 1.;
       Point3df p1 = iflip.transformVector( p );
-      strides[i] = &at( int( rint( p1[0] ) ), int( rint( p1[1] ) ),
+      new_strides[i] = &at( int( rint( p1[0] ) ), int( rint( p1[1] ) ),
                         int( rint( p1[2] ) ) )
         - &at( 0 );
-      std::cout << p1 << ": " << strides[i] << std::endl;
     }
     Point3df ndim = flip.transformVector( float( dims[0] ), float( dims[1] ),
                                           float( dims[2] ) );
-    std::vector<int> new_dims = dims;
-    new_dims[0] = int( rint( fabs( ndim[0] ) ) );
-    new_dims[1] = int( rint( fabs( ndim[1] ) ) );
-    new_dims[2] = int( rint( fabs( ndim[2] ) ) );
-    std::cout << "new dims: " << new_dims[0] << ", " << new_dims[1] << ", " << new_dims[2] << std::endl;
+    blitz::TinyVector<int, Volume<T>::DIM_MAX> new_bdims = dims;
+    std::vector<int> new_dims = this->getSize();
+    new_bdims[0] = int( rint( fabs( ndim[0] ) ) );
+    new_bdims[1] = int( rint( fabs( ndim[1] ) ) );
+    new_bdims[2] = int( rint( fabs( ndim[2] ) ) );
+    new_dims[0] = new_bdims[0];
+    new_dims[1] = new_bdims[1];
+    new_dims[2] = new_bdims[2];
+    // std::cout << "new dims: " << new_dims[0] << ", " << new_dims[1] << ", " << new_dims[2] << std::endl;
+    for( i=0; i<3; ++i )
+      if( new_strides[i] < 0 )
+        offset += -new_strides[i] * ( new_dims[i] - 1 );
+
+    this->blockSignals( true );
+    this->header().setProperty( "volume_dimension", new_dims );
+    _start = &_items[0] + offset;
+    _blitz.reference(
+      blitz::Array<T,Volume<T>::DIM_MAX>(
+        _start,
+        new_bdims,
+        new_strides,
+        blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+        ( blitz::shape( 0, 1, 2, 3, 5, 6, 7, 8 ), true ) ) );
+    this->blockSignals( false );
   }
 
 
