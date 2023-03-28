@@ -1330,11 +1330,11 @@ namespace carto
     this->blockSignals( false );
 
     // update referential info, generate a new ID
+    _referential.setOrientation( orient );
     if( orient == "LPI" ) // initial LPI orientation
       _referential.setUuid( _referential.lpiReferentialUuid() );
     else
     {
-      _referential.setOrientation( orient );
       UUID uuid;
       uuid.generate();
       _referential.setUuid( uuid.toString() );
@@ -1359,16 +1359,31 @@ namespace carto
     soma::AffineTransformation3dBase & flip
       = static_cast<soma::AffineTransformation3dBase &>( *flipt );
 
-    bool change_layout = true;
-//     ( force_memory_layout != this->referential().orientationStr() );
+    bool change_layout = false;
+    Point3df ndim = flip.transformVector( float( dims[0] ), float( dims[1] ),
+                                          float( dims[2] ) );
+    new_dims[0] = int( rint( fabs( ndim[0] ) ) );
+    new_dims[1] = int( rint( fabs( ndim[1] ) ) );
+    new_dims[2] = int( rint( fabs( ndim[2] ) ) );
+    long cstride = 1;
+
+    AffineTransformation3dBase iflip = flip.inverse();
+    for( i=0; i<3; ++i )
+    {
+      Point3df p0( 0, 0, 0 );
+      p0[i] = 1;
+      p0 = iflip.transformVector( p0 );
+      long st = &this->at( int( rint( p0[0] ) ), int( rint( p0[1] ) ), int( rint( p0[2] ) ) ) - &this->at( 0 );
+      if( st != cstride )
+      {
+        change_layout = true;
+        break;
+      }
+      cstride *= new_dims[i];
+    }
 
     if( change_layout )
     {
-      Point3df ndim = flip.transformVector( float( dims[0] ), float( dims[1] ),
-                                            float( dims[2] ) );
-      new_dims[0] = int( rint( fabs( ndim[0] ) ) );
-      new_dims[1] = int( rint( fabs( ndim[1] ) ) );
-      new_dims[2] = int( rint( fabs( ndim[2] ) ) );
 
       // allocate a new Volume before copying it into this
       VolumeRef<T> copy( new_dims );
@@ -1400,15 +1415,12 @@ namespace carto
       else
         ++pos[it.line_direction()];
       dstride = &copy->at( pos ) - dp;
-      std::cout << "copy dim: " << new_dims[0] << ", " << new_dims[1] << ", " << new_dims[2] << std::endl;
-      std::cout << "dstride " << it.line_direction() << ": " << dstride << std::endl;
 
       for( ; !it.ended(); ++it )
       {
         p = &*it;
         pos = it.position();
         p0 = flip.transform( float( pos[0] ), pos[1], pos[2] );
-        std::cout << "pos: " << pos[0] << ", " << pos[1] << ", " << pos[2] << " -> " << p0 << std::endl;
         pos[0] = int( rint( p0[0] ) );
         pos[1] = int( rint( p0[1] ) );
         pos[2] = int( rint( p0[2] ) );
@@ -1418,7 +1430,6 @@ namespace carto
             it.inc_line_ptr( p ), dp += dstride )
           *dp = *p;
       }
-      std::cout << "data copied to copy\n";
 
       // copy back data to this
       *this = *copy;
