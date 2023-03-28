@@ -45,6 +45,7 @@ namespace aims
                             long *strides = 0 );
   void resizeNumpyArray( PyObject*, int ndim, int* dims, char* buffer,
                          long *strides = 0 );
+  void releaseNumpyArray( PyObject* );
 }
 
 #endif

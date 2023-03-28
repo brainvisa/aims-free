@@ -278,6 +278,11 @@ The header contains all meta-data.
   carto::Referential & referential();
 
   void flipToOrientation( const std::string & orient );
+%MethodCode
+  sipCpp->flipToOrientation( *a0 );
+  aims::releaseNumpyArray( sipSelf );
+%End
+
   void flipToOrientation( const std::string & orient,
                           const std::string & force_memory_layout );
 %Docstring
@@ -299,6 +304,10 @@ The header contains all meta-data.
   will be reallocated and flipped to match the given orientation. It is
   also given as a 3 char string, thus it may specify a different memory
   layout from the one used for indices.
+%End
+%MethodCode
+  sipCpp->flipToOrientation( *a0, *a1 );
+  aims::releaseNumpyArray( sipSelf );
 %End
 
   Volume_%Template1typecode%* operator + ( Volume_%Template1typecode% & )

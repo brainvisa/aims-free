@@ -231,5 +231,13 @@ namespace aims
     }
   }
 
+
+  void releaseNumpyArray( PyObject* sipSelf )
+  {
+    if( !PyObject_HasAttrString( sipSelf, "_arrayref" ) )
+      return;
+    PyObject_DelAttrString( sipSelf, "_arrayref" );
+  }
+
 }
 

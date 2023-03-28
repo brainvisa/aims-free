@@ -797,6 +797,7 @@ namespace carto
             ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
     _refvol = other._refvol;
     _pos = other._pos;
+    _referential = other._referential;
 
     initialize();
 
@@ -1327,6 +1328,17 @@ namespace carto
         blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
         ( blitz::shape( 0, 1, 2, 3, 5, 6, 7, 8 ), true ) ) );
     this->blockSignals( false );
+
+    // update referential info, generate a new ID
+    if( orient == "LPI" ) // initial LPI orientation
+      _referential.setUuid( _referential.lpiReferentialUuid() );
+    else
+    {
+      _referential.setOrientation( orient );
+      UUID uuid;
+      uuid.generate();
+      _referential.setUuid( uuid.toString() );
+    }
   }
 
 
@@ -1334,7 +1346,86 @@ namespace carto
   void Volume< T >::flipToOrientation(
       const std::string & orient, const std::string & force_memory_layout )
   {
-    std::cerr << "NOT IMPLEMENTED YET.\n";
+    // calculate strides and dims for asked memory layout
+    std::vector<int> dims = this->getSize();
+    std::vector<int> new_dims = dims;
+    std::vector<float>transl( 3, 0.f );
+    int i;
+    for( i=0; i<3; ++i )
+      transl[i] = dims[i] - 1;
+
+    carto::rc_ptr<Transformation3d> flipt
+      = referential().toOrientation( force_memory_layout, transl );
+    soma::AffineTransformation3dBase & flip
+      = static_cast<soma::AffineTransformation3dBase &>( *flipt );
+
+    bool change_layout = true;
+//     ( force_memory_layout != this->referential().orientationStr() );
+
+    if( change_layout )
+    {
+      Point3df ndim = flip.transformVector( float( dims[0] ), float( dims[1] ),
+                                            float( dims[2] ) );
+      new_dims[0] = int( rint( fabs( ndim[0] ) ) );
+      new_dims[1] = int( rint( fabs( ndim[1] ) ) );
+      new_dims[2] = int( rint( fabs( ndim[2] ) ) );
+
+      // allocate a new Volume before copying it into this
+      VolumeRef<T> copy( new_dims );
+      copy->copyHeaderFrom( this->header() );
+      copy->referential().setOrientation( force_memory_layout );
+      copy->referential().setLpiReferential( this->referential().uuid() );
+
+      // copy data in the new layout
+      line_NDIterator<T> it( &this->at( 0 ), this->getSize(),
+                             this->getStrides(), true );
+      Point3df tp;
+      T* p, *pp, *dp;
+      long dstride = 0;
+      std::vector<int> pos = it.position();
+      Point3df p0 = flip.transform( 0.f, 0.f, 0.f );
+      pos[0] = int( rint( p0[0] ) );
+      pos[1] = int( rint( p0[1] ) );
+      pos[2] = int( rint( p0[2] ) );
+      dp = &copy->at( pos );
+      if( it.line_direction() < 3 )
+      {
+        p0 = Point3df( 0, 0, 0 );
+        p0[it.line_direction()] = 1;
+        p0 = flip.transform( p0 );
+        pos[0] = int( rint( p0[0] ) );
+        pos[1] = int( rint( p0[1] ) );
+        pos[2] = int( rint( p0[2] ) );
+      }
+      else
+        ++pos[it.line_direction()];
+      dstride = &copy->at( pos ) - dp;
+      std::cout << "copy dim: " << new_dims[0] << ", " << new_dims[1] << ", " << new_dims[2] << std::endl;
+      std::cout << "dstride " << it.line_direction() << ": " << dstride << std::endl;
+
+      for( ; !it.ended(); ++it )
+      {
+        p = &*it;
+        pos = it.position();
+        p0 = flip.transform( float( pos[0] ), pos[1], pos[2] );
+        std::cout << "pos: " << pos[0] << ", " << pos[1] << ", " << pos[2] << " -> " << p0 << std::endl;
+        pos[0] = int( rint( p0[0] ) );
+        pos[1] = int( rint( p0[1] ) );
+        pos[2] = int( rint( p0[2] ) );
+        dp = &copy->at( pos );
+
+        for( pp=p + it.line_length(); p!=pp;
+            it.inc_line_ptr( p ), dp += dstride )
+          *dp = *p;
+      }
+      std::cout << "data copied to copy\n";
+
+      // copy back data to this
+      *this = *copy;
+    }
+
+    // then flip strides to the wanted orientation
+    this->flipToOrientation( orient );
   }
 
 //============================================================================
