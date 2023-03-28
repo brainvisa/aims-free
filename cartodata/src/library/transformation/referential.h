@@ -60,6 +60,8 @@ namespace carto
     Referential( Object ref );
     ~Referential();
 
+    Referential & operator = ( const Referential & ref );
+
     std::string uuid() const { return _uuid; }
     std::string orientationStr() const;
     std::vector<int> axesOrientation() const { return _orientation; }
@@ -76,14 +78,15 @@ namespace carto
     void setUuid( const std::string & uuid );
     void setOrientation( const std::string & orient );
     void setOrientation( const std::vector<int> & orient );
-    void setLPIReferential( const std::string & lpi_uuid );
+    void setLpiReferential( const std::string & lpi_uuid );
 
     static std::string orientationStr( Orientation orient );
     static Orientation orientationCode( const std::string & orient );
     static std::vector<int> orientationVector( const std::string & orient );
     static void setAxisTransform( AffineTransformation3dBase & tr,
                                   Orientation from_code, Orientation code,
-                                  float transl = 0.f );
+                                  const std::vector<float> & transl
+                                  = std::vector<float>() );
     Object header() const { return _header; }
 
   private:

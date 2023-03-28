@@ -37,7 +37,7 @@ namespace carto
     void setUuid( const std::string & uuid );
     void setOrientation( const std::string & orient );
     void setOrientation( const vector_S32 & orient );
-    void setLPIReferential( const std::string & lpi_uuid );
+    void setLpiReferential( const std::string & lpi_uuid );
 
     static std::string orientationStr( carto::Referential::Orientation orient );
     static carto::Referential::Orientation orientationCode( const std::string & orient );
@@ -45,7 +45,7 @@ namespace carto
     static void setAxisTransform( soma::AffineTransformation3dBase & tr,
                                   carto::Referential::Orientation from_code,
                                   carto::Referential::Orientation code,
-                                  float tsl = 0.f );
+                                  const vector_FLOAT & tsl = vector_FLOAT() );
     carto::Object header() const;
   };
 

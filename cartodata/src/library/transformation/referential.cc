@@ -87,6 +87,25 @@ Referential::~Referential()
 }
 
 
+Referential & Referential::operator = ( const Referential & ref )
+{
+//   _uuid = ref._uuid;
+//   _lpi_uuid = ref._lpi_uuid;
+//   _orientation = ref._orientation;
+
+  _header = Object::value( PropertySet() );
+
+  PropertySet & ps = _header->value<PropertySet>();
+  ps.addBuiltinProperty( "uuid", _uuid );
+  ps.addBuiltinProperty( "lpi_uuid", _lpi_uuid );
+  ps.addBuiltinProperty( "axes_orientation", _orientation );
+
+  ps.copyProperties( ref.header() );
+
+  return *this;
+}
+
+
 string Referential::orientationStr( Orientation orient )
 {
   static map<Orientation, string> orient_map;
@@ -153,7 +172,7 @@ vector<int> Referential::orientationVector( const std::string & orient )
 
 void Referential::setAxisTransform( AffineTransformation3dBase & tr,
                                     Orientation from_code, Orientation code,
-                                    float tsl )
+                                    const std::vector<float> & tsl )
 {
   int from_ax = 0, to_ax = 0;
   float from_or = 1, to_or = 1, mul = 1;
@@ -218,8 +237,8 @@ void Referential::setAxisTransform( AffineTransformation3dBase & tr,
   }
   mul = from_or * to_or;
   tr.matrix()( from_ax, to_ax ) = mul;
-  if( mul < 0 )
-    tr.matrix()( from_ax, 3 ) = tsl;
+  if( mul < 0 && !tsl.empty() )
+    tr.matrix()( from_ax, 3 ) = tsl[to_ax];
 }
 
 
@@ -264,11 +283,8 @@ Referential::toOrientation( const vector<int> & orient,
   for( axis=0; axis<3; ++axis )
   {
     Orientation code = Orientation( orient[axis] );
-    float tsl = 0.f;
-    if( transl.size() > axis )
-      tsl = transl[axis];
     Orientation from_code = Orientation( _orientation[axis] );
-    setAxisTransform( *tr, from_code, code, tsl );
+    setAxisTransform( *tr, from_code, code, transl );
   }
 
   return trans;
@@ -306,7 +322,7 @@ void Referential::setOrientation( const std::vector<int> & orient )
 }
 
 
-void Referential::setLPIReferential( const std::string & lpi_uuid )
+void Referential::setLpiReferential( const std::string & lpi_uuid )
 {
   _lpi_uuid = lpi_uuid;
 }
