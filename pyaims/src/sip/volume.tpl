@@ -310,6 +310,8 @@ The header contains all meta-data.
   aims::releaseNumpyArray( sipSelf );
 %End
 
+  carto::Object reorientedHeader( const std::string & orient ) const;
+
   Volume_%Template1typecode%* operator + ( Volume_%Template1typecode% & )
     /Factory, ReleaseGIL/;
 %MethodCode

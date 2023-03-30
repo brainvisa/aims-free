@@ -206,6 +206,20 @@ namespace soma
     localMsg( std::string(" -> ") + ( withborders ? "with borders" : "without borders" ) );
     withborders = withborders; // compilation warning
 
+    // handle internal orientation: go back to LPI
+    const Referential & ref = obj.referential();
+    std::vector<float> osz( obj.getSize().begin(), obj.getSize().end() );
+    for( dim=0; dim<osz.size(); ++dim )
+      --osz[dim];
+    rc_ptr<Transformation3d> tolpir = ref.toOrientation( "LPI", osz );
+    AffineTransformation3dBase & tolpi
+      = static_cast<AffineTransformation3dBase &>( *tolpir );
+    AffineTransformation3dBase itolpi = tolpi.inverse();
+
+    std::vector<int> lpi_size = tolpi.transformVector( size );
+    for( dim=0; dim<lpi_size.size(); ++dim )
+      lpi_size[dim] = std::abs( lpi_size[dim] );
+
     //=== header info ========================================================
     localMsg( "setting header..." );
     if( !options )
@@ -215,18 +229,14 @@ namespace soma
     if( !dsi->header() )
     {
       dsi->header() = carto::Object::value( carto::PropertySet() );
-      dsi->header()->copyProperties(
-        carto::Object::reference( obj.header() ) );
-    }
-    dsi->header()->setProperty( "volume_dimension", size );
-    dsi->header()->setProperty( "sizeX", size[ 0 ] );
-    dsi->header()->setProperty( "sizeY", size[ 1 ] );
-    dsi->header()->setProperty( "sizeZ", size[ 2 ] );
-    dsi->header()->setProperty( "sizeT", size[ 3 ] );
-    if( !dsi->header()->hasProperty( "voxel_size" ) )
-    {
-      std::vector<float> voxel_size( 4, 1. );
-      dsi->header()->setProperty( "voxel_size", voxel_size );
+      Object lpi_header = obj.reorientedHeader( "LPI" );
+      dsi->header()->copyProperties( lpi_header );
+      std::vector<int> size;
+      lpi_header->getProperty( "volume_dimension", size );
+      dsi->header()->setProperty( "sizeX", size[0] );
+      dsi->header()->setProperty( "sizeY", size[1] );
+      dsi->header()->setProperty( "sizeZ", size[2] );
+      dsi->header()->setProperty( "sizeT", size[3] );
     }
 
 
@@ -280,9 +290,28 @@ namespace soma
     }
     
     this->filterProperties(dsi->header(), options);
+
+    // handle internal orientation: go back to LPI
+    std::vector<int> opos = position;
+    std::vector<int> oview = view;
+    const T* start = &obj(0);
+    {
+      opos = tolpi.transformVector( position );
+      Point3di pi = itolpi.transform( 0, 0, 0 );
+      start = &obj( pi );
+      oview = tolpi.transformVector( view );
+      for( dim=0; dim<oview.size(); ++dim )
+        oview[dim] = std::abs( oview[dim] );
+      pi = itolpi.transformVector( 1, 0, 0 );
+      strides[0] = &obj.at( pi ) - &obj.at( 0 );
+      pi = itolpi.transformVector( 0, 1, 0 );
+      strides[1] = &obj.at( pi ) - &obj.at( 0 );
+      pi = itolpi.transformVector( 0, 0, 1 );
+      strides[2] = &obj.at( pi ) - &obj.at( 0 );
+    }
+
     
-    
-    *dsi = _imw->writeHeader( *dsi, (T*) &obj(0,0,0,0), position, view,
+    *dsi = _imw->writeHeader( *dsi, start, opos, oview,
                               strides, options );
 
     //=== sanity check =======================================================
@@ -302,7 +331,7 @@ namespace soma
       {
         if( file_sz.size() <= dim )
           file_sz.push_back( 1 );
-          if( position[dim] + view[dim] > file_sz[dim] )
+          if( opos[dim] + oview[dim] > file_sz[dim] )
         {
           localMsg( "view is larger than the volume." );
           throw carto::format_error( "view is larger than the volume." );
@@ -314,9 +343,9 @@ namespace soma
     localMsg( "writing volume..." );
     const T* data = 0;
     if( parent1 || obj.allocatorContext().isAllocated() )
-      data = reinterpret_cast<const T*>( &obj(0,0,0,0) );
+      data = start;
     // in unallocated case, data is null; this is OK.
-    _imw->write( data, *dsi, position, view, strides, options );
+    _imw->write( data, *dsi, opos, oview, strides, options );
 //     {
 // //       if( !withborders ) {
 //         _imw->write( (T*) &obj(0,0,0,0), *dsi, position, view, strides,

@@ -1278,7 +1278,6 @@ namespace carto
   {
     std::vector<float>transl( 3, 0.f );
     blitz::TinyVector<int, Volume<T>::DIM_MAX> dims = _blitz.shape();
-    std::vector<float> vs = this->getVoxelSize();
     blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>
       strides = _blitz.stride();
 
@@ -1317,8 +1316,16 @@ namespace carto
       if( new_strides[i] < 0 )
         offset += -new_strides[i] * ( new_dims[i] - 1 );
 
+    Object reor_hdr = reorientedHeader( orient );
+
     this->blockSignals( true );
-    this->header().setProperty( "volume_dimension", new_dims );
+
+    if( this->header().hasProperty( "referential" ) )
+      this->header().removeProperty( "referential" );
+
+    this->header().copyProperties( reor_hdr );
+
+    // this->header().setProperty( "volume_dimension", new_dims );
     _start = &_items[0] + offset;
     _blitz.reference(
       blitz::Array<T,Volume<T>::DIM_MAX>(
@@ -1419,11 +1426,7 @@ namespace carto
       for( ; !it.ended(); ++it )
       {
         p = &*it;
-        pos = it.position();
-        p0 = flip.transform( float( pos[0] ), pos[1], pos[2] );
-        pos[0] = int( rint( p0[0] ) );
-        pos[1] = int( rint( p0[1] ) );
-        pos[2] = int( rint( p0[2] ) );
+        pos = flip.transform( it.position() );
         dp = &copy->at( pos );
 
         for( pp=p + it.line_length(); p!=pp;
@@ -1437,6 +1440,91 @@ namespace carto
 
     // then flip strides to the wanted orientation
     this->flipToOrientation( orient );
+  }
+
+
+  template <typename T>
+  Object Volume<T>::reorientedHeader( const std::string & orient ) const
+  {
+    Object rhdr = Object::value( PropertySet() );
+    const PropertySet & hdr = this->header();
+
+    rhdr->copyProperties( Object::reference( hdr ) );
+
+    std::vector<float>transl( 3, 0.f );
+    std::vector<int> dims = this->getSize();
+
+    int i, n;
+    for( i=0; i<3; ++i )
+      transl[i] = dims[i] - 1;
+    carto::rc_ptr<Transformation3d> flipt
+      = referential().toOrientation( orient, transl );
+    soma::AffineTransformation3dBase & flip
+      = static_cast<soma::AffineTransformation3dBase &>( *flipt );
+    AffineTransformation3dBase iflip = flip.inverse();
+
+    dims = flip.transformVector( dims );
+    for( i=0, n=dims.size(); i<n; ++i )
+      dims[i] = std::abs( dims[i] );
+    rhdr->setProperty( "volume_dimension", dims );
+    if( rhdr->hasProperty( "sizeX" ) )
+      rhdr->removeProperty( "sizeX" );
+    if( rhdr->hasProperty( "sizeY" ) )
+      rhdr->removeProperty( "sizeY" );
+    if( rhdr->hasProperty( "sizeZ" ) )
+      rhdr->removeProperty( "sizeZ" );
+    if( rhdr->hasProperty( "sizeT" ) )
+      rhdr->removeProperty( "sizeT" );
+
+    std::vector<float> vs = this->getVoxelSize();
+    std::vector<float> rvs = flip.transformVector( vs );
+    for( i=0, n=rvs.size(); i<n; ++i )
+      rvs[i] = std::abs( rvs[i] );
+    rhdr->setProperty( "voxel_size", rvs );
+
+    if( hdr.hasProperty( "transformations" ) )
+    {
+      AffineTransformation3dBase mvs;
+      AffineTransformation3dBase rmvs;
+      mvs.matrix()(0, 0) = vs[0];
+      mvs.matrix()(1, 1) = vs[1];
+      mvs.matrix()(2, 2) = vs[2];
+      rmvs.matrix()(0, 0) = 1.f / rvs[0];
+      rmvs.matrix()(1, 1) = 1.f / rvs[1];
+      rmvs.matrix()(2, 2) = 1.f / rvs[2];
+      // affine in mm
+      AffineTransformation3dBase iflipmm = mvs * iflip * rmvs;
+
+      std::vector<std::vector<float> > rtrans;
+      Object transs = hdr.getProperty( "transformations" );
+      rtrans.reserve( transs->size() );
+      Object tit = transs->objectIterator();
+      for(; tit->isValid(); tit->next() )
+      {
+        AffineTransformation3dBase trans( tit->currentValue() );
+        trans = trans * iflipmm;
+        rtrans.push_back( trans.toVector() );
+      }
+      rhdr->setProperty( "transformations", rtrans );
+    }
+
+    if( hdr.hasProperty( "storage_to_memory" ) )
+    {
+      AffineTransformation3dBase
+        s2m( hdr.getProperty( "storage_to_memory" ) );
+      s2m = flip * s2m;
+      rhdr->setProperty( "storage_to_memory", s2m.toVector() );
+    }
+
+    if( rhdr->hasProperty( "referential" ) )
+    {
+      if( orient == "LPI" ) // initial LPI orientation
+        rhdr->setProperty( "referential", _referential.lpiReferentialUuid() );
+      else
+        rhdr->removeProperty( "referential" );
+    }
+
+    return rhdr;
   }
 
 //============================================================================

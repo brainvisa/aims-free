@@ -532,6 +532,8 @@ namespace carto
     */
     void flipToOrientation( const std::string & orient,
                             const std::string & force_memory_layout );
+    /// used by flipToOrientation(), reorient header information
+    Object reorientedHeader( const std::string & orient ) const;
 
   protected:
     //========================================================================
