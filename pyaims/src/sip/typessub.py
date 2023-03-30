@@ -711,7 +711,7 @@ typessub = {'bool':
             },
 
             'Point3dd':
-           {'typecode': 'POINT3DD',
+            {'typecode': 'POINT3DD',
                'pyFromC': 'pyaimsConvertFrom_AimsVector',
                'CFromPy': 'pyaimsConvertTo_AimsVector<double,3>',
                'castFromSip': '',
@@ -740,6 +740,37 @@ typessub = {'bool':
                '#endif',
                'module': 'aims',
                'testPyType': 'pyaimsCheck_AimsVector<double,3>',
+               'compareElement': '',
+            },
+
+            'Point3di':
+            {'typecode': 'POINT3DI',
+               'pyFromC': 'pyaimsConvertFrom_AimsVector',
+               'CFromPy': 'pyaimsConvertTo_AimsVector<int32_t,3>',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'new': 'new Point3di',
+               'defNumpyBindings': '#define PYAIMS_NUMPY_BINDINGS',
+               'NumType': 'NPY_AimsVector<int32_t, 3>()',
+               'NumType_Descr': 'NPY_AimsVector_Descr<int32_t, 3>()',
+               'defNumpyIsSubArray': '#define PYAIMS_NPY_IS_SUBARRAY',
+               'PyType': 'Point3di',
+               'sipClass': 'AimsVector_S32_3',
+               'typeinclude': '#include <pyaims/vector/vector.h>',
+               'sipinclude': ''
+               '#include <pyaims/vector/sipvector.h>\n'
+               '#ifndef PYAIMS_WRAPPER_AIMSVECTOR_S32_3\n'
+               '#define PYAIMS_WRAPPER_AIMSVECTOR_S32_3\n'
+               'template <> inline const sipTypeDef*\n'
+               'sipType_AimsVector<int32_t,3>()\n'
+               '{ return sipFindType( "AimsVector_S32_3" ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsCheck_AimsVector<int32_t,3>',
                'compareElement': '',
             },
 

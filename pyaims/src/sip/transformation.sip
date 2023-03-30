@@ -33,6 +33,12 @@ a test would be difficult to implement or expensive to run.
 
     carto::Object header();
     void setHeader( carto::Object ph );
+    virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const = 0;
+    virtual vector_FLOAT transform( const vector_FLOAT & pos ) const;
+    virtual vector_S32 transform( const vector_S32 & pos ) const;
+    virtual vector_DOUBLE transformVector( const vector_DOUBLE & pos ) const;
+    virtual vector_FLOAT transformVector( const vector_FLOAT & pos ) const;
+    virtual vector_S32 transformVector( const vector_S32 & pos ) const;
 
   protected:
     Transformation();
@@ -148,6 +154,7 @@ Base class for spatial transformations in 3D.
     virtual Point3df transformPoint3df( const Point3df & dir ) const;
     virtual Point3d transformPoint3d( const Point3d & p ) const;
     virtual Point3df transformFloat( float x, float y, float z ) const;
+    virtual Point3di transformInt( int x, int y, int z ) const;
   };
 
 
@@ -174,6 +181,7 @@ Base class for spatial transformations in 3D.
     Point3df transformVector( const Point3df & dir ) const;
     Point3dd transformVector( double x, double y, double z ) const;
     // Point3df transformVector( float x, float y, float z ) const;
+    // Point3di transformVector( int x, int y, int z ) const;
     Point3dd transformNormal( const Point3dd & dir ) const;
     Point3df transformNormal( const Point3df & dir ) const;
     Point3dd transformNormal( double x, double y, double z ) const;
