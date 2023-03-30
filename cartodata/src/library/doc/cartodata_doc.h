@@ -256,6 +256,69 @@ namespace carto
   line_NDIterator                 |  10.7   | 10.4   |   10.6    |  11.
 
 
+  \section volume_orient Volumes axes orientation
+
+  A volume is not just an array. Each index in the array corresponds to a direction in space. By default, the first axis (X) corresponds to right->left head orientation, the second (Y) is anterior -> posterior, the third (Z) is superior -> inferior. Remaining axes are free of interpretation.
+
+  Axes orientation has a code using 3 letters for the initials of the axes directions: see [this AIMS document](../../aimsdata/user_doc/coordinates_systems.html) and http://www.grahamwideman.com/gw/brain/orientation/orientterms.htm.
+
+  Using this convention, the default orientation in Cartodata / AIMS is "LPI".
+
+  Before CartoData 5.2 this LPI orientation was fixed.
+
+  In CartoData 5.2 the orientation can be changed.
+
+  Note that there are several axes orientations at different places and levels:
+
+  - disk storage voxels orientation: voxels are stored on disk in a certain order, corresponding to certain axes. Some file formats impose a given order, others (like NIFTI) allow other orientations.
+
+  - physical memory orientation (or "memory layout"): voxels are stored in computer memory in a possibly different order, with axes in a different order or orientation.
+
+  - array indices orientation: each index in the Volume structure array (ie volume(x, y, z) correspond to an axis with a given orientation.
+
+  Array indices and memory orientation can differ, using strides. Starting in Cartodata 5.2, strides can also be negative, which means we can switch between increasing and decreasing axes directions without copying voxels data.
+
+  Thus "loading in LPI orientation" may mean 2 different things: load in LPI memory layout, meaning that voxels are contiguous in the R->L direction, or it may mean that the first index increases from right to left. We choose to take the second convention: "orientation" means indices axes orientation, whatever the actual order of voxels in memory. The voxels order is thus calles "memory layout".
+
+  To flip a volume to a different orientation, we may use:
+
+  \code
+  Volume<float> vol( 10, 10, 10 ); // volume in LPI orientation convention
+  vol.flipToOrientation( "ASR" );
+  \endcode
+  After this operation we will use different indices: vol(z, y, x).
+
+  However voxels are left untouched in this operation: only strides have been modified.
+
+  If we want to actually copy voxels in a given orientation, we should use:
+  \code
+  Volume<float> vol( 10, 10, 10 ); // volume in LPI orientation convention
+  vol.flipToOrientation( "ASR", "ASR" );
+  \endcode
+
+  and it's possible to specify a memory layout different from the indices orientation:
+  \code
+  Volume<float> vol( 10, 10, 10 ); // volume in LPI orientation convention
+  vol.flipToOrientation( "ASR", "LIA" );
+  \endcode
+  Here indices will use the ASR orientation, but voxels will actually be in memory in LIA orientation.
+
+  To know the orientation of a Volume, and to help transfroming to other orientations, the Referential class can help:
+
+  \code
+  const Referential & ref = vol.referential();
+  std::cout << ref.orientationStr() << std::endl;
+  rc_ptr<Transformation3d> trans = ref.toOrientation( "ASR" );
+  \endcode
+  Note that Referential gives only information about the indices axes, not on the memory layout (which is handled by strides).
+
+  \subsection volume_orient_io Volume orientation and IO
+
+  Soma-IO supports writing non-LPI Volumes. This means that writing a Volume after any Volume::flipToOrientation() will have in the same result on disk.
+
+  Formats defined in Aims IO do not (yet). So after a flipToOrientation(), a non-LPI volume will be written actually flipped.
+
+  Some formats like NIFTI support to write voxels in any orientation. This can be controlled via the Volume header "storage_to_memory" transformation. It has to be appropriately set before writing the Volume. Note that this transformation is in voxels (int coefficients) and gives the transformation between disk voxels layout and the indices axes.
 
 */
 

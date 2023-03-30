@@ -73,6 +73,8 @@ AIMS is always loading data in memory in a constant orientation, namely a **"LPI
 
 **Note that this referential is indirect**.
 
+**Note:** In AIMS 5.2 the memory and indices layout may be changed, and are not always forced to LPI: read :cartoddox:`the CartoData documentation <cartovolumes.html#volume_orient>`.
+
 An example:
 
 .. figure:: images/voxels_refs.png
