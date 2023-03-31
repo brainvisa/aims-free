@@ -211,7 +211,7 @@ namespace soma
     std::vector<float> osz( obj.getSize().begin(), obj.getSize().end() );
     for( dim=0; dim<osz.size(); ++dim )
       --osz[dim];
-    rc_ptr<Transformation3d> tolpir = ref.toOrientation( "LPI", osz );
+    rc_ptr<Transformation> tolpir = ref.toOrientation( "LPI", osz );
     AffineTransformation3dBase & tolpi
       = static_cast<AffineTransformation3dBase &>( *tolpir );
     AffineTransformation3dBase itolpi = tolpi.inverse();

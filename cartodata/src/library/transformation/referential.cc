@@ -253,7 +253,7 @@ std::string Referential::orientationStr() const
 }
 
 
-rc_ptr<Transformation3d>
+rc_ptr<Transformation>
 Referential::toOrientation( const std::string & orient,
                             const std::vector<float> & transl ) const
 {
@@ -261,11 +261,11 @@ Referential::toOrientation( const std::string & orient,
 }
 
 
-rc_ptr<Transformation3d>
+rc_ptr<Transformation>
 Referential::toOrientation( const vector<int> & orient,
                             const std::vector<float> & transl ) const
 {
-  rc_ptr<Transformation3d> trans;
+  rc_ptr<Transformation> trans;
   if( orient.size() < 3 )
   {
     cerr << "Undefined orientation\n";

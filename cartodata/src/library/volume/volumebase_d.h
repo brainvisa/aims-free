@@ -1292,7 +1292,7 @@ namespace carto
     int i;
     for( i=0; i<3; ++i )
       transl[i] = dims[i] - 1;
-    carto::rc_ptr<Transformation3d> flipt
+    carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( orient, transl );
     soma::AffineTransformation3dBase & flip
       = static_cast<soma::AffineTransformation3dBase &>( *flipt );
@@ -1374,7 +1374,7 @@ namespace carto
     for( i=0; i<3; ++i )
       transl[i] = dims[i] - 1;
 
-    carto::rc_ptr<Transformation3d> flipt
+    carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( force_memory_layout, transl );
     soma::AffineTransformation3dBase & flip
       = static_cast<soma::AffineTransformation3dBase &>( *flipt );
@@ -1470,7 +1470,7 @@ namespace carto
     int i, n;
     for( i=0; i<3; ++i )
       transl[i] = dims[i] - 1;
-    carto::rc_ptr<Transformation3d> flipt
+    carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( orient, transl );
     soma::AffineTransformation3dBase & flip
       = static_cast<soma::AffineTransformation3dBase &>( *flipt );

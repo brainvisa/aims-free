@@ -28,9 +28,9 @@ namespace carto
     std::string uuid() const;
     std::string orientationStr() const;
     vector_S32 axesOrientation() const;
-    rc_ptr_Transformation3d
+    rc_ptr_Transformation
     toOrientation( const std::string & orient, const vector_FLOAT & transl = vector_FLOAT() ) const;
-    rc_ptr_Transformation3d
+    rc_ptr_Transformation
     toOrientation( const vector_S32 & orient, const vector_FLOAT & transl = vector_FLOAT() ) const;
     std::string lpiReferentialUuid() const;
 

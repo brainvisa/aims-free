@@ -47,6 +47,7 @@ a test would be difficult to implement or expensive to run.
 };
 
 %Include rcptr_Transformation3d.sip
+%Include rcptr_Transformation.sip
 
 namespace soma
 {

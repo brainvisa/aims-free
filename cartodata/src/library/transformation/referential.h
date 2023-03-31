@@ -65,11 +65,11 @@ namespace carto
     std::string uuid() const { return _uuid; }
     std::string orientationStr() const;
     std::vector<int> axesOrientation() const { return _orientation; }
-    rc_ptr<Transformation3d>
+    rc_ptr<Transformation>
     toOrientation(
       const std::string & orient,
       const std::vector<float> & transl = std::vector<float>() ) const;
-    rc_ptr<Transformation3d>
+    rc_ptr<Transformation>
     toOrientation(
       const std::vector<int> & orient,
       const std::vector<float> & transl = std::vector<float>() ) const;

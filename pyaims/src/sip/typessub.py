@@ -2679,6 +2679,10 @@ typessub = {'bool':
                'testPyType': 'pyaimsBucketMap_DOUBLE_Check',
             },
 
+            'soma::Transformation':
+            classInSomaNamespace(
+                'soma-io/transformation/transformation.h', 'Transformation'),
+
             'soma::Transformation3d':
             classInSomaNamespace(
                 'soma-io/transformation/transformation.h', 'Transformation3d'),
