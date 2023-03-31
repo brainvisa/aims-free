@@ -129,7 +129,11 @@ namespace aims
     carto::rc_ptr<carto::Volume<T> > 
       ptr( const_cast<carto::Volume<T> *>( &vol ) );
     {
-      AimsData<T>			d( ptr );
+      // use a view in LPI orientation
+      carto::VolumeRef vol2( ptr, std::vector<int>( 4, 0 ), vol.getSize() );
+      // vol2->flipToOrientation( "LPI" );
+
+      AimsData<T>			d( vol2 );
       std::string			*fmt = 0;
       if( !_preferredFormat.empty() )
         fmt = &_preferredFormat;
