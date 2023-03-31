@@ -325,14 +325,15 @@ namespace carto
     if( other->allocatorContext().isAllocated() )
     {
       size_t bsize = sizeof(T);
-      int i, n = size.size();
+      std::vector<int> osize = other->getSize();
+      int i, n = osize.size();
       for( i=0; i<n; ++i )
-        bsize *= size[i];
+        bsize *= osize[i];
 
       allocate( -1, -1, -1, -1, true,
                 AllocatorContext( AllocatorStrategy::NotOwner,
                                   rc_ptr<DataSource>( new BufferDataSource
-                                    ( (char *) &(*other)( pos.toVector() ),
+                                    ( (char *) &other->_items[0],
                                       bsize ) ) ) );
       // fix offsets
       blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
@@ -341,6 +342,7 @@ namespace carto
         dims[i] = VolumeProxy<T>::_size[i];
       for( ; i<Volume<T>::DIM_MAX; ++i )
         dims[i] = 1;
+      _start = &(*other)( pos.toVector() );
       _blitz.reference
         ( blitz::Array<T,Volume<T>::DIM_MAX>
           ( _start,
@@ -402,14 +404,17 @@ namespace carto
     if( other->allocatorContext().isAllocated() )
     {
       size_t bsize = sizeof(T);
-      int i, n = size.size();
+      std::vector<int> osize = other->getSize();
+      int i, n = osize.size();
       for( i=0; i<n; ++i )
-        bsize *= size[i];
+        bsize *= osize[i];
+
+//       std::cout << "use block start: " << (char *) ( &_items[0] + (&(*other)( pos ) - other->_start ) ) << std::endl;
 
       allocate( -1, -1, -1, -1, true,
                 AllocatorContext( AllocatorStrategy::NotOwner,
                                   rc_ptr<DataSource>( new BufferDataSource
-                                    ( (char *) &(*other)( pos ),
+                                    ( (char *) &other->_items[0],
                                       bsize ) ) ) );
 
       // fix offsets
@@ -419,6 +424,7 @@ namespace carto
         dims[i] = VolumeProxy<T>::_size[i];
       for( ; i<Volume<T>::DIM_MAX; ++i )
         dims[i] = 1;
+      _start = &(*other)( pos );
       _blitz.reference
         ( blitz::Array<T,Volume<T>::DIM_MAX>
           ( _start,
@@ -994,7 +1000,9 @@ namespace carto
       // allocating memory space
       _items.free();
       if( allocate )
+      {
         _items.allocate( ( size_t ) total_len, ac );
+      }
     }
     else if ( oldSize != VolumeProxy<T>::_size
               || &ac != &_items.allocatorContext() )
@@ -1291,7 +1299,8 @@ namespace carto
     AffineTransformation3dBase iflip = flip.inverse();
     blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>
       new_strides = strides;
-    long long offset = 0;
+    long long offset = 0, old_offset = _start - &_items[0];
+    long old_stride;
     for( i=0; i<3; ++i )
     {
       Point3df p( 0.f, 0.f, 0.f );
@@ -1313,8 +1322,12 @@ namespace carto
     new_dims[2] = new_bdims[2];
     // std::cout << "new dims: " << new_dims[0] << ", " << new_dims[1] << ", " << new_dims[2] << std::endl;
     for( i=0; i<3; ++i )
+    {
       if( new_strides[i] < 0 )
         offset += -new_strides[i] * ( new_dims[i] - 1 );
+      if( strides[i] < 0 )
+        old_offset += strides[i] * ( dims[i] - 1 );
+    }
 
     Object reor_hdr = reorientedHeader( orient );
 
@@ -1326,7 +1339,7 @@ namespace carto
     this->header().copyProperties( reor_hdr );
 
     // this->header().setProperty( "volume_dimension", new_dims );
-    _start = &_items[0] + offset;
+    _start = &_items[0] + offset + old_offset;
     _blitz.reference(
       blitz::Array<T,Volume<T>::DIM_MAX>(
         _start,
