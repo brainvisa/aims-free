@@ -314,9 +314,7 @@ namespace carto
 
   \subsection volume_orient_io Volume orientation and IO
 
-  Soma-IO supports writing non-LPI Volumes. This means that writing a Volume after any Volume::flipToOrientation() will have in the same result on disk.
-
-  Formats defined in Aims IO do not (yet). So after a flipToOrientation(), a non-LPI volume will be written actually flipped.
+  Soma-IO and AIMS support writing non-LPI Volumes. This means that writing a Volume after any Volume::flipToOrientation() will have in the same result on disk.
 
   Some formats like NIFTI support to write voxels in any orientation. This can be controlled via the Volume header "storage_to_memory" transformation. It has to be appropriately set before writing the Volume. Note that this transformation is in voxels (int coefficients) and gives the transformation between disk voxels layout and the indices axes.
 
