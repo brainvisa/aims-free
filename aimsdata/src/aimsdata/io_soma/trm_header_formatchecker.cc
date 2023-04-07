@@ -156,7 +156,7 @@ DataSourceInfo TrmHeaderFormatChecker::check( DataSourceInfo dsi,
     bool inv = bool( oinv->getScalar() );
     if( inv )
     {
-      t = t.inverse();
+      t = *t.inverse();
       Object s;
       if( hdr->hasProperty( "source_referential" ) )
       {

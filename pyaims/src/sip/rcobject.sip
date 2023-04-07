@@ -175,27 +175,37 @@ class RCObject
     sipType = sipType_BucketMap_DOUBLE;
     *sipCppRet = dynamic_cast<BucketMap_DOUBLE *>( sipCpp );
   }
-  else if( dynamic_cast<carto::Transformation3d *>( sipCpp ) )
+  else if( dynamic_cast<carto::Transformation *>( sipCpp ) )
   {
-    sipType = sipType_soma_Transformation3d;
-    *sipCppRet = dynamic_cast<soma::Transformation3d *>( sipCpp );
-    // std::cout << "I'm a Transformation3d: " << sipCppRet << std::endl;
-    if( dynamic_cast<soma::AffineTransformation3dBase *>( sipCpp ) )
+    sipType = sipType_soma_Transformation;
+    *sipCppRet = dynamic_cast<soma::Transformation *>( sipCpp );
+    if( dynamic_cast<carto::Transformation3d *>( sipCpp ) )
     {
-      sipType = sipType_soma_AffineTransformation3dBase;
-      *sipCppRet = dynamic_cast<soma::AffineTransformation3dBase *>( sipCpp );
-      if( dynamic_cast<aims::AffineTransformation3d *>( sipCpp ) )
+      sipType = sipType_soma_Transformation3d;
+      *sipCppRet = dynamic_cast<soma::Transformation3d *>( sipCpp );
+      // std::cout << "I'm a Transformation3d: " << sipCppRet << std::endl;
+      if( dynamic_cast<soma::AffineTransformation3dBase *>( sipCpp ) )
       {
-        sipType = sipType_aims_AffineTransformation3d;
-        *sipCppRet = dynamic_cast<aims::AffineTransformation3d *>( sipCpp );
-        // std::cout << "I'm an AffineTransformation3d: " << sipCppRet << std::endl;
+        sipType = sipType_soma_AffineTransformation3dBase;
+        *sipCppRet = dynamic_cast<soma::AffineTransformation3dBase *>( sipCpp );
+        if( dynamic_cast<aims::AffineTransformation3d *>( sipCpp ) )
+        {
+          sipType = sipType_aims_AffineTransformation3d;
+          *sipCppRet = dynamic_cast<aims::AffineTransformation3d *>( sipCpp );
+          // std::cout << "I'm an AffineTransformation3d: " << sipCppRet << std::endl;
+        }
+      }
+      else if( dynamic_cast<aims::TransformationChain3d *>( sipCpp ) )
+      {
+        sipType = sipType_aims_TransformationChain3d;
+        *sipCppRet = dynamic_cast<aims::TransformationChain3d *>( sipCpp );
+        // std::cout << "I'm an TransformationChain3d: " << *sipCppRet << std::endl;
       }
     }
-    else if( dynamic_cast<aims::TransformationChain3d *>( sipCpp ) )
+    else if( dynamic_cast<carto::AffineTransformationBase *>( sipCpp ) )
     {
-      sipType = sipType_aims_TransformationChain3d;
-      *sipCppRet = dynamic_cast<aims::TransformationChain3d *>( sipCpp );
-      // std::cout << "I'm an TransformationChain3d: " << *sipCppRet << std::endl;
+      sipType = sipType_soma_AffineTransformationBase;
+      *sipCppRet = dynamic_cast<soma::AffineTransformationBase *>( sipCpp );
     }
   }
 %End

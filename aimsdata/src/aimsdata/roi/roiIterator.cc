@@ -225,7 +225,7 @@ rc_ptr< ROILabelMap > MotionedRoiIterator::createLabelMap()
   volume->fill( 0UL );
 
   rc_ptr< ROILabelMap >
-    result( new MotionedVolumeROILabelMap( volume, _motion.inverse() ) );
+    result( new MotionedVolumeROILabelMap( volume, *_motion.inverse() ) );
   result->roiNames.push_back( "background" );
   for( restart(); isValid(); next() ) {
     result->roiNames.push_back( regionName() );

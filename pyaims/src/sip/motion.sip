@@ -39,14 +39,14 @@ public:
   sipRes = new aims::AffineTransformation3d( -*sipCpp );
 %End
 
-  Point3dd transformVector( const Point3dd & vec ) const;
   Point3df transformVector( const Point3df & dir ) const;
+  Point3dd transformVector( const Point3dd & vec ) const;
   Point3dd transformVector( double x, double y, double z ) const;
-  Point3dd transformNormal( const Point3dd & dir ) const;
   Point3df transformNormal( const Point3df & dir ) const;
+  Point3dd transformNormal( const Point3dd & dir ) const;
   Point3dd transformNormal( double x, double y, double z ) const;
-  Point3dd transformUnitNormal( const Point3dd & dir ) const;
   Point3df transformUnitNormal( const Point3df & dir ) const;
+  Point3dd transformUnitNormal( const Point3dd & dir ) const;
   Point3dd transformUnitNormal( double x, double y, double z ) const;
 
   Point3df translation();
@@ -56,7 +56,6 @@ public:
   rc_ptr_Volume_FLOAT affine();
   bool isIdentity() const;
   virtual void setToIdentity();
-  aims::AffineTransformation3d inverse() const;
   aims::AffineTransformation3d operator* (const aims::AffineTransformation3d & ) const;
   void operator*= (const aims::AffineTransformation3d & ); // SIP4.5> (*sipCpp) *= *a0))
   virtual void scale( const Point3df &, const Point3df & );

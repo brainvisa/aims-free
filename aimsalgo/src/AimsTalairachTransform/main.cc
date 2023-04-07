@@ -104,13 +104,13 @@ bool TalTransform::tal_m( VolumeRef<T> & data, const string & filename, Finder &
   AffineTransformation3d transf = talBox.computeTransformationAndBox(
     talPoints, data ) ;
   
-  AffineTransformation3d invTransf = transf.inverse() ;
+  unique_ptr<AffineTransformation3d> invTransf = transf.inverse() ;
   cout << "AC transformed : " << transf.transform( _ac ) << "\tPC transformed : " << transf.transform( _pc ) 
        << "\tIPH transformed : " << transf.transform( _ihp ) << endl ;
-  cout << "ACInv transformed : " << invTransf.transform( Point3df(0., 0., 0.) ) 
-       << "\tPCInv transformed : " << invTransf.transform( Point3df(0., 1., 0.) ) 
-       << "\tIPHInv transformed : " << invTransf.transform( Point3df(0., 0., 1.) )
-       << "\tXInv transformed : " << invTransf.transform( Point3df(1., 0., 0.) ) << endl ;
+  cout << "ACInv transformed : " << invTransf->transform( Point3df(0., 0., 0.) )
+       << "\tPCInv transformed : " << invTransf->transform( Point3df(0., 1., 0.) )
+       << "\tIPHInv transformed : " << invTransf->transform( Point3df(0., 0., 1.) )
+       << "\tXInv transformed : " << invTransf->transform( Point3df(1., 0., 0.) ) << endl ;
   Writer<AffineTransformation3d> writer( _fileout );
   writer.write( transf ) ;
   return( 1 );

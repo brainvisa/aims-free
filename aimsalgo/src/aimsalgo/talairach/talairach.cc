@@ -126,5 +126,5 @@ Point3df TalairachReferential::toTalairach( const Point3df& pt )
 
 Point3df TalairachReferential::fromTalairach( const Point3df& pt )
 {
-  return _transformation.inverse().transform( pt )  ;
+  return _transformation.inverse()->transform( pt )  ;
 }

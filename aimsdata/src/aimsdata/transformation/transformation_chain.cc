@@ -111,10 +111,10 @@ bool aims::TransformationChain3d::invertible() const
   return true;
 }
 
-std::unique_ptr<soma::Transformation3d>
+std::unique_ptr<soma::Transformation>
 aims::TransformationChain3d::getInverse() const
 {
-  std::unique_ptr<soma::Transformation3d> ret(new aims::TransformationChain3d);
+  std::unique_ptr<soma::Transformation> ret(new aims::TransformationChain3d);
   aims::TransformationChain3d & new_chain
     = dynamic_cast<aims::TransformationChain3d&>(*ret.get());
 
@@ -122,9 +122,12 @@ aims::TransformationChain3d::getInverse() const
       rit != _transformations.rend() ;
       ++rit)
   {
-    new_chain.push_back(carto::rc_ptr<Transformation3d>(
-      (*rit)->getInverse())
-    );
+    Transformation3d * t3 = dynamic_cast<Transformation3d *>(
+      (*rit)->getInverse().release() );
+    if( t3 )
+      new_chain.push_back( carto::rc_ptr<Transformation3d>( t3 ) );
+    else
+      throw std::runtime_error( "not a Transformation3d" );
   }
 
   return ret;

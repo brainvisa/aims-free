@@ -175,8 +175,8 @@ namespace aims
     // AffineTransformation3d & operator += ( const AffineTransformation3d & trans );
     virtual AffineTransformation3d operator - () const;
 
-    AffineTransformation3d inverse() const;
-    std::unique_ptr<Transformation3d> getInverse() const CARTO_OVERRIDE;
+    std::unique_ptr<AffineTransformation3d> inverse() const;
+    std::unique_ptr<Transformation> getInverse() const CARTO_OVERRIDE;
 
     inline Point3df translation();
     inline Point3df translation() const;

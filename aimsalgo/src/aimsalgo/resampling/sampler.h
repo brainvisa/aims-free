@@ -115,13 +115,13 @@ Sampler<T>::doit( const Motion& motion, carto::rc_ptr<carto::Volume<PVItem> >& t
   ASSERT( thing->getSizeT() == (*_ref)->getSizeT() && thing->getBorders()[0] == 0 );
 
   Motion dirMotion = motion;
-  Motion invMotion = motion.inverse();
+  std::unique_ptr<Motion> invMotion = motion.inverse();
   
   // scale motion
   Point3df sizeFrom( (*_ref)->getVoxelSize() );
   Point3df sizeTo( thing->getVoxelSize() );
   dirMotion.scale( sizeFrom, sizeTo );
-  invMotion.scale( sizeTo, sizeFrom );
+  invMotion->scale( sizeTo, sizeFrom );
 
   PVItem *it;
 
@@ -130,7 +130,7 @@ Sampler<T>::doit( const Motion& motion, carto::rc_ptr<carto::Volume<PVItem> >& t
 #endif
   for (int t = 0; t < thing->getSizeT(); t++ )
   {
-    Point3df start = invMotion.translation();
+    Point3df start = invMotion->translation();
     for ( int s = 0; s < thing->getSizeZ(); s++ )
     {
 #ifdef DEBUG
@@ -139,10 +139,10 @@ Sampler<T>::doit( const Motion& motion, carto::rc_ptr<carto::Volume<PVItem> >& t
            << std::setw( 3 ) << s << "]" << std::flush;
 #endif
       it = &thing->at( 0, 0, s, t );
-      _sliceResamp( thing, it, start, t, invMotion.rotation() );
-      start[ 0 ] += invMotion.rotation()( 0, 2 );
-      start[ 1 ] += invMotion.rotation()( 1, 2 );
-      start[ 2 ] += invMotion.rotation()( 2, 2 );
+      _sliceResamp( thing, it, start, t, invMotion->rotation() );
+      start[ 0 ] += invMotion->rotation()( 0, 2 );
+      start[ 1 ] += invMotion->rotation()( 1, 2 );
+      start[ 2 ] += invMotion->rotation()( 2, 2 );
     }
   }
   //cout << endl;
@@ -251,8 +251,8 @@ BucketSampler<T>::doit( const Motion& motion,
 
   ASSERT( _ref );
   
-  Motion dirMotion; dirMotion  = motion;
-  Motion invMotion; invMotion  = motion.inverse();
+  Motion dirMotion  = motion;
+  std::unique_ptr<Motion> invMotion  = motion.inverse();
 
   
   // scale motion
@@ -260,7 +260,7 @@ BucketSampler<T>::doit( const Motion& motion,
   Point3df sizeTo( model.sizeX(), model.sizeY(), model.sizeZ() );
 
   dirMotion.scale( sizeFrom, sizeTo );
-  invMotion.scale( sizeTo, sizeFrom );
+  invMotion->scale( sizeTo, sizeFrom );
 
   typename aims::BucketMap<T>::Bucket::const_iterator 
     it = model.begin()->second.begin() ;
@@ -273,15 +273,15 @@ BucketSampler<T>::doit( const Motion& motion,
   
   Point3df x, y, z;
 
-  float transl0 = invMotion.translation()[0];
-  float transl1 = invMotion.translation()[1];
-  float transl2 = invMotion.translation()[2];
+  float transl0 = invMotion->translation()[0];
+  float transl1 = invMotion->translation()[1];
+  float transl2 = invMotion->translation()[2];
 
-  invMotion.setTranslation( 0. );
+  invMotion->setTranslation( 0. );
 
-  x = invMotion.transform( 1.F, 0.F, 0.F ) ;
-  y = invMotion.transform( 0.F, 1.F, 0.F ) ;
-  z = invMotion.transform( 0.F, 0.F, 1.F ) ;
+  x = invMotion->transform( 1.F, 0.F, 0.F ) ;
+  y = invMotion->transform( 0.F, 1.F, 0.F ) ;
+  z = invMotion->transform( 0.F, 0.F, 1.F ) ;
 
   int maxX = (*_ref)->getSizeX() - 1;
   int maxY = (*_ref)->getSizeY() - 1;

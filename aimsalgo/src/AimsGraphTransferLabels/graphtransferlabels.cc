@@ -135,7 +135,7 @@ int main( int argc, const char** argv )
       vshm.rotation()(0,0) = vsh[0];
       vshm.rotation()(1,1) = vsh[1];
       vshm.rotation()(2,2) = vsh[2];
-      Motion gToh = vshm.inverse() * hToTal.inverse() * gToTal * vsgm;
+      Motion gToh = *vshm.inverse() * *hToTal.inverse() * gToTal * vsgm;
       // gToh goes from g to h in voxels
 
       Point3df bbmingm( 0, 0, 0 ), bbmaxgm( bbmaxg[0], bbmaxg[1], bbmaxg[2] );

@@ -200,7 +200,7 @@ int main( int argc, const char **argv )
       cout << "Reading affine motion" << endl;
       Reader<AffineTransformation3d> mrd(inputmotion);
       mrd.read( motion );
-      motion = motion.inverse();
+      motion = *motion.inverse();
     }
     // motion.scale( Point3df( reference.sizeX(), reference.sizeY(), reference.sizeZ() ),
     //               Point3df( testimg.sizeX(),   testimg.sizeY(),   testimg.sizeZ()   ) );

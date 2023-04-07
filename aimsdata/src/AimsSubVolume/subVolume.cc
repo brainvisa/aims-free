@@ -252,7 +252,7 @@ bool subvolume( Process & p, const string & filein, Finder & f )
     im.setToIdentity();
     im.setTranslation( Point3df( sx * data.sizeX(), sy * data.sizeY(),
                        sz * data.sizeZ()) );
-    motion = im.inverse();
+    motion = *im.inverse();
 
     // setup output header
     if( ( first || !sv.nominf ) && data.header() )
@@ -374,7 +374,7 @@ bool subvolume( Process & p, const string & filein, Finder & f )
 				     sy * data.sizeY(),
 				     sz * data.sizeZ()) );
 	
-	m = im.inverse();
+	m = *im.inverse();
 
 	MotionWriter mw( sv.motiondirect );
 	mw.write( m );

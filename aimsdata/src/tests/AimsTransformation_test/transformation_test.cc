@@ -91,13 +91,14 @@ int main()
 
     cout << "  invertible(), inverse(), and getInverse()" << endl;
     ASSERT(t1.invertible());
-    AffineTransformation3d t3(t1.inverse());
+    AffineTransformation3d t3(*t1.inverse());
     ASSERT_EQ(t3.transform(tp1), p1); ASSERT_EQ(t3.transform(tp2), p2);
     ASSERT_EQ(t3.transform(tp3), p3); ASSERT_EQ(t3.transform(tp4), p4);
 
-    unique_ptr<Transformation3d> t4(t1.getInverse());
-    ASSERT_EQ(t4->transform(tp1), p1); ASSERT_EQ(t4->transform(tp2), p2);
-    ASSERT_EQ(t4->transform(tp3), p3); ASSERT_EQ(t4->transform(tp4), p4);
+    unique_ptr<Transformation> t4(t1.getInverse());
+    Transformation3d *t5 = dynamic_cast<Transformation3d *>( t4.get() );
+    ASSERT_EQ(t5->transform(tp1), p1); ASSERT_EQ(t5->transform(tp2), p2);
+    ASSERT_EQ(t5->transform(tp3), p3); ASSERT_EQ(t5->transform(tp4), p4);
   }
 
   cout << "Testing TransformationChain3d..." << endl;
@@ -146,9 +147,10 @@ int main()
     cout << "  inversion of two-transformation chain" << endl;
     ASSERT(!t3->isIdentity());
     ASSERT(t3->invertible());
-    rc_ptr<Transformation3d> t4(t3->getInverse());
-    ASSERT_EQ(t4->transform(-tp1), p1); ASSERT_EQ(t4->transform(-tp2), p2);
-    ASSERT_EQ(t4->transform(-tp3), p3); ASSERT_EQ(t4->transform(-tp4), p4);
+    rc_ptr<Transformation> t4(t3->getInverse());
+    Transformation3d *t10 = dynamic_cast<Transformation3d *>( t4.get() );
+    ASSERT_EQ(t10->transform(-tp1), p1); ASSERT_EQ(t10->transform(-tp2), p2);
+    ASSERT_EQ(t10->transform(-tp3), p3); ASSERT_EQ(t10->transform(-tp4), p4);
 
     cout << "  simplification of empty chain" << endl;
     const const_ref<Transformation3d> t5(t1.simplify());

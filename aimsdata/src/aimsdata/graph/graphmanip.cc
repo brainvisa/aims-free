@@ -542,7 +542,7 @@ void GraphManip::storeTalairach( Graph & g, const AffineTransformation3d & m,
   if(force_old_attributes || hasOldTalairachTransform(g))
   {
     vector<float>		rot(9), scl(3, 1.), trans(3);
-    AffineTransformation3d	minv = m.inverse();
+    unique_ptr<AffineTransformation3d>	minv = m.inverse();
     const VolumeRef<float>	r = m.rotation();
     rot[0] = r( 0, 0 );
     rot[1] = r( 0, 1 );
@@ -553,7 +553,7 @@ void GraphManip::storeTalairach( Graph & g, const AffineTransformation3d & m,
     rot[6] = r( 2, 0 );
     rot[7] = r( 2, 1 );
     rot[8] = r( 2, 2 );
-    Point3df	t = -minv.translation();
+    Point3df	t = -minv->translation();
     trans[0] = t[0];
     trans[1] = t[1];
     trans[2] = t[2];

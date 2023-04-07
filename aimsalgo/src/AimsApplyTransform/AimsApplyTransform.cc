@@ -560,7 +560,7 @@ load_transformation(const string &filename_arg,
       throw FatalError(s.str());
     }
     if(invert) {
-      *affine = affine->inverse();
+      affine = affine->inverse();
     }
     return rc_ptr<Transformation3d>(affine.release());
   }
@@ -585,7 +585,13 @@ load_transformation(const string &filename_arg,
           << " is not invertible, aborting.";
         throw FatalError(s.str());
       }
-      return tr->getInverse();
+
+      unique_ptr<Transformation> ti = tr->getInverse();
+      Transformation3d *ti3 = dynamic_cast<Transformation3d *>( ti.get() );
+      if( !ti3 )
+        throw FatalError( "Inverse is not a 3D transform" );
+      ti.release();
+      return rc_ptr<Transformation3d>( ti3 );
     }
     return tr;
   }
@@ -782,7 +788,14 @@ load_transformations(const ApplyTransformProc& proc,
         throw FatalError("Error using --input-coords: the transformation "
                          "is not invertible");
       }
-      inverse_chain.push_back(aims_to_input_space_transform->getInverse());
+      unique_ptr<Transformation> ti
+        = aims_to_input_space_transform->getInverse();
+      Transformation3d *ti3 = dynamic_cast<Transformation3d *>( ti.get() );
+      if( !ti3 )
+        throw FatalError( "An inverse transformation is not a 3D "
+                          "transformation" );
+      inverse_chain.push_back( rc_ptr<Transformation3d>( ti3 ) );
+      ti.release();
     }
     ret.second = inverse_chain.simplify();
   }
@@ -835,7 +848,7 @@ load_transformations(const ApplyTransformProc& proc,
         t->setTranslation( vs / 2 );
         ret.first = tid;
         ret.second = rc_ptr<Transformation3d>(
-          new AffineTransformation3d( t->inverse() ) );
+          new AffineTransformation3d( *t->inverse() ) );
       }
     }
     else
@@ -847,11 +860,21 @@ load_transformations(const ApplyTransformProc& proc,
   }
 
   if(ret.first.isNull() && ret.second->invertible()) {
-    ret.first = const_ref<Transformation3d>(ret.second->getInverse());
+    unique_ptr<Transformation> ti = ret.second->getInverse();
+    Transformation3d *ti3 = dynamic_cast<Transformation3d *>( ti.get() );
+    if( !ti3 )
+      throw FatalError( "Inverse is not a 3D transform" );
+    ti.release();
+    ret.first = const_ref<Transformation3d>( ti3 );
   }
 
   if(ret.second.isNull() && ret.first->invertible()) {
-    ret.second = const_ref<Transformation3d>(ret.first->getInverse());
+    unique_ptr<Transformation> ti = ret.first->getInverse();
+    Transformation3d *ti3 = dynamic_cast<Transformation3d *>( ti.get() );
+    if( !ti3 )
+      throw FatalError( "Inverse is not a 3D transform" );
+    ti.release();
+    ret.second = const_ref<Transformation3d>( ti3 );
   }
 
   return ret;

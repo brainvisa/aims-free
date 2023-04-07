@@ -574,7 +574,7 @@ bool doit( Process & process, const string & fileinr, Finder & )
   // Ecriture de la transformation finale obtenue r
   string outmotion = abm.outmotion;
   if (abm.inverse)
-    r = r.inverse();
+    r = *r.inverse();
     
   if( outmotion.empty() )
   {

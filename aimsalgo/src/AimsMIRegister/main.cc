@@ -80,7 +80,7 @@ void WriteCurrentDepInFile(
 {
   // Infer deplacement from p and gravity centers stored in objfunc
   Motion depl    = objfunc->getDepl( p );
-  Motion invdepl = depl.inverse();
+  unique_ptr<AffineTransformation3d> invdepl = depl.inverse();
 
   cout << "Direct FileName " << direct << endl;
   cout << "Inverse FileName " << inverse << endl;
@@ -92,7 +92,7 @@ void WriteCurrentDepInFile(
         (notFirstCall? ios::app : ios::out) );
 
   motionWDir.write( depl );
-  motionWRev.write( invdepl );
+  motionWRev.write( *invdepl );
 
 
   if (generatecurve) {

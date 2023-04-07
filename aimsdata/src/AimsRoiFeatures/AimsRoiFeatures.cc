@@ -182,7 +182,7 @@ int main( int argc, const char **argv )
       Motion transformation;
       transformationReader.read( transformation );
       if( invertMotion )
-        transformation = transformation.inverse();
+        transformation = *transformation.inverse();
       roiFeatures.computeFeatures( getRoiIterator( inputFileName, transformation ) );
     }
 

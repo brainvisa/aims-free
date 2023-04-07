@@ -121,7 +121,7 @@ void TrmFormatReader::read( AffineTransformation3d & obj,
     bool inv = bool( oinv->getScalar() );
     if( inv )
     {
-      obj = obj.inverse();
+      obj = *obj.inverse();
     }
   }
   catch( runtime_error & )

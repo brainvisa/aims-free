@@ -40,6 +40,9 @@ a test would be difficult to implement or expensive to run.
     virtual vector_FLOAT transformVector( const vector_FLOAT & pos ) const;
     virtual vector_S32 transformVector( const vector_S32 & pos ) const;
 
+    virtual bool invertible() const;
+    rc_ptr_Transformation getInverse() const;
+
   protected:
     Transformation();
   };
@@ -68,10 +71,16 @@ Base class for spatial transformations in 3D.
   public:
     virtual ~Transformation3d();
 
+    virtual vector_S32 transform( const vector_S32 & pos ) const;
+    virtual vector_FLOAT transform( const vector_FLOAT & pos ) const;
+    virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const;
     Point3dd transform( double x, double y, double z ) const;
-    Point3dd transform( const Point3dd & pos ) const;
-    Point3df transform( const Point3df & dir ) const;
     Point3d transform( const Point3d & p ) const;
+    Point3df transform( const Point3df & dir ) const;
+    Point3dd transform( const Point3dd & pos ) const;
+    virtual vector_S32 transformVector( const vector_S32 & pos ) const;
+    virtual vector_FLOAT transformVector( const vector_FLOAT & pos ) const;
+    virtual vector_DOUBLE transformVector( const vector_DOUBLE & pos ) const;
 
     SIP_PYOBJECT transformPoints( SIP_PYOBJECT ) const /Factory/;
 %MethodCode
@@ -151,15 +160,47 @@ Base class for spatial transformations in 3D.
   protected:
     Transformation3d();
     virtual Point3dd transformDouble( double x, double y, double z ) const = 0;
-    virtual Point3dd transformPoint3dd( const Point3dd & pos ) const;
-    virtual Point3df transformPoint3df( const Point3df & dir ) const;
-    virtual Point3d transformPoint3d( const Point3d & p ) const;
-    virtual Point3df transformFloat( float x, float y, float z ) const;
-    virtual Point3di transformInt( int x, int y, int z ) const;
   };
 
 
-  class AffineTransformation3dBase : soma::Transformation3d
+  class AffineTransformationBase : soma::Transformation
+  {
+%TypeHeaderCode
+#include <soma-io/transformation/affinetransformation3d_base.h>
+%End
+
+public:
+    AffineTransformationBase( int order = 3 );
+    AffineTransformationBase( const soma::AffineTransformationBase& other );
+    AffineTransformationBase( const vector_FLOAT & mat );
+    virtual ~AffineTransformationBase();
+
+    virtual bool operator == ( const soma::AffineTransformationBase & ) const;
+
+    soma::AffineTransformationBase & operator *= (
+      const soma::AffineTransformationBase & trans );
+    // soma::AffineTransformationBase operator - () const;
+    soma::AffineTransformationBase* __neg__() const /Factory/;
+%MethodCode
+  sipRes = new soma::AffineTransformationBase( -*sipCpp );
+%End
+
+    bool isIdentity() const;
+    virtual void setToIdentity();
+
+    virtual bool invertible() const;
+    rc_ptr_Transformation getInverse() const;
+
+    int order() const;
+
+    virtual vector_S32 transform( const vector_S32 & pos ) const;
+    virtual vector_FLOAT transform( const vector_FLOAT & pos ) const;
+    virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const;
+  };
+
+
+  class AffineTransformation3dBase
+    : soma::Transformation3d, soma::AffineTransformationBase
   {
 %TypeHeaderCode
 #include <soma-io/transformation/affinetransformation3d_base.h>
@@ -178,26 +219,33 @@ Base class for spatial transformations in 3D.
       const soma::AffineTransformation3dBase & trans );
     // soma::AffineTransformation3dBase operator - () const;
 
-    Point3dd transformVector( const Point3dd & vec ) const;
+    virtual vector_S32 transform( const vector_S32 & pos ) const;
+    virtual vector_FLOAT transform( const vector_FLOAT & pos ) const;
+    virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const;
+    Point3d transform( const Point3d & p ) const;
+    Point3df transform( const Point3df & dir ) const;
+    Point3dd transform( const Point3dd & pos ) const;
+    Point3dd transform( double x, double y, double z ) const;
+
     Point3df transformVector( const Point3df & dir ) const;
+    Point3dd transformVector( const Point3dd & vec ) const;
     Point3dd transformVector( double x, double y, double z ) const;
     // Point3df transformVector( float x, float y, float z ) const;
     // Point3di transformVector( int x, int y, int z ) const;
-    Point3dd transformNormal( const Point3dd & dir ) const;
     Point3df transformNormal( const Point3df & dir ) const;
+    Point3dd transformNormal( const Point3dd & dir ) const;
     Point3dd transformNormal( double x, double y, double z ) const;
     // Point3df transformNormal( float x, float y, float z ) const;
-    Point3dd transformUnitNormal( const Point3dd & dir ) const;
     Point3df transformUnitNormal( const Point3df & dir ) const;
+    Point3dd transformUnitNormal( const Point3dd & dir ) const;
     Point3dd transformUnitNormal( double x, double y, double z ) const;
     // Point3df transformUnitNormal( float x, float y, float z ) const;
 
     bool isIdentity() const;
     virtual void setToIdentity();
 
-    // soma::AffineTransformation3dBase inverse() const;
-    bool invertible() const;
-    rc_ptr_Transformation3d getInverse() const;
+    virtual bool invertible() const;
+    rc_ptr_Transformation getInverse() const;
     virtual void scale( const Point3df& sizeFrom, const Point3df& sizeTo );
     bool isDirect() const;
 
@@ -301,8 +349,8 @@ public:
 %End
 
   bool isIdentity() const;
-  bool invertible() const;
-  rc_ptr_Transformation3d getInverse() const;
+  virtual bool invertible() const;
+  rc_ptr_Transformation getInverse() const;
 
   rc_ptr_Transformation3d simplify() const;
 %Docstring

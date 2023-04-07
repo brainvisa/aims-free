@@ -765,7 +765,7 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
             removeProperty( "spm_normalized" );
           reftrans = trans->objectIterator()->currentValue();
           Motion  mm( reftrans );
-          origin = mm.inverse().transform( Point3df( 0, 0, 0 ) );
+          origin = mm.inverse()->transform( Point3df( 0, 0, 0 ) );
           // cout << "origin: " << origin << endl;
           origin = Point3df( rint( origin[0] / vs[0] ),
                               rint( origin[1] / vs[1] ),
@@ -889,9 +889,9 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
     orient = 0;
   header.hist.orient = orient ;
 
-  Motion  m2s = stom.inverse();
-  Point3df df = m2s.transform( Point3df( dims[0], dims[1], dims[2] ) )
-      - m2s.transform( Point3df( 0, 0, 0 ) );
+  unique_ptr<AffineTransformation3d>  m2s = stom.inverse();
+  Point3df df = m2s->transform( Point3df( dims[0], dims[1], dims[2] ) )
+      - m2s->transform( Point3df( 0, 0, 0 ) );
   tdims = Point3d( short( rint( fabs( df[0] ) ) ),
                    short( rint( fabs( df[1] ) ) ),
                    short( rint( fabs( df[2] ) ) ) );
@@ -911,8 +911,8 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
   header.dime.bitpix = dlen;
   header.dime.vox_offset = 0.0;
 
-  df = m2s.transform( Point3df( vs[0], vs[1], vs[2] ) )
-      - m2s.transform( Point3df( 0, 0, 0 ) );
+  df = m2s->transform( Point3df( vs[0], vs[1], vs[2] ) )
+      - m2s->transform( Point3df( 0, 0, 0 ) );
   Point3df tvs = Point3df( fabs( df[0] ), fabs( df[1] ), fabs( df[2] ) );
   header.dime.pixdim[1] = tvs[0];
   header.dime.pixdim[2] = tvs[1];

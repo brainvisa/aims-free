@@ -88,7 +88,7 @@ public:
 
   bool isIdentity() const CARTO_OVERRIDE;
   bool invertible() const CARTO_OVERRIDE;
-  std::unique_ptr<soma::Transformation3d> getInverse() const CARTO_OVERRIDE;
+  std::unique_ptr<soma::Transformation> getInverse() const CARTO_OVERRIDE;
 
   /** Compute a simpler transformation that is equivalent to the chain.
 

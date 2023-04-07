@@ -273,12 +273,12 @@ namespace aims
         rm(2,0) = rot[6];
         rm(2,1) = rot[7];
         rm(2,2) = rot[8];
-        Motion	mot2 = motion.inverse();
+        std::unique_ptr<AffineTransformation3d>	mot2 = motion.inverse();
         rm(0, 3) = transl[0];
         rm(1, 3) = transl[1];
         rm(2, 3) = transl[2];
 
-        Point3df	t2 = mot2.transform( transl[0], transl[1], transl[2] );
+        Point3df	t2 = mot2->transform( transl[0], transl[1], transl[2] );
         transl[0] = t2[0];
         transl[1] = t2[1];
         transl[2] = t2[2];

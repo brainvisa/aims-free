@@ -189,7 +189,7 @@ Resampler< T >::resample( const carto::Volume< T >& inVolume,
 
   normTransform3d.scale( inResolution, Point3df( 1, 1, 1 ) );
   normTransform3d = transform3d * normTransform3d;
-  normTransform3d = normTransform3d.inverse();
+  normTransform3d = *normTransform3d.inverse();
 
   resample_inv_to_vox(inVolume, normTransform3d, outBackground, outVolume,
                       verbose);
@@ -212,7 +212,7 @@ Resampler< T >::resample( const carto::Volume< T >& inVolume,
 
   normTransform3d.scale( inResolution, Point3df( 1, 1, 1 ) );
   normTransform3d = transform3d * normTransform3d;
-  normTransform3d = normTransform3d.inverse();
+  normTransform3d = *normTransform3d.inverse();
 
   updateParameters( inVolume, t, carto::verbose );
 
@@ -268,13 +268,14 @@ carto::VolumeRef<T> Resampler<T>::doit(
     {
       carto::Object trs = ph.getProperty( "transformations" );
       carto::Object tit = trs->objectIterator();
-      aims::AffineTransformation3d motioninv = motion.inverse();
+      std::unique_ptr<aims::AffineTransformation3d> motioninv
+        = motion.inverse();
       std::vector<std::vector<float> > trout;
       trout.reserve( trs->size() );
       for( ; tit->isValid(); tit->next() )
       {
         aims::AffineTransformation3d m( tit->currentValue() );
-        m *= motioninv;
+        m *= *motioninv;
         trout.push_back( m.toVector() );
       }
       ph.setProperty( "transformations", trout );
@@ -298,7 +299,7 @@ carto::VolumeRef<T> Resampler<T>::doit(
         refsout.push_back( "Coordinates aligned to another file or to "
             "anatomical truth" );
 
-      trout.push_back( motion.inverse().toVector() );
+      trout.push_back( motion.inverse()->toVector() );
       ph.setProperty( "transformations", trout );
       ph.setProperty( "referentials", refsout );
     }

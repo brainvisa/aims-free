@@ -292,7 +292,7 @@ Object TrackvisBundleReader::readHeaderStream( istream & file )
     tvs.rotation()( 0, 0 ) = 1. / voxel_size[0];
     tvs.rotation()( 1, 1 ) = 1. / voxel_size[1];
     tvs.rotation()( 2, 2 ) = 1. / voxel_size[2];
-    aims_tr = v2r * aims_s2m.inverse() * tvs;
+    aims_tr = v2r * *aims_s2m.inverse() * tvs;
     vector<vector<float> > trans;
     trans.push_back( aims_tr.toVector() );
     header->setProperty( "transformations", trans );
@@ -342,7 +342,7 @@ void TrackvisBundleReader::read()
   tvs.rotation()( 0, 0 ) = vs[0];
   tvs.rotation()( 1, 1 ) = vs[1];
   tvs.rotation()( 2, 2 ) = vs[2];
-  s2m = tvs * s2m * tvs.inverse(); // s2m in mm -> mm
+  s2m = tvs * s2m * *tvs.inverse(); // s2m in mm -> mm
 
   int npts, p;
   FiberPoint pos;

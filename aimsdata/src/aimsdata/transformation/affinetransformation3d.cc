@@ -267,7 +267,7 @@ bool AffineTransformation3d::operator != ( const AffineTransformation3d & other 
 
 
 //-----------------------------------------------------------------------------
-AffineTransformation3d AffineTransformation3d::inverse() const
+unique_ptr<AffineTransformation3d> AffineTransformation3d::inverse() const
 {
 //   AffineTransformation3d AffineTransformation3d;
 //
@@ -286,12 +286,13 @@ AffineTransformation3d AffineTransformation3d::inverse() const
 //
 //   return AffineTransformation3d;
 
-  AffineTransformation3d inv( AffineTransformation3dBase::inverse() );
-  Object ihdr = inv.header();
+  AffineTransformation3d *inv = new AffineTransformation3d(
+    *AffineTransformation3dBase::inverse() );
+  Object ihdr = inv->header();
   PythonHeader::copy( header(), ihdr );
 
   Object s;
-  Object hdr = inv.header();
+  Object hdr = inv->header();
   if( hdr->hasProperty( "source_referential" ) )
   {
     s = hdr->getProperty( "source_referential" );
@@ -306,12 +307,15 @@ AffineTransformation3d AffineTransformation3d::inverse() const
   if( s )
     hdr->setProperty( "destination_referential", s );
 
-  return inv;
+  return unique_ptr<AffineTransformation3d>( inv );
 }
 
-unique_ptr<soma::Transformation3d> AffineTransformation3d::getInverse() const
+unique_ptr<soma::Transformation> AffineTransformation3d::getInverse() const
 {
-  return unique_ptr<soma::Transformation3d>(new AffineTransformation3d(inverse()));
+  unique_ptr<AffineTransformation3d> ti = inverse();
+  unique_ptr<soma::Transformation> res( ti.get() );
+  ti.release();
+  return res;
 }
 
 

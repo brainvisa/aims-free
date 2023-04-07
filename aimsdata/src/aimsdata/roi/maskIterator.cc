@@ -57,7 +57,7 @@ MotionedMaskIterator( const carto::rc_ptr< MaskIterator > &maskIterator,
   _maskIterator( maskIterator ),
   _motion( motion )
 {
-  _inverseMotion = _motion.inverse();
+  _inverseMotion = *_motion.inverse();
 }
 
 //----------------------------------------------------------------------------

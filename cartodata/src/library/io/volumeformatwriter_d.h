@@ -213,8 +213,8 @@ namespace soma
       --osz[dim];
     rc_ptr<Transformation> tolpir = ref.toOrientation( "LPI", osz );
     AffineTransformation3dBase & tolpi
-      = static_cast<AffineTransformation3dBase &>( *tolpir );
-    AffineTransformation3dBase itolpi = tolpi.inverse();
+      = dynamic_cast<AffineTransformation3dBase &>( *tolpir );
+    std::unique_ptr<AffineTransformation3dBase> itolpi = tolpi.inverse();
 
     std::vector<int> lpi_size = tolpi.transformVector( size );
     for( dim=0; dim<lpi_size.size(); ++dim )
@@ -297,16 +297,16 @@ namespace soma
     const T* start = &obj(0);
     {
       opos = tolpi.transformVector( position );
-      Point3di pi = itolpi.transform( 0, 0, 0 );
+      Point3di pi = itolpi->transform( 0, 0, 0 );
       start = &obj( pi );
       oview = tolpi.transformVector( view );
       for( dim=0; dim<oview.size(); ++dim )
         oview[dim] = std::abs( oview[dim] );
-      pi = itolpi.transformVector( 1, 0, 0 );
+      pi = itolpi->transformVector( 1, 0, 0 );
       strides[0] = &obj.at( pi ) - &obj.at( 0 );
-      pi = itolpi.transformVector( 0, 1, 0 );
+      pi = itolpi->transformVector( 0, 1, 0 );
       strides[1] = &obj.at( pi ) - &obj.at( 0 );
-      pi = itolpi.transformVector( 0, 0, 1 );
+      pi = itolpi->transformVector( 0, 0, 1 );
       strides[2] = &obj.at( pi ) - &obj.at( 0 );
     }
 

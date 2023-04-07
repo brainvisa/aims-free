@@ -1295,8 +1295,8 @@ namespace carto
     carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( orient, transl );
     soma::AffineTransformation3dBase & flip
-      = static_cast<soma::AffineTransformation3dBase &>( *flipt );
-    AffineTransformation3dBase iflip = flip.inverse();
+      = dynamic_cast<soma::AffineTransformation3dBase &>( *flipt );
+    std::unique_ptr<AffineTransformation3dBase> iflip = flip.inverse();
     blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>
       new_strides = strides;
     long long offset = 0, old_offset = _start - &_items[0];
@@ -1305,7 +1305,7 @@ namespace carto
     {
       Point3df p( 0.f, 0.f, 0.f );
       p[i] = 1.;
-      Point3df p1 = iflip.transformVector( p );
+      Point3df p1 = iflip->transformVector( p );
       new_strides[i] = &at( int( rint( p1[0] ) ), int( rint( p1[1] ) ),
                         int( rint( p1[2] ) ) )
         - &at( 0 );
@@ -1377,7 +1377,7 @@ namespace carto
     carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( force_memory_layout, transl );
     soma::AffineTransformation3dBase & flip
-      = static_cast<soma::AffineTransformation3dBase &>( *flipt );
+      = dynamic_cast<soma::AffineTransformation3dBase &>( *flipt );
 
     bool change_layout = false;
     Point3df ndim = flip.transformVector( float( dims[0] ), float( dims[1] ),
@@ -1387,12 +1387,12 @@ namespace carto
     new_dims[2] = int( rint( fabs( ndim[2] ) ) );
     long cstride = 1;
 
-    AffineTransformation3dBase iflip = flip.inverse();
+    std::unique_ptr<AffineTransformation3dBase> iflip = flip.inverse();
     for( i=0; i<3; ++i )
     {
       Point3df p0( 0, 0, 0 );
       p0[i] = 1;
-      p0 = iflip.transformVector( p0 );
+      p0 = iflip->transformVector( p0 );
       long st = &this->at( int( rint( p0[0] ) ), int( rint( p0[1] ) ), int( rint( p0[2] ) ) ) - &this->at( 0 );
       if( st != cstride )
       {
@@ -1473,8 +1473,8 @@ namespace carto
     carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( orient, transl );
     soma::AffineTransformation3dBase & flip
-      = static_cast<soma::AffineTransformation3dBase &>( *flipt );
-    AffineTransformation3dBase iflip = flip.inverse();
+      = dynamic_cast<soma::AffineTransformation3dBase &>( *flipt );
+    std::unique_ptr<AffineTransformation3dBase> iflip = flip.inverse();
 
     dims = flip.transformVector( dims );
     for( i=0, n=dims.size(); i<n; ++i )
@@ -1506,7 +1506,7 @@ namespace carto
       rmvs.matrix()(1, 1) = 1.f / rvs[1];
       rmvs.matrix()(2, 2) = 1.f / rvs[2];
       // affine in mm
-      AffineTransformation3dBase iflipmm = mvs * iflip * rmvs;
+      AffineTransformation3dBase iflipmm = mvs * *iflip * rmvs;
 
       std::vector<std::vector<float> > rtrans;
       Object transs = hdr.getProperty( "transformations" );

@@ -116,13 +116,13 @@ void MaskLinearResampler<T>::resample( const carto::Volume< T >& input_data,
           && thing.refVolume().isNull() );
 
   aims::AffineTransformation3d dirMotion = motion;
-  aims::AffineTransformation3d invMotion = motion.inverse();
+  std::unique_ptr<aims::AffineTransformation3d> invMotion = motion.inverse();
   
   // scale motion
   Point3df sizeFrom( input_data.getVoxelSize() );
   Point3df sizeTo( thing.getVoxelSize() );
   dirMotion.scale( sizeFrom, sizeTo );
-  invMotion.scale( sizeTo, sizeFrom );
+  invMotion->scale( sizeTo, sizeFrom );
 
   //
   Point3df start;
@@ -135,7 +135,7 @@ void MaskLinearResampler<T>::resample( const carto::Volume< T >& input_data,
 
   for (int t = 1; t <= dimt; t++ )
   {
-    start = invMotion.translation();
+    start = invMotion->translation();
     for ( int s = 1; s <= dimz; s++ )
     {
       if(verbose) {
@@ -145,11 +145,11 @@ void MaskLinearResampler<T>::resample( const carto::Volume< T >& input_data,
       }
 
       _sliceResamp( input_data, thing, background, it, start, t - 1,
-                    invMotion.rotation() );
+                    invMotion->rotation() );
       it = &thing.at( 0, 0, s, t - 1 );
-      start[ 0 ] += invMotion.rotation()( 0, 2 );
-      start[ 1 ] += invMotion.rotation()( 1, 2 );
-      start[ 2 ] += invMotion.rotation()( 2, 2 );
+      start[ 0 ] += invMotion->rotation()( 0, 2 );
+      start[ 1 ] += invMotion->rotation()( 1, 2 );
+      start[ 2 ] += invMotion->rotation()( 2, 2 );
     }
   }
   if(verbose) {

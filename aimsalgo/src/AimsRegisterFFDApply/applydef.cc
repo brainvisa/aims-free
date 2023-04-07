@@ -592,7 +592,12 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   if(transform->invertible()) {
     cout << "Resampling the Bucket with the combined pushforward and pullback "
       "methods... ";
-    rc_ptr<soma::Transformation3d> inverse_transform(transform->getInverse());
+    unique_ptr<soma::Transformation> ti = transform->getInverse();
+    Transformation3d *ti3 = dynamic_cast<Transformation3d *>( ti.get() );
+    if( !ti3 )
+      throw runtime_error( "inverse transformation is not 3D !" );
+    ti.release();
+    rc_ptr<soma::Transformation3d> inverse_transform( ti3 );
     out = resampleBucket( in, *transform, *inverse_transform,
                           Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
   } else {
@@ -721,8 +726,14 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   cout << "Resampling the Graph... ";
   rc_ptr<soma::Transformation3d> inverse_transform;
 
-  if(transform->invertible()) {
-    inverse_transform = rc_ptr<soma::Transformation3d>(transform->getInverse());
+  if(transform->invertible())
+  {
+    unique_ptr<soma::Transformation> ti = transform->getInverse();
+    Transformation3d *ti3 = dynamic_cast<Transformation3d *>( ti.get() );
+    if( !ti3 )
+      throw runtime_error( "inverse transformation is not 3D !" );
+    ti.release();
+    inverse_transform = rc_ptr<soma::Transformation3d>( ti3 );
   }
   transformGraph( *in, *transform, inverse_transform.get(),
                   Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
@@ -830,7 +841,7 @@ load_transformations(const FFDApplyProc& ffdproc,
       throw FatalError(s.str());
     }
     if(volume_mode) {
-      *affine = affine->inverse();
+      affine = affine->inverse();
     }
   }
   cout << "Affine : " << *affine << endl;
@@ -905,7 +916,7 @@ load_transformation(const string &filename_arg,
       throw FatalError(s.str());
     }
     if(invert) {
-      *affine = affine->inverse();
+      affine = affine->inverse();
     }
     return rc_ptr<soma::Transformation3d>(affine.release());
   }

@@ -151,20 +151,20 @@ namespace carto
     while( vs.size() < 3 )
       vs.push_back( 1. );
 
-    AffineTransformation3dBase trinv = tr.inverse();
+    std::unique_ptr<AffineTransformation3dBase> trinv = tr.inverse();
     // embed voxel size in trinv
     AffineTransformation3dBase ivs;
     ivs.matrix()( 0, 0 ) = 1.f / vs[0];
     ivs.matrix()( 1, 1 ) = 1.f / vs[1];
     ivs.matrix()( 2, 2 ) = 1.f / vs[2];
-    trinv = ivs * trinv;
+    *trinv = ivs * *trinv;
 
     line_NDIterator<T> oit( &output.at( 0 ), output.getSize(),
                             output.getStrides(), true );
 
     Point3df ipos( 0, 0, 0 );
     ipos[oit.line_direction()] = ovs[oit.line_direction()];
-    Point3df xoff = trinv.transformVector( ipos );
+    Point3df xoff = trinv->transformVector( ipos );
     std::vector<int> vipos;
     std::vector<int> idims = input.getSize();
     int dx = idims[0], dy = idims[1], dz = idims[2];
@@ -175,7 +175,7 @@ namespace carto
     {
       p = &*oit;
       vipos = oit.position();
-      ipos = trinv.transform( vipos[0] * ovs[0], vipos[1] * ovs[1],
+      ipos = trinv->transform( vipos[0] * ovs[0], vipos[1] * ovs[1],
                               vipos[2] * ovs[2] );
       for( pp=p + oit.line_length(); p!=pp; oit.inc_line_ptr( p ) )
       {

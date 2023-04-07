@@ -166,10 +166,9 @@ namespace aims
       }
     }
 
-    Motion  m2s = stom.inverse();
-    Point3df df = m2s.transform( Point3df( thing.dimX(), thing.dimY(),
-                                    thing.dimZ() ) )
-        - m2s.transform( Point3df( 0, 0, 0 ) );
+    std::unique_ptr<AffineTransformation3d>  m2s = stom.inverse();
+    Point3df df = m2s->transformVector( Point3df( thing.dimX(), thing.dimY(),
+                                        thing.dimZ() ) );
     Point4d tdims = Point4d( short( rint( fabs( df[0] ) ) ), 
                    short( rint( fabs( df[1] ) ) ),
                    short( rint( fabs( df[2] ) ) ), thing.dimT() );

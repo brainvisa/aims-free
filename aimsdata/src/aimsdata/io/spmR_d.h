@@ -254,10 +254,9 @@ namespace aims
                            int16_t( rint( incf[2] ) ), 0 );
     Point3df d0f;
     Point4d d0;
-    AffineTransformation3d  m2s = stom.inverse();
-    Point3df df = m2s.transform( Point3df( data.dimX(), data.dimY(),
-                                 data.dimZ() ) )
-        - m2s.transform( Point3df( 0, 0, 0 ) );
+    std::unique_ptr<AffineTransformation3d>  m2s = stom.inverse();
+    Point3df df = m2s->transformVector( Point3df( data.dimX(), data.dimY(),
+                                        data.dimZ() ) );
     Point4d tdims = Point4d( short( rint( fabs( df[0] ) ) ), 
                    short( rint( fabs( df[1] ) ) ),
                    short( rint( fabs( df[2] ) ) ), (short) data.dimT() );
@@ -308,10 +307,9 @@ namespace aims
                            int16_t( rint( incf[2] ) ), 0 );
     Point3df d0f;
     Point4d d0;
-    AffineTransformation3d  m2s = stom.inverse();
-    Point3df df = m2s.transform( Point3df( data.dimX(), data.dimY(),
-                                 data.dimZ() ) )
-        - m2s.transform( Point3df( 0, 0, 0 ) );
+    std::unique_ptr<AffineTransformation3d>  m2s = stom.inverse();
+    Point3df df = m2s->transformVector( Point3df( data.dimX(), data.dimY(),
+                                        data.dimZ() ) );
     Point4d tdims = Point4d( short( rint( fabs( df[0] ) ) ), 
                    short( rint( fabs( df[1] ) ) ),
                    short( rint( fabs( df[2] ) ) ), data.dimT() );

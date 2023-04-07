@@ -58,7 +58,7 @@ int main( int argc, const char** argv )
       Motion		m;
       MotionReader	mr( r );
       mr.read( m );
-      m = m.inverse();
+      m = *m.inverse();
       if( w.empty() )
         {
           w = FileUtil::removeExtension( r ) + "_inverted.trm";

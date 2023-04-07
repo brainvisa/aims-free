@@ -794,14 +794,19 @@ void TransformationGraph3d::registerInverseTransformations( bool loadAffines )
       continue;
     }
 
-    unique_ptr<Transformation3d> inv_trans_u = trans->getInverse();
+    unique_ptr<Transformation> inv_trans_u = trans->getInverse();
     if( inv_trans_u )
     {
       ++ie;
 
-      rc_ptr<Transformation3d> inv_trans( inv_trans_u.release() );
-      registerTransformation( dst, src, inv_trans, true );
-      modified = true;
+      Transformation3d * t3
+        = dynamic_cast<Transformation3d *>( inv_trans_u.release() );
+      if( t3 )
+      {
+        rc_ptr<Transformation3d> inv_trans( t3 );
+        registerTransformation( dst, src, inv_trans, true );
+        modified = true;
+      }
       continue;
     }
 
