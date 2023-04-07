@@ -574,7 +574,7 @@ int main(int argc, const char **argv)
 	    
 	    //ecriture des 'images' propres dans un fichier numerique
 	    ofstream C ;
-	    char     fileProj[10];
+	    char     fileProj[16];
 	    sprintf(fileProj, "proj_%d",fac+1 ); 
 	    C.open(fileProj);
 	    
@@ -746,11 +746,11 @@ int main(int argc, const char **argv)
 	    som2 += eigenVect(n+4,k);    
 	  }
 	
-	char filenameMod[10];
+	char filenameMod[20];
 	sprintf(filenameMod, "vectMod%d",    k+1);
 	C.open(filenameMod);
 
-	char filename[10];
+	char filename[20];
 	sprintf(filename, "vect%d",    k+1);
 	Cp.open(filename);
 	
