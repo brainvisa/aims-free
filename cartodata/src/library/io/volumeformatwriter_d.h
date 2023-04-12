@@ -208,7 +208,8 @@ namespace soma
 
     // handle internal orientation: go back to LPI
     const Referential & ref = obj.referential();
-    std::vector<float> osz( obj.getSize().begin(), obj.getSize().end() );
+    std::vector<int> odim = obj.getSize();
+    std::vector<float> osz( odim.begin(), odim.end() );
     for( dim=0; dim<osz.size(); ++dim )
       --osz[dim];
     rc_ptr<Transformation> tolpir = ref.toOrientation( "LPI", osz );
