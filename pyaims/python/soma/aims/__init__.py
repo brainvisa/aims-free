@@ -1184,6 +1184,7 @@ Point4dd = AimsVector_DOUBLE_4
 Point3d = AimsVector_S16_3
 Point3du = AimsVector_U32_3
 Point3dl = AimsVector_S64_3
+Point3di = AimsVector_S32_3
 Point3df = AimsVector_FLOAT_3
 Point3dd = AimsVector_DOUBLE_3
 Point2d = AimsVector_S16_2
@@ -1199,7 +1200,7 @@ Point4d.__repr__ = Point4du.__repr__ = Point4dl.__repr__= Point4df.__repr__ \
     = Point4dd.__repr__ = Point3d.__repr__ = Point3du.__repr__ \
     = Point3dl.__repr__ = Point3df.__repr__ = Point3dd.__repr__ \
     = Point2d.__repr__ = Point2du.__repr__ = Point2dl.__repr__ \
-    = Point2df.__repr__ = Point2dd.__repr__ \
+    = Point2df.__repr__ = Point2dd.__repr__ = Point3di.__repr__ \
     = lambda self: __fixsipclasses__.fakerepr(self) + "\n" + str(list(self.items()))
 
 
@@ -1252,6 +1253,10 @@ def __AffineTransformation3d__affine(self):
     return a
 
 
+def __Transformation__inverse(self):
+    return self.getInverse().get()
+
+
 AffineTransformationBase.toMatrix = __toMatrix
 AffineTransformationBase.fromMatrix = __AffineTransformation3dFromMatrix
 AffineTransformation3d.__oldinit__ = AffineTransformation3d.__init__
@@ -1262,9 +1267,11 @@ Transformation.__oldheader__ = Transformation.header
 Transformation.header = __AffineTransformation3d__header
 AffineTransformation3d.__oldaffine__ = AffineTransformation3d.affine
 AffineTransformation3d.affine = __AffineTransformation3d__affine
+Transformation.inverse = __Transformation__inverse
 del __toMatrix, __AffineTransformation3dFromMatrix, \
-    __AffineTransformation3d__init__, __AffineTransformation3d__header, \
-    __AffineTransformation3d__affine
+    __AffineTransformation3d__init__, __AffineTransformation__init__, \
+    __AffineTransformation3d__header, \
+    __AffineTransformation3d__affine, __Transformation__inverse
 # backward compatibility
 Motion = AffineTransformation3d
 
@@ -1305,6 +1312,8 @@ convertersObjectToPython = {
     'rc_ptr of Transformation3d': Transformation3d.fromObject,
     'POINT2DF': Point2df.fromObject,
     'POINT3DF': Point3df.fromObject,
+    'POINT3DI': Point3di.fromObject,
+    'POINT3DL': Point3dl.fromObject,
     'POINT4DF': Point4df.fromObject,
     'S16': carto.NumericGenericObjectConverter.asInt,
     'U16': carto.NumericGenericObjectConverter.asInt,

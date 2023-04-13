@@ -33,12 +33,12 @@ a test would be difficult to implement or expensive to run.
 
     carto::Object header();
     void setHeader( carto::Object ph );
-    virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const = 0;
-    virtual vector_FLOAT transform( const vector_FLOAT & pos ) const;
     virtual vector_S32 transform( const vector_S32 & pos ) const;
-    virtual vector_DOUBLE transformVector( const vector_DOUBLE & pos ) const;
-    virtual vector_FLOAT transformVector( const vector_FLOAT & pos ) const;
+    virtual vector_FLOAT transform( const vector_FLOAT & pos /Constrained/ ) const;
+    virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const = 0;
     virtual vector_S32 transformVector( const vector_S32 & pos ) const;
+    virtual vector_FLOAT transformVector( const vector_FLOAT & pos /Constrained/ ) const;
+    virtual vector_DOUBLE transformVector( const vector_DOUBLE & pos ) const;
 
     virtual bool invertible() const;
     rc_ptr_Transformation getInverse() const;
@@ -71,15 +71,15 @@ Base class for spatial transformations in 3D.
   public:
     virtual ~Transformation3d();
 
+    Point3d transform( const Point3d & p /Constrained/ ) const;
+    Point3df transform( const Point3df & dir /Constrained/ ) const;
+    Point3dd transform( const Point3dd & pos /Constrained/ ) const;
     virtual vector_S32 transform( const vector_S32 & pos ) const;
-    virtual vector_FLOAT transform( const vector_FLOAT & pos ) const;
+    virtual vector_FLOAT transform( const vector_FLOAT & pos /Constrained/ ) const;
     virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const;
     Point3dd transform( double x, double y, double z ) const;
-    Point3d transform( const Point3d & p ) const;
-    Point3df transform( const Point3df & dir ) const;
-    Point3dd transform( const Point3dd & pos ) const;
     virtual vector_S32 transformVector( const vector_S32 & pos ) const;
-    virtual vector_FLOAT transformVector( const vector_FLOAT & pos ) const;
+    virtual vector_FLOAT transformVector( const vector_FLOAT & pos /Constrained/ ) const;
     virtual vector_DOUBLE transformVector( const vector_DOUBLE & pos ) const;
 
     SIP_PYOBJECT transformPoints( SIP_PYOBJECT ) const /Factory/;
@@ -177,6 +177,7 @@ public:
     AffineTransformationBase( int order = 3 );
     AffineTransformationBase( const soma::AffineTransformationBase& other );
     AffineTransformationBase( const vector_FLOAT & mat );
+    AffineTransformationBase( const carto::Object mat );
     virtual ~AffineTransformationBase();
 
     virtual bool operator == ( const soma::AffineTransformationBase & ) const;
@@ -196,9 +197,10 @@ public:
     rc_ptr_Transformation getInverse() const;
 
     int order() const;
+    virtual void extendOrder( unsigned n );
 
     virtual vector_S32 transform( const vector_S32 & pos ) const;
-    virtual vector_FLOAT transform( const vector_FLOAT & pos ) const;
+    virtual vector_FLOAT transform( const vector_FLOAT & pos /Constrained/ ) const;
     virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const;
 
     vector_FLOAT toVector() const;
@@ -213,7 +215,8 @@ public:
   PyArray_Descr *descr = PyArray_DescrFromType( NPY_FLOAT32 );
   sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
                                  &dims[0],
-                                 (char *) &(sipCpp->matrix()[0]) );
+                                 (char *) &(sipCpp->matrix()[0]),
+                                 false );
 %End
 
   void _arrayDestroyedCallback( SIP_PYOBJECT );
@@ -251,24 +254,24 @@ public:
       const soma::AffineTransformation3dBase & trans );
     // soma::AffineTransformation3dBase operator - () const;
 
-    virtual vector_S32 transform( const vector_S32 & pos ) const;
-    virtual vector_FLOAT transform( const vector_FLOAT & pos ) const;
-    virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const;
-    Point3d transform( const Point3d & p ) const;
-    Point3df transform( const Point3df & dir ) const;
-    Point3dd transform( const Point3dd & pos ) const;
+    Point3d transform( const Point3d & p /Constrained/ ) const;
+    Point3df transform( const Point3df & dir /Constrained/ ) const;
+    Point3dd transform( const Point3dd & pos /Constrained/ ) const;
     Point3dd transform( double x, double y, double z ) const;
+    virtual vector_S32 transform( const vector_S32 & pos ) const;
+    virtual vector_FLOAT transform( const vector_FLOAT & pos /Constrained/ ) const;
+    virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const;
 
-    Point3df transformVector( const Point3df & dir ) const;
-    Point3dd transformVector( const Point3dd & vec ) const;
+    Point3df transformVector( const Point3df & dir /Constrained/ ) const;
+    Point3dd transformVector( const Point3dd & vec /Constrained/ ) const;
     Point3dd transformVector( double x, double y, double z ) const;
     // Point3df transformVector( float x, float y, float z ) const;
     // Point3di transformVector( int x, int y, int z ) const;
-    Point3df transformNormal( const Point3df & dir ) const;
-    Point3dd transformNormal( const Point3dd & dir ) const;
+    Point3df transformNormal( const Point3df & dir /Constrained/ ) const;
+    Point3dd transformNormal( const Point3dd & dir /Constrained/ ) const;
     Point3dd transformNormal( double x, double y, double z ) const;
     // Point3df transformNormal( float x, float y, float z ) const;
-    Point3df transformUnitNormal( const Point3df & dir ) const;
+    Point3df transformUnitNormal( const Point3df & dir /Constrained/ ) const;
     Point3dd transformUnitNormal( const Point3dd & dir ) const;
     Point3dd transformUnitNormal( double x, double y, double z ) const;
     // Point3df transformUnitNormal( float x, float y, float z ) const;
@@ -276,12 +279,17 @@ public:
     bool isIdentity() const;
     virtual void setToIdentity();
 
+    virtual void extendOrder( unsigned n );
+
     virtual bool invertible() const;
     rc_ptr_Transformation getInverse() const;
     virtual void scale( const Point3df& sizeFrom, const Point3df& sizeTo );
     bool isDirect() const;
 
     void setTranslation(Point3df trans);
+
+  protected:
+    virtual Point3dd transformDouble( double x, double y, double z ) const;
   };
 
 };
@@ -695,6 +703,25 @@ rc_ptr_Transformation3d
 %MethodCode
     sipRes = new carto::rc_ptr<soma::Transformation3d>(
       aims::operator * ( *a0, *a1 ) );
+%End
+
+soma::Transformation*
+    operator * ( const soma::AffineTransformationBase & transformation3d1,
+                 const soma::AffineTransformationBase & transformation3d2 )
+        /Factory, ReleaseGIL/;
+%MethodCode
+    sipRes =
+      new soma::AffineTransformationBase( soma::operator * ( *a0, *a1 ) );
+%End
+
+
+soma::Transformation*
+    operator * ( const soma::AffineTransformation3dBase & transformation3d1,
+                 const soma::AffineTransformation3dBase & transformation3d2 )
+        /Factory, ReleaseGIL/;
+%MethodCode
+    sipRes =
+      new soma::AffineTransformation3dBase( soma::operator * ( *a0, *a1 ) );
 %End
 
 soma::Transformation3d*

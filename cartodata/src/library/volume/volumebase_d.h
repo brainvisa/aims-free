@@ -1285,44 +1285,38 @@ namespace carto
   template < typename T >
   void Volume< T >::flipToOrientation( const std::string & orient )
   {
-    std::vector<float>transl( 3, 0.f );
     blitz::TinyVector<int, Volume<T>::DIM_MAX> dims = _blitz.shape();
     blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>
       strides = _blitz.stride();
 
-    int i;
-    for( i=0; i<3; ++i )
+    int i, n = this->getSize().size();
+    std::vector<float>transl( n, 0.f );
+
+    for( i=0; i<n; ++i )
       transl[i] = dims[i] - 1;
     carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( orient, transl );
-    soma::AffineTransformation3dBase & flip
-      = dynamic_cast<soma::AffineTransformation3dBase &>( *flipt );
-    std::unique_ptr<AffineTransformation3dBase> iflip = flip.inverse();
+    soma::AffineTransformationBase & flip
+      = dynamic_cast<soma::AffineTransformationBase &>( *flipt );
+    std::unique_ptr<AffineTransformationBase> iflip = flip.inverse();
     blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>
       new_strides = strides;
     long long offset = 0, old_offset = _start - &_items[0];
     long old_stride;
-    for( i=0; i<3; ++i )
+    for( i=0; i<n; ++i )
     {
-      Point3df p( 0.f, 0.f, 0.f );
+      std::vector<int> p( n, 0.f );
       p[i] = 1.;
-      Point3df p1 = iflip->transformVector( p );
-      new_strides[i] = &at( int( rint( p1[0] ) ), int( rint( p1[1] ) ),
-                        int( rint( p1[2] ) ) )
-        - &at( 0 );
+      std::vector<int> p1 = iflip->transformVector( p );
+      new_strides[i] = &at( p1 ) - &at( 0 );
     }
-    Point3df ndim = flip.transformVector( float( dims[0] ), float( dims[1] ),
-                                          float( dims[2] ) );
+    std::vector<int> vdims( dims.begin(), dims.end() );
+    std::vector<int> new_dims = flip.transformVector( vdims );
     blitz::TinyVector<int, Volume<T>::DIM_MAX> new_bdims = dims;
-    std::vector<int> new_dims = this->getSize();
-    new_bdims[0] = int( rint( fabs( ndim[0] ) ) );
-    new_bdims[1] = int( rint( fabs( ndim[1] ) ) );
-    new_bdims[2] = int( rint( fabs( ndim[2] ) ) );
-    new_dims[0] = new_bdims[0];
-    new_dims[1] = new_bdims[1];
-    new_dims[2] = new_bdims[2];
+    for( i=0; i<n; ++i )
+      new_bdims[i] = new_dims[i];
     // std::cout << "new dims: " << new_dims[0] << ", " << new_dims[1] << ", " << new_dims[2] << std::endl;
-    for( i=0; i<3; ++i )
+    for( i=0; i<n; ++i )
     {
       if( new_strides[i] < 0 )
         offset += -new_strides[i] * ( new_dims[i] - 1 );
@@ -1352,7 +1346,8 @@ namespace carto
 
     // update referential info, generate a new ID
     _referential.setOrientation( orient );
-    if( orient == "LPI" ) // initial LPI orientation
+    if( _referential.orientationStr()
+        == _referential.orientationStr( "LPI" ) ) // initial LPI orientation
       _referential.setUuid( _referential.lpiReferentialUuid() );
     else
     {
@@ -1369,32 +1364,27 @@ namespace carto
   {
     // calculate strides and dims for asked memory layout
     std::vector<int> dims = this->getSize();
-    std::vector<int> new_dims = dims;
-    std::vector<float>transl( 3, 0.f );
-    int i;
-    for( i=0; i<3; ++i )
+    int i, n = dims.size();
+    std::vector<float>transl( n, 0.f );
+    for( i=0; i<n; ++i )
       transl[i] = dims[i] - 1;
 
     carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( force_memory_layout, transl );
-    soma::AffineTransformation3dBase & flip
-      = dynamic_cast<soma::AffineTransformation3dBase &>( *flipt );
+    soma::AffineTransformationBase & flip
+      = dynamic_cast<soma::AffineTransformationBase &>( *flipt );
 
     bool change_layout = false;
-    Point3df ndim = flip.transformVector( float( dims[0] ), float( dims[1] ),
-                                          float( dims[2] ) );
-    new_dims[0] = int( rint( fabs( ndim[0] ) ) );
-    new_dims[1] = int( rint( fabs( ndim[1] ) ) );
-    new_dims[2] = int( rint( fabs( ndim[2] ) ) );
+    std::vector<int> new_dims = flip.transformVector( dims );
     long cstride = 1;
 
-    std::unique_ptr<AffineTransformation3dBase> iflip = flip.inverse();
-    for( i=0; i<3; ++i )
+    std::unique_ptr<AffineTransformationBase> iflip = flip.inverse();
+    for( i=0; i<n; ++i )
     {
-      Point3df p0( 0, 0, 0 );
+      std::vector<int> p0( n, 0 );
       p0[i] = 1;
       p0 = iflip->transformVector( p0 );
-      long st = &this->at( int( rint( p0[0] ) ), int( rint( p0[1] ) ), int( rint( p0[2] ) ) ) - &this->at( 0 );
+      long st = &this->at( p0 ) - &this->at( 0 );
       if( st != cstride )
       {
         change_layout = true;
@@ -1415,26 +1405,15 @@ namespace carto
       // copy data in the new layout
       line_NDIterator<T> it( &this->at( 0 ), this->getSize(),
                              this->getStrides(), true );
-      Point3df tp;
       T* p, *pp, *dp;
       long dstride = 0;
-      std::vector<int> pos = it.position();
-      Point3df p0 = flip.transform( 0.f, 0.f, 0.f );
-      pos[0] = int( rint( p0[0] ) );
-      pos[1] = int( rint( p0[1] ) );
-      pos[2] = int( rint( p0[2] ) );
+      std::vector<int> pos;
+      std::vector<int> p0;
+      pos = flip.transform( it.position() );
       dp = &copy->at( pos );
-      if( it.line_direction() < 3 )
-      {
-        p0 = Point3df( 0, 0, 0 );
-        p0[it.line_direction()] = 1;
-        p0 = flip.transform( p0 );
-        pos[0] = int( rint( p0[0] ) );
-        pos[1] = int( rint( p0[1] ) );
-        pos[2] = int( rint( p0[2] ) );
-      }
-      else
-        ++pos[it.line_direction()];
+      p0 = std::vector<int>( n, 0 );
+      p0[it.line_direction()] = 1;
+      pos = flip.transform( p0 );
       dstride = &copy->at( pos ) - dp;
 
       for( ; !it.ended(); ++it )
@@ -1473,9 +1452,9 @@ namespace carto
       transl[i] = dims[i] - 1;
     carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( orient, transl );
-    soma::AffineTransformation3dBase & flip
-      = dynamic_cast<soma::AffineTransformation3dBase &>( *flipt );
-    std::unique_ptr<AffineTransformation3dBase> iflip = flip.inverse();
+    soma::AffineTransformationBase & flip
+      = dynamic_cast<soma::AffineTransformationBase &>( *flipt );
+    std::unique_ptr<AffineTransformationBase> iflip = flip.inverse();
 
     dims = flip.transformVector( dims );
     for( i=0, n=dims.size(); i<n; ++i )
@@ -1498,16 +1477,15 @@ namespace carto
 
     if( hdr.hasProperty( "transformations" ) )
     {
-      AffineTransformation3dBase mvs;
-      AffineTransformation3dBase rmvs;
-      mvs.matrix()(0, 0) = vs[0];
-      mvs.matrix()(1, 1) = vs[1];
-      mvs.matrix()(2, 2) = vs[2];
-      rmvs.matrix()(0, 0) = 1.f / rvs[0];
-      rmvs.matrix()(1, 1) = 1.f / rvs[1];
-      rmvs.matrix()(2, 2) = 1.f / rvs[2];
+      AffineTransformationBase mvs( dims.size() );
+      AffineTransformationBase rmvs( dims.size() );
+      for( i=0, n=vs.size(); i<n; ++i )
+      {
+        mvs.matrix()(i, i) = vs[i];
+        rmvs.matrix()(i, i) = 1.f / rvs[i];
+      }
       // affine in mm
-      AffineTransformation3dBase iflipmm = mvs * *iflip * rmvs;
+      AffineTransformationBase iflipmm = mvs * *iflip * rmvs;
 
       std::vector<std::vector<float> > rtrans;
       Object transs = hdr.getProperty( "transformations" );
@@ -1515,7 +1493,10 @@ namespace carto
       Object tit = transs->objectIterator();
       for(; tit->isValid(); tit->next() )
       {
-        AffineTransformation3dBase trans( tit->currentValue() );
+        AffineTransformationBase trans( tit->currentValue() );
+        trans.extendOrder( flip.order() );
+        // TODO extend both to max order( flip, trans )
+        // then handle non-3D transforms in header
         trans = trans * iflipmm;
         rtrans.push_back( trans.toVector() );
       }
@@ -1524,8 +1505,9 @@ namespace carto
 
     if( hdr.hasProperty( "storage_to_memory" ) )
     {
-      AffineTransformation3dBase
+      AffineTransformationBase
         s2m( hdr.getProperty( "storage_to_memory" ) );
+      s2m.extendOrder( flip.order() );
       s2m = flip * s2m;
       rhdr->setProperty( "storage_to_memory", s2m.toVector() );
     }

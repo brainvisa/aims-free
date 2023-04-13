@@ -39,16 +39,6 @@ public:
   sipRes = new aims::AffineTransformation3d( -*sipCpp );
 %End
 
-  Point3df transformVector( const Point3df & dir ) const;
-  Point3dd transformVector( const Point3dd & vec ) const;
-  Point3dd transformVector( double x, double y, double z ) const;
-  Point3df transformNormal( const Point3df & dir ) const;
-  Point3dd transformNormal( const Point3dd & dir ) const;
-  Point3dd transformNormal( double x, double y, double z ) const;
-  Point3df transformUnitNormal( const Point3df & dir ) const;
-  Point3dd transformUnitNormal( const Point3dd & dir ) const;
-  Point3dd transformUnitNormal( double x, double y, double z ) const;
-
   Point3df translation();
   // const Point3df translation() const;
   rc_ptr_Volume_FLOAT rotation();
