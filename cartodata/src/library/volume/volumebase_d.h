@@ -1142,6 +1142,7 @@ namespace carto
                         blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
                         ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
     }
+    _referential.ensureOrder( VolumeProxy<T>::_size.size() );
 
   }
 

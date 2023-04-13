@@ -558,7 +558,7 @@ namespace carto
     blitz::Array<T, Volume<T>::DIM_MAX>  _blitz;
     rc_ptr<Volume<T> >  _refvol;
     std::vector<int>    _pos;
-    Referential         _referential;
+    Referential _referential;
   };
 
 //============================================================================

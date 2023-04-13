@@ -169,6 +169,10 @@ Base class for spatial transformations in 3D.
 #include <soma-io/transformation/affinetransformation3d_base.h>
 %End
 
+%TypeCode
+#include <pyaims/vector/numpyarrayfunc.h>
+%End
+
 public:
     AffineTransformationBase( int order = 3 );
     AffineTransformationBase( const soma::AffineTransformationBase& other );
@@ -196,6 +200,34 @@ public:
     virtual vector_S32 transform( const vector_S32 & pos ) const;
     virtual vector_FLOAT transform( const vector_FLOAT & pos ) const;
     virtual vector_DOUBLE transform( const vector_DOUBLE & pos ) const;
+
+    vector_FLOAT toVector() const;
+    vector_FLOAT toColumnVector() const;
+    void fromColumnVector( const vector_FLOAT & vec );
+
+    SIP_PYOBJECT __array__() /Factory/;
+%MethodCode
+  int n = sipCpp->matrix().ncols;
+  std::vector<int> dims( 2, n );
+
+  PyArray_Descr *descr = PyArray_DescrFromType( NPY_FLOAT32 );
+  sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
+                                 &dims[0],
+                                 (char *) &(sipCpp->matrix()[0]) );
+%End
+
+  void _arrayDestroyedCallback( SIP_PYOBJECT );
+%MethodCode
+  // remove weak reference in volume
+  PyObject_DelAttrString( sipSelf, "_arrayref" );
+  // dec reference to self that was manually incremented in __array__()
+  // when building the numpy array
+  Py_DECREF( sipSelf );
+  // the aditional ref to self will be deleted when the callback
+  // (method bound on self) is destroyed, just after now
+  // so self can be destroyed safely
+%End
+
   };
 
 
@@ -250,9 +282,6 @@ public:
     bool isDirect() const;
 
     void setTranslation(Point3df trans);
-    vector_FLOAT toVector() const;
-    vector_FLOAT toColumnVector() const;
-    void fromColumnVector( const vector_FLOAT & vec );
   };
 
 };

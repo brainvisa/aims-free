@@ -63,9 +63,6 @@ public:
   void setTranslation( Point3df );
   virtual void setRotationAffine( float, float, float,
                                   const Point3df & = Point3df(0.0,0.0,0.0) );
-  vector_FLOAT toVector() const;
-  vector_FLOAT toColumnVector() const;
-  void fromColumnVector( const vector_FLOAT & );
 
   static rc_ptr_Volume_FLOAT rotationaroundx( float );
   static rc_ptr_Volume_FLOAT rotationaroundy( float );

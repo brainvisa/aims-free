@@ -52,23 +52,41 @@ namespace carto
       A,
       P,
       S,
-      I
+      I,
+      T,
+      t,
+      U,
+      u,
+      V,
+      v,
+      W,
+      w,
+      X,
+      x,
+      Y,
+      y,
+      Z,
+      z
     };
 
-    Referential();
+    Referential( unsigned ndim = 3 );
     Referential( const Referential & ref );
     Referential( Object ref );
     ~Referential();
 
     Referential & operator = ( const Referential & ref );
 
+    unsigned order() const { return _orientation.size(); }
+    void ensureOrder( unsigned ndim );
     std::string uuid() const { return _uuid; }
     std::string orientationStr() const;
+    std::string orientationStr( const std::string & orient ) const;
     std::vector<int> axesOrientation() const { return _orientation; }
     rc_ptr<Transformation>
     toOrientation(
       const std::string & orient,
-      const std::vector<float> & transl = std::vector<float>() ) const;
+      const std::vector<float> & transl = std::vector<float>(),
+      bool allow_resize = false ) const;
     rc_ptr<Transformation>
     toOrientation(
       const std::vector<int> & orient,
@@ -76,14 +94,17 @@ namespace carto
     std::string lpiReferentialUuid() const { return _lpi_uuid; }
 
     void setUuid( const std::string & uuid );
-    void setOrientation( const std::string & orient );
+    void setOrientation( const std::string & orient,
+                         bool allow_resize = false );
     void setOrientation( const std::vector<int> & orient );
     void setLpiReferential( const std::string & lpi_uuid );
 
     static std::string orientationStr( Orientation orient );
+    static std::string orientationStr( const std::vector<int> & orient );
     static Orientation orientationCode( const std::string & orient );
-    static std::vector<int> orientationVector( const std::string & orient );
-    static void setAxisTransform( AffineTransformation3dBase & tr,
+    static std::vector<int> orientationVector( const std::string & orient,
+                                               unsigned dim = 0 );
+    static void setAxisTransform( AffineTransformationBase & tr,
                                   Orientation from_code, Orientation code,
                                   const std::vector<float> & transl
                                   = std::vector<float>() );

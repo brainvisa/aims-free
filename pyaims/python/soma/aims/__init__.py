@@ -185,6 +185,8 @@ ExtendedImporter().importInModule('', globals(), locals(), 'aimssip',
 Object = carto.Object
 Transformation = soma.Transformation
 Transformation3d = soma.Transformation3d
+AffineTransformationBase = soma.AffineTransformationBase
+AffineTransformation3dBase = soma.AffineTransformation3dBase
 
 del ExtendedImporter
 
@@ -1158,7 +1160,8 @@ del proxyget
 del _vol_getstate, _vol_setstate
 del __vol_pow__, __vol_ipow__, __vol_floordiv__, __vol_ifloordiv__
 
-__fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
+__fixsipclasses__(list(globals().items()) + list(carto.__dict__.items())
+                  + list(soma.__dict__.items()) )
 
 Object.__iter__ = __fixsipclasses__.objiter
 Object.__next__ = __fixsipclasses__.objnext
@@ -1205,19 +1208,29 @@ import numpy
 
 def __toMatrix(s):
     """ This function return a copy of the transformation matrix """
-    return numpy.asarray(s.affine())[:, :, 0, 0]
+    return numpy.asarray(s)
 
 
 def __AffineTransformation3dFromMatrix(self, value):
-    if value.shape[0] == 3:
-        numpy.asarray(self.affine())[:3, :, 0, 0] = value
+    if value.shape[0] == 3 and issubclass(self.__class__,
+                                          Transformation3d):
+        numpy.asarray(self)[:3, :] = value
     else:
-        numpy.asarray(self.affine())[:, :, 0, 0] = value
+        numpy.asarray(self)[:, :] = value
 
 
 def __AffineTransformation3d__init__(self, *args):
     if len( args ) != 0 and isinstance( args[0], numpy.ndarray ) \
             and args[0].shape == (4, 4):
+        self.__oldinit__()
+        self.fromMatrix(args[0])
+    else:
+        self.__oldinit__(*args)
+
+
+def __AffineTransformation__init__(self, *args):
+    if len( args ) != 0 and isinstance( args[0], numpy.ndarray ) \
+            and args[0].shape[0] == args[0].shape[1]:
         self.__oldinit__()
         self.fromMatrix(args[0])
     else:
@@ -1239,12 +1252,14 @@ def __AffineTransformation3d__affine(self):
     return a
 
 
-AffineTransformation3d.toMatrix = __toMatrix
-AffineTransformation3d.fromMatrix = __AffineTransformation3dFromMatrix
+AffineTransformationBase.toMatrix = __toMatrix
+AffineTransformationBase.fromMatrix = __AffineTransformation3dFromMatrix
 AffineTransformation3d.__oldinit__ = AffineTransformation3d.__init__
 AffineTransformation3d.__init__ = __AffineTransformation3d__init__
-AffineTransformation3d.__oldheader__ = AffineTransformation3d.header
-AffineTransformation3d.header = __AffineTransformation3d__header
+AffineTransformationBase.__oldinit__ = AffineTransformationBase.__init__
+AffineTransformationBase.__init__ = __AffineTransformation__init__
+Transformation.__oldheader__ = Transformation.header
+Transformation.header = __AffineTransformation3d__header
 AffineTransformation3d.__oldaffine__ = AffineTransformation3d.affine
 AffineTransformation3d.affine = __AffineTransformation3d__affine
 del __toMatrix, __AffineTransformation3dFromMatrix, \
@@ -1253,7 +1268,7 @@ del __toMatrix, __AffineTransformation3dFromMatrix, \
 # backward compatibility
 Motion = AffineTransformation3d
 
-AffineTransformation3d.__repr__ = lambda self: __fixsipclasses__.fakerepr(
+AffineTransformationBase.__repr__ = lambda self: __fixsipclasses__.fakerepr(
     self) + "\n" + str(self.toMatrix())
 AffineTransformation3d.__str__ = lambda self: self.toMatrix().__str__()
 
