@@ -54,39 +54,36 @@ namespace carto
   {
   public:
       static VolumeRef<T> allocateResampledVolume(
-        const Volume<T> & vol, const AffineTransformation3dBase & tr );
+        const Volume<T> & vol, const AffineTransformationBase & tr );
       static void resampleVolume(
         const Volume<T> & input, Volume<T> & output,
-        const AffineTransformation3dBase & tr, const T & background = 0 );
+        const AffineTransformationBase & tr, const T & background = 0 );
       /// adapt info in header (referential, transformations)
       static Object transformHeader( const Object & header,
-                                     const AffineTransformation3dBase & tr );
+                                     const AffineTransformationBase & tr );
       static std::vector<int> getTransformedDims(
-        const std::vector<int> & dims, const AffineTransformation3dBase & tr );
+        const std::vector<int> & dims, const AffineTransformationBase & tr );
       static std::vector<float> getTransformedVoxelSize(
-        const std::vector<float> & vs, const AffineTransformation3dBase & tr );
+        const std::vector<float> & vs, const AffineTransformationBase & tr );
   };
 
 
   template <typename T>
   std::vector<int> LightResampler<T>::getTransformedDims(
-    const std::vector<int> & dims, const AffineTransformation3dBase & tr )
+    const std::vector<int> & dims, const AffineTransformationBase & tr )
   {
-    int d, n = dims.size();
-    std::vector<int> out_dims( n, 1 );
-    if( n > 3 )
-      n = 3;
-    Point3df zero( 0, 0, 0 ), td( 0, 0, 0 );
+    int d, n = dims.size(), i;
+    std::vector<int> out_dims( n, 0 );
     for( d=0; d<n; ++d )
     {
-      Point3df p( 0, 0, 0 );
+      std::vector<int> p( n, 0 );
       p[d] = dims[d];
-      td += tr.transformVector( p ) - tr.transformVector( zero );
+      p = tr.transformVector( p );
+      for( i=0; i<n; ++i )
+        out_dims[i] += p[i];
     }
     for( d=0; d<n; ++d )
-      out_dims[d] = fabs( td[d] );
-    for( n=dims.size(); d<d; ++d )
-      out_dims[d] = dims[d];
+      out_dims[d] = fabs( out_dims[d] );
 
     return out_dims;
   }
@@ -94,23 +91,24 @@ namespace carto
 
   template <typename T>
   std::vector<float> LightResampler<T>::getTransformedVoxelSize(
-    const std::vector<float> & vs, const AffineTransformation3dBase & tr )
+    const std::vector<float> & vs, const AffineTransformationBase & tr )
   {
-    int d, n = vs.size();
-    std::vector<float> out_vs( n, 1. );
-    if( n > 3 )
-      n = 3;
-    Point3df zero( 0, 0, 0 ), td( 0, 0, 0 );
+    unsigned d, n = tr.order(), nv = vs.size(), i;
+    n = std::max( n, nv );
+    std::vector<float> out_vs( n, 0.f );
     for( d=0; d<n; ++d )
     {
-      Point3df p( 0, 0, 0 );
-      p[d] = vs[d];
-      td += tr.transformVector( p ) - tr.transformVector( zero );
+      std::vector<float> p( n, 0.f );
+      if( d < nv )
+        p[d] = vs[d];
+      else
+        p[d] = 1.f;
+      p = tr.transformVector( p );
+      for( i=0; i<n; ++i )
+        out_vs[i] += p[i];
     }
     for( d=0; d<n; ++d )
-      out_vs[d] = fabs( td[d] );
-    for( n=vs.size(); d<d; ++d )
-      out_vs[d] = vs[d];
+      out_vs[d] = fabs( out_vs[d] );
 
     return out_vs;
   }
@@ -118,7 +116,7 @@ namespace carto
 
   template <typename T>
   VolumeRef<T> LightResampler<T>::allocateResampledVolume(
-    const Volume<T> & vol, const AffineTransformation3dBase & tr )
+    const Volume<T> & vol, const AffineTransformationBase & tr )
   {
     std::vector<int> odim = getTransformedDims( vol.getSize(), tr );
     VolumeRef<T> res( odim );
@@ -132,7 +130,7 @@ namespace carto
 
   template <typename T>
   Object LightResampler<T>::transformHeader(
-    const Object & header,  const AffineTransformation3dBase & tr )
+    const Object & header,  const AffineTransformationBase & tr )
   {
     Object out_hdr;
     return out_hdr;
@@ -142,7 +140,7 @@ namespace carto
   template <typename T>
   void LightResampler<T>::resampleVolume(
     const Volume<T> & input, Volume<T> & output,
-    const AffineTransformation3dBase & tr, const T & background )
+    const AffineTransformationBase & tr, const T & background )
   {
     std::vector<float> ovs = output.getVoxelSize();
     while( ovs.size() < 3 )
@@ -151,23 +149,25 @@ namespace carto
     while( vs.size() < 3 )
       vs.push_back( 1. );
 
-    std::unique_ptr<AffineTransformation3dBase> trinv = tr.inverse();
+    std::unique_ptr<AffineTransformationBase> trinv = tr.inverse();
     // embed voxel size in trinv
-    AffineTransformation3dBase ivs;
-    ivs.matrix()( 0, 0 ) = 1.f / vs[0];
-    ivs.matrix()( 1, 1 ) = 1.f / vs[1];
-    ivs.matrix()( 2, 2 ) = 1.f / vs[2];
+    AffineTransformationBase ivs( tr.order() );
+    unsigned i, n = vs.size();
+    for( i=0; i<n; ++i )
+      ivs.matrix()( i, i ) = 1.f / vs[i];
     *trinv = ivs * *trinv;
 
     line_NDIterator<T> oit( &output.at( 0 ), output.getSize(),
                             output.getStrides(), true );
 
-    Point3df ipos( 0, 0, 0 );
+    n = output.getSize().size();
+    std::vector<float> ipos( n, 0.f );
     ipos[oit.line_direction()] = ovs[oit.line_direction()];
-    Point3df xoff = trinv->transformVector( ipos );
+    std::vector<float> xoff = trinv->transformVector( ipos );
     std::vector<int> vipos;
     std::vector<int> idims = input.getSize();
     int dx = idims[0], dy = idims[1], dz = idims[2];
+    unsigned m = idims.size();
 
     T *p, *pp;
 
@@ -175,19 +175,29 @@ namespace carto
     {
       p = &*oit;
       vipos = oit.position();
-      ipos = trinv->transform( vipos[0] * ovs[0], vipos[1] * ovs[1],
-                              vipos[2] * ovs[2] );
+      ipos.clear();
+      ipos.insert( ipos.end(), vipos.begin(), vipos.end() );
+      for( i=0; i<n; ++i )
+        ipos[i] *= ovs[i];
+
+      ipos = trinv->transform( ipos );
       for( pp=p + oit.line_length(); p!=pp; oit.inc_line_ptr( p ) )
       {
-        vipos[0] = int(rint(ipos[0]));
-        vipos[1] = int(rint(ipos[1]));
-        vipos[2] = int(rint(ipos[2]));
-        if( vipos[0] < 0 || vipos[1] < 0 || vipos[2] < 0
-            || vipos[0] >= dx || vipos[1] >=dy || vipos[2] >= dz )
-          *p = background;
-        else
+        bool doit = true;
+        for( i=0; i<m; ++i )
+        {
+          vipos[i] = int(rint(ipos[i]));
+          if( vipos[i] < 0 || vipos[i] >= idims[i] )
+          {
+            *p = background;
+            doit = false;
+            break;
+          }
+        }
+        if( doit )
           *p = input.at( vipos );
-        ipos += xoff;
+        for( i=0; i<m; ++i )
+          ipos[i] += xoff[i];
       }
     }
   }

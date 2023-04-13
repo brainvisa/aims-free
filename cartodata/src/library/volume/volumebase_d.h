@@ -1305,17 +1305,18 @@ namespace carto
     long old_stride;
     for( i=0; i<n; ++i )
     {
-      std::vector<int> p( n, 0.f );
-      p[i] = 1.;
+      std::vector<int> p( n, 0 );
+      p[i] = 1;
       std::vector<int> p1 = iflip->transformVector( p );
       new_strides[i] = &at( p1 ) - &at( 0 );
     }
     std::vector<int> vdims( dims.begin(), dims.end() );
     std::vector<int> new_dims = flip.transformVector( vdims );
+    for( i=0; i<n; ++i )
+      new_dims[i] = std::abs( new_dims[i] );
     blitz::TinyVector<int, Volume<T>::DIM_MAX> new_bdims = dims;
     for( i=0; i<n; ++i )
       new_bdims[i] = new_dims[i];
-    // std::cout << "new dims: " << new_dims[0] << ", " << new_dims[1] << ", " << new_dims[2] << std::endl;
     for( i=0; i<n; ++i )
     {
       if( new_strides[i] < 0 )
