@@ -1377,6 +1377,9 @@ namespace carto
 
     bool change_layout = false;
     std::vector<int> new_dims = flip.transformVector( dims );
+    for( i=0; i<n; ++i )
+      new_dims[i] = std::abs( new_dims[i] );
+
     long cstride = 1;
 
     std::unique_ptr<AffineTransformationBase> iflip = flip.inverse();
