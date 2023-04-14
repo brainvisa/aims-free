@@ -832,7 +832,40 @@ int main( int /*argc*/, const char** /*argv*/ )
       cerr << "at ( 3, 14, 19, 9 ): " << v1->at( 3, 14, 19, 9 ) << endl;
       result = EXIT_FAILURE;
     }
-//     if( v1->getStrides()
+    vector<long> strides = v1->getStrides();
+    if( strides[0] != 1 || strides[1] != 4 || strides[2] != 60
+        || strides[3] != 1200 )
+    {
+      cerr << "Orientation flip did not correctly fix the memory layout\n";
+      result = EXIT_FAILURE;
+    }
+    v1->flipToOrientation( "LPI", "PTRS" );
+    if( v1->at( 0, 0, 0, 0 ) != 21.7f )
+    {
+      cerr << "Re-orientation flip did not correctly flip indices\n";
+      result = EXIT_FAILURE;
+    }
+    strides = v1->getStrides();
+    if( strides[0] != -60 || strides[1] != 1 || strides[2] != -600
+        || strides[3] != 15 )
+    {
+      cerr << "Re-orientation flip did not correctly fix the memory layout\n";
+      result = EXIT_FAILURE;
+    }
+    v1->flipToOrientation( "LPI", "LPI" );
+    if( v1->at( 0, 0, 0, 0 ) != 21.7f )
+    {
+      cerr << "Reset-orientation flip did not correctly flip indices\n";
+      result = EXIT_FAILURE;
+    }
+    strides = v1->getStrides();
+    if( strides[0] != 1 || strides[1] != 10 || strides[2] != 150
+        || strides[3] != 3000 )
+    {
+      cerr << "Reset-orientation flip did not correctly fix the memory "
+           << "layout\n";
+      result = EXIT_FAILURE;
+    }
   }
 
 
