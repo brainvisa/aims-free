@@ -91,6 +91,9 @@ namespace soma
                                      carto::rc_ptr<DataSourceInfo> dsi,
                                      carto::Object options )
   {
+    std::cout << "VolumeFormatWriter<T>::write " << dsi->url() << std::endl;
+    std::cout << "format: " << typeid( *_imw ).name() << std::endl;
+
     localMsg( "writing: " + dsi->url() );
     //=== memory mapping =====================================================
     localMsg( "checking for memory mapping..." );
@@ -154,6 +157,7 @@ namespace soma
     //=== view size ==========================================================
     localMsg( "reading view size..." );
     view = obj.getSize();
+std::cout << "1\n";
 
     //=== full volume size ===================================================
     localMsg( "reading full volume size and view position..." );
@@ -205,6 +209,7 @@ namespace soma
       withborders = true;
     localMsg( std::string(" -> ") + ( withborders ? "with borders" : "without borders" ) );
     withborders = withborders; // compilation warning
+std::cout << "2\n";
 
     // handle internal orientation: go back to LPI
     const Referential & ref = obj.referential();
@@ -213,9 +218,9 @@ namespace soma
     for( dim=0; dim<osz.size(); ++dim )
       --osz[dim];
     rc_ptr<Transformation> tolpir = ref.toOrientation( "LPI", osz );
-    AffineTransformation3dBase & tolpi
-      = dynamic_cast<AffineTransformation3dBase &>( *tolpir );
-    std::unique_ptr<AffineTransformation3dBase> itolpi = tolpi.inverse();
+    AffineTransformationBase & tolpi
+      = dynamic_cast<AffineTransformationBase &>( *tolpir );
+    std::unique_ptr<AffineTransformationBase> itolpi = tolpi.inverse();
 
     std::vector<int> lpi_size = tolpi.transformVector( size );
     for( dim=0; dim<lpi_size.size(); ++dim )
@@ -239,6 +244,7 @@ namespace soma
       dsi->header()->setProperty( "sizeZ", size[2] );
       dsi->header()->setProperty( "sizeT", size[3] );
     }
+std::cout << "3\n";
 
 
     //=== use optional parameters for partial writing ========================
@@ -279,6 +285,7 @@ namespace soma
         catch( ... ) {}
       }
     }
+std::cout << "4\n";
 
     //=== writing header & creating files ====================================
     localMsg( "writing header..." );
@@ -298,22 +305,28 @@ namespace soma
     const T* start = &obj(0);
     {
       opos = tolpi.transformVector( position );
-      Point3di pi = itolpi->transform( 0, 0, 0 );
+      std::vector<int> p = std::vector<int>( ndim, 0 );
+      std::vector<int> pi = itolpi->transform( p );
       start = &obj( pi );
       oview = tolpi.transformVector( view );
       for( dim=0; dim<oview.size(); ++dim )
         oview[dim] = std::abs( oview[dim] );
-      pi = itolpi->transformVector( 1, 0, 0 );
-      strides[0] = &obj.at( pi ) - &obj.at( 0 );
-      pi = itolpi->transformVector( 0, 1, 0 );
-      strides[1] = &obj.at( pi ) - &obj.at( 0 );
-      pi = itolpi->transformVector( 0, 0, 1 );
-      strides[2] = &obj.at( pi ) - &obj.at( 0 );
+      for( dim=0; dim<ndim; ++dim )
+      {
+        p[dim] = 1;
+        pi = itolpi->transformVector( p );
+        strides[dim] = &obj.at( pi ) - &obj.at( 0 );
+        p[dim] = 0;
+      }
     }
 
-    
+    std::cout << "5\n";
+
+
     *dsi = _imw->writeHeader( *dsi, start, opos, oview,
                               strides, options );
+std::cout << "6\n";
+
 
     //=== sanity check =======================================================
     if( partial )
@@ -339,6 +352,8 @@ namespace soma
         }
       }
     }
+std::cout << "7\n";
+
 
     //=== writing image ======================================================
     localMsg( "writing volume..." );
@@ -373,6 +388,8 @@ namespace soma
     // we reset at 0 the ImageWriter's members (sizes, binary, ...) so that
     // they are recomputed at the next writing.
     _imw->resetParams();
+std::cout << "8\n";
+
     return true;
   }
 
