@@ -370,3 +370,25 @@ void Referential::setLpiReferential( const std::string & lpi_uuid )
 }
 
 
+bool Referential::is3DOriented() const
+{
+  return is3DOriented( _orientation );
+}
+
+
+bool Referential::is3DOriented( const std::string & orient ) const
+{
+  return is3DOriented( orientationVector( orient, _orientation.size() ) );
+}
+
+
+bool Referential::is3DOriented( const vector<int> & orient )
+{
+  unsigned i, n = orient.size();
+  for( i=3; i<n; ++i )
+    if( orient[i] != i * 2 + 1 )
+      return false;
+  return true;
+}
+
+

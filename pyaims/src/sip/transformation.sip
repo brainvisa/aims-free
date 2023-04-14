@@ -198,6 +198,8 @@ public:
 
     int order() const;
     virtual void extendOrder( unsigned n );
+    virtual void squeezeOrder( unsigned n, bool check = true,
+                               bool notify_fail = true );
 
     virtual vector_S32 transform( const vector_S32 & pos ) const;
     virtual vector_FLOAT transform( const vector_FLOAT & pos /Constrained/ ) const;

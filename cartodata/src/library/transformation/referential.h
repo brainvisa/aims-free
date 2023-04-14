@@ -99,6 +99,12 @@ namespace carto
     void setOrientation( const std::vector<int> & orient );
     void setLpiReferential( const std::string & lpi_uuid );
 
+    Object header() const { return _header; }
+    /// tells if the orientation is comatible with a 3D transformation
+    /// (all axes after the 3th are the default ones)
+    bool is3DOriented() const;
+    bool is3DOriented( const std::string & orient ) const;
+
     static std::string orientationStr( Orientation orient );
     static std::string orientationStr( const std::vector<int> & orient );
     static Orientation orientationCode( const std::string & orient );
@@ -108,7 +114,7 @@ namespace carto
                                   int src_axis, int dst_axis, int inv_mult,
                                   const std::vector<float> & transl
                                   = std::vector<float>() );
-    Object header() const { return _header; }
+    static bool is3DOriented( const std::vector<int> & orient );
 
   private:
     std::string _uuid;

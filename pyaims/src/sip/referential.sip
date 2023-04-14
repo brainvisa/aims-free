@@ -52,6 +52,14 @@ namespace carto
                                   int inv_mult,
                                   const vector_FLOAT & tsl = vector_FLOAT() );
     carto::Object header() const;
+    bool is3DOriented() const;
+%Docstring
+    tells if the orientation is comatible with a 3D transformation
+    (all axes after the 3th are the default ones)
+%End
+
+    bool is3DOriented( const std::string & orient ) const;
+    static bool is3DOriented( const std::vector<int> & orient );
   };
 
 };

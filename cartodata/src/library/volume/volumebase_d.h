@@ -1479,6 +1479,8 @@ namespace carto
       rvs[i] = std::abs( rvs[i] );
     rhdr->setProperty( "voxel_size", rvs );
 
+    bool is3d = this->referential().is3DOriented( orient );
+
     if( hdr.hasProperty( "transformations" ) )
     {
       AffineTransformationBase mvs( dims.size() );
@@ -1502,6 +1504,8 @@ namespace carto
         // TODO extend both to max order( flip, trans )
         // then handle non-3D transforms in header
         trans = trans * iflipmm;
+        if( is3d )
+          trans.squeezeOrder( 3, true, false );
         rtrans.push_back( trans.toVector() );
       }
       rhdr->setProperty( "transformations", rtrans );
@@ -1513,6 +1517,8 @@ namespace carto
         s2m( hdr.getProperty( "storage_to_memory" ) );
       s2m.extendOrder( flip.order() );
       s2m = flip * s2m;
+      if( is3d )
+        s2m.squeezeOrder( 3, true, false );
       rhdr->setProperty( "storage_to_memory", s2m.toVector() );
     }
 
