@@ -91,9 +91,6 @@ namespace soma
                                      carto::rc_ptr<DataSourceInfo> dsi,
                                      carto::Object options )
   {
-    std::cout << "VolumeFormatWriter<T>::write " << dsi->url() << std::endl;
-    std::cout << "format: " << typeid( *_imw ).name() << std::endl;
-
     localMsg( "writing: " + dsi->url() );
     //=== memory mapping =====================================================
     localMsg( "checking for memory mapping..." );
@@ -157,7 +154,6 @@ namespace soma
     //=== view size ==========================================================
     localMsg( "reading view size..." );
     view = obj.getSize();
-std::cout << "1\n";
 
     //=== full volume size ===================================================
     localMsg( "reading full volume size and view position..." );
@@ -209,7 +205,6 @@ std::cout << "1\n";
       withborders = true;
     localMsg( std::string(" -> ") + ( withborders ? "with borders" : "without borders" ) );
     withborders = withborders; // compilation warning
-std::cout << "2\n";
 
     // handle internal orientation: go back to LPI
     const Referential & ref = obj.referential();
@@ -244,8 +239,6 @@ std::cout << "2\n";
       dsi->header()->setProperty( "sizeZ", size[2] );
       dsi->header()->setProperty( "sizeT", size[3] );
     }
-std::cout << "3\n";
-
 
     //=== use optional parameters for partial writing ========================
     if( partial ) {
@@ -285,7 +278,6 @@ std::cout << "3\n";
         catch( ... ) {}
       }
     }
-std::cout << "4\n";
 
     //=== writing header & creating files ====================================
     localMsg( "writing header..." );
@@ -320,13 +312,9 @@ std::cout << "4\n";
       }
     }
 
-    std::cout << "5\n";
-
 
     *dsi = _imw->writeHeader( *dsi, start, opos, oview,
                               strides, options );
-std::cout << "6\n";
-
 
     //=== sanity check =======================================================
     if( partial )
@@ -352,8 +340,6 @@ std::cout << "6\n";
         }
       }
     }
-std::cout << "7\n";
-
 
     //=== writing image ======================================================
     localMsg( "writing volume..." );
@@ -388,7 +374,6 @@ std::cout << "7\n";
     // we reset at 0 the ImageWriter's members (sizes, binary, ...) so that
     // they are recomputed at the next writing.
     _imw->resetParams();
-std::cout << "8\n";
 
     return true;
   }
