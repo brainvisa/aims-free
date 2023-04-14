@@ -59,7 +59,7 @@ namespace carto
 %End
 
     bool is3DOriented( const std::string & orient ) const;
-    static bool is3DOriented( const std::vector<int> & orient );
+    static bool is3DOriented( const vector_S32 & orient );
   };
 
 };
