@@ -773,16 +773,12 @@ int main( int /*argc*/, const char** /*argv*/ )
   }
 
 
-  cout << "-- Test " << ntest++ << ": orientation test --" << endl;
+  cout << "-- Test " << ntest++ << ": orientation test (strides) --" << endl;
   {
     VolumeRef<float> v1( 10, 15, 20, 4 );
     v1->fill( 0 );
-    v1->at( 0, 0, 0, 0 ) = 21.7;
-    v1->at( 3, 4, 5, 0 ) = 10;
-    v1->at( 4, 4, 5, 1 ) = 11;
-    v1->at( 5, 4, 5, 1 ) = 12;
-    v1->at( 3, 5, 5, 2 ) = 20;
-    v1->at( 4, 5, 5, 3 ) = 21;
+    v1->at( 0, 0, 0, 0 ) = 21.7f;
+    v1->at( 3, 4, 5, 0 ) = 10.f;
 
     v1->flipToOrientation( "tASR" );
     if( v1->referential().orientationStr() != "tASR" )
@@ -790,13 +786,55 @@ int main( int /*argc*/, const char** /*argv*/ )
       cerr << "Orientation flip did not get to the expected orientation: got " << v1->referential().orientationStr() << " instead of tASR\n";
       result = EXIT_FAILURE;
     }
-    if( v1->at( 3, 10, 14, 6 ) != 10 )
+    if( v1->at( 3, 14, 19, 9 ) != 21.7f )
+    {
+      cerr << "Orientation flip did not correctly flip indices\n";
+      cerr << "at ( 3, 14, 19, 9 ): " << v1->at( 3, 14, 19, 9 ) << endl;
+      result = EXIT_FAILURE;
+    }
+    if( v1->at( 3, 10, 14, 6 ) != 10.f )
     {
       cerr << "Orientation flip did not correctly flip indices\n";
       cerr << "at ( 3, 10, 14, 6 ): " << v1->at( 3, 10, 14, 6 ) << endl;
       result = EXIT_FAILURE;
     }
+    v1->flipToOrientation( "PTRS" );
+    if( v1->at( 0, 0, 9, 19 ) != 21.7f )
+    {
+      cerr << "Re-orientation flip did not correctly flip indices\n";
+      result = EXIT_FAILURE;
+    }
+    v1->flipToOrientation( "LPI" );
+    if( v1->at( 0, 0, 0, 0 ) != 21.7f )
+    {
+      cerr << "Reset-orientation flip did not correctly flip indices\n";
+      result = EXIT_FAILURE;
+    }
   }
+
+  cout << "-- Test " << ntest++ << ": orientation test (memory layout) --"
+      << endl;
+  {
+    VolumeRef<float> v1( 10, 15, 20, 4 );
+    v1->fill( 0 );
+    v1->at( 0, 0, 0, 0 ) = 21.7f;
+    v1->at( 3, 4, 5, 0 ) = 10.f;
+
+    v1->flipToOrientation( "tASR", "tASR" );
+    if( v1->referential().orientationStr() != "tASR" )
+    {
+      cerr << "Orientation flip did not get to the expected orientation: got " << v1->referential().orientationStr() << " instead of tASR\n";
+      result = EXIT_FAILURE;
+    }
+    if( v1->at( 3, 14, 19, 9 ) != 21.7f )
+    {
+      cerr << "Orientation flip did not correctly flip indices\n";
+      cerr << "at ( 3, 14, 19, 9 ): " << v1->at( 3, 14, 19, 9 ) << endl;
+      result = EXIT_FAILURE;
+    }
+//     if( v1->getStrides()
+  }
+
 
   cout << "-- Test " << ntest++ << ": fast allocation test --" << endl;
   {

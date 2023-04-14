@@ -105,7 +105,7 @@ namespace carto
     static std::vector<int> orientationVector( const std::string & orient,
                                                unsigned dim = 0 );
     static void setAxisTransform( AffineTransformationBase & tr,
-                                  Orientation from_code, Orientation code,
+                                  int src_axis, int dst_axis, int inv_mult,
                                   const std::vector<float> & transl
                                   = std::vector<float>() );
     Object header() const { return _header; }

@@ -237,186 +237,13 @@ vector<int> Referential::orientationVector( const std::string & orient,
 
 
 void Referential::setAxisTransform( AffineTransformationBase & tr,
-                                    Orientation from_code, Orientation code,
+                                    int src_axis, int dst_axis,
+                                    int inv,
                                     const std::vector<float> & tsl )
 {
-  int from_ax = 0, to_ax = 0;
-  float from_or = 1, to_or = 1, mul = 1;
-
-  switch( from_code )
-  {
-    case L:
-      from_ax = 0;
-      from_or = 1;
-      break;
-    case R:
-      from_ax = 0;
-      from_or = -1;
-      break;
-    case A:
-      from_ax = 1;
-      from_or = -1;
-      break;
-    case P:
-      from_ax = 1;
-      from_or = 1;
-      break;
-    case S:
-      from_ax = 2;
-      from_or = -1;
-      break;
-    case I:
-      from_ax = 2;
-      from_or = 1;
-      break;
-    case T:
-      from_ax = 3;
-      from_or = 1;
-      break;
-    case t:
-      from_ax = 3;
-      from_or = -1;
-      break;
-    case U:
-      from_ax = 4;
-      from_or = 1;
-      break;
-    case u:
-      from_ax = 4;
-      from_or = -1;
-      break;
-    case V:
-      from_ax = 5;
-      from_or = 1;
-      break;
-    case v:
-      from_ax = 5;
-      from_or = -1;
-      break;
-    case W:
-      from_ax = 6;
-      from_or = 1;
-      break;
-    case w:
-      from_ax = 6;
-      from_or = -1;
-      break;
-    case X:
-      from_ax = 7;
-      from_or = 1;
-      break;
-    case x:
-      from_ax = 7;
-      from_or = -1;
-      break;
-    case Y:
-      from_ax = 8;
-      from_or = 1;
-      break;
-    case y:
-      from_ax = 8;
-      from_or = -1;
-      break;
-    case Z:
-      from_ax = 9;
-      from_or = 1;
-      break;
-    case z:
-      from_ax = 9;
-      from_or = -1;
-      break;
-    default:
-      break;
-  }
-  switch( code )
-  {
-    case L:
-      to_ax = 0;
-      to_or = 1;
-      break;
-    case R:
-      to_ax = 0;
-      to_or = -1;
-      break;
-    case A:
-      to_ax = 1;
-      to_or = -1;
-      break;
-    case P:
-      to_ax = 1;
-      to_or = 1;
-      break;
-    case S:
-      to_ax = 2;
-      to_or = -1;
-      break;
-    case I:
-      to_ax = 2;
-      to_or = 1;
-      break;
-    case T:
-      to_ax = 3;
-      to_or = 1;
-      break;
-    case t:
-      to_ax = 3;
-      to_or = -1;
-      break;
-    case U:
-      to_ax = 4;
-      to_or = 1;
-      break;
-    case u:
-      to_ax = 4;
-      to_or = -1;
-      break;
-    case V:
-      to_ax = 5;
-      to_or = 1;
-      break;
-    case v:
-      to_ax = 5;
-      to_or = -1;
-      break;
-    case W:
-      to_ax = 6;
-      to_or = 1;
-      break;
-    case w:
-      to_ax = 6;
-      to_or = -1;
-      break;
-    case X:
-      to_ax = 7;
-      to_or = 1;
-      break;
-    case x:
-      to_ax = 7;
-      to_or = -1;
-      break;
-    case Y:
-      to_ax = 8;
-      to_or = 1;
-      break;
-    case y:
-      to_ax = 8;
-      to_or = -1;
-      break;
-    case Z:
-      to_ax = 9;
-      to_or = 1;
-      break;
-    case z:
-      to_ax = 9;
-      to_or = -1;
-      break;
-    default:
-      break;
-  }
-  mul = from_or * to_or;
-  tr.matrix()( from_ax, to_ax ) = mul;
-  if( mul < 0 && !tsl.empty() )
-    tr.matrix()( from_ax, tr.matrix().ncols - 1 ) = tsl[to_ax];
+  tr.matrix()( src_axis, dst_axis ) = inv;
+  if( inv < 0 && !tsl.empty() )
+    tr.matrix()( src_axis, tr.matrix().ncols - 1 ) = tsl[dst_axis];
 }
 
 
@@ -478,15 +305,25 @@ Referential::toOrientation( const vector<int> & orient,
     = new AffineTransformationBase( _orientation.size() );
   trans.reset( tr );
 
-  int axis, n = _orientation.size();
+  int axis, n = _orientation.size(), i;
   for( axis=0; axis<n; ++axis)
     tr->matrix()( axis, axis ) = 0;
 
   for( axis=0; axis<n; ++axis )
   {
-    Orientation code = Orientation( orient[axis] );
-    Orientation from_code = Orientation( _orientation[axis] );
-    setAxisTransform( *tr, from_code, code, transl );
+    int src = axis;
+    int dsta = ( orient[axis] - 1 ) / 2;
+    int dst = 0;
+    int inv = 1;
+    for( i=0; i<n; ++i )
+      if( ( _orientation[i] - 1 ) / 2 == dsta )
+      {
+        dst = i;
+        inv = ( ( _orientation[i] - 1 ) % 2 ) * 2 - 1;
+        break;
+      }
+    inv *= ( ( ( orient[axis] - 1 ) % 2 ) * 2 - 1 );
+    setAxisTransform( *tr, src, dst, inv, transl );
   }
 
   return trans;

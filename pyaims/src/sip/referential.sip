@@ -47,8 +47,9 @@ namespace carto
     static vector_S32 orientationVector( const std::string & orient,
                                          unsigned ndim = 0 );
     static void setAxisTransform( soma::AffineTransformationBase & tr,
-                                  carto::Referential::Orientation from_code,
-                                  carto::Referential::Orientation code,
+                                  int src_axis,
+                                  int dst_axis,
+                                  int inv_mult,
                                   const vector_FLOAT & tsl = vector_FLOAT() );
     carto::Object header() const;
   };
