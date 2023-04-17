@@ -312,7 +312,6 @@ namespace soma
       }
     }
 
-
     *dsi = _imw->writeHeader( *dsi, start, opos, oview,
                               strides, options );
 
@@ -346,6 +345,7 @@ namespace soma
     const T* data = 0;
     if( parent1 || obj.allocatorContext().isAllocated() )
       data = start;
+
     // in unallocated case, data is null; this is OK.
     _imw->write( data, *dsi, opos, oview, strides, options );
 //     {
@@ -374,6 +374,8 @@ namespace soma
     // we reset at 0 the ImageWriter's members (sizes, binary, ...) so that
     // they are recomputed at the next writing.
     _imw->resetParams();
+
+    localMsg( "writing done." );
 
     return true;
   }
