@@ -43,6 +43,66 @@ a test would be difficult to implement or expensive to run.
     virtual bool invertible() const;
     rc_ptr_Transformation getInverse() const;
 
+    static vector_S32 vadd( const vector_S32 & v1 /Constrained/,
+                            const vector_S32 & v2 /Constrained/ );
+    static vector_FLOAT vadd( const vector_FLOAT & v1 /Constrained/,
+                              const vector_FLOAT & v2 /Constrained/ );
+    static vector_DOUBLE vadd( const vector_DOUBLE & v1,
+                               const vector_DOUBLE & v2 );
+%Docstring
+    vector arithmetics, as convenience static functions
+%End
+
+    static vector_S32 vsub( const vector_S32 & v1 /Constrained/,
+                            const vector_S32 & v2 /Constrained/);
+    static vector_FLOAT vsub( const vector_FLOAT & v1 /Constrained/,
+                              const vector_FLOAT & v2 /Constrained/);
+    static vector_DOUBLE vsub( const vector_DOUBLE & v1 ,
+                               const vector_DOUBLE & v2 );
+%Docstring
+    vector arithmetics, as convenience static functions
+%End
+
+    static vector_S32 vadd( const vector_S32 & v1 /Constrained/,
+                            const int & v2 );
+    static vector_FLOAT vadd( const vector_FLOAT & v1 /Constrained/,
+                              const float & v2 );
+    static vector_DOUBLE vadd( const vector_DOUBLE & v1,
+                               const double & v2 );
+%Docstring
+    vector arithmetics, as convenience static functions
+%End
+
+    static vector_S32 vsub( const vector_S32 & v1 /Constrained/,
+                            const int & v2 );
+    static vector_FLOAT vsub( const vector_FLOAT & v1 /Constrained/,
+                              const float & v2 );
+    static vector_DOUBLE vsub( const vector_DOUBLE & v1,
+                               const double & v2 );
+%Docstring
+    vector arithmetics, as convenience static functions
+%End
+
+    static vector_S32 vadd( const int & v1,
+                            const vector_S32 & v2 /Constrained/ );
+    static vector_FLOAT vadd( const float & v1,
+                              const vector_FLOAT & v2 /Constrained/ );
+    static vector_DOUBLE vadd( const double & v1,
+                               const vector_DOUBLE & v2 );
+%Docstring
+    vector arithmetics, as convenience static functions
+%End
+
+    static vector_S32 vsub( const int & v1,
+                            const vector_S32 & v2 /Constrained/ );
+    static vector_FLOAT vsub( const float & v1,
+                              const vector_FLOAT & v2 /Constrained/ );
+    static vector_DOUBLE vsub( const double & v1,
+                               const vector_DOUBLE & v2 );
+%Docstring
+    vector arithmetics, as convenience static functions
+%End
+
   protected:
     Transformation();
   };
@@ -212,7 +272,7 @@ public:
     SIP_PYOBJECT __array__() /Factory/;
 %MethodCode
   int n = sipCpp->matrix().ncols;
-  std::vector<int> dims( 2, n );
+  vector_S32 dims( 2, n );
 
   PyArray_Descr *descr = PyArray_DescrFromType( NPY_FLOAT32 );
   sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
