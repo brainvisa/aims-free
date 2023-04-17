@@ -1285,6 +1285,11 @@ namespace carto
   template < typename T >
   void Volume< T >::flipToOrientation( const std::string & orient )
   {
+    if( _referential.orientationVector( orient, _referential.order() )
+        == _referential.axesOrientation() )
+      // already in the same orientation
+      return;
+
     blitz::TinyVector<int, Volume<T>::DIM_MAX> dims = _blitz.shape();
     blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>
       strides = _blitz.stride();
