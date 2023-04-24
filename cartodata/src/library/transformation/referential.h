@@ -142,6 +142,18 @@ namespace carto
       const std::string & orient,
       const std::vector<float> & transl = std::vector<float>(),
       bool allow_resize = false ) const;
+    rc_ptr<Transformation>
+    /// same as above but translation is given as ints
+    toOrientation(
+      const std::string & orient,
+      const std::vector<int> & transl,
+      bool allow_resize = false ) const
+      {
+        return toOrientation( orient,
+                              std::vector<float>( transl.begin(),
+                                                  transl.end() ),
+                              allow_resize );
+      }
     /** Build a transformation matrix to go from this referential to a given
         orientation.
 
@@ -183,6 +195,11 @@ namespace carto
     bool is3DOriented() const;
     /// tells if the given orientation is 3D compatible
     bool is3DOriented( const std::string & orient ) const;
+    /** target orientation for a given transform matrix.
+        The matrix should be a flip matrix, not any affine transform.
+    */
+    std::vector<int> orientationFromTransform(
+      const AffineTransformationBase & tr ) const;
 
     /// orientation string for a single axis orientation (1 char)
     static std::string orientationStr( Orientation orient );

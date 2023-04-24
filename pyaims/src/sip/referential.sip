@@ -183,6 +183,14 @@ namespace carto
     orientation constant for a single orientation axis character
 %End
 
+    vector_S32 orientationFromTransform(
+      const soma::AffineTransformationBase & tr ) const;
+%Docstring
+    target orientation for a given transform matrix.
+
+    The matrix should be a flip matrix, not any affine transform.
+%End
+
     static vector_S32 orientationVector( const std::string & orient,
                                          unsigned ndim = 0 );
 %Docstring

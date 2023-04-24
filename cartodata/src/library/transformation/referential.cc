@@ -319,10 +319,10 @@ Referential::toOrientation( const vector<int> & orient,
       if( ( _orientation[i] - 1 ) / 2 == dsta )
       {
         dst = i;
-        inv = ( ( _orientation[i] - 1 ) % 2 ) * 2 - 1;
+        inv = 1 - ( ( _orientation[i] - 1 ) % 2 ) * 2;
         break;
       }
-    inv *= ( ( ( orient[axis] - 1 ) % 2 ) * 2 - 1 );
+    inv *= 1 - ( ( orient[axis] - 1 ) % 2 ) * 2;
     setAxisTransform( *tr, src, dst, inv, transl );
   }
 
@@ -389,6 +389,44 @@ bool Referential::is3DOriented( const vector<int> & orient )
     if( orient[i] != i * 2 + 1 )
       return false;
   return true;
+}
+
+
+std::vector<int> Referential::orientationFromTransform(
+  const AffineTransformationBase & tr ) const
+{
+  vector<int> orient( std::max( size_t( tr.order() ), _orientation.size() ),
+                      0 );
+
+  unsigned i, j, n = tr.order();
+  for( i=0; i<n; ++i )
+  {
+    int from = 0, sign = 1;
+
+    for( j=0; j<n; ++j )
+    {
+      if( tr.matrix()( i, j ) > 0.9 )
+      {
+        from = j;
+        break;
+      }
+      if( tr.matrix()( i, j ) < -0.9 )
+      {
+        from = j;
+        sign *= -1;
+        break;
+      }
+    }
+    from = _orientation[from] - 1;
+    if( from % 2 == 1 )
+      sign *= -1;
+    from = int( from / 2 ) * 2 + 1;
+    if( sign < 0 )
+      ++from;
+    orient[i] = from;
+  }
+
+  return orient;
 }
 
 
