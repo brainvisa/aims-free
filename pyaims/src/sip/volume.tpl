@@ -774,7 +774,7 @@ The header contains all meta-data.
     {
       dims[i] = PyArray_DIMS( arr )[ start + inc * i];
       strides[i] = PyArray_STRIDES( arr )[ start + inc * i ]
-        / sizeof( %Template1% );
+        / long( sizeof( %Template1% ) );
     }
 
     sipCpp = new sipVolume_%Template1typecode%(

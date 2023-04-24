@@ -69,6 +69,12 @@ class TestVolumeStrides(unittest.TestCase):
         vol.np[:] = np.arange(vol.np.size).reshape(vol.np.shape)
         self._test_numpy_conversion(vol)
 
+    def test_numpy_conversion_neg_striodes(self):
+        vol = aims.Volume_FLOAT(10, 15, 20, 4)
+        vol.flipToOrientation('LPI', 'PTRS')
+        vol2 = aims.Volume(vol.np)
+        self.assertEqual(list(vol2.getStrides()), [-60, 1, -600, 15])
+
 
 def test():
     suite = unittest.TestLoader().loadTestsFromTestCase(TestVolumeStrides)
