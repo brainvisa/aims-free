@@ -78,6 +78,7 @@ int main()
     const AffineTransformation3d t1(trm_vec);
     ASSERT_EQ(t1.transform(p1), tp1); ASSERT_EQ(t1.transform(p2), tp2);
     ASSERT_EQ(t1.transform(p3), tp3); ASSERT_EQ(t1.transform(p4), tp4);
+    cout << "print trans:\n" << t1 << endl;
 
     cout << "  copy constructor" << endl;
     AffineTransformation3d t2(t1);
