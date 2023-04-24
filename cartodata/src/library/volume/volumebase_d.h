@@ -1339,7 +1339,6 @@ namespace carto
 
     this->header().copyProperties( reor_hdr );
 
-    // this->header().setProperty( "volume_dimension", new_dims );
     _start = &_items[0] + offset + old_offset;
     _blitz.reference(
       blitz::Array<T,Volume<T>::DIM_MAX>(
@@ -1409,7 +1408,8 @@ namespace carto
       VolumeRef<T> copy( new_dims );
       copy->copyHeaderFrom( this->header() );
       copy->referential().setOrientation( force_memory_layout );
-      copy->referential().setLpiReferential( this->referential().uuid() );
+      copy->referential().setLpiReferential(
+        this->referential().lpiReferentialUuid() );
 
       // copy data in the new layout
       line_NDIterator<T> it( &this->at( 0 ), this->getSize(),
@@ -1453,11 +1453,11 @@ namespace carto
 
     rhdr->copyProperties( Object::reference( hdr ) );
 
-    std::vector<float>transl( 3, 0.f );
     std::vector<int> dims = this->getSize();
+    size_t i, n = dims.size();
+    std::vector<float>transl( n, 0.f );
 
-    int i, n;
-    for( i=0; i<3; ++i )
+    for( i=0; i<n; ++i )
       transl[i] = dims[i] - 1;
     carto::rc_ptr<Transformation> flipt
       = referential().toOrientation( orient, transl );
