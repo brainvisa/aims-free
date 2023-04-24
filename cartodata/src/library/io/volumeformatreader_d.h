@@ -162,7 +162,7 @@ namespace soma
       dsi->list().dataSource().reset( new FileDataSource(  url ) );
     }
     //=== if no options -> classic reading ===================================
-    if( !options.get() )
+    if( !options.get() || options->size() == 0 )
       return FormatReader<Volume<T> >::createAndRead( dsi, context, options );
     //=== else, look for known properties ====================================
     std::set<std::string> prop = VolumeUtilIO<T>::listReadProperties();
