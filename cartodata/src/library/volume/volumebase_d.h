@@ -1556,12 +1556,82 @@ namespace carto
       header->getProperty( "sizeZ", dims[2] );
       header->getProperty( "sizeT", dims[3] );
     }
-    options->getProperty( "unallocated", unalloc );
+
+    unsigned n = dims.size();
+
+    try
+    {
+      Object uao = options->getProperty( "unallocated" );
+      unalloc = bool( uao->getScalar() );
+    }
+    catch( ... )
+    {
+    }
+
+    std::string orient;
+    try
+    {
+      Object oo = options->getProperty( "orientation" );
+      orient = oo->getString();
+    }
+    catch( ... )
+    {
+    }
+
+    rc_ptr<soma::AffineTransformationBase> ortr(
+      new soma::AffineTransformationBase( dims.size() ) );
+    std::vector<int> tdims = dims;
+
+    if( !orient.empty() )
+    {
+      // dims and borders are given in LPI orientation
+
+      Referential ref( dims.size() );
+      if( orient == "storage" )
+      {
+        try
+        {
+          // std::cout << "request storage orientation\n";
+          Object s2mo = header->getProperty( "storage_to_memory" );
+          soma::AffineTransformationBase s2m( s2mo );
+          // volume will be in storage orientation,
+          // and ortr will get from LPI orientation to storage one
+          rc_ptr<Transformation> t = s2m.getInverse();
+          ortr.reset(
+            dynamic_cast<soma::AffineTransformationBase *>( t.get() ) );
+          // determine storage orientation
+          orient = ref.orientationStr( ref.orientationFromTransform( *ortr ) );
+          // std::cout << "orient: " << orient << std::endl;
+        }
+        catch( ... )
+        {
+        }
+      }
+      else
+      {
+        // ref.setOrientation( orient );
+        rc_ptr<Transformation> t
+          = ref.toOrientation( orient, soma::Transformation::vsub( dims, 1 ) );
+        ortr.reset(
+          dynamic_cast<soma::AffineTransformationBase *>( t.get() ) );
+      }
+      tdims = ortr->transformVector( dims );
+      for( unsigned i=0; i<n; ++i )
+        tdims[i] = std::abs( tdims[i] );
+      // tdims are in memory orientation
+      orient = ref.orientationStr( orient );
+      if( orient == ref.orientationStr( "LPI" ) )
+      {
+        // orient is LPI: no need to transform things
+        orient.clear();
+      }
+    }
+
     std::vector<int> borders( 3, 0 );
     try {
       borders[0] = (int) rint( options->getProperty( "border" )->getScalar() );
-      borders[1] = (int) rint( options->getProperty( "border" )->getScalar() );
-      borders[2] = (int) rint( options->getProperty( "border" )->getScalar() );
+      borders[1] = borders[0];
+      borders[2] = borders[0];
     } catch( ... ) {}
     try {
       borders[0] = (int) rint( options->getProperty( "bx" )->getScalar() );
@@ -1580,11 +1650,36 @@ namespace carto
       big_dims[0] += borders[0] * 2;
       big_dims[1] += borders[1] * 2;
       big_dims[2] += borders[2] * 2;
+
+      big_dims = ortr->transformVector( big_dims );
+      for( unsigned i=0; i<big_dims.size(); ++i )
+        big_dims[i] = std::abs( big_dims[i] );
+      borders = ortr->transformVector( borders );
+      for( unsigned i=0; i<borders.size(); ++i )
+        borders[i] = std::abs( borders[i] );
+
       obj = new Volume<T>( big_dims, context, !unalloc );
-      obj = new Volume<T>( rc_ptr<Volume<T> >( obj ), borders, dims, context );
+      if( !orient.empty() )
+        obj->referential().setOrientation( orient );
+      obj = new Volume<T>( rc_ptr<Volume<T> >( obj ), borders, tdims, context );
     }
     else
-      obj = new Volume<T>( dims, context, !unalloc );
+      obj = new Volume<T>( tdims, context, !unalloc );
+
+    if( !orient.empty() )
+    {
+      obj->referential().setOrientation( orient );
+//       // copy header to a temp, unallocated volume
+//       Volume<T> tvol( dims, AllocatorContext( &NullAllocator::singleton() ) );
+//       tvol.header().copyProperties( header );
+//       // then get a properly reoriented header
+//       header = tvol.reorientedHeader( orient );
+//       std::cout << "reoriented header\n";
+
+      // set strides orientation to default LPI
+      obj->flipToOrientation( "LPI" );
+    }
+
     obj->blockSignals( true );
     obj->header().copyProperties( header );
     // restore original sizes : temporary too...
