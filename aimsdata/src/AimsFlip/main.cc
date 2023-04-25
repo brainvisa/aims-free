@@ -52,18 +52,23 @@ static bool flip( Process & p, const string & filename, Finder & f );
 class Flip : public Process
 {
 public:
-  Flip( const string & fout, const string& mode );
+  Flip( const string & fout, const string& mode, bool no_trans,
+        const string & center_ref );
 
   template<class T> 
   bool flip_m( VolumeRef<T> & data, const string & filename, Finder & f );
 
 private:
   string	fileout;
-  string        mode ;
+  string    mode ;
+  bool      no_trans;
+  string    center_ref;
 };
 
-Flip::Flip( const string & fout, const string& mm )
-	      : Process(), fileout( fout ), mode (mm)
+Flip::Flip( const string & fout, const string& mm, bool no_trans,
+            const string & center_ref )
+  : Process(), fileout( fout ), mode( mm ), no_trans( no_trans ),
+    center_ref( center_ref )
 {
   registerProcessType( "Volume", "U8", &flip<uint8_t> );
   registerProcessType( "Volume", "S8", &flip<int8_t> );
@@ -95,7 +100,10 @@ bool Flip::flip_m( VolumeRef<T> & data, const string & filename, Finder & f )
     return( false );
   VolumeRef<T> outimage ;
   
-  AimsFlip<T> flip ;
+  AimsFlip<T> flip;
+
+  flip.setUpdateTransforms( !no_trans );
+  flip.setCenterReferential( center_ref );
   
   if( mode == "XX" )
     outimage = flip.doXX(data);
@@ -118,7 +126,7 @@ bool Flip::flip_m( VolumeRef<T> & data, const string & filename, Finder & f )
   else if( mode == "YZ" )
       outimage = flip.doYZ(data);
   else
-      throw runtime_error("Wrong mode") ;
+      outimage = flip.flip( data, mode );
 
   Writer< VolumeRef<T> > writer( fileout );
   return( writer.write( outimage ) );
@@ -130,17 +138,25 @@ int main( int argc, const char **argv )
   try
     {
       string filein,fileout, mode;
+      bool no_trans = false;
+      string center_ref;
 
       AimsApplication app(argc, argv, "Image flip" ) ;
       app.addOption( filein, "-i", "input image to flip" ) ;
       app.alias( "--input", "-i" );
       app.addOption( fileout, "-o", "output flipped image" ) ;
       app.alias( "--output", "-o" );
-      app.addOption( mode, "-m", "flip image XX, YY, ZZ, XXYY, XXZZ, YYZZ, XXYYZZ, or flip axes : XY, XZ, YZ ") ;
-  
+      app.addOption( mode, "-m", "flip image XX, YY, ZZ, XXYY, XXZZ, YYZZ, XXYYZZ, or flip axes : XY, XZ, YZ. Flip orientation may also be specified using orientation letters (L,R,P,A,I,S...) starting from a LPI orientation (ex: RPI will be the same as XX)") ;
+      app.addOption( no_trans, "-n", "do not update transformations to other coordinates systems (just flip voxels)", true );
+      app.alias( "--no-transform", "-n" );
+      /*
+      app.addOption( center_ref, "-c", "rotate around the center of this referential. Given as a referential ID in the image header, or its index", true );
+      app.alias( "--center", "-c" );
+      */
+
       app.initialize() ;
 
-      Flip	proc( fileout, mode );
+      Flip	proc( fileout, mode, no_trans, center_ref );
       if( !proc.execute( filein ) )
         {
           cerr << "Couldn't process\n";

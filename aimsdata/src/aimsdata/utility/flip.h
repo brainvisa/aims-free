@@ -50,16 +50,10 @@ template <class T>
 class AimsFlip
 {
 public:
-    /**@name Constructor and Destructor*/
-    //@{
-    /// Constructor does nothing
-    AimsFlip() { }
-    /// Destructor does nothing
+    AimsFlip() : _shared_view( true ), _update_transforms( true ),
+      _flip_memory( false ) { }
     virtual ~AimsFlip() { }
-    //@}
     
-    /**@name Methods*/
-    //@{
     /// function which returns the XX flipped data
     inline carto::VolumeRef<T> doXX(
       const carto::rc_ptr<carto::Volume<T> > &thing );
@@ -90,196 +84,118 @@ public:
     /// function which returns the YZ flipped data
     inline carto::VolumeRef<T> doYZ(
       const carto::rc_ptr<carto::Volume<T> > &thing );
-    //@}
+    /** returns the flipped data in the given orientation
+
+        Orientation conventions are those of the carto::Referential class.
+    */
+    inline carto::VolumeRef<T> flip(
+      const carto::rc_ptr<carto::Volume<T> > &thing,
+      const std::string & orient );
+
+    bool useSharedView() const { return _shared_view; }
+    void setUseSharedView( bool x ) { _shared_view = x; }
+    bool updateTransforms() const { return _update_transforms; }
+    void setUpdateTransforms( bool x ) { _update_transforms = x; }
+    bool flipMemory() const { return _flip_memory; }
+    void setFlipMemory( bool x ) { _flip_memory = x; }
+    std::string centerRefertential() const { return _center_ref; }
+    void setCenterReferential( const std::string & x ) { _center_ref = x; }
+
+protected:
+    bool _shared_view;
+    bool _update_transforms;
+    bool _flip_memory;
+    std::string _center_ref;
 };
+
+
+template <class T> inline
+carto::VolumeRef<T> AimsFlip<T>::flip(
+  const carto::rc_ptr<carto::Volume<T> > &thing, const std::string & orient )
+{
+  carto::VolumeRef<T> res;
+  if( _shared_view )
+    // build a view inside thing
+    res.reset( new carto::Volume<T>( thing, std::vector<int>( 4, 0 ),
+                                     thing->getSize() ) );
+  else
+    res.reset( new carto::Volume<T>( *thing ) );
+
+  res.copyHeaderFrom( thing->header() );
+
+  carto::Object trans;
+  if( !_update_transforms )
+  {
+    try
+    {
+      trans = res->header().getProperty( "transformations" );
+    }
+    catch( ... )
+    {
+    }
+  }
+
+  // flip L/R
+  if( !_shared_view && _flip_memory )
+    res->flipToOrientation( orient, orient );
+  else
+    res->flipToOrientation( orient );
+  // and pretend we are back to LPI
+  res->referential().setOrientation( "LPI" );
+
+  if( trans )
+    // restore initial transforms
+    res->header().setProperty( "transformations", trans );
+
+  return res;
+}
 
 
 template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doXX(
   const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSize(), thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    pos[0] = thing->getSizeX() -  1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), --pos[0] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "RPI" );
 }
-
 
 template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doYY( const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSizeX(), thing->getSizeY(),
-                           thing->getSizeZ(), thing->getSizeT(),
-                           thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    pos[1] = thing->getSizeY() - pos[1] - 1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), ++pos[0] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "LAI" );
 }
 
 
 template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doZZ( const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSizeX(), thing->getSizeY(),
-                           thing->getSizeZ(), thing->getSizeT(),
-                           thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    pos[2] = thing->getSizeZ() - pos[2] - 1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), ++pos[0] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "LPS" );
 }
 
 
 template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doXXZZ( const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSizeX(), thing->getSizeY(),
-                           thing->getSizeZ(), thing->getSizeT(),
-                           thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    pos[0] = thing->getSizeX() -  1;
-    pos[2] = thing->getSizeZ() - pos[2] - 1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), --pos[0] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "RPS" );
 }
 
 template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doXXYY( const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSizeX(), thing->getSizeY(),
-                           thing->getSizeZ(), thing->getSizeT(),
-                           thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    pos[0] = thing->getSizeX() -  1;
-    pos[1] = thing->getSizeY() - pos[1] - 1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), --pos[0] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "RAI" );
 }
 
 
 template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doYYZZ( const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSizeX(), thing->getSizeY(),
-                           thing->getSizeZ(), thing->getSizeT(),
-                           thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    pos[1] = thing->getSizeY() - pos[1] - 1;
-    pos[2] = thing->getSizeZ() - pos[2] - 1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), ++pos[0] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "LAS" );
 }
 
 
 template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doXY( const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSizeY(), thing->getSizeX(),
-                           thing->getSizeZ(), thing->getSizeT(),
-                           thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-  std::vector<float> vs = thing->getVoxelSize();
-  float t = vs[0];
-  vs[0] = vs[1];
-  vs[1] = t;
-  res.setVoxelSize( vs );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    pos[0] = res->getSizeY() - pos[1] - 1;
-    pos[1] = res->getSizeX() - 1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), --pos[1] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "PLI" );
 }
 
 
@@ -287,32 +203,7 @@ template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doXZ(
   const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSizeZ(), thing->getSizeY(),
-                           thing->getSizeX(), thing->getSizeT(),
-                           thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-  std::vector<float> vs = thing->getVoxelSize();
-  float t = vs[0];
-  vs[0] = vs[2];
-  vs[2] = t;
-  res.setVoxelSize( vs );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    pos[0] = res->getSizeZ() - pos[2] - 1;
-    pos[2] = res->getSizeX() - 1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), --pos[2] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "IPL" );
 }
 
 
@@ -320,34 +211,7 @@ template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doYZ(
   const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSizeX(), thing->getSizeZ(),
-                           thing->getSizeY(), thing->getSizeT(),
-                           thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-  std::vector<float> vs = thing->getVoxelSize();
-  float t = vs[1];
-  vs[1] = vs[2];
-  vs[2] = t;
-  res.setVoxelSize( vs );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-  int x;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    x = pos[1];
-    pos[1] = res->getSizeZ() - pos[2] - 1;
-    pos[2] = res->getSizeY() - x - 1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), ++pos[0] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "LIP" );
 }
 
 
@@ -355,26 +219,7 @@ template <class T> inline
 carto::VolumeRef<T> AimsFlip<T>::doXXYYZZ(
   const carto::rc_ptr<carto::Volume<T> > &thing )
 {
-  carto::VolumeRef<T> res( thing->getSize(), thing->getBorders() );
-  res.copyHeaderFrom( thing->header() );
-
-  carto::line_NDIterator<T> it( &res->at( 0 ), res->getSize(),
-                                res->getStrides() );
-  T *p, *pp;
-  std::vector<int> pos;
-
-  for( ; !it.ended(); ++it )
-  {
-    p=&*it;
-    pos = it.position();
-    pos[0] = thing->getSizeX() - 1;
-    pos[1] = thing->getSizeY() - pos[1] - 1;
-    pos[2] = thing->getSizeZ() - pos[2] - 1;
-    for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ), --pos[0] )
-      *p = thing->at( pos );
-  }
-
-  return res;
+  return this->flip( thing, "RAS" );
 }
 
 
