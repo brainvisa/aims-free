@@ -278,7 +278,41 @@ namespace carto
 
   Array indices and memory orientation can differ, using strides. Starting in Cartodata 5.2, strides can also be negative, which means we can switch between increasing and decreasing axes directions without copying voxels data.
 
-  Thus "loading in LPI orientation" may mean 2 different things: load in LPI memory layout, meaning that voxels are contiguous in the R->L direction, or it may mean that the first index increases from right to left. We choose to take the second convention: "orientation" means indices axes orientation, whatever the actual order of voxels in memory. The voxels order is thus calles "memory layout".
+  Thus "loading in LPI orientation" may mean 2 different things: load in LPI memory layout, meaning that voxels are contiguous in the R->L direction, or it may mean that the first index increases from right to left. We choose to take the second convention: "orientation" means indices axes orientation, whatever the actual order of voxels in memory. The voxels order is thus called "memory layout".
+
+  \b Querying orientation
+
+  - Axes (indices) orientation can be queries using:
+
+    To know the orientation of a Volume, and to help transfroming to other orientations, the Referential class can help:
+    \code
+    const Referential & ref = vol.referential();
+    std::cout << ref.orientationStr() << std::endl;
+
+    // or using a vector of constants:
+    std::vector<int> orient_v = vol.referential.axesOrientation();
+
+    rc_ptr<Transformation3d> trans = ref.toOrientation( "ASR" );
+    \endcode
+    Note that Referential gives only information about the indices axes, not on the memory layout (which is handled by strides).
+
+  - Memory layout orientation:
+    \code
+    std::vector<int> orient_v = vol.memoryLayoutOrientation();
+    // then if needed:
+    std::string orient = vol.referential().orientationStr( orient_v );
+    \endcode
+
+  - Storage (disk) layout orientation:
+
+    Note that the storage layout may be undefined if the volume header property "storage_to_memory" is not defined.
+    \code
+    std::vector<int> orient_v = vol.storageLayoutOrientation();
+    // then if needed:
+    std::string orient = vol.referential().orientationStr( orient_v );
+    \endcode
+
+  \b Flipping
 
   To flip a volume to a different orientation, we may use:
 
@@ -303,21 +337,32 @@ namespace carto
   \endcode
   Here indices will use the ASR orientation, but voxels will actually be in memory in LIA orientation.
 
-  To know the orientation of a Volume, and to help transfroming to other orientations, the Referential class can help:
-
-  \code
-  const Referential & ref = vol.referential();
-  std::cout << ref.orientationStr() << std::endl;
-  rc_ptr<Transformation3d> trans = ref.toOrientation( "ASR" );
-  \endcode
-  Note that Referential gives only information about the indices axes, not on the memory layout (which is handled by strides).
-
   \subsection volume_orient_io Volume orientation and IO
+
+  \b Writing
 
   Soma-IO and AIMS support writing non-LPI Volumes. This means that writing a Volume after any Volume::flipToOrientation() will have in the same result on disk.
 
   Some formats like NIFTI support to write voxels in any orientation. This can be controlled via the Volume header "storage_to_memory" transformation. It has to be appropriately set before writing the Volume. Note that this transformation is in voxels (int coefficients) and gives the transformation between disk voxels layout and the indices axes.
 
+  \b Reading
+
+  Most, if not all, formats will assume a Volume allocated in LPI orientation for indices. However the strides management will usually allow to read volumes in arbitrary memory layout orientation. When the IO system allocates the volume for reading, it is possible to specify via an option the memory layout to be used. In the options dictionary, the property "orientation" can specify it:
+  \code
+  Reader<Volume<float> > reader( "/tmp/volume.nii" );
+  Object options = Object::value( PropertySet() );
+  options->setProperty( "orientation", "tASR" );
+  reader.setOptions( options );
+  VolumeRef<float> vol( reader.read() );
+  \endcode
+
+  The "orientation" property value is a string, which uses the letters for axes orientation ("LPI", "RAST" etc). Optionally the value "storage" will specify that we want to use the same memory layout as the disk storage layout.
+
+  Note that this specifies the memory layout, but the axes indices will still be LPI oriented. If you need another orientation, just use Volume::flipToOrientation() afterwards, as it is a lightweight, non-copy operation.
+
+  As usual the orientation option may be passed as an URI option in the filename (see \ref cartovolumes_io)
+
+  \see \ref cartovolumes_io
 */
 
 /*! \page cartovolumes_io Volumes IO in CartoData
