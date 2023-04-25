@@ -440,7 +440,68 @@ protected:
   };
 
 
-    class DataSourceInfo
+  class DataSourceCapabilities
+  {
+%Docstring
+    Reading/Writing Capabilities of a FormatReader
+
+    This object is constructed by the FormatChecker after reading the
+    header. It allows one to give information about the possible ways to
+    read a volume ( partial reading ... ).
+
+    see DataSourceInfo
+%End
+
+    public:
+      DataSourceCapabilities();
+      DataSourceCapabilities( const soma::DataSourceCapabilities & );
+      virtual ~DataSourceCapabilities();
+
+      bool  allowsMemoryMapping() const;
+      bool  isThreadSafe()        const;
+      bool  isOrdered()           const;
+      bool  canSeekVoxel()  const;
+      bool  canSeekLine()   const;
+      bool  canSeekSlice()  const;
+      bool  canSeekVolume() const;
+      bool  isRandomAccessEfficient() const;
+      bool  canHandleStrides() const;
+
+      rc_ptr_DataSource  mappableDataSource() const;
+
+      void  setMemoryMapping  ( const bool & boo = true );
+      void  setThreadSafe     ( const bool & boo = true );
+      void  setOrdered        ( const bool & boo = true );
+      void  setSeekVoxel      ( const bool & boo = true );
+      void  setSeekLine       ( const bool & boo = true );
+      void  setSeekSlice      ( const bool & boo = true );
+      void  setSeekVolume     ( const bool & boo = true );
+      void  setRandomAccessEfficient( const bool & boo = true );
+      void  setHandleStrides  ( const bool & boo = true );
+
+      void  setDataSource( const rc_ptr_DataSource ds );
+
+      bool  isInit() const;
+%Docstring
+    Did we initialize the capabilities ? default : False
+    Since a DataSourceInfo can be either fully initialized because of a
+    previous call to DataSourceInfoLoader or be only partially
+    initialized because we just know the header, it is important to
+    know if the value of this object matters or not.
+    each time one of the mutators is called, setInit( true ) is also
+    called.
+%End
+
+      void  setInit( const bool & boo = true );
+      void  reset();
+%Docstring
+    Sets the whole capabilities to its default value (including
+    isInit() to false )
+%End
+  };
+
+
+  class DataSourceInfo
   {
 %TypeHeaderCode
 #include <soma-io/datasourceinfo/datasourceinfo.h>
@@ -518,7 +579,7 @@ protected:
       get the header dict of the underlying data
 %End
 
-//      DataSourceCapabilities & capabilities();
+      DataSourceCapabilities & capabilities();
 //      carto::Object privateIOData();
       soma::DataSourceList & list();
 %Docstring
