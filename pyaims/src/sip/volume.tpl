@@ -312,6 +312,29 @@ The header contains all meta-data.
 
   carto::Object reorientedHeader( const std::string & orient ) const;
 
+  vector_S32 memoryLayoutOrientation() const;
+%Docstring
+    determine the memory layout orientation from strides and current
+    indices orientation.
+
+    Use
+    ``volume.referential().orientationStr(volume.memoryLayoutOrientation())``
+    to get a more readable string description.
+%End
+
+  vector_S32 storageLayoutOrientation() const;
+%Docstring
+    determine the storage (disk) layout orientation.
+
+    The storage orientation is optionnally stored int the header
+    "storage_to_memory" matrix. If not, the storage orientation is
+    undefined.
+
+    Use
+    volume.referential().orientationStr(volume.storageLayoutOrientation())
+    to get a more readable string description.
+%End
+
   Volume_%Template1typecode%* operator + ( Volume_%Template1typecode% & )
     /Factory, ReleaseGIL/;
 %MethodCode

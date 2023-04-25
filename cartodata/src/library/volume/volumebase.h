@@ -525,7 +525,8 @@ namespace carto
     void flipToOrientation( const std::string & orient );
     /** Flip the volume to a given orientation
 
-        The volume voxels will be reordered to match the given orientation. Contrarily to the other flipToOrientation method, the voxels data block
+        The volume voxels will be reordered to match the given orientation.
+        Contrarily to the other flipToOrientation method, the voxels data block
         will be reallocated and flipped to match the given orientation. It is
         also given as a 3 char string, thus it may specify a different memory
         layout from the one used for indices.
@@ -534,6 +535,25 @@ namespace carto
                             const std::string & force_memory_layout );
     /// used by flipToOrientation(), reorient header information
     Object reorientedHeader( const std::string & orient ) const;
+    /** determine the memory layout orientation from strides and current
+        indices orientation.
+
+        Use
+        volume.referential().orientationStr(volume.memoryLayoutOrientation())
+        to get a more readable string description.
+    */
+    std::vector<int> memoryLayoutOrientation() const;
+    /** determine the storage (disk) layout orientation.
+
+        The storage orientation is optionnally stored int the header
+        "storage_to_memory" matrix. If not, the storage orientation is
+        undefined.
+
+        Use
+        volume.referential().orientationStr(volume.storageLayoutOrientation())
+        to get a more readable string description.
+    */
+    std::vector<int> storageLayoutOrientation() const;
 
   protected:
     //========================================================================

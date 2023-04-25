@@ -1538,6 +1538,62 @@ namespace carto
     return rhdr;
   }
 
+
+  template <typename T>
+  std::vector<int> Volume<T>::memoryLayoutOrientation() const
+  {
+    std::vector<long> strides = this->getStrides();
+    size_t i, j, n = strides.size();
+    std::multimap<std::pair<long, bool>, size_t> ordered_strides;
+    std::vector<int> orient( n, 0 );
+    std::vector<int> dims = this->getSize();
+
+    for( i=0; i<n; ++i )
+    {
+      bool several = ( dims[i] > 1 );
+      ordered_strides.insert(
+        std::make_pair( std::make_pair( std::abs( strides[i] ), several),
+                        i ) );
+    }
+
+    std::vector<int> aorient = this->referential().axesOrientation();
+    std::multimap<std::pair<long, bool>, size_t>::const_iterator
+      im, em = ordered_strides.end();
+
+    for( im=ordered_strides.begin(), i=0; im!=em; ++im, ++i )
+    {
+      j = ( ( aorient[ im->second ] - 1 ) / 2 ) * 2 + 1;
+      bool neg = ( aorient[ im->second ] - 1 ) % 2;
+      if( strides[ im->second] < 0 )
+        neg = !neg;
+      if( neg )
+        ++j;
+      orient[i] = j;
+    }
+
+    return orient;
+  }
+
+
+  template <typename T>
+  std::vector<int> Volume<T>::storageLayoutOrientation() const
+  {
+    try
+    {
+      Object s2mo = this->header().getProperty( "storage_to_memory" );
+      soma::AffineTransformationBase s2m( s2mo );
+      std::unique_ptr<AffineTransformationBase> m2s = s2m.inverse();
+      return this->referential().orientationFromTransform( *m2s );
+    }
+    catch( ... )
+    {
+    }
+
+    std::vector<int> orient( this->getSize().size(), 0 );
+    return orient;
+  }
+
+
 //============================================================================
 //   U T I L I T I E S
 //============================================================================
