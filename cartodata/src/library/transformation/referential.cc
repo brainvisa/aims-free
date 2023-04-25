@@ -399,6 +399,7 @@ std::vector<int> Referential::orientationFromTransform(
                       0 );
 
   unsigned i, j, n = tr.order();
+  set<int> taken;
   for( i=0; i<n; ++i )
   {
     int from = 0, sign = 1;
@@ -424,6 +425,17 @@ std::vector<int> Referential::orientationFromTransform(
     if( sign < 0 )
       ++from;
     orient[i] = from;
+    taken.insert( (from - 1) / 2 );
+  }
+
+  // complete non-transformed axes
+  j = 0;
+  for( ; i<orient.size(); ++i )
+  {
+    while( taken.find( j ) != taken.end() )
+      ++j;
+    orient[i] = j * 2 + 1;
+    taken.insert( j );
   }
 
   return orient;
