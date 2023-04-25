@@ -40,7 +40,6 @@
 #include <aims/io/datatypecode.h>
 #include <aims/io/defaultItemR.h>
 #include <aims/io/spmheader.h>
-#include <aims/utility/flip.h>
 #include <aims/data/data.h>
 #include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/exception/ioexcept.h>
