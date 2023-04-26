@@ -26,6 +26,11 @@ There is a PyAims tutorial available as a `Jupyter/Ipython notebook <http://jupy
     * :download:`download tutorial notebook <pyaims_tutorial_nb.ipynb>`
     * :doc:`see it in the doc <pyaims_tutorial>`
 
+And a volume orientation manipulation demo:
+
+* :download:`download tutorial notebook <volume_orientation.ipynb>`
+* :doc:`see it in the doc <volume_orientation>`
+
 
 Contents
 ++++++++
@@ -36,6 +41,7 @@ Contents
     :titlesonly:
 
     pyaims_tutorial
+    volume_orientation
 
 .. ifconfig:: 'nbsphinx' in extensions
 
@@ -43,6 +49,7 @@ Contents
     :titlesonly:
 
     pyaims_tutorial_nb.ipynb
+    volume_orientation.ipynb
 
 .. toctree::
   :titlesonly:
