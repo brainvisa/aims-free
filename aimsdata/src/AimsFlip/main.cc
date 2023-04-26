@@ -146,13 +146,27 @@ int main( int argc, const char **argv )
       app.alias( "--input", "-i" );
       app.addOption( fileout, "-o", "output flipped image" ) ;
       app.alias( "--output", "-o" );
-      app.addOption( mode, "-m", "flip image XX, YY, ZZ, XXYY, XXZZ, YYZZ, XXYYZZ, or flip axes : XY, XZ, YZ. Flip orientation may also be specified using orientation letters (L,R,P,A,I,S...) starting from a LPI orientation (ex: RPI will be the same as XX)") ;
-      app.addOption( no_trans, "-n", "do not update transformations to other coordinates systems (just flip voxels)", true );
+      app.addOption( mode, "-m",
+                     "flip image XX, YY, ZZ, XXYY, XXZZ, YYZZ, XXYYZZ, or "
+                     "flip axes : XY, XZ, YZ. Flip orientation may also be "
+                     "specified using orientation letters (L,R,P,A,I,S...) "
+                     "starting from a LPI orientation (ex: RPI will be the "
+                     "same as XX)") ;
+      app.addOption( no_trans, "-n",
+                     "do not update transformations to other coordinates "
+                     "systems (just flip voxels). If not used, "
+                     "transformations will be updated so that the volume does "
+                     "not appear to have changed in any other referential.",
+                     true );
       app.alias( "--no-transform", "-n" );
-      /*
-      app.addOption( center_ref, "-c", "rotate around the center of this referential. Given as a referential ID in the image header, or its index", true );
+      app.addOption( center_ref, "-c",
+                     "rotate around the center of this referential. Given as "
+                     "a referential ID in the image header, or its index (0, "
+                     "1, ...). The volume will actually be flipped or rotated "
+                     "in another referential (as with -n), but rotation / "
+                     "flip will be centered on the origin of the given "
+                     "referential.", true );
       app.alias( "--center", "-c" );
-      */
 
       app.initialize() ;
 
