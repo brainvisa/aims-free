@@ -75,17 +75,9 @@ namespace aims
     // std::cout << "initNumpyArray from descr: " << numType << std::endl;
 
     PyObject *sipRes = 0;
-    // if the object has been built from an existing array, just return it
-    if( PyObject_HasAttrString( sipSelf, "_arrayext" ) )
-    {
-      PyObject *arr = PyObject_GetAttrString( sipSelf, "_arrayext" );
-      if( arr )
-      {
-        sipRes = transposeNumpyArray( arr, xyzorder );
-      }
-    }
-    // else look if an array has already been built on the object
-    else if( PyObject_HasAttrString( sipSelf, "_arrayref" ) )
+    // don't return any external _arrayext array since its strides
+    // may have been modified.
+    if( PyObject_HasAttrString( sipSelf, "_arrayref" ) )
     {
       PyObject *wr = PyObject_GetAttrString( sipSelf, "_arrayref" );
       if( wr )
