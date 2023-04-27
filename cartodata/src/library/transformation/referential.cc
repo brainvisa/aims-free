@@ -392,6 +392,19 @@ bool Referential::is3DOriented( const vector<int> & orient )
 }
 
 
+bool Referential::isLpiOriented() const
+{
+  if( _orientation[0] != int(L) || _orientation[1] != int(P)
+      || _orientation[2] != int(I) )
+    return false;
+  unsigned i, n = order();
+  for( i=3; i<n; ++i )
+    if( _orientation[i] != i * 2 + 1 )
+      return false;
+  return true;
+}
+
+
 std::vector<int> Referential::orientationFromTransform(
   const AffineTransformationBase & tr ) const
 {

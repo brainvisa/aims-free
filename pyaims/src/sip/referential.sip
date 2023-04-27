@@ -231,6 +231,11 @@ namespace carto
 
     bool is3DOriented( const std::string & orient ) const;
     static bool is3DOriented( const vector_S32 & orient );
+
+    bool isLpiOriented() const;
+%Docstring
+    tells if the orientation is the default LPI one.
+%End
   };
 
 };

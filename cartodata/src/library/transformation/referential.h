@@ -117,7 +117,8 @@ namespace carto
     /// update the order, keeping existing orientation information
     void ensureOrder( unsigned ndim );
     /// a referential has an unique identifier
-    std::string uuid() const { return _uuid; }
+    const std::string & uuid() const { return _uuid; }
+    std::string & uuid() { return _uuid; }
     /// orientation of the referential, as a string of one letter per axis
     std::string orientationStr() const;
     /// extended orientation information according to the needed number of axes
@@ -169,7 +170,12 @@ namespace carto
         referential will change to a diferent one. The LPI referential is the
         original one before any flip is applied.
     */
-    std::string lpiReferentialUuid() const { return _lpi_uuid; }
+    std::string lpiReferentialUuid() const
+    {
+      if( isLpiOriented() && _uuid != _lpi_uuid )
+        _lpi_uuid = _uuid;
+      return _lpi_uuid;
+    }
 
     /// force a new UUID
     void setUuid( const std::string & uuid );
@@ -195,6 +201,8 @@ namespace carto
     bool is3DOriented() const;
     /// tells if the given orientation is 3D compatible
     bool is3DOriented( const std::string & orient ) const;
+    /// tells if the orientation is the default LPI one.
+    bool isLpiOriented() const;
     /** target orientation for a given transform matrix.
         The matrix should be a flip matrix, not any affine transform.
     */
@@ -229,7 +237,7 @@ namespace carto
 
   private:
     std::string _uuid;
-    std::string _lpi_uuid;
+    mutable std::string _lpi_uuid;
     std::vector<int> _orientation;
     Object _header;
   };

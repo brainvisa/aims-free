@@ -77,6 +77,7 @@ namespace carto
       _start( &_items[0] ),
       _pos( 4, 0 )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     allocate( -1, -1, -1, -1, allocated, allocatorContext );
   }
 
@@ -92,6 +93,7 @@ namespace carto
     _start( &_items[0] ),
     _pos( 4, 0 )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     allocate( -1, -1, -1, -1, allocated, allocatorContext );
   }
 
@@ -162,6 +164,7 @@ namespace carto
       _start( &_items[0] ),
       _pos( bordersize.toVector() )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     constructBorders( bordersize.toVector(), allocatorContext, allocated );
   }
 
@@ -179,6 +182,7 @@ namespace carto
     _start( &_items[0] ),
     _pos( bordersize.toVector() )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     constructBorders( bordersize.toVector(), allocatorContext, allocated );
   }
 
@@ -193,6 +197,7 @@ namespace carto
       _start( &_items[0] ),
       _pos( 4, 0 )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     _pos[0] = bordersize;
     _pos[1] = bordersize;
     _pos[2] = bordersize;
@@ -216,6 +221,7 @@ namespace carto
     _start( &_items[0] ),
     _pos( 4, 0 )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     _pos[0] = bordersize;
     _pos[1] = bordersize;
     _pos[2] = bordersize;
@@ -234,6 +240,7 @@ namespace carto
     _start( &_items[0] ),
     _pos( 4, 0 )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     allocate( std::vector<int>( 1, -1 ), allocated, allocatorContext );
   }
 
@@ -249,6 +256,7 @@ namespace carto
     _start( &_items[0] ),
     _pos( bordersize )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     while( _pos.size() < 4 )
       _pos.push_back( 0 );
     constructBorders( bordersize, allocatorContext, allocated );
@@ -265,6 +273,7 @@ namespace carto
       _start( &_items[0] ),
       _pos( 4, 0 )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     allocate( -1, -1, -1, -1, true, allocatorContext(), strides );
   }
 
@@ -282,6 +291,7 @@ namespace carto
             (long)(size[3] > 0 ? size[3] : 1), buffer ),
     _pos( 4, 0 )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     allocate( -1, -1, -1, -1, true, allocatorContext(), strides );
   }
 
@@ -293,6 +303,7 @@ namespace carto
     _items( (long) Position4Di::size_num_elements( size ), buffer ),
     _pos( 4, 0 )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     allocate( std::vector<int>( 1, -1 ), true, allocatorContext(), strides );
   }
 
@@ -317,6 +328,7 @@ namespace carto
       _pos( pos.toVector() ),
       _referential( other->referential() )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     // use a unique referential UUID, but keep orientation information
     UUID uuid;
     uuid.generate();
@@ -396,6 +408,7 @@ namespace carto
       _pos( Position4Di::fixed_position( pos ) ),
       _referential( other->referential() )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     // use a unique referential UUID, but keep orientation information
     UUID uuid;
     uuid.generate();
@@ -480,6 +493,7 @@ namespace carto
       _pos( pos ),
       _referential( other->referential() )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     // use a unique referential UUID, but keep orientation information
     UUID uuid;
     uuid.generate();
@@ -511,6 +525,7 @@ namespace carto
       _pos( other.posInRefVolume() ),
       _referential( other.referential() )
   {
+    this->header().addBuiltinProperty( "referential", _referential.uuid() );
     if( _refvol.get() ) // view case: the underlying volume is copied.
     {
       Position4Di pos = other.posInRefVolume();
@@ -1334,9 +1349,6 @@ namespace carto
 
     this->blockSignals( true );
 
-    if( this->header().hasProperty( "referential" ) )
-      this->header().removeProperty( "referential" );
-
     this->header().copyProperties( reor_hdr );
 
     _start = &_items[0] + offset + old_offset;
@@ -1351,8 +1363,7 @@ namespace carto
 
     // update referential info, generate a new ID
     _referential.setOrientation( orient );
-    if( _referential.orientationStr()
-        == _referential.orientationStr( "LPI" ) ) // initial LPI orientation
+    if( _referential.isLpiOriented() ) // initial LPI orientation
       _referential.setUuid( _referential.lpiReferentialUuid() );
     else
     {
