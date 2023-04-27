@@ -280,6 +280,8 @@ namespace carto
 
   Thus "loading in LPI orientation" may mean 2 different things: load in LPI memory layout, meaning that voxels are contiguous in the R->L direction, or it may mean that the first index increases from right to left. We choose to take the second convention: "orientation" means indices axes orientation, whatever the actual order of voxels in memory. The voxels order is thus called "memory layout".
 
+  This doc is part of the C++ documentation of CartoData, but is mainly valid also for python exports. A python-oriented documentation and notebook are available on the [PyAIMS documentation](../../pyaims/sphinx/index.html#tutorial).
+
   \b Querying orientation
 
   - Axes (indices) orientation can be queries using:
