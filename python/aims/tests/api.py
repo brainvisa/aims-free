@@ -45,6 +45,7 @@ class ImageFileComparison(object):
             d1 = soma.aims.read(image1)
             h1 = dict(d1.header())
             i1 = d1.arraydata()
+            ImageFileComparison.clean_header(h1)
         else:
             h1 = dict()
             i1 = numpy.array([])
@@ -52,6 +53,7 @@ class ImageFileComparison(object):
         if os.path.exists(image2):
             d2 = soma.aims.read(image2)
             h2 = dict(d2.header())
+            ImageFileComparison.clean_header(h2)
             i2 = d2.arraydata()
         else:
             h2 = dict()
@@ -74,6 +76,17 @@ class ImageFileComparison(object):
 
         i1 = None
         i2 = None
+
+    @staticmethod
+    def clean_header(hdr):
+        """ Remove from header items which should not be compared for volume
+            equality: typically, the "uuid" and "referential" fields are
+            removed.
+        """
+        neutral_fields = ('uuid', 'referential')
+        for field in neutral_fields:
+            if field in hdr:
+                del hdr[field]
 
 
 class TextFileComparison(object):
