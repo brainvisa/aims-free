@@ -42,11 +42,20 @@ class PyaimsNBTest(unittest.TestCase):
     @unittest.skipIf(tnb.main_jupyter is None, 'Notebook tests not supported')
     def test_pyaims_notebook(self):
         # try the notebook version if it can be processed on this system
-        print('testing notebook')
+        print('testing pyaims tutorial notebook')
         tnb.test_notebook(
             os.path.join(os.path.dirname(sys.argv[0]),
                           'pyaims_tutorial_nb.ipynb'),
             timeout=300)
+
+    @unittest.skipIf(tnb.main_jupyter is None, 'Notebook tests not supported')
+    def test_vol_orient_notebook(self):
+        # try the notebook version if it can be processed on this system
+        print('testing volume orientation notebook')
+        tnb.test_notebook(
+            os.path.join(os.path.dirname(sys.argv[0]),
+                          'volume_orientation.ipynb'),
+            timeout=30)
 
 
 def test_suite():
