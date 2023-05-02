@@ -179,6 +179,8 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
   // return 0;
 %End
 
+  Object() /ReleaseGIL/;
+
   bool operator == ( const carto::Object & ) const;
   bool operator == ( SIP_PYOBJECT ) const;
 %MethodCode
@@ -193,7 +195,6 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 
 
   protected:
-    Object() /ReleaseGIL/;
     Object( const carto::Object & ) /ReleaseGIL/;
     Object( carto::GenericObject*, bool = false ) /ReleaseGIL/;
 %MethodCode
