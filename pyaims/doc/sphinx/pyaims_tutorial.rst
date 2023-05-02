@@ -4,7 +4,7 @@
 PyAims tutorial : programming with AIMS in Python language
 **********************************************************
 
-This tutorial should work with Python 2 (2.6 or higher), and is also compatible with Python 3 (if pyaims is compiled in python3 mode).
+This tutorial should work with Python 3 (Python 2 support has been dropped in pyaims 5.1).
 
 AIMS is a C++ library, but has python language bindings: **PyAIMS**. This means that the C++ classes and functions can be used from python. 
 This has many advantages compared to pure C++:
@@ -68,6 +68,18 @@ To work smoothly with python2 or python3, let's use print():
     f.extractall()
     del f
     print('we are working in:', tuto_dir)
+
+We will need this function to print headers in a reproducible way in order to pass tests (it bascally removes the "referential" property which may be a randomly changing value).
+
+::
+
+    def clean_h(hdr, hidden=None):
+        if hidden is None:
+            hidden = set(['referential'])
+        return {k: v for k, v in hdr.items() if k not in hidden}
+    ​
+    def print_h(hdr, hidden=None):
+        print(clean_h(hdr, hidden))
 
 
 Using data structures
@@ -150,7 +162,7 @@ Building a volume
 
 >>> # set the voxels size
 >>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
->>> print(vol.header())
+>>> print_h(vol.header())
 { 'volume_dimension' : [ 192, 256, 128, 1 ], 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 
@@ -358,7 +370,7 @@ If you need to build another, different volume, with the same structure and size
 
 >>> vol2 = aims.Volume(vol.getSize(), 'FLOAT')
 >>> vol2.copyHeaderFrom(vol.header())
->>> vol2.header()
+>>> print_h(vol2.header())
 { 'volume_dimension' : [ 192, 256, 128, 1 ], 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 Important information can reside in the header, like voxel size, or coordinates systems and geometric transformations to other coordinates systems, 
@@ -405,7 +417,7 @@ others are optional and default to 0, but up to 4 coordinates may be used. In th
 12
 >>> # set the voxels size
 >>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
->>> print(vol.header())
+>>> print_h(vol.header())
 { 'volume_dimension' : [ 30, 30, 30, 4 ], 'sizeX' : 30, 'sizeY' : 30, 'sizeZ' : 30, 'sizeT' : 4, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 Similarly, 1D or 2D volumes may be used exactly the same way.
