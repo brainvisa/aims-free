@@ -69,18 +69,6 @@ To work smoothly with python2 or python3, let's use print():
     del f
     print('we are working in:', tuto_dir)
 
-We will need this function to print headers in a reproducible way in order to pass tests (it bascally removes the "referential" property which may be a randomly changing value).
-
-::
-
-    def clean_h(hdr, hidden=None):
-        if hidden is None:
-            hidden = set(['referential'])
-        return {k: v for k, v in hdr.items() if k not in hidden}
-    ​
-    def print_h(hdr, hidden=None):
-        print(clean_h(hdr, hidden))
-
 
 Using data structures
 =====================
@@ -100,6 +88,8 @@ or:
 >>> # the module is available as aims (not soma.aims):
 >>> vol = aims.Volume(100, 100, 100, dtype='int16')
 >>> # in the following, we will be using this form because it is shorter.
+>>> # we will also use these functions:
+>>> from soma.aims.filetools import clean_hdr, print_hdr
 
 
 IO: reading and writing objects
@@ -162,7 +152,7 @@ Building a volume
 
 >>> # set the voxels size
 >>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
->>> print_h(vol.header())
+>>> print_hdr(vol.header())
 { 'volume_dimension' : [ 192, 256, 128, 1 ], 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 
@@ -370,7 +360,7 @@ If you need to build another, different volume, with the same structure and size
 
 >>> vol2 = aims.Volume(vol.getSize(), 'FLOAT')
 >>> vol2.copyHeaderFrom(vol.header())
->>> print_h(vol2.header())
+>>> print_hdr(vol2.header())
 { 'volume_dimension' : [ 192, 256, 128, 1 ], 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 Important information can reside in the header, like voxel size, or coordinates systems and geometric transformations to other coordinates systems, 
@@ -417,7 +407,7 @@ others are optional and default to 0, but up to 4 coordinates may be used. In th
 12
 >>> # set the voxels size
 >>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
->>> print_h(vol.header())
+>>> print_hdr(vol.header())
 { 'volume_dimension' : [ 30, 30, 30, 4 ], 'sizeX' : 30, 'sizeY' : 30, 'sizeZ' : 30, 'sizeT' : 4, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 Similarly, 1D or 2D volumes may be used exactly the same way.
