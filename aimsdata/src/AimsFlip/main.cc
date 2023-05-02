@@ -167,6 +167,7 @@ int main( int argc, const char **argv )
                      "flip will be centered on the origin of the given "
                      "referential.", true );
       app.alias( "--center", "-c" );
+      app.alias( "--centre", "-c" );
 
       app.initialize() ;
 
