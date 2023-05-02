@@ -127,8 +127,8 @@ def compare_nii_files(file1, file2, thresh=50, out_stream=sys.stdout):
 def filter_header_for_cmp(hdr):
     '''
     Utility function used by cmp()
-    Removed uuid and referential properties from the given header, in order to
-    be compared with another file wich may differ only in thoses identifiers
+    Remove uuid and referential properties from the given header, in order to
+    be compared with another file wich may differ only in those identifiers
     '''
     for prop in ('uuid', 'referential', 'GIFTI_dataarrays_info',
                  'GIFTI_metadata', 'file_type', 'format', 'GIFTI_version'):
@@ -139,6 +139,19 @@ def filter_header_for_cmp(hdr):
         gcs = hdr['GIFTI_coordinates_systems']
         if 'data_referentials' in gcs:
             del gcs['data_referentials']
+
+
+def clean_hdr(hdr, hidden=None):
+    if hidden is None:
+        hidden = set(['referential', 'uuid', 'GIFTI_dataarrays_info',
+                      'GIFTI_metadata', 'file_type', 'format',
+                      'GIFTI_version'])
+    res = type(hdr)({k: v for k, v in hdr.items() if k not in hidden})
+    return res
+
+
+def print_hdr(hdr, hidden=None):
+    print(clean_hdr(hdr, hidden))
 
 
 def cmp(ref_file, test_file, skip_suffixes=None):
