@@ -665,7 +665,7 @@ namespace carto
 
     // Syntaxed API
 
-    virtual bool hasSyntax() const;
+    bool hasSyntax() const;
 %MethodCode
     const carto::SyntaxedInterface 
       *si = sipCpp->getInterface<carto::SyntaxedInterface>();
@@ -891,13 +891,14 @@ namespace carto
     virtual std::string key() const = 0;
     virtual long intKey() const = 0;
     // virtual carto::GenericObject * keyObject() const = 0 /Facrory/;
+    virtual carto::Object clone() const = 0;
 
   protected:
     GenericObject();
 
   private:
     GenericObject( const carto::GenericObject & );
-    virtual carto::GenericObject* clone() const = 0;
+    void _sip_dont_instantiate_() = 0;
   };
 
 // --------
