@@ -62,8 +62,9 @@ public:
   sipRes = l;
 %End
 
+  virtual carto::Object clone() const;
+
 private:
-  virtual carto::GenericObject* clone() const;
 };
 
 

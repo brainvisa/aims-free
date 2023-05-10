@@ -41,9 +41,9 @@ public:
     /*virtual*/ carto::Object currentValue() const  /Factory/;
     virtual std::string key() const  /Factory/;
     virtual long intKey() const;
+    virtual carto::Object clone() const;
 
 private:
-    virtual carto::GenericObject* clone() const;
     GraphObject& operator = ( const GraphObject & );
 
 };
