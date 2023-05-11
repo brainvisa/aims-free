@@ -11,7 +11,7 @@ typedef aims::BucketMap< Void > BucketMap_VOID;
 namespace carto
 {
 
-  class GenericObject : carto::RCObject
+  class GenericObject : carto::RCObject /Abstract/
   {
 %TypeHeaderCode
 #include <pyaims/object/object.h>
@@ -898,7 +898,7 @@ namespace carto
 
   private:
     GenericObject( const carto::GenericObject & );
-    void _sip_dont_instantiate_() = 0;
+    // void _sip_dont_instantiate_() = 0;
   };
 
 // --------
