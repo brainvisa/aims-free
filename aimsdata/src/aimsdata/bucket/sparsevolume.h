@@ -517,6 +517,14 @@ namespace aims
           break;
       }
     }
+    std::unique_ptr<carto::AllocatorContext> pac;
+    if( ac->allocatorType() == carto::AllocatorStrategy::Unallocated )
+    {
+      // if src is unallocated (does not own its data), we still need to
+      // allocate a volume.
+      pac.reset( new carto::AllocatorContext );
+      ac = pac.get();
+    }
     carto::Volume<T> *data = new carto::Volume<T>( src.getSizeX(),
         src.getSizeY(), src.getSizeZ(), src.getSizeT(), *ac );
     data->copyHeaderFrom( src.header() );
