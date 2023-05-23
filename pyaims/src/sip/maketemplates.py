@@ -102,7 +102,10 @@ cppc = options.preprocessor
 if options.extra_defs:
     for ed in options.extra_defs:
         if ed.startswith('SIP_MODULE='):
-            sip_mod = ed[12:-1]
+            sip_mod = ed[11:]
+            if sip_mod.startswith('"') or sip_mod.startswith("'"):
+                # module is between quotes, remove them
+                sip_mod = sip_mod[1:-1]
             # print('use sip module:', sip_mod, file=sys.stderr)
             # import the correct sip module so that generatedtypes.py has it.
             sip = importlib.import_module(sip_mod)
