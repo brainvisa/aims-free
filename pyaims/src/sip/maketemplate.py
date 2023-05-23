@@ -75,7 +75,7 @@ def get_sip_version(qt_version=0x050000, sip_mod=None):
 
 def makeTemplate(infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
                  quiet=0, extra_defs=None):
-    print('input :', infile, file=sys.stderr)
+    # print('input :', infile, file=sys.stderr)
     # print('output:', outfile, file=sys.stderr)
     # print('types :', types, file=sys.stderr)
     # print('extra_defs:', extra_defs, file=sys.stderr)
@@ -117,7 +117,7 @@ def makeTemplate(infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
             for ed in extra_defs:
                 if ed.startswith('-DSIP_MODULE='):
                     sip_mod = ed[14:-1]
-                    print('use sip module:', sip_mod, file=sys.stderr)
+                    # print('use sip module:', sip_mod, file=sys.stderr)
         sipver = get_sip_version(qver, sip_mod)
         cppcmd = cpp.split() + ['-DSIP_VERSION=' + '0x%06x' % sipver]
         cppcmd.append('-DQT_VERSION=' + hex(qver))
