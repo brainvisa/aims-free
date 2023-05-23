@@ -42,9 +42,9 @@ import re
 from optparse import OptionParser
 import subprocess
 import platform
+import importlib
 
 import six
-from six.moves import range
 
 
 def convert_string_to_int(s):
@@ -59,7 +59,10 @@ def convert_string_to_int(s):
     return int(s)
 
 
-def get_sip_version(qt_version=0x050000):
+def get_sip_version(qt_version=0x050000, sip_mod=None):
+    if sip_mod:
+        sip = importlib.import_module(sip_mod)
+        return sip.SIP_VERSION
     if qt_version >= 0x060000:
         import sipbuild
         return sipbuild.version.SIP_VERSION
@@ -72,9 +75,10 @@ def get_sip_version(qt_version=0x050000):
 
 def makeTemplate(infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
                  quiet=0, extra_defs=None):
-    # print('input :', infile)
-    # print('output:', outfile)
-    # print('types :', types)
+    print('input :', infile, file=sys.stderr)
+    # print('output:', outfile, file=sys.stderr)
+    # print('types :', types, file=sys.stderr)
+    # print('extra_defs:', extra_defs, file=sys.stderr)
     if not moc:
         print('makeTemplate, without moc:', moc, file=sys.stderr)
 
@@ -108,7 +112,13 @@ def makeTemplate(infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
             if not quiet:
                 print(e, file=sys.stderr)
             pass  # Qt not available ?
-        sipver = get_sip_version(qver)
+        sip_mod = None
+        if extra_defs:
+            for ed in extra_defs:
+                if ed.startswith('-DSIP_MODULE='):
+                    sip_mod = ed[14:-1]
+                    print('use sip module:', sip_mod, file=sys.stderr)
+        sipver = get_sip_version(qver, sip_mod)
         cppcmd = cpp.split() + ['-DSIP_VERSION=' + '0x%06x' % sipver]
         cppcmd.append('-DQT_VERSION=' + hex(qver))
         if extra_defs:
