@@ -46,9 +46,9 @@ import re
 from optparse import OptionParser
 import platform
 import subprocess
+import importlib
 
 import six
-from six.moves import filter, range
 
 
 parser = OptionParser(description='Preprocess a template file to generate '
@@ -98,6 +98,16 @@ if args:
 
 cpp = options.preprocess
 cppc = options.preprocessor
+
+if options.extra_defs:
+    for ed in options.extra_defs:
+        if ed.startswith('SIP_MODULE='):
+            sip_mod = ed[12:-1]
+            # print('use sip module:', sip_mod, file=sys.stderr)
+            # import the correct sip module so that generatedtypes.py has it.
+            sip = importlib.import_module(sip_mod)
+            break
+
 extra_defs = ['-D%s' % d for d in options.extra_defs]
 if cpp and not cppc:
     cppc = 'cpp -C'
@@ -191,7 +201,7 @@ for file, tps in todo.items():
     else:
         ofilebase = file
     for x in tps:
-        if isinstance(x, six.string_types):
+        if isinstance(x, str):
             templates = {'Template1': x}
             ts = typessub[x].get('typecode')
             if not ts:

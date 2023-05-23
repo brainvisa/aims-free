@@ -32,8 +32,13 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-from __future__ import absolute_import
-import sip
+import importlib
+
+if 'sip' not in globals():
+    if 'sip_mod' in globals():
+        sip = importlib.import_module(sip_mod)
+    else:
+        import sip
 
 numtypes = ['bool', 'unsigned char', 'short', 'unsigned short',
             'int', 'long', 'unsigned', 'unsigned long', 'unsigned long long',
