@@ -118,6 +118,7 @@ def makeTemplate(infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
                 if ed.startswith('-DSIP_MODULE='):
                     sip_mod = ed[13:]
                     if sip_mod and sip_mod[0] in ('"', "'"):
+                        # module is between quotes, remove them
                         sip_mod = sip_mod[1:-1]
                     # print('use sip module:', sip_mod, file=sys.stderr)
         sipver = get_sip_version(qver, sip_mod)

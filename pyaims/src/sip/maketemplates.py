@@ -104,6 +104,7 @@ if options.extra_defs:
         if ed.startswith('SIP_MODULE='):
             sip_mod = ed[11:]
             if sip_mod and sip_mod[0] in ('"', "'"):
+                # module is between quotes, remove them
                 sip_mod = sip_mod[1:-1]
             # print('use sip module:', sip_mod, file=sys.stderr)
             # import the correct sip module so that generatedtypes.py has it.
