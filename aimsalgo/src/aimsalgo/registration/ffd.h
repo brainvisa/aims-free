@@ -58,6 +58,8 @@ namespace aims {
     { return _ctrlPointDelta; }
     operator carto::rc_ptr<carto::Volume<Point3df> > & ()
     { return _ctrlPointDelta; }
+    carto::rc_ptr<carto::Volume<Point3df> > & ctrlDeformations()
+    { return _ctrlPointDelta; }
 
     /// Always false, because testing for identity is expensive
     bool isIdentity() const CARTO_OVERRIDE { return false; }
