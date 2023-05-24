@@ -841,24 +841,29 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
       for( int i=0; i<ffdims.size(); ++i )
         ffdims[i] = dims[i];
       VolumeRef<Point3df> rvol( (rc_ptr<Volume<Point3df> > ) obj );
-      rvol->reallocate( ffdims );
       rvol->copyHeaderFrom( fvol->header() );
+      rvol->reallocate( ffdims );
 
       // copy and convert contents
       vector<size_t> sstrides = rvol->getStrides();
       vector<int> strides;
       strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
       int x, y, z;
+      int d = dims.size() - 1;
 
       NDIterator<Point3df> it( &rvol->at( 0 ), rvol->getSize(), strides );
       for( ; !it.ended(); ++it )
       {
-        x = it.position()[0];
-        y = it.position()[0];
-        z = it.position()[0];
-        *it = Point3df( fvol->at( x, y, z, 0 ),
-                        fvol->at( x, y, z, 1 ),
-                        fvol->at( x, y, z, 2 ) );
+        vector<int> pos = it.position();
+        pos.resize( d + 1, 0 );
+        pos[d] = 0;
+        Point3df p;
+        p[0] = fvol->at( pos );
+        pos[d] = 1;
+        p[1] = fvol->at( pos );
+        pos[d] = 2;
+        p[2] = fvol->at( pos );
+        *it = p;
       }
 
       res = true;
