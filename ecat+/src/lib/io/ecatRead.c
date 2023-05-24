@@ -142,7 +142,7 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
     matnode = matnode->next;
   }
   if (!foundframegate) {
-    printf("EcatReadVolume_S16 : frame/gate %d does not exists in image %s\n", framegate, mptr->fname);
+    printf("EcatReadVolume_S16 : frame/gate %d does not exist in image %s\n", framegate, mptr->fname);
     return ECATSHFJ_FAIL;
   }
   /*{{{  multi-bed*/
