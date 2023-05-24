@@ -534,7 +534,7 @@ class TestPyaimsIO(unittest.TestCase):
             check that uuid in minf is rightly written and conserved 
             by writters for existing formats.
             To summarize behaviour:
-            - when output .minf file does not exists, writers must
+            - when output .minf file does not exist, writers must
               remove uuid property in given meta information, 
               except when specific option is given. This is because
               we want to avoid uuid copy when meta informations are 
@@ -636,7 +636,7 @@ class TestPyaimsIO(unittest.TestCase):
             
             remove_file(f)
             
-            # Output .minf file does not exists so re-read meta
+            # Output .minf file does not exist so re-read meta
             # must not contain uuid, even though it was given
             # in meta
             meta = {'uuid': str(uuid.Uuid())}

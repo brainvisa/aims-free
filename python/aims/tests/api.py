@@ -229,7 +229,7 @@ class CommandTest(object):
 
         if not os.path.exists(run_directory):
             raise RuntimeError(
-                'Command exited because run directory \'%s\' does not exists.'
+                'Command exited because run directory \'%s\' does not exist.'
                 % (run_directory,))
         retcode = soma.subprocess.call(self.__command,
                                        stdout=fout,
