@@ -113,6 +113,7 @@ Vector fields are stored in volumes rc_ptr_Volume_POINT3DF.
     bool isXFlat() const;
     bool isYFlat() const;
     bool isZFlat() const;
+    rc_ptr_Volume_POINT3DF ctrlDeformations();
     virtual void updateDimensions();
 
     //--- Debug --------------------------------------------------------------
