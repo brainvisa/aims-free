@@ -151,6 +151,44 @@ def fsl_to_aims_warp_field(W, input_hdr, output_hdr):
     return WLPI
 
 
+def affine_estimate_from_aims_field(WLPI):
+    trans = aims.AffineTransformation3d()
+    t_std = np.zeros((4, 4))
+    VSo = np.diag(WLPI.header()['voxel_size'][:3] + [1.])
+    Wx = WLPI[1:] - WLPI[:-1]
+    trans.np[:3, 0] = [np.average(Wx[:, :, :, i]) for i in range(3)]
+    t_std[:3, 0] = [np.std(Wx[:, :, :, i]) for i in range(3)]
+    Wx = WLPI[:, 1:] - WLPI[:, :-1]
+    trans.np[:3, 1] = [np.average(Wx[:, :, :, i]) for i in range(3)]
+    t_std[:3, 1] = [np.std(Wx[:, :, :, i]) for i in range(3)]
+    Wx = WLPI[:, :, 1:] - WLPI[:, :, :-1]
+    trans.np[:3, 2] = [np.average(Wx[:, :, :, i]) for i in range(3)]
+    t_std[:3, 2] = [np.std(Wx[:, :, :, i]) for i in range(3)]
+    del Wx
+
+    trans.np[:] /= VSo.diagonal()
+    #trans.np[:3, 3] = [np.average(WLPI[:, :, :, i]) for i in range(3)]
+
+    o = np.indices(WLPI.shape[:3], dtype=np.int32)
+    indices = np.array([o[i].ravel() for i in range(o.shape[0])])
+    ind_t = tuple(indices)
+    N = indices.shape[1]
+    indices = np.vstack((indices, np.ones((N, ), dtype=np.int32)))
+
+    t_std /= VSo.diagonal()
+
+    X = aims.Volume(WLPI)
+    # compose X - trans.VSo
+    X[ind_t] -= (trans * aims.AffineTransformation3d(VSo)).np.dot(indices)[:3,:].T
+    trans.np[:3, 3] = [np.average(X[:,:,:, i]) for i in range(3)]
+    t_std[:3, 3] = [np.std(X[:,:,:, i]) for i in range(3)]
+
+    trans.np[:] += np.eye(4)
+    #trans.np[:3, 3] = WLPI[0, 0, 0]  # can we do better ?
+
+    return trans, t_std
+
+
 def main():
     import argparse
 
