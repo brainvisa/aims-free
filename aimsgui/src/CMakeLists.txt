@@ -19,7 +19,7 @@ add_subdirectory( aimscifti )
 #------------------------------------------------------------------------------
 # Build targets for commands by looking into "Aims*" directories
 #------------------------------------------------------------------------------
-link_directories(${OPENGL_LIBRARY_DIRECTORIES})
+link_directories(${OPENGL_FIX_LIBRARY_DIRECTORIES})
 
 foreach( _command AimsAttributedViewer AimsLabelSelector )
   if( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
@@ -33,7 +33,7 @@ foreach( _command AimsAttributedViewer AimsLabelSelector )
     endforeach()
 
     BRAINVISA_ADD_EXECUTABLE( ${_target} ${_guiExecutable} ${_sources} )
-    target_link_libraries( ${_target} aimsgui ${OPENGL_LIBRARIES} )
+    target_link_libraries( ${_target} aimsgui ${OPENGL_FIX_LIBRARIES} )
 
     if( APPLE )
       add_custom_command( TARGET ${_target} POST_BUILD
