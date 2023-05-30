@@ -173,14 +173,12 @@ def fslMatToTrm(matfile, srcimage, dstimage):
     vsm2.fromMatrix(numpy.diag(vs2 + [1]))
     m2s1 = s2m1.inverse()
     m2s2 = s2m2.inverse()
-    dimd1 = [abs(x) for x in m2s1.transform(im1['volume_dimension'][:3])
-             - m2s1.transform([0, 0, 0])]
-    dimd2 = [abs(x) for x in m2s2.transform(im2['volume_dimension'][:3])
-             - m2s2.transform([0, 0, 0])]
-    x = [abs(x) for x in m2s1.transform(vs1) - m2s1.transform([0, 0, 0])]
+    dimd1 = [abs(x) for x in m2s1.transformVector(im1['volume_dimension'][:3])]
+    dimd2 = [abs(x) for x in m2s2.transformVector(im2['volume_dimension'][:3])]
+    x = [abs(x) for x in m2s1.transformVector(vs1)]
     vsd1 = aims.Motion()
     vsd1.fromMatrix(numpy.diag(x + [1]))
-    x = [abs(x) for x in m2s2.transform(vs2) - m2s2.transform([0, 0, 0])]
+    x = [abs(x) for x in m2s2.transformVector(vs2)]
     vsd2 = aims.Motion()
     vsd2.fromMatrix(numpy.diag(x + [1]))
     flip1 = aims.Motion()
