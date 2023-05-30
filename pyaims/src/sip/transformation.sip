@@ -329,6 +329,11 @@ public:
     Point3dd transformVector( double x, double y, double z ) const;
     // Point3df transformVector( float x, float y, float z ) const;
     // Point3di transformVector( int x, int y, int z ) const;
+
+    virtual vector_S32 transformVector( const vector_S32 & pos ) const;
+    virtual vector_FLOAT transformVector( const vector_FLOAT & pos /Constrained/ ) const;
+    virtual vector_DOUBLE transformVector( const vector_DOUBLE & pos ) const;
+
     Point3df transformNormal( const Point3df & dir /Constrained/ ) const;
     Point3dd transformNormal( const Point3dd & dir /Constrained/ ) const;
     Point3dd transformNormal( double x, double y, double z ) const;
