@@ -223,14 +223,10 @@ in AIMS programs as a FfdTransformation.
         help='output estimated affine transformation (.trm). Remember that '
         'the FSL field is the inverse of what is "said": from where a point '
         'is pulled to get to destination space, so the affine is also the '
-        'inverse (destination to source space).')
-    parser.add_argument(
-        '--without_affine',
-        help='optional input FSL warp field without the affine part (use '
-        'fnirtfileutils without -a option). Only used to estimate the affine '
-        'transformation (with -a option here). If provided, the difference '
-        'between warp fields with and without the affine part will be used to '
-        'estimate the affine field, which is more accurate and more robust.')
+        'inverse (destination to source space). Note: for more accuracy, use '
+        'the affine difference between the full warping field and the field '
+        'without the affine part (as output by the fnirtutils tool without '
+        '-a option).')
     options = parser.parse_args()
 
     input_name = options.input
@@ -240,14 +236,9 @@ in AIMS programs as a FfdTransformation.
     if ref_name is None:
         ref_name = input_name
     affine_name = options.affine
-    input_wo_affine_name = None
-    input_wo_affine_name = options.without_affine
     if not output_name and not affine_name:
         print('Warning: no output specified - nothing to do.')
         return
-    if input_wo_affine_name and not affine_name:
-        print('Warning: without_affine is specified, but affine output is not '
-              'given, without_affine will not be used.')
 
     W = aims.read(input_name)
     finder = aims.Finder()
@@ -261,14 +252,7 @@ in AIMS programs as a FfdTransformation.
         aims.write(WLPI, output_name)
 
     if affine_name:
-        if input_wo_affine_name:
-            print('reading and transforming field without affine...')
-            WNA = aims.read(input_wo_affine_name)
-            WNALPI = fsl_to_aims_warp_field(WNA, input_hdr, output_hdr)
-            WA = WLPI - WNALPI
-        else:
-            WA = WLPI
-        affine, aff_std = affine_estimate_from_aims_field(WA)
+        affine, aff_std = affine_estimate_from_aims_field(WLPI)
         print('affine std:')
         print(aff_std)
         std_max = np.max(aff_std)
