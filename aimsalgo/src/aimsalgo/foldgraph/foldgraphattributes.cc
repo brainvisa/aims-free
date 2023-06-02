@@ -1367,11 +1367,25 @@ void FoldGraphAttributes::makeJunctionAttributes()
     }
 
   if( _graph.getProperty( "boundingbox_min", pointi ) )
-    bb.add( Point3df( pointi[0] * vs[0], pointi[1] * vs[1], 
+    bb.add( Point3df( pointi[0] * vs[0], pointi[1] * vs[1],
                       pointi[2] * vs[2] ) );
-  if( _graph.getProperty( "boundingbox_max", pointi ) )
-    bb.add( Point3df( pointi[0] * vs[0], pointi[1] * vs[1], 
-                      pointi[2] * vs[2] ) );
+  try
+  {
+    Object pi = _graph.getProperty( "boundingbox_max" );
+    if( pi->size() >= 3 )
+    {
+      pointi.resize( 3 );
+      pointi[0] = pi->getArrayItem( 0 )->getScalar();
+      pointi[1] = pi->getArrayItem( 1 )->getScalar();
+      pointi[2] = pi->getArrayItem( 2 )->getScalar();
+      bb.add( Point3df( pointi[0] * vs[0], pointi[1] * vs[1],
+                        pointi[2] * vs[2] ) );
+    }
+  }
+  catch( ... )
+  {
+  }
+
   if( _motion )
     {
       if( _graph.getProperty( "Tal_boundingbox_min", point ) )
