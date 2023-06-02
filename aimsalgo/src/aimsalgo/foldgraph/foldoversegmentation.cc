@@ -1566,7 +1566,10 @@ void FoldArgOverSegment::mergeVertices( Vertex *v1, Vertex *v2 )
   if( !v1->getProperty( "aims_ss", ss1 ) )
     ss1.reset( new BucketMap<Void> );
   if( v2->getProperty( "aims_ss", ss2 ) )
+  {
     (*ss1)[0].insert( (*ss2)[0].begin(), (*ss2)[0].end() );
+    ss1->setSizeXYZT( ss2->sizeX(), ss2->sizeY(), ss2->sizeZ(), 1. );
+  }
 
   // add junctions in main ss
   list<Edge *>::iterator ij, ej = junctions.end();
@@ -1581,14 +1584,22 @@ void FoldArgOverSegment::mergeVertices( Vertex *v1, Vertex *v2 )
   if( !v1->getProperty( "aims_bottom", bottom1 ) )
     bottom1.reset( new BucketMap<Void> );
   if( v2->getProperty( "aims_bottom", bottom2 ) )
+  {
     (*bottom1)[0].insert( (*bottom2)[0].begin(), (*bottom2)[0].end() );
+    bottom1->setSizeXYZT( bottom2->sizeX(), bottom2->sizeY(),
+                          bottom2->sizeZ(), 1. );
+  }
   if( !bottom1->empty() && !(*bottom1)[0].empty() )
     GraphManip::storeAims( *_graph, v1, "aims_bottom", bottom1 );
 
   if( !v1->getProperty( "aims_other", other1 ) )
     other1.reset( new BucketMap<Void> );
   if( v2->getProperty( "aims_other", other2 ) )
+  {
     (*other1)[0].insert( (*other2)[0].begin(), (*other2)[0].end() );
+    other1->setSizeXYZT( other2->sizeX(), other2->sizeY(), other2->sizeZ(),
+                         1. );
+  }
   if( !other1->empty() && !(*other1)[0].empty() )
     GraphManip::storeAims( *_graph, v1, "aims_other", other1 );
 
@@ -1638,6 +1649,9 @@ void FoldArgOverSegment::mergeVertices( Vertex *v1, Vertex *v2 )
           if( !match->getProperty( string( "aims_" ) + *iet, ss1 ) )
             ss1.reset( new BucketMap<Void> );
           (*ss1)[0].insert( (*junction)[0].begin(), (*junction)[0].end() );
+          ss1->setSizeXYZT( junction->sizeX(), junction->sizeY(),
+                            junction->sizeZ(), 1. );
+
           GraphManip::storeAims( *_graph, match, string( "aims_" ) + *iet,
                                  ss1 );
           pn1 = 0;
