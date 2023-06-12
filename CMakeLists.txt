@@ -180,7 +180,7 @@ if( BUILD_ECAT )
   add_subdirectory( ecat+ )
 endif( BUILD_ECAT )
 
-if( NOT WIN32 )
+if( (NOT DEFINED BUILD_VIDAIO OR BUILD_VIDAIO) AND NOT WIN32 )
   add_subdirectory( vidaIO )
 endif( NOT WIN32 )
 
