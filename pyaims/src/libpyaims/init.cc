@@ -64,19 +64,3 @@ namespace carto
     npy_import_array();
   }
 }
-
-#if PY_VERSION_HEX < 0x02070000
-/* in python 2.6, PyErr_NewExceptionWithDoc does not exist.
-   Some modules (Pandas for Mac + python2.6) need it. Pandas seems obviously
-   compiled for python 2.7 but easy_install actually installs it this way.
-   However with this trick, it seems to work.
-*/
-extern "C"
-{
-  PyObject* PyErr_NewExceptionWithDoc(char *name, char *doc, PyObject *base, PyObject *dict)
-  {
-    return PyErr_NewException( name, base, dict );
-  }
-}
-#endif
-

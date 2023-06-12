@@ -32,8 +32,8 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 from __future__ import absolute_import
-import sys
 import unittest
+import sys
 
 import numpy as np
 
