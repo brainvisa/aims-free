@@ -45,5 +45,5 @@ target_link_libraries( aimsalgosip "${PYTHON_LIBRARY}" cartobase soma-io cartoda
 add_dependencies( aimsalgosip ${headersTarget} )
 
 BRAINVISA_INSTALL( TARGETS aimsalgosip 
-                   DESTINATION python/soma/aimsalgo
+                   DESTINATION ${PYTHON_INSTALL_DIRECTORY}/soma/aimsalgo
                    COMPONENT ${PROJECT_NAME} )

@@ -64,6 +64,6 @@ target_link_libraries( aimssip "${PYTHON_LIBRARY}" cartobase soma-io cartodata g
 add_dependencies( aimssip ${headersTarget} )
 
 BRAINVISA_INSTALL( TARGETS aimssip 
-                   DESTINATION python/soma/aims
+                   DESTINATION ${PYTHON_INSTALL_DIRECTORY}/soma/aims
                    COMPONENT ${PROJECT_NAME} )
 
