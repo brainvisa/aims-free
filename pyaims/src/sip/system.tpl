@@ -33,10 +33,13 @@ std::string sip_module();
   sipRes = new std::string( SIP_MODULE );
 %End
 
-%#if SIP_VERSION < 0x060000%
+%#if SIP_VERSION < 0x060700%
 
 typedef long Py_hash_t;
+
+%#if SIP_VERSION < 0x060000%
 typedef int Py_ssize_t;
+%#endif%
 
 %#endif%
 

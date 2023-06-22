@@ -159,7 +159,7 @@ public:
   bool operator == ( const rc_ptr_%Template1typecode% & x ) const;
   bool operator != ( const rc_ptr_%Template1typecode% & x ) const;
   bool operator < ( const rc_ptr_%Template1typecode% & x ) const;
-  long __hash__() const;
+  Py_hash_t __hash__() const;
 %MethodCode
   sipRes = 
 #if defined( _WIN64 )
