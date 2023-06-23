@@ -37,15 +37,13 @@ std::string sip_module();
 typedef long Py_hash_t;
 %#endif%
 
-%#if SIP_ABI_MAJOR_VERSION < 13%
 %ModuleHeaderCode
-typedef long Aims_hash_t;
+#include <pyaims/sipnewtypedefs.h>
 %End
+
+%#if SIP_ABI_MAJOR_VERSION < 13%
 typedef long Aims_hash_t;
 %#else%
-%ModuleHeaderCode
-typedef Py_hash_t Aims_hash_t;
-%End
 typedef Py_hash_t Aims_hash_t;
 %#endif%
 

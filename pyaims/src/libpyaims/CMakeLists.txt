@@ -2,6 +2,7 @@
 set( _headers
         init.h
         numpyarray.h
+        sipnewtypedefs.h
         data/data.h
         data/sipdatatypes.h
         data/volumeoperators.h

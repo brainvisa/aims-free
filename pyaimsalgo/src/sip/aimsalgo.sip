@@ -5,6 +5,10 @@
 %DefaultDocstringFormat "deindented"
 %DefaultDocstringSignature "prepended"
 
+%ModuleHeaderCode
+#include <pyaims/sipnewtypedefs.h>
+%End
+
 %Include moment_DOUBLE.sip
 %Include moment_FLOAT.sip
 %Include moment_S16.sip
