@@ -13,7 +13,11 @@ file( GLOB _sipSources "${CMAKE_CURRENT_SOURCE_DIR}/*.sip" )
 if( SIP_MODULE )
   set( extra_defs "-D" "SIP_MODULE=\"${SIP_MODULE}\"" )
 endif()
-
+if( SIP_ABI )
+  string( REGEX MATCH "[^.]*" SIP_ABI_MAJOR_VERSION "${SIP_ABI}")
+  set( extra_defs "${extra_defs}" "-D"
+       "SIP_ABI_MAJOR_VERSION=${SIP_ABI_MAJOR_VERSION}")
+endif()
 
 execute_process( COMMAND "${PYTHON_HOST_EXECUTABLE}"
         "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}/maketemplates.py"
