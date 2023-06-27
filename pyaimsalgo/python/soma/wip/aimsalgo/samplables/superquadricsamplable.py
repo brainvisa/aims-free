@@ -1,52 +1,6 @@
-#  This software and supporting documentation are distributed by
-#      Institut Federatif de Recherche 49
-#      CEA/NeuroSpin, Batiment 145,
-#      91191 Gif-sur-Yvette cedex
-#      France
-#
-# This software is governed by the CeCILL-B license under
-# French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the
-# terms of the CeCILL-B license as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info".
-#
-# As a counterpart to the access to the source code and  rights to copy,
-# modify and redistribute granted by the license, users are provided only
-# with a limited warranty  and the software's author,  the holder of the
-# economic rights,  and the successive licensors  have only  limited
-# liability.
-#
-# In this respect, the user's attention is drawn to the risks associated
-# with loading,  using,  modifying and/or developing or reproducing the
-# software by the user in light of its specific status of free software,
-# that may mean  that it is complicated to manipulate,  and  that  also
-# therefore means  that it is reserved for developers  and  experienced
-# professionals having in-depth computer knowledge. Users are therefore
-# encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or
-# data to be ensured and,  more generally, to use and operate it in the
-# same conditions as regards security.
-#
-# The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL-B license and that you accept its terms.
-
-#########################################################################
-#
-# Project : Pyaimsalgo
-# Module : aimsalgo.samplables
-# Create date : 2007-07-13
-#
-# Description :
-# 	This file contains SuperQuadricSamplable class
-#
-#########################################################################
-from __future__ import absolute_import
-import sys
 import math
-import types
 
-import numpy
-from soma import aimsalgo, aims
+from soma import aims
 
 from soma.aimsalgo import Samplable_FLOAT_3
 from soma.wip.aimsalgo.transform import BendingTransform
@@ -61,16 +15,16 @@ class SuperQuadricSamplable(Samplable_FLOAT_3):
 
     @type coefficients: list
     @param checkActivated: list of the 10 deformable superquadric coefficients.
-            - e1 : first shape parameter
-            - e2 : second shape parameter
-            - a1 : x axis ray
-            - a2 : y axis ray
-            - a3 : z axis ray
-            - k1 : first tapering parameter
-            - k2 : second tapering parameter
-            - k3 : third tapering parameter
-            - alpha : angle of bending plan
-            - kapa : curvature radius for the bending transform
+    - e1 : first shape parameter
+    - e2 : second shape parameter
+    - a1 : x axis ray
+    - a2 : y axis ray
+    - a3 : z axis ray
+    - k1 : first tapering parameter
+    - k2 : second tapering parameter
+    - k3 : third tapering parameter
+    - alpha : angle of bending plan
+    - kapa : curvature radius for the bending transform
     """
 
     def __init__(self, coefficients, bending=True, tapering=True, checkActivated=True, maxBoundingBoxVolume=10 ** 7):
