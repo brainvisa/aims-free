@@ -1222,6 +1222,17 @@ def load_gltf(filename, object_parser=AimsGLTFParser()):
 
     Parsing is done using :func:`gltf_to_meshes`.
     '''
+    if not osp.exists(filename):
+        for ext in ('gltf', 'glb'):
+            filename2 = '{}.{}'.format(filename, ext)
+            if osp.exists(filename2):
+                filename = filename2
+                break
+        else:
+            with open(filename):
+                # just raise a FileNotFound error
+                pass
+
     try:
         from pygltflib import GLTF2, BufferFormat, ImageFormat
     except ImportError:
