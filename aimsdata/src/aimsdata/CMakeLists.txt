@@ -236,6 +236,7 @@ set( _headers
     utility/clock.h
     utility/cyclic_iterator.h
     utility/flip.h
+    utility/linearcomb.h
     utility/masscenter.h
     utility/merge.h
     utility/minmax.h

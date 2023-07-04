@@ -33,10 +33,21 @@ std::string sip_module();
   sipRes = new std::string( SIP_MODULE );
 %End
 
-%#if SIP_VERSION < 0x060000%
-
+%#if SIP_ABI_MAJOR_VERSION < 12%
 typedef long Py_hash_t;
-typedef int Py_ssize_t;
+%#endif%
 
+%ModuleHeaderCode
+#include <pyaims/sipnewtypedefs.h>
+%End
+
+%#if SIP_ABI_MAJOR_VERSION < 13%
+typedef long Aims_hash_t;
+%#else%
+typedef Py_hash_t Aims_hash_t;
+%#endif%
+
+%#if SIP_VERSION < 0x060000%
+typedef int Py_ssize_t;
 %#endif%
 

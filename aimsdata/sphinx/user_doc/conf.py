@@ -266,13 +266,15 @@ extlinks = {
   'anatomist': ('../../anatomist-' + version + '/%s', 'anatomist '),
   'pyanatomist': ('../../pyanatomist-' + version + '/sphinx/%s',
     'pyanatomist '),
-  'cmds': ('../../index_commands.html', 'commands '),
+  # 'cmds': ('../../index_commands.html', 'commands '),
   'documents': ('../../documents-' + version + '/%s', 'documents '),
 }
 
 import soma
 docpath = os.path.join( os.path.dirname( os.path.dirname( os.path.dirname( \
   soma.__file__ ) ) ), 'share', 'doc' )
+if not os.path.exists(docpath) and 'CONDA_PREFIX' in os.environ:
+    docpath = os.path.join(os.path.dirname(os.environ['CONDA_PREFIX']), 'build', 'share', 'doc')
 try:
   from soma import aims, aimsalgo
 except:

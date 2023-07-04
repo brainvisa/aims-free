@@ -34,8 +34,8 @@ static bool doit( Process &p, const string &filename, Finder & finder);
 class CxParcel: public Process
 {
 public:
-  CxParcel( const string & meshfile, const string & intexfile,const string & outputfile, 
-	    int gm_value );
+  CxParcel( const string & meshfile, const string & intexfile,
+            const string & outputfile, int gm_value );
   
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
@@ -48,9 +48,10 @@ private:
   int           gm_value;
 };
 
-CxParcel::CxParcel( const string & meshfile, const string & intexfile, const string & outputfile,
-		    int gm) 
-  	: Process(), meshf( meshfile ), itexf( intexfile ), parcelf(outputfile), gm_value( gm )
+CxParcel::CxParcel( const string & meshfile, const string & intexfile,
+                    const string & outputfile, int gm )
+  : Process(), meshf( meshfile ), itexf( intexfile ), parcelf(outputfile),
+    gm_value( gm )
 {
     registerProcessType( "Volume", "S8", &doit<int8_t> );
     registerProcessType( "Volume", "U8", &doit<uint8_t> );
@@ -124,23 +125,25 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
   if(verbose)
   	cout << "done.\n";
 
+  if( itexf.empty() )
+    throw runtime_error( "Input texture file is not provided." );
   if(verbose)
         cout << "reading input texture file...";
   TimeTexture<float>             itex;
-  if( itexf.length() ) {
-      Reader<TimeTexture<float> >    reader1(itexf);
-      if( !reader1.read( itex, 0) )
-            return(false);
-  }
+
+  Reader<TimeTexture<float> >    reader1(itexf);
+  if( !reader1.read( itex, 0) )
+    return(false);
   if(verbose)
         cout << "done.\n";
   
   VolumeRef<short> parcel (xmax, ymax, zmax);
-  parcel->header().setProperty( "voxel_size", vs );
-  if( parcelf .length() ==0 )
+  parcel->copyHeaderFrom( gmdata->header() );
+  if( parcelf.length() ==0 )
   {
-    cerr<<"ERROR: output parcellation file has not been defined!" << flush;
-    return(false);
+    cerr << "ERROR: output parcellation file has not been defined!"
+         << flush;
+    return false;
   }    
   Writer< VolumeRef< short > > w( parcelf );
 
@@ -199,7 +202,7 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
   {
     pct = int( g * 100 / gmax );
     if( int( pct / 10 ) != int( lastpct / 10 ) )
-      cout << pct << " pct done" << endl;
+      cout << pct << " % done" << endl;
     lastpct = pct;
 
     // searching for the closest vertex
@@ -233,8 +236,9 @@ bool CxParcel::parcellation( VolumeRef<T> & gmdata )
       parcel->at(x,y,z,0) = (short int)(round) (itex.item(pmin));
     }
     else
-      printf("ERROR: could not find any single vertex closer than 1m to (%.0f, %.0f, %.f)!\n",
-	     gm[g][0]/sx,gm[g][1]/sy,gm[g][2]/sz);
+      printf("ERROR: could not find any single vertex closer than 1m to "
+             "(%.0f, %.0f, %.f)!\n",
+             gm[g][0]/sx, gm[g][1]/sy, gm[g][2]/sz );
   }
 
   /* Writing ouput */
@@ -255,12 +259,22 @@ int main( int argc, const char** argv )
   string                        intexfile, outputfile;
   int                           gm_value=0;
 
-  AimsApplication	app( argc, argv, "Compute cortical parcellation" );
-  app.addOption( gmvolumefile, "-i", "Cortical segmentation" );
+  AimsApplication app( argc, argv,
+                       "Compute cortical parcellation.\n"
+                       "Project mesh texture values inside a cortex mask "
+                       "volume. The value assigned to each voxel of the "
+                       "mask is the texture from the nearest mesh vertex "
+                       "(euclidean distance). No interpolation is done in "
+                       "values (OK for labels)" );
+  app.addOption( gmvolumefile, "-i",
+                 "Cortical segmentation (grey matter volume)" );
   app.addOption( meshfile, "-m", "input sulcal mesh" );
-  app.addOption( intexfile, "-t", "input segmentation texture");
-  app.addOption( gm_value, "-g", "cortical label [default=0]", 0);
+  app.addOption( intexfile, "-t",
+                 "input segmentation texture (read as float texture)");
   app.addOption( outputfile, "-o", "output cortical parcellation");
+  app.addOption( gm_value, "-g",
+                 "cortical label in grey matter volume [default=0]",
+                 true );
   app.alias( "--mesh", "-m" );
   app.alias( "--input", "-i" );
   app.alias( "--texture", "-t" );
@@ -271,7 +285,8 @@ int main( int argc, const char** argv )
       app.initialize();
       if( verbose )
         cout << "Init program" << endl;
-      CxParcel	proc( meshfile.fileName(), intexfile, outputfile, gm_value);
+      CxParcel	proc( meshfile.fileName(), intexfile, outputfile,
+                      gm_value);
       if( verbose )
         cout << "Starting program.." << endl;
       if( !proc.execute( gmvolumefile ) )

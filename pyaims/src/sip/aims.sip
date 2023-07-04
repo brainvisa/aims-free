@@ -131,13 +131,16 @@ typedef int int32_t;
 %Include map_U8_ULONG.sip
 %Include map_U8_ULONGLONG.sip
 %Include map_U8_U32.sip
+%Include map_S16_S16.sip
 %Include map_S16_ULONG.sip
 %Include map_S16_ULONGLONG.sip
 %Include map_S16_U32.sip
 %Include map_S16_STRING.sip
+%Include map_U16_U16.sip
 %Include map_U16_ULONG.sip
 %Include map_U16_ULONGLONG.sip
 %Include map_U16_U32.sip
+%Include map_S32_S32.sip
 %Include map_S32_ULONG.sip
 %Include map_S32_ULONGLONG.sip
 %Include map_S32_U32.sip
@@ -145,6 +148,7 @@ typedef int int32_t;
 %Include map_U32_ULONG.sip
 %Include map_U32_ULONGLONG.sip
 %Include map_U32_U32.sip
+%Include map_FLOAT_FLOAT.sip
 // %Include map_STRING_RGB.sip
 // %Include map_STRING_RGBA.sip
 // %Include map_STRING_HSV.sip
@@ -341,6 +345,12 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include aimsgraphreader.sip
 %Include iotypes.sip
 %Include headerutil.sip
+
+%Include replacer_S16.sip
+%Include replacer_U16.sip
+%Include replacer_S32.sip
+%Include replacer_U32.sip
+%Include replacer_FLOAT.sip
 
 %If ( CARTODATA )
  

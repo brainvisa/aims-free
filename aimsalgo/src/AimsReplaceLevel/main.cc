@@ -36,6 +36,7 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/io/io_g.h>
 #include <aims/data/data_g.h>
+#include <aims/utility/linearcomb.h>
 #include <functional>
 #include <iostream>
 #include <string>
@@ -63,46 +64,9 @@ private:
   string		fileout;
 };
 
-namespace std
-{
-    template<>
-    struct less<AimsRGB>:binary_function<AimsRGB, AimsRGB, bool> {
 
-        bool operator() (const AimsRGB& x, const AimsRGB& y) const 
-        {
-            for(int32_t i=0; i<3; ++i)
-            {
-                if (x[i] > y[i])
-                    return false;
-                
-                if (x[i] < y[i])
-                    return true;
-            }
-            
-            return false;
-        }
-    };
-    
-    template<>
-    struct less<AimsRGBA>:binary_function<AimsRGBA, AimsRGBA, bool> {
-
-        bool operator() (const AimsRGBA& x, const AimsRGBA& y) const 
-        {
-            for(int32_t i=0; i<4; ++i)
-            {
-                if (x[i] > y[i])
-                    return false;
-                
-                if (x[i] < y[i])
-                    return true;
-            }
-            
-            return false;
-        }
-    };
-}
-
-Replacer::Replacer( vector<string> l1, vector<string> l2, const string & fout ) 
+::Replacer::Replacer( vector<string> l1, vector<string> l2,
+                      const string & fout )
     : Process(), level1( l1 ), level2( l2 ), fileout( fout )
 {
   registerProcessType( "Volume", "S8", &doit<int8_t> );
@@ -121,16 +85,14 @@ Replacer::Replacer( vector<string> l1, vector<string> l2, const string & fout )
 template<class T> bool
 doit( Process & p, const string & fname, Finder & f )
 {
-  Replacer		& rp = (Replacer &) p;
+  ::Replacer		& rp = (::Replacer &) p;
   string		format = f.format();
-  Reader<AimsData<T> >	r( fname );
-  AimsData<T>		in;
+  Reader<Volume<T> >	r( fname );
+  VolumeRef<T>		in;
 
-  if( !r.read( in, 0, &format ) )
-    return false;
-    
+  in.reset( r.read( 0, &format ) );
+
   map<T, T>	levels;
-  typename map<T, T>::iterator	it, ie;
   
   for(unsigned int i = 0; i < rp.level1.size(); i++)
   {
@@ -139,18 +101,11 @@ doit( Process & p, const string & fname, Finder & f )
      carto::stringTo(rp.level2[i], l2);
      levels[l1] = l2;
   }
-  ie = levels.end();
 
-  int x, y, z, t;
-  ForEach4d(in, x, y, z, t)
-  {
-    it = levels.find(in(x, y, z, t));
-    if (it != ie)
-      in(x, y, z, t) = (T)it->second;
-  }
-  
-  Writer<AimsData<T> > writer( rp.fileout );
-  return writer.write( in );
+  aims::Replacer<T>::replace( *in, *in, levels );
+
+  Writer<Volume<T> > writer( rp.fileout );
+  return writer.write( *in );
 }
 
 
@@ -184,7 +139,7 @@ vector<string>		graylevel, newlevel;
     {
       app.initialize();
  
-      Replacer			proc( graylevel, newlevel, fileout );
+      ::Replacer proc( graylevel, newlevel, fileout );
       
       if( !proc.execute( filein ) )
       {

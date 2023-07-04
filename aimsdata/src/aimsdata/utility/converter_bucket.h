@@ -111,6 +111,10 @@ namespace carto
                         const Point3d & offset = Point3d( 0, 0, 0 ) ) const;
     void setTimeIsLabel( bool x ) { _timeIsLabel = x; }
     bool timeIsLabel() const { return( _timeIsLabel ); }
+    OUTP constValue() const { return _value; }
+    bool hasConstantValue() const { return _hasValue; }
+    void setConstValue( OUTP x ) { _value = x; }
+    void setHasConstValue( bool x ) { _hasValue = x; }
 
   private:
     bool	_timeIsLabel;

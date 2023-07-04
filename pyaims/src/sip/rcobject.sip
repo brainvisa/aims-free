@@ -250,7 +250,7 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
   }
 %End
 
-  long __hash__() const;
+  Aims_hash_t __hash__() const;
 %MethodCode
   sipRes = static_cast<long>( reinterpret_cast<unsigned long long>(sipCpp) );
 %End
