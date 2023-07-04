@@ -55,6 +55,7 @@ int main( int argc, const char** argv )
   bool connexity = false;
   short background = 0 ;
   short forbidden = -1;
+  bool verbose = false;
   int T = 0;
   Reader<AimsSurfaceTriangle> triR;
   Writer<TimeTexture<short> > texW;
@@ -74,6 +75,7 @@ int main( int argc, const char** argv )
   app.addOption( connexity, "-c",
                  "connectivity or geodesic euclidean distance "
                  "<default: euclidean>", true );
+  app.addOption( verbose, "--verbose", "<default = 0>", true );
   app.alias( "--mesh", "-m" );
   app.alias( "--output", "-o" );
   app.alias( "--texture", "-t" );
@@ -91,17 +93,27 @@ int main( int argc, const char** argv )
     //
     // read triangulation
     //
+    if ( verbose )
+    {
     cout << "reading white triangulation   : " << flush;
+    }
     AimsSurfaceTriangle surface;
     triR >> surface;
+    if ( verbose )
+    {
     cout << "done" << endl;
-
+    }
     //
     // read input texture
     //
+    if ( verbose )
+    {
     cout << "reading texture   : " << flush;
+    }
     TimeTexture<short>    seed, voronoi;
     texR >> seed;
+    if ( verbose )
+    {
     cout << "done" << endl;
 
     cout << "mesh vertices : " << surface[0].vertex().size() << endl;
@@ -109,19 +121,29 @@ int main( int argc, const char** argv )
     cout << "Object texture dim   : " << seed[0].nItem() << endl;
     cout << "Background label: " << background << " Forbidden label : "
       << forbidden << endl;
+    }
     if ( ! (  seed[0].nItem() ==  surface[0].vertex().size() ) )
       {
         cerr << "The triangulation and the textures must correspond to the same object \n";
         assert( 0 );
       }
 
+    if ( verbose )
+    {
     cout << "Compute the voronoi diagram\n";
+    }
     voronoi[0] = MeshVoronoiT<short>( surface[0], seed[(unsigned) T],
                                       background ,forbidden, dist,
                                       connexity, true );
+    if ( verbose )
+    {
     cout << "writing texture : " << flush;
+    }
     texW <<  voronoi ;
+    if ( verbose )
+    {
     cout << "done" << endl;
+    }
 
     return EXIT_SUCCESS;
   }
