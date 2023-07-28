@@ -34,6 +34,7 @@
 #include <aims/transform/transform_objects.h>
 
 #include <aims/mesh/surface.h>
+#include <aims/mesh/surfacemanip.h>
 
 using namespace std;
 using namespace carto;
@@ -58,7 +59,14 @@ void transformMesh( AimsTimeSurface<D, Void> & mesh,
     }
   }
 
-  mesh.updateNormals();
+  if(!direct_transformation.isDirect()) {
+    SurfaceManip::invertSurfacePolygons(mesh);
+  }
+
+  if(!mesh.normal().empty()) {
+    // Old normals are not valid anymore, recalculate them if they were present
+    mesh.updateNormals();
+  }
 }
 
 } // namespace aims

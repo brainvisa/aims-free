@@ -520,6 +520,20 @@ void FfdTransformation::estimateLocalDisplacement( const Point3df & VoxelSize)
 }
 #endif
 
+bool FfdTransformation::isDirect() const
+{
+  // FIXME: in theory a FFD (free-form deformation) can be direct or indirect,
+  // or even both in pathological cases (i.e. locally direct is some places,
+  // locally indirect in others). However, in practice we normally use FFDs to
+  // express the residual deformation after an affine transformation, so in
+  // these cases the FFD is always direct. Moreover, testing if the
+  // transformation is direct or indirect would be ambiguous, so let's assume
+  // that all FFDs are direct (the only side effect that I see so far is that
+  // mesh normals may fail to be reversed in the case of an indirect FFD).
+  // -- Yann Leprince 2023-07-28
+  return true;
+}
+
 void FfdTransformation::printControlPointsGrid() const
 {
   for( int z = 0; z < _ctrlPointDelta->getSizeZ(); ++z ) {
