@@ -254,7 +254,7 @@ public:
 
     bool isIdentity() const;
     virtual void setToIdentity();
-    bool isDirect() const;
+    virtual bool isDirect() const;
 
     virtual bool invertible() const;
     rc_ptr_Transformation getInverse() const;
@@ -319,6 +319,7 @@ public:
       const soma::AffineTransformation3dBase & trans );
     // soma::AffineTransformation3dBase operator - () const;
 
+    virtual bool isDirect() const;
     Point3d transform( const Point3d & p /Constrained/ ) const;
     Point3df transform( const Point3df & dir /Constrained/ ) const;
     Point3dd transform( const Point3dd & pos /Constrained/ ) const;
@@ -457,6 +458,7 @@ public:
   bool isIdentity() const;
   virtual bool invertible() const;
   rc_ptr_Transformation getInverse() const;
+  virtual bool isDirect() const;
 
   rc_ptr_Transformation3d simplify() const;
 %Docstring
