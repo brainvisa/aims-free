@@ -1,4 +1,9 @@
 
+%ModuleCode
+#include <cartobase/exception/file.h>
+%End
+
+
 %MappedType std::string
 {
 %TypeHeaderCode
@@ -135,4 +140,17 @@
   return carto::PyString_FromStdString( sipCpp );
 %End
 };
+
+
+%VirtualErrorHandler io_err_handler
+    /* PyObject *exception, *value, *traceback;
+
+    PyErr_Fetch(&exception, &value, &traceback); */
+
+    PyErr_Clear();
+
+    SIP_RELEASE_GIL(sipGILState);
+
+    throw carto::file_error("IO failed");
+%End
 
