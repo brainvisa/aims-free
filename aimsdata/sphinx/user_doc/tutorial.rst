@@ -14,7 +14,7 @@ Introduction
 
 In order to work through the following sections, please download the demonstration data from one of the following links:
 
-* ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip
+* https://brainvisa.info/download/data/demo_data.zip
 
 For more information concerning the installation, please refer to :axonman:`the handbook of BrainVISA <index.html>`.
 
