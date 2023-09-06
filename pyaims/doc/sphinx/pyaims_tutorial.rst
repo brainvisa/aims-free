@@ -17,7 +17,7 @@ This has many advantages compared to pure C++:
 
 A few examples of how to use and manipulate the main data structures will be shown here.
 
-The data for the examples in this section can be downloaded here: `<ftp://ftp.cea.fr/pub/dsv/anatomist/data/test_data.zip>`_.
+The data for the examples in this section can be downloaded here: `<https://brainvisa.info/download/data/test_data.zip>`_.
 To use the examples directly, users should go to the directory where this archive was uncompressed, and then run ipython from this directory.
 A cleaner alternative, especially if no write access is allowed on this data directory, is to make a symbolic link to the *data_for_anatomist* subdirectory
 
@@ -58,7 +58,7 @@ To work smoothly with python2 or python3, let's use print():
     print('old cwd:', older_cwd)
     if not os.path.exists(test_data):
         print('downloading test_data.zip...')
-        f = urlopen('ftp://ftp.cea.fr/pub/dsv/anatomist/data/test_data.zip')
+        f = urlopen('https://brainvisa.info/download/data/test_data.zip')
         test_data = os.path.join(tuto_dir, 'test_data.zip')
         open(test_data, 'wb').write(f.read())
         f.close()

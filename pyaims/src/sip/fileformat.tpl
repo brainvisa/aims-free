@@ -1,5 +1,6 @@
 
-  class FileFormat_%Template1typecode%
+
+  class FileFormat_%Template1typecode% /VirtualErrorHandler=io_err_handler/
   {
 %TypeHeaderCode
 #include <aims/io/fileFormat.h>

@@ -43,6 +43,8 @@ a test would be difficult to implement or expensive to run.
     virtual bool invertible() const;
     rc_ptr_Transformation getInverse() const;
 
+    virtual bool isDirect() const = 0;
+
     static vector_S32 vadd( const vector_S32 & v1 /Constrained/,
                             const vector_S32 & v2 /Constrained/ );
     static vector_FLOAT vadd( const vector_FLOAT & v1 /Constrained/,
@@ -252,6 +254,7 @@ public:
 
     bool isIdentity() const;
     virtual void setToIdentity();
+    virtual bool isDirect() const;
 
     virtual bool invertible() const;
     rc_ptr_Transformation getInverse() const;
@@ -316,6 +319,7 @@ public:
       const soma::AffineTransformation3dBase & trans );
     // soma::AffineTransformation3dBase operator - () const;
 
+    virtual bool isDirect() const;
     Point3d transform( const Point3d & p /Constrained/ ) const;
     Point3df transform( const Point3df & dir /Constrained/ ) const;
     Point3dd transform( const Point3dd & pos /Constrained/ ) const;
@@ -351,7 +355,6 @@ public:
     virtual bool invertible() const;
     rc_ptr_Transformation getInverse() const;
     virtual void scale( const Point3df& sizeFrom, const Point3df& sizeTo );
-    bool isDirect() const;
 
     void setTranslation(Point3df trans);
 
@@ -455,6 +458,7 @@ public:
   bool isIdentity() const;
   virtual bool invertible() const;
   rc_ptr_Transformation getInverse() const;
+  virtual bool isDirect() const;
 
   rc_ptr_Transformation3d simplify() const;
 %Docstring

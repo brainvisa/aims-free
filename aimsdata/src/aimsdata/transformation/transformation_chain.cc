@@ -133,6 +133,21 @@ aims::TransformationChain3d::getInverse() const
   return ret;
 }
 
+bool aims::TransformationChain3d::isDirect() const
+{
+  bool result = true;
+  for(auto it = _transformations.begin(),
+        itend = _transformations.end() ;
+      it != itend ;
+      ++it)
+  {
+    if(!(*it)->isDirect()) {
+      result = !result;
+    }
+  }
+  return result;
+}
+
 Point3dd aims::TransformationChain3d::
 transformPoint3dd( const Point3dd& point ) const
 {

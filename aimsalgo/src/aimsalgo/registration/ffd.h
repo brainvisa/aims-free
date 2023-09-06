@@ -64,6 +64,8 @@ namespace aims {
     /// Always false, because testing for identity is expensive
     bool isIdentity() const CARTO_OVERRIDE { return false; }
 
+    bool isDirect() const override;
+
     //--- Control Knots ------------------------------------------------------
     Point3df     getCtrlKnot( int nx, int ny, int nz ) const;
     void         updateCtrlKnot( int nx, int ny, int nz, const Point3df & newCtrlKnot );
