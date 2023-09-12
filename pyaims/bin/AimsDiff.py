@@ -76,8 +76,10 @@ def diff_headers(reference_header, test_header):
             test_value = test_header[key]
         except KeyError:
             print("Header field {0} is missing from the test header"
-                  .format(key))
+                  "(reference value: {1}"
+                  .format(key, reference_value))
             difference_found = True
+            continue
         except TypeError as e:
             print("TypeError when reading {0}: {1}".format(key, e))
             continue
