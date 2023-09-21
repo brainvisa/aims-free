@@ -420,4 +420,11 @@ Freesurfer performs several resampling and coordinates systems changes during it
       anat2mesh = mesh2mni.inverse() * sb2mni * anat2sb
 
 
+FSL and AIMS coordinats systems
+===============================
 
+FSL produces transformations in some of its tools, like ``flirt`` (linear registration), ``fnirt`` (non-linear registration). Transformations source and destination referentials are actually in **disk storage spaces**.
+AIMS (or pyaims, actually) provide a few functions to convert FSL transformations to AIMS world:
+
+* :func:`~soma.aims.fsl_transformation.fsl_mat_to_trm` for affine transformations (``.mat`` files).
+* :func:`~soma.aims.fsl_warp.fsl_to_aims_warp_field` for non-linear warping fields (NIFTI images).

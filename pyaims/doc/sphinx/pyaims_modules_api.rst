@@ -29,10 +29,18 @@ SubModule: ``filetools``
     :show-inheritance:
 
 
-SubModule: ``fslTransformation``
-================================
+SubModule: ``fsl_transformation``
+=================================
 
-.. automodule:: soma.aims.fslTransformation
+.. automodule:: soma.aims.fsl_transformation
+    :members:
+    :show-inheritance:
+
+
+SubModule: ``fsl_warp``
+=======================
+
+.. automodule:: soma.aims.fsl_warp
     :members:
     :show-inheritance:
 

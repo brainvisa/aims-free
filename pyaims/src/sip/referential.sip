@@ -108,7 +108,7 @@ namespace carto
 %End
 
     rc_ptr_Transformation
-    toOrientation( const std::string & orient, const vector_FLOAT & transl = vector_FLOAT() ) const;
+    toOrientation( const std::string & orient, const vector_FLOAT & transl = vector_FLOAT(), bool allow_resize = false ) const;
 %Docstring
     Build a transformation matrix to go from this referential to a given
     orientation.
@@ -129,7 +129,8 @@ namespace carto
 %End
 
     rc_ptr_Transformation
-    toOrientation( const vector_S32 & orient, const vector_FLOAT & transl = vector_FLOAT() ) const;
+    toOrientation( const vector_S32 & orient,
+                   const vector_FLOAT & transl = vector_FLOAT() ) const;
 
     std::string lpiReferentialUuid() const;
 %Docstring

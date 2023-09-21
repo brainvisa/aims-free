@@ -42,7 +42,6 @@ AIMS is also composed of several sub-projects:
 * :aimsalgo:`AIMS algo <index.html>`: algorithms for AIMS
 * :graphdox:`Graph <index.html>`: high-level graphs library
 * :aimsgui:`AIMS GUI <index.html>`: `Qt-based <http://qt-project.org>`_ GUI classes for AIMS
-* :aimstil:`AIMS Til <index.html>`: Mainly meshes manipulation tools for AIMS
 * **Soma-IO**: C++ general IO libraries, containing these sub-projects:
 
   * :cartobdox:`Carto base <index.html>`: C++ general usage library
