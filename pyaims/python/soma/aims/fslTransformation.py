@@ -35,7 +35,8 @@
 '''FSL matrixes seem to transform from/to internal refs, like Aims but with
 a different convention:
 
-The disk orientation seems to be used actually, which is in most cases with FSL:
+The disk orientation seems to be used actually, which is in most cases with
+FSL:
 
 - X: right -> left
 - Y: back -> front
