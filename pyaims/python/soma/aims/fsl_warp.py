@@ -9,7 +9,7 @@ def fsl_to_aims_warp_field(W, input_hdr, output_hdr):
     '''
     FSL warp fields conversion to AIMS
 
-    Deals with FSL fields output from fnirt, as relzative deformation fields
+    Deals with FSL fields output from fnirt, as relative deformation fields
     (not spline coefs).
     FSL fields code the dispalcement in mm from a source point in Nifti disk
     space coordinates of the Destination (output) image to the disk space
