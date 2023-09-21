@@ -35,25 +35,34 @@
 '''FSL matrixes seem to transform from/to internal refs, like Aims but with
 a different convention:
 
+The disk orientation seems to be used actually, which is in most cases with FSL:
+
 - X: right -> left
 - Y: back -> front
 - Z: bottom -> top
 
-which appears to be Y and Z flipped compared to Aims
+which is Y and Z flipped compared to Aims.
 '''
-from __future__ import absolute_import
-import six
-__docformat__ = 'restructuredtext en'
 
 from soma import aims
 from soma.minf.api import readMinf
 import numpy
-import types
 import os
-import sys
 
-def fslMatToTrm(matfile, srcimage, dstimage):
+__docformat__ = 'restructuredtext en'
+
+
+def fsl_mat_to_trm(matfile, srcimage, dstimage):
     '''
+    Transform a FSL affine matrix (.mat) typically output from the ``flirt``
+    tool to Aims AffineTransformation3d. The function handles coordinates
+    systems transformations at both ends of the transformation matrix, as FSL
+    and AIMS use different conventions, and work in different coordinates
+    systems when handling images.
+
+    Thus we also need to provide knowledge about images at both ends of the
+    transformation.
+
     As far as I have understood:
 
     A FSL transformation goes from the disk referential of the source image
@@ -64,6 +73,19 @@ def fslMatToTrm(matfile, srcimage, dstimage):
     if the qform of an image (disk -> "real world") implies a flip (goes from a
     direct referential to an indirect one or the contrary), then a flip along X
     axis is inserted in the matrix, since FSL flirt doesn't allow flipping.
+
+    Parameters
+    ----------
+    matfile: str
+        FSL transformation filaneme (``.mat``)
+    srcimage:
+        Image at the source of the transformation. It may be provided as a
+        filename (str) (``image.nii.gz``), or an Aims Volume object instance,
+        or an Aims volume header object (dict-like).
+    dstimage:
+        Image at the destination of the transformation. It may be provided as a
+        filename (str) (``image.nii.gz``), or an Aims Volume object instance,
+        or an Aims volume header object (dict-like).
     '''
     # The FSL transform (mat) goes from the potentially flipped disk-oriented,
     # referential of the 1st image, in millimeters (R_FDflipmm1) to the same
@@ -121,23 +143,25 @@ def fslMatToTrm(matfile, srcimage, dstimage):
     #   vsm2 * s2m2 * inv(vsd2) * inv(flip2)
     # with mot between both parts.
 
-    if isinstance(srcimage, six.string_types):
+    if isinstance(srcimage, str):
         f = aims.Finder()
         f.check(srcimage)
         im1 = f.header()
     else:  # try srcimage as a volume
         try:
             im1 = srcimage.header()
-        except:  # otherwise it is considered to already be a header
+        except AttributeError:
+            # otherwise it is considered to already be a header
             im1 = srcimage
-    if isinstance(dstimage, six.string_types):
+    if isinstance(dstimage, str):
         f = aims.Finder()
         f.check(dstimage)
         im2 = f.header()
     else:  # try dstimage as a volume
         try:
             im2 = dstimage.header()
-        except:  # otherwise it is considered to already be a header
+        except AttributeError:
+            # otherwise it is considered to already be a header
             im2 = dstimage
 
     vs1 = im1['voxel_size'][:3]
@@ -152,7 +176,7 @@ def fslMatToTrm(matfile, srcimage, dstimage):
     if not s2m1:
         try:
             s2m1 = im1['storage_to_memory']
-        except:
+        except KeyError:
             s2m1 = [-1., 0, 0, im1['volume_dimension'][0] - 1,
                     0, -1., 0, im1['volume_dimension'][1] - 1,
                     0, 0, -1., im1['volume_dimension'][2] - 1,
@@ -160,29 +184,29 @@ def fslMatToTrm(matfile, srcimage, dstimage):
     if not s2m2:
         try:
             s2m2 = im2['storage_to_memory']
-        except:
+        except KeyError:
             s2m2 = [1., 0, 0, 0,
                     0, -1., 0, im2['volume_dimension'][1] - 1,
                     0, 0, -1., im2['volume_dimension'][2] - 1,
                     0, 0, 0, 1.]
-    s2m1 = aims.Motion(s2m1)
-    s2m2 = aims.Motion(s2m2)
-    vsm1 = aims.Motion()
+    s2m1 = aims.AffineTransformation3d(s2m1)
+    s2m2 = aims.AffineTransformation3d(s2m2)
+    vsm1 = aims.AffineTransformation3d()
     vsm1.fromMatrix(numpy.diag(vs1 + [1]))
-    vsm2 = aims.Motion()
+    vsm2 = aims.AffineTransformation3d()
     vsm2.fromMatrix(numpy.diag(vs2 + [1]))
     m2s1 = s2m1.inverse()
     m2s2 = s2m2.inverse()
     dimd1 = [abs(x) for x in m2s1.transformVector(im1['volume_dimension'][:3])]
     dimd2 = [abs(x) for x in m2s2.transformVector(im2['volume_dimension'][:3])]
     x = [abs(x) for x in m2s1.transformVector(vs1)]
-    vsd1 = aims.Motion()
+    vsd1 = aims.AffineTransformation3d()
     vsd1.fromMatrix(numpy.diag(x + [1]))
     x = [abs(x) for x in m2s2.transformVector(vs2)]
-    vsd2 = aims.Motion()
+    vsd2 = aims.AffineTransformation3d()
     vsd2.fromMatrix(numpy.diag(x + [1]))
-    flip1 = aims.Motion()
-    flip2 = aims.Motion()
+    flip1 = aims.AffineTransformation3d()
+    flip2 = aims.AffineTransformation3d()
     if not s2m1.isDirect():
         flip1.rotation().setValue(-1., 0, 0)
         flip1.setTranslation([vsd1.rotation().value(0, 0) * (dimd1[0] - 1),
@@ -194,7 +218,7 @@ def fslMatToTrm(matfile, srcimage, dstimage):
 
     with open(matfile) as f:
         mat = [x.split() for x in f.readlines()]
-    mot = aims.Motion()
+    mot = aims.AffineTransformation3d()
     mot.fromMatrix(numpy.mat(mat))
 
     trm = (vsm2 * s2m2 * vsd2.inverse() * flip2.inverse() * mot
