@@ -76,8 +76,10 @@ def diff_headers(reference_header, test_header):
             test_value = test_header[key]
         except KeyError:
             print("Header field {0} is missing from the test header"
-                  .format(key))
+                  "(reference value: {1}"
+                  .format(key, reference_value))
             difference_found = True
+            continue
         except TypeError as e:
             print("TypeError when reading {0}: {1}".format(key, e))
             continue
@@ -469,16 +471,6 @@ def diff_files_AIMS(reference_file_name, test_file_name,
         return 1
 
     # From now on the data are guaranteed to be of the same kind
-    #
-    # TODO handle data of the same kind (volumes/mesh/bucket) but of different
-    # datatype (VOID/FLOAT/...)
-
-    if type(reference_data) != type(test_data):
-        print("Files have differing types, comparison is not yet supported:\n"
-              "  Type of reference: {0}\n"
-              "  Type of test: {1}"
-              .format(type(reference_data), type(test_data)))
-        return 1
 
     difference_found = diff_headers(reference_data.header(),
                                     test_data.header())
