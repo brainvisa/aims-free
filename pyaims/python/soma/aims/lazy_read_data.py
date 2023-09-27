@@ -39,7 +39,7 @@ class LazyReadData(object):
         res = sum(volumes)
 
     This expression, ``sum(volumes)`` uses a complete list of volumes, and thus
-    needs the 100 volumes to be physically in mempry before the sum operation
+    needs the 100 volumes to be physically in memory before the sum operation
     actually begins. However as the sum is performed sequentially, it should be
     possible to perform the same operation using only memory for 2 volumes.
 
