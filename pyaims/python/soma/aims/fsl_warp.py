@@ -24,44 +24,48 @@ def fsl_to_aims_warp_field(W, input_hdr, output_hdr):
 
     Say Nifti images are in LAS orientation (it's an example, no matter).
     Aims works in LPI.
-    i prefix/suffix is for input image spaces
-    o prefix/suffix is for output image spaces
-    v is for voxel coordinates (int)
-    m is for mm coordinates (float)
-    LPI / LAS are the aims / disk orientations identifiers
+
+    - ``i`` prefix/suffix is for input image spaces
+    - ``o`` prefix/suffix is for output image spaces
+    - ``v`` is for voxel coordinates (int)
+    - ``m`` is for mm coordinates (float)
+    - ``LPI`` / ``LAS`` are the aims / disk orientations identifiers
 
     thus:
-    PiLASm: position in input image in disk orientation, in mm
-    PoLPIv: position in output image in aims orientation, in voxels
-    VSi, VSo: voxel sizes transform matrices (aims LPI orientation)
-    VSiLAS, VSoLAS: voxel sizes transform matrices in disk LAS orientation
-    S2Mi, S2Mo: storage-to-memory matrices, in voxels ('storage_to_memory'
-    fields of aims volumes)
-    W: FSL warping field image (the "main" input of this script)
-    WLPI: aims warping field image (what we want, the output of this script)
-        displacement in mm from output LPI space to input LPI space
+
+    - ``PiLASm``: position in input image in disk orientation, in mm
+    - ``PoLPIv``: position in output image in aims orientation, in voxels
+    - ``VSi``, ``VSo``: voxel sizes transform matrices (aims LPI orientation)
+    - ``VSiLAS``, ``VSoLAS``: voxel sizes transform matrices in disk LAS
+      orientation
+    - ``S2Mi``, ``S2Mo``: storage-to-memory matrices, in voxels
+      (``storage_to_memory`` fields of aims volumes)
+    - ``W``: FSL warping field image (the "main" input of this script)
+    - ``WLPI``: aims warping field image (what we want, the output of this
+      script) displacement in mm from output LPI space to input LPI space
 
     We need also:
-    input image space grid (dims, voxel size, S2Mi)
-    output image space grid (also called "reference" in applywarp and in
+
+    - input image space grid (dims, voxel size, ``S2Mi``)
+    - output image space grid (also called "reference" in applywarp and in
       AimsApplyTransform)
-    we actually need only headers for these images.
+    - we actually need only headers for these images.
 
     Math part::
 
-    PiLASm = W.PoLASv + PoLASm = (W + VSoLAS).PoLASv
-    PoLPIv = S2Mo.PoLASv, so PoLASv = S2Mo^-1.PoLPIv
-    PiLPIv = S2Mi.PiLASv = S2Mi.VSiLAS^-1.PiLASm
-    PiLPIv = S2Mi.VSiLAS^-1.(W + VSoLAS).PoLASv
-    PiLPIm = VSi.S2Mi.VSiLAS^-1.(W + VSoLAS).PoLASv
-    we want:
-    PiLPIm = WLPI.PoLPIv + PoPLIm (WPLI is the relative warp)
-    combine:
-    WLPI.PoLPIv = VSi.S2Mi.VSiLAS^-1.(W + VSoLAS).PoLASv - PoPLIm
-    replace PoLASv and PoPLIm using PoPLIv:
-    WLPI.PoLPIv = [VSi.S2Mi.VSiLAS^-1.(W + VSoLAS).S2Mo^-1 - VSo].PoLPIv
+        PiLASm = W.PoLASv + PoLASm = (W + VSoLAS).PoLASv
+        PoLPIv = S2Mo.PoLASv, so PoLASv = S2Mo^-1.PoLPIv
+        PiLPIv = S2Mi.PiLASv = S2Mi.VSiLAS^-1.PiLASm
+        PiLPIv = S2Mi.VSiLAS^-1.(W + VSoLAS).PoLASv
+        PiLPIm = VSi.S2Mi.VSiLAS^-1.(W + VSoLAS).PoLASv
+        we want:
+        PiLPIm = WLPI.PoLPIv + PoPLIm (WPLI is the relative warp)
+        combine:
+        WLPI.PoLPIv = VSi.S2Mi.VSiLAS^-1.(W + VSoLAS).PoLASv - PoPLIm
+        replace PoLASv and PoPLIm using PoPLIv:
+        WLPI.PoLPIv = [VSi.S2Mi.VSiLAS^-1.(W + VSoLAS).S2Mo^-1 - VSo].PoLPIv
 
-    WLPI = VSi.S2Mi.VSiLAS^-1.(W + VSoLAS).S2Mo^-1 - VSo
+        WLPI = VSi.S2Mi.VSiLAS^-1.(W + VSoLAS).S2Mo^-1 - VSo
 
     Parameters
     ----------
