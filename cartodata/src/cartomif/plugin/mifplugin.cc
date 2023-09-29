@@ -64,11 +64,9 @@ namespace {
 
 MifPlugin::MifPlugin() : Plugin()
 {
-    vector<string>  exts(7);
+    vector<string>  exts(2);
     exts[0] = "mif";
     exts[1] = "mif.gz";
-    exts[4] = "mih";
-    exts[6] = "gz";
 
     ////////////////////////////////////////////////////////////////////////////
     ////                           R E A D E R                              ////
