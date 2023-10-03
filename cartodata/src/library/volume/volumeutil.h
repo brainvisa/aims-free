@@ -43,6 +43,7 @@
 #include <cartobase/containers/nditerator.h>
 //--- std --------------------------------------------------------------------
 #include <algorithm>
+#include <cstddef>
 #include <exception>
 //----------------------------------------------------------------------------
 
@@ -421,7 +422,7 @@ namespace carto
   {
     std::vector<int> dim1 = v1.getSize();
     std::vector<int> dim2 = v2.getSize();
-    int i, n1 = dim1.size(), n2 = dim2.size(), n = std::min( n1, n2 );
+    std::size_t i, n1 = dim1.size(), n2 = dim2.size(), n = std::min( n1, n2 );
     for( i=0; i<n; ++i )
       if( dim1[i] != dim2[i] )
         return false;
@@ -459,8 +460,8 @@ namespace carto
 
     bool sameSize( const std::vector<int> & s1, const std::vector<int> & s2 )
     {
-      int s0 = s1.size();
-      int i;
+      std::size_t s0 = s1.size();
+      std::size_t i;
       if( s2.size() < s0 )
         s0 = s2.size();
       for( i=0; i<s0; ++i )
@@ -480,8 +481,8 @@ namespace carto
                               const std::vector<int> & s2 )
     {
       std::vector<int> dim( std::max( s1.size(), s2.size() ), 1 );
-      int s0 = s1.size();
-      int i;
+      std::size_t s0 = s1.size();
+      std::size_t i;
       if( s2.size() < s0 )
         s0 = s2.size();
       for( i=0; i<s0; ++i )
@@ -498,8 +499,8 @@ namespace carto
                               const std::vector<int> & s2 )
     {
       std::vector<int> dim( std::min( s1.size(), s2.size() ), 1 );
-      int s0 = s1.size();
-      int i;
+      std::size_t s0 = s1.size();
+      std::size_t i;
       if( s2.size() < s0 )
         s0 = s2.size();
       for( i=0; i<s0; ++i )
