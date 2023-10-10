@@ -38,6 +38,8 @@ from soma import aims
 import six
 import sys
 
+from . import diff
+
 
 rel_flx_max_diff = 1e-4
 ''' max accepted relative difference of float numbers
@@ -143,7 +145,9 @@ def _same_dictionary(ref_dict, test_dict, same_element_function, verbose=False):
 
 
 def _same_value(ref_value, test_value):
-    if isinstance(ref_value, float):
+    if isinstance(ref_value, diff.TESTABLE_TYPES):
+        return (diff.diff_objects(ref_value, test_value) == 0)
+    elif isinstance(ref_value, float):
         if ref_value != test_value and \
                 abs(ref_value - test_value) / max(abs(ref_value),
                                                   abs(test_value)) \
@@ -171,16 +175,13 @@ def _same_vertice(ref_vertice, test_vertice, verbose):
             if verbose:
                 print(repr(key) + " not in test_vertice")
             return False
-        if key not in ['aims_bottom', 'aims_other', 'aims_ss', 'aims_Tmtktri',
-                       'bottom_label', 'other_label', 'ss_label',
-                       'Tmtktri_label']:
-            ref_value = ref_vertice[key]
-            test_value = test_vertice[key]
-            if not _same_value(ref_value, test_value):
-                if verbose:
-                    print("vertex " + repr(key) + " " + str(ref_vertice[key])
-                          + " != " + str(test_vertice[key]))
-                return False
+        ref_value = ref_vertice[key]
+        test_value = test_vertice[key]
+        if not _same_value(ref_value, test_value):
+            if verbose:
+                print("vertex " + repr(key) + " " + str(ref_vertice[key])
+                      + " != " + str(test_vertice[key]))
+            return False
     return True
 
 
@@ -197,14 +198,11 @@ def _same_edge(ref_edge, test_edge, verbose):
             if verbose:
                 print(repr(key) + " not in test_edge")
             return False
-        if key not in ['aims_cortical', 'aims_junction', 'aims_plidepassage',
-                       'cortical_label', 'junction_label',
-                       'plidepassage_label']:
-            ref_value = ref_edge[key]
-            test_value = test_edge[key]
-            if not _same_value(ref_value, test_value):
-                if verbose:
-                    print("edge " + repr(key) + " " + str(ref_edge[key]) + " "
-                          + str(test_edge[key]))
-                return False
+        ref_value = ref_edge[key]
+        test_value = test_edge[key]
+        if not _same_value(ref_value, test_value):
+            if verbose:
+                print("edge " + repr(key) + " " + str(ref_edge[key]) + " "
+                      + str(test_edge[key]))
+            return False
     return True
