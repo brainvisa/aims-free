@@ -260,9 +260,10 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
             if matrix.isIdentity():
                 matrix = None
             else:
-                matrix = list(matrix.affine().np.transpose().ravel())
+                matrix = list(matrix.affine().np.transpose().ravel().astype(
+                    float))
         elif isinstance(matrix, np.ndarray):
-            matrix = list(matrix.transpose().ravel())
+            matrix = list(matrix.transpose().ravel().astype(float))
 
         if matrix is not None \
                 and not aims.AffineTransformation3d(matrix).isIdentity():
@@ -550,11 +551,12 @@ def default_gltf_scene(matrix=None, gltf=None):
             if matrix.isIdentity():
                 matrix = None
             else:
-                matrix = list(matrix.affine().np.transpose().ravel())
+                matrix = list(matrix.affine().np.transpose().ravel().astype(
+                    float))
         elif isinstance(matrix, np.ndarray):
-            matrix = list(matrix.transpose().ravel())
+            matrix = list(matrix.transpose().ravel().astype(float))
         elif not isinstance(matrix, list):
-            matrix = list(matrix)
+            matrix = [float(x) for x in matrix]
 
         if matrix is not None \
                 and not aims.AffineTransformation3d(matrix).isIdentity():
@@ -1248,6 +1250,7 @@ def load_gltf(filename, object_parser=AimsGLTFParser()):
         with open(filename) as f:
             gltf = json.load(f)
 
+    object_parser.base_uri = osp.dirname(filename)
     meshes = gltf_to_meshes(gltf, object_parser=object_parser)
     return meshes
 
