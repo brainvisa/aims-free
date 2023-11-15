@@ -244,6 +244,8 @@ extlinks = {
     'axonman': ('../../axon-' + version + '/bv_man/en/html/%s', 'axon %s'),
     'aimsalgodox': ('../../aimsalgo-' + version + '/doxygen/%s',
                     'aimsalgodox %s'),
+    'aimsex': ('../../pyaims-' + version + '/examples/%s',
+                   'aimsex %s'),
     'aimsalgoex': ('../../pyaimsalgo-' + version + '/examples/%s',
                    'aimsalgoex %s'),
     'aims': ('../%s', 'aims %s'),

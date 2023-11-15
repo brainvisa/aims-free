@@ -160,7 +160,7 @@ Iteration on nodes
 
 Complete example 1 source:
 
-.. literalinclude:: ../../code_examples/graphex1.cc
+.. literalinclude:: ../../doc/code_examples/graphex1.cc
     :linenos:
 
 .. seealso:: the :aimsex:`example 1 <graphex1.cc>`
@@ -199,7 +199,7 @@ Currently :aimsdox:`MaskIterator <classaims_1_1MaskIterator.html>` does not work
 
 Complete example 2 source:
 
-.. literalinclude:: ../../code_examples/graphex2.cc
+.. literalinclude:: ../../doc/code_examples/graphex2.cc
     :linenos:
 
 .. seealso:: :aimsex:`example 2 <graphex2.cc>` source file
@@ -212,14 +212,14 @@ Using :aimsdox:`GraphManip <classaims_1_1GraphManip.html>` class and :aimsdox:`G
 
 * When you know what you are looking for in a graph:
 
-  .. literalinclude:: ../../code_examples/graphex3.cc
+  .. literalinclude:: ../../doc/code_examples/graphex3.cc
       :linenos:
 
   .. seealso:: :aimsex:`example 3 <graphex3.cc>` source file
 
 * exhaustive iteration:
 
-  .. literalinclude:: ../../code_examples/graphex4.cc
+  .. literalinclude:: ../../doc/code_examples/graphex4.cc
       :linenos:
 
   .. seealso:: :aimsex:`example 4 <graphex4.cc>` source file
