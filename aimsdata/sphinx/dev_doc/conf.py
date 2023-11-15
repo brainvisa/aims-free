@@ -204,40 +204,35 @@ latex_documents = [
 #latex_use_modindex = True
 
 autoclass_content = "both"
-aimstil_version = '1.4' # FIXME: find this automatically
 
 extlinks = {
-  'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
-    'aimsdox '),
-  'aimsdata' : ('../../aimsdata-' + version + '/%s', 'aimsdata '),
-  'aimsex' : ('../../aimsdata-' + version + '/doc/code_examples/%s', 'aimsdata '),
-  'pyaims': ('../../pyaims-' + version + '/sphinx/%s',
-    'pyaims '),
-  'aimsalgo' : ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo '),
-  'aimsgui': ('../../aimsgui-' + version + '/doxygen/%s', 'aimsgui '),
-  'aimstil': ('../../aimstil-' + aimstil_version + '/doxygen/%s', 'aimstil '),
-  'cartobdox' : ('../../cartobase-' + version + '/doxygen/%s',
-  'cartobdox '),
-  'cartoddox' : ('../../cartodata-' + version + '/doxygen/%s',
-  'cartoddox '),
-  'graphdox' : ('../../graph-' + version + '/doxygen/%s', 'graphdox '),
-  'somaio' : ('../../soma-io-' + version + '/%s', 'somaio '),
-  'sidox' : ('../../sigraph-' + version + '/doxygen/%s', 'sidox '),
-  'connectdox' : ('../../connectomist-' + version + '/doxygen/%s',
-                  'connectdox '),
+    'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
+                'aimsdox %s'),
+    'aimsdata': ('../../aimsdata-' + version + '/%s', 'aimsdata %S'),
+    'aimsex': ('../../aimsdata-' + version + '/doc/code_examples/%s',
+               'aimsdata %s'),
+    'pyaims': ('../../pyaims-' + version + '/sphinx/%s',
+               'pyaims %s'),
+    'aimsalgo': ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo %s'),
+    'aimsgui': ('../../aimsgui-' + version + '/doxygen/%s', 'aimsgui %s'),
+    'cartobdox': ('../../cartobase-' + version + '/doxygen/%s',
+                  'cartobdox %s'),
+    'cartoddox': ('../../cartodata-' + version + '/doxygen/%s',
+                  'cartoddox %s'),
+    'graphdox': ('../../graph-' + version + '/doxygen/%s', 'graphdox %s'),
+    'somaio': ('../../soma-io-' + version + '/%s', 'somaio %s'),
+    'sidox': ('../../sigraph-' + version + '/doxygen/%s', 'sidox %s'),
 }
 
 intersphinx_mapping = {
-  'python': ('http://docs.python.org/3.5', None),
+    'python': ('http://docs.python.org/%d.%d' % sys.version_info[:2], None),
 }
 
 try:
     from soma import aims
     pyaimsdoc = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
-        os.path.dirname(aims.__file__)))), 'share', 'doc', 
-        'pyaims-%s' %version, 'sphinx')
+        os.path.dirname(aims.__file__)))), 'share', 'doc',
+        'pyaims-%s' % version, 'sphinx')
     intersphinx_mapping['soma.aims'] = (pyaimsdoc, None)
 except ImportError:
     pass
-
-
