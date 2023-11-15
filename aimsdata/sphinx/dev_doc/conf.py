@@ -225,7 +225,7 @@ extlinks = {
 }
 
 intersphinx_mapping = {
-    'python': ('http://docs.python.org/%d.%d' % sys.version_info[:2], None),
+    'python': ('https://docs.python.org/%d.%d' % sys.version_info[:2], None),
 }
 
 try:
