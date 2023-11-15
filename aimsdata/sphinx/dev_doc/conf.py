@@ -208,7 +208,7 @@ autoclass_content = "both"
 extlinks = {
     'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
                 'aimsdox %s'),
-    'aimsdata': ('../../aimsdata-' + version + '/%s', 'aimsdata %S'),
+    'aimsdata': ('../../aimsdata-' + version + '/%s', 'aimsdata %s'),
     'aimsex': ('../../aimsdata-' + version + '/doc/code_examples/%s',
                'aimsdata %s'),
     'pyaims': ('../../pyaims-' + version + '/sphinx/%s',
