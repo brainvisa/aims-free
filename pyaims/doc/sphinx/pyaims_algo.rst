@@ -32,10 +32,10 @@ soma.aims.colormaphints module
 .. automodule:: soma.aims.colormaphints
   :members:
 
-soma.aims.fslTransformation module
-----------------------------------
+soma.aims.fsl_transformation module
+-----------------------------------
 
-.. automodule:: soma.aims.fslTransformation
+.. automodule:: soma.aims.fsl_transformation
   :members:
 
 soma.aims.spmnormalizationreader module

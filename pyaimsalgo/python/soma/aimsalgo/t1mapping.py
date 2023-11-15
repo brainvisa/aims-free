@@ -126,6 +126,7 @@ class BAFIData(object):
         * The method is Yarnykh's (MRM 57:192-200 (2007)) +
         * Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
         and B1)
+
         """
         BAFI_amplitude = np.asarray(self.amplitude_volume)
         signal_echo1 = BAFI_amplitude[:, :, :, 0]
