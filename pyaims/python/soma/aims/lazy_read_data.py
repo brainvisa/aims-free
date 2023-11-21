@@ -7,15 +7,10 @@ A specialized version in aimsalgo handles resampling while loading: :class:`~som
 
 '''
 
-from __future__ import print_function
-from __future__ import absolute_import
-
 from soma import aims
 import threading
 import itertools
 import multiprocessing
-import six
-from six.moves import range
 
 
 class LazyReadData(object):
@@ -121,7 +116,7 @@ class LazyReadData(object):
             read.
         '''
         # print('init', self)
-        if isinstance(data_or_filename, six.string_types):
+        if isinstance(data_or_filename, str):
             self.filename = data_or_filename
             self.data = None
         elif isinstance(data_or_filename, LazyReadData):
