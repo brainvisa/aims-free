@@ -8,8 +8,8 @@ A specialized version in aimsalgo handles resampling while loading: :class:`~som
 '''
 
 from __future__ import print_function
-
 from __future__ import absolute_import
+
 from soma import aims
 import threading
 import itertools
@@ -154,7 +154,8 @@ class LazyReadData(object):
         '''
         Implements actual data reading. The default implementation calls
         self.reader.read() if a Reader instance has been provided, or aims.read
-        otherwise. It may be called from a non-principal thread when used in a threaded context such as in :class:`PreloadIterator`.
+        otherwise. It may be called from a non-principal thread when used in a
+        threaded context such as in :class:`PreloadIterator`.
         '''
         if self.data is None:
             if self.reader is not None:
@@ -171,7 +172,6 @@ class LazyReadData(object):
             self._loading = True
         with self._lock:
             return self._lazy_read()
-
 
     def _dec_release(self):
         with self._preload_lock:
@@ -368,7 +368,6 @@ class LazyReadData(object):
 
     def __pow__(self, d):
         self._lazy_read_()
-        ld = None
         res = LazyReadData(self.data.__pow__(d), filename=self.filename)
         self._dec_release()
         return res
@@ -380,11 +379,11 @@ class LazyReadData(object):
 
     def __neg__(self):
         self._lazy_read_()
-        return LazyReadData(-self.data, filename=filename)
+        return LazyReadData(-self.data, filename=self.filename)
 
     def __abs__(self):
         self._lazy_read_()
-        return LazyReadData(self.data.__abs__(), filename=filename)
+        return LazyReadData(self.data.__abs__(), filename=self.filename)
 
 
 class PreloadIterator(object):
@@ -414,6 +413,7 @@ class PreloadIterator(object):
     data preloads will be triggered.
 
     '''
+
     def __init__(self, iterable, npreload=multiprocessing.cpu_count()):
         '''
         Parameters
@@ -466,6 +466,7 @@ class PreloadList(list):
         volumes = [LazyReadData(f, nops=1) for f in filenames]
         res = sum(PreloadIterator(volumes, npreload=8))
     '''
+
     def __init__(self, iterable=None, npreload=multiprocessing.cpu_count()):
         super(PreloadList, self).__init__(iterable)
         self.npreload = npreload
