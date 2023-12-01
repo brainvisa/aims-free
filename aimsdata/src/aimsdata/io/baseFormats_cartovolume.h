@@ -90,6 +90,29 @@ namespace aims
     VolumeFormat<T>	_volformat;
   };
 
+
+  template<typename T>
+  class VolumeRefAimsFormat : public FileFormat<carto::VolumeRef<T> >
+  {
+  public:
+    VolumeRefAimsFormat( const std::string & prefformat = std::string() );
+    virtual ~VolumeRefAimsFormat();
+
+    virtual bool read( const std::string & filename,
+                       carto::VolumeRef<T> & vol,
+		       const carto::AllocatorContext & context,
+                       carto::Object options );
+    virtual bool write( const std::string & filename,
+                        const carto::VolumeRef<T> & vol,
+                        carto::Object options = carto::none() );
+    virtual carto::VolumeRef<T>*
+    read( const std::string &filename,
+          const carto::AllocatorContext & context, carto::Object options );
+
+  private:
+    std::string	_preferredFormat;
+  };
+
 }
 
 

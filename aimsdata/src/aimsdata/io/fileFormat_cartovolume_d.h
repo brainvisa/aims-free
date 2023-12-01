@@ -231,6 +231,58 @@ namespace aims
     return _volformat.write( filename, *vol, options );
   }
 
+  // ----
+
+  template<typename T>
+  VolumeRefAimsFormat<T>::VolumeRefAimsFormat( const std::string & prefformat )
+    : FileFormat<carto::VolumeRef<T> >(), _preferredFormat( prefformat )
+  {
+  }
+
+
+  template<typename T>
+  VolumeRefAimsFormat<T>::~VolumeRefAimsFormat()
+  {
+  }
+
+
+  template<typename T>
+  bool VolumeRefAimsFormat<T>::read( const std::string & filename,
+                                     carto::VolumeRef<T> & vol,
+                                     const carto::AllocatorContext & context,
+                                     carto::Object options )
+  {
+    Reader<carto::Volume<T> >	r( filename );
+    r.setAllocatorContext( context );
+    r.setOptions( options );
+    vol.reset( r.read() );
+    return true;
+  }
+
+
+  template<typename T>
+  carto::VolumeRef<T>*
+  VolumeRefAimsFormat<T>::read( const std::string & filename,
+                                const carto::AllocatorContext & context,
+                                carto::Object options )
+  {
+    Reader<carto::Volume<T> >	r( filename );
+    r.setAllocatorContext( context );
+    r.setOptions( options );
+    carto::VolumeRef<T> *vol = new carto::VolumeRef( r.read() );
+    return vol;
+  }
+
+
+  template<typename T>
+  bool VolumeRefAimsFormat<T>::write( const std::string & filename,
+                                      const carto::VolumeRef<T> & vol,
+                                      carto::Object options )
+  {
+    Writer<carto::Volume<T> >	w( filename, options );
+    return w.write( *vol );
+  }
+
 }
 
 #endif

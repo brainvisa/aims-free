@@ -810,6 +810,23 @@ template class VolumeRefFormat<cdouble>;
 template class VolumeRefFormat<char>;
 #endif
 
+template class VolumeRefAimsFormat<int8_t>;
+template class VolumeRefAimsFormat<uint8_t>;
+template class VolumeRefAimsFormat<int16_t>;
+template class VolumeRefAimsFormat<uint16_t>;
+template class VolumeRefAimsFormat<int32_t>;
+template class VolumeRefAimsFormat<uint32_t>;
+template class VolumeRefAimsFormat<int64_t>;
+template class VolumeRefAimsFormat<uint64_t>;
+template class VolumeRefAimsFormat<float>;
+template class VolumeRefAimsFormat<double>;
+template class VolumeRefAimsFormat<cfloat>;
+template class VolumeRefAimsFormat<cdouble>;
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template class VolumeRefAimsFormat<char>;
+#endif
+
 } // namespace aims
 
 

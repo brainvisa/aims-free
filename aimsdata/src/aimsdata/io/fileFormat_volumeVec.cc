@@ -284,6 +284,13 @@ template class VolumeRefFormat<Point3df>;
 template class VolumeRefFormat<Point3d>;
 template class VolumeRefFormat<AimsVector<float,6> >;
 
+template class VolumeRefAimsFormat<AimsRGB>;
+template class VolumeRefAimsFormat<AimsRGBA>;
+template class VolumeRefAimsFormat<AimsHSV>;
+template class VolumeRefAimsFormat<Point3df>;
+template class VolumeRefAimsFormat<Point3d>;
+template class VolumeRefAimsFormat<AimsVector<float,6> >;
+
 } // namespace aims
 
 
