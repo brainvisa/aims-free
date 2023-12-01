@@ -34,7 +34,7 @@
 #ifndef AIMS_IO_QTFORMATSR_H
 #define AIMS_IO_QTFORMATSR_H
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/io/qtformatsheader.h>
 #include <aims/io/datatypecode.h>
 #include <aims/rgb/rgb.h>
@@ -58,11 +58,12 @@ namespace aims
     QtFormatsReader( const std::string& name ) : _name( name ) {}
     ~QtFormatsReader() {}
 
-    void read( AimsData<T>& thing, const carto::AllocatorContext & context, 
+    void read( carto::Volume<T>& thing,
+               const carto::AllocatorContext & context,
                carto::Object options );
     /**	called by read(), but you can call it for single frame reading 
 	(axial slice) */
-    void readFrame( AimsData<T> & thing, QtFormatsHeader* hdr,
+    void readFrame( carto::Volume<T> & thing, QtFormatsHeader* hdr,
                     const std::string & filename, unsigned zfame,
                     unsigned tframe );
 
@@ -74,7 +75,7 @@ namespace aims
 
   template <typename T>
   inline QtFormatsReader<T> & 
-  operator >> ( QtFormatsReader<T> & reader, AimsData<T> & thing )
+  operator >> ( QtFormatsReader<T> & reader, carto::Volume<T> & thing )
   {
     reader.read( thing );
     return reader;
@@ -83,7 +84,7 @@ namespace aims
 
   template <typename T>
   inline
-  void QtFormatsReader<T>::read( AimsData<T>& thing, 
+  void QtFormatsReader<T>::read( carto::Volume<T>& thing,
                                  const carto::AllocatorContext & context, 
                                  carto::Object options )
   {
@@ -128,13 +129,15 @@ namespace aims
                                      carto::DataSource::Read ) ), 
         false, context.useFactor() );
 
-    AimsData<T> data( hdr->dimX(), hdr->dimY(), hdr->dimZ(), 
-		      tmax - tmin + 1, border, al );
+    carto::VolumeRef<T> data( hdr->dimX(), hdr->dimY(), hdr->dimZ(),
+                              tmax - tmin + 1, border, al );
 
-    data.setSizeX( hdr->sizeX() );
-    data.setSizeY( hdr->sizeY() );
-    data.setSizeZ( hdr->sizeZ() );
-    data.setSizeT( hdr->sizeT() );
+    std::vector<float> vs( 4, 1. );
+    vs[0] = hdr->sizeX();
+    vs[1] = hdr->sizeY();
+    vs[2] = hdr->sizeZ();
+    vs[3] = hdr->sizeT();
+    data->header().setProperty( "voxel_size", vs );
 
     std::vector<int>	dims(4);
     dims[0] = hdr->dimX();
@@ -143,15 +146,6 @@ namespace aims
     dims[3] = tmax - tmin + 1;
     hdr->setProperty( "volume_dimension", dims );
 
-    if( dims.size() < 1 )
-      dims.push_back( hdr->dimX() );
-    if( dims.size() < 2 )
-      dims.push_back( hdr->dimY() );
-    if( dims.size() < 3 )
-      dims.push_back( hdr->dimZ() );
-    if( dims.size() < 4 )
-      dims.push_back( hdr->dimT() );
-
     //	force data type into header
     carto::DataTypeCode<T>	dtc;
     hdr->setType( dtc.dataType() );
@@ -159,20 +153,21 @@ namespace aims
     if( !dir.empty() )
       dir += carto::FileUtil::separator();
 
-    unsigned	i = 0, s, t, ns = (unsigned) data.dimZ(), nt = tmax - tmin + 1;
+    unsigned	i = 0, s, t, ns = (unsigned) data.getSizeZ(),
+                nt = tmax - tmin + 1;
     for( t=0; t<nt; ++t )
       for( s=0; s<ns; ++s, ++i )
-        readFrame( data, hdr, dir + files[i], s, t );
+        readFrame( *data, hdr, dir + files[i], s, t );
 
-    thing = data;
+    thing = *data;
     if( hdr->hasProperty( "filenames" ) )
       hdr->removeProperty( "filenames" );
-    thing.setHeader( hdr );
+    thing.header().copyProperties( hdr );
   }
 
   template<typename T>
   inline
-  void QtFormatsReader<T>::readFrame( AimsData<T> & data,
+  void QtFormatsReader<T>::readFrame( carto::Volume<T> & data,
                                       QtFormatsHeader * hdr,
                                       const std::string & name, unsigned z, 
                                       unsigned t )
@@ -205,15 +200,15 @@ namespace aims
       }
 
     const QImage	& im = *imp;
-    int			y, dx = data.dimX(), dy = data.dimY();
+    int			y, dx = data.getSizeX(), dy = data.getSizeY();
 
     if( im.depth() == sizeof(T) && im.colorCount() == 0 )
       for( y=0; y<dy; ++y )
-        memcpy( &data( 0, y, z, t ), im.scanLine( y ), dx * sizeof( T ) );
+        memcpy( &data.at( 0, y, z, t ), im.scanLine( y ), dx * sizeof( T ) );
     else
       for( y=0; y<dy; ++y )
         for( int x=0; x<dx; ++x )
-          data( x, y, z, t ) = convertColor( im.pixel( x, y ) );
+          data.at( x, y, z, t ) = convertColor( im.pixel( x, y ) );
   }
 
 

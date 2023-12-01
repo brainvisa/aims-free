@@ -35,18 +35,19 @@
 #define AIMS_IO_QTFORMATS_H
 
 #include <aims/io/fileFormat.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 
 namespace aims
 {
 
   template<typename T>
-  class QtFormats : public FileFormat<AimsData<T> >
+  class QtFormats : public FileFormat<carto::Volume<T> >
   {
-    virtual bool read( const std::string & filename, AimsData<T> & vol,
+    virtual bool read( const std::string & filename, carto::Volume<T> & vol,
                        const carto::AllocatorContext & context,
                        carto::Object options );
-    virtual bool write( const std::string & filename, const AimsData<T> & vol,
+    virtual bool write( const std::string & filename,
+                        const carto::Volume<T> & vol,
                         carto::Object options=carto::none() );
   };
 

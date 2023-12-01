@@ -42,7 +42,8 @@ namespace aims
 {
 
   template<class T>
-  bool QtFormats<T>::read( const std::string & filename, AimsData<T> & vol, 
+  bool QtFormats<T>::read( const std::string & filename,
+                           carto::Volume<T> & vol,
                            const carto::AllocatorContext & context, 
                            carto::Object options )
   {
@@ -53,7 +54,7 @@ namespace aims
 
   template<class T>
   bool QtFormats<T>::write( const std::string & filename, 
-                            const AimsData<T> & vol, carto::Object )
+                            const carto::Volume<T> & vol, carto::Object )
   {
     try
     {

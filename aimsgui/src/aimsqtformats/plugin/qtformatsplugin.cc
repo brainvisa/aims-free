@@ -31,12 +31,6 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
-// we don't want to issue a warning while compiling the obsolete classes
-// themselves...
-#ifndef AIMSDATA_CLASS_NO_DEPREC_WARNING
-#define AIMSDATA_CLASS_NO_DEPREC_WARNING
-#endif
-
 #include <aims/plugin/qtformatsplugin.h>
 #include <aims/io/qtformats_d.h>
 #include <aims/io/qtfinderformats.h>
@@ -146,92 +140,84 @@ QtFormatsPlugin::QtFormatsPlugin() : Plugin()
 //           if( format == "QtFormats" )
 //             format = fmt;
         }
-      if( !FileFormatDictionary<AimsData<int8_t> >::fileFormat( fmt ) )
+      if( !FileFormatDictionary<carto::Volume<int8_t> >::fileFormat( fmt ) )
       {
 #ifdef AIMS_APPLE_GCC33BUG
         macosxbugs::fileFormatDictionary_dataint8_registerFormat( fmt, df1,
           ext );
 #else
-        FileFormatDictionary<AimsData<int8_t> >::registerFormat( fmt, df1, ext );
+        FileFormatDictionary<carto::Volume<int8_t> >::registerFormat( fmt, df1, ext );
 #endif
-        VolumeFormat<int8_t>	*vf1 = new VolumeFormat<int8_t>( fmt );
-        FileFormatDictionary<Volume<int8_t> >::registerFormat( fmt, vf1,
-          ext );
+        FileFormatDictionary<carto::VolumeRef<int8_t> >::registerFormat(
+          fmt, new VolumeRefAimsFormat<int8_t>( fmt ), ext );
       }
 
-      if( !FileFormatDictionary<AimsData<uint8_t> >::fileFormat( fmt ) )
+      if( !FileFormatDictionary<carto::Volume<uint8_t> >::fileFormat( fmt ) )
       {
-        FileFormatDictionary<AimsData<uint8_t> >::registerFormat( fmt, df2,
-                                                                  ext );
-        VolumeFormat<uint8_t>	*vf2 = new VolumeFormat<uint8_t>( fmt );
-        FileFormatDictionary<Volume<uint8_t> >::registerFormat( fmt, vf2,
-            ext );
+        FileFormatDictionary<carto::Volume<uint8_t> >::registerFormat(
+          fmt, df2, ext );
+        FileFormatDictionary<carto::VolumeRef<uint8_t> >::registerFormat(
+          fmt, new VolumeRefAimsFormat<uint8_t>( fmt ), ext );
       }
 
-      if( !FileFormatDictionary<AimsData<int16_t> >::fileFormat( fmt ) )
+      if( !FileFormatDictionary<carto::Volume<int16_t> >::fileFormat( fmt ) )
       {
-        FileFormatDictionary<AimsData<int16_t> >::registerFormat( fmt, df3,
-            ext );
-        VolumeFormat<int16_t>	*vf3 = new VolumeFormat<int16_t>( fmt );
-        FileFormatDictionary<Volume<int16_t> >::registerFormat( fmt, vf3,
-            ext );
+        FileFormatDictionary<carto::Volume<int16_t> >::registerFormat(
+          fmt, df3, ext );
+        FileFormatDictionary<carto::VolumeRef<int16_t> >::registerFormat(
+          fmt, new VolumeRefAimsFormat<int16_t>( fmt ), ext );
       }
 
-      if( !FileFormatDictionary<AimsData<uint16_t> >::fileFormat( fmt ) )
+      if( !FileFormatDictionary<carto::Volume<uint16_t> >::fileFormat( fmt ) )
       {
-        FileFormatDictionary<AimsData<uint16_t> >::registerFormat( fmt, df4,
-            ext );
-        VolumeFormat<uint16_t>	*vf4 = new VolumeFormat<uint16_t>( fmt );
-        FileFormatDictionary<Volume<uint16_t> >::registerFormat( fmt, vf4,
-            ext );
+        FileFormatDictionary<carto::Volume<uint16_t> >::registerFormat(
+          fmt, df4, ext );
+        FileFormatDictionary<carto::VolumeRef<uint16_t> >::registerFormat(
+          fmt, new VolumeRefAimsFormat<uint16_t>( fmt ), ext );
       }
 
-      if( !FileFormatDictionary<AimsData<int32_t> >::fileFormat( fmt ) )
+      if( !FileFormatDictionary<carto::Volume<int32_t> >::fileFormat( fmt ) )
       {
-        FileFormatDictionary<AimsData<int32_t> >::registerFormat( fmt, df5,
-            ext );
-        VolumeFormat<int32_t>	*vf5 = new VolumeFormat<int32_t>( fmt );
-        FileFormatDictionary<Volume<int32_t> >::registerFormat( fmt, vf5,
-            ext );
+        FileFormatDictionary<carto::Volume<int32_t> >::registerFormat(
+          fmt, df5, ext );
+        FileFormatDictionary<carto::VolumeRef<int32_t> >::registerFormat(
+          fmt, new VolumeRefAimsFormat<int32_t>( fmt ), ext );
       }
 
-      if( !FileFormatDictionary<AimsData<uint32_t> >::fileFormat( fmt ) )
+      if( !FileFormatDictionary<carto::Volume<uint32_t> >::fileFormat( fmt ) )
       {
-        FileFormatDictionary<AimsData<uint32_t> >::registerFormat( fmt, df6,
-            ext );
-        VolumeFormat<uint32_t>	*vf6 = new VolumeFormat<uint32_t>( fmt );
-        FileFormatDictionary<Volume<uint32_t> >::registerFormat( fmt, vf6,
-            ext );
+        FileFormatDictionary<carto::Volume<uint32_t> >::registerFormat(
+          fmt, df6, ext );
+        FileFormatDictionary<carto::VolumeRef<uint32_t> >::registerFormat(
+          fmt, new VolumeRefAimsFormat<uint32_t>( fmt ), ext );
       }
 
-      if( !FileFormatDictionary<AimsData<AimsRGB> >::fileFormat( fmt ) )
+      if( !FileFormatDictionary<carto::Volume<AimsRGB> >::fileFormat( fmt ) )
       {
 #ifdef AIMS_APPLE_GCC33BUG
         macosxbugs::fileFormatDictionary_dataRGB_registerFormat( fmt, df8, ext );
 #else
-        FileFormatDictionary<AimsData<AimsRGB> >::registerFormat( fmt, df8, 
-                                                                  ext );
+        FileFormatDictionary<carto::Volume<AimsRGB> >::registerFormat(
+          fmt, df8, ext );
 #endif
-        VolumeFormat<AimsRGB>	*vf13 = new VolumeFormat<AimsRGB>( fmt );
-        FileFormatDictionary<Volume<AimsRGB> >::registerFormat( fmt, vf13,
-                                                                ext );
+        FileFormatDictionary<carto::VolumeRef<AimsRGB> >::registerFormat(
+          fmt, new VolumeRefAimsFormat<AimsRGB>( fmt ), ext );
       }
 
-      if( !FileFormatDictionary<AimsData<AimsRGBA> >::fileFormat( fmt ) )
+      if( !FileFormatDictionary<carto::Volume<AimsRGBA> >::fileFormat( fmt ) )
       {
-        FileFormatDictionary<AimsData<AimsRGBA> >::registerFormat( fmt, df9,
-                                                                  ext );
-        VolumeFormat<AimsRGBA>	*vf14 = new VolumeFormat<AimsRGBA>( fmt );
-        FileFormatDictionary<Volume<AimsRGBA> >::registerFormat( fmt, vf14,
-                                                                ext );
+        FileFormatDictionary<carto::Volume<AimsRGBA> >::registerFormat(
+          fmt, df9, ext );
+        FileFormatDictionary<carto::VolumeRef<AimsRGBA> >::registerFormat(
+          fmt, new VolumeRefAimsFormat<AimsRGBA>( fmt ), ext );
       }
 
-      if( !FileFormatDictionary<AimsData<int8_t> >::fileFormat( fmt ) )
+      if( !FileFormatDictionary<carto::Volume<int8_t> >::fileFormat( fmt ) )
       {
         // ### remove after everything has been moved to intN_t/uintN_t
-        FileFormatDictionary<AimsData<char> >::registerFormat( fmt, df10, ext );
-        VolumeFormat<char>	*vf10 = new VolumeFormat<char>( fmt );
-        FileFormatDictionary<Volume<char> >::registerFormat( fmt, vf10, ext );
+        FileFormatDictionary<carto::Volume<char> >::registerFormat( fmt, df10, ext );
+        FileFormatDictionary<carto::VolumeRef<char> >::registerFormat(
+          fmt, new VolumeRefAimsFormat<char>( fmt ), ext );
       }
       Finder::registerFormat( fmt, new FinderQtFormats, ext );
     }
