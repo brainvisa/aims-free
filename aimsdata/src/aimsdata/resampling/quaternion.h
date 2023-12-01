@@ -41,11 +41,7 @@
 namespace aims
 {
   class AffineTransformation3d;
-}
-typedef aims::AffineTransformation3d Motion;
 
-namespace aims
-{
 
   class Quaternion
   {
@@ -56,6 +52,7 @@ namespace aims
     Quaternion( const Point4df & q );
     Quaternion( const Quaternion & q );
     Quaternion( float x, float y, float z, float t );
+    Quaternion( const AffineTransformation3d & tr );
     ~Quaternion();
 
     Quaternion & operator = ( const Quaternion & q );
@@ -66,7 +63,10 @@ namespace aims
     AimsVector<float,16> inverseRotationMatrix() const;
     /// 4x4 matrix in columns (OpenGL-style)
     void buildFromMatrix( const float* m );
-    void buildFromMotion( const Motion & m );
+    void buildFromTransformation( const AffineTransformation3d & m );
+    /// Obsolete in aims 5.2: use buildFromTransformation() instead.
+    void buildFromMotion( const AffineTransformation3d & m )
+    { buildFromTransformation( m ); }
     /// Rotates vecotor (x,y,z)
     Point3df transform( float x, float y, float z ) const
     { return transform( Point3df( x, y, z ) ); }

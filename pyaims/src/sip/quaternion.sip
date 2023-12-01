@@ -13,6 +13,7 @@ class Quaternion
   Quaternion( const Point4df &q );
   Quaternion( const aims::Quaternion &q );
   Quaternion( float x, float y, float z, float t );
+  Quaternion( const AffineTransformation3d & tr );
   ~Quaternion();
 
   const Point4df & vector() const;
@@ -32,6 +33,7 @@ class Quaternion
 %MethodCode
   sipCpp->buildFromMatrix( &(*a0)[0] );
 %End
+  void buildFromTransformation( const AffineTransformation3d & m );
   void buildFromMotion( const Motion & m );
   Point3df transform( const Point3df &p ) const;
   Point3df transform( float x, float y, float z ) const;

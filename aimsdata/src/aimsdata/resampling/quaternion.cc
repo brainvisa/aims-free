@@ -65,6 +65,13 @@ Quaternion::Quaternion( float x, float y, float z, float t )
 }
 
 
+Quaternion::Quaternion( const AffineTransformation3d & tr )
+  : _vector( 1, 0, 0, 0 )
+{
+  buildFromTransformation( tr );
+}
+
+
 Quaternion::~Quaternion()
 {
 }
@@ -327,9 +334,9 @@ void Quaternion::buildFromMatrix( const float* m )
 }
 
 
-void Quaternion::buildFromMotion( const Motion & m )
+void Quaternion::buildFromTransformation( const AffineTransformation3d & m )
 {
-  /* I reimplement buildFromMatrix() to speedup,
+  /* I reimplement buildFromTransformation() to speedup,
   and avoid matrix copy/transposition */
 
   Point4df      vec;
