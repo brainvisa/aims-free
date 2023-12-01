@@ -339,6 +339,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                     nbuff += 1
                 nbuffv += 1
             else:
+                image_bytes = base64.encodebytes(b).decode().replace('\n', '')
                 image_bytes = "data:image/%s;base64," % tex_format \
                     + image_bytes
                 images.append({
