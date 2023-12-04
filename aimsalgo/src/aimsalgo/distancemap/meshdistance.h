@@ -59,6 +59,12 @@ namespace aims
                     float radius_close, float radius_erode) ;
 
     /** Computes a distance texture over a mesh
+
+        inittex values have the following meaning:
+
+        0: propagation domain
+        n>0: seed (distance 0)
+        -1: forbidden
     */
     template<typename T>
     Texture<float> MeshDistance( const AimsSurface<3,Void> & mesh,
