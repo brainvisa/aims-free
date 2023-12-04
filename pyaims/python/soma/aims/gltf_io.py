@@ -55,7 +55,7 @@ def image_as_buffer(image, format):
 def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                             textures=[], teximages=[], name=None, gltf=None,
                             tex_format='webp', images_as_buffers=True,
-                            single_buffer=True):
+                            single_buffer=True, samplers=None):
     ''' Export a mesh with optional texture to a GLTF JSON dictionary.
 
     The gltf dict may already contain a scene with meshes, the new mesh will be
@@ -122,6 +122,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     ntex = len(gtextures)
     images = gltf.setdefault('images', [])
     nimages = len(images)
+    user_samplers = samplers  # use another var for this
     samplers = gltf.setdefault('samplers', [])
     nsamplers = len(samplers)
     buf_offset = 0
@@ -312,6 +313,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
         if images_as_buffers:
             nimages_bv = nbuffv
         for tex, teximage in enumerate(teximages):
+            tex_prop = teximage.header().get('gltf_properties', {})
             b = image_as_buffer(teximage, tex_format)
             if images_as_buffers:
                 if single_buffer:
@@ -389,12 +391,21 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
             nbuffv += 1
             naccess += 1
 
-            samplers.append({
-                "magFilter" : 9729,
-                "minFilter" : 9987,
-                "wrapS" : 33648,
-                "wrapT" : 33648
-            })
+            sampler = {
+                "magFilter": 9729,
+                "minFilter": 9987,
+                "wrapS": 10497,  # mirroredrepeat: 33648,
+                "wrapT": 10497  # mirroredrepeat: 33648
+            }
+            if user_samplers is not None and len(user_samplers) > tex:
+                ssampler = user_samplers[tex]
+                if ssampler is not None:
+                    sampler.update(ssampler)
+            elif 'sampler' in tex_prop:
+                ssampler = tex_prop['sampler']
+                if ssampler is not None:
+                    sampler.update(ssampler)
+            samplers.append(sampler)
 
             if tex_format == 'webp':
                 gtextures.append({
