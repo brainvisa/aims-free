@@ -218,29 +218,22 @@ bool PythonHeader::writeMinf( const Object & header,
   string		uuid;
   Object options = Object::value( Dictionary() );
   options->setProperty( "syntaxset", rc_ptr<SyntaxSet>( syntax(), true ) );
-  
-  
+
+  // remove any UUID (as in soma-io)
+  if( ph->hasProperty( "uuid" ) )
+    ph->removeProperty( "uuid" );
+
   try
   {
-    Object u = ph->getProperty("uuid");
+    Reader<GenericObject> r( filename );
+    r.setOptions( options );
+    Object oh( r.read() );
+    Object u = oh->getProperty("uuid");
     uuid = u->getString();
   }
   catch( exception & )
   {
   }
-  
-  if( uuid.empty() )
-    try
-    {
-      Reader<GenericObject> r( filename );
-      r.setOptions( options );
-      Object oh( r.read() );
-      Object u = oh->getProperty("uuid");
-      uuid = u->getString();    
-    }
-    catch( exception & )
-    {
-    }
     
   //std::cout << "writeMinf, setting uuid " << uuid << std::endl << std::flush;
   if( !uuid.empty() )
