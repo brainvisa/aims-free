@@ -1,7 +1,35 @@
-#! /usr/bin/env python
-# -*- coding: utf-8; -*-
+#! /usr/bin/env python3
+#
+# Copyright CEA (2018-2023).
+#
+# Author: Yann Leprince <yann.leprince@ylep.fr>.
+#
+# This software is governed by the CeCILL licence under French law and
+# abiding by the rules of distribution of free software. You can use,
+# modify and/or redistribute the software under the terms of the CeCILL
+# licence as circulated by CEA, CNRS and INRIA at the following URL:
+# <http://www.cecill.info/>.
+#
+# As a counterpart to the access to the source code and rights to copy,
+# modify and redistribute granted by the licence, users are provided only
+# with a limited warranty and the software's author, the holder of the
+# economic rights, and the successive licensors have only limited
+# liability.
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading, using, modifying and/or developing or reproducing the
+# software by the user in light of its specific status of scientific
+# software, that may mean that it is complicated to manipulate, and that
+# also therefore means that it is reserved for developers and experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and, more generally, to use and operate it in the
+# same conditions as regards security.
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL licence and that you accept its terms.
 
-from __future__ import division, print_function, unicode_literals
 
 import argparse
 import logging
@@ -67,7 +95,7 @@ def classify_matrix(trm, verbose=False, rtol=1e-5, translation_tol=1e-3):
                                    rtol=0, atol=translation_tol)):
             print('Projection')
             return 'projection'
-        print('Non-invertible affine transformation')
+        print('Non-invertible affine')
         return 'affine'
 
     determinant = numpy.linalg.det(trm[:-1, :-1])
@@ -113,7 +141,7 @@ def classify_matrix(trm, verbose=False, rtol=1e-5, translation_tol=1e-3):
             trm[:-1, -1],
         )
         print('Invariant point: {0}'.format(invariant))
-        if has_no_pre_rotation or has_no_post_rotation:
+        if isotropic_scaling and has_direct_orientation:
             angle_of_rotation_deg = math.degrees(math.acos(numpy.dot(
                 normalize_vect(numpy.matmul(trm[:-1, :-1],
                                             [1] + [0] * (dim - 1))),
@@ -137,7 +165,7 @@ def classify_matrix(trm, verbose=False, rtol=1e-5, translation_tol=1e-3):
                 print('Translation')
                 return 'translation'
             if has_direct_orientation:
-                print('Pure isotropic scaling')
+                print('Isotropic scaling')
                 return 'scaling'
             # Transforms that have a reflection have has_rotation=True
             # so this case is never reached.
@@ -175,7 +203,7 @@ def classify_matrix(trm, verbose=False, rtol=1e-5, translation_tol=1e-3):
             print('Anisotropic scaling followed by rotation-reflection')
             return 'stretching+rotation+reflection'
         else:
-            print('Invertible affine transformation')
+            print('Invertible affine')
             return 'invertible_affine'
 
 
@@ -187,8 +215,41 @@ def classify_trm(trm_filename, verbose=False):
 def parse_command_line(argv=sys.argv):
     """Parse the script's command line."""
     parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         description="""\
-Find out the transformation type contained in a .trm file.""")
+Determine the type of affine transformation contained in a .trm file.
+
+This program is designed for interactive use, it will print the result on
+standard output. It will classify an affine transformation as one of the
+following subtypes, listed from the most particular to the most general:
+
+- Identity
+- Translation
+- Isotropic scaling
+- Rigid
+- Rotation-reflection
+- Similarity
+- Similarity-reflection
+- Anisotropic scaling and reflection
+- Rigid followed by anisotropic scaling
+- Rotation-reflection followed by anisotropic scaling
+- Anisotropic scaling followed by rigid
+- Anisotropic scaling followed by rotation-reflection
+- Invertible affine
+- Projection (i.e. idempotent non-invertible transformation)
+- Non-invertible affine
+
+With the --verbose option, it will additionally print the following
+characteristics of the transformation:
+
+- Rank (usually 3, except for non-invertible transforms, e.g. 3D-to-2D)
+- Determinant
+- Orientation (direct or indirect)
+- Volume dilation factor (cubic root of determinant)
+- Scaling factor(s)
+- Invariant point (e.g. centre of rotation/scaling)
+- Angle of rotation (only for similarity transforms)
+""")
     parser.add_argument("trm_file",
                         help="trm file to analyze")
     parser.add_argument("--verbose", action='store_true',
@@ -208,6 +269,7 @@ def main(argv=sys.argv):
         logging.basicConfig(level=logging.INFO)
     return classify_trm(args.trm_file,
                         verbose=args.verbose) or 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
