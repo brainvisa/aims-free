@@ -12,9 +12,10 @@
 # serve to show the default.
 
 from __future__ import print_function
-
 from __future__ import absolute_import
-import sys, os
+import sys
+import os
+import soma
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -235,53 +236,54 @@ latex_documents = [
 #latex_use_modindex = True
 
 autoclass_content = "both"
-aimstil_version = '1.3' # FIXME: find this automatically
 
 extlinks = {
-  'axon': ('../../axon-' + version + '/%s', 'axon '),
-  'axonusr': ('../../axon-' + version + '/user_doc/%s', 'axon '),
-  'axondev': ('../../axon-' + version + '/dev_doc/%s', 'axon '),
-  'axonman': ('../../axon-' + version + '/bv_man/en/html/%s', 'axon '),
-  'aimsalgodox': ('../../aimsalgo-' + version + '/doxygen/%s',
-    'aimsalgodox '),
-  'aimsalgoex': ('../../pyaimsalgo-' + version + '/examples/%s',
-    'aimsalgoex '),
-  'aims': ('../%s', 'aims '),
-  'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
-    'aimsdox '),
-  'aimsdata' : ('../../aimsdata-' + version + '/%s', 'aimsdata '),
-  'aimsalgo' : ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo '),
-  'aimsgui': ('../../aimsgui-' + version + '/doxygen/%s', 'aimsgui '),
-  'aimstil': ('../../aimstil-' + aimstil_version + '/doxygen/%s', 'aimstil '),
-  'pyaims': ('../../pyaims-' + version + '/%s', 'pyaims '),
-  'pyaimsdev': ('../../pyaims-' + version + '/sphinx/%s', 'pyaims '),
-  'cartobdox' : ('../../cartobase-' + version + '/doxygen/%s',
-  'cartobdox '),
-  'cartoddox' : ('../../cartodata-' + version + '/doxygen/%s',
-  'cartoddox '),
-  'graphdox' : ('../../graph-' + version + '/doxygen/%s',
-  'graphdox '),
-  'somabase': ('../../soma-base-' + somabase_version + '/%s', 'soma-base '),
-  'somaio': ('../../soma-io-' + version + '/%s', 'soma-io ' ),
-  'anatomist': ('../../anatomist-' + version + '/%s', 'anatomist '),
-  'pyanatomist': ('../../pyanatomist-' + version + '/sphinx/%s',
-    'pyanatomist '),
-  'cmds': ('../../index_commands.html', 'commands '),
-  'documents': ('../../documents-' + version + '/%s', 'documents '),
+    'axon': ('../../axon-' + version + '/%s', 'axon %s'),
+    'axonusr': ('../../axon-' + version + '/user_doc/%s', 'axon %s'),
+    'axondev': ('../../axon-' + version + '/dev_doc/%s', 'axon %s'),
+    'axonman': ('../../axon-' + version + '/bv_man/en/html/%s', 'axon %s'),
+    'aimsalgodox': ('../../aimsalgo-' + version + '/doxygen/%s',
+                    'aimsalgodox %s'),
+    'aimsex': ('../../pyaims-' + version + '/examples/%s',
+                   'aimsex %s'),
+    'aimsalgoex': ('../../pyaimsalgo-' + version + '/examples/%s',
+                   'aimsalgoex %s'),
+    'aims': ('../%s', 'aims %s'),
+    'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
+                'aimsdox %s'),
+    'aimsdata': ('../../aimsdata-' + version + '/%s', 'aimsdata %s'),
+    'aimsalgo': ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo %s'),
+    'aimsgui': ('../../aimsgui-' + version + '/doxygen/%s', 'aimsgui %s'),
+    'pyaims': ('../../pyaims-' + version + '/%s', 'pyaims %s'),
+    'pyaimsdev': ('../../pyaims-' + version + '/sphinx/%s', 'pyaims %s'),
+    'cartobdox': ('../../cartobase-' + version + '/doxygen/%s',
+                  'cartobdox %s'),
+    'cartoddox': ('../../cartodata-' + version + '/doxygen/%s',
+                  'cartoddox %s'),
+    'graphdox': ('../../graph-' + version + '/doxygen/%s',
+                 'graphdox %s'),
+    'somabase': ('../../soma-base-' + somabase_version + '/%s',
+                 'soma-base %s'),
+    'somaio': ('../../soma-io-' + version + '/%s', 'soma-io %s'),
+    'anatomist': ('../../anatomist-' + version + '/%s', 'anatomist %s'),
+    'pyanatomist': ('../../pyanatomist-' + version + '/sphinx/%s',
+                    'pyanatomist %s'),
+    'cmds': ('../../index_commands.html%s', 'commands %s'),
+    'documents': ('../../documents-' + version + '/%s', 'documents %s'),
 }
 
-import soma
-docpath = os.path.join( os.path.dirname( os.path.dirname( os.path.dirname( \
-  soma.__file__ ) ) ), 'share', 'doc' )
+docpath = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+    soma.__file__))), 'share', 'doc')
 try:
-  from soma import aims, aimsalgo
-except:
-  pass
+    from soma import aims, aimsalgo
+except ImportError:
+    pass
 
 intersphinx_mapping = {
-  'somabase': (os.path.join(docpath, 'soma-base-' + version + '/sphinx'), None),
-  'pyaims': (os.path.join(docpath, 'pyaims-' + version + '/sphinx'), None),
-  'pyana': (os.path.join(docpath, 'pyanatomist-' + version + '/sphinx'), None),
-  'python': ('http://docs.python.org/2.7', None),
+    'somabase': (os.path.join(docpath, 'soma-base-' + version + '/sphinx'),
+                 None),
+    'pyaims': (os.path.join(docpath, 'pyaims-' + version + '/sphinx'), None),
+    'pyana': (os.path.join(docpath, 'pyanatomist-' + version + '/sphinx'),
+              None),
+    'python': ('https://docs.python.org/%d.%d' % sys.version_info[:2], None),
 }
-

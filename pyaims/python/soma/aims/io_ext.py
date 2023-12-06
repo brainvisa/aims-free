@@ -158,6 +158,7 @@ class GLTFFormat(aims.FileFormat_Object):
 
         return True
 
+
 class GLTFMeshFormat_3(aims.FileFormat_AimsTimeSurface_3_VOID):
     def read(self, filename, obj, context, options=None):
         meshes = gltf_io.load_gltf(filename)

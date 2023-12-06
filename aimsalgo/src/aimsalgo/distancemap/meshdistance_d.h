@@ -207,7 +207,7 @@ namespace aims
 }
 
 
-template <typename T, typename MapType=std::vector< std::map<size_t, float> > >
+template <typename T, typename MapType>
 void
 aims::meshdistance::pairwiseDistanceMaps( const AimsSurface<3,Void> & mesh,
                                           MapType & distmaps,

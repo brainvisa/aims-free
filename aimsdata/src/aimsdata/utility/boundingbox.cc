@@ -42,7 +42,8 @@
 using namespace aims;
 
 BoundingBox::BoundingBox( const Motion* motion )
-  : _npoints( 0 ), _motion( motion ? new Motion( *motion ) : 0 )
+  : _npoints( 0 ), _minimum( 0, 0, 0 ), _maximum( 0, 0, 0 ),
+    _motion( motion ? new Motion( *motion ) : 0 )
 {
 }
 

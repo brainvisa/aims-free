@@ -210,6 +210,8 @@ def completeTypesSub(typessub):
         for key in ('defNumpyIsSubArray', 'defIsRcptr'):
             if key not in y:
                 y[key] = ''
+        if 'needs_typedef' not in y:
+            y['needs_typedef'] = '0'
 
 
 if 'options' in globals() and hasattr(options, 'target_platform'):

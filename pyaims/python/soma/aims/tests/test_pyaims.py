@@ -21,10 +21,10 @@ def setup_doctest(test):
         os.makedirs(tests_dir)
     os.chdir(tests_dir)
     if not os.path.exists("test_data.zip"):
-        print("Download ftp://ftp.cea.fr/pub/dsv/anatomist/data/test_data.zip "
+        print("Download https://brainvisa.info/download/data/test_data.zip "
               "to ", tests_dir)
         six.moves.urllib.request.urlretrieve(
-            "ftp://ftp.cea.fr/pub/dsv/anatomist/data/test_data.zip",
+            "https://brainvisa.info/download/data/test_data.zip",
             "test_data.zip")
     if os.path.exists("data_for_anatomist"):
         rmtree("data_for_anatomist")

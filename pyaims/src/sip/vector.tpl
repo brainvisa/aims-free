@@ -597,7 +597,7 @@ public:
 
   SIP_PYOBJECT array_struct() /Factory/;
 %Docstring
-Return a numpy array of elements. For vectors of scalar types, this is the same as the other functions __array__() and arraydata(). But for vectors where the elements are "sub-arrays", ie objects that can be mapped to arrays, the returned array elements will be structures: for instance a Point3df will be mapped to numpy.dtype([('v', '3f4)])
+Return a numpy array of elements. For vectors of scalar types, this is the same as the other functions __array__() and arraydata(). But for vectors where the elements are "sub-arrays", ie objects that can be mapped to arrays, the returned array elements will be structures: for instance a Point3df will be mapped to numpy.dtype([('v', '3f4')])
 %End
 
 %MethodCode

@@ -28,7 +28,6 @@ AIMS is also composed of several sub-projects:
 * :aimsalgo:`AIMS algo <index.html>`: algorithms for AIMS
 * :graphdox:`Graph <index.html>`: high-level graphs library
 * :aimsgui:`AIMS GUI <index.html>`: `Qt-based <http://qt-project.org>`_ GUI classes for AIMS
-* :aimstil:`AIMS Til <index.html>`: Mainly meshes manipulation tools for AIMS
 * **Soma-IO**: C++ general IO libraries, containing these sub-projects:
 
   * :cartobdox:`Carto base <index.html>`: C++ general usage library
@@ -161,7 +160,7 @@ Iteration on nodes
 
 Complete example 1 source:
 
-.. literalinclude:: ../../code_examples/graphex1.cc
+.. literalinclude:: ../../doc/code_examples/graphex1.cc
     :linenos:
 
 .. seealso:: the :aimsex:`example 1 <graphex1.cc>`
@@ -200,7 +199,7 @@ Currently :aimsdox:`MaskIterator <classaims_1_1MaskIterator.html>` does not work
 
 Complete example 2 source:
 
-.. literalinclude:: ../../code_examples/graphex2.cc
+.. literalinclude:: ../../doc/code_examples/graphex2.cc
     :linenos:
 
 .. seealso:: :aimsex:`example 2 <graphex2.cc>` source file
@@ -213,14 +212,14 @@ Using :aimsdox:`GraphManip <classaims_1_1GraphManip.html>` class and :aimsdox:`G
 
 * When you know what you are looking for in a graph:
 
-  .. literalinclude:: ../../code_examples/graphex3.cc
+  .. literalinclude:: ../../doc/code_examples/graphex3.cc
       :linenos:
 
   .. seealso:: :aimsex:`example 3 <graphex3.cc>` source file
 
 * exhaustive iteration:
 
-  .. literalinclude:: ../../code_examples/graphex4.cc
+  .. literalinclude:: ../../doc/code_examples/graphex4.cc
       :linenos:
 
   .. seealso:: :aimsex:`example 4 <graphex4.cc>` source file
@@ -302,9 +301,7 @@ It is also possible to force the graph type and to use the other mode of the Rea
 Another specialized use of Graphs: fiber bundles
 ++++++++++++++++++++++++++++++++++++++++++++++++
 
-Implementation in the :connectdox:`connectomist <index.html>` library.
-
-The fiber bundles are stored on disk in their own format (*.bundles*, *.bundlesdata*). They have no dedicated data structure in memory: this format has been designed to be read and written on-the-fly, in stream mode (see :connectdox:`BundleProducer <classcomist_1_1BundleProducer.html>`, :connectdox:`BundleListener <classcomist_1_1BundleListener.html>` and derived classes).
+The fiber bundles are stored on disk in their own format (*.bundles*, *.bundlesdata*). They have no dedicated data structure in memory: this format has been designed to be read and written on-the-fly, in stream mode (see :aimsdox:`BundleProducer <classcomist_1_1BundleProducer.html>`, :aimsdox:`BundleListener <classcomist_1_1BundleListener.html>` and derived classes).
 
 However they can also be read as a graph: this is how they are used in Anatomist. In principle when the connectomist plugin is loaded, :aimsdox:`Reader <classaims_1_1Reader.html>` <Graph> can read *.bundles* files.
 

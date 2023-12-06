@@ -119,7 +119,6 @@ public:
     const throw(std::runtime_error) /ReleaseGIL/;
 %Docstring
 doit(transform, output_data)
-============================
 
 Resample the input volume set with setRef() into an existing volume.
 
@@ -158,7 +157,6 @@ RuntimeError
   const throw(std::runtime_error) /Factory, ReleaseGIL/;
 %Docstring
 doit(transform, dimx, dimy, dimz, voxel_size)
-=============================================
 
 Resample the input volume set with setRef() in a newly allocated volume.
 
@@ -212,7 +210,6 @@ RuntimeError: if no input volume has been set with setRef.
                          bool verbose = false ) const /ReleaseGIL/;
 %Docstring
 resample(input_data, transform, background, output_data, verbose=False)
-=======================================================================
 
 Resample a volume into an existing output volume.
 
@@ -256,7 +253,7 @@ verbose: bool
                  int timestep) const /ReleaseGIL/;
 %Docstring
 resample(input_data, transform, background, output_location, timestep) -> output_value
-======================================================================================
+
 Resample a volume at a single location.
 
 This method does *not* use the instance state set by setRef() or
@@ -292,7 +289,6 @@ Returns
                      bool verbose = false ) const /ReleaseGIL/;
 %Docstring
 resample_inv(input_data, inverse_transform, background, output_data, verbose=False)
-===================================================================================
 
 Resample a volume into an existing output volume.
 
@@ -331,7 +327,6 @@ verbose: bool
                      int timestep ) const /ReleaseGIL/;
 %Docstring
 resample_inv(input_data, inverse_transform, background, output_location, timestep) -> output_value
-==================================================================================================
 
 Resample a volume at a single location.
 
@@ -365,7 +360,6 @@ Returns
                                     bool verbose=false ) const /ReleaseGIL/;
 %Docstring
 resample_inv_to_vox(input_data, inverse_transform_to_vox, background, output_data, verbose=False)
-=================================================================================================
 
 Resample a volume into an existing output volume.
 
@@ -407,7 +401,6 @@ verbose: bool
                             int timestep ) const /ReleaseGIL/;
 %Docstring
 resample_inv_to_vox(input_data, inverse_transform_to_vox, background, output_location, timestep) -> output_value
-================================================================================================================
 
 Resample a volume at a single location.
 
