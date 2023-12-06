@@ -136,7 +136,7 @@ def classify_matrix(trm, verbose=False, rtol=1e-5, translation_tol=1e-3):
         print('Scaling: {0}'.format('{0} (isotropic)'.format(S.mean())
                                     if isotropic_scaling
                                     else '{0} (anisotropic)'.format(S)))
-        invariant = (numpy.linalg.inv(numpy.eye(dim) - trm[:-1, :-1])
+        invariant = (numpy.linalg.pinv(numpy.eye(dim) - trm[:-1, :-1])
                      @ trm[:-1, -1])
         print('Invariant point: {0}'.format(invariant))
         if isotropic_scaling and has_direct_orientation:
