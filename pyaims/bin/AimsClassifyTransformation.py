@@ -53,9 +53,9 @@ def read_trm_matrix(trm_filename, dtype=numpy.float_):
 
 
 def matrix_is_orthogonal(mat):
-    return (numpy.allclose(numpy.matmul(mat.T, mat),
+    return (numpy.allclose(mat.T @ mat,
                            numpy.eye(mat.shape[0], mat.shape[0]))
-            and numpy.allclose(numpy.matmul(mat, mat.T),
+            and numpy.allclose(mat @ mat.T,
                                numpy.eye(mat.shape[1], mat.shape[1])))
 
 
@@ -88,7 +88,7 @@ def classify_matrix(trm, verbose=False, rtol=1e-5, translation_tol=1e-3):
         print('Rank: {0:d}'.format(rank))
 
     if rank < dim:
-        trm_trm = numpy.matmul(trm, trm)
+        trm_trm = trm @ trm
         if (numpy.allclose(trm_trm[:-1, :-1], trm[:-1, :-1],
                            rtol=rtol, atol=0)
                 and numpy.allclose(trm_trm[:-1, -1], trm[:-1, -1],
@@ -104,13 +104,13 @@ def classify_matrix(trm, verbose=False, rtol=1e-5, translation_tol=1e-3):
     has_scaling = not numpy.allclose(S[0], 1, rtol=rtol, atol=0)
     isotropic_scaling = numpy.allclose(S[0], S[1:], rtol=rtol, atol=0)
 
-    has_rotation = not numpy.allclose(numpy.matmul(U, V), numpy.eye(3),
+    has_rotation = not numpy.allclose(U @ V, numpy.eye(3),
                                       rtol=0, atol=rtol)
     has_no_pre_rotation = matrix_is_diagonal(
-        numpy.matmul(numpy.matmul(U, numpy.diag(S)), U.T),
+        U @ numpy.diag(S) @ U.T,
         atol=rtol * S[0])
     has_no_post_rotation = matrix_is_diagonal(
-        numpy.matmul(numpy.matmul(V.T, numpy.diag(S)), V),
+        V.T @ numpy.diag(S) @ V,
         atol=rtol * S[0])
 
     if logger.isEnabledFor(logging.DEBUG):
@@ -119,11 +119,11 @@ def classify_matrix(trm, verbose=False, rtol=1e-5, translation_tol=1e-3):
         logger.debug('S:\n%s', S)
         logger.debug('V:\n%s', V)
         logger.debug('U @ diag(S) @ Ut:\n%s',
-                     numpy.matmul(numpy.matmul(U, numpy.diag(S)), U.T))
+                     U @ numpy.diag(S) @ U.T)
         if has_rotation:
             logger.debug('has_no_pre_rotation: %s', has_no_pre_rotation)
         logger.debug('Vt @ diag(S) @ V:\n%s',
-                     numpy.matmul(numpy.matmul(V.T, numpy.diag(S)), V))
+                     V.T @ numpy.diag(S) @ V)
         if has_rotation:
             logger.debug('has_no_post_rotation: %s', has_no_post_rotation)
 
@@ -136,15 +136,12 @@ def classify_matrix(trm, verbose=False, rtol=1e-5, translation_tol=1e-3):
         print('Scaling: {0}'.format('{0} (isotropic)'.format(S.mean())
                                     if isotropic_scaling
                                     else '{0} (anisotropic)'.format(S)))
-        invariant = numpy.matmul(
-            numpy.linalg.inv(numpy.eye(dim) - trm[:-1, :-1]),
-            trm[:-1, -1],
-        )
+        invariant = (numpy.linalg.inv(numpy.eye(dim) - trm[:-1, :-1])
+                     @ trm[:-1, -1])
         print('Invariant point: {0}'.format(invariant))
         if isotropic_scaling and has_direct_orientation:
             angle_of_rotation_deg = math.degrees(math.acos(numpy.dot(
-                normalize_vect(numpy.matmul(trm[:-1, :-1],
-                                            [1] + [0] * (dim - 1))),
+                normalize_vect(trm[:-1, :-1] @ ([1] + [0] * (dim - 1))),
                 [1] + [0] * (dim - 1),
             )))
             print('Angle of rotation: {0:.3f}°'.format(angle_of_rotation_deg))
