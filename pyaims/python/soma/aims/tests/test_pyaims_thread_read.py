@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
-from __future__ import absolute_import
 import threading
 from soma import aims
 import os
 import sys
 from optparse import OptionParser
-import threading
 import tempfile
 import shutil
 import soma.subprocess
@@ -237,8 +233,8 @@ if __name__ == '__main__':
     # p = xml.parsers.expat.ParserCreate()
     # p.ParseFile( open( '/tmp/xml.xml' ) )
 
-    from soma.qt_gui.qt_backend import QtGui
-    app = QtGui.QApplication(sys.argv)
+    from soma.qt_gui.qt_backend import QtWidgets
+    app = QtWidgets.QApplication(sys.argv)
 
     doit = True
     while doit:
