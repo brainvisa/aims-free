@@ -1,8 +1,4 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import
-from __future__ import division, print_function, unicode_literals
+#! /usr/bin/env python3
 
 import argparse
 import logging
@@ -58,7 +54,7 @@ def descale_matrix(trm, centre=(0, 0, 0), centre_space='target'):
     # Compute coordinates of the centre in the input space
     if centre_space == 'source':
         centre_in_source_space = centre
-        centre_in_target_space = numpy.matmul(trm, numpy.r_[centre, [1]])[:-1]
+        centre_in_target_space = (trm @ numpy.r_[centre, [1]])[:-1]
     elif centre_space == 'target':
         centre_in_target_space = centre
         # Same algorithm as numpy.linalg.matrix_rank
@@ -67,17 +63,16 @@ def descale_matrix(trm, centre=(0, 0, 0), centre_space='target'):
         )
         if rank < dim:
             raise RuntimeError('The transformation is not invertible')
-        inv_linear = numpy.matmul(numpy.matmul(V.T, numpy.diag(1 / S)), U.T)
+        inv_linear = V.T @ numpy.diag(1 / S) @ U.T
         inv_trm = numpy.r_[
             numpy.c_[
                 inv_linear,
-                -numpy.matmul(inv_linear, trm[:-1, -1])[:, numpy.newaxis],
+                -(inv_linear @ trm[:-1, -1])[:, numpy.newaxis],
             ],
             numpy.array([0] * dim + [1])[numpy.newaxis, :],
         ]
         logger.debug('Inverse transformation:\n%s', inv_trm)
-        centre_in_source_space = numpy.matmul(inv_trm,
-                                             numpy.r_[centre, [1]])[:-1]
+        centre_in_source_space = (inv_trm @ numpy.r_[centre, [1]])[:-1]
     else:
         raise ValueError('invalid value for centre_space')
 
@@ -85,10 +80,9 @@ def descale_matrix(trm, centre=(0, 0, 0), centre_space='target'):
     logger.debug('centre in target space: %s', centre_in_target_space)
 
     # Compute the new matrix as a pure rotation and translation
-    new_linear_part = numpy.matmul(U, V)
+    new_linear_part = U @ V
     new_translation = (
-        centre_in_target_space
-        - numpy.matmul(new_linear_part, centre_in_source_space)
+        centre_in_target_space - (new_linear_part @ centre_in_source_space)
     )
 
     descaled_trm = numpy.zeros_like(trm)
@@ -97,8 +91,7 @@ def descale_matrix(trm, centre=(0, 0, 0), centre_space='target'):
     descaled_trm[-1, -1] = 1
 
     logger.debug('centre transformed by the descaled transformation: %s',
-                 numpy.matmul(descaled_trm,
-                              numpy.r_[centre_in_source_space, [1]])[:-1])
+                 (descaled_trm @ numpy.r_[centre_in_source_space, [1]])[:-1])
 
     return descaled_trm
 
