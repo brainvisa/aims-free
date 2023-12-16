@@ -666,15 +666,20 @@ def meshes_dict_to_gltf(meshes, gltf=None, matrix=None, tex_format='webp',
 def gltf_convert_draco(infilename, outfilename=None, fail=True):
     # compress meshes using Draco
     # gltf-transform optimize <filename>.gltf <filename>.glb --texture-compress webp
-    # gltf-transform draco filename filename
+    # gltf-transform draco [options] filename filename
+    # we use the following options to avoid loss and texture shifts:
+    # * --quantize-position 0
+    # * --quantize-texcoord 0
     gltf_trans = shutil.which('gltf-transform')
     if not gltf_trans:
         if fail:
             raise ValueError('gltf-transform command is not found')
         return
+    opts = ['--quantize-position', '0',  # don't quantize position
+            '--quantize-texcoord', '0']  # don't quantize texcoords
     if outfilename is None:
         outfilename = infilename
-    cmd = [gltf_trans, 'draco', infilename, outfilename]
+    cmd = [gltf_trans, 'draco'] + opts + [infilename, outfilename]
     if 'LD_PRELOAD' in os.environ:
         # in VirtualGL processes (anatomist headless for instance), LD_PRELOAD
         # is used, and this causes a warning when running gltf-transform.
@@ -970,7 +975,11 @@ class GLTFParser:
             webp_data = webp.WebPData.from_buffer(data)
             arr = webp_data.decode(color_mode=webp.WebPColorMode.RGBA)
             teximage = aims.Volume_RGBA(arr.shape[:2])
-            teximage.np['v'][:, :, 0, 0, :] = arr.transpose((1, 0, 2))
+            try:
+                teximage.np['v'][:, :, 0, 0, :] = arr.transpose((1, 0, 2))
+            except ValueError:
+                # I don't know when textures are transposed or not...
+                teximage.np['v'][:, :, 0, 0, :] = arr
             return teximage
 
         tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
