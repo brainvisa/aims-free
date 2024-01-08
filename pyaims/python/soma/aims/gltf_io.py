@@ -8,11 +8,11 @@ which has a binary (GLB) alternative.
 To be fully operational, the following modules should be installed:
 
 - pygltflib (python module) for complete GLTF parsing and GLB support
-- DracoPy (python module) for meshes compression
+- DracoPy (python module) for compressed meshes readiing
 - webp (python module) for texture compression and webp format support for
-  textures
-- gltf-transform tool for meshes compression. It is a javascript node.js tool,
-  which can be installed using ``npm``, the node.js install tool::
+  textures (used both in reading and writing)
+- gltf-transform tool for writing compressed meshes. It is a javascript node.js
+  tool, which can be installed using ``npm``, the node.js install tool::
 
         npm install -g @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions @gltf-transform/cli
 
@@ -1158,6 +1158,7 @@ class AimsGLTFParser(GLTFParser):
                     ttype = aims.typeCode(ttype)
                 atex = aims.TimeTexture(ttype)
                 atex[0].data().assign(texture)
+                atex.header()['allow_normalize_coords'] = 0
                 mattex = mat.get('textures', {}).get(tex, {})
                 if mattex:
                     atex.header()['gltf_texture'] = mattex
