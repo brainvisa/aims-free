@@ -1,3 +1,26 @@
+'''
+GLTF (and GLB) format support for AIMS
+
+GLTF is a 3D scene format which contains in a single file (or in few files)
+meshes, textures and materials for a complete 3D scene. It is a JSON file,
+which has a binary (GLB) alternative.
+
+To be fully operational, the following modules should be installed:
+
+- pygltflib (python module) for complete GLTF parsing and GLB support
+- DracoPy (python module) for meshes compression
+- webp (python module) for texture compression and webp format support for
+  textures
+- gltf-transform tool for meshes compression. It is a javascript node.js tool,
+  which can be installed using ``npm``, the node.js install tool::
+
+        npm install -g @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions @gltf-transform/cli
+
+Without these modules, some functionalities will be missing, and it will not be
+possible to read some GLTF/GLB files, depending on the formats used in them.
+'''
+
+
 import base64
 import numpy as np
 import os
@@ -31,7 +54,7 @@ def vec_to_bytes(vector):
 def image_as_buffer(image, format):
     if format == 'webp':
         if webp is not None:
-            arr = np.asarray(image.np['v'][:,:,0,0,:].transpose(1, 0, 2),
+            arr = np.asarray(image.np['v'][:, :, 0, 0, :].transpose(1, 0, 2),
                              order='C')
             webp_data = webp.WebPPicture.from_numpy(arr)
             webp_data = webp_data.encode()
