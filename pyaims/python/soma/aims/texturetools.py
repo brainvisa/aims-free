@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
 
-from __future__ import absolute_import
 from soma import aims, aimsalgo
 from soma.utils.csv_utils import dict_to_table
 import numpy
 import numpy as np
-import os
-import six
-import sys
-from six.moves import range
 
 
 def mergeLabelsFromTexture(tex, labels_list, new_label):
@@ -296,7 +290,7 @@ def vertex_texture_to_polygon_texture(mesh, tex, allow_cut=False):
     if allow_cut:
         out_mesh = mesh.__class__(mesh)
 
-    for t, tex0 in six.iteritems(tex):
+    for t, tex0 in tex.items():
         tdata = tex0.arraydata()
         ptex0 = poly_tex[t]
         ptex0.resize(len(mesh.polygon(t)))
@@ -401,9 +395,8 @@ def mesh_to_polygon_textured_mesh(mesh, poly_tex):
     """
     out_mesh = mesh.__class__()
     out_tex = poly_tex.__class__()
-    polygons = mesh.polygon()
     dtype = poly_tex[list(poly_tex.keys())[0]].arraydata().dtype
-    for t, tex0 in six.iteritems(poly_tex):
+    for t, tex0 in poly_tex.items():
         print('t:', t)
         overt = out_mesh.vertex(t)
         overt.assign(mesh.vertex())

@@ -160,6 +160,8 @@ namespace aims
                                 const AimsTimeSurface<D,T> & add )
   {
     typename AimsTimeSurface<D, T>::const_iterator is, es = add.end();
+    dst.header().copyProperties( carto::Object::reference( add.header() ) );
+
     for( is=add.begin(); is!=es; ++is )
     {
       int t = is->first;
