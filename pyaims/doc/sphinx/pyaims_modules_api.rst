@@ -21,6 +21,14 @@ SubModule: ``colormaphints``
     :show-inheritance:
 
 
+SubModule: ``diff``
+===================
+
+.. automodule:: soma.aims.diff
+    :members:
+    :show-inheritance:
+
+
 SubModule: ``filetools``
 ========================
 
@@ -37,6 +45,14 @@ SubModule: ``fslTransformation``
     :show-inheritance:
 
 
+SubModule: ``gltf_io``
+======================
+
+.. automodule:: soma.aims.gltf_io
+    :members:
+    :show-inheritance:
+
+
 SubModule: ``graph_comparison``
 ===============================
 
@@ -49,6 +65,14 @@ SubModule: ``io_ext``
 =====================
 
 .. automodule:: soma.aims.io_ext
+    :members:
+    :show-inheritance:
+
+
+SubModule: ``labelstools``
+===============================
+
+.. automodule:: soma.aims.labelstools
     :members:
     :show-inheritance:
 
@@ -129,6 +153,14 @@ SubModule: ``aimsalgo.polyfit``
 ===============================
 
 .. automodule:: soma.aimsalgo.polyfit
+    :members:
+    :show-inheritance:
+
+
+SubModule: ``aimsalgo.sulci.graph_pointcloud``
+==============================================
+
+.. automodule:: soma.aimsalgo.sulci.graph_pointcloud
     :members:
     :show-inheritance:
 
