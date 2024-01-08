@@ -1,17 +1,16 @@
-
-from soma import aims
-import json
-import os.path as osp
-import xml.etree.cElementTree as ET
-import argparse
-
-
 '''
 Manipulate labels maps in several formats (json, csv, xml, hie...) in a GIFTI-colormap compatible dict.
 
 Such labels maps can be saved in textures or volumes headers. In a GIFTI texture, it will be saved in native GIFTI colormap format, otherwise it will be saved in the object .minf. Anatomist will read and use it.
 
 '''
+
+
+from soma import aims
+import json
+import os.path as osp
+import xml.etree.cElementTree as ET
+import argparse
 
 
 read_labels_formats = ['json', 'hie', 'csv', 'xml']

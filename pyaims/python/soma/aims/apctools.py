@@ -32,15 +32,14 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 '''.APC (commissure coordinates) IO and other tools'''
+
 from __future__ import absolute_import
 import six
-from six.moves import range
 from six.moves import zip
 __docformat__ = 'restructuredtext en'
 
 from soma import aims
-import types
-import sys
+
 
 def apcRead(filename, imagefile=None):
     '''Read a .APC file
@@ -95,7 +94,7 @@ def apcRead(filename, imagefile=None):
     if imagefile is None:
         return apcdict
 
-    if isinstqnce(imagefile, six.string_types):
+    if isinstance(imagefile, six.string_types):
         f = aims.Finder()
         if f.check(imagefile):
             image = f.header()
@@ -104,9 +103,9 @@ def apcRead(filename, imagefile=None):
     else:
         try:
             image = imagefile.header()
-        except:  # otherwise it is considered to already be a header
+        except Exception:  # otherwise it is considered to already be a header
             image = imagefile
-            if not hasattr( image, 'keys' ) \
+            if not hasattr(image, 'keys') \
                     or 'voxel_size' not in image:
                 image = {'voxel_size': imagefile}  # directly the VS list ?
     vs = image['voxel_size']
@@ -121,7 +120,7 @@ def apcRead(filename, imagefile=None):
         apcdict['ihmm'] = ihm
     try:
         apcWrite(filename, apcdict)
-    except:
+    except Exception:
         # could not write modifications
         pass
 
@@ -191,7 +190,7 @@ def apcTransform(apcdict, transform, outimagevoxelsize):
     else:
         try:
             outhdr = outimagevoxelsize.header()
-        except:  # otherwise it is considered to already be a header
+        except Exception:  # otherwise it is considered to already be a header
             outhdr = outimagevoxelsize
             if not hasattr( outhdr, 'keys' ) \
                     or 'voxel_size' not in outhdr:
@@ -202,7 +201,7 @@ def apcTransform(apcdict, transform, outimagevoxelsize):
         pmm = apcdict[p + 'mm']
         pmm2 = transform.transform(pmm)
         apcdict[p + 'mm'] = pmm2
-        vs = [pmm[i] / px[i] for i in range(3)]
+        # vs = [pmm[i] / px[i] for i in range(3)]
         px2 = [int(round(x / y)) for x, y in zip(pmm2, outvs)]
         apcdict[p] = px2
 
