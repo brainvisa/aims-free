@@ -36,10 +36,10 @@ from soma import aims
 import six
 from . import diff
 
-
 rel_flx_max_diff = 1e-4
 ''' max accepted relative difference of float numbers
 '''
+
 
 
 def same_graphs(ref_graph, test_graph, verbose=False):

@@ -61,6 +61,14 @@ SubModule: ``gltf_io``
     :show-inheritance:
 
 
+SubModule: ``gltf_io``
+======================
+
+.. automodule:: soma.aims.gltf_io
+    :members:
+    :show-inheritance:
+
+
 SubModule: ``graph_comparison``
 ===============================
 
