@@ -1052,11 +1052,14 @@ class GLTFParser:
             shutil.rmtree(tmpd)
 
     def get_teximage(self, texnum, gltf, arrays):
+        # print('get_teximage', texnum, arrays is not None)
         if arrays is not None:
             images = arrays.get('images', [])
+            # print('images cache:', len(images))
             if len(images) > texnum:
                 teximage = images[texnum]
                 if teximage is not None:
+                    # print('get_teximage from cache', texnum)
                     return teximage
 
         texdef = gltf.get('images', [])[texnum]
@@ -1071,11 +1074,6 @@ class GLTFParser:
             else:
                 url = osp.join(self.base_uri, uri)
                 teximage = aims.read(url)
-            if arrays is None:
-                arrays = {}
-            images = arrays.setdefault('images', [])
-            if len(images) <= texnum:
-                images += [None] * (texnum + 1 - len(images))
 
         else:  # uri is None
             bv = gltf['bufferViews'][texdef['bufferView']]
@@ -1086,6 +1084,13 @@ class GLTFParser:
             # mtype should be 'image/<format>'
             format = mtype[6:]
             teximage = self.image_from_buffer(data, format)
+
+        if arrays is not None:
+            images = arrays.setdefault('images', [])
+            if len(images) <= texnum:
+                images += [None] * (texnum + 1 - len(images))
+            # print('set cache image')
+            images[texnum] = teximage
 
         return teximage
 
