@@ -1110,8 +1110,8 @@ class AimsGLTFParser(GLTFParser):
         if arrays is None:
             arrays = {}
         pmeshes = super().parse(gltf, mesh, arrays=arrays)
-
         name = pmeshes.get('name')
+
         objects = []
         for obj in pmeshes['meshes']:
             aimsobj = self.parse_object(obj, name)
@@ -1123,12 +1123,24 @@ class AimsGLTFParser(GLTFParser):
         aimsobj = {}
         poly = mesh.get('polygons')
         pdim = poly.shape[1]
+        # Note: in Aims <= 5.2, aims.vector.assign() is slow because it
+        # converts its argument to a std::vector, then goes to the = operator.
+        # Here we assign a numpy array, so we can use np operator in a much
+        # more efficient way
+
         amesh = aims.AimsTimeSurface(pdim)
-        amesh.vertex().assign(mesh.get('vertices'))
-        amesh.polygon().assign(poly)
+        # amesh.vertex().assign(mesh.get('vertices'))
+        v = mesh.get('vertices')
+        amesh.vertex().resize(len(v))
+        amesh.vertex().np[:] = v
+        # amesh.polygon().assign(poly)
+        amesh.polygon().resize(len(poly))
+        amesh.polygon().np[:] = poly
         norm = mesh.get('normals')
         if norm is not None:
-            amesh.normal().assign(norm)
+            # amesh.normal().assign(norm)
+            amesh.normal().resize(len(norm))
+            amesh.normal().np[:] = norm
         aimsobj['mesh'] = amesh
         if name:
             amesh.header()['name'] = name
@@ -1160,7 +1172,9 @@ class AimsGLTFParser(GLTFParser):
                 else:
                     ttype = aims.typeCode(ttype)
                 atex = aims.TimeTexture(ttype)
-                atex[0].data().assign(texture)
+                # atex[0].data().assign(texture)
+                atex[0].data().resize(len(texture))
+                atex[0].data().np[:] = texture
                 atex.header()['allow_normalize_coords'] = 0
                 mattex = mat.get('textures', {}).get(tex, {})
                 if mattex:
