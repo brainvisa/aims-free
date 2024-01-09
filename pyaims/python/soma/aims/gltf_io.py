@@ -713,13 +713,14 @@ def meshes_dict_to_gltf(meshes, gltf=None, matrix=None, tex_format='webp',
                     tr = aims.AffineTransformation3d(tl[ri])
         if tex:
             tex_mesh_to_gltf(mesh, tex, matrix=tr, name=None, gltf=gltf,
-                      tex_format=tex_format, images_as_buffers=images_as_buffers,
-                      single_buffer=single_buffer)
+                             tex_format=tex_format,
+                             images_as_buffers=images_as_buffers,
+                             single_buffer=single_buffer)
         else:
             mesh_to_gltf(mesh, matrix=tr, name=None, gltf=gltf,
-                        tex_format=tex_format,
-                        images_as_buffers=images_as_buffers,
-                        single_buffer=single_buffer)
+                         tex_format=tex_format,
+                         images_as_buffers=images_as_buffers,
+                         single_buffer=single_buffer)
 
     return gltf
 
@@ -825,7 +826,7 @@ class Accessor:
             itsize = 4
         else:
             raise ValueError('unsupported component type: %d in accessor'
-                              % ctype)
+                             % ctype)
         atype = self.ddef['type']
         if atype == 'SCALAR':
             nc = 1
@@ -1027,20 +1028,16 @@ class GLTFParser:
             mtc['teximage'] = teximage
         return mattex
 
-
     def image_from_buffer(self, data, format):
         if format == 'webp':
             global webp
             if webp is None:
                 import webp  # raise an ImportError
             webp_data = webp.WebPData.from_buffer(data)
-            arr = webp_data.decode(color_mode=webp.WebPColorMode.RGBA)
+            arr = webp_data.decode(
+                color_mode=webp.WebPColorMode.RGBA).transpose((1, 0, 2))
             teximage = aims.Volume_RGBA(arr.shape[:2])
-            try:
-                teximage.np['v'][:, :, 0, 0, :] = arr.transpose((1, 0, 2))
-            except ValueError:
-                # I don't know when textures are transposed or not...
-                teximage.np['v'][:, :, 0, 0, :] = arr
+            teximage.np['v'][:, :, 0, 0, :] = arr
             return teximage
 
         tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
@@ -1068,7 +1065,6 @@ class GLTFParser:
             if uri.startswith('data:'):
                 start = uri.find(',') + 1
                 data = base64.decodebytes(uri[start:].encode())
-                tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
                 endf = uri.find(';', 11)
                 format = uri[11: endf]
                 teximage = self.image_from_buffer(data, format)
@@ -1081,7 +1077,7 @@ class GLTFParser:
             if len(images) <= texnum:
                 images += [None] * (texnum + 1 - len(images))
 
-        else: # uri is None
+        else:  # uri is None
             bv = gltf['bufferViews'][texdef['bufferView']]
             bv = BufferView(gltf, bv, arrays)
             data = bv.data()
@@ -1151,6 +1147,11 @@ class AimsGLTFParser(GLTFParser):
             }
             atexs = []
             aimsobj['textures'] = atexs
+            wrap_values = {
+                10497: 'repeat',
+                33071: 'clamp_to_edge',
+                33648: 'mirrored_repeat'
+            }
             for tex in sorted(textures.keys()):
                 texture = textures[tex]
                 ttype = texture.dtype
@@ -1164,6 +1165,23 @@ class AimsGLTFParser(GLTFParser):
                 mattex = mat.get('textures', {}).get(tex, {})
                 if mattex:
                     atex.header()['gltf_texture'] = mattex
+                    sampler = mattex.get('sampler')
+                    if sampler is not None:
+                        wrap = []
+                        wraps = sampler.get('wrapS')
+                        wv = 'clamp_to_edge'
+                        if wraps is not None:
+                            wv = wrap_values.get(wraps, wv)
+                        wrap.append(wv)
+                        wrapt = sampler.get('wrapT')
+                        wv = 'clamp_to_edge'
+                        if wrapt is not None:
+                            wv = wrap_values.get(wrapt, wv)
+                        wrap.append(wv)
+                        if wrap != ['clamp_to_edge', 'clamp_to_edge']:
+                            atex.header()['texture_properties'] = [{
+                                'wrapmode': wrap
+                            }]
                 atexs.append(atex)
         return aimsobj
 
@@ -1334,4 +1352,3 @@ def load_gltf(filename, object_parser=AimsGLTFParser()):
     object_parser.base_uri = osp.dirname(filename)
     meshes = gltf_to_meshes(gltf, object_parser=object_parser)
     return meshes
-
