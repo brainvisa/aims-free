@@ -88,28 +88,31 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
     unsigned	n = PySequence_Size( sipPy );
     (*sipCppPtr)->resize( n );
 
-    std::vector<int> dims( 1, n );
-    std::vector<int> added_dims = %Template1NumDims%;
-    dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
-
-    PyObject *pyobj = sipConvertFromType(
-      *sipCppPtr, sipType_vector_%Template1typecode%,  0 );
-    PyObject *pyarr = PyObject_GetAttrString( pyobj, "np" );
-    int res = PySequence_SetSlice( pyarr, 0, n, sipPy );
-
-    // delete internal ref to the array which nobody else owns
-    // PyObject_DelAttrString( (PyObject *) sipSelf, "_arrayref" );
-    // dec reference to self that was manually incremented in arraydata()
-    // when building the numpy array
-    Py_DECREF( pyarr );
-    Py_DECREF( pyobj );
-
-    if( res < 0 )
+    if( n != 0 )
     {
-      *sipIsErr = 1;
-      delete *sipCppPtr;
-      *sipCppPtr = 0;
-      return 0;
+      std::vector<int> dims( 1, n );
+      std::vector<int> added_dims = %Template1NumDims%;
+      dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+
+      PyObject *pyobj = sipConvertFromType(
+        *sipCppPtr, sipType_vector_%Template1typecode%,  0 );
+      PyObject *pyarr = PyObject_GetAttrString( pyobj, "np" );
+      int res = PySequence_SetSlice( pyarr, 0, n, sipPy );
+
+      // delete internal ref to the array which nobody else owns
+      // PyObject_DelAttrString( (PyObject *) sipSelf, "_arrayref" );
+      // dec reference to self that was manually incremented in arraydata()
+      // when building the numpy array
+      Py_DECREF( pyarr );
+      Py_DECREF( pyobj );
+
+      if( res < 0 )
+      {
+        *sipIsErr = 1;
+        delete *sipCppPtr;
+        *sipCppPtr = 0;
+        return 0;
+      }
     }
 
 %#else%
@@ -226,44 +229,45 @@ public:
 
       sipCpp->resize( n );
 
-      std::vector<int> dims( 1, n );
-      std::vector<int> added_dims = %Template1NumDims%;
-      dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+      if( n != 0 )
+      {
+        std::vector<int> dims( 1, n );
+        std::vector<int> added_dims = %Template1NumDims%;
+        dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
 
-      PyArray_Descr *descr = %Template1NumType_Descr%;
-      if( !descr )
-        descr = PyArray_DescrFromType( %Template1NumType% );
-      PyObject *pyarr = aims::initNumpyArray( (PyObject *) sipSelf, descr,
-                                              dims.size(),
-                                              &dims[0],
-                                              (char *) &(*sipCpp)[0] );
+        PyArray_Descr *descr = %Template1NumType_Descr%;
+        if( !descr )
+          descr = PyArray_DescrFromType( %Template1NumType% );
+        PyObject *pyarr = aims::initNumpyArray( (PyObject *) sipSelf, descr,
+                                                dims.size(),
+                                                &dims[0],
+                                                (char *) &(*sipCpp)[0] );
 %#ifdef PYAIMS_NPY_IS_SUBARRAY%
-      PyObject *sub_arr = PyMapping_GetItemString( pyarr,
-                                                   const_cast<char *>( "v" ) );
-      if( sub_arr )
-      {
-        Py_DECREF( pyarr ); // we don't use the whole array
-        pyarr = sub_arr;
-      }
+        PyObject *sub_arr = PyMapping_GetItemString(
+          pyarr, const_cast<char *>( "v" ) );
+        if( sub_arr )
+        {
+          Py_DECREF( pyarr ); // we don't use the whole array
+          pyarr = sub_arr;
+        }
 %#endif%
-      int res = PySequence_SetSlice( pyarr, 0, n, a0 );
+        int res = PySequence_SetSlice( pyarr, 0, n, a0 );
 
-      // delete internal ref to the array which nobody else owns
-      PyObject_DelAttrString( (PyObject *) sipSelf, "_arrayref" );
-      // dec reference to self that was manually incremented in arraydata()
-      // when building the numpy array
-      Py_DECREF( (PyObject *) sipSelf );
-      Py_DECREF( pyarr );
+        // delete internal ref to the array which nobody else owns
+        PyObject_DelAttrString( (PyObject *) sipSelf, "_arrayref" );
+        // dec reference to self that was manually incremented in arraydata()
+        // when building the numpy array
+        Py_DECREF( (PyObject *) sipSelf );
+        Py_DECREF( pyarr );
 
-      if( res < 0 )
-      {
-        sipIsErr = 1;
-        // Py_DECREF( pyarr );
-        delete sipCpp;
-        sipCpp = 0;
+        if( res < 0 )
+        {
+          sipIsErr = 1;
+          // Py_DECREF( pyarr );
+          delete sipCpp;
+          sipCpp = 0;
+        }
       }
-      else
-        PyErr_Clear();
 
 %#else%
 
@@ -363,16 +367,21 @@ public:
     unsigned	n = PySequence_Size( a0 );
     sipCpp->resize( n );
 
-    std::vector<int> dims( 1, n );
-    std::vector<int> added_dims = %Template1NumDims%;
-    dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+    if( n != 0 )
+    {
+      std::vector<int> dims( 1, n );
+      std::vector<int> added_dims = %Template1NumDims%;
+      dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
 
-    PyObject *pyarr = PyObject_GetAttrString( sipSelf, "np" );
-    int res = PySequence_SetSlice( pyarr, 0, n, a0 );
+      PyObject *pyarr = PyObject_GetAttrString( sipSelf, "np" );
+      int res = PySequence_SetSlice( pyarr, 0, n, a0 );
 
-    Py_DECREF( pyarr );
+      Py_DECREF( pyarr );
 
-    if( res == 0 )
+      if( res == 0 )
+        ok = true;
+    }
+    else
       ok = true;
 
     // ---
