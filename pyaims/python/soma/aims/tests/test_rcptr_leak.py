@@ -71,7 +71,7 @@ def repeat_test(ninit, ntest, test_func):
 
 def test_leak():
     if not sys.platform.startswith('linux'):
-        # skip this test on non-linux platforms becaus I don't know how to
+        # skip this test on non-linux platforms because I don't know how to
         # test memory usage
         return True
 
