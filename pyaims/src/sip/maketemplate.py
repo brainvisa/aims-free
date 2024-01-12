@@ -79,8 +79,9 @@ def makeTemplate(infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
     # print('output:', outfile, file=sys.stderr)
     # print('types :', types, file=sys.stderr)
     # print('extra_defs:', extra_defs, file=sys.stderr)
-    if not moc:
-        print('makeTemplate, without moc:', moc, file=sys.stderr)
+
+    #if not moc:
+        #print('makeTemplate, without moc:', moc, file=sys.stderr)
 
     fi = open(infile)
     fo = open(outfile, 'w')

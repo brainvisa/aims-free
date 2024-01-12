@@ -19,6 +19,10 @@ if( SIP_ABI )
        "SIP_ABI_MAJOR_VERSION=${SIP_ABI_MAJOR_VERSION}")
 endif()
 
+if( QT_MOC_EXECUTABLE )
+  set( MT_MOC_OPTS "-m" "${QT_MOC_EXECUTABLE}" )
+endif()
+
 execute_process( COMMAND "${PYTHON_HOST_EXECUTABLE}"
         "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}/maketemplates.py"
         -i "${CMAKE_CURRENT_SOURCE_DIR}/generatedtypes.py"
@@ -27,7 +31,7 @@ execute_process( COMMAND "${PYTHON_HOST_EXECUTABLE}"
         -t "${PYAIMS_SOURCE_DIR}/src/sip/typessub.py"
         -t "${CMAKE_CURRENT_SOURCE_DIR}/aimsalgotypessub.py"
         -l
-        -m "${QT_MOC_EXECUTABLE}"
+        ${MT_MOC_OPTS}
         -P "${CMAKE_C_PREPROCESSOR}"
         ${extra_defs}
   OUTPUT_VARIABLE _generatedSipFileList 
