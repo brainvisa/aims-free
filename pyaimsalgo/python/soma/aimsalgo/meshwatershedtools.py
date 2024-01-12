@@ -19,20 +19,17 @@ Main dependencies: PyAims library
 """
 
 
-#----------------------------Imports-------------------------------------------
+# ----------------------------Imports------------------------------------------
 
 
 # import system
-from __future__ import absolute_import
-from __future__ import print_function
 import numpy
-import sys
 
 # soma import
 from soma import aims, aimsalgo
 from six.moves import range
 
-#----------------------------Functions-----------------------------------------
+# ---------------------------Functions-----------------------------------------
 
 
 def _clean_after_merge(labels, parents, valid):
@@ -160,10 +157,10 @@ def watershedWithBasinsMerging(
     # labelWt: array of shape (number of vertices)
     #          labelling of the vertices according to their basin
 
-    data = tex[0].arraydata()
-    idxW = idxWt[0].data().arraydata()
-    majorW = majorWt[0].data().arraydata()
-    labelW = labelWt[0].data().arraydata()
+    data = tex[0].np
+    idxW = idxWt[0].data().np
+    majorW = majorWt[0].data().np
+    labelW = labelWt[0].data().np
 
     if size_min != 0 or depth_min != 0:
         size = numpy.asarray([len(numpy.where(labelW == x)[0])
@@ -173,7 +170,7 @@ def watershedWithBasinsMerging(
         # Blobs
         blobindices = aimsalgo.blobsHeights(
             mesh, tex[0].data(), labelWt[0].data())
-        blobheights = data[blobindices.arraydata()]
+        blobheights = data[blobindices.np]
         blobdepths = data[idxW] - blobheights
         print("criteria depth: ", blobdepths)
 

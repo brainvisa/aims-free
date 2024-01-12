@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 from soma import aims, aimsalgo
 from soma.utils.csv_utils import dict_to_table
 import numpy
@@ -17,9 +16,9 @@ def mergeLabelsFromTexture(tex, labels_list, new_label):
           otex: labeled texture with merged regions
     """
     otex = aims.TimeTexture_S16()
-    tex_ar = tex[0].arraydata()
+    tex_ar = tex[0].np
     otex[0].assign(tex_ar)
-    otex_ar = otex[0].arraydata()
+    otex_ar = otex[0].np
     for i in labels_list:
         otex_ar[otex_ar == int(i)] = new_label
     return otex
@@ -37,8 +36,8 @@ def extractLabelsFromTexture(tex, labels_list, new_label):
     otex[0].reserve(tex[0].nItem())
     for i in range(tex[0].nItem()):
         otex[0].push_back(0)
-    tex_ar = tex[0].arraydata()
-    otex_ar = otex[0].arraydata()
+    tex_ar = tex[0].np
+    otex_ar = otex[0].np
     for i in labels_list:
         otex_ar[tex_ar == int(i)] = new_label
     return otex
@@ -69,7 +68,7 @@ def connectedComponents(mesh, tex, areas_mode=0):
         with area = 16.5 and 6.0 respectively, areas are in square mm
     """
     # create a numpy array from aims object
-    dtex = tex[0].arraydata()
+    dtex = tex[0].np
 
     # number of vertices
     nbvert = len(mesh.vertex())
@@ -97,7 +96,7 @@ def connectedComponents(mesh, tex, areas_mode=0):
         otex[0].assign((dtex == label))
         label_cc = aimsalgo.AimsMeshLabelConnectedComponent(mesh, otex, 0, 0)
         # transform aims.TimeTexture_S16 to numpy array
-        label_cc_np = label_cc[0].arraydata()
+        label_cc_np = label_cc[0].np
         step_cc[label-1].assign(label_cc_np)
         
         if areas_mode:
@@ -130,19 +129,19 @@ def remove_non_principal_connected_components(mesh, tex, trash_label):
     -------
     out_tex: label texture
     """
-    t0 = tex[0].arraydata()
+    t0 = tex[0].np
     t0 += 1  # 0 is a real label
     conn_comp, areas = connectedComponents(mesh, tex, areas_mode=True)
     t0 -= 1
-    dtype = tex[0].arraydata().dtype
+    dtype = tex[0].np.dtype
     out_tex = aims.TimeTexture(dtype=dtype)
     out_tex[0].assign(numpy.zeros(tex[0].size(), dtype=dtype))
-    out_arr = out_tex[0].arraydata()
+    out_arr = out_tex[0].np
     out_arr[:] = trash_label
     for label in conn_comp.keys():
         comps = conn_comp[label]
         largest = numpy.argmax(areas[label + 1]) + 1
-        comp_arr = comps.arraydata()
+        comp_arr = comps.np
         out_arr[comp_arr==largest] = label
     return out_tex
 
@@ -156,8 +155,8 @@ def meshDiceIndex(mesh, texture1, texture2, timestep1=0,
 
     return
     """
-    tex1 = texture1[timestep1].arraydata()
-    tex2 = texture2[timestep2].arraydata()
+    tex1 = texture1[timestep1].np
+    tex2 = texture2[timestep2].np
     if labels_table1 is not None:
         tex1 = numpy.array([labels_table1[x] for x in tex1])
     if labels_table2 is not None:
@@ -204,7 +203,7 @@ def average_texture(output, inputs):
     for fname in inputs:
         tex.append(aims.read(fname))
     # make a 2D array from a series of textures
-    ar = numpy.vstack([t[0].arraydata() for t in tex])
+    ar = numpy.vstack([t[0].np for t in tex])
     # replace the negative values by positive integers
     if len(ar[ar == -1]) != 0:
         tmp_label = numpy.max(ar) + 1
@@ -284,17 +283,17 @@ def vertex_texture_to_polygon_texture(mesh, tex, allow_cut=False):
       * new mesh with possibly split triangles
     It only works for meshes of triangles.
     """
-    dtype = tex[list(tex.keys())[0]].arraydata().dtype
+    dtype = tex[list(tex.keys())[0]].np.dtype
     poly_tex = aims.TimeTexture(dtype=dtype)
 
     if allow_cut:
         out_mesh = mesh.__class__(mesh)
 
     for t, tex0 in tex.items():
-        tdata = tex0.arraydata()
+        tdata = tex0.np
         ptex0 = poly_tex[t]
         ptex0.resize(len(mesh.polygon(t)))
-        poly_labels = ptex0.arraydata()
+        poly_labels = ptex0.np
         if allow_cut:
             added_vert = {}
             vertex = out_mesh.vertex(t)
@@ -395,7 +394,7 @@ def mesh_to_polygon_textured_mesh(mesh, poly_tex):
     """
     out_mesh = mesh.__class__()
     out_tex = poly_tex.__class__()
-    dtype = poly_tex[list(poly_tex.keys())[0]].arraydata().dtype
+    dtype = poly_tex[list(poly_tex.keys())[0]].np.dtype
     for t, tex0 in poly_tex.items():
         print('t:', t)
         overt = out_mesh.vertex(t)
@@ -406,8 +405,8 @@ def mesh_to_polygon_textured_mesh(mesh, poly_tex):
         opoly.assign(mesh.polygon())
         otex = out_tex[t]
         otex.assign(numpy.zeros(mesh.vertex().size(), dtype=dtype) - 1)
-        #otex_arr = otex.arraydata()
-        tex_arr = tex0.arraydata()
+        #otex_arr = otex.np
+        tex_arr = tex0.np
         added = {}
         for p in range(len(mesh.polygon())):
             plabel = tex_arr[p]
@@ -427,7 +426,7 @@ def mesh_to_polygon_textured_mesh(mesh, poly_tex):
                         poly[i] = vb
                         otex.data().append(plabel)
                         added[(v, plabel)] = vb
-                        #otex_arr = otex.arraydata()
+                        #otex_arr = otex.np
 
     out_mesh.updateNormals()
     return out_mesh, out_tex
@@ -529,7 +528,7 @@ def clean_gyri_texture(mesh, gyri_tex):
         if areas_measures[label].size != 1:
             wrong_labels.append(label)
     for label in wrong_labels:
-        cc_tex_label = cc_tex[label - 1].arraydata()
+        cc_tex_label = cc_tex[label - 1].np
         areas_measures_cc = areas_measures[label]
         cc_nb = areas_measures_cc.size
         for l in range(1, cc_nb):

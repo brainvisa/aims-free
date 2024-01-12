@@ -1,20 +1,14 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 
-from __future__ import absolute_import
 import os
 import shutil
 import soma.subprocess
 import sys
-import errno
 import warnings
-
 import soma.test_utils
-from six.moves import map
-from six.moves import zip
 
 
-class ImageFileComparison(object):
+class ImageFileComparison:
 
     """ Class to compare test command output image files.
     """
@@ -44,7 +38,7 @@ class ImageFileComparison(object):
         if os.path.exists(image1):
             d1 = soma.aims.read(image1)
             h1 = dict(d1.header())
-            i1 = d1.arraydata()
+            i1 = d1.np
             ImageFileComparison.clean_header(h1)
         else:
             h1 = dict()
@@ -54,7 +48,7 @@ class ImageFileComparison(object):
             d2 = soma.aims.read(image2)
             h2 = dict(d2.header())
             ImageFileComparison.clean_header(h2)
-            i2 = d2.arraydata()
+            i2 = d2.np
         else:
             h2 = dict()
             i2 = numpy.array([])
@@ -87,7 +81,7 @@ class ImageFileComparison(object):
                 del hdr[field]
 
 
-class TextFileComparison(object):
+class TextFileComparison:
 
     """ Class to compare test command output text files.
     """
@@ -120,7 +114,7 @@ class TextFileComparison(object):
         testcase.assertEqual(f1content, f2content, msg)
 
 
-class FileComparison(object):
+class FileComparison:
 
     """ Class to compare test command output files.
     """
@@ -177,7 +171,7 @@ class FileComparison(object):
             ImageFileComparison.assertEqual(testcase, file1, file2, msg)
 
 
-class CommandTest(object):
+class CommandTest:
 
     """ CommandsTest class references a test command and its output files.
         It is used for testing a command and compare its output files to
@@ -422,7 +416,7 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
             list of tuples (run_file, ref_file).
         """
         files = list(zip(self.get_run_files(testcommand),
-                    self.get_ref_files(testcommand)))
+                         self.get_ref_files(testcommand)))
         if check_ref_files:
             ref_files = set([t[1] for t in files])
             real_ref_files = set(
@@ -465,7 +459,8 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
                     os.makedirs(cmd_run_dir)
         else:
             raise Exception(
-                'An attribute named test_cases that contains a list of CommandTest must be added.')
+                'An attribute named test_cases that contains a list of '
+                'CommandTest must be added.')
 
     def runTest(self):
         """
@@ -478,7 +473,7 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
                 if self.test_mode == soma.test_utils.ref_mode:
                     # Run the test in the test ref directory
                     c.execute(self.get_ref_directory(c))
-                    #print('command run normally:', c, file=sys.stderr)
+                    # print('command run normally:', c, file=sys.stderr)
                 else:
                     # Get reference and run files (this is a bit of extra work
                     # if we don't run the test but simplify code)
@@ -495,11 +490,12 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
 
                     # Run the test in the test run directory
                     c.execute(self.get_run_directory(c))
-                    #print('command run normally:', c, file=sys.stderr)
+                    # print('command run normally:', c, file=sys.stderr)
 
                     # Compare each run file with its reference
                     for run_file, ref_file in run_ref_files:
-                        sys.stderr.write('compare files: %s <=> %s\n' % (ref_file, run_file))
+                        sys.stderr.write('compare files: %s <=> %s\n'
+                                         % (ref_file, run_file))
                         FileComparison.assertEqual(self, run_file, ref_file)
 
             except Exception as e:

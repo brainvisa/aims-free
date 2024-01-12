@@ -93,7 +93,7 @@ def meshSplit2(mesh, tex, graph, voxel_size=None, tex_time_step=None):
     else:
         tex_tstep = tex
     # labels in the texture
-    labels = (numpy.unique(tex_tstep[0].arraydata())).tolist()
+    labels = (numpy.unique(tex_tstep[0].np)).tolist()
     #if 0 in labels:
         #labels.remove(0)
 

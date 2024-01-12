@@ -9,10 +9,7 @@
 # and INRIA at the following URL "http://www.cecill.info".
 ############################################################################
 
-from __future__ import print_function
-
 # system import
-from __future__ import absolute_import
 import numpy
 
 # Soma import
@@ -41,8 +38,8 @@ def draw_sphere(mesh, longitude, latitude):
         a spherical triangulation of the subject of its cortical hemisphere,
         projected on a sphere
     """
-    lon = longitude[0].arraydata()
-    lat = latitude[0].arraydata()
+    lon = longitude[0].np
+    lat = latitude[0].np
 
     nmesh = numpy.asarray(mesh.vertex())
 
@@ -162,8 +159,8 @@ def resample_mesh_to_sphere(
 
     #  ...
     # multiply latitudes by 2 to get same amplitude on both coords
-    latitude = aims.TimeTexture(latitude[0].arraydata() * 2)
-    slat_tex = aims.TimeTexture(slat_tex[0].arraydata() * 2)
+    latitude = aims.TimeTexture(latitude[0].np * 2)
+    slat_tex = aims.TimeTexture(slat_tex[0].np * 2)
     interpoler = aims.CoordinatesFieldMeshInterpoler(
         mesh, sphere, latitude, longitude, slat_tex, slon_tex)
 
@@ -223,8 +220,8 @@ def resample_texture_to_sphere(
 
     #  ...
     # multiply latitudes by 2 to get same amplitude on both coords
-    latitude = aims.TimeTexture(latitude[0].arraydata() * 2)
-    slat_tex = aims.TimeTexture(slat_tex[0].arraydata() * 2)
+    latitude = aims.TimeTexture(latitude[0].np * 2)
+    slat_tex = aims.TimeTexture(slat_tex[0].np * 2)
     interpoler = aims.CoordinatesFieldMeshInterpoler(
         mesh, sphere, latitude, longitude, slat_tex, slon_tex)
 
@@ -370,8 +367,8 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
                             - init_sphere.vertex()[
                             init_sphere.polygon()[0][0]]).norm()
 
-    init_lat = aims.TimeTexture(init_lat[0].arraydata() * 2)
-    current_lat = aims.TimeTexture(current_lat[0].arraydata() * 2)
+    init_lat = aims.TimeTexture(init_lat[0].np * 2)
+    current_lat = aims.TimeTexture(current_lat[0].np * 2)
     interpoler = aims.CoordinatesFieldMeshInterpoler(init_sphere,
                                                      current_sphere,
                                                      init_lat,
