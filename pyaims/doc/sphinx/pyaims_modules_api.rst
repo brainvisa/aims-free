@@ -29,6 +29,14 @@ SubModule: ``diff``
     :show-inheritance:
 
 
+SubModule: ``demotools``
+========================
+
+.. automodule:: soma.aims.demotools
+    :members:
+    :show-inheritance:
+
+
 SubModule: ``filetools``
 ========================
 
