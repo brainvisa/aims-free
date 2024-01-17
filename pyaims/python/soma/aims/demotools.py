@@ -109,25 +109,49 @@ def get_demo_datasets(download_url='https://brainvisa.info/download/data'):
     return filtered
 
 
-def install_demo_data(dataset='test_data.zip', install_dir=None,
+def install_demo_data(dataset='test_data.zip', download_dir=None,
                       download_url='https://brainvisa.info/download/data',
-                      force_overwrite=False):
-    ''' Downoad a demo dataset from brainvisa server, and install it in the local filesystem in ``install_dir``.
-    If ``install_dir`` is not given, the output location will be guessed as such:
+                      install_dir=None):
+    ''' Downoad a demo dataset from brainvisa server to the ``download_dir`` directory, and install it in the local filesystem in ``install_dir``.
+    If ``download_dir`` is not given, the output download location will be guessed as such:
     1. try to write in $BRAINVISA_SHARE/brainvisa_demo/
     2. try to wtite in the current directory
     3. raise an error
 
-    If ``force_overwrite`` is True, the dataset will be re-installed even if it is already present. Otherwise if the dataset output directory already exists and is not empty, then nothing will be done.
+    If ``install_dir`` is not given, download and install will be done in the same directory, namely ``download_dir``.
+    If ``install_dir`` is given, the archive will be extracted to this directory.
 
-    The return value is the dataset directory on the local filesystem.
+    The return value is the dataset directoried on the local filesystem.
     '''
     full_url = download_url + '/' + dataset
+    if download_dir is None:
+        download_dirs = [osp.join(aims.carto.Paths.globalShared(),
+                                'brainvisa_demo'),
+                        os.getcwd()]
+        for download_dir in download_dirs:
+            if not osp.exists(download_dir):
+                try:
+                    os.makedirs(download_dir)
+                except Exception:
+                    pass
+            try:
+                with open(osp.join(download_dir, 'testfile'), 'w') as f:
+                    f.write('test writing\n')
+                ok = True
+                os.unlink(osp.join(download_dir, 'testfile'))
+            except Exception:
+                ok = False
+            if ok:
+                break  # use this one
+
+    print('download dir:', download_dir)
     if install_dir is None:
-        install_dir = osp.join(aims.carto.Paths.globalShared(),
-                               'brainvisa_demo')
+        install_dir = download_dir
+    elif not osp.exists(install_dir):
+        os.makedirs(install_dir)
     print('install dir:', install_dir)
-    zf = osp.join(install_dir, dataset)
+
+    zf = osp.join(download_dir, dataset)
     tzf = zf + '.part'
 
     ds = dataset.split('.')
@@ -154,13 +178,13 @@ def install_demo_data(dataset='test_data.zip', install_dir=None,
 
                 pg = fread * 100 / fsize
                 print(f'\r{full_url}: {int(pg)}%')
-                print('download done')
 
-            print('installing', dataset, '...')
             if osp.exists(zf):
                 os.unlink(zf)
             os.rename(tzf, zf)
+            print('download done')
 
-        out_dirs = unzip_file(zf)
+        print('installing', dataset, '...')
+        out_dirs = unzip_file(zf, destdir=install_dir)
 
     return out_dirs
