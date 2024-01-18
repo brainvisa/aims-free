@@ -114,15 +114,16 @@ def install_demo_data(dataset='test_data.zip', download_dir=None,
                       install_dir=None):
     ''' Downoad a demo dataset from brainvisa server to the ``download_dir`` directory, and install it in the local filesystem in ``install_dir``.
     If ``download_dir`` is not given, the output download location will be guessed as such:
-    1. try to write in $BRAINVISA_SHARE/brainvisa_demo/
-    2. if install_dir is provided, download in install_dir
+
+    1. try to write in ``$BRAINVISA_SHARE/brainvisa_demo/``
+    2. if ``install_dir`` is provided, download in ``install_dir``
     3. try to wtite in the current directory
     4. raise an error
 
     If ``install_dir`` is not given, download and install will be done in the same directory, namely ``download_dir``.
     If ``install_dir`` is given, the archive will be extracted to this directory.
 
-    The return value is the dataset directoried on the local filesystem.
+    The return value is the dataset directories on the local filesystem.
     '''
     full_url = download_url + '/' + dataset
     if download_dir is None:
