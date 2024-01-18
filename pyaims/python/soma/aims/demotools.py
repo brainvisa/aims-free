@@ -115,8 +115,9 @@ def install_demo_data(dataset='test_data.zip', download_dir=None,
     ''' Downoad a demo dataset from brainvisa server to the ``download_dir`` directory, and install it in the local filesystem in ``install_dir``.
     If ``download_dir`` is not given, the output download location will be guessed as such:
     1. try to write in $BRAINVISA_SHARE/brainvisa_demo/
-    2. try to wtite in the current directory
-    3. raise an error
+    2. if install_dir is provided, download in install_dir
+    3. try to wtite in the current directory
+    4. raise an error
 
     If ``install_dir`` is not given, download and install will be done in the same directory, namely ``download_dir``.
     If ``install_dir`` is given, the archive will be extracted to this directory.
@@ -126,8 +127,10 @@ def install_demo_data(dataset='test_data.zip', download_dir=None,
     full_url = download_url + '/' + dataset
     if download_dir is None:
         download_dirs = [osp.join(aims.carto.Paths.globalShared(),
-                                'brainvisa_demo'),
-                        os.getcwd()]
+                                  'brainvisa_demo'),
+                         os.getcwd()]
+        if install_dir is not None:
+            download_dirs.insert(1, install_dir)
         for download_dir in download_dirs:
             if not osp.exists(download_dir):
                 try:
@@ -143,6 +146,9 @@ def install_demo_data(dataset='test_data.zip', download_dir=None,
                 ok = False
             if ok:
                 break  # use this one
+        if not ok:
+            raise ValueError('Cound not find a suitable writable directory '
+                             'for download.')
 
     print('download dir:', download_dir)
     if install_dir is None:

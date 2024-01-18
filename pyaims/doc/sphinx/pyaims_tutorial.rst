@@ -31,42 +31,23 @@ A cleaner alternative, especially if no write access is allowed on this data dir
 
 Doing this in python:
 
-To work smoothly with python2 or python3, let's use print():
+To work smoothly with python, let's use print():
 
 ::
-    from __future__ import print_function
     import sys
     print(sys.version_info)
 
 ::
 
+    from soma.aims import demotools
     import sys
-    if sys.version_info[0] >= 3:
-        from urllib.request import urlopen
-    else:
-        from urllib2 import urlopen
-    import zipfile
     import os
     import os.path
     import tempfile
     # let's work in a temporary directory
     tuto_dir = tempfile.mkdtemp(prefix='pyaims_tutorial_')
-    # either we already have test_data.zip in the current directory
-    # otherwise we fetch it from the server
-    older_cwd = os.getcwd()
-    test_data = os.path.join(older_cwd, 'test_data.zip')
-    print('old cwd:', older_cwd)
-    if not os.path.exists(test_data):
-        print('downloading test_data.zip...')
-        f = urlopen('https://brainvisa.info/download/data/test_data.zip')
-        test_data = os.path.join(tuto_dir, 'test_data.zip')
-        open(test_data, 'wb').write(f.read())
-        f.close()
-    print('test_data:', test_data)
+    demotools.install_demo_data('test_data.zip', install_dir=tuto_dir)
     os.chdir(tuto_dir)
-    f = zipfile.ZipFile(test_data)
-    f.extractall()
-    del f
     print('we are working in:', tuto_dir)
 
 
