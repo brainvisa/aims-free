@@ -428,7 +428,7 @@ Returns
 %End
 
 
-  void setRef( const rc_ptr_Volume_%Template1typecode% & /Transfer/ );
+  void setRef( const rc_ptr_Volume_%Template1typecode% & );
 %Docstring
 setRef(input_data)
 
