@@ -268,17 +268,22 @@ namespace carto
     typename aims::BucketMap<INP>::const_iterator	 it, et = in.end();
     typename aims::BucketMap<INP>::Bucket::const_iterator ib, eb;
     unsigned						 i = 0;
+    int dx = out->getSizeX(), dy = out->getSizeY(), dz = out->getSizeZ(),
+        dt = out->getSizeT();
 
     RawConverter<INP, OUTP>	itemconv;
 
     for( it=in.begin(); it!=et; ++it, ++i )
     {
+      if( i >= dt )
+        continue;
       for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
       {
-        const Point3d	& pos = ib->first;
-        itemconv.convert( ib->second,
-                          out->at( pos[0] + offset[0], pos[1] + offset[1],
-                                   pos[2] + offset[2], i ) );
+        const Point3d	pos = ib->first + offset;
+        if( pos[0] >= 0 && pos[1] >= 0 && pos[2] >= 0
+            && pos[0] < dx && pos[1] < dy && pos[2] < dz )
+          itemconv.convert( ib->second,
+                            out->at( pos[0], pos[1], pos[2], i ) );
       }
     }
   }
@@ -312,16 +317,17 @@ namespace carto
 
         aims::BucketMap<Void>::const_iterator		it, et = in.end();
         aims::BucketMap<Void>::Bucket::const_iterator	ib, eb;
-        unsigned						i = 0;
+        unsigned					i = 0;
+        int dx = out->getSizeX(), dy = out->getSizeY(), dz = out->getSizeZ();
 
         for( it=in.begin(); it!=et; ++it, ++i )
         {
           for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
           {
-            const Point3d	& pos = ib->first;
-            out->at( pos[0] + offset[0], pos[1] + offset[1],
-                     pos[2] + offset[2] )
-              = (OUTP) it->first;
+            const Point3d	pos = ib->first + offset;
+            if( pos[0] >= 0 && pos[1] >= 0 && pos[2] >= 0
+                && pos[0] < dx && pos[1] < dy && pos[2] < dz )
+              out->at( pos ) = (OUTP) it->first;
           }
         }
       }
@@ -340,17 +346,22 @@ namespace carto
         typename aims::BucketMap<INP>::const_iterator	it, et = in.end();
         typename aims::BucketMap<INP>::Bucket::const_iterator	ib, eb;
         unsigned					i = 0;
+        int dx = out->getSizeX(), dy = out->getSizeY(), dz = out->getSizeZ(),
+            dt = out->getSizeT();
 
         RawConverter<INP,OUTP>	itemconv;
 
         for( it=in.begin(); it!=et; ++it, ++i )
         {
+          if( i >= dt )
+            continue;
           for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
           {
-            const Point3d	& pos = ib->first;
-            itemconv.convert( ib->second,
-                              out->at( pos[0] + offset[0], pos[1] + offset[1],
-                                       pos[2] + offset[2], i ) );
+            const Point3d	pos = ib->first + offset;
+            if( pos[0] >= 0 && pos[1] >= 0 && pos[2] >= 0
+                && pos[0] < dx && pos[1] < dy && pos[2] < dz )
+              itemconv.convert( ib->second,
+                                out->at( pos[0], pos[1], pos[2], i ) );
           }
         }
       }
@@ -379,13 +390,15 @@ namespace carto
       typename aims::BucketMap<Void>::const_iterator   it, et = in.end();
       typename aims::BucketMap<Void>::Bucket::const_iterator   ib, eb;
       unsigned                                        i = 0;
+      int dx = out->getSizeX(), dy = out->getSizeY(), dz = out->getSizeZ();
       for( it=in.begin(); it!=et; ++it, ++i )
       {
         for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
         {
-          const Point3d     & pos = ib->first;
-          out->at( pos[0] + offset[0], pos[1] + offset[1],
-                   pos[2] + offset[2], i ) = _value;
+          const Point3d     & pos = ib->first + offset;
+          if( pos[0] >= 0 && pos[1] >= 0 && pos[2] >= 0
+              && pos[0] < dx && pos[1] < dy && pos[2] < dz )
+            out->at( pos[0], pos[1], pos[2], i ) = _value;
         }
       }
     }
