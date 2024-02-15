@@ -133,6 +133,14 @@ SubModule: ``texturetools``
     :show-inheritance:
 
 
+SubModule: ``thicknesstools``
+=============================
+
+.. automodule:: soma.aims.thicknesstools
+    :members:
+    :show-inheritance:
+
+
 SubModule: ``volumetools``
 ==========================
 
