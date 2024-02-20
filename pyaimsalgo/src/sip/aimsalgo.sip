@@ -85,3 +85,10 @@
 %Include rcptr_GeometricProperties.sip
 %Include transform_objects.sip
 %Include geometric.sip
+%Include topoclassifier_U8.sip
+%Include topoclassifier_S16.sip
+%Include topoclassifier_U16.sip
+%Include topoclassifier_S32.sip
+%Include topoclassifier_U32.sip
+%Include topoclassifier_FLOAT.sip
+%Include topoclassifier_DOUBLE.sip
