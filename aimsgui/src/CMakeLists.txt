@@ -33,19 +33,7 @@ foreach( _command AimsAttributedViewer AimsLabelSelector )
     endforeach()
 
     BRAINVISA_ADD_EXECUTABLE( ${_target} ${_guiExecutable} ${_sources} )
-    target_link_libraries( ${_target} aimsgui ${OPENGL_FIX_LIBRARIES} )
-
-    if( APPLE )
-      add_custom_command( TARGET ${_target} POST_BUILD
-        COMMAND "ln"
-        ARGS "-sf"
-        "${_target}.app/Contents/MacOS/${_target}"
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_target}"
-      )
-      BRAINVISA_INSTALL( FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_target}"
-                  DESTINATION bin
-                  COMPONENT ${PROJECT_NAME} )
-    endif()
+    target_link_libraries( ${_target} aimsgui )
 
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin

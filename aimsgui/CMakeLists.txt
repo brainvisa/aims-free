@@ -28,6 +28,7 @@ elseif( DESIRED_QT_VERSION EQUAL 6 )
   include_directories(${Qt6Widgets_INCLUDE_DIRS} ${Qt6Sql_INCLUDE_DIRS})
   set( QT_LIBRARIES ${Qt6Widgets_LIBRARIES} ${Qt6Sql_LIBRARIES} )
 endif()
+set(QT_LIBRARIES ${QT_LIBRARIES} ${OPENGL_FIX_LIBRARIES})
 
 add_subdirectory( src )
 
