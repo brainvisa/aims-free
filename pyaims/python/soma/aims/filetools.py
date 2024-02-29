@@ -31,8 +31,6 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 '''File functions'''
-from __future__ import print_function
-from __future__ import absolute_import
 
 import os
 import sys
@@ -55,7 +53,7 @@ def compare_gzip_files(file1, file2):
     os.close(tmp_file1[0])
     tf1 = open(tmp_file1[1], 'wb')
     tf1.write(f1)
-    trf.close()
+    tf1.close()
     # file2
     with gzip.open(file2, 'rb') as f:
         f2 = f.read()
@@ -64,12 +62,12 @@ def compare_gzip_files(file1, file2):
     tf2 = open(tmp_file2[1], 'wb')
     tf2.write(f2)
     tf2.close()
-    
-    same = filecmp.cmp(tmp_ref_file[1], tmp_test_file[1])
-    
+
+    same = filecmp.cmp(tmp_file1[1], tmp_file2[1])
+
     os.unlink(tmp_file1[1])
     os.unlink(tmp_file2[1])
-    
+
     return same
 
 
@@ -82,15 +80,15 @@ def compare_text_files(file1, file2, thresh=1e-6):
     #if not np.any(np.isnan(arr1)) and not np.any(np.isnan(arr2)):
         #return filecmp.cmp(file1, file2)
     if np.any(np.isnan(arr1)) and np.any(np.isnan(arr2)):
-        if np.all(np.isnan(arr1)==np.isnan(arr2)):
-            arr1[np.isnan(arr1)]=0
-            arr2[np.isnan(arr2)]=0
+        if np.all(np.isnan(arr1) == np.isnan(arr2)):
+            arr1[np.isnan(arr1)] = 0
+            arr2[np.isnan(arr2)] = 0
             return np.max(np.abs(arr2 - arr1)) <= thresh
     elif not np.any(np.isnan(arr1)) and not np.any(np.isnan(arr2)):
         return np.max(np.abs(arr2 - arr1)) <= thresh
-    
+
     return False
-    
+
 
 def compare_nii_files(file1, file2, thresh=50, out_stream=sys.stdout):
     '''
@@ -110,7 +108,7 @@ def compare_nii_files(file1, file2, thresh=50, out_stream=sys.stdout):
 
     if md5_file1 == md5_file2:
         return True
-    
+
     # md5 are differents
     # Check the voxels
     a_1 = aims.read(file1)
@@ -202,7 +200,7 @@ def cmp(ref_file, test_file, skip_suffixes=None):
         if obj1 == obj2:
             return True
 
-    except Exception as e:
+    except Exception:
         # aims cannot read them: use the standard filecmp
         pass
     return filecmp.cmp(ref_file, test_file)

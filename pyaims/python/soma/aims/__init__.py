@@ -585,6 +585,27 @@ def write(obj, filename, format=None, options={}):
     w = Writer()
     w.write(obj, filename, format=format, options=options)
 
+def check(filename):
+    '''check that <filename> can be read using aims::
+       IOError is raised when <filename> can not be read using aims::
+        
+        Parameters
+        ----------
+        filename: str
+
+        Returns
+        ----------
+        dict containing header information
+
+    aims.check('file.nii')
+    '''
+    f = Finder()
+    if f.check(filename):
+        return eval(str(f.header()), locals())
+    else:
+        raise IOError(f"{filename} is not readable using aims library. "
+                      "Please check that file exists, is readable and is in "
+                      "a format supported by aims.")
 
 # vector-like iterator
 

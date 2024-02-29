@@ -29,6 +29,10 @@ if( SIP_ABI )
        "SIP_ABI_MAJOR_VERSION=${SIP_ABI_MAJOR_VERSION}")
 endif()
 
+if( QT_MOC_EXECUTABLE )
+  set( MT_MOC_OPTS "-m" "${QT_MOC_EXECUTABLE}" )
+endif()
+
 set(__command "${PYTHON_HOST_EXECUTABLE}"
         "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}/maketemplates.py"
         -i "${_generatedtypes_py}"
@@ -36,7 +40,7 @@ set(__command "${PYTHON_HOST_EXECUTABLE}"
         -o "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}"
         -t "${CMAKE_CURRENT_SOURCE_DIR}/typessub.py"
         -l
-        -m "${QT_MOC_EXECUTABLE}"
+        ${MT_MOC_OPTS}
         -P "${CMAKE_C_PREPROCESSOR}"
         ${extra_defs} )
 if(CMAKE_CROSSCOMPILING AND WIN64)

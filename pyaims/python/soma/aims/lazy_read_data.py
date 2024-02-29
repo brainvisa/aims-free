@@ -7,15 +7,10 @@ A specialized version in aimsalgo handles resampling while loading: :class:`~som
 
 '''
 
-from __future__ import print_function
-
-from __future__ import absolute_import
 from soma import aims
 import threading
 import itertools
 import multiprocessing
-import six
-from six.moves import range
 
 
 class LazyReadData(object):
@@ -121,7 +116,7 @@ class LazyReadData(object):
             read.
         '''
         # print('init', self)
-        if isinstance(data_or_filename, six.string_types):
+        if isinstance(data_or_filename, str):
             self.filename = data_or_filename
             self.data = None
         elif isinstance(data_or_filename, LazyReadData):
@@ -154,7 +149,8 @@ class LazyReadData(object):
         '''
         Implements actual data reading. The default implementation calls
         self.reader.read() if a Reader instance has been provided, or aims.read
-        otherwise. It may be called from a non-principal thread when used in a threaded context such as in :class:`PreloadIterator`.
+        otherwise. It may be called from a non-principal thread when used in a
+        threaded context such as in :class:`PreloadIterator`.
         '''
         if self.data is None:
             if self.reader is not None:
@@ -166,12 +162,15 @@ class LazyReadData(object):
             # print('read', self, ':', self.data)
         return self.data
 
-    def _lazy_read_(self):
+    def get_data(self):
+        '''
+        Get the underlying data object, and load it beforehand if not already
+        done, in a thread-safe way.
+        '''
         with self._preload_lock:
             self._loading = True
         with self._lock:
             return self._lazy_read()
-
 
     def _dec_release(self):
         with self._preload_lock:
@@ -199,7 +198,7 @@ class LazyReadData(object):
             #aims.write(self.data, self.filename)
 
     def __getattr__(self, name):
-        self._lazy_read_()
+        self.get_data()
         return getattr(self.data, name)
 
     #def __del__(self):
@@ -207,10 +206,10 @@ class LazyReadData(object):
             #print('del', self, ':', self.data)
 
     def __add__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             ld = d
             d = d.data
         res = LazyReadData(self.data.__add__(d), filename=self.filename)
@@ -220,10 +219,10 @@ class LazyReadData(object):
         return res
 
     def __radd__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             ld = d
             filename = d.filename
             d = d.data
@@ -236,10 +235,10 @@ class LazyReadData(object):
         return res
 
     def __iadd__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             d = d.data
         self.data.__iadd__(d)
         if ld is not None:
@@ -247,10 +246,10 @@ class LazyReadData(object):
         return self
 
     def __sub__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             ld = d
             d = d.data
         res = LazyReadData(self.data.__sub__(d), filename=self.filename)
@@ -260,10 +259,10 @@ class LazyReadData(object):
         return res
 
     def __rsub__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             ld = d
             filename = d.filename
             d = d.data
@@ -276,10 +275,10 @@ class LazyReadData(object):
         return res
 
     def __isub__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             d = d.data
         self.data.__isub__(d)
         if ld is not None:
@@ -287,10 +286,10 @@ class LazyReadData(object):
         return self
 
     def __mul__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             ld = d
             d = d.data
         res = LazyReadData(self.data.__mul__(d), filename=self.filename)
@@ -300,10 +299,10 @@ class LazyReadData(object):
         return res
 
     def __rmul__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             ld = d
             filename = d.filename
             d = d.data
@@ -316,10 +315,10 @@ class LazyReadData(object):
         return res
 
     def __imul__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             d = d.data
         self.data.__imul__(d)
         if ld is not None:
@@ -327,10 +326,10 @@ class LazyReadData(object):
         return self
 
     def __div__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             ld = d
             d = d.data
         res = LazyReadData(self.data.__div__(d), filename=self.filename)
@@ -340,10 +339,10 @@ class LazyReadData(object):
         return res
 
     def __rdiv__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             ld = d
             filename = d.filename
             d = d.data
@@ -356,10 +355,10 @@ class LazyReadData(object):
         return res
 
     def __idiv__(self, d):
-        self._lazy_read_()
+        self.get_data()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read_()
+            d.get_data()
             d = d.data
         self.data.__idiv__(d)
         if ld is not None:
@@ -367,24 +366,23 @@ class LazyReadData(object):
         return self
 
     def __pow__(self, d):
-        self._lazy_read_()
-        ld = None
+        self.get_data()
         res = LazyReadData(self.data.__pow__(d), filename=self.filename)
         self._dec_release()
         return res
 
     def __ipow__(self, d):
-        self._lazy_read_()
+        self.get_data()
         self.data.__ipow__(d)
         return self
 
     def __neg__(self):
-        self._lazy_read_()
-        return LazyReadData(-self.data, filename=filename)
+        self.get_data()
+        return LazyReadData(-self.data, filename=self.filename)
 
     def __abs__(self):
-        self._lazy_read_()
-        return LazyReadData(self.data.__abs__(), filename=filename)
+        self.get_data()
+        return LazyReadData(self.data.__abs__(), filename=self.filename)
 
 
 class PreloadIterator(object):
@@ -414,6 +412,7 @@ class PreloadIterator(object):
     data preloads will be triggered.
 
     '''
+
     def __init__(self, iterable, npreload=multiprocessing.cpu_count()):
         '''
         Parameters
@@ -431,7 +430,7 @@ class PreloadIterator(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         self.preload()
         item = next(self.iter)
         return item
@@ -466,6 +465,7 @@ class PreloadList(list):
         volumes = [LazyReadData(f, nops=1) for f in filenames]
         res = sum(PreloadIterator(volumes, npreload=8))
     '''
+
     def __init__(self, iterable=None, npreload=multiprocessing.cpu_count()):
         super(PreloadList, self).__init__(iterable)
         self.npreload = npreload

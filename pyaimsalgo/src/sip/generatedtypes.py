@@ -52,4 +52,5 @@ todo = {
   'histogram' : numtypes,
   'rcptr': ['aims::FfdTransformation', 'aims::SplineFfd', 'aims::TrilinearFfd',
             'aims::GeometricProperties', ],
+  'topoclassifier': numtypes,
 }

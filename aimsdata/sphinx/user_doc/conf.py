@@ -11,7 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import os
+import soma
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -234,38 +236,39 @@ latex_documents = [
 autoclass_content = "both"
 
 extlinks = {
-    'axon': ('../../axon-' + version + '/%s', 'axon '),
-    'axonusr': ('../../axon-' + version + '/user_doc/%s', 'axon '),
-    'axondev': ('../../axon-' + version + '/dev_doc/%s', 'axon '),
-    'axonman': ('../../axon-' + version + '/bv_man/en/html/%s', 'axon '),
+    'axon': ('../../axon-' + version + '/%s', 'axon %s'),
+    'axonusr': ('../../axon-' + version + '/user_doc/%s', 'axon %s'),
+    'axondev': ('../../axon-' + version + '/dev_doc/%s', 'axon %s'),
+    'axonman': ('../../axon-' + version + '/bv_man/en/html/%s', 'axon %s'),
     'aimsalgodox': ('../../aimsalgo-' + version + '/doxygen/%s',
-      'aimsalgodox '),
+                    'aimsalgodox %s'),
+    'aimsex': ('../../pyaims-' + version + '/examples/%s',
+                   'aimsex %s'),
     'aimsalgoex': ('../../pyaimsalgo-' + version + '/examples/%s',
-      'aimsalgoex '),
-    'aims': ('../%s', 'aims '),
+                   'aimsalgoex %s'),
+    'aims': ('../%s', 'aims %s'),
     'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
-      'aimsdox '),
-    'aimsdata' : ('../../aimsdata-' + version + '/%s', 'aimsdata '),
-    'aimsalgo' : ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo '),
-    'aimsgui': ('../../aimsgui-' + version + '/doxygen/%s', 'aimsgui '),
-    'pyaims': ('../../pyaims-' + version + '/%s', 'pyaims '),
-    'pyaimsdev': ('../../pyaims-' + version + '/sphinx/%s', 'pyaims '),
-    'cartobdox' : ('../../cartobase-' + version + '/doxygen/%s',
-    'cartobdox '),
-    'cartoddox' : ('../../cartodata-' + version + '/doxygen/%s',
-    'cartoddox '),
-    'graphdox' : ('../../graph-' + version + '/doxygen/%s',
-    'graphdox '),
-    'somabase': ('../../soma-base-' + somabase_version + '/%s', 'soma-base '),
-    'somaio': ('../../soma-io-' + version + '/%s', 'soma-io ' ),
-    'anatomist': ('../../anatomist-' + version + '/%s', 'anatomist '),
+                'aimsdox %s'),
+    'aimsdata': ('../../aimsdata-' + version + '/%s', 'aimsdata %s'),
+    'aimsalgo': ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo %s'),
+    'aimsgui': ('../../aimsgui-' + version + '/doxygen/%s', 'aimsgui %s'),
+    'pyaims': ('../../pyaims-' + version + '/%s', 'pyaims %s'),
+    'pyaimsdev': ('../../pyaims-' + version + '/sphinx/%s', 'pyaims %s'),
+    'cartobdox': ('../../cartobase-' + version + '/doxygen/%s',
+                  'cartobdox %s'),
+    'cartoddox': ('../../cartodata-' + version + '/doxygen/%s',
+                  'cartoddox %s'),
+    'graphdox': ('../../graph-' + version + '/doxygen/%s',
+                 'graphdox %s'),
+    'somabase': ('../../soma-base-' + somabase_version + '/%s',
+                 'soma-base %s'),
+    'somaio': ('../../soma-io-' + version + '/%s', 'soma-io %s'),
+    'anatomist': ('../../anatomist-' + version + '/%s', 'anatomist %s'),
     'pyanatomist': ('../../pyanatomist-' + version + '/sphinx/%s',
-      'pyanatomist '),
-    'cmds': ('../../index_commands.html', 'commands '),
-    'documents': ('../../documents-' + version + '/%s', 'documents '),
+                    'pyanatomist %s'),
+    'cmds': ('../../index_commands.html%s', 'commands %s'),
+    'documents': ('../../documents-' + version + '/%s', 'documents %s'),
 }
-
-import soma
 
 docpath = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
     soma.__file__))), 'share', 'doc')
@@ -279,7 +282,7 @@ reldocpath = '../..'
 
 try:
     from soma import aims, aimsalgo
-except:
+except ImportError:
     pass
 
 intersphinx_mapping = {
@@ -292,5 +295,5 @@ intersphinx_mapping = {
     'pyana': (os.path.join(reldocpath, 'pyanatomist-' + version + '/sphinx'),
               os.path.join(docpath,
                            'pyanatomist-%s/sphinx/objects.inv' % version)),
-    'python': ('http://docs.python.org/3.10', None),
+    'python': ('http://docs.python.org/%d.%d' % sys.version_info[:2], None),
 }

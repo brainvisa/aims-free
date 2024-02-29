@@ -32,14 +32,11 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-from __future__ import print_function
-from __future__ import absolute_import
 from soma import aims
-from soma import aimsalgo
 import numpy
 
 
-class FoldsGraphThickness(object):
+class FoldsGraphThickness:
     def __init__(self, fold_graph, lgw_vol, gm_wm_mesh, gm_lcr_mesh,
                  voronoi=None):
         self.fold_graph = fold_graph
@@ -89,7 +86,7 @@ class FoldsGraphThickness(object):
             f1.doit(seed, [-self.LCR_label, -self.GM_label], seed_label_list)
             self.voronoi_vol = f1.voronoiVol()
             print("Voronoi in White matter")
-            n = numpy.array(voronoi_vol, copy=False)
+            n = self.voronoi_vol.np
             n[n == -1] = -100  # avoid value -1 which doesn't seem to work (!)
             del n
             f1.doit(self.voronoi_vol, [-100], seed_label_list)
@@ -127,14 +124,14 @@ class FoldsGraphThickness(object):
     def graphProcess(self):
         voxel_size = self.lgw_vol.header()["voxel_size"]
         voxel_volume = voxel_size[0]*voxel_size[1]*voxel_size[2]
-        coords = self.mid_interface.arraydata() != -1
-        data = self.mid_interface.arraydata()[coords]
+        coords = self.mid_interface.np != -1
+        data = self.mid_interface[coords]
         self.fold_graph['thickness_mean'] = data.mean()
         self.fold_graph['thickness_std'] = data.std()
-        coords = self.lgw_vol.arraydata() == self.GM_label
+        coords = self.lgw_vol.np == self.GM_label
         GM_voxels = numpy.where(coords)[0].size
         self.fold_graph['GM_volume'] = GM_voxels * voxel_volume
-        coords = self.lgw_vol.arraydata() == self.LCR_label
+        coords = self.lgw_vol.np == self.LCR_label
         LCR_voxels = numpy.where(coords)[0].size
         self.fold_graph['LCR_volume'] = LCR_voxels * voxel_volume
         self.fold_graph['CSF_volume'] = LCR_voxels * voxel_volume
@@ -142,8 +139,6 @@ class FoldsGraphThickness(object):
     def vertexProcess(self):
         print("vertexProcess")
         voxel_size = self.lgw_vol.header()["voxel_size"]
-        voxel_volume = voxel_size[0]*voxel_size[1]*voxel_size[2]
-        coords = self.mid_interface.arraydata() != -1
 
         def vertex_mesh(self, v, skel):
             cut_mesh = aims.SurfaceManip.meshExtract(
@@ -168,8 +163,8 @@ class FoldsGraphThickness(object):
         for v in self.fold_graph.vertices():
             try:
                 skel = v['skeleton_label']
-                print("skel : " + str(skel) + " compteur : " + str(compteur) + '/'
-                      + str(n))
+                print("skel : " + str(skel) + " compteur : " + str(compteur)
+                      + '/' + str(n))
                 compteur = compteur + 1
                 vertex_mesh(self, v, skel)
             except:

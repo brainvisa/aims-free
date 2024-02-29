@@ -37,7 +37,7 @@
 #include <aims/io/qtformatsheader.h>
 #include <aims/io/datatypecode.h>
 #include <aims/data/pheader.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/rgb/rgb.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
@@ -56,10 +56,11 @@ namespace aims
     QtFormatsWriter( const std::string& name ) : _name( name ) {}
     ~QtFormatsWriter() {}
 
-    void write( const AimsData<T> & thing );
+    void write( const carto::Volume<T> & thing );
     /**	called by write(), but you can call it for single frame writing 
 	(axial slice) */
-    void writeFrame( const AimsData<T> & thing, const std::string & filename, 
+    void writeFrame( const carto::Volume<T> & thing,
+                     const std::string & filename,
 		     unsigned zfame, unsigned tframe );
     std::string format() const;
 
@@ -72,7 +73,7 @@ namespace aims
 
   template <typename T>
   inline QtFormatsWriter<T> & 
-  operator << ( QtFormatsWriter<T> & writer, const AimsData<T> & thing )
+  operator << ( QtFormatsWriter<T> & writer, const carto::Volume<T> & thing )
   {
     writer.write( thing );
     return writer;
@@ -81,22 +82,21 @@ namespace aims
 
   template <typename T>
   inline
-  void QtFormatsWriter<T>::write( const AimsData<T>& thing )
+  void QtFormatsWriter<T>::write( const carto::Volume<T>& thing )
   {
     std::string fmt = format();
     // std::cout << "QtFormatsWriter< " << carto::DataTypeCode<T>::name() << " >::write, format: " << fmt << std::endl;
     if( !qApp && ( fmt == "EPS" || fmt == "EPSF" || fmt == "EPSI" ) )
       throw carto::format_error( fmt + " format needs a QApplication",
                                  _name );
-    unsigned	t, z, dt = thing.dimT(), dz = thing.dimZ();
+    unsigned	t, z, dt = thing.getSizeT(), dz = thing.getSizeZ();
+    std::vector<float> vs = thing.getVoxelSize();
     QtFormatsHeader	hdr( _name, carto::DataTypeCode<T>().dataType(), 
-                             thing.dimX(), thing.dimY(), thing.dimZ(), 
-                             thing.dimT(), thing.sizeX(), 
-                             thing.sizeY(), thing.sizeZ(), thing.sizeT() );
-    const PythonHeader 
-      *ph = dynamic_cast<const PythonHeader *>( thing.header() );
-    if( ph )
-      hdr.copy( *ph );
+                             thing.getSizeX(), thing.getSizeY(),
+                             thing.getSizeZ(), thing.getSizeT(),
+                             vs[0], vs[1], vs[2], vs[3] );
+    const carto::PropertySet *ph = &thing.header();
+    hdr.copyProperties( carto::Object::reference( *ph ) );
 
     std::string			dir = carto::FileUtil::dirname( _name );
     std::vector<std::string>	files = hdr.outputFilenames();
@@ -130,20 +130,21 @@ namespace aims
 
   template<typename T>
   inline
-  void QtFormatsWriter<T>::writeFrame( const AimsData<T> & thing, 
+  void QtFormatsWriter<T>::writeFrame( const carto::Volume<T> & thing,
                                        const std::string & filename, 
                                        unsigned z, unsigned t )
   {
-    int		x, y, dx = thing.dimX(), dy = thing.dimY();
+    int		x, y, dx = thing.getSizeX(), dy = thing.getSizeY();
     QImage	im( dx, dy, QImage::Format_RGB32 );
     if( carto::DataTypeCode<T>::name()
         == carto::DataTypeCode<AimsRGBA>::name() )
       im = im.convertToFormat( QImage::Format_ARGB32 );
-    im.setDotsPerMeterX( (int) rint( 1000 / thing.sizeX() ) );
-    im.setDotsPerMeterY( (int) rint( 1000 / thing.sizeY() ) );
+    std::vector<float> vs = thing.getVoxelSize();
+    im.setDotsPerMeterX( (int) rint( 1000 / vs[0] ) );
+    im.setDotsPerMeterY( (int) rint( 1000 / vs[1] ) );
     for( y=0; y<dy; ++y )
       for( x=0; x<dx; ++x )
-        im.setPixel( x, y, convertColor( thing( x, y, z, t ) ) );
+        im.setPixel( x, y, convertColor( thing.at( x, y, z, t ) ) );
     if( !im.save( filename.c_str(), 
                   format().c_str(), 
                   100 ) )
@@ -153,19 +154,21 @@ namespace aims
 
   template<>
   inline
-  void QtFormatsWriter<uint8_t>::writeFrame( const AimsData<uint8_t> & thing, 
-                                             const std::string & filename, 
-                                             unsigned z, unsigned t )
+  void QtFormatsWriter<uint8_t>::writeFrame(
+    const carto::Volume<uint8_t> & thing,
+    const std::string & filename,
+    unsigned z, unsigned t )
   {
-    int		x, y, dx = thing.dimX(), dy = thing.dimY();
+    int		x, y, dx = thing.getSizeX(), dy = thing.getSizeY();
     QImage	im( dx, dy, QImage::Format_Indexed8 );
-    im.setDotsPerMeterX( (int) rint( 1000 / thing.sizeX() ) );
-    im.setDotsPerMeterY( (int) rint( 1000 / thing.sizeY() ) );
+    std::vector<float> vs = thing.getVoxelSize();
+    im.setDotsPerMeterX( (int) rint( 1000 / vs[0] ) );
+    im.setDotsPerMeterY( (int) rint( 1000 / vs[1] ) );
     for( x=0; x<256; ++x )
       im.setColor( x, qRgb( x, x, x ) );
     for( y=0; y<dy; ++y )
       for( x=0; x<dx; ++x )
-        im.setPixel( x, y, thing( x, y, z, t ) );
+        im.setPixel( x, y, thing.at( x, y, z, t ) );
     if( !im.save( filename.c_str(), 
                   carto::stringUpper( carto::FileUtil::extension( filename 
                                                                   ) ).c_str(), 

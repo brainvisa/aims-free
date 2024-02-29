@@ -32,16 +32,11 @@
 
 '''Volume functions'''
 
-from __future__ import print_function
-
-from __future__ import absolute_import
-from six.moves import range
-from six.moves import zip
-__docformat__ = 'restructuredtext en'
 
 from soma import aims
 import numpy as np
-import sys
+
+__docformat__ = 'restructuredtext en'
 
 
 def crop_volume(vol, threshold=0, border=0):
@@ -74,7 +69,7 @@ def crop_volume(vol, threshold=0, border=0):
     # look for empty slices
     zeroslice = -1
     for z in range(vol.getSizeZ()):
-        slicevol = arr[:,:, z,:]
+        slicevol = arr[:, :, z, :]
         if np.all(slicevol <= threshold):
             zeroslice = z
         else:
@@ -85,7 +80,7 @@ def crop_volume(vol, threshold=0, border=0):
     zeroslice = vol.getSizeZ()
     if z != -1:
         for z in range(vol.getSizeZ()-1, 0, -1):
-            slicevol = arr[:,:, z,:]
+            slicevol = arr[:, :, z, :]
             if np.all(slicevol <= threshold):
                 zeroslice = z
             else:
@@ -94,7 +89,7 @@ def crop_volume(vol, threshold=0, border=0):
 
     zeroslice = -1
     for y in range(vol.getSizeY()):
-        slicevol = arr[:, y,:,:]
+        slicevol = arr[:, y, :, :]
         if np.all(slicevol <= threshold):
             zeroslice = y
         else:
@@ -105,7 +100,7 @@ def crop_volume(vol, threshold=0, border=0):
     zeroslice = vol.getSizeY()
     if y != -1:
         for y in range(vol.getSizeY()-1, 0, -1):
-            slicevol = arr[:, y,:,:]
+            slicevol = arr[:, y, :, :]
             if np.all(slicevol <= threshold):
                 zeroslice = y
             else:
@@ -114,7 +109,7 @@ def crop_volume(vol, threshold=0, border=0):
 
     zeroslice = -1
     for x in range(vol.getSizeX()):
-        slicevol = arr[x,:,:,:]
+        slicevol = arr[x, :, :, :]
         if np.all(slicevol <= threshold):
             zeroslice = x
         else:
@@ -125,7 +120,7 @@ def crop_volume(vol, threshold=0, border=0):
     zeroslice = vol.getSizeX()
     if x != -1:
         for x in range(vol.getSizeX()-1, 0, -1):
-            slicevol = arr[x,:,:,:]
+            slicevol = arr[x, :, :, :]
             if np.all(slicevol <= threshold):
                 zeroslice = x
             else:
@@ -159,18 +154,20 @@ def crop_volume(vol, threshold=0, border=0):
 
     return cropped_vol
 
+
 def compare_images(vol, vol2, vol1_name='input', vol2_name='output',
-                   thresh=1e-6, rel_thresh = False):
+                   thresh=1e-6, rel_thresh=False):
 #    print('comp vol, sizes:', vol.getSize(), vol2.getSize())
 #    print('    vsizes:', str(vol.getVoxelSize()), str(vol2.getVoxelSize()))
     msg = 'comparing %s and %s' % (vol1_name, vol2_name)
     if vol.getSize().list() != vol2.getSize().list():
         raise RuntimeError(msg + ': %s != %s'
-                            % (str(vol.getSize()), str(vol2.getSize())))
-    if np.max(np.abs(np.asarray(vol.getVoxelSize()) \
-                      - vol2.getVoxelSize())) >= 1e-6 :
+                           % (str(vol.getSize()), str(vol2.getSize())))
+    if np.max(np.abs(np.asarray(vol.getVoxelSize())
+                     - vol2.getVoxelSize())) >= 1e-6:
         raise RuntimeError(msg + ': voxels size differ: %s != %s'
-                            % (str(vol.getVoxelSize()), str(vol2.getVoxelSize())))
+                           % (str(vol.getVoxelSize()),
+                              str(vol2.getVoxelSize())))
 
     if len(np.asarray(vol).shape) == 0:
         # not bound to numpy, elements are supposed to be arrays
@@ -180,7 +177,8 @@ def compare_images(vol, vol2, vol1_name='input', vol2_name='output',
         end = False
         nd = len(dim)
         while not end:
-            diff = max([np.abs(x - y) for x, y in zip(vol.at(pos), vol2.at(pos))])
+            diff = max([np.abs(x - y) for x, y in zip(vol.at(pos),
+                                                      vol2.at(pos))])
             if diff >= thresh:
                 print('values at', pos, ':', vol.at(pos), vol2.at(pos))
                 raise RuntimeError(
@@ -212,7 +210,7 @@ def compare_images(vol, vol2, vol1_name='input', vol2_name='output',
     if np.max(np.abs(nvol - nvol2)) >= thresh:
         raise RuntimeError(msg + ', max diff: %f, max allowed: %f'
                            % (np.max(np.abs(nvol - nvol2)), thresh))
-    
+
     return True
 
 
@@ -222,7 +220,7 @@ def fill_border_constant(data, value = 0, whole=False):
     (the visible data) in a larger allocated Volume (the Volume that contains 
     borders). In order to be filled, the borders must exists, otherwise the 
     function has no effect on the Volume.
-    
+
     Parameters
     ----------
         data: Volume_* or rc_ptr_Volume_*
@@ -235,11 +233,10 @@ def fill_border_constant(data, value = 0, whole=False):
             Default is False
     '''
     if type(data).__name__.startswith('Volume_') \
-       or type(data).__name__.startswith('rc_ptr_Volume_') :
+            or type(data).__name__.startswith('rc_ptr_Volume_'):
         vt = aims.voxelTypeCode(data)
-        bf = getattr(aims, 
-                    'BorderFiller_{}'.format(vt))
-        
+        bf = getattr(aims, 'BorderFiller_{}'.format(vt))
+
         if vt in ('RGB', 'RGBA'):
             if type(value) in (aims.AimsRGB, aims.AimsRGBA):
                 val = value
@@ -249,21 +246,21 @@ def fill_border_constant(data, value = 0, whole=False):
         else:
             t = data.np.dtype
             val = t(value)
-            
+
         bf.fillConstant(data, val, not whole)
-        
+
     else:
         raise TypeError('data parameter must be of Volume_* type')
-    
 
-def fill_border_median(data, size = (-1,-1,-1,-1), whole=False):
+
+def fill_border_median(data, size=(-1, -1, -1, -1), whole=False):
     '''Fill the border of data using the median value processed in the inside 
     border.
     In aims, a Volume with border is managed as an unallocated view
     (the visible data) in a larger allocated Volume (the Volume that contains 
     borders). In order to be filled, the borders must exists, otherwise the 
     function has no effect on the Volume.
-    
+
     Parameters
     ----------
         data: Volume_* or rc_ptr_Volume_*
@@ -280,14 +277,14 @@ def fill_border_median(data, size = (-1,-1,-1,-1), whole=False):
             Default is False
     '''
     if type(data).__name__.startswith('Volume_') \
-       or type(data).__name__.startswith('rc_ptr_Volume_') :
+            or type(data).__name__.startswith('rc_ptr_Volume_'):
         vt = aims.voxelTypeCode(data)
-        bf = getattr(aims, 
-                    'BorderFiller_{}'.format(vt))
+        bf = getattr(aims, 'BorderFiller_{}'.format(vt))
         bf.fillMedian(data, aims.Point4dl(size), not whole)
-            
+
     else:
         raise TypeError('data parameter must be of Volume_* type')
+
 
 def fill_border_nearest(data, whole=False):
     '''Fill the border of data using the inside border voxel value.
@@ -295,7 +292,7 @@ def fill_border_nearest(data, whole=False):
     (the visible data) in a larger allocated Volume (the Volume that contains 
     borders). In order to be filled, the borders must exists, otherwise the 
     function has no effect on the Volume.
-    
+
     Parameters
     ----------
         data: Volume_* or rc_ptr_Volume_*
@@ -306,14 +303,14 @@ def fill_border_nearest(data, whole=False):
             Default is False
     '''
     if type(data).__name__.startswith('Volume_') \
-       or type(data).__name__.startswith('rc_ptr_Volume_') :
+            or type(data).__name__.startswith('rc_ptr_Volume_'):
         vt = aims.voxelTypeCode(data)
-        bf = getattr(aims, 
-                    'BorderFiller_{}'.format(vt))
+        bf = getattr(aims, 'BorderFiller_{}'.format(vt))
         bf.fillNearest(data, not whole)
-            
+
     else:
         raise TypeError('data parameter must be of Volume_* type')
+
 
 def fill_border_mirror(data, whole=False):
     '''Fills the border mirroring the inside border.
@@ -321,7 +318,7 @@ def fill_border_mirror(data, whole=False):
     (the visible data) in a larger allocated Volume (the Volume that contains 
     borders). In order to be filled, the borders must exists, otherwise the 
     function has no effect on the Volume.
-    
+
     Parameters
     ----------
         data: Volume_* or rc_ptr_Volume_*
@@ -332,13 +329,10 @@ def fill_border_mirror(data, whole=False):
             Default is False
     '''
     if type(data).__name__.startswith('Volume_') \
-       or type(data).__name__.startswith('rc_ptr_Volume_') :
+            or type(data).__name__.startswith('rc_ptr_Volume_'):
         vt = aims.voxelTypeCode(data)
-        bf = getattr(aims, 
-                    'BorderFiller_{}'.format(vt))
+        bf = getattr(aims, 'BorderFiller_{}'.format(vt))
         bf.fillMirror(data, not whole)
-            
+
     else:
         raise TypeError('data parameter must be of Volume_* type')
-    
-

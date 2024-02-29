@@ -92,8 +92,16 @@ parser.add_option("-D", "--define", dest='extra_defs', action='append',
                   default=[],
                   help="additional preprocessor definitions")
 
-(options, args) = parser.parse_args()
+try:
+    (options, args) = parser.parse_args()
+except Exception:
+    print('*** MAKETEMPLATES BAD ARGS, argv: ***', file=sys.stderr)
+    print(sys.argv, file=sys.stderr)
+    raise
+
 if args:
+    print('*** MAKETEMPLATES BAD ARGS, argv: ***', file=sys.stderr)
+    print(sys.argv, file=sys.stderr)
     parser.parse_args(['-h'])
 
 cpp = options.preprocess

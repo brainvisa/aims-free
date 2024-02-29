@@ -481,10 +481,18 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
     return carto::volumeutil::apply( vol, carto::volumeutil::bitwise_not<T>() );
   }
 
+  /** The "not" operator on a VolumeRef does NOT behave like rc_ptr operator
+      "not", but rather like Volume operator "not": it returns a boolean
+      volume, with element-wise test.
+  */
   template <typename T>
   inline
   carto::VolumeRef<bool> operator! ( const carto::VolumeRef<T> & vol )
   {
+    // if the input vol is null, also return a null result.
+    if( vol.isNull() )
+      return carto::VolumeRef<bool>();
+
     carto::VolumeRef<bool> output = carto::copyStructure<bool,T>( vol );
     carto::volumeutil::applyTowards( *vol, *output, carto::volumeutil::logical_not<T>() );
     return output;

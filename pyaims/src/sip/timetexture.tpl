@@ -306,10 +306,19 @@ public:
   // so self can be destroyed safely
 %End
 
-  // assignation operator: uses copy operator
-  void assign( const vector_%Template1typecode% & );
+  // assignation operator
+  void assign( const SIP_PYOBJECT );
 %MethodCode
-  sipCpp->data() = *a0;
+  PyObject *data_m = PyObject_GetAttrString( sipSelf, "data" );
+  PyObject *data = PyObject_CallNoArgs( data_m );
+  Py_DECREF( data_m );
+  PyObject *assign_m = PyObject_GetAttrString( data, "assign" );
+  PyObject *res = PyObject_CallOneArg( assign_m, a0 );
+  Py_DECREF( assign_m );
+  if( res )
+    Py_DECREF( res );
+
+  // sipCpp->data() = *a0;
   std::vector<int> dims( 1, sipCpp->data().size() );
   std::vector<int> added_dims = %Template1NumDims%;
   dims.insert( dims.end(), added_dims.begin(), added_dims.end() );

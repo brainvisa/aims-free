@@ -141,3 +141,59 @@
 };
 
 
+%Exception carto::missing_option
+{
+%TypeHeaderCode
+  #include <soma-io/getopt/getopt.h>
+%End
+%RaiseCode
+  const char *detail = sipExceptionRef.what();
+  SIP_BLOCK_THREADS
+  PyErr_SetString(PyExc_RuntimeError, detail);
+  SIP_UNBLOCK_THREADS
+%End
+};
+
+
+%Exception carto::unexpected_option
+{
+%TypeHeaderCode
+  #include <soma-io/getopt/getopt.h>
+%End
+%RaiseCode
+  const char *detail = sipExceptionRef.what();
+  SIP_BLOCK_THREADS
+  PyErr_SetString(PyExc_RuntimeError, detail);
+  SIP_UNBLOCK_THREADS
+%End
+};
+
+
+%Exception carto::unexpected_option_value
+{
+%TypeHeaderCode
+  #include <soma-io/getopt/getopt.h>
+%End
+%RaiseCode
+  const char *detail = sipExceptionRef.what();
+  SIP_BLOCK_THREADS
+  PyErr_SetString(PyExc_RuntimeError, detail);
+  SIP_UNBLOCK_THREADS
+%End
+};
+
+
+%Exception carto::user_interruption
+{
+%TypeHeaderCode
+  #include <soma-io/getopt/getopt.h>
+%End
+%RaiseCode
+  const char *detail = sipExceptionRef.what();
+  SIP_BLOCK_THREADS
+  PyErr_SetString(PyExc_RuntimeError, detail);
+  SIP_UNBLOCK_THREADS
+%End
+};
+
+

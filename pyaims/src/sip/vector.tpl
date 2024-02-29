@@ -77,6 +77,46 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
 
   if( PySequence_Check( sipPy ) )
   {
+    // --- numpy impl ---
+
+%%Template1defScalar%%
+%%Template1defNumpyBindings%%
+%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS )%
+%%Template1defNumpyIsSubArray%%
+
+    *sipCppPtr = new std::vector<%Template1% >;
+    unsigned	n = PySequence_Size( sipPy );
+    (*sipCppPtr)->resize( n );
+
+    if( n != 0 )
+    {
+      std::vector<int> dims( 1, n );
+      std::vector<int> added_dims = %Template1NumDims%;
+      dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+
+      PyObject *pyobj = sipConvertFromType(
+        *sipCppPtr, sipType_vector_%Template1typecode%,  0 );
+      PyObject *pyarr = PyObject_GetAttrString( pyobj, "np" );
+      int res = PySequence_SetSlice( pyarr, 0, n, sipPy );
+
+      // delete internal ref to the array which nobody else owns
+      // PyObject_DelAttrString( (PyObject *) sipSelf, "_arrayref" );
+      // dec reference to self that was manually incremented in arraydata()
+      // when building the numpy array
+      Py_DECREF( pyarr );
+      Py_DECREF( pyobj );
+
+      if( res < 0 )
+      {
+        *sipIsErr = 1;
+        delete *sipCppPtr;
+        *sipCppPtr = 0;
+        return 0;
+      }
+    }
+
+%#else%
+
     *sipCppPtr = new std::vector<%Template1% >;
     unsigned	i, n = PySequence_Size( sipPy );
     (*sipCppPtr)->reserve( n );
@@ -125,9 +165,12 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
 %#endif%
       Py_DECREF( pyitem );
     }
+
+%#endif%
+
     return sipGetState( sipTransferObj );
   }
-  *sipCppPtr = 
+  *sipCppPtr =
      (vector_%Template1typecode% *) 
      sipConvertToType( sipPy, sipType_vector_%Template1typecode%,
                            0, SIP_NO_CONVERTORS, 0, sipIsErr );
@@ -147,52 +190,136 @@ public:
   }
   else
   {
-    unsigned	i, n = PySequence_Size( a0 );
-    sipCpp = new vector_%Template1typecode%;
-    sipCpp->reserve( n );
-    PyObject	*pyitem;
-    for( i=0; i<n; ++i )
+
+    if( sipCanConvertToType( a0, sipType_vector_%Template1typecode%,
+                             SIP_NO_CONVERTORS ) )
     {
-      pyitem = PySequence_GetItem(a0,i);
-      bool ok = false;
-      bool conv = false;
-      if( pyitem )
+      int state = 0;
+
+      vector_%Template1typecode% * dat
+        = (vector_%Template1typecode% *)
+          sipConvertToType( a0,
+            sipType_vector_%Template1typecode%,
+            0, SIP_NO_CONVERTORS, &state, &sipIsErr );
+      if( sipIsErr && dat )
       {
-        if( %Template1testPyType%( pyitem ) )
-          ok = true;
-        else
+        sipReleaseType( dat, sipType_vector_%Template1typecode%, state );
+        dat = 0;
+      }
+      else if( dat )
+      {
+        sipCpp = new vector_%Template1typecode%( *dat );
+        sipReleaseType( dat, sipType_vector_%Template1typecode%, state );
+      }
+    }
+
+    else
+    {
+      // not a vector
+
+      unsigned	i, n = PySequence_Size( a0 );
+      sipCpp = new vector_%Template1typecode%;
+
+      // --- numpy impl ---
+
+%%Template1defScalar%%
+%%Template1defNumpyBindings%%
+%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS )%
+%%Template1defNumpyIsSubArray%%
+
+      sipCpp->resize( n );
+
+      if( n != 0 )
+      {
+        std::vector<int> dims( 1, n );
+        std::vector<int> added_dims = %Template1NumDims%;
+        dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+
+        PyArray_Descr *descr = %Template1NumType_Descr%;
+        if( !descr )
+          descr = PyArray_DescrFromType( %Template1NumType% );
+        PyObject *pyarr = aims::initNumpyArray( (PyObject *) sipSelf, descr,
+                                                dims.size(),
+                                                &dims[0],
+                                                (char *) &(*sipCpp)[0] );
+%#ifdef PYAIMS_NPY_IS_SUBARRAY%
+        PyObject *sub_arr = PyMapping_GetItemString(
+          pyarr, const_cast<char *>( "v" ) );
+        if( sub_arr )
         {
-          const sipTypeDef* st = sipFindType( "%Template1sipClass%" );
-          if( st )
+          Py_DECREF( pyarr ); // we don't use the whole array
+          pyarr = sub_arr;
+        }
+%#endif%
+        int res = PySequence_SetSlice( pyarr, 0, n, a0 );
+
+        // delete internal ref to the array which nobody else owns
+        PyObject_DelAttrString( (PyObject *) sipSelf, "_arrayref" );
+        // dec reference to self that was manually incremented in arraydata()
+        // when building the numpy array
+        Py_DECREF( (PyObject *) sipSelf );
+        Py_DECREF( pyarr );
+
+        if( res < 0 )
+        {
+          sipIsErr = 1;
+          // Py_DECREF( pyarr );
+          delete sipCpp;
+          sipCpp = 0;
+        }
+      }
+
+%#else%
+
+      // ---
+
+      sipCpp->reserve( n );
+      PyObject	*pyitem;
+      for( i=0; i<n; ++i )
+      {
+        pyitem = PySequence_GetItem(a0,i);
+        bool ok = false;
+        bool conv = false;
+        if( pyitem )
+        {
+          if( %Template1testPyType%( pyitem ) )
+            ok = true;
+          else
           {
-            if( sipCanConvertToType( pyitem, st, SIP_NOT_NONE ) )
+            const sipTypeDef* st = sipFindType( "%Template1sipClass%" );
+            if( st )
             {
-              ok = true;
-              conv = true;
+              if( sipCanConvertToType( pyitem, st, SIP_NOT_NONE ) )
+              {
+                ok = true;
+                conv = true;
+              }
             }
           }
         }
-      }
-      if( !ok )
-      {
-        sipIsErr = 1;
-        delete sipCpp;
-        sipCpp = 0;
-        std::ostringstream s;
-        s << "wrong list item type, item " << i;
-        PyErr_SetString( PyExc_TypeError, s.str().c_str() );
-        if( pyitem )
-          Py_DECREF( pyitem );
-        break;
-      }
+        if( !ok )
+        {
+          sipIsErr = 1;
+          delete sipCpp;
+          sipCpp = 0;
+          std::ostringstream s;
+          s << "wrong list item type, item " << i;
+          PyErr_SetString( PyExc_TypeError, s.str().c_str() );
+          if( pyitem )
+            Py_DECREF( pyitem );
+          break;
+        }
 
-      %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
-      sipCpp->push_back( %Template1deref%item );
+        %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
+        sipCpp->push_back( %Template1deref%item );
 %%Template1defScalar%%
 %#ifndef PYAIMS_SCALAR%
-      if( conv )
-        delete & %Template1deref% item;
-      Py_DECREF( pyitem );
+        if( conv )
+          delete & %Template1deref% item;
+        Py_DECREF( pyitem );
+%#endif%
+      }
+
 %#endif%
     }
   }
@@ -201,16 +328,102 @@ public:
 
   ~vector_%Template1typecode%();
 
-  // assignation operator: uses copy operator
-  void assign( const vector_%Template1typecode% & );
+  // assignation operator
+  void assign( SIP_PYOBJECT );
 %MethodCode
-  *sipCpp = *a0;
+  bool ok = false;
 
-  std::vector<int> dims( 1, sipCpp->size() );
-  std::vector<int> added_dims = %Template1NumDims%;
-  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
-  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
-                          (char *) &(*sipCpp)[0] );
+  if( sipCanConvertToType( a0, sipType_vector_%Template1typecode%,
+                           SIP_NO_CONVERTORS ) )
+  {
+    int state = 0;
+
+    vector_%Template1typecode% * dat
+      = (vector_%Template1typecode% *)
+        sipConvertToType( a0,
+          sipType_vector_%Template1typecode%,
+          0, SIP_NO_CONVERTORS, &state, &sipIsErr );
+    if( sipIsErr && dat )
+    {
+      sipReleaseType( dat, sipType_vector_%Template1typecode%, state );
+      dat = 0;
+    }
+    else if( dat )
+    {
+      *sipCpp = *dat;
+      sipReleaseType( dat, sipType_vector_%Template1typecode%, state );
+      ok = true;
+    }
+  }
+  else if( PySequence_Check( a0 ) )
+  {
+    // --- numpy impl ---
+
+%%Template1defScalar%%
+%%Template1defNumpyBindings%%
+%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS )%
+%%Template1defNumpyIsSubArray%%
+
+    unsigned	n = PySequence_Size( a0 );
+    sipCpp->resize( n );
+
+    if( n != 0 )
+    {
+      std::vector<int> dims( 1, n );
+      std::vector<int> added_dims = %Template1NumDims%;
+      dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+
+      PyObject *pyarr = PyObject_GetAttrString( sipSelf, "np" );
+      int res = PySequence_SetSlice( pyarr, 0, n, a0 );
+
+      Py_DECREF( pyarr );
+
+      if( res == 0 )
+        ok = true;
+    }
+    else
+      ok = true;
+
+    // ---
+
+%#else%
+
+    if( sipCanConvertToType( a0, sipType_vector_%Template1typecode%, 0 ) )
+    {
+
+      int state = 0;
+      vector_%Template1typecode% * dat
+        = (vector_%Template1typecode% *)
+          sipConvertToType( a0,
+            sipType_vector_%Template1typecode%,
+            0, 0, &state, &sipIsErr );
+      if( sipIsErr && dat )
+      {
+        sipReleaseType( dat, sipType_vector_%Template1typecode%, state );
+        dat = 0;
+      }
+      else if( dat )
+      {
+        *sipCpp = *dat;
+        sipReleaseType( dat, sipType_vector_%Template1typecode%, state );
+        ok = true;
+      }
+    }
+%#endif%
+  }
+
+  if( ok )
+  {
+    std::vector<int> dims( 1, sipCpp->size() );
+    std::vector<int> added_dims = %Template1NumDims%;
+    dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+    aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                            (char *) &(*sipCpp)[0] );
+  }
+  else
+  {
+    sipIsErr = 1;
+  }
 %End
 
 

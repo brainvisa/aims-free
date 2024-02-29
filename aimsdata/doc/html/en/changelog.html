@@ -55,11 +55,24 @@
 
 
 <!-- -->
-<h4> <a name="version-5.2.0"></a>Apr. 14, 2023, Version 5.2.0</h4>
+<h4> <a name="version-5.2.0"></a>Jan. 18, 2024, Version 5.2.0</h4>
 
 <ul>
   <li>Referential and axes manipulation in Volume: axes orientation is no longer fixed to LPI orientation but may be queried, and changed. Transformations are updated when axes orientation is changed.
   </li>
+  <li>Performance improvements in conversion, copy and assignation of pyaims vector classes. They used to be versy slow, they are now fast.
+  </li>
+  <li>Improvements and optimizations in GLTF IO (gloablly more than 10 times faster).
+  </li>
+  <li>New command AimsClassifyTransformation.py</li>
+  <li>Support for MIF (MRTrix volumes) format reading</li>
+  <li>pyaims functions to handle FSL warp fields</li>
+  <li>Complete rework of Transformation classes: N-dimensional transforms are supported, non-linear ones (warp fields as FFD) etc.
+  </li>
+  <li>New modeule <tt>soma.aims.demotools</tt> in pyaims, providing functions to list and install demo and test datasets from the BrainVisa server.
+  </li>
+
+  <li>Many other bug fixes</li>
 </ul>
 
 

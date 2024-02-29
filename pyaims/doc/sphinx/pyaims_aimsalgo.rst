@@ -80,7 +80,7 @@ In soma.aims module
 .. autoclass:: soma.aims.TrilinearFfd
   :members:
 
-.. autoclass:: BundleTransformer
+.. autoclass:: soma.aims.BundleTransformer
   :members:
 
 

@@ -1,10 +1,3 @@
-
-import numpy as np
-import atexit
-import sys
-from . import gltf_io
-aims = sys.modules['soma.aims']
-
 '''
 IO formats readers / writers written in python for aims.
 
@@ -13,6 +6,14 @@ Currently:
 Numpy format for matrices
 YAML format for Object
 '''
+
+
+import numpy as np
+import atexit
+import sys
+from . import gltf_io
+aims = sys.modules['soma.aims']
+
 
 class NpyFormat(aims.FileFormat_SparseOrDenseMatrix):
     def read(self, filename, obj, context, options=None):

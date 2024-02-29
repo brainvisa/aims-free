@@ -83,7 +83,7 @@ def main():
                   if gyrus in labels_inv_map[i]]
         if len(gyrdef) != 0:
             tex, gyrus_num = gyrdef[0]
-            gyrus_indices = np.where(gyri[tex][0].arraydata() == gyrus_num)[0]
+            gyrus_indices = np.where(gyri[tex][0].np == gyrus_num)[0]
             gyri_vert_l.append((tex, gyrus_indices))
         else:
             try:
@@ -91,11 +91,11 @@ def main():
             except ValueError:
                 print("Gyrus %s not found" % gyrus)
                 continue
-            texs = [gyrus_num in roi[0].arraydata() for roi in gyri]
+            texs = [gyrus_num in roi[0].np for roi in gyri]
             for tex in len(texs):
                 if texs[tex]:
                     gyrus_indices = np.where(
-                        gyri[tex][0].arraydata() == gyrus_num)[0]
+                        gyri[tex][0].np == gyrus_num)[0]
                     gyri_vert_l.append((tex, gyrus_indices))
 
     # concatenate by texture/surface
@@ -115,7 +115,7 @@ def main():
     print('row_indices:', len(row_indices))
     total_vertices = sum([len(troi[i][0]) for i in range(len(troi))])
     print('total_vertices:', total_vertices)
-    col_vertices = [(i, np.where(troi[i][0].arraydata() != 0)[0])
+    col_vertices = [(i, np.where(troi[i][0].np != 0)[0])
                     for i in range(len(troi))]
     col_indices = np.hstack([c.getIndicesForSurfaceIndices(1, i, vert)
                               for i, vert in col_vertices])
@@ -134,7 +134,7 @@ def main():
         print('row:', row, ':', i, '/', len(row_indices), 'dense:',
               gyr_mat.isDense())
         mat.readRow(row)
-        row_data = mat.getRow(row).arraydata()
+        row_data = mat.getRow(row).np
         #row_data[np.isnan(row_data)] = 0
         row_data[np.isinf(row_data)] = 0
         mat.freeRow(row)

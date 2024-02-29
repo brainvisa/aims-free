@@ -15,6 +15,15 @@ namespace aims
     MeshDistance( const AimsSurfaceTriangle & mesh,
                   const TimeTexture_S16 & inittex,
                   bool allowUnreached ) /ReleaseGIL/;
+%Docstring
+    dist_tex = MeshDistance(mesh, inittex, allowUnreached)
+
+    inittex values have the following meaning:
+
+    0: propagation domain
+    n>0: seed (distance 0)
+    -1: forbidden
+%End
 %MethodCode
   sipRes = new TimeTexture_FLOAT;
   (*sipRes)[0] = aims::meshdistance::MeshDistance( a0->begin()->second,

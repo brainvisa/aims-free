@@ -1,3 +1,26 @@
+'''
+GLTF (and GLB) format support for AIMS
+
+GLTF is a 3D scene format which contains in a single file (or in few files)
+meshes, textures and materials for a complete 3D scene. It is a JSON file,
+which has a binary (GLB) alternative.
+
+To be fully operational, the following modules should be installed:
+
+- pygltflib (python module) for complete GLTF parsing and GLB support
+- DracoPy (python module) for compressed meshes readiing
+- webp (python module) for texture compression and webp format support for
+  textures (used both in reading and writing)
+- gltf-transform tool for writing compressed meshes. It is a javascript node.js
+  tool, which can be installed using ``npm``, the node.js install tool::
+
+        npm install -g @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions @gltf-transform/cli
+
+Without these modules, some functionalities will be missing, and it will not be
+possible to read some GLTF/GLB files, depending on the formats used in them.
+'''
+
+
 import base64
 import numpy as np
 import os
@@ -31,7 +54,7 @@ def vec_to_bytes(vector):
 def image_as_buffer(image, format):
     if format == 'webp':
         if webp is not None:
-            arr = np.asarray(image.np['v'][:,:,0,0,:].transpose(1, 0, 2),
+            arr = np.asarray(image.np['v'][:, :, 0, 0, :].transpose(1, 0, 2),
                              order='C')
             webp_data = webp.WebPPicture.from_numpy(arr)
             webp_data = webp_data.encode()
@@ -55,7 +78,7 @@ def image_as_buffer(image, format):
 def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                             textures=[], teximages=[], name=None, gltf=None,
                             tex_format='webp', images_as_buffers=True,
-                            single_buffer=True):
+                            single_buffer=True, samplers=None):
     ''' Export a mesh with optional texture to a GLTF JSON dictionary.
 
     The gltf dict may already contain a scene with meshes, the new mesh will be
@@ -120,8 +143,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     nmat = len(materials)
     gtextures = gltf.setdefault('textures', [])
     ntex = len(gtextures)
-    images = gltf.setdefault('images', [])
-    nimages = len(images)
+    user_samplers = samplers  # use another var for this
     samplers = gltf.setdefault('samplers', [])
     nsamplers = len(samplers)
     buf_offset = 0
@@ -161,7 +183,7 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                 # base64 should not contain "\n"
                 "uri":
                     ("data:application/octet-stream;base64,"
-                      + base64.encodebytes(data).decode()
+                     + base64.encodebytes(data).decode()
                     ).replace('\n', ''),
                 "byteLength": len(data)
             })
@@ -194,29 +216,28 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
 
     accessors.append(
         {
-            "bufferView" : nbuffv,
-            "componentType" : 5125,
+            "bufferView": nbuffv,
+            "componentType": 5125,
             "count": len(poly) * ps,
             "type": "SCALAR",
         })
 
     accessors.append(
         {
-            "bufferView" : nbuffv + 1,
-            "componentType" : 5126,
-            "count" : len(vert),
-            "type" : "VEC3",
+            "bufferView": nbuffv + 1,
+            "componentType": 5126,
+            "count": len(vert),
+            "type": "VEC3",
         })
 
     if hasnorm:
         accessors.append(
             {
-                "bufferView" : nbuffv + 2,
-                "componentType" : 5126,
-                "count" : len(norm),
-                "type" : "VEC3",
+                "bufferView": nbuffv + 2,
+                "componentType": 5126,
+                "count": len(norm),
+                "type": "VEC3",
             })
-
 
     pa = {
         "POSITION": naccess + 1,
@@ -260,9 +281,10 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
             if matrix.isIdentity():
                 matrix = None
             else:
-                matrix = list(matrix.affine().np.transpose().ravel())
+                matrix = list(matrix.affine().np.transpose().ravel().astype(
+                    float))
         elif isinstance(matrix, np.ndarray):
-            matrix = list(matrix.transpose().ravel())
+            matrix = list(matrix.transpose().ravel().astype(float))
 
         if matrix is not None \
                 and not aims.AffineTransformation3d(matrix).isIdentity():
@@ -309,42 +331,14 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
     textures = [tc for tc in textures if tc is not None]
 
     if len(textures) != 0:
-        if images_as_buffers:
-            nimages_bv = nbuffv
+        tex_prop = None
         for tex, teximage in enumerate(teximages):
-            b = image_as_buffer(teximage, tex_format)
-            if images_as_buffers:
-                if single_buffer:
-                    buffers[-1]['data'] += b
-                else:
-                    image_bytes = base64.encodebytes(b).decode().replace(
-                        '\n', '')
-                    buffers.append({
-                        "uri" :
-                            "data:application/octet-stream;base64,"
-                            + image_bytes,
-                        "byteLength" : len(b)
-                    })
-                buffviews.append({
-                    "buffer": nbuff,
-                    "byteOffset": buf_offset,
-                    "byteLength": len(b)
-                })
-                images.append({
-                    'mimeType': 'image/%s' % tex_format,
-                    'bufferView': nimages_bv + tex
-                })
-                buf_offset += len(b)
-                if not single_buffer:
-                    nbuff += 1
-                nbuffv += 1
-            else:
-                image_bytes = "data:image/%s;base64," % tex_format \
-                    + image_bytes
-                images.append({
-                    'uri': image_bytes,
-                })
-            del b
+            if tex_prop is None:
+                tex_prop = teximage.header().get('gltf_properties', {})
+            image_data_buf = get_image_view(gltf, teximage, tex_format,
+                                            images_as_buffers, single_buffer)
+            tex_image_i = image_data_buf[2]
+
         if tex_format == 'webp' and len(teximages) != 0:
             extused = gltf.setdefault('extensionsUsed', [])
             if 'EXT_texture_webp' not in extused:
@@ -352,6 +346,15 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
             extreq = gltf.setdefault('extensionsRequired', [])
             if 'EXT_texture_webp' not in extreq:
                 extreq.append('EXT_texture_webp')
+
+        buffers = gltf.setdefault('buffers', [])
+        buf_offset = 0
+        nbuff = len(buffers)
+        if single_buffer:
+            buf = buffers[-1]
+            buf_offset = len(buf.get('data', b''))
+            nbuff -= 1
+        nbuffv = len(buffviews)
 
         # note: only one baseColorTexture is allowed.
         texnames = ['pbrMetallicRoughness.baseColorTexture',
@@ -363,23 +366,24 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                 buffers[-1]['data'] += b
             else:
                 buffers.append({
-                    "uri" :
+                    "uri":
                         ("data:application/octet-stream;base64,"
-                        + base64.encodebytes(b).decode()
+                         + base64.encodebytes(b).decode()
                         ).replace('\n', ''),
-                    "byteLength" : int(np.prod(tc.shape) * 4)
+                    "byteLength": int(np.prod(tc.shape) * 4)
                 })
             buffviews.append({
                 "buffer": nbuff,
                 "byteOffset": buf_offset,
                 "byteLength": int(np.prod(tc.shape) * 4)
             })
-            buf_offset += len(b)
+            if single_buffer:
+                buf_offset += len(b)
             accessors.append({
-                "bufferView" : nbuffv,
-                "componentType" : 5126,
-                "count" : len(tc),
-                "type" : vtype[tc.shape[1]],
+                "bufferView": nbuffv,
+                "componentType": 5126,
+                "count": len(tc),
+                "type": vtype[tc.shape[1]],
             })
             mesh['primitives'][0]['attributes']['TEXCOORD_%s' % tex] \
                 = naccess
@@ -388,24 +392,33 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
             nbuffv += 1
             naccess += 1
 
-            samplers.append({
-                "magFilter" : 9729,
-                "minFilter" : 9987,
-                "wrapS" : 33648,
-                "wrapT" : 33648
-            })
+            sampler = {
+                "magFilter": 9729,
+                "minFilter": 9987,
+                "wrapS": 10497,  # mirroredrepeat: 33648,
+                "wrapT": 10497  # mirroredrepeat: 33648
+            }
+            if user_samplers is not None and len(user_samplers) > tex:
+                ssampler = user_samplers[tex]
+                if ssampler is not None:
+                    sampler.update(ssampler)
+            elif 'sampler' in tex_prop:
+                ssampler = tex_prop['sampler']
+                if ssampler is not None:
+                    sampler.update(ssampler)
+            samplers.append(sampler)
 
             if tex_format == 'webp':
                 gtextures.append({
                     'extensions': {
-                        'EXT_texture_webp': {'source': nimages}
+                        'EXT_texture_webp': {'source': tex_image_i}
                     },
                     'sampler': nsamplers,
                     'source': None
                 })
             else:
                 gtextures.append({
-                    'source': nimages,
+                    'source': tex_image_i,
                     'sampler': nsamplers
                 })
             nsamplers += 1
@@ -420,13 +433,72 @@ def add_object_to_gltf_dict(vert, norm, poly, material=None, matrix=None,
                     'texCoord': tex
                 })
             ntex += 1
-            nimages += 1
 
     nodes.append(node)
     if 'children' in nodes[0]:
         nodes[0]['children'].append(nnodes)
 
     return gltf
+
+
+def get_image_view(gltf, teximage, tex_format, images_as_buffers,
+                   single_buffer):
+    ''' Internal function used to get the GLTF buffer or image view for a
+    texture image (given as an aims Volume_RGBA). Texture images are re-used,
+    meaning that if we call several times this function using the same
+    teximage, we get a reference to the same buffer.
+    '''
+    aims_teximages = gltf.setdefault('_teximages', {})
+    tex_buf_ref = aims_teximages.get(id(teximage))
+    if tex_buf_ref is not None:
+        # teximage has already been used: take it in cache
+        return tex_buf_ref
+
+    b = image_as_buffer(teximage, tex_format)
+    buf_offset = 0
+    if images_as_buffers:
+        buffers = gltf.setdefault('buffers', [])
+        if single_buffer:
+            if len(buffers) == 0:
+                buf = {'data': b''}
+                buffers.append(buf)
+            else:
+                buf = buffers[-1]
+            buf_offset = len(buf['data'])  # + buf.get('byteLength', 0)
+            buf['data'] += b
+        else:
+            image_bytes = base64.encodebytes(b).decode().replace(
+                '\n', '')
+            buf = {
+                "uri": "data:application/octet-stream;base64," + image_bytes,
+                "byteLength": len(b)
+            }
+            buffers.append(buf)
+        buffviews = gltf.setdefault('bufferViews', [])
+        buffviews.append({
+            "buffer": len(buffers) - 1,
+            "byteOffset": buf_offset,
+            "byteLength": len(b)
+        })
+        images = gltf.setdefault('images', [])
+        images.append({
+            'mimeType': 'image/%s' % tex_format,
+            'bufferView': len(buffviews) - 1
+        })
+        buf_offset += len(b)
+    else:
+        image_bytes = base64.encodebytes(b).decode().replace('\n', '')
+        image_bytes = "data:image/%s;base64," % tex_format \
+            + image_bytes
+        images.append({
+            'uri': image_bytes,
+        })
+
+    del b
+
+    ret_ref = (images_as_buffers, single_buffer, len(images) - 1)
+    aims_teximages[id(teximage)] = ret_ref
+    return ret_ref
 
 
 def mesh_to_gltf(mesh, matrix=None, name=None, gltf=None, tex_format='webp',
@@ -550,11 +622,12 @@ def default_gltf_scene(matrix=None, gltf=None):
             if matrix.isIdentity():
                 matrix = None
             else:
-                matrix = list(matrix.affine().np.transpose().ravel())
+                matrix = list(matrix.affine().np.transpose().ravel().astype(
+                    float))
         elif isinstance(matrix, np.ndarray):
-            matrix = list(matrix.transpose().ravel())
+            matrix = list(matrix.transpose().ravel().astype(float))
         elif not isinstance(matrix, list):
-            matrix = list(matrix)
+            matrix = [float(x) for x in matrix]
 
         if matrix is not None \
                 and not aims.AffineTransformation3d(matrix).isIdentity():
@@ -640,13 +713,14 @@ def meshes_dict_to_gltf(meshes, gltf=None, matrix=None, tex_format='webp',
                     tr = aims.AffineTransformation3d(tl[ri])
         if tex:
             tex_mesh_to_gltf(mesh, tex, matrix=tr, name=None, gltf=gltf,
-                      tex_format=tex_format, images_as_buffers=images_as_buffers,
-                      single_buffer=single_buffer)
+                             tex_format=tex_format,
+                             images_as_buffers=images_as_buffers,
+                             single_buffer=single_buffer)
         else:
             mesh_to_gltf(mesh, matrix=tr, name=None, gltf=gltf,
-                        tex_format=tex_format,
-                        images_as_buffers=images_as_buffers,
-                        single_buffer=single_buffer)
+                         tex_format=tex_format,
+                         images_as_buffers=images_as_buffers,
+                         single_buffer=single_buffer)
 
     return gltf
 
@@ -654,15 +728,20 @@ def meshes_dict_to_gltf(meshes, gltf=None, matrix=None, tex_format='webp',
 def gltf_convert_draco(infilename, outfilename=None, fail=True):
     # compress meshes using Draco
     # gltf-transform optimize <filename>.gltf <filename>.glb --texture-compress webp
-    # gltf-transform draco filename filename
+    # gltf-transform draco [options] filename filename
+    # we use the following options to avoid loss and texture shifts:
+    # * --quantize-position 0
+    # * --quantize-texcoord 0
     gltf_trans = shutil.which('gltf-transform')
     if not gltf_trans:
         if fail:
             raise ValueError('gltf-transform command is not found')
         return
+    opts = ['--quantize-position', '0',  # don't quantize position
+            '--quantize-texcoord', '0']  # don't quantize texcoords
     if outfilename is None:
         outfilename = infilename
-    cmd = [gltf_trans, 'draco', infilename, outfilename]
+    cmd = [gltf_trans, 'draco'] + opts + [infilename, outfilename]
     if 'LD_PRELOAD' in os.environ:
         # in VirtualGL processes (anatomist headless for instance), LD_PRELOAD
         # is used, and this causes a warning when running gltf-transform.
@@ -747,7 +826,7 @@ class Accessor:
             itsize = 4
         else:
             raise ValueError('unsupported component type: %d in accessor'
-                              % ctype)
+                             % ctype)
         atype = self.ddef['type']
         if atype == 'SCALAR':
             nc = 1
@@ -949,16 +1028,16 @@ class GLTFParser:
             mtc['teximage'] = teximage
         return mattex
 
-
     def image_from_buffer(self, data, format):
         if format == 'webp':
             global webp
             if webp is None:
                 import webp  # raise an ImportError
             webp_data = webp.WebPData.from_buffer(data)
-            arr = webp_data.decode(color_mode=webp.WebPColorMode.RGBA)
+            arr = webp_data.decode(
+                color_mode=webp.WebPColorMode.RGBA).transpose((1, 0, 2))
             teximage = aims.Volume_RGBA(arr.shape[:2])
-            teximage.np['v'][:, :, 0, 0, :] = arr.transpose((1, 0, 2))
+            teximage.np['v'][:, :, 0, 0, :] = arr
             return teximage
 
         tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
@@ -973,11 +1052,14 @@ class GLTFParser:
             shutil.rmtree(tmpd)
 
     def get_teximage(self, texnum, gltf, arrays):
+        # print('get_teximage', texnum, arrays is not None)
         if arrays is not None:
             images = arrays.get('images', [])
+            # print('images cache:', len(images))
             if len(images) > texnum:
                 teximage = images[texnum]
                 if teximage is not None:
+                    # print('get_teximage from cache', texnum)
                     return teximage
 
         texdef = gltf.get('images', [])[texnum]
@@ -986,20 +1068,14 @@ class GLTFParser:
             if uri.startswith('data:'):
                 start = uri.find(',') + 1
                 data = base64.decodebytes(uri[start:].encode())
-                tmpd = tempfile.mkdtemp(prefix='aims_gltf_')
                 endf = uri.find(';', 11)
                 format = uri[11: endf]
                 teximage = self.image_from_buffer(data, format)
             else:
                 url = osp.join(self.base_uri, uri)
                 teximage = aims.read(url)
-            if arrays is None:
-                arrays = {}
-            images = arrays.setdefault('images', [])
-            if len(images) <= texnum:
-                images += [None] * (texnum + 1 - len(images))
 
-        else: # uri is None
+        else:  # uri is None
             bv = gltf['bufferViews'][texdef['bufferView']]
             bv = BufferView(gltf, bv, arrays)
             data = bv.data()
@@ -1008,6 +1084,13 @@ class GLTFParser:
             # mtype should be 'image/<format>'
             format = mtype[6:]
             teximage = self.image_from_buffer(data, format)
+
+        if arrays is not None:
+            images = arrays.setdefault('images', [])
+            if len(images) <= texnum:
+                images += [None] * (texnum + 1 - len(images))
+            # print('set cache image')
+            images[texnum] = teximage
 
         return teximage
 
@@ -1032,8 +1115,8 @@ class AimsGLTFParser(GLTFParser):
         if arrays is None:
             arrays = {}
         pmeshes = super().parse(gltf, mesh, arrays=arrays)
-
         name = pmeshes.get('name')
+
         objects = []
         for obj in pmeshes['meshes']:
             aimsobj = self.parse_object(obj, name)
@@ -1045,6 +1128,11 @@ class AimsGLTFParser(GLTFParser):
         aimsobj = {}
         poly = mesh.get('polygons')
         pdim = poly.shape[1]
+        # Note: in Aims <= 5.2, aims.vector.assign() is slow because it
+        # converts its argument to a std::vector, then goes to the = operator.
+        # Here we assign a numpy array, so we can use np operator in a much
+        # more efficient way
+
         amesh = aims.AimsTimeSurface(pdim)
         amesh.vertex().assign(mesh.get('vertices'))
         amesh.polygon().assign(poly)
@@ -1069,6 +1157,11 @@ class AimsGLTFParser(GLTFParser):
             }
             atexs = []
             aimsobj['textures'] = atexs
+            wrap_values = {
+                10497: 'repeat',
+                33071: 'clamp_to_edge',
+                33648: 'mirrored_repeat'
+            }
             for tex in sorted(textures.keys()):
                 texture = textures[tex]
                 ttype = texture.dtype
@@ -1078,9 +1171,27 @@ class AimsGLTFParser(GLTFParser):
                     ttype = aims.typeCode(ttype)
                 atex = aims.TimeTexture(ttype)
                 atex[0].data().assign(texture)
+                atex.header()['allow_normalize_coords'] = 0
                 mattex = mat.get('textures', {}).get(tex, {})
                 if mattex:
                     atex.header()['gltf_texture'] = mattex
+                    sampler = mattex.get('sampler')
+                    if sampler is not None:
+                        wrap = []
+                        wraps = sampler.get('wrapS')
+                        wv = 'clamp_to_edge'
+                        if wraps is not None:
+                            wv = wrap_values.get(wraps, wv)
+                        wrap.append(wv)
+                        wrapt = sampler.get('wrapT')
+                        wv = 'clamp_to_edge'
+                        if wrapt is not None:
+                            wv = wrap_values.get(wrapt, wv)
+                        wrap.append(wv)
+                        if wrap != ['clamp_to_edge', 'clamp_to_edge']:
+                            atex.header()['texture_properties'] = [{
+                                'wrapmode': wrap
+                            }]
                 atexs.append(atex)
         return aimsobj
 
@@ -1248,6 +1359,6 @@ def load_gltf(filename, object_parser=AimsGLTFParser()):
         with open(filename) as f:
             gltf = json.load(f)
 
+    object_parser.base_uri = osp.dirname(filename)
     meshes = gltf_to_meshes(gltf, object_parser=object_parser)
     return meshes
-

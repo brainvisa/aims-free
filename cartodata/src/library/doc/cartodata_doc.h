@@ -292,7 +292,7 @@ namespace carto
     std::cout << ref.orientationStr() << std::endl;
 
     // or using a vector of constants:
-    std::vector<int> orient_v = vol.referential.axesOrientation();
+    std::vector<int> orient_v = vol.referential().axesOrientation();
 
     rc_ptr<Transformation3d> trans = ref.toOrientation( "ASR" );
     \endcode
@@ -307,7 +307,7 @@ namespace carto
 
   - Storage (disk) layout orientation:
 
-    Note that the storage layout may be undefined if the volume header property "storage_to_memory" is not defined.
+    Note that the storage layout may be undefined if the volume header property "storage_to_memory" is not defined. This is especially the case if the volume has not be loaded from a file, but created in memory.
     \code
     std::vector<int> orient_v = vol.storageLayoutOrientation();
     // then if needed:
@@ -324,7 +324,7 @@ namespace carto
   \endcode
   After this operation we will use different indices: vol(z, y, x).
 
-  However voxels are left untouched in this operation: only strides have been modified.
+  However voxels are left untouched in this operation: only strides have been modified. Thus the operation is relatively lightweight (just header properties have been modified).
 
   If we want to actually copy voxels in a given orientation, we should use:
   \code
