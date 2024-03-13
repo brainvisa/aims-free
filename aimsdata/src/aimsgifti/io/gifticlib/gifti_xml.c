@@ -1132,7 +1132,7 @@ static int pop_darray(gxml_data * xd)
             fprintf(stderr,"-- uncompressing %lld bytes into %lld\n",
                            xd->dind, (long long)outlen);
 
-        rv = uncompress(da->data, &outlen, (Bytef*)xd->zdata, xd->dind);
+        rv = uncompress((Bytef*) da->data, &outlen, (Bytef*)xd->zdata, xd->dind);
         olen = outlen;
 
         if( rv != Z_OK ) {
@@ -2704,7 +2704,7 @@ static int ewrite_data(gxml_data * xd, giiDataArray * da, FILE * fp)
             if( update_partial_buffer(&xd->zdata, &xd->zlen, blen, 1) )
                 return 1;
 
-            rv = compress2((Bytef *)xd->zdata, &blen, da->data,
+            rv = compress2((Bytef *)xd->zdata, &blen, (const Bytef*) da->data,
                            da->nvals*da->nbyper, xd->zlevel);
             if ( xd->verb > 2 )
                 fprintf(stderr,"-- compress buffer (%.2f%% of %lld bytes)...\n",
