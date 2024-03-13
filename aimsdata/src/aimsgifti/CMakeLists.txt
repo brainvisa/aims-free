@@ -12,7 +12,7 @@ set( _headers
 )
 
 set( _sources
-    io/gifti.c
+    io/gifti.cc
     io/giftiformat.cc
     io/giftiheader.cc
     io/giftiutil.cc
