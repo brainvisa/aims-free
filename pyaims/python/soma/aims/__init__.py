@@ -928,12 +928,18 @@ def __Volume_astype__(self, dtype, copy=False):
     else:
         dtype = typeCode(dtype)
     outtype = 'Volume_%s' % dtype
-    try:
-        if not copy:
-            conv = ShallowConverter(intype=self, outtype=outtype)
-        else:
-            conv = Converter(intype=self, outtype=outtype)
-    except AttributeError:
+    types = (self, type(self).__base__)  # to be improved
+    conv = None
+    for t in types:
+        try:
+            if not copy:
+                conv = ShallowConverter(intype=t, outtype=outtype)
+            else:
+                conv = Converter(intype=t, outtype=outtype)
+            break
+        except AttributeError:
+            pass
+    if conv is None:
         raise TypeError('No conversion to type %s' % outtype)
     return conv(self)
 
