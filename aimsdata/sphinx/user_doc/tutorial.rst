@@ -321,7 +321,7 @@ For instance, if you have 2 activation maps which have been obtained by function
 
   amongst allowed operations in formulas, are the standard linear operators +, -, \*, /. They are applied voxel-wise. Groups are allowed using parentheses.
 
-  In fact the formula is directly interpreted in `Python <http://python.org>`_ language, provided operations are defined on volumes in :pyaimsdev:`PyAIMS <index.html>`.
+  In fact the formula is directly interpreted in `Python <https://python.org>`_ language, provided operations are defined on volumes in :pyaimsdev:`PyAIMS <index.html>`.
 
   For instance, volume / scalar operations are allowed: ``I1*3``, ``I1+12`` etc.
 
