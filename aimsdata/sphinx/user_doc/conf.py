@@ -295,5 +295,5 @@ intersphinx_mapping = {
     'pyana': (os.path.join(reldocpath, 'pyanatomist-' + version + '/sphinx'),
               os.path.join(docpath,
                            'pyanatomist-%s/sphinx/objects.inv' % version)),
-    'python': ('http://docs.python.org/%d.%d' % sys.version_info[:2], None),
+    'python': ('https://docs.python.org/%d.%d' % sys.version_info[:2], None),
 }
