@@ -289,7 +289,7 @@ intersphinx_mapping = {
     'pyaims': (os.path.join(docpath, 'pyaims-' + version + '/sphinx'), None),
     'pyana': (os.path.join(docpath, 'pyanatomist-' + version + '/sphinx'), None),
     'aims': (os.path.join(docpath, 'aimsdata-' + version + '/dev_doc'), None),
-    'python': ('http://docs.python.org/'
+    'python': ('https://docs.python.org/'
                + '.'.join([str(x) for x in sys.version_info[:2]]),
                None),
     'numpy': ('https://numpy.org/doc/stable/', None),
