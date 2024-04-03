@@ -77,6 +77,7 @@ namespace carto
   template <> bool TypedObject<PyObject *>::isDynArray() const;
   template <> bool TypedObject<PyObject *>::isNone() const;
   template <> bool TypedObject<PyObject *>::isIntKeyIterator() const;
+  template <> bool TypedObject<PyObject *>::isKeyIterator() const;
 
   extern template class TypedObject<PyObject *>;
 

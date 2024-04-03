@@ -232,7 +232,17 @@ namespace carto
           }
           catch( std::runtime_error & )
           {
-            PyTuple_SetItem( po, c, PyLong_FromLong( i->intKey() ) );
+            try
+            {
+              PyTuple_SetItem( po, c, PyLong_FromLong( i->intKey() ) );
+            }
+            catch( std::runtime_error & )
+            {
+              carto::Object key = i->keyObject();
+              PyObject *obj = key->value<PyObject *>();
+              Py_INCREF( obj );
+              PyTuple_SetItem( po, c, obj );
+            }
           }
         }
         sipRes = po;
@@ -844,6 +854,8 @@ namespace carto
     // iterator API
     virtual bool isIterator() const = 0;
     virtual bool isDictionaryIterator() const = 0;
+    virtual bool isIntKeyIterator() const = 0;
+    virtual bool isKeyIterator() const = 0;
     virtual bool isValid() const = 0;
     /*virtual*/ carto::Object currentValue() const = 0;
 
@@ -890,7 +902,7 @@ namespace carto
 
     virtual std::string key() const = 0;
     virtual long intKey() const = 0;
-    // virtual carto::GenericObject * keyObject() const = 0 /Facrory/;
+    virtual carto::Object keyObject() const = 0;
     virtual carto::Object clone() const = 0;
 
   protected:
