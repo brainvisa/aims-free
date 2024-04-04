@@ -293,6 +293,24 @@ namespace carto
         Py_DECREF( res );
       }
     }
+    if( !x && PyObject_HasAttrString( _value, "keys" )
+        && PyObject_Size( _value ) > 0 )
+    {
+      PyObject *it = PyObject_GetIter( _value );
+      PyErr_Clear();
+      if( it )
+      {
+        Py_ssize_t pos = 0;
+        PyObject *key = 0;
+        PyObject *val = 0;
+        if( PyDict_Next( _value, &pos, &key, &val ) )
+        {
+          if( PyLong_Check( key ) )
+            x = true;
+        }
+        PyErr_Clear();
+      }
+    }
     PyGILState_Release(gstate);
     return x;
   }
@@ -316,6 +334,24 @@ namespace carto
       {
         x = ( res == Py_True );
         Py_DECREF( res );
+      }
+    }
+    if( !x && PyObject_HasAttrString( _value, "keys" )
+        && PyObject_Size( _value ) > 0 )
+    {
+      PyObject *it = PyObject_GetIter( _value );
+      PyErr_Clear();
+      if( it )
+      {
+        Py_ssize_t pos = 0;
+        PyObject *key = 0;
+        PyObject *val = 0;
+        if( PyDict_Next( _value, &pos, &key, &val ) )
+        {
+          if( PyLong_Check( key ) )
+            x = true;
+        }
+        PyErr_Clear();
       }
     }
     PyGILState_Release(gstate);
@@ -687,6 +723,13 @@ namespace carto
         if( !o )
         {
           PyErr_Clear();
+          PyObject *key = PyLong_FromLong( index );
+          o = PyObject_GetItem( to.getValue(), key );
+          Py_DECREF( key );
+        }
+        if( !o )
+        {
+          PyErr_Clear();
           PyGILState_Release(gstate);
           throw std::runtime_error( std::string( "Array item not found in " )
                                     + DataTypeCode<PyObject *>::name()
@@ -704,17 +747,24 @@ namespace carto
         PyObject	*po = value->value<PyObject *>();
         if( !po )
           throw std::runtime_error
-            ( std::string( "Cannot (²?) set non-python element " )
+            ( std::string( "Cannot (?) set non-python element " )
               + value->type() + " in python sequence" );
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
         if( PySequence_SetItem( to.getValue(), index, po ) < 0 )
         {
           PyErr_Clear();
-          PyGILState_Release(gstate);
-          throw std::runtime_error( std::string( "Array item not found in " )
-                                    + DataTypeCode<PyObject *>::name() 
-                                    + " at index " + toString( index ) );
+          PyObject *key = PyLong_FromLong( index );
+          if( PyObject_SetItem( to.getValue(), key, po ) < 0 )
+          {
+            Py_DECREF( key );
+            PyErr_Clear();
+            PyGILState_Release(gstate);
+            throw std::runtime_error( std::string( "Array item not found in " )
+                                      + DataTypeCode<PyObject *>::name()
+                                      + " at index " + toString( index ) );
+          }
+          Py_DECREF( key );
         }
         PyGILState_Release(gstate);
       }

@@ -762,7 +762,7 @@ def proxygetitem(self, attr):
 
 def proxysetitem(self, attr, value):
     try:
-        return __setitem__(self, attr, value)
+        return self.__setitem__(self, attr, value)
     except:
         return self._get().__setitem__(attr, value)
 
