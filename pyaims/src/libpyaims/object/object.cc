@@ -744,7 +744,56 @@ namespace carto
       static inline void setArrayItem( TypedObject<PyObject *> & to, 
                                        int index, Object value )
       {
-        PyObject	*po = value->value<PyObject *>();
+        // cout << "setArrayItem " << index << ": " << value->type() << endl;
+        PyObject *po = 0;
+        try
+        {
+          po = value->value<PyObject *>();
+        }
+        catch( ... )
+        {
+          try
+          {
+            string s = value->getString();
+            po = PyUnicode_FromString( s.c_str() );
+          }
+          catch( ... )
+          {
+            try
+            {
+              long i = NumericGenericObjectConverter::asInt( *value );
+              po = PyLong_FromLong( i );
+            }
+            catch( ... )
+            {
+              try
+              {
+                long i = NumericGenericObjectConverter::asLong( *value );
+                po = PyLong_FromLong( i );
+              }
+              catch( ... )
+              {
+                try
+                {
+                  double d = value->getScalar();
+                  po = PyFloat_FromDouble( d );
+                }
+                catch( ... )
+                {
+//                   try
+//                   {
+//                     po = PyLong_FromLong( i );
+//                   }
+//                   catch( ... )
+//                   {
+                  // TODO: PyObject from Object
+//                   }
+                }
+              }
+            }
+          }
+        }
+
         if( !po )
           throw std::runtime_error
             ( std::string( "Cannot (?) set non-python element " )
@@ -818,11 +867,18 @@ namespace carto
         gstate = PyGILState_Ensure();
         if( !PySequence_Check( to.getValue() ) )
         {
-          PyGILState_Release(gstate);
-          throw std::runtime_error( "Cannot delete array item on non-array "
-                                    "object" );
+          PyObject *key = PyLong_FromLong( index );
+          bool res = PyObject_DelItem( to.getValue(), key );
+          Py_DECREF( key );
+          PyErr_Clear();
+          if( res < 0 )
+          {
+            PyGILState_Release(gstate);
+            throw std::runtime_error( "Cannot delete array item on non-array "
+                                      "object" );
+          }
         }
-        if( PySequence_DelItem( to.getValue(), index ) < 0 )
+        else if( PySequence_DelItem( to.getValue(), index ) < 0 )
         {
           PyErr_Clear();
           PyGILState_Release(gstate);

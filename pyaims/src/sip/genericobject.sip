@@ -401,15 +401,6 @@ namespace carto
     try
     {
         void	*obj;
-#if PY_VERSION_HEX < 0x03000000
-        if( PyInt_Check( a1 ) )
-          {
-            sipCpp->setArrayItem( a0,
-                                  carto::Object::value
-                                   ( (int) PyInt_AsLong( a1 ) ) );
-          }
-        else
-#endif
         if( PyLong_Check( a1 ) )
           {
             sipCpp->setArrayItem( a0,
@@ -428,24 +419,20 @@ namespace carto
                 carto::Object::value
                 ( carto::PyString_AsStdString( a1 ) ) );
           }
-        else if( sipCanConvertToType( a1, sipType_carto_Object,
-                   SIP_NO_CONVERTORS ) )
-        {
-          obj = sipForceConvertToType( a1, sipType_carto_Object,
-            0, 0, &state, &sipIsErr );
-          carto::Object	*o = (carto::Object *) obj;
-          sipCpp->setArrayItem( a0, *o );
-          sipReleaseType( obj, sipType_carto_Object, state );
-        }
-        else if( sipCanConvertToType( a1, sipType_carto_GenericObject,
-                   SIP_NO_CONVERTORS ) )
-        {
-          obj = sipForceConvertToType( a1,
-            sipType_carto_GenericObject, 0, 0, &state, &sipIsErr );
-          carto::GenericObject	*o = (carto::GenericObject *) obj;
-          sipCpp->setArrayItem( a0, carto::Object( o ) );
-          sipReleaseType( obj, sipType_carto_GenericObject, state );
-        }
+        else if( ( obj = sipForceConvertToType( a1, sipType_carto_Object,
+          0, 0, &state, &sipIsErr ) ) )
+          {
+            carto::Object       *o = (carto::Object *) obj;
+            sipCpp->setArrayItem( a0, *o );
+            sipReleaseType( obj, sipType_carto_Object, state );
+          }
+        else if( ( obj = sipForceConvertToType( a1,
+          sipType_carto_GenericObject, 0, 0, &state, &sipIsErr ) ) )
+          {
+            carto::GenericObject        *o = (carto::GenericObject *) obj;
+            sipCpp->setArrayItem( a0, carto::Object( o ) );
+            sipReleaseType( obj, sipType_carto_GenericObject, state );
+          }
         else
         {
           sipCpp->setArrayItem( a0, carto::Object::value( a1 ) );
@@ -503,15 +490,6 @@ namespace carto
     try
     {
         void    *obj;
-#if PY_VERSION_HEX < 0x03000000
-        if( PyInt_Check( a1 ) )
-          {
-            sipCpp->setProperty( *a0, 
-                                 carto::Object::value
-                                   ( (int) PyInt_AsLong( a1 ) ) );
-          }
-        else
-#endif
         if( PyLong_Check( a1 ) )
           {
             sipCpp->setProperty( *a0, 
