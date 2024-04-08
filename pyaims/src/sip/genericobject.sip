@@ -384,7 +384,23 @@ namespace carto
     {
       carto::Object o = sipCpp->getProperty( *a0 );
       sipRes = sipConvertFromType( new carto::Object( o ),
-                                       sipType_carto_Object, Py_None );
+                                   sipType_carto_Object, Py_None );
+    }
+    catch( ... )
+    {
+      sipRes = a1;
+      Py_INCREF( sipRes );
+    }
+%End
+
+
+    SIP_PYOBJECT get( int, SIP_PYOBJECT = Py_None );
+%MethodCode
+    try
+    {
+      carto::Object o = sipCpp->getArrayItem( a0 );
+      sipRes = sipConvertFromType( new carto::Object( o ),
+                                   sipType_carto_Object, Py_None );
     }
     catch( ... )
     {
