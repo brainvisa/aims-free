@@ -1380,7 +1380,10 @@ def getPython(self):
     t = self.type()
     cv = convertersObjectToPython.get(t)
     res = None
-    gen = self._get()
+    if hasattr(self, '_get'):
+        gen = self._get()
+    else:
+        gen = self
     if cv is not None:
         res = cv(gen)
         try:
@@ -1557,7 +1560,7 @@ def genobj__getitem__(self, item):
     try:
         x = Object.getPython(self)
         return x.__getitem__(item)
-    except:
+    except RuntimeError:
         return carto.GenericObject._proxy.retvalue(
             self.__oldgetitem__(item))
 
