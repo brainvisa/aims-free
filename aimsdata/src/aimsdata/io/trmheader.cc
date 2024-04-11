@@ -37,7 +37,8 @@
 #endif
 
 #include <aims/io/trmheader.h>
-#include <aims/io/motionR.h>
+#include <aims/io/reader.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/exception/ioexcept.h>
 
 using namespace aims;
@@ -58,8 +59,8 @@ void TrmHeader::read( size_t * )
   string fileName = filename();
 
   // simple test: try to read all...
-  MotionReader	mr( fileName );
-  Motion	m;
+  Reader<AffineTransformation3d> mr( fileName );
+  AffineTransformation3d m;
   mr.read( m );
 
   setProperty( "file_type", string( "TRM" ) );

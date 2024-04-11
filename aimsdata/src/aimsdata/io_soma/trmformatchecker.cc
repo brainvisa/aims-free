@@ -35,7 +35,7 @@
 #include <aims/transformation/affinetransformation3d.h>
 #include <aims/io/finder.h>
 #include <aims/data/pheader.h>
-#include <aims/io/motionR.h>
+#include <aims/io_soma/trmformatreader.h>
 #include <cartobase/stream/fileutil.h>
 #include <soma-io/datasource/filedatasource.h>
 #include <soma-io/datasourceinfo/datasourceinfoloader.h>
@@ -50,7 +50,7 @@ DataSourceInfo TrmFormatChecker::check( DataSourceInfo dsi,
                                         carto::Object options )
                                         const
 {
-  // cout << "TrmFormatChecker::check\n";
+  // cout << "TrmFormatChecker::check " << dsi.list().dataSource()->url() << endl;;
 
   bool dolist = dsi.list().typecount() == 1;
   if( dolist )
@@ -83,9 +83,20 @@ DataSourceInfo TrmFormatChecker::check( DataSourceInfo dsi,
     // cout << "URL: " << url << endl;
 
     // simple test: try to read all...
-    MotionReader mr( url );
+    TrmFormatReader mr;
     AffineTransformation3d m;
-    mr.read( m );
+    rc_ptr<DataSourceInfo> rdsi( &dsi );
+    try
+    {
+      mr.read( m, rdsi, AllocatorContext(), options );
+    }
+    catch( ... )
+    {
+      rdsi.release();
+      throw;
+    }
+
+    rdsi.release();
 
     Object hdr = Object::value( PropertySet() );  // header
 

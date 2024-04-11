@@ -35,7 +35,6 @@
 #include <aims/io_soma/trmformatreader.h>
 #include <aims/transformation/affinetransformation3d.h>
 #include <aims/data/pheader.h>
-#include <aims/io/motionR.h>
 #include <soma-io/io/formatdictionary.h>
 #include <soma-io/datasource/datasource.h>
 #include <soma-io/io/reader.h>
@@ -112,9 +111,50 @@ void TrmFormatReader::read( AffineTransformation3d & obj,
 {
   // cout << "TrmFormatReader::read\n";
   rc_ptr<DataSource> ds = dsi->list().dataSource();
-  MotionReader r( FileUtil::uriFilename( ds->url() ) );
-  r.read( obj );
-  obj.header()->copyProperties( dsi->header() );
+
+  if( !ds->isOpen() )
+    ds->open( DataSource::Read );
+  if( !ds->isOpen() )
+    throw file_not_found_error( ds->url() );
+
+  AsciiDataSourceTraits<float>		fir;
+  if( !StreamUtil::skip( *ds, " \t\n\r" ) )
+    throw wrong_format_error( ds->url() );
+  if( !fir.read( *ds, obj.matrix()( 0, 3 ) ) )
+    throw wrong_format_error( ds->url() );
+  if( !StreamUtil::skip( *ds, " \t\n\r" ) )
+    throw wrong_format_error( ds->url() );
+  if( !fir.read( *ds, obj.matrix()( 1, 3 ) ) )
+    throw wrong_format_error( ds->url() );
+  if( !StreamUtil::skip( *ds, " \t\n\r" ) )
+    throw wrong_format_error( ds->url()  );
+  if( !fir.read( *ds, obj.matrix()( 2, 3 ) ) )
+    throw wrong_format_error( ds->url() );
+  unsigned	i, j;
+  for( i=0; i<3; ++i )
+    for( j=0; j<3; ++j )
+      {
+        if( !StreamUtil::skip( *ds, " \t\n\r" ) )
+          throw wrong_format_error( ds->url() );
+        if( !fir.read( *ds, obj.rotation()( i, j ) ) )
+          throw wrong_format_error( ds->url() );
+      }
+  ds->close();
+
+  PythonHeader  *ph = new PythonHeader;
+  Reader<carto::GenericObject> minfr(
+      dsi->list().dataSource( "minf" )->url() );
+  try
+  {
+    minfr.read( *ph );
+  }
+  catch( ... )
+  {
+  }
+  obj.setHeader( ph );
+
+  if( dsi->header().get() )
+    obj.header()->copyProperties( dsi->header() );
   try
   {
     Object oinv = options->getProperty( "inv" );
@@ -127,7 +167,6 @@ void TrmFormatReader::read( AffineTransformation3d & obj,
   catch( runtime_error & )
   {
   }
-  // cout << "read TRM OK\n";
 }
 
 

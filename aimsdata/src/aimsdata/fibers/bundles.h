@@ -40,7 +40,6 @@
 #include <aims/mesh/surface.h>
 #include <aims/vector/vector.h>
 #include <aims/resampling/motion.h>
-#include <aims/io/motionR.h>
 #include <aims/roi/roiIterator.h>
 #include <graph/graph/graph.h>
 #include <cartobase/smart/rcptr.h>

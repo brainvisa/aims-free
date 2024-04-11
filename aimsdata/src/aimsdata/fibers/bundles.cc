@@ -1787,8 +1787,8 @@ BundleMotion::BundleMotion( const Motion &motion ) :
 //-----------------------------------------------------------------------------
 BundleMotion::BundleMotion( const string &fileName )
 {
-  MotionReader reader( fileName );
-  reader >> _motion;
+  Reader<AffineTransformation3d> reader( fileName );
+  reader.read( _motion );
 }
 
 

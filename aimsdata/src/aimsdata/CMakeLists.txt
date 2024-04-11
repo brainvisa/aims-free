@@ -116,8 +116,6 @@ set( _headers
     io/listItemW.h
     io/macosxbugs.h
     io/mniobjheader.h
-    io/motionR.h
-    io/motionW.h
     io/povW.h
     io/scaledcoding.h
     io/selectionr.h
@@ -130,7 +128,6 @@ set( _headers
     io/spmattribconverter.h
     io/triederItemR.h
     io/triederItemW.h
-    io/trmheader.h
     io/reader.h
     io/reader_d.h
     io/readerasobject.h
@@ -142,12 +139,13 @@ set( _headers
     io/roiR.h
     io/tensorItemR.h
     io/tensorItemW.h
-    io/triheader.h
-    io/triR.h
-    io/triW.h
     io/texheader.h
     io/texR.h
     io/texW.h
+    io/triheader.h
+    io/triR.h
+    io/triW.h
+    io/trmheader.h
     io/process.h
     io/datatypecode.h
     io/wavefrontheader.h
@@ -331,8 +329,6 @@ set(_aimsdata_sources
     io/iooptions.cc
     io/imasparseheader.cc
     io/labelR.cc
-    io/motionR.cc
-    io/motionW.cc
     io/meshheader.cc
     io/mniobjformat.cc
     io/mniobjheader.cc
