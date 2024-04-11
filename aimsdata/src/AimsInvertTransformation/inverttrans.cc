@@ -32,9 +32,9 @@
  */
 
 #include <aims/getopt/getopt2.h>
-#include <aims/io/motionR.h>
-#include <aims/io/motionW.h>
-#include <aims/resampling/motion.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/stream/fileutil.h>
 
 using namespace aims;
@@ -55,15 +55,15 @@ int main( int argc, const char** argv )
 		     "(default: <input>_inverted.trm)", true );
       app.initialize();
 
-      Motion		m;
-      MotionReader	mr( r );
+      AffineTransformation3d m;
+      Reader<AffineTransformation3d> mr( r );
       mr.read( m );
       m = *m.inverse();
       if( w.empty() )
-        {
-          w = FileUtil::removeExtension( r ) + "_inverted.trm";
-        }
-      MotionWriter	mw( w );
+      {
+        w = FileUtil::removeExtension( r ) + "_inverted.trm";
+      }
+      Writer<AffineTransformation3d> mw( w );
       mw.write( m );
     }
   catch( user_interruption & )

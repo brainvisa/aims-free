@@ -37,7 +37,6 @@
 #include <aims/io/finder.h>
 #include <aims/io/process.h>
 #include <aims/io/reader.h>
-#include <aims/io/motionR.h>
 #include <aims/io/writer.h>
 #include <aims/vector/vector.h>
 #include <aims/resampling/resampling_g.h>
@@ -134,9 +133,9 @@ bool doit( Process & p, const string & fname, Finder & f )
 
   cout << "done\n";
 
-  Motion motion;
+  AffineTransformation3d motion;
   if( ! rp.motionfile.empty() ) {
-    MotionReader mReader( rp.motionfile );
+    Reader<AffineTransformation3d> mReader( rp.motionfile );
     mReader.read( motion );
   }
 

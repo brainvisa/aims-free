@@ -48,7 +48,6 @@
 #include <aims/primalsketch/primalSketch.h>
 #include <aims/primalsketch/primalSketch2graph.h>
 #include <aims/primalsketch/primalSketchUtil.h>
-#include <aims/io/motionR.h>
 #include <cartobase/stream/fileutil.h>
 
 using namespace aims;
@@ -303,8 +302,8 @@ int main(int argc, const char **argv)
 
         Primalsketch2graph<AimsSurface<3, Void>, Texture<float> > translate(&sketch);
         if( !motionfile.empty() ) {
-            MotionReader  mr( motionfile );
-            Motion  mot;
+            Reader<AffineTransformation3d>  mr( motionfile );
+            AffineTransformation3d  mot;
             mr.read( mot );
             translate.setMotion( mot );
         }

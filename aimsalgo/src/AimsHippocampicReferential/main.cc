@@ -33,11 +33,8 @@
 
 
 #include <cstdlib>
-#include <aims/data/data_g.h> 
-#include <aims/io/io_g.h>
-#include <aims/io/motionW.h>
+#include <aims/io/writer.h>
 #include <aims/getopt/getopt2.h>
-#include <aims/math/math_g.h>
 #include <aims/talairach/talairach.h>
 #include <cmath>
 #include <math.h>
@@ -86,18 +83,19 @@ int main( int argc, const char **argv )
     talPoints.Hemimm() = Point3df( ihpMm[0], ihpMm[1], ihpMm[2] ) ;
     
     TalairachReferential talRef ;
-    Motion toRef = talRef.computeTransformation( talPoints ) ;
+    AffineTransformation3d toRef = talRef.computeTransformation( talPoints ) ;
     
     Point3df rotCenter( (acMm[0]+pcMm[0])/2., (acMm[1]+pcMm[1])/2., (acMm[2]+pcMm[2])/2. ) ;
     
-    Motion rot ;
+    AffineTransformation3d rot ;
     rot.setToIdentity() ;
     
     rot.setRotationAffine( axis == "x" ? angle * M_PI / 180. : 0., 
-			   axis == "y" ? angle * M_PI / 180. : 0., 
-			   axis == "z" ? angle * M_PI / 180. : 0., rotCenter ) ;
+                           axis == "y" ? angle * M_PI / 180. : 0.,
+                           axis == "z" ? angle * M_PI / 180. : 0.,
+                           rotCenter ) ;
 
-    MotionWriter wri( outfile ) ;
+    Writer<AffineTransformation3d> wri( outfile ) ;
     wri.write( rot * toRef ) ;
     result = EXIT_SUCCESS ;
   }

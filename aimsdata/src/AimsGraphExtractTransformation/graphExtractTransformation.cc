@@ -34,8 +34,7 @@
 #include <cstdlib>
 #include <aims/getopt/getopt2.h>
 #include <cartobase/config/paths.h>
-#include <aims/resampling/motion.h>
-#include <aims/io/motionW.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/graph/graphmanip.h>
 #include <graph/graph/graph.h>
 #include <graph/graph/greader.h>
@@ -52,14 +51,14 @@ int main( int argc, const char **argv )
   string	filein, fileout;
 
   AimsApplication	app( argc, argv, 
-			     "Extracts the Talairach transformation in a graph"
-			     " file and write it as an Aims/Anatomist "
-			     "transformation file" );
+                             "Extracts the Talairach transformation in a graph"
+                             " file and write it as an Aims/Anatomist "
+                             "transformation file" );
 
   app.addOption( filein, "-i", "input data graph" );
   app.alias( "-input", "-i" );
   app.addOption( fileout, "-o", "output transformation (default: "
-		 "<input>TOtalairach.trm)", true );
+                 "<input>TOtalairach.trm)", true );
   app.alias( "-output", "-o" );
 
   Graph		g( "ClusterArg" );
@@ -70,17 +69,17 @@ int main( int argc, const char **argv )
       app.initialize();
 
       if( fileout.empty() )
-	{
-	  fileout = filein;
-	  string::size_type p1 = fileout.rfind( '.' );
-	  if( p1 != string::npos )
-	    {
-	      string::size_type p2 = fileout.rfind( '/' );
-	      if( p2 == string::npos || p2 < p1 )
-		fileout.erase( p1, fileout.length() - p1 );
-	    }
-	  fileout += "TOtalairach.trm";
-	}
+      {
+        fileout = filein;
+        string::size_type p1 = fileout.rfind( '.' );
+        if( p1 != string::npos )
+        {
+          string::size_type p2 = fileout.rfind( '/' );
+          if( p2 == string::npos || p2 < p1 )
+            fileout.erase( p1, fileout.length() - p1 );
+        }
+        fileout += "TOtalairach.trm";
+      }
 
       // syntax
       SyntaxReader	sr( Paths::findResourceFile(
@@ -92,9 +91,9 @@ int main( int argc, const char **argv )
       grd >> g;
 
       // read transformation
-      Motion	m = GraphManip::talairach( g );
+      AffineTransformation3d m = GraphManip::talairach( g );
 
-      MotionWriter	w( fileout );
+      Writer<AffineTransformation3d> w( fileout );
       w.write( m );
     }
   catch( user_interruption &e )

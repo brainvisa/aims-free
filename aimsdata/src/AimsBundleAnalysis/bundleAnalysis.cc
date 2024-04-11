@@ -172,9 +172,9 @@ int main( int argc, const char *argv[] )
           ( new BundleROISplit( getRoiIterator( splitRoiFile ),
                                 splitKeepOriginalBundle ) );
       } else {
-        MotionReader reader( splitRoiMotion );
-        Motion motion;
-        reader >> motion;
+        Reader<AffineTransformation3d> reader( splitRoiMotion );
+        AffineTransformation3d motion;
+        reader.read( motion );
         bundleROISplit.reset
           ( new  BundleROISplit( getRoiIterator( splitRoiFile,
                                                  motion ),

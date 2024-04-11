@@ -40,8 +40,9 @@
 #include <aims/io/finder.h>
 #include <aims/io/process.h>
 #include <aims/io/iooptions.h>
-#include <aims/io/motionW.h>
+#include <aims/io/writer.h>
 #include <aims/io/fileFormat.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/stream/fileutil.h>
 #include <iomanip>
 
@@ -248,7 +249,7 @@ bool subvolume( Process & p, const string & filein, Finder & f )
       outimage(i, j, k, l) = data(i+sx, j+sy, k+sz, l+st);
 
     // keep track of transformations
-    Motion motion, im;
+    AffineTransformation3d motion, im;
     im.setToIdentity();
     im.setTranslation( Point3df( sx * data.sizeX(), sy * data.sizeY(),
                        sz * data.sizeZ()) );
@@ -319,7 +320,7 @@ bool subvolume( Process & p, const string & filein, Finder & f )
           trout.reserve( trs->size() );
           for( ; tit->isValid(); tit->next() )
           {
-            Motion m( tit->currentValue() );
+            AffineTransformation3d m( tit->currentValue() );
             m *= im;
             trout.push_back( m.toVector() );
           }
@@ -356,38 +357,38 @@ bool subvolume( Process & p, const string & filein, Finder & f )
     w << outimage;
 
     if( sv.writemotion == true )
+    {
+      AffineTransformation3d m, im;
+
+      if( sv.motiondirect.empty() )
       {
-	Motion m, im;
-
-	if( sv.motiondirect.empty() )
-	  {
-	    sv.motiondirect = FileUtil::removeExtension( FileUtil::basename( filein )) + "_whole_TO_subvolume.trm";
-	  }
-
-	if( sv.motioninverse.empty() ) 
-	  {
-	    sv.motioninverse = FileUtil::removeExtension( FileUtil::basename( filein )) + "_subvolume_TO_whole.trm";
-	  }
-
-	im.setToIdentity();
-	im.setTranslation( Point3df( sx * data.sizeX(), 
-				     sy * data.sizeY(),
-				     sz * data.sizeZ()) );
-	
-	m = *im.inverse();
-
-	MotionWriter mw( sv.motiondirect );
-	mw.write( m );
-	MotionWriter imw( sv.motioninverse );
-	imw.write( im );
+        sv.motiondirect = FileUtil::removeExtension( FileUtil::basename( filein )) + "_whole_TO_subvolume.trm";
       }
+
+      if( sv.motioninverse.empty() )
+      {
+        sv.motioninverse = FileUtil::removeExtension( FileUtil::basename( filein )) + "_subvolume_TO_whole.trm";
+      }
+
+      im.setToIdentity();
+      im.setTranslation( Point3df( sx * data.sizeX(),
+                                    sy * data.sizeY(),
+                                    sz * data.sizeZ()) );
+
+      m = *im.inverse();
+
+      Writer<AffineTransformation3d> mw( sv.motiondirect );
+      mw.write( m );
+      Writer<AffineTransformation3d> imw( sv.motioninverse );
+      imw.write( im );
+    }
 
     if( first )
-      {
-        first = false;
-        if( sv.nominf )
-          IOOptions::ioOptions()->setProperty( "writeMinf", bool( false ) );
-      }
+    {
+      first = false;
+      if( sv.nominf )
+        IOOptions::ioOptions()->setProperty( "writeMinf", bool( false ) );
+    }
   }
   return true;
 }

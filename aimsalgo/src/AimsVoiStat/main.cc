@@ -18,7 +18,6 @@
 #include <aims/roi/roigtm.h>
 #include <aims/io/roiR.h>
 #include <aims/io/roigtmR.h>
-#include <aims/io/motionR.h>
 #include <aims/resampling/resampling_g.h>
 #include <aims/roi/hie.h>
 #include <aims/io/hieR.h>
@@ -73,8 +72,8 @@ static bool doit( Process &, const string &, Finder & );
 class VoiStat : public Process
 {
 public:
-  VoiStat( RoiStats & rs, AimsRoi & r, Motion & m, const string & fout, 
-	   RoiGtm *rgtm, bool framed );
+  VoiStat( RoiStats & rs, AimsRoi & r, AffineTransformation3d & m,
+           const string & fout, RoiGtm *rgtm, bool framed );
 
 private:
   template<class T>
@@ -82,15 +81,15 @@ private:
 
   RoiStats	& rsa;
   AimsRoi	& roi;
-  Motion	& motion;
+  AffineTransformation3d & motion;
   string	fileoutput;
   RoiGtm	*gtm;
   bool		byframe;
 };
 
 
-VoiStat::VoiStat( RoiStats & rs, AimsRoi & r, Motion & m, const string & fout, 
-         RoiGtm *rgtm, bool framed ) 
+VoiStat::VoiStat( RoiStats & rs, AimsRoi & r, AffineTransformation3d & m,
+                  const string & fout, RoiGtm *rgtm, bool framed )
   : Process(), rsa( rs ), roi( r ), motion( m ), fileoutput( fout ), 
     gtm( rgtm ), byframe( framed )
 {
@@ -344,11 +343,11 @@ int main( int argc, const char **argv )
       }
     
     //Read Motion info =========================================================
-    Motion motion;  // set with Identity
+    AffineTransformation3d motion;  // set with Identity
     if( !filemotion.empty() )
       {
-        MotionReader mrd( filemotion );
-        mrd >> motion;
+        Reader<AffineTransformation3d> mrd( filemotion );
+        mrd.read( motion );
       }
     
     // Initialisation

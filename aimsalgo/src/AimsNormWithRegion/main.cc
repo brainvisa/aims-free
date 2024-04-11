@@ -38,7 +38,6 @@
 #include <aims/roi/roi_g.h>
 #include <aims/roi/roigtm.h>
 #include <aims/io/roiR.h>
-#include <aims/io/motionR.h>
 #include <aims/resampling/resampling_g.h>
 #include <aims/roi/hie.h>
 #include <aims/io/hieR.h>
@@ -268,7 +267,7 @@ int main(int argc, const char **argv)
       }
 
     //Read Motion info =========================================================
-    Motion motion;  // set with Identity
+    AffineTransformation3d motion;  // set with Identity
     if (!mrd.fileName().empty() )
       {
         mrd.read( motion );

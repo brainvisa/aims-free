@@ -41,8 +41,6 @@
 #include <aims/math/math_g.h>
 #include <aims/utility/utility_g.h>
 #include <aims/morphology/morphology_g.h>
-#include <aims/io/motionW.h>
-#include <aims/io/motionR.h>
 #include <vector>
 #include <aims/roi/roiIterator.h>
 

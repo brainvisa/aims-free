@@ -17,15 +17,15 @@
 #include <cartobase/config/verbose.h>
 #include <iostream>
 
-#include <aims/io/motionW.h>
 #include <aims/transform/least_square_estimation.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/registration/minimisation.h>
 
 
 //methode principale:
 
 template <class T>
-Motion Minimisation::quaternion(DisplacementField<T>& displacementField)
+aims::AffineTransformation3d Minimisation::quaternion(DisplacementField<T>& displacementField)
 {
       
   //on charge l'ensemble des points a apparier
@@ -52,7 +52,7 @@ Motion Minimisation::quaternion(DisplacementField<T>& displacementField)
 //   }
 //   std::cout << "!! Ref points sum: " << carto::toString(sumref) << std::endl;
   
-  Motion m;
+  aims::AffineTransformation3d m;
 
   if ((sizekept > 0) && (ptsref.size() > 0))
   {
@@ -104,8 +104,8 @@ Motion Minimisation::quaternion(DisplacementField<T>& displacementField)
     Point3df r; // point residu courant
     float r2; // norme carree de r
     unsigned indice; // indice de boucle multiple (variable locale boucle impossible)
-    Motion rigide_kept;
-    Motion similitude_kept;
+    aims::AffineTransformation3d rigide_kept;
+    aims::AffineTransformation3d similitude_kept;
 
     // La liste des points ref et test ayant les plus petits residus
     std::vector<Point3df> ptstestkept;

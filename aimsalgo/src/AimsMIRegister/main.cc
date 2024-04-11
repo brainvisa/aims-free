@@ -39,7 +39,6 @@
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <aims/io/finder.h>
-#include <aims/io/motionW.h>
 #include <aims/io/channelR.h>
 #include <aims/math/math_g.h>
 #include <aims/io/datatypecode.h>
@@ -79,17 +78,17 @@ void WriteCurrentDepInFile(
           bool                 generatecurve)
 {
   // Infer deplacement from p and gravity centers stored in objfunc
-  Motion depl    = objfunc->getDepl( p );
+  AffineTransformation3d depl = objfunc->getDepl( p );
   unique_ptr<AffineTransformation3d> invdepl = depl.inverse();
 
   cout << "Direct FileName " << direct << endl;
   cout << "Inverse FileName " << inverse << endl;
 
   // Write ref_TO_test transform matrix
-  MotionWriter motionWDir(direct,
-        (notFirstCall? ios::app : ios::out) );
-  MotionWriter motionWRev(inverse,
-        (notFirstCall? ios::app : ios::out) );
+  Writer<AffineTransformation3d> motionWDir(direct );
+//         (notFirstCall? ios::app : ios::out) );
+  Writer<AffineTransformation3d> motionWRev(inverse) ;
+//         (notFirstCall? ios::app : ios::out) );
 
   motionWDir.write( depl );
   motionWRev.write( *invdepl );

@@ -42,7 +42,7 @@
 #include <cartobase/config/verbose.h>
 #include <cartobase/stream/fileutil.h>
 #include <aims/getopt/getopt2.h>
-#include <aims/io/motionR.h>
+#include <aims/io/reader.h>
 
 
 using namespace aims;
@@ -54,7 +54,7 @@ int main( int argc, const char **argv )
 {
   try {
     string inputFileName;
-    Reader< Motion > transformationReader( "" );
+    Reader< AffineTransformation3d > transformationReader( "" );
     vector< string > imageStatistics;
     vector< string > imageWeights;
     string outputFileName = "";
@@ -179,7 +179,7 @@ int main( int argc, const char **argv )
     if ( transformationReader.fileName().empty() ) {
       roiFeatures.computeFeatures( getRoiIterator( inputFileName ) );
     } else {
-      Motion transformation;
+      AffineTransformation3d transformation;
       transformationReader.read( transformation );
       if( invertMotion )
         transformation = *transformation.inverse();

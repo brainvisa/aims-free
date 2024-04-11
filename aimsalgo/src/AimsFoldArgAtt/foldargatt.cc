@@ -35,10 +35,9 @@
 #include <cstdlib>
 #include <aims/getopt/getopt2.h>
 #include <aims/data/data.h>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
-#include <aims/io/motionR.h>
 #include <aims/io/apcreader.h>
 #include <aims/foldgraph/foldgraphattributes.h>
 #include <graph/graph/graph.h> 
@@ -124,11 +123,11 @@ int main( int argc, const char** argv )
       Graph	graph;
       graphr.read( graph, -1 );
 
-      unique_ptr<Motion>	motion;
+      unique_ptr<AffineTransformation3d> motion;
       if( !motionfname.empty() )
         {
-          motion.reset( new Motion );
-          MotionReader	mr( motionfname );
+          motion.reset( new AffineTransformation3d );
+          Reader<AffineTransformation3d> mr( motionfname );
           mr.read( *motion );
         }
 

@@ -14,8 +14,6 @@
 // Entrees sorties generiques
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
-#include <aims/io/motionW.h>
-#include <aims/io/motionR.h>
 #include <aims/resampling/resampling_g.h> 
 
 // Gestion des fichiers
@@ -194,7 +192,7 @@ bool doit( Process & process, const string & fileinr, Finder & )
 
   // Declaration des differents motions necessaires
   // p transfo totale precedente, q transfo ponctuelle calculee, r nouvelle transfo totale composee
-  Motion p, q, r ;
+  AffineTransformation3d p, q, r ;
   q.setToIdentity();
   r.setToIdentity();
 
@@ -227,8 +225,8 @@ bool doit( Process & process, const string & fileinr, Finder & )
 
     //  Lecture d'une transfo initiale éventuelle
     if(abm.filemotion.length() != 0) {
-      MotionReader mord(abm.filemotion);
-      mord >> p;
+      Reader<AffineTransformation3d> mord(abm.filemotion);
+      mord.read( p );
     }
     else p.setToIdentity();
 
@@ -392,7 +390,7 @@ bool doit( Process & process, const string & fileinr, Finder & )
   // Mise de l'image test a la resolution de l'image de reference si besoin
   if( (vs_ref[0]!=vs_test[0]) || (vs_ref[1]!=vs_test[1]) || (vs_ref[2]!=vs_test[2]) )
   {
-    Motion identity;
+    AffineTransformation3d identity;
     identity.setToIdentity();
     LinearResampler<T> reech;
     reech.setRef( test );
@@ -593,7 +591,7 @@ bool doit( Process & process, const string & fileinr, Finder & )
                   + FileUtil::removeExtension( FileUtil::basename(string(n1))) + "_TO_" 
                   + FileUtil::removeExtension( FileUtil::basename(string(n2))) + ".trm";
   }
-  MotionWriter wm( outmotion );
+  Writer<AffineTransformation3d> wm( outmotion );
   wm.write( r );
   
   cout << "End of the process" << endl << "Motion estimated is: " << endl;
