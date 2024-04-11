@@ -145,13 +145,6 @@ namespace aims
     virtual bool check( const std::string & filename, Finder & f ) const;
   };
 
-  class FinderTrmFormat : public FinderFormat
-  {
-  public:
-    virtual ~FinderTrmFormat() {}
-    virtual bool check( const std::string & filename, Finder & f ) const;
-  };
-
   class FinderHieFormat : public FinderFormat
   {
     public:

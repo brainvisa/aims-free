@@ -41,12 +41,13 @@
 #include <cartobase/object/object_d.h>
 #include <aims/data/pheader.h>
 #include <aims/io/iooptions.h>
-#include <aims/io/reader.h>
-#include <aims/io/writer.h>
+#include <soma-io/io/reader.h>
+#include <soma-io/io/writer.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/uuid/uuid.h>
 #include <soma-io/datasourceinfo/datasourceinfoloader.h>
 #include <soma-io/writer/pythonwriter.h>
+#include <cartobase/stream/fileutil.h>
 
 using namespace aims;
 using namespace aims::internal;
@@ -144,9 +145,12 @@ carto::SyntaxSet* PythonHeader::syntax()
 
 bool PythonHeader::readMinf( const string &filename )
 {
+  if( FileUtil::fileStat( filename ).find('+') == string::npos )
+    return false;
+
   try
   {
-    Reader<GenericObject> r( filename );
+    soma::Reader<GenericObject> r( filename );
     Object options = Object::value( Dictionary() );
     options->setProperty( "syntaxset", rc_ptr<SyntaxSet>( syntax(), true ) );
     bool hasbs = hasProperty( "byte_swapping" );
@@ -223,17 +227,18 @@ bool PythonHeader::writeMinf( const Object & header,
   if( ph->hasProperty( "uuid" ) )
     ph->removeProperty( "uuid" );
 
-  try
-  {
-    Reader<GenericObject> r( filename );
-    r.setOptions( options );
-    Object oh( r.read() );
-    Object u = oh->getProperty("uuid");
-    uuid = u->getString();
-  }
-  catch( exception & )
-  {
-  }
+  if( FileUtil::fileStat( filename ).find('+') != string::npos )
+    try
+    {
+      soma::Reader<GenericObject> r( filename );
+      r.setOptions( options );
+      Object oh( r.read() );
+      Object u = oh->getProperty("uuid");
+      uuid = u->getString();
+    }
+    catch( exception & )
+    {
+    }
     
   //std::cout << "writeMinf, setting uuid " << uuid << std::endl << std::flush;
   if( !uuid.empty() )

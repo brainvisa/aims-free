@@ -145,7 +145,6 @@ set( _headers
     io/triheader.h
     io/triR.h
     io/triW.h
-    io/trmheader.h
     io/process.h
     io/datatypecode.h
     io/wavefrontheader.h
@@ -363,7 +362,6 @@ set(_aimsdata_sources
     io/triheader.cc
     io/triR.cc
     io/triW.cc
-    io/trmheader.cc
     io/wavefrontheader.cc
     io/writer_bucket.cc
     io/writer_cartovolume.cc

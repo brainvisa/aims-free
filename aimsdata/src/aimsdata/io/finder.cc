@@ -154,9 +154,6 @@ void Finder::initPrivate()
       ext.push_back( "tck" );
       registerFormat( "BUNDLES", new FinderGraphFormat, ext );
       ext.clear();
-      ext.push_back( "trm" );
-      registerFormat( "TRM", new FinderTrmFormat, ext );
-      ext.clear();
       ext.push_back( "hie" );
       registerFormat( "HIE", new FinderHieFormat, ext );
       // at end: formats without an extension

@@ -110,7 +110,7 @@ void XfmFormatReader::read( AffineTransformation3d & obj,
                             const AllocatorContext & /* context */,
                             Object options )
 {
-  // cout << "XfmFormatReader::read\n";
+  // cout << "XfmFormatReader::read " << dsi->list().dataSource()->url() << endl;
   rc_ptr<DataSource> ds = dsi->list().dataSource();
 
   if( !ds->isOpen() )
@@ -128,8 +128,8 @@ void XfmFormatReader::read( AffineTransformation3d & obj,
     if( r && s.substr( 0, 18 ) == "MNI Transform File" )
       mni = true;
   }
-  while( r && s.substr( 0, 18 ) != "Linear_Transform =" );
-  if( !r )
+  while( r && !ds->eof() && s.substr( 0, 18 ) != "Linear_Transform =" );
+  if( !r || ds->eof() )
     throw wrong_format_error( ds->url() );
 
   unsigned	i, j;

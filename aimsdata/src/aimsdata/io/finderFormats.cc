@@ -57,7 +57,6 @@
 #include <aims/io/triheader.h>
 #include <aims/io/bckheader.h>
 #include <aims/io/argheader.h>
-#include <aims/io/trmheader.h>
 #include <aims/io/mniobjheader.h>
 #include <aims/io/wavefrontheader.h>
 #include <aims/io/imasparseheader.h>
@@ -531,32 +530,6 @@ bool FinderGraphFormat::check( const string & filename, Finder & f ) const
   f.setPossibleDataTypes( vt );
   string format = hdr->getProperty( "file_type" )->getString();
   f.setFormat( format );
-  f.setHeader( hdr );
-
-  return true;
-}
-
-
-bool FinderTrmFormat::check( const string & filename, Finder & f ) const
-{
-  TrmHeader	*hdr = new TrmHeader( filename );
-
-  try
-    {
-      hdr->read();
-    }
-  catch( exception & )
-    {
-      delete hdr;
-      throw;
-    }
-
-  f.setObjectType( "AffineTransformation3d" );
-  f.setDataType( "VOID" );
-  vector<string>	vt;
-  vt.push_back( "VOID" );
-  f.setPossibleDataTypes( vt );
-  f.setFormat( "TRM" );
   f.setHeader( hdr );
 
   return true;
