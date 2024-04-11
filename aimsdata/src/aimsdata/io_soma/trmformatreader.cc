@@ -38,6 +38,7 @@
 #include <soma-io/io/formatdictionary.h>
 #include <soma-io/datasource/datasource.h>
 #include <soma-io/io/reader.h>
+#include <soma-io/datasourceinfo/datasourceinfoloader.h>
 #include <cartobase/stream/fileutil.h>
 //--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
@@ -141,32 +142,33 @@ void TrmFormatReader::read( AffineTransformation3d & obj,
       }
   ds->close();
 
-  PythonHeader  *ph = new PythonHeader;
-  Reader<carto::GenericObject> minfr(
-      dsi->list().dataSource( "minf" )->url() );
+  Object  hdr = Object::value( PropertySet() );
+  rc_ptr<DataSource> mds( 0 );
   try
   {
-    minfr.read( *ph );
+    mds = dsi->list().dataSource( "minf" );
+    if( mds.get() )
+      DataSourceInfoLoader::readMinf( *mds, hdr, options );
   }
   catch( ... )
   {
   }
-  obj.setHeader( ph );
+  obj.setHeader( hdr );
 
-  if( dsi->header().get() )
-    obj.header()->copyProperties( dsi->header() );
   try
   {
     Object oinv = options->getProperty( "inv" );
     bool inv = bool( oinv->getScalar() );
     if( inv )
-    {
       obj = *obj.inverse();
-    }
   }
   catch( runtime_error & )
   {
   }
+
+  // this is done after inv because the dsi header has also been inverted
+  if( dsi->header().get() )
+    obj.header()->copyProperties( dsi->header() );
 }
 
 

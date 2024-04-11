@@ -38,7 +38,6 @@
 #include <aims/io_soma/trmformatreader.h>
 #include <cartobase/stream/fileutil.h>
 #include <soma-io/datasource/filedatasource.h>
-#include <soma-io/datasourceinfo/datasourceinfoloader.h>
 
 
 using namespace aims;
@@ -100,44 +99,13 @@ DataSourceInfo TrmFormatChecker::check( DataSourceInfo dsi,
 
     Object hdr = Object::value( PropertySet() );  // header
 
-    hdr->copyProperties( Object::reference( *m.header() ) );
+    hdr->copyProperties( m.header() );
 
     hdr->setProperty( "format", "TRM" );
     hdr->setProperty( "object_type", "AffineTransformation3d" );
     hdr->setProperty( "data_type", "VOID" );
 
     dsi.header() = hdr;
-
-    // add meta-info to header
-    DataSource* minfds = dsi.list().dataSource( "minf" ).get();
-    DataSourceInfoLoader::readMinf( *minfds, dsi.header(), options );
-
-    try
-    {
-      Object oinv = options->getProperty( "inv" );
-      bool inv = bool( oinv->getScalar() );
-      if( inv )
-      {
-        Object s;
-        if( hdr->hasProperty( "source_referential" ) )
-        {
-          s = hdr->getProperty( "source_referential" );
-          hdr->removeProperty( "source_referential" );
-        }
-        if( hdr->hasProperty( "destination_referential" ) )
-        {
-          hdr->setProperty( "source_referential",
-                            hdr->getProperty( "destination_referential" ) );
-          hdr->removeProperty( "destination_referential" );
-        }
-        if( s )
-          hdr->setProperty( "destination_referential", s );
-      }
-    }
-    catch( runtime_error & )
-    {
-    }
-
   }
 
   bool docapa = !dsi.capabilities().isInit();
