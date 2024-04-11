@@ -102,15 +102,9 @@ Main classes
   - a few algorithms will be added
 
 '''
-from __future__ import print_function
-from __future__ import absolute_import
 
-from six.moves import range
-import collections
 import functools
-import types
 import os
-import six
 import sys
 import numbers
 import inspect
@@ -140,16 +134,14 @@ except ImportError as exc:
         raise ImportError('version mismatch: you are running Python {0} '
                           'but the soma.aims module was likely compiled for '
                           'Python 3.'
-                          .format(sys.version.split()[0], sys.api_version))
+                          .format(sys.version.split()[0]))
     elif exc.args[0] == ('dynamic module does not define module export '
                          'function (PyInit_aimssip)'):
-        six.raise_from(
-            ImportError('version mismatch: you are running Python {0} '
-                        'but the soma.aims module was likely compiled for '
-                        'Python 2.'
-                        .format(sys.version.split()[0], sys.api_version)),
-            exc
-        )
+        raise ImportError('version mismatch: you are running Python {0} '
+                          'but the soma.aims module was likely compiled for '
+                          'Python 2.'
+                          .format(sys.version.split()[0])) \
+            from exc
     raise  # other import errors are re-raised
 
 sip = None
@@ -842,29 +834,16 @@ def __setitem_vec__(self, s, val):
         return self.__oldsetitem__(s, val)
 
 
-if six.PY34:
-    def __operator_overload__(self, op, other):
-        try:
-            return op(self, other)
-        except TypeError:
-            # this exception handling is here to follow the behaviour of normal
-            # operators: if a.__add__(b) does not support the operand type of
-            # b, it should return NotImplemented, and should not raise an
-            # exception. In that case, python can call b.__radd__(a), which it
-            # doesn't do if an exception is raised.
-            return NotImplemented
-
-else:
-    def __operator_overload__(op, self, other):
-        try:
-            return op(self, other)
-        except TypeError:
-            # this exception handling is here to follow the behaviour of normal
-            # operators: if a.__add__(b) does not support the operand type of
-            # b, it should return NotImplemented, and should not raise an
-            # exception. In that case, python can call b.__radd__(a), which it
-            # doesn't do if an exception is raised.
-            return NotImplemented
+def __operator_overload__(self, op, other):
+    try:
+        return op(self, other)
+    except TypeError:
+        # this exception handling is here to follow the behaviour of normal
+        # operators: if a.__add__(b) does not support the operand type of
+        # b, it should return NotImplemented, and should not raise an
+        # exception. In that case, python can call b.__radd__(a), which it
+        # doesn't do if an exception is raised.
+        return NotImplemented
 
 
 def __vol_pow__(self, y, z=None):
@@ -918,7 +897,7 @@ def __Volume_astype__(self, dtype, copy=False):
     -------
     A volume of the converted type
     '''
-    if isinstance(dtype, six.string_types):
+    if isinstance(dtype, str):
         if dtype.startswith('Volume_'):
             dtype = typeCode(dtype[7:])
         else:
@@ -973,7 +952,7 @@ def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
     import sip
     for x, y in classes:
-        if not isinstance(y, six.class_types):
+        if not isinstance(y, type):
             continue
         try:
             try:
@@ -1019,19 +998,10 @@ def __fixsipclasses__(classes):
                     except AttributeError:
                         add = None
                     if add is not None:
-                        if six.PY34:
-                            setattr(
-                                y, '__%s__' % op, functools.partialmethod(
-                                    __fixsipclasses__.__operator_overload__,
-                                    add))
-                        else:
-                            setattr(
-                                y, '__%s__' % op,
-                                types.MethodType(
-                                    functools.partial(
-                                      __fixsipclasses__.__operator_overload__,
-                                        add),
-                                    None, y))
+                        setattr(
+                            y, '__%s__' % op, functools.partialmethod(
+                                __fixsipclasses__.__operator_overload__,
+                                add))
                 # pow, ipow, floordiv, ifloordiv
                 y.__pow__ = __fixsipclasses__.__vol_pow__
                 y.__ipow__ = __fixsipclasses__.__vol_ipow__
@@ -1042,11 +1012,7 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self).__getitem__(*args, **kwargs)
                 y.__setitem__ = lambda self, *args, **kwargs: \
                     numpy.asarray(self).__setitem__(*args, **kwargs)
-                if not six.PY2:
-                    y.astype = __fixsipclasses__.__Volume_astype__
-                else:
-                    y.astype = types.MethodType(
-                        __fixsipclasses__.__Volume_astype__, None, y)
+                y.astype = __fixsipclasses__.__Volume_astype__
                 # volume pickling
                 y.__getstate__ = __fixsipclasses__._vol_getstate
                 y.__setstate__ = __fixsipclasses__._vol_setstate
@@ -1058,8 +1024,6 @@ def __fixsipclasses__(classes):
                     y.__iter__ = __fixsipclasses__.newiter
                 if hasattr(y, '__objnext__'):
                     y.__next__ = __fixsipclasses__.newnext
-                    if six.PY2:
-                        y.next = __fixsipclasses__.newnext
                 if name.startswith('AimsVector_') \
                         or name.startswith('Texture_') \
                         or name in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
@@ -1081,9 +1045,7 @@ def __fixsipclasses__(classes):
                     y.__iter__ = lambda self: self.__iterclass__(self)
                     y.iteritems = lambda self: self.__iteritemclass__(
                         self)
-                    if not six.PY2:
-                        y.items = lambda self: self.__iteritemclass__(
-                            self)
+                    y.items = lambda self: self.__iteritemclass__(self)
                     if name.startswith('BucketMap_'):
                         y.Bucket.__iterclass__ = BckIter
                         y.Bucket.__iteritemclass__ = BckIterItem
@@ -1091,9 +1053,8 @@ def __fixsipclasses__(classes):
                             = lambda self: self.__iterclass__(self)
                         y.Bucket.iteritems \
                             = lambda self: self.__iteritemclass__(self)
-                        if not six.PY2:
-                            y.Bucket.items \
-                                = lambda self: self.__iteritemclass__(self)
+                        y.Bucket.items \
+                            = lambda self: self.__iteritemclass__(self)
 
             if (hasattr(y, 'next')
                     and hasattr(y, '__iter__')
@@ -1108,10 +1069,7 @@ def __fixsipclasses__(classes):
             if hasattr(y, '__array__'):
                 patch = True
                 try:
-                    if six.PY2:
-                        s = inspect.getargspec(y.__array__)
-                    else:
-                        s = inspect.getfullargspec(y.__array__)
+                    s = inspect.getfullargspec(y.__array__)
                     if 'dtype' in s.args:
                         # dtype is already an argument of __array__:
                         # don't need a patch
@@ -1122,28 +1080,18 @@ def __fixsipclasses__(classes):
                     # Moving the method __array__ prevents it from being called
                     # with the self argument. This is not the case for the
                     # __call__ method above for instance... I don't understand.
-                    if six.PY2:
-                        y.__oldarray__ = y.__array__
-                        y.__array__ = lambda self, dtype=None: \
-                            self.__oldarray__(self).astype(
-                                dtype=dtype or self.__oldarray__(self).dtype,
-                                copy=False)
-                    else:
-                        # better fix in python3 (or less bad...)
-                        y.__oldarray__ = functools.partialmethod(y.__array__)
-                        y.__array__ = lambda self, dtype=None: \
-                            self.__oldarray__().astype(
-                                dtype=dtype or self.__oldarray__().dtype, 
-                                copy=False)
+                    # better fix in python3 (or less bad...)
+                    y.__oldarray__ = functools.partialmethod(y.__array__)
+                    y.__array__ = lambda self, dtype=None: \
+                        self.__oldarray__().astype(
+                            dtype=dtype or self.__oldarray__().dtype,
+                            copy=False)
                 del patch
 
                 # useful shortcut: volume.np is handier than np.asarray(volume)
                 if not hasattr(y, 'np'):
                     y.np = property(lambda self: self.__array__())
-                    if not six.PY2:
-                        # we cannot set the __doc__ attribute (or any other
-                        # attribute actually) on a property object in python2
-                        y.np.__doc__ = \
+                    y.np.__doc__ = \
 '''The ``np`` property is a shortcut to the ``__array__`` method. Thus::
 
     something.np
@@ -1192,8 +1140,6 @@ __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items())
 
 Object.__iter__ = __fixsipclasses__.objiter
 Object.__next__ = __fixsipclasses__.objnext
-if six.PY2:
-    Object.next = __fixsipclasses__.objnext
 Object.__delitem__ = __fixsipclasses__.proxydelitem
 Object._getAttributeNames = __fixsipclasses__.getAttributeNames
 
@@ -1581,8 +1527,8 @@ def genobj__update__(self, x):
     if not self.isDictionary():
         raise ValueError(
             'Generic object is not a dictionary-compatible object')
-    for x, y in six.iteritems(x):
-        self[x] = y
+    for k, y in x.items():
+        self[k] = y
 
 
 def genobj__iadd__(self, x):
@@ -1608,11 +1554,7 @@ carto.GenericObject.__oldgetattribute__ = carto.GenericObject.__getattribute__
 carto.GenericObject.__getattribute__ = genobj__getattribute__
 carto.GenericObject.update = genobj__update__
 carto.GenericObject.__iadd__ = genobj__iadd__
-carto.GenericObject.iteritems = objiteritems
-if not six.PY2:
-    carto.GenericObject.items = objiteritems
-carto.GenericObject.itervalues = objitervalues
-carto.GenericObject.iterkeys = carto.GenericObject.__iter__
+carto.GenericObject.items = objiteritems
 Object.__iadd__ = obj__iadd__
 del genobj__getitem__, genobj__new__, genobj__update__, genobj__iadd__
 del genobj__getattribute__
@@ -1662,7 +1604,7 @@ def typeCode(data):
             }
     if isinstance(data, numpy.dtype):
         data = str(data)
-    if type(data) in (str, six.text_type):
+    if isinstance(data, str):
         return dmap.get(data, data)
     if not isinstance(data, type):
         # we use the type, not an instance (which may not be hashable)
@@ -1743,7 +1685,7 @@ def somaio_typeCode(data):
             return data
     if isinstance(data, tuple):
         return '%s of %s' % (_somaio_objecttype(data[0]), data[1])
-    if not isinstance(data, str) and not isinstance(data, six.text_type):
+    if not isinstance(data, str):
         if hasattr(data, '__name__'):
             data = data.__name__
         else:
@@ -1760,7 +1702,7 @@ def _parseTypeInArgs(*args, **kwargs):
         del kwargs['dtype']
     else:
         y = [i for i, x in enumerate(args)
-             if type(x) in (str, six.text_type) or hasattr(x, '__name__')]
+             if isinstance(x, str) or hasattr(x, '__name__')]
         if len(y) != 0:
             i = y[0]
             dtype = args[y[0]]
@@ -2203,14 +2145,14 @@ def supported_io_formats(otypes=None, access=''):
     iotypes = IOObjectTypesDictionary.objectsTypes()
     if otypes is None:
         otypes = iotypes
-    elif isinstance(otypes, six.string_types):
+    elif isinstance(otypes, str):
         otypes = {otypes: None}
     elif isinstance(otypes, (list, tuple)):
         otypes = dict([(x, None) for x in otypes])
     iosread = carto.IOObjectTypesDictionary.readTypes()
     ioswrite = carto.IOObjectTypesDictionary.writeTypes()
     formats = set()
-    for otype, dtypes in six.iteritems(otypes):
+    for otype, dtypes in otypes.items():
         if otype not in iotypes:
             continue
         if dtypes is None:
