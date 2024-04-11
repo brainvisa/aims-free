@@ -165,6 +165,7 @@ set( _headers
     io_soma/trm_header_formatreader.h
     io_soma/xfmformatchecker.h
     io_soma/xfmformatreader.h
+    io_soma/xfmformatwriter.h
     math/dtitensor.h
     math/gausslu.h
     math/integrator.h
@@ -388,6 +389,7 @@ set(_aimsdata_sources
     io_soma/trm_header_formatreader.cc
     io_soma/xfmformatchecker.cc
     io_soma/xfmformatreader.cc
+    io_soma/xfmformatwriter.cc
     math/gausslu.cc
     math/mathelem.cc
     math/romberg.cc

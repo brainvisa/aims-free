@@ -31,8 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef AIMS_IO_SOMA_XFM_HEADER_FORMATREADER_H
-#define AIMS_IO_SOMA_XFM_HEADER_FORMATREADER_H
+#ifndef AIMS_IO_SOMA_XFMFORMATREADER_H
+#define AIMS_IO_SOMA_XFMFORMATREADER_H
 
 #include <soma-io/reader/formatreader.h>
 

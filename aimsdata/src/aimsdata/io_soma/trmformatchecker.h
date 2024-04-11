@@ -30,8 +30,8 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-#ifndef AIMS_IO_SOMA_TRM_FORMATCHECKER_H
-#define AIMS_IO_SOMA_TRM_FORMATCHECKER_H
+#ifndef AIMS_IO_SOMA_TRMFORMATCHECKER_H
+#define AIMS_IO_SOMA_TRMFORMATCHECKER_H
 
 #include <soma-io/checker/formatchecker.h>
 //----------------------------------------------------------------------------

@@ -31,8 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef AIMS_IO_SOMA_TRMFORMATWRITER_H
-#define AIMS_IO_SOMA_TRMFORMATWRITER_H
+#ifndef AIMS_IO_SOMA_XFMFORMATWRITER_H
+#define AIMS_IO_SOMA_XFMFORMATWRITER_H
 
 #include <soma-io/writer/formatwriter.h>
 
@@ -48,7 +48,7 @@ namespace soma
   class Transformation3d;
 
 
-  class TrmFormatWriter : public FormatWriter<aims::AffineTransformation3d>
+  class XfmFormatWriter : public FormatWriter<aims::AffineTransformation3d>
   {
   public:
     virtual bool filterProperties(carto::Object properties,
@@ -60,7 +60,7 @@ namespace soma
   };
 
 
-  class Trm3DFormatWriter : public FormatWriter<Transformation3d>
+  class Xfm3DFormatWriter : public FormatWriter<Transformation3d>
   {
   public:
     virtual bool filterProperties(carto::Object properties,

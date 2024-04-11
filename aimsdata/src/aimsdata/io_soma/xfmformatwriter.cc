@@ -31,15 +31,16 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <aims/io_soma/trmformatwriter.h>
+#include <aims/io_soma/xfmformatwriter.h>
 #include <aims/transformation/affinetransformation3d.h>
 #include <aims/io/writer.h>
+#include <aims/resampling/standardreferentials.h>
 #include <soma-io/io/formatdictionary.h>
 #include <soma-io/utilities/minfutil.h>
 #include <soma-io/datasource/filedatasource.h>
 //--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
-#define localMsg( message ) cartoCondMsg( 4, message, "TRMFORMATWRITER" )
+#define localMsg( message ) cartoCondMsg( 4, message, "XFMFORMATWRITER" )
 // localMsg must be undef at end of file
 //----------------------------------------------------------------------------
 
@@ -48,14 +49,16 @@ using namespace soma;
 using namespace carto;
 using namespace std;
 
-bool TrmFormatWriter::filterProperties( Object /* properties */,
+
+bool XfmFormatWriter::filterProperties( Object /* properties */,
                                         Object /* options */ )
 {
   // Nothing to filter here
   return true;
 }
 
-bool TrmFormatWriter::write( const AffineTransformation3d & obj,
+
+bool XfmFormatWriter::write( const AffineTransformation3d & obj,
                              rc_ptr<DataSourceInfo> dsi,
                              Object options )
 {
@@ -64,25 +67,37 @@ bool TrmFormatWriter::write( const AffineTransformation3d & obj,
 
   std::string minfname = ds->url() + ".minf";
 
-  dsl.addDataSource( "trm", ds );
+  dsl.addDataSource( "xfm", ds );
   dsl.addDataSource( "minf", carto::rc_ptr<DataSource>
                                ( new FileDataSource( minfname ) ) );
 
   localMsg( "write " + ds->url() );
 
   ofstream ddeplacements( ds->url().c_str(), std::ios::out );
-  ddeplacements << obj.translation()[0]  << " "
-                << obj.translation()[1]  << " "
-                << obj.translation()[2]  << endl;
-  ddeplacements << obj.rotation()(0,0) << " "
-                << obj.rotation()(0,1) << " "
-                << obj.rotation()(0,2) << endl;
-  ddeplacements << obj.rotation()(1,0) << " "
-                << obj.rotation()(1,1) << " "
-                << obj.rotation()(1,2) << endl;
-  ddeplacements << obj.rotation()(2,0) << " "
-                << obj.rotation()(2,1) << " "
-                << obj.rotation()(2,2) << endl;
+  try
+  {
+    Object d = obj.header()->getProperty( "destination_referential" );
+    string s = d->getString();
+    if( s == StandardReferentials::mniTemplateReferentialID()
+        || s == StandardReferentials::mniTemplateReferential() )
+      ddeplacements << "MNI Transform File\n";
+  }
+  catch( ... )
+  {
+  }
+  ddeplacements << "% AIMS\n\nTransform_Type = Linear;\nLinear_Transform =\n";
+  ddeplacements << obj.matrix()(0, 0)  << " "
+                << obj.matrix()(0, 1)  << " "
+                << obj.matrix()(0, 2)  << " "
+                << obj.matrix()(0, 3)  << endl;
+  ddeplacements << obj.matrix()(1, 0)  << " "
+                << obj.matrix()(1, 1)  << " "
+                << obj.matrix()(1, 2)  << " "
+                << obj.matrix()(1, 3)  << endl;
+  ddeplacements << obj.matrix()(2, 0)  << " "
+                << obj.matrix()(2, 1)  << " "
+                << obj.matrix()(2, 2)  << " "
+                << obj.matrix()(2, 3)  << endl;
   ddeplacements.close();
 
   if( obj.header() )
@@ -116,14 +131,14 @@ bool TrmFormatWriter::write( const AffineTransformation3d & obj,
 }
 
 
-bool Trm3DFormatWriter::filterProperties( Object /* properties */,
+bool Xfm3DFormatWriter::filterProperties( Object /* properties */,
                                           Object /* options */ )
 {
   // Nothing to filter here
   return true;
 }
 
-bool Trm3DFormatWriter::write( const Transformation3d & obj,
+bool Xfm3DFormatWriter::write( const Transformation3d & obj,
                                rc_ptr<DataSourceInfo> dsi,
                                Object options )
 {
@@ -142,21 +157,21 @@ bool Trm3DFormatWriter::write( const Transformation3d & obj,
 namespace
 {
 
-  bool inittrmformat()
+  bool initxfmformat()
   {
-    TrmFormatWriter	*r = new TrmFormatWriter;
+    XfmFormatWriter	*r = new XfmFormatWriter;
     vector<string>	exts;
-    exts.push_back( "trm" );
-    FormatDictionary<AffineTransformation3d>::registerFormat( "TRM", r, exts );
+    exts.push_back( "xfm" );
+    FormatDictionary<AffineTransformation3d>::registerFormat( "XFM", r, exts );
 
-    Trm3DFormatWriter *r2 = new Trm3DFormatWriter;
-    FormatDictionary<Transformation3d>::registerFormat( "AFFINETRANS", r2,
+    Xfm3DFormatWriter *r2 = new Xfm3DFormatWriter;
+    FormatDictionary<Transformation3d>::registerFormat( "XFM3D", r2,
                                                         exts );
 
     return true;
   }
 
-  bool dummy __attribute__((unused)) = inittrmformat();
+  bool dummy __attribute__((unused)) = initxfmformat();
 
 }
 
