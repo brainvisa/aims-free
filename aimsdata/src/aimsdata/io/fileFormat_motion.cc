@@ -49,6 +49,7 @@
 #include <aims/transformation/affinetransformation3d.h>
 #include <aims/transformation/transformationgraph3d.h>
 #include <aims/io_soma/trmformatchecker.h>
+#include <aims/io_soma/xfmformatchecker.h>
 #include <aims/io_soma/trm_header_formatchecker.h>
 #include <aims/io_soma/trm_compose_formatchecker.h>
 #include <aims/io_soma/trmingraphformatchecker.h>
@@ -129,6 +130,14 @@ static bool _motiondic()
     exts[0] = "trm";
     DataSourceInfoLoader::registerFormat( "TRM",
                                           new TrmFormatChecker, exts );
+  }
+
+  // register soma-io checker for the XFM format
+  {
+    vector<string>  exts(1);
+    exts[0] = "xfm";
+    DataSourceInfoLoader::registerFormat( "XFM",
+                                          new XfmFormatChecker, exts );
   }
 
   // register soma-io checker for the TRMHEADER format
