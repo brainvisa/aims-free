@@ -45,9 +45,13 @@
 
 #include <aims/io/fileFormat_d.h>
 #include <aims/io/baseFormats_mesh_d.h>
+#include <soma-io/datasourceinfo/datasourceinfoloader.h>
+#include <aims/io_soma/fssurfformatchecker.h>
 
 
 using namespace aims;
+using namespace soma;
+using namespace std;
 
 namespace aims
 {
@@ -255,8 +259,36 @@ static bool _meshdic()
   FileFormatDictionary<AimsTimeSurface<3, Point2df> >::init();
   FileFormatDictionary<AimsTimeSurface<4, Point2df> >::init();
 
+  // register soma-io checker for the FSSURF format
+  {
+    vector<string>  exts(2);
+    exts[0] = "white";
+    exts[1] = "pial";
+    DataSourceInfoLoader::registerFormat( "FSSURF",
+                                          new FsSurfFormatChecker, exts );
+  }
+
   return true;
 }
 
 static bool meshdic __attribute__((unused)) = _meshdic();
+
+
+#include <soma-io/io/formatdictionary_d.h>
+#include <soma-io/reader/formatreader_d.h>
+#include <soma-io/io/reader_d.h>
+#include <soma-io/io/writer_d.h>
+
+namespace soma
+{
+  template class FormatReader<AimsSurfaceTriangle>;
+  template class FormatDictionary<AimsSurfaceTriangle>;
+  template class Reader<AimsSurfaceTriangle>;
+  template class Writer<AimsSurfaceTriangle>;
+
+//   template class FormatReader<AimsTimeSurface<4, Void> >;
+//   template class FormatDictionary<AimsTimeSurface<4, Void> >;
+//   template class Reader<AimsTimeSurface<4, Void> >;
+//   template class Writer<AimsTimeSurface<4, Void> >;
+}
 
