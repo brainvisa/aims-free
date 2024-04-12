@@ -80,7 +80,6 @@ PSUBDIRS = \
     AimsRegisterFFDFromCoordImages \
     AimsRegisterFFDApply           \
     AimsReplaceLevel               \
-    AimsResample                   \
     AimsSegmentsToMesh             \
     AimsSNR \
     AimsSphereDistribution         \

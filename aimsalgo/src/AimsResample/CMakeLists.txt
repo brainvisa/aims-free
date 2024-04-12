@@ -1,1 +1,0 @@
-SHFJ_ADD_EXECUTABLE(AimsResample AimsResample.cc aimsalgo)

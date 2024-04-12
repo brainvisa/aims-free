@@ -1044,7 +1044,7 @@ int main( int argc, const char **argv )
       "- when resampling an image, inverse transformations must be given, "
       "ordered from the target space to the input space. This also applies to "
       "affine transformations (this is the opposite convention to "
-      "AimsResample, use the :inv suffix to invert affine transformations on "
+      "AimsApplyTransform, use the :inv suffix to invert affine transformations on "
       "the fly).\n"
       "\n"
       "- when resampling meshes, buckets, fibers, or points, the direct "

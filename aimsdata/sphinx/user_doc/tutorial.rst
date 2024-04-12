@@ -831,7 +831,7 @@ Get a symmetrical ROI
 
 * :cmds:`command help for AimsMidPlaneAlign <#aims_AimsMidPlaneAlign>`
 * :cmds:`command help for cartoLinearComb.py <#carto_cartoLinearComb.py>`
-* :cmds:`command help for AimsResample <#aims_AimsResample>`
+* :cmds:`command help for AimsApplyTransform <#aims_AimsApplyTransform>`
 * :cmds:`command help for AimsThreshold <#aims_AimsThreshold>`
 * :cmds:`command help for AimsFlip <#aims_AimsFlip>`
 
@@ -865,7 +865,7 @@ The purpose of this section is for instance to compare the ROI measurement for b
 
   ::
 
-    prompt% AimsResample -i linearComb_roi.nii -o resample_roi.nii -m mriT1.nii_TO_align.nii.trm
+    prompt% AimsApplyTransform -i linearComb_roi.nii -o resample_roi.nii -m mriT1.nii_TO_align.nii.trm
 
 * Perform a threshold to 8000 to preserve a correct volume because the resampling widely extend the symmetric roi volume:
 
@@ -889,7 +889,7 @@ The purpose of this section is for instance to compare the ROI measurement for b
 
   ::
 
-    prompt% AimsResample -i sym_roi.nii -o sym_roi_RT1.nii -m align.nii_TO_rmiT1.nii.trm
+    prompt% AimsApplyTransform -i sym_roi.nii -o sym_roi_RT1.nii -m align.nii_TO_rmiT1.nii.trm
 
 * Analyze/compare the ROIs by using :ref:`AimsRoiFeatures <aimsroifeatures>`.
 
@@ -917,7 +917,7 @@ Here is a summary to help you compute and/or do a threshold of your ROI to prese
   <td>Binary image (max=1)</td>
   <td>
   <pre>AimsLinearComb -i roi.ima -o roi.ima -a 16000
-  AimsResample -i roi.ima -o roi.ima -m motion.trm
+  AimsApplyTransform -i roi.ima -o roi.ima -m motion.trm
   AimsThreshold -i roi.ima -o roi.ima -m ge -t 8000
   </pre>
   </td>
@@ -925,7 +925,7 @@ Here is a summary to help you compute and/or do a threshold of your ROI to prese
   <tr class="row-odd">
   <td>Max=max_value</td>
   <td><pre>AimsLinearComb -i roi.ima -o roi.ima -a 16000 -b max_value
-  AimsResample -i roi.ima -o roi.ima -m motion.trm
+  AimsApplyTransform -i roi.ima -o roi.ima -m motion.trm
   AimsThreshold -i roi.ima -o roi.ima -m ge -t 8000
   </pre></td>
   </tr>
