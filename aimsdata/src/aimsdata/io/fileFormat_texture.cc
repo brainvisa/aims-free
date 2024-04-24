@@ -46,6 +46,7 @@
 #include <aims/io/fileFormat_d.h>
 #include <aims/io/baseFormats_texture_d.h>
 #include <aims/io_soma/fscurvformatchecker.h>
+#include <aims/io_soma/fsannotformatchecker.h>
 #include <soma-io/datasourceinfo/datasourceinfoloader.h>
 
 
@@ -230,6 +231,14 @@ static bool _texdic()
                                           new FsCurvFormatChecker, exts );
   }
 
+  // register soma-io checker for the FSANNOT format
+  {
+    vector<string>  exts(1);
+    exts[0] = "annot";
+    DataSourceInfoLoader::registerFormat( "FSANNOT",
+                                          new FsAnnotFormatChecker, exts );
+  }
+
   return true;
 }
 
@@ -248,5 +257,9 @@ namespace soma
   template class Reader<TimeTexture<float> >;
   template class Writer<TimeTexture<float> >;
 
+  template class FormatReader<TimeTexture<int16_t> >;
+  template class FormatDictionary<TimeTexture<int16_t> >;
+  template class Reader<TimeTexture<int16_t> >;
+  template class Writer<TimeTexture<int16_t> >;
 }
 

@@ -32,11 +32,11 @@
  */
 
 //-------------------------------------------------------------------
-#include <aims/io_soma/fscurvformatreader_d.h>
+#include <aims/io_soma/fsannotformatreader_d.h>
 #include <soma-io/io/formatdictionary.h>
 //--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
-#define localMsg( message ) cartoCondMsg( 4, message, "FSCURVFORMATREADER" )
+#define localMsg( message ) cartoCondMsg( 4, message, "FSANNOTFORMATREADER" )
 // localMsg must be undef at end of file
 //----------------------------------------------------------------------------
 
@@ -49,27 +49,27 @@ using namespace std;
 //   I N I T
 //============================================================================
 
-template class FsCurvFormatReader<float>;
-// template class FsCurvFormatReader<int16_t>;
+template class FsAnnotFormatReader<float>;
+// template class FsAnnotFormatReader<int16_t>;
 
 
 namespace
 {
 
-  bool initfscurvformat()
+  bool initfsannotformat()
   {
     {
-      FsCurvFormatReader<float>  *r = new FsCurvFormatReader<float>;
+      FsAnnotFormatReader<int16_t>  *r = new FsAnnotFormatReader<int16_t>;
       vector<string>  exts;
-      exts.push_back( "curv" );
-      FormatDictionary<TimeTexture<float> >::registerFormat( "FSCURV", r,
-                                                             exts );
+      exts.push_back( "annot" );
+      FormatDictionary<TimeTexture<int16_t> >::registerFormat( "FSANNOT", r,
+                                                               exts );
     }
 
     return true;
   }
 
-  bool dummy __attribute__((unused)) = initfscurvformat();
+  bool dummy __attribute__((unused)) = initfsannotformat();
 
 }
 

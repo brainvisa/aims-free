@@ -150,6 +150,9 @@ set( _headers
     io/wavefrontheader.h
     io/wavefrontmeshW.h
     io/wavefrontmeshR.h
+    io_soma/fsannotformatchecker.h
+    io_soma/fsannotformatreader.h
+    io_soma/fsannotformatreader_d.h
     io_soma/fscurvformatchecker.h
     io_soma/fscurvformatreader.h
     io_soma/fscurvformatreader_d.h
@@ -379,6 +382,8 @@ set(_aimsdata_sources
     io/writer_sparsematrix.cc
     io/writer_texture.cc
     io/writer_volume.cc
+    io_soma/fsannotformatchecker.cc
+    io_soma/fsannotformatreader.cc
     io_soma/fscurvformatchecker.cc
     io_soma/fscurvformatreader.cc
     io_soma/fssurfformatchecker.cc

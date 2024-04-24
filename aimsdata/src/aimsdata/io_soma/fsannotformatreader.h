@@ -31,47 +31,43 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-//-------------------------------------------------------------------
-#include <aims/io_soma/fscurvformatreader_d.h>
-#include <soma-io/io/formatdictionary.h>
-//--- debug ------------------------------------------------------------------
-#include <cartobase/config/verbose.h>
-#define localMsg( message ) cartoCondMsg( 4, message, "FSCURVFORMATREADER" )
-// localMsg must be undef at end of file
-//----------------------------------------------------------------------------
+#ifndef AIMS_IO_SOMA_FSANNOTFORMATREADER_H
+#define AIMS_IO_SOMA_FSANNOTFORMATREADER_H
 
-using namespace aims;
-using namespace soma;
-using namespace carto;
-using namespace std;
-
-//============================================================================
-//   I N I T
-//============================================================================
-
-template class FsCurvFormatReader<float>;
-// template class FsCurvFormatReader<int16_t>;
+#include <soma-io/reader/formatreader.h>
 
 
-namespace
+template <typename T> class TimeTexture;
+
+namespace soma
 {
 
-  bool initfscurvformat()
+  /** Freesurfer texture (curvature) format
+   */
+  template <typename T>
+  class FsAnnotFormatReader
+    : public FormatReader<TimeTexture<T> >
   {
-    {
-      FsCurvFormatReader<float>  *r = new FsCurvFormatReader<float>;
-      vector<string>  exts;
-      exts.push_back( "curv" );
-      FormatDictionary<TimeTexture<float> >::registerFormat( "FSCURV", r,
-                                                             exts );
-    }
+  public:
+    //========================================================================
+    //   N E W   M E T H O D S
+    //========================================================================
+    virtual TimeTexture<T>*
+    createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
+                   const AllocatorContext & context,
+                   carto::Object options );
+    virtual void read( TimeTexture<T> & obj,
+                       carto::rc_ptr<DataSourceInfo> dsi,
+                       const AllocatorContext & context,
+                       carto::Object options );
+    virtual FormatReader<TimeTexture<T> >* clone() const;
+    virtual std::string formatID() const { return "FSCURV"; }
 
-    return true;
-  }
-
-  bool dummy __attribute__((unused)) = initfscurvformat();
+    bool readTexture( carto::rc_ptr<DataSource> ds,
+                      TimeTexture<T> & obj, int nv,
+                      bool ascii, bool bswap ) const;
+  };
 
 }
 
-#undef localMsg
-
+#endif

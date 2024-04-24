@@ -30,48 +30,31 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+#ifndef AIMS_IO_SOMA_FSANNOTFORMATCHECKER_H
+#define AIMS_IO_SOMA_FSANNOTFORMATCHECKER_H
 
-//-------------------------------------------------------------------
-#include <aims/io_soma/fscurvformatreader_d.h>
-#include <soma-io/io/formatdictionary.h>
-//--- debug ------------------------------------------------------------------
-#include <cartobase/config/verbose.h>
-#define localMsg( message ) cartoCondMsg( 4, message, "FSCURVFORMATREADER" )
-// localMsg must be undef at end of file
+#include <soma-io/checker/formatchecker.h>
+#include <soma-io/datasource/datasource.h>
 //----------------------------------------------------------------------------
 
-using namespace aims;
-using namespace soma;
-using namespace carto;
-using namespace std;
-
-//============================================================================
-//   I N I T
-//============================================================================
-
-template class FsCurvFormatReader<float>;
-// template class FsCurvFormatReader<int16_t>;
-
-
-namespace
+namespace soma
 {
 
-  bool initfscurvformat()
+  /** Freesurfer texture (annotations) format
+   */
+  class FsAnnotFormatChecker : public FormatChecker
   {
-    {
-      FsCurvFormatReader<float>  *r = new FsCurvFormatReader<float>;
-      vector<string>  exts;
-      exts.push_back( "curv" );
-      FormatDictionary<TimeTexture<float> >::registerFormat( "FSCURV", r,
-                                                             exts );
-    }
+  public:
 
-    return true;
-  }
-
-  bool dummy __attribute__((unused)) = initfscurvformat();
+    virtual DataSourceInfo check( DataSourceInfo dsi,
+                                  DataSourceInfoLoader & f,
+                                  carto::Object options = carto::none() )
+                                  const;
+    virtual ~FsAnnotFormatChecker() {}
+    bool checkBinaryTexture( carto::rc_ptr<DataSource> ds,
+                             carto::Object hdr ) const;
+  };
 
 }
 
-#undef localMsg
-
+#endif
