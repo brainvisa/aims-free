@@ -45,10 +45,13 @@
 
 #include <aims/io/fileFormat_d.h>
 #include <aims/io/baseFormats_texture_d.h>
+#include <aims/io_soma/fscurvformatchecker.h>
+#include <soma-io/datasourceinfo/datasourceinfoloader.h>
 
 
 using namespace aims;
 using namespace std;
+using namespace soma;
 
 namespace aims
 {
@@ -218,8 +221,32 @@ static bool _texdic()
   FileFormatDictionary<TimeTexture<int32_t> >::init();
   FileFormatDictionary<TimeTexture<Point2d> >::init();
   FileFormatDictionary<TimeTexture<Point2df> >::init();
+
+  // register soma-io checker for the FSCURV format
+  {
+    vector<string>  exts(1);
+    exts[0] = "curv";
+    DataSourceInfoLoader::registerFormat( "FSCURV",
+                                          new FsCurvFormatChecker, exts );
+  }
+
   return true;
 }
 
 static bool texdic __attribute__((unused)) = _texdic();
+
+
+#include <soma-io/io/formatdictionary_d.h>
+#include <soma-io/reader/formatreader_d.h>
+#include <soma-io/io/reader_d.h>
+#include <soma-io/io/writer_d.h>
+
+namespace soma
+{
+  template class FormatReader<TimeTexture<float> >;
+  template class FormatDictionary<TimeTexture<float> >;
+  template class Reader<TimeTexture<float> >;
+  template class Writer<TimeTexture<float> >;
+
+}
 

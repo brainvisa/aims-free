@@ -32,11 +32,11 @@
  */
 
 //-------------------------------------------------------------------
-#include <aims/io_soma/fssurfformatreader_d.h>
+#include <aims/io_soma/fscurvformatreader_d.h>
 #include <soma-io/io/formatdictionary.h>
 //--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
-#define localMsg( message ) cartoCondMsg( 4, message, "FSSURFFORMATREADER" )
+#define localMsg( message ) cartoCondMsg( 4, message, "FSCURVFORMATREADER" )
 // localMsg must be undef at end of file
 //----------------------------------------------------------------------------
 
@@ -49,37 +49,27 @@ using namespace std;
 //   I N I T
 //============================================================================
 
-template class FsSurfFormatReader<3>;
-// template class FsSurfFormatReader<4>;
+template class FsCurvFormatReader<float>;
+// template class FsCurvFormatReader<int16_t>;
 
 
 namespace
 {
 
-  bool initfssurfformat()
+  bool initfscurvformat()
   {
     {
-      FsSurfFormatReader<3>  *r = new FsSurfFormatReader<3>;
+      FsCurvFormatReader<float>  *r = new FsCurvFormatReader<float>;
       vector<string>  exts;
-      exts.push_back( "white" );
-      exts.push_back( "pial" );
-      FormatDictionary<AimsTimeSurface<3, Void> >::registerFormat( "FSSURF", r,
+      exts.push_back( "curv" );
+      FormatDictionary<TimeTexture<float> >::registerFormat( "FSSURF", r,
                                                                    exts );
     }
-
-//     {
-//       FsSurfFormatReader<4>  *r = new FsSurfFormatReader<4>;
-//       vector<string>  exts;
-//       exts.push_back( "white" );
-//       exts.push_back( "pial" );
-//       FormatDictionary<AimsTimeSurface<4, Void> >::registerFormat( "FSSURF", r,
-//                                                                    exts );
-//     }
 
     return true;
   }
 
-  bool dummy __attribute__((unused)) = initfssurfformat();
+  bool dummy __attribute__((unused)) = initfscurvformat();
 
 }
 

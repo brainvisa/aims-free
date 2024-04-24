@@ -30,58 +30,33 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+#ifndef AIMS_IO_SOMA_FSCURVFORMATCHECKER_H
+#define AIMS_IO_SOMA_FSCURVFORMATCHECKER_H
 
-//-------------------------------------------------------------------
-#include <aims/io_soma/fssurfformatreader_d.h>
-#include <soma-io/io/formatdictionary.h>
-//--- debug ------------------------------------------------------------------
-#include <cartobase/config/verbose.h>
-#define localMsg( message ) cartoCondMsg( 4, message, "FSSURFFORMATREADER" )
-// localMsg must be undef at end of file
+#include <soma-io/checker/formatchecker.h>
+#include <soma-io/datasource/datasource.h>
 //----------------------------------------------------------------------------
 
-using namespace aims;
-using namespace soma;
-using namespace carto;
-using namespace std;
-
-//============================================================================
-//   I N I T
-//============================================================================
-
-template class FsSurfFormatReader<3>;
-// template class FsSurfFormatReader<4>;
-
-
-namespace
+namespace soma
 {
 
-  bool initfssurfformat()
+  /** Freesurfer texture (curvature?) format
+   */
+  class FsCurvFormatChecker : public FormatChecker
   {
-    {
-      FsSurfFormatReader<3>  *r = new FsSurfFormatReader<3>;
-      vector<string>  exts;
-      exts.push_back( "white" );
-      exts.push_back( "pial" );
-      FormatDictionary<AimsTimeSurface<3, Void> >::registerFormat( "FSSURF", r,
-                                                                   exts );
-    }
+  public:
 
-//     {
-//       FsSurfFormatReader<4>  *r = new FsSurfFormatReader<4>;
-//       vector<string>  exts;
-//       exts.push_back( "white" );
-//       exts.push_back( "pial" );
-//       FormatDictionary<AimsTimeSurface<4, Void> >::registerFormat( "FSSURF", r,
-//                                                                    exts );
-//     }
-
-    return true;
-  }
-
-  bool dummy __attribute__((unused)) = initfssurfformat();
+    virtual DataSourceInfo check( DataSourceInfo dsi,
+                                  DataSourceInfoLoader & f,
+                                  carto::Object options = carto::none() )
+                                  const;
+    virtual ~FsCurvFormatChecker() {}
+    bool checkAsciiTexture( carto::rc_ptr<DataSource> ds,
+                            carto::Object hdr ) const;
+    bool checkBinaryTexture( carto::rc_ptr<DataSource> ds,
+                             carto::Object hdr ) const;
+  };
 
 }
 
-#undef localMsg
-
+#endif
