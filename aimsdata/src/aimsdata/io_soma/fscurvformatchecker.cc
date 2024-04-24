@@ -32,12 +32,12 @@
  */
 
 #include <aims/io_soma/fscurvformatchecker.h>
-#include <aims/mesh/surface.h>
-#include <aims/io/finder.h>
 #include <aims/io/byteswap.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/ioexcept.h>
+#include <cartobase/object/property.h>
 #include <soma-io/datasource/filedatasource.h>
+#include <soma-io/datasourceinfo/datasourceinfo.h>
 #include <soma-io/reader/itemreader.h>
 
 
