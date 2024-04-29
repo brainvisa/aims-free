@@ -78,7 +78,7 @@ Referential::Referential( Object ref )
   ps.addBuiltinProperty( "lpi_uuid", _lpi_uuid );
   ps.addBuiltinProperty( "axes_orientation", _orientation );
 
-  _header->copyProperties( ref );
+  setHeader( ref );
 }
 
 
@@ -105,6 +105,56 @@ void Referential::ensureOrder( unsigned ndim )
         _orientation[i] = j * 2 + 1;
         ++i;
       }
+    }
+  }
+}
+
+
+void Referential::setHeader( const Object header )
+{
+  if( header->hasProperty( "referential_def" ) )
+  {
+    // the header is not a referential header itself, but another object
+    // header (volume, mesh etc) which contains a dict of referential
+    // definition inside
+    Object ref_hdr = header->getProperty( "referential_def" );
+    setHeader( ref_hdr );
+    return;
+  }
+
+  set<string> forbidden;
+  forbidden.insert( "axes_orientation" );
+  forbidden.insert( "direct_referential" );
+
+  Object it = header->objectIterator();
+  for( ; it->isValid(); it->next() )
+  {
+    if( forbidden.find( it->key() ) == forbidden.end() )
+      _header->setProperty( it->key(), it->currentValue() );
+  }
+  if( header->hasProperty( "axes_orientation" ) )
+  {
+    try
+    {
+      string orient = header->getProperty( "axes_orientation" )->getString();
+      setOrientation( orient );
+    }
+    catch( ... )
+    {
+    }
+  }
+  else if( header->hasProperty( "direct_referential" ) )
+  {
+    try
+    {
+      bool direct = bool(
+        header->getProperty( "direct_referential" )->getScalar() );
+      if( direct )
+        // then assume RAS which is the most standard
+        setOrientation( "RAS" );
+    }
+    catch( ... )
+    {
     }
   }
 }
@@ -233,6 +283,18 @@ vector<int> Referential::orientationVector( const std::string & orient,
   }
 
   return orient_vec;
+}
+
+
+bool Referential::isDirect() const
+{
+  int direct = -1;
+  int i, n = std::min( 3u, unsigned( _orientation.size() ) );
+
+  for( i=0; i<n; ++i )
+    direct *= ( ( _orientation[i] & 1 ) == 0 ? -1 : 1 );
+
+  return direct > 0;
 }
 
 
@@ -454,4 +516,26 @@ std::vector<int> Referential::orientationFromTransform(
   return orient;
 }
 
+
+Referential Referential::fromHeader( Object header, bool except_if_undefined )
+{
+  if( except_if_undefined )
+  {
+    bool has_info = false;
+    if( header->hasProperty( "referential_def" ) )
+    {
+      Object ref_def = header->getProperty( "referential_def" );
+      if( ref_def && ( ref_def->hasProperty( "axes_orientation" )
+                        || ref_def->hasProperty( "direct_referential" ) ) )
+        has_info = true;
+    }
+    if( !has_info && !header->hasProperty( "axes_orientation" )
+      && !header->hasProperty( "direct_referential" ) )
+    {
+        throw runtime_error( "no orientation in header" );
+    }
+  }
+
+  return Referential( header );
+}
 

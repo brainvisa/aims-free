@@ -126,6 +126,7 @@ namespace carto
     /// orientation of the referential, as a vector of constants. Each number
     /// corresponds to an Orientation enum value, but cast to int
     std::vector<int> axesOrientation() const { return _orientation; }
+    bool isDirect() const;
     /** Build a transformation matrix to go from this referential to a given
         orientation.
 
@@ -196,6 +197,7 @@ namespace carto
 
     /// referential header, may contain anything useful
     Object header() const { return _header; }
+    void setHeader( const Object header );
     /// tells if the orientation is comatible with a 3D transformation
     /// (all axes after the 3th are the default ones)
     bool is3DOriented() const;
@@ -234,6 +236,13 @@ namespace carto
                                   = std::vector<float>() );
     /// tells if the given orientation is 3D compatible
     static bool is3DOriented( const std::vector<int> & orient );
+    /** Build a Referential object from a header.
+        This is basically the same as the constructor Referential( Object )
+        except that if except_if_undefined is set, and if the header does
+        not specify an orientation, then an exception is thrown.
+    */
+    static Referential fromHeader( const Object header,
+                                   bool except_if_undefined = false );
 
   private:
     std::string _uuid;

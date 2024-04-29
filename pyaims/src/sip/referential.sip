@@ -217,6 +217,8 @@ namespace carto
 %End
 
     carto::Object header() const;
+    void setHeader( const carto::Object header );
+    bool isDirect() const;
     bool is3DOriented() const;
 %Docstring
     * res = referential.is3DOriented()
@@ -236,6 +238,18 @@ namespace carto
     bool isLpiOriented() const;
 %Docstring
     tells if the orientation is the default LPI one.
+%End
+
+
+    static carto::Referential fromHeader( carto::Object header,
+                                          bool except_if_undefined = false );
+%Docstring
+    referential = Referential.fromHeader(header)
+
+    Build a Referential object from a header dict.
+    This is basically the same as the constructor Referential( Object )
+    except that if except_if_undefined is set, and if the header does
+    not specify an orientation, then an exception is thrown.
 %End
   };
 
