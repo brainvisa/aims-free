@@ -217,6 +217,12 @@ namespace carto
 %End
 
     carto::Object header() const;
+    carto::Object exportedHeader() const;
+%Docstring
+    export a ready-to-save version of the header, where, especially,
+    the axes_orientation property is an orientation string
+%End
+
     void setHeader( const carto::Object header );
     bool isDirect() const;
     bool is3DOriented() const;

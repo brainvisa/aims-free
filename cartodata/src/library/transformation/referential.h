@@ -198,6 +198,9 @@ namespace carto
     /// referential header, may contain anything useful
     Object header() const { return _header; }
     void setHeader( const Object header );
+    /// export a ready-to-save version of the header, where, especially,
+    /// the axes_orientation property is an orientation string
+    Object exportedHeader() const;
     /// tells if the orientation is comatible with a 3D transformation
     /// (all axes after the 3th are the default ones)
     bool is3DOriented() const;

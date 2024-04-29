@@ -73,6 +73,10 @@ Referential::Referential( const Referential & ref )
 Referential::Referential( Object ref )
   : RCObject(), _orientation( 3, 0 ), _header( Object::value( PropertySet() ) )
 {
+  // the default is LPI for AIMS library.
+  string orient = "LPITUVWXYZ";
+  _orientation = orientationVector( orient.substr( 0, 3 ) );
+
   PropertySet & ps = _header->value<PropertySet>();
   ps.addBuiltinProperty( "uuid", _uuid );
   ps.addBuiltinProperty( "lpi_uuid", _lpi_uuid );
@@ -130,7 +134,9 @@ void Referential::setHeader( const Object header )
   for( ; it->isValid(); it->next() )
   {
     if( forbidden.find( it->key() ) == forbidden.end() )
+    {
       _header->setProperty( it->key(), it->currentValue() );
+    }
   }
   if( header->hasProperty( "axes_orientation" ) )
   {
@@ -537,5 +543,15 @@ Referential Referential::fromHeader( Object header, bool except_if_undefined )
   }
 
   return Referential( header );
+}
+
+
+Object Referential::exportedHeader() const
+{
+  Object hdr = Object::value( PropertySet() );
+  hdr->copyProperties( header() );
+  hdr->setProperty( "axes_orientation", orientationStr( _orientation ) );
+
+  return hdr;
 }
 
