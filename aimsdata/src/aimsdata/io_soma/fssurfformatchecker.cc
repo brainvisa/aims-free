@@ -199,12 +199,14 @@ bool FsSurfFormatChecker::checkBinarySurface( rc_ptr<DataSource> ds,
     return false;
   }
   hdr->setProperty( "byte_swapping", int(bswap) );
-  // mesges are in RAS orientation
+  // meshes are in RAS orientation
   Object mat = Object::value( PropertySet() );
   mat->setProperty( "front_face", "counterclockwise" );
   hdr->setProperty( "material", mat );
-  hdr->setProperty( "referential",
-                    StandardReferentials::mniTemplateReferentialID() );
+  // the mesh referential is not MNI/ICBM but is RAS oriented.
+  Object ref_def = Object::value( Dictionary() );
+  ref_def->setProperty( "axes_orientation", "RAS" );
+  hdr->setProperty( "referential_def", ref_def );
 
   return true;
 }

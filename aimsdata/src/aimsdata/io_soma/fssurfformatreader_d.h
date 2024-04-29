@@ -40,6 +40,9 @@
 #include <soma-io/datasource/datasource.h>
 #include <soma-io/datasourceinfo/datasourceinfoloader.h>
 #include <soma-io/reader/itemreader.h>
+#include <cartobase/stream/stringutil.h>
+#include <aims/transformation/affinetransformation3d.h>
+#include <aims/resampling/standardreferentials.h>
 //--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
 #define localMsg( message ) cartoCondMsg( 4, message, "FSSURFFORMATREADER" )
@@ -110,6 +113,13 @@ namespace soma
     if( !readPolygons( ds, obj, np, ascii, bswap ) )
       throw carto::invalid_format_error( ds->url() );
 
+    std::cout << "left in file: " << ds->size() - ds->at() << std::endl;
+    std::cout << "pos: " << ds->at() << std::endl;
+
+    readAdditions( ds, obj, ascii, bswap );
+
+    std::cout << "left in file: " << ds->size() - ds->at() << std::endl;
+    std::cout << "pos: " << ds->at() << std::endl;
 
     hdr = carto::Object::value( carto::PropertySet() );
     rc_ptr<DataSource> mds( 0 );
@@ -180,6 +190,122 @@ namespace soma
     long n = itemr->read( *ds, (uint32_t *) &poly[0], np * D );
     if( n != np * D )
       return false;
+
+    return true;
+  }
+
+
+  template <int D>
+  bool FsSurfFormatReader<D>::readAdditions( carto::rc_ptr<DataSource> ds,
+                                             AimsTimeSurface<D, Void> & obj,
+                                             bool ascii, bool bswap ) const
+  {
+    std::cout << "readAdditions: " << ascii << ", " << bswap << std::endl;
+
+    DefaultItemReader<uint32_t> dir;
+    std::unique_ptr<ItemReader<uint32_t> > itemr;
+    itemr.reset( dir.reader( !ascii, bswap ) );
+
+    std::vector<uint32_t> dat( 3 );
+
+    long n = itemr->read( *ds, &dat[0], 3 );
+    // 0: should be 3 (magic number), 2: should be 0x14 (magic num)
+    if( n != 3 || dat[0] != 2 || dat[2] != 0x14 )
+      return false;
+    bool using_old_real_ras = bool( dat[1] );
+    obj.header().setProperty( "using_old_real_ras",
+                              int( using_old_real_ras ) );
+
+    int i;
+    bool r;
+    std::vector<std::string> lines( 8 );
+    aims::AffineTransformation3d tr;
+    bool has_trans = false;
+
+    for( i=0; i<8; ++i )
+    {
+      r = StreamUtil::getline( *ds, lines[i] );
+      if( !r )
+        return false;
+      std::cout << "read line: " << lines[i] << std::endl;
+      lines[i] = StringUtil::strip( lines[i] );
+      std::vector<std::string> val = StringUtil::split( lines[i], "=", 1 );
+      std::cout << "split: " << val.size() << std::endl;
+      if( val.size() == 2 )
+      {
+        val[0] = StringUtil::strip( val[0] );
+        val[1] = StringUtil::strip( val[1] );
+        std::cout << "var: " << val[0] << ", value: " << val[1] << std::endl;
+        if( val[0] == "valid" )
+          continue;
+        if( val[0] == "volume" )
+        {
+          std::vector<std::string> sdims = StringUtil::split( val[1], " " );
+          std::vector<int> dims( sdims.size() );
+          for( int j=0; j<sdims.size(); ++j )
+          {
+            std::stringstream s( sdims[j] );
+            s >> dims[j];
+          }
+          obj.header().setProperty( "volume_dimension", dims );
+        }
+        else if( val[0] == "filename" )
+          obj.header().setProperty( "freesurfer_filename", val[1] );
+        else if( val[0] == "voxelsize" )
+        {
+          std::vector<std::string> svs = StringUtil::split( val[1], " " );
+          std::vector<float> vs( vs.size() );
+          for( int j=0; j<svs.size(); ++j )
+          {
+            std::stringstream s( svs[j] );
+            s >> vs[j];
+          }
+          obj.header().setProperty( "voxel_size", vs );
+        }
+        else if( val[0] == "xras" || val[0] == "yras" || val[0] == "zras"
+                 || val[0] == "cras" )
+        {
+          int c = 0;
+          if( val[0][0] == 'x' )
+            c = 0;
+          else if( val[0][0] == 'y' )
+            c = 1;
+          else if( val[0][0] == 'z' )
+            c = 2;
+          else
+            c = 3;
+          std::vector<std::string> sv = StringUtil::split( val[1], " " );
+          for( int j=0; j<sv.size(); ++j )
+          {
+            std::stringstream s( sv[j] );
+            s >> tr.matrix()( j, c );
+          }
+          has_trans = true;
+        }
+      }
+    }
+    if( has_trans )
+    {
+      std::cout << "trans: " << tr << std::endl;
+      // TODO: get from RAS to LPI
+      std::vector<std::vector<float> > trvec(1);
+      trvec[0] = tr.toVector();
+      obj.header().setProperty( "transformations", trvec );
+      std::vector<std::string> sref(1);
+      sref[0] = aims::StandardReferentials::commonScannerBasedReferential();
+      obj.header().setProperty( "referentials", sref );
+    }
+
+    n = itemr->read( *ds, &dat[0], 3 );
+    // should be 3 (magic number)
+    if( n != 3 || dat[0] != 3 )
+      return false;
+    unsigned len = dat[2];
+    std::string line;
+    r = StreamUtil::getline( *ds, line );
+    if( !r )
+      return false;
+    obj.header().setProperty( "freesurfer_cmdline", line );
 
     return true;
   }

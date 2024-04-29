@@ -69,6 +69,9 @@ namespace soma
     bool readPolygons( carto::rc_ptr<DataSource> ds,
                        AimsTimeSurface<D, Void> & obj, int np,
                        bool ascii, bool bswap ) const;
+    bool readAdditions( carto::rc_ptr<DataSource> ds,
+                        AimsTimeSurface<D, Void> & obj, bool ascii,
+                        bool bswap ) const;
   };
 
 }
