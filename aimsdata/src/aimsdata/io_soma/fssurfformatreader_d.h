@@ -112,14 +112,7 @@ namespace soma
       throw carto::invalid_format_error( ds->url() );
     if( !readPolygons( ds, obj, np, ascii, bswap ) )
       throw carto::invalid_format_error( ds->url() );
-
-    std::cout << "left in file: " << ds->size() - ds->at() << std::endl;
-    std::cout << "pos: " << ds->at() << std::endl;
-
     readAdditions( ds, obj, ascii, bswap );
-
-    std::cout << "left in file: " << ds->size() - ds->at() << std::endl;
-    std::cout << "pos: " << ds->at() << std::endl;
 
     hdr = carto::Object::value( carto::PropertySet() );
     rc_ptr<DataSource> mds( 0 );
@@ -200,7 +193,7 @@ namespace soma
                                              AimsTimeSurface<D, Void> & obj,
                                              bool ascii, bool bswap ) const
   {
-    std::cout << "readAdditions: " << ascii << ", " << bswap << std::endl;
+    // std::cout << "readAdditions: " << ascii << ", " << bswap << std::endl;
 
     DefaultItemReader<uint32_t> dir;
     std::unique_ptr<ItemReader<uint32_t> > itemr;
@@ -227,15 +220,12 @@ namespace soma
       r = StreamUtil::getline( *ds, lines[i] );
       if( !r )
         return false;
-      std::cout << "read line: " << lines[i] << std::endl;
       lines[i] = StringUtil::strip( lines[i] );
       std::vector<std::string> val = StringUtil::split( lines[i], "=", 1 );
-      std::cout << "split: " << val.size() << std::endl;
       if( val.size() == 2 )
       {
         val[0] = StringUtil::strip( val[0] );
         val[1] = StringUtil::strip( val[1] );
-        std::cout << "var: " << val[0] << ", value: " << val[1] << std::endl;
         if( val[0] == "valid" )
           continue;
         if( val[0] == "volume" )
@@ -286,8 +276,6 @@ namespace soma
     }
     if( has_trans )
     {
-      std::cout << "trans: " << tr << std::endl;
-      // TODO: get from RAS to LPI
       std::vector<std::vector<float> > trvec(1);
       trvec[0] = tr.toVector();
       obj.header().setProperty( "transformations", trvec );
