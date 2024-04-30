@@ -122,14 +122,17 @@ void XfmFormatReader::read( AffineTransformation3d & obj,
   string s;
   bool r;
   bool mni = false;
+  unsigned l = 0, nmax = 10; // give up after 10 lines
   do
   {
     r = StreamUtil::getline( *ds, s );
     if( r && s.substr( 0, 18 ) == "MNI Transform File" )
       mni = true;
+    ++l;
   }
-  while( r && !ds->eof() && s.substr( 0, 18 ) != "Linear_Transform =" );
-  if( !r || ds->eof() )
+  while( r && l < nmax && !ds->eof()
+         && s.substr( 0, 18 ) != "Linear_Transform =" );
+  if( l == nmax || !r || ds->eof() )
     throw wrong_format_error( ds->url() );
 
   unsigned	i, j;
