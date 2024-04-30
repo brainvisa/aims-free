@@ -276,11 +276,17 @@ namespace soma
     }
     if( has_trans )
     {
-      std::vector<std::vector<float> > trvec(1);
-      trvec[0] = tr.toVector();
+      std::vector<std::vector<float> > trvec(2);
+      // the matrix content seem to go to another orientation (mni305?)
+      aims::AffineTransformation3d tr2;
+      tr2.setTranslation( tr.translation() );
+      trvec[0] = tr2.toVector();
+      trvec[1] = tr.toVector();
       obj.header().setProperty( "transformations", trvec );
-      std::vector<std::string> sref(1);
+      std::vector<std::string> sref(2);
       sref[0] = aims::StandardReferentials::commonScannerBasedReferential();
+      obj.header().setProperty( "referentials", sref );
+      sref[1] = "mni305?";
       obj.header().setProperty( "referentials", sref );
     }
 
