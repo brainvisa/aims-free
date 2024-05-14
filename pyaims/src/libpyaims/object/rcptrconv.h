@@ -132,6 +132,14 @@ namespace pyaims
 
   inline PyObject* extractPyObjectFromProxy( PyObject* sipPy )
   {
+    /* WARNING the call to PyObject_HasAttrString() sometimes fails (returns 0)
+       whereras the object actuallt the _get attribute. Calling it twice
+       actually avoids the problem.
+       I don't understand that thing, it's completely insane.
+       (Denis 2024/05/14)
+    */
+    PyErr_Clear();
+    PyObject_HasAttrString( sipPy, "_get" );
     if( !PyObject_HasAttrString( sipPy, "_get" ) )
       return 0;
     PyObject* pointee = PyObject_CallMethod( sipPy, (char *) "_get", NULL );
@@ -170,6 +178,7 @@ namespace pyaims
   T* fromProxy( PyObject * sipPy, sipTypeDef* tclass,
                 PyObject *transferObj, int *state, int *iserr )
   {
+    *iserr = 0;
     PyObject *inside = extractPyObjectFromProxy( sipPy );
     if( !inside )
       return 0;
@@ -180,7 +189,7 @@ namespace pyaims
       return 0;
     }
     T *sipRes = (T*) sipConvertToType( inside, tclass, transferObj,
-                                           SIP_NOT_NONE, state, iserr );
+                                       SIP_NOT_NONE, state, iserr );
     Py_DECREF( inside );
     if( *iserr )
     {
@@ -195,6 +204,7 @@ namespace pyaims
   T* fromProxy( PyObject * sipPy, const sipTypeDef* tclass,
                 PyObject *transferObj, int *state, int *iserr )
   {
+    *iserr = 0;
     PyObject *inside = extractPyObjectFromProxy( sipPy );
     if( !inside )
       return 0;
@@ -223,7 +233,7 @@ namespace pyaims
   {
     if( !sipIsErr )
       return sipCanConvertToType( sipPy, tclass,
-                                      SIP_NOT_NONE | SIP_NO_CONVERTORS )
+                                  SIP_NOT_NONE | SIP_NO_CONVERTORS )
         || pyaims::canConvertFromProxy( sipPy, tclass );
 
     if( sipPy == Py_None )
@@ -251,15 +261,20 @@ namespace pyaims
     }
 
     *sipIsErr = 0;
-    *sipCppPtr = fromProxy<T>( sipPy, tclass, sipTransferObj, &state,
+    *sipCppPtr = fromProxy<T>( sipPy, tclass, 0, &state,
                                sipIsErr );
-    if( !*sipIsErr )
+
+    if( !*sipCppPtr && !*sipIsErr )
+      *sipIsErr = 1; // if conversion failed, set an error flag
+
+    if( *sipIsErr )
     {
       PyErr_Clear();
       // return 0; //sipGetState(sipTransferObj);
       return state;
     }
-    return 0;
+
+    return state;
   }
 
 
@@ -300,13 +315,16 @@ namespace pyaims
     *sipIsErr = 0;
     *sipCppPtr = fromProxy<T>( sipPy, tclass, sipTransferObj, &state,
                                sipIsErr );
-    if( !*sipIsErr )
+
+    if( !*sipCppPtr && !*sipIsErr )
+      *sipIsErr = 1; // if conversion failed, set an error flag
+
+    if( *sipIsErr )
     {
       PyErr_Clear();
-      // return 0; //sipGetState(sipTransferObj);
       return state;
     }
-    return 0;
+    return state;
   }
 
 }
