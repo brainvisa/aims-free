@@ -52,7 +52,17 @@ parser.add_option("-f", "--formula",
                   help="image formula, ex: ( I1 * 2 + I2 * I3 ) / 1.2 . Image "
                   "(or other objects) can be named I1, I2... or image[1], "
                   "image[2] etc. Indices normally start at 1 (kind of "
-                  "matlab-style) but can start at 0 if the -z option is used. A formula is basically a python expression, thus can use anything supported in python expressions. ex: sum(images). Numpy may be used (as np), and numpy results can be converted to volumes: np.asarray(I1) ** 2, or np.sqrt(I1)")
+                  "matlab-style) but can start at 0 if the -z option is used. "
+                  "A formula is basically a python expression, thus can use "
+                  "anything supported in python expressions. ex: sum(images). "
+                  "Numpy may be used (as np), and numpy results can be "
+                  "converted to volumes: np.asarray(I1) ** 2, or np.sqrt(I1). "
+                  "'image' is the list of images, with index starting at "
+                  "either 1 or 0 (if -z is used). 'images' is also the list "
+                  "of images, with index starting at 0. If -z is not used, "
+                  "'image' contains an additional first element, which "
+                  "is None: image[0] is None, thus sum(image) will fail, "
+                  "whereas sum(images) is OK.")
 parser.add_option('-i', '--input', dest='filename', action='append',
                   help='input volume(s)')
 parser.add_option('-l', '--lazy', action='store_true',
@@ -94,11 +104,10 @@ formula = re.sub('I([0-9]+)', 'image[\\1]', options.formula)
 # print(formula)
 
 # read images
+image = []
 if options.zero:
-    image = []
     i0 = 0
 else:
-    image = [None]
     i0 = 1
 objtype = None
 
@@ -135,9 +144,14 @@ for x in options.filename:
                         % (objtype, t_objtype))
     image.append(vol)
 
-if options.threads:
+if options.threads != 1:
     # list with preloading iterator
     image = aims.lazy_read_data.PreloadList(image, npreload=options.threads)
+
+images = image  # same but more logical when using the list ("sum(images)")
+if not options.zero:
+    image = type(image)(image)
+    image.insert(0, None)
 
 # print(image)
 

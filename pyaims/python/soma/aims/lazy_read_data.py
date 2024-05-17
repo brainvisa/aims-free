@@ -440,7 +440,7 @@ class PreloadIterator(object):
         for i in range(self.npreload):
             try:
                 item = next(iter)
-                if not item.preloading():
+                if hasattr(item, 'preloading') and not item.preloading():
                     item._loading = True
                     # print('preload:', item.filename)
                     th = threading.Thread(target=item._lazy_read)
@@ -467,7 +467,9 @@ class PreloadList(list):
     '''
 
     def __init__(self, iterable=None, npreload=multiprocessing.cpu_count()):
-        super(PreloadList, self).__init__(iterable)
+        if isinstance(iterable, PreloadList):
+            super().__init__(list.__iter__(iterable))
+        super().__init__(iterable)
         self.npreload = npreload
 
     def __iter__(self):
