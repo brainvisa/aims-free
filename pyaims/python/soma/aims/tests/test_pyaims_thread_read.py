@@ -9,8 +9,6 @@ import tempfile
 import shutil
 import soma.subprocess
 import time
-import six
-from six.moves import zip
 
 
 def aims_test_thread_read(filenames, verbose=True):
@@ -84,7 +82,7 @@ def _convertFileFormat(aimsobj, directory, prefix, format, is_soma=False):
             aims.write(aimsobj, newfilename, format=format)
             if not os.path.exists(newfilename):
                 for f in os.listdir(directory):
-                    if not f.endswith( '.minf' ) \
+                    if not f.endswith('.minf') \
                             and (ext == '' or f.endswith('.' + ext)):
                         newfilename = os.path.join(directory, f)
                         break
@@ -100,7 +98,7 @@ def _convertFileFormat(aimsobj, directory, prefix, format, is_soma=False):
                 # print('could not read', newfilename)
                 shutil.rmtree(directory)
                 os.mkdir(directory)
-        except:
+        except Exception:
             shutil.rmtree(directory)
             os.mkdir(directory)
             continue
@@ -144,7 +142,7 @@ def somaio_extensions(aimsobj, format):
         else:
             return []
     exts = fclass.writeExtensions()
-    exts_for_format = [ext for ext, formats in six.iteritems(exts)
+    exts_for_format = [ext for ext, formats in exts.items()
                        if format in formats]
     return exts_for_format
 
@@ -167,6 +165,11 @@ def test_all_formats(filename, number=30, separate_process=False):
         formats.update(formats_l)
     formats = sorted(formats)
     soma_io_formats, soma_io_not_tested_formats = somaio_formats(aimsobj)
+    if f.format() not in formats and f.format() not in soma_io_formats:
+        # the input format cannot be written, however we already have a file
+        # to test it, so move it from non_tested to tested ones
+        soma_io_formats[f.format()] = soma_io_not_tested_formats[f.format()]
+        del soma_io_not_tested_formats[f.format()]
     success = True
     unsafe_formats = []
     safe_formats = []
@@ -179,33 +182,41 @@ def test_all_formats(filename, number=30, separate_process=False):
         if format in ('JP2'):
             continue
         print('testing: %s / %s, format: %s' % (otd, dt, format))
-        try:
+        if format == f.format():
+            directory = None
+            newfilename = filename
+        else:
             directory = tempfile.mkdtemp(prefix='aims_thread_test')
-            newfilename = _convertFileFormat(aimsobj, directory, 'aims_test',
-                                             format, is_soma)
-            if not newfilename:
-                print('could not generate format', format)
-                not_tested_formats.append(format)
-                # shutil.rmtree( directory )
-                continue
+        try:
+            if format == f.format():
+                newfilename = filename
+            else:
+                newfilename = _convertFileFormat(aimsobj, directory,
+                                                 'aims_test', format, is_soma)
+                if not newfilename:
+                    print('could not generate format', format)
+                    not_tested_formats.append(format)
+                    # shutil.rmtree( directory )
+                    continue
             print('testing read on %s...' % newfilename)
             try:
                 if separate_process:
-                    soma.subprocess.check_call([sys.executable, '-m',
-                                           'soma.aims.tests.test_pyaims_thread_read', '-i',
-                                           newfilename, '-n', str(number), '--silent'])
+                    soma.subprocess.check_call(
+                        [sys.executable, '-m',
+                         'soma.aims.tests.test_pyaims_thread_read',
+                         '-i', newfilename, '-n', str(number), '--silent'])
                 else:
                     aims_test_thread_read([newfilename] * number,
                                           verbose=False)
                 print('Passed.')
                 safe_formats.append(format)
-                # shutil.rmtree( directory )
-            except:
+            except Exception:
                 print('format %s is unsafe.' % format)
                 success = False
                 unsafe_formats.append(format)
         finally:
-            shutil.rmtree(directory)
+            if directory is not None:
+                shutil.rmtree(directory)
     print('All done for %s / %s. Success =' % (otd, dt), success)
     if not success:
         return ({otd: unsafe_formats}, {otd: safe_formats},
@@ -216,22 +227,31 @@ def test_all_formats(filename, number=30, separate_process=False):
 if __name__ == '__main__':
 
     parser = OptionParser(
-        description='Perform tests of threaded concurrent loading of aims objects in pyaims')
+        description='Perform tests of threaded concurrent loading of aims '
+        'objects in pyaims')
     parser.add_option('-i', '--input', dest='infiles',
-                      help='files to be read concurrently', action='append', default=[])
+                      help='files to be read concurrently', action='append',
+                      default=[])
     parser.add_option('-n', '--number', dest='number', type='int',
-                      help='number of times each file should be read at the same time. Default: 30 if one input filename, 1 otherwise', default=0)
+                      help='number of times each file should be read at the '
+                      'same time. Default: 30 if one input filename, '
+                      '1 otherwise', default=0)
     parser.add_option('-a', '--all', dest='all', action='store_true',
                       default=False,
-                      help='test all possible formats for each input file (convert to all of them and test)')
+                      help='test all possible formats for each input file '
+                      '(convert to all of them and test)')
     parser.add_option('-s', '--subprocess', dest='subprocess',
                       action='store_true', default=False,
-                      help='use subprocesses to run formats tests (with -a option). By default, they run in a single process, so a thread-related crash will end all tests (but will be easier to trace with a debugger).')
+                      help='use subprocesses to run formats tests (with -a '
+                      'option). By default, they run in a single process, so '
+                      'a thread-related crash will end all tests (but will be '
+                      'easier to trace with a debugger).')
     parser.add_option('--silent', dest='silent', action='store_true',
                       default=False,
                       help='be less verbose in per-file tests (no -a option)')
     parser.add_option('-l', '--loop', dest='loop',
-                      action='store_true', help='loop the execution endlessly (until it crashes). Useful for debugging rare crashes')
+                      action='store_true', help='loop the execution endlessly '
+                      '(until it crashes). Useful for debugging rare crashes')
 
     options, args = parser.parse_args()
 
@@ -246,13 +266,6 @@ if __name__ == '__main__':
             num = 1
     else:
         num = options.number
-
-    # import libxml2
-    # libxml2.newTextReaderFilename( '/tmp/ra_head.gii.minf' )
-    # import xml.parsers.expat
-    # open( '/tmp/xml.xml', 'w' ).write( '<?xml version="1.0" encoding="utf-8" ?><grop></grop>' )
-    # p = xml.parsers.expat.ParserCreate()
-    # p.ParseFile( open( '/tmp/xml.xml' ) )
 
     from soma.qt_gui.qt_backend import QtWidgets
     app = QtWidgets.QApplication(sys.argv)
