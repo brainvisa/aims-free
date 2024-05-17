@@ -34,7 +34,7 @@
 #include <cartodata/transformation/referential.h>
 #include <cartobase/uuid/uuid.h>
 #include <cartobase/object/property.h>
-
+#include <cartobase/thread/mutex.h>
 using namespace carto;
 using namespace std;
 
@@ -187,7 +187,10 @@ Referential & Referential::operator = ( const Referential & ref )
 
 string Referential::orientationStr( Orientation orient )
 {
+  // use a mutex for static data initialization for thread safety
+  static Mutex mutex( Mutex::Recursive );
   static map<Orientation, string> orient_map;
+  mutex.lock();
   if( orient_map.empty() )
   {
     orient_map[Undefined] = "Undefined";
@@ -212,6 +215,7 @@ string Referential::orientationStr( Orientation orient )
     orient_map[Z] = "Z";
     orient_map[z] = "z";
   }
+  mutex.unlock();
 
   map<Orientation, string>::const_iterator i = orient_map.find( orient );
   if( i == orient_map.end() )
@@ -224,7 +228,10 @@ string Referential::orientationStr( Orientation orient )
 Referential::Orientation
 Referential::orientationCode( const std::string & orient )
 {
+  // use a mutex for static data initialization for thread safety
+  static Mutex mutex( Mutex::Recursive );
   static map<string, Orientation> orient_map;
+  mutex.lock();
   if( orient_map.empty() )
   {
     orient_map["Undefined"] = Undefined;
@@ -249,6 +256,7 @@ Referential::orientationCode( const std::string & orient )
     orient_map["Z"] = Z;
     orient_map["z"] = z;
   }
+  mutex.unlock();
 
   map<string, Orientation>::const_iterator i = orient_map.find( orient );
   if( i == orient_map.end() )
