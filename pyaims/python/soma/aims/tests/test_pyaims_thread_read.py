@@ -113,25 +113,32 @@ def somaio_formats(aimsobj):
     try:
         fclass = getattr(aims.carto,
                          'FormatDictionary_%s' % aims.typeCode(aimsobj))
-    except:
+    except Exception:
         if isinstance(aimsobj, aims.carto.GenericObject):
             fclass = aims.carto.FormatDictionary_Object
         else:
             return
     formats = fclass.writeFormats()
+    read_formats = [f for f in fclass.readFormats() if f not in formats]
     exts = fclass.writeExtensions()
+    rexts = fclass.readExtensions()
     ext_by_format = dict([(f, []) for f in formats])
-    for ext, flist in six.iteritems(exts):
+    ext_non_written = dict([(f, []) for f in read_formats])
+    for ext, flist in exts.items():
         for f in flist:
             ext_by_format[f].append(ext)
-    return ext_by_format
+    for ext, flist in rexts.items():
+        for f in flist:
+            if f in read_formats:
+                ext_non_written[f].append(ext)
+    return ext_by_format, ext_non_written
 
 
 def somaio_extensions(aimsobj, format):
     try:
         fclass = getattr(aims.carto,
                          'FormatDictionary_%s' % aims.typeCode(aimsobj))
-    except:
+    except Exception:
         if isinstance(aimsobj, aims.carto.GenericObject):
             fclass = aims.carto.FormatDictionary_Object
         else:
@@ -146,26 +153,39 @@ def test_all_formats(filename, number=30, separate_process=False):
     f = aims.Finder()
     if not f.check(filename):
         raise IOError('%f is not readable' % filename)
-    ot = f.objectType(), f.dataType()
+    otd = f.objectType()
+    dt = f.dataType()
+    ot_equiv = [{'Volume', 'CartoVolume'}, ]
+    otgs = [g for g in ot_equiv if otd in g]
+    otg = [otd]
+    if otgs:
+        otg = otgs[0]
     aimsobj = aims.read(filename)
-    formats = aims.IOObjectTypesDictionary.formats(*ot)
-    soma_io_formats = somaio_formats(aimsobj)
+    formats = set()
+    for ot in otg:
+        formats_l = aims.IOObjectTypesDictionary.formats(ot, dt)
+        formats.update(formats_l)
+    formats = sorted(formats)
+    soma_io_formats, soma_io_not_tested_formats = somaio_formats(aimsobj)
     success = True
     unsafe_formats = []
     safe_formats = []
+    not_tested_formats = list(soma_io_not_tested_formats.keys())
     all_formats = list(zip(formats, [False] * len(formats))) \
         + [(f, True) for f in soma_io_formats]
+    print('formats:', all_formats)
     for format, is_soma in all_formats:
         # JP2 writer in Qt (4.8.1 at least) systematically crashes.
         if format in ('JP2'):
             continue
-        print('testing: %s / %s, format: %s' % (ot[0], ot[1], format))
+        print('testing: %s / %s, format: %s' % (otd, dt, format))
         try:
             directory = tempfile.mkdtemp(prefix='aims_thread_test')
             newfilename = _convertFileFormat(aimsobj, directory, 'aims_test',
                                              format, is_soma)
             if not newfilename:
                 print('could not generate format', format)
+                not_tested_formats.append(format)
                 # shutil.rmtree( directory )
                 continue
             print('testing read on %s...' % newfilename)
@@ -186,10 +206,11 @@ def test_all_formats(filename, number=30, separate_process=False):
                 unsafe_formats.append(format)
         finally:
             shutil.rmtree(directory)
-    print('All done for %s / %s. Success =' % ot, success)
+    print('All done for %s / %s. Success =' % (otd, dt), success)
     if not success:
-        return {ot: unsafe_formats}, {ot: safe_formats}
-    return {}, {ot: safe_formats}
+        return ({otd: unsafe_formats}, {otd: safe_formats},
+                {otd: not_tested_formats})
+    return {}, {otd: safe_formats}, {otd: not_tested_formats}
 
 
 if __name__ == '__main__':
@@ -241,11 +262,16 @@ if __name__ == '__main__':
         if options.all:
             unsafe_formats = {}
             safe_formats = {}
+            not_tested_formats = {}
             for filename in filenames:
-                tested_formats = test_all_formats(filename, num,
-                                                  separate_process=options.subprocess)
+                tested_formats = test_all_formats(
+                    filename, num, separate_process=options.subprocess)
                 unsafe_formats.update(tested_formats[0])
                 safe_formats.update(tested_formats[1])
+                not_tested_formats.update(tested_formats[2])
+            if len(not_tested_formats) != 0:
+                print('The following format cound not be tested:')
+                print(not_tested_formats)
             if len(unsafe_formats) != 0:
                 print('Results:')
                 print('unsafe formats:')
