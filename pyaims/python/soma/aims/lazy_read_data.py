@@ -11,6 +11,7 @@ from soma import aims
 import threading
 import itertools
 import multiprocessing
+import time
 
 
 class LazyReadData(object):
@@ -116,12 +117,15 @@ class LazyReadData(object):
             read.
         '''
         # print('init', self)
+        self._loaded = False
         if isinstance(data_or_filename, str):
             self.filename = data_or_filename
             self.data = None
         elif isinstance(data_or_filename, LazyReadData):
             self.filename = data_or_filename.filename
-            self.data = data_or_filename.data
+            with data_or_filename._lock:
+                self.data = data_or_filename.data
+                self._loaded = data_or_filename._loaded
             self.allocator_context = data_or_filename.allocator_context
             self.read_options = data_or_filename.read_options
             self.kwargs = data_or_filename.kwargs
@@ -130,6 +134,7 @@ class LazyReadData(object):
             return
         else:
             self.data = data_or_filename
+            self._loaded = True
             if 'filename' in kwargs:
                 self.filename = kwargs['filename']
                 kwargs = dict(kwargs)
@@ -142,38 +147,65 @@ class LazyReadData(object):
         self.nops = nops
         self.reader = reader
         self._lock = threading.RLock()
-        self._preload_lock = threading.RLock()
         self._loading = False
 
     def _lazy_read(self):
         '''
+        Internal mechanism of data reading. It may be called from a non-
+        principal thread when used in a threaded context such as in
+        :class:`PreloadIterator`.
+        '''
+        with self._lock:
+            if self._loaded:
+                return self.data
+        with self._lock:
+            self._loading = True
+        try:
+            self.load_data()
+        finally:
+            with self._lock:
+                self._loading = False
+                self._loaded = True
+        # print('read done:', self, ':', self.data)
+        return self.data
+
+    def load_data(self):
+        '''
         Implements actual data reading. The default implementation calls
         self.reader.read() if a Reader instance has been provided, or aims.read
-        otherwise. It may be called from a non-principal thread when used in a
-        threaded context such as in :class:`PreloadIterator`.
+        otherwise. You normally do not call this directly, but it will be
+        triggered, either by a threaded preloading, or via get_data().
         '''
-        if self.data is None:
-            if self.reader is not None:
-                self.data = self.reader.read(self.filename, **self.kwargs)
-            else:
-                self.data = aims.read(self.filename,
-                                      allocmode=self.allocator_context,
-                                      options=self.read_options, **self.kwargs)
-            # print('read', self, ':', self.data)
-        return self.data
+        if self.reader is not None:
+            self.data = self.reader.read(self.filename, **self.kwargs)
+        else:
+            self.data = aims.read(self.filename,
+                                  allocmode=self.allocator_context,
+                                  options=self.read_options,
+                                  **self.kwargs)
 
     def get_data(self):
         '''
         Get the underlying data object, and load it beforehand if not already
         done, in a thread-safe way.
         '''
-        with self._preload_lock:
-            self._loading = True
+        loading = False
         with self._lock:
-            return self._lazy_read()
+            if self._loaded:
+                return self.data
+            loading = self._loading
+            # reading in another thread
+        if loading:
+            while loading:
+                time.sleep(0.01)
+                with self._lock:
+                    loading = self._loading
+            return self.data
+        # read it (in current thread, possibly main thread)
+        return self._lazy_read()
 
     def _dec_release(self):
-        with self._preload_lock:
+        with self._lock:
             if self.nops > 0:
                 self.nops -= 1
                 if self.nops == 0:
@@ -182,7 +214,9 @@ class LazyReadData(object):
                     self.data = None
                     # allow one additional operation
                     self.nops = 1
-                    self._loading = False
+                    with self._lock:
+                        self._loading = False
+                        self._loaded = False
 
     def preloading(self):
         ''' If a threaded load operation has been started ("preloading"), then
@@ -190,8 +224,16 @@ class LazyReadData(object):
         returns True as long as the data is in memory. Its goal is to tell that
         another load operation is not needed.
         '''
-        with self._preload_lock:
+        with self._lock:
             return self._loading
+
+    def loaded(self):
+        with self._lock:
+            return self._loaded
+
+    def not_started(self):
+        with self._lock:
+            return not self._loaded and not self._loading
 
     #def write(self):
         #if self.data is not None:
@@ -440,9 +482,9 @@ class PreloadIterator(object):
         for i in range(self.npreload):
             try:
                 item = next(iter)
-                if hasattr(item, 'preloading') and not item.preloading():
-                    item._loading = True
-                    # print('preload:', item.filename)
+                if hasattr(item, 'not_started') and item.not_started():
+                    with item._lock:
+                        item._loading = True
                     th = threading.Thread(target=item._lazy_read)
                     th.start()
             except StopIteration:
