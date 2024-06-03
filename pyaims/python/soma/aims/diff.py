@@ -436,10 +436,10 @@ def diff_mesh_vectors(reference_vec, test_vec, reference_name, test_name,
         return True
 
     if reference_vec == test_vec:
-        if len(reference_vec) != 0:
-            # print the message only for non-empty vectors
-            print("Vectors {0} and {1} are identical."
-                  .format(reference_name, test_name))
+        #if len(reference_vec) != 0:
+            ## print the message only for non-empty vectors
+            #print("Vectors {0} and {1} are identical."
+                  #.format(reference_name, test_name))
         return False
 
     # Vectors may compare unequal but still be equivalent (AIMS bug
@@ -524,8 +524,8 @@ def diff_objects(reference_data, test_data,
             and hasattr(test_data, "header")):
         difference_found = diff_headers(reference_data.header(),
                                         test_data.header())
-        if not difference_found:
-            print("Headers are identical")
+        #if not difference_found:
+            #print("Headers are identical")
 
     data_difference_found = None
     if type(reference_data) in VOLUME_TYPES:
@@ -551,8 +551,8 @@ def diff_objects(reference_data, test_data,
         raise NotImplementedError("Comparison of {} is not implemented"
                                   .format(type(reference_data)))
 
-    if data_difference_found is not None and not data_difference_found:
-        print("Data are identical")
+    #if data_difference_found is not None and not data_difference_found:
+        #print("Data are identical")
     difference_found = difference_found or data_difference_found
 
     return difference_found
