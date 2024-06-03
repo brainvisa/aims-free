@@ -41,8 +41,32 @@ rel_flx_max_diff = 1e-4
 '''
 
 
+class _fuzzy_same_label:
+    def __init__(self, nmax):
+        self.num_diff = 0
+        self.num_diff_max = nmax
 
-def same_graphs(ref_graph, test_graph, verbose=False):
+    def __call__(self, ref_vertice, test_vertice, verbose):
+        ref_keys = [k for k in ref_vertice.keys() if k != 'label']
+        test_keys = [k for k in test_vertice.keys() if k != 'label']
+        if not len(ref_keys) == len(test_keys):
+            return False
+        for key in ref_keys:
+            if key not in test_vertice:
+                return False
+            ref_value = ref_vertice[key]
+            test_value = test_vertice[key]
+            if not _same_value(ref_value, test_value):
+                return False
+        ref_label = ref_vertice.get('label')
+        test_label = test_vertice.get('label')
+        if ref_label != test_label:
+            self.num_diff += 1
+            return self.num_diff <= self.num_diff_max
+        return True
+
+
+def same_graphs(ref_graph, test_graph, verbose=False, max_label_diff=0):
     '''
     Compare two graphs and return if they are identical.
     This function is useful for testing and validation purposes.
@@ -60,6 +84,10 @@ def same_graphs(ref_graph, test_graph, verbose=False):
         case the graph is read using aims.read() function.
     verbose: bool (optional, default: False)
         if True, messages are print on the standard output during comparison.
+    max_label_diff: int (optional, default: 0)
+        if graphs differ only for a limited of "label" properties, then this
+        maximum number of mis-labelings are accepted. This is useful when
+        stochastic or unreproducible lableing methods are used.
 
     Returns
     -------
@@ -76,11 +104,16 @@ def same_graphs(ref_graph, test_graph, verbose=False):
 
     if verbose:
         print("Compare vertices:")
-    if not _same_dictionary(ref_vertices, test_vertices, _same_vertice,
-                            verbose):
+    cmp_func = _same_vertice
+    if max_label_diff != 0:
+        cmp_func = _fuzzy_same_label(max_label_diff)
+    if not _same_dictionary(ref_vertices, test_vertices, cmp_func, verbose):
         if verbose:
             print("  differences in vertices")
-        return False
+            return False
+
+    if verbose and max_label_diff != 0 and cmp_func.num_diff != 0:
+        print('A few label differences:', cmp_func.num_diff)
 
     ref_edges = _build_edge_dictionary(ref_graph)
     test_edges = _build_edge_dictionary(test_graph)
@@ -112,7 +145,8 @@ def _build_edge_dictionary(graph):
     return edge_dict
 
 
-def _same_dictionary(ref_dict, test_dict, same_element_function, verbose=False):
+def _same_dictionary(ref_dict, test_dict, same_element_function,
+                     verbose=False):
     if verbose:
         print("  first:  " + str(len(ref_dict)) + " elements.")
         print("  second: " + str(len(test_dict)) + " elements.")
