@@ -227,7 +227,7 @@ class FuzzySulcusComparator(SulcusComparator):
         return True
 
 
-def _same_edge(ref_edge, test_edge, verbose):
+def _same_edge(ref_edge, test_edge, verbose, ignored=None):
     # TODO remove the duplication with same_vertice
     same = len(ref_edge) == len(test_edge)
     if not same:
@@ -236,6 +236,8 @@ def _same_edge(ref_edge, test_edge, verbose):
                   + " " + repr(len(test_edge)))
         return False
     for key in ref_edge.keys():
+        if ignored is not None and key in ignored:
+            continue
         if key not in test_edge:
             if verbose:
                 print(repr(key) + " not in test_edge")
@@ -248,3 +250,11 @@ def _same_edge(ref_edge, test_edge, verbose):
                       + str(test_edge[key]))
             return False
     return True
+
+
+class SulcusEdgeComparator:
+    ignored = {'cortical_label', 'junction_label', 'plidepassage_label'}
+
+    def __call__(self, ref_vertice, test_vertice, verbose):
+        return _same_edge(ref_vertice, test_vertice, verbose, self.ignored)
+
