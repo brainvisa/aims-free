@@ -95,7 +95,8 @@ def same_graphs(ref_graph, test_graph, verbose=False, max_label_diff=0):
 
     if verbose:
         print("Compare edges:")
-    if not _same_dictionary(ref_edges, test_edges, _same_edge, verbose):
+    cmp_func = SulcusEdgeComparator()
+    if not _same_dictionary(ref_edges, test_edges, cmp_func, verbose):
         if verbose:
             print("  differences in edges")
         return False
