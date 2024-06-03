@@ -41,31 +41,6 @@ rel_flx_max_diff = 1e-4
 '''
 
 
-class _fuzzy_same_label:
-    def __init__(self, nmax):
-        self.num_diff = 0
-        self.num_diff_max = nmax
-
-    def __call__(self, ref_vertice, test_vertice, verbose):
-        ref_keys = [k for k in ref_vertice.keys() if k != 'label']
-        test_keys = [k for k in test_vertice.keys() if k != 'label']
-        if not len(ref_keys) == len(test_keys):
-            return False
-        for key in ref_keys:
-            if key not in test_vertice:
-                return False
-            ref_value = ref_vertice[key]
-            test_value = test_vertice[key]
-            if not _same_value(ref_value, test_value):
-                return False
-        ref_label = ref_vertice.get('label')
-        test_label = test_vertice.get('label')
-        if ref_label != test_label:
-            self.num_diff += 1
-            return self.num_diff <= self.num_diff_max
-        return True
-
-
 def same_graphs(ref_graph, test_graph, verbose=False, max_label_diff=0):
     '''
     Compare two graphs and return if they are identical.
@@ -104,9 +79,9 @@ def same_graphs(ref_graph, test_graph, verbose=False, max_label_diff=0):
 
     if verbose:
         print("Compare vertices:")
-    cmp_func = _same_vertice
+    cmp_func = SulcusComparator()
     if max_label_diff != 0:
-        cmp_func = _fuzzy_same_label(max_label_diff)
+        cmp_func = FuzzySulcusComparator(max_label_diff)
     if not _same_dictionary(ref_vertices, test_vertices, cmp_func, verbose):
         if verbose:
             print("  differences in vertices")
@@ -195,13 +170,15 @@ def _same_value(ref_value, test_value):
     return True
 
 
-def _same_vertice(ref_vertice, test_vertice, verbose):
+def _same_vertice(ref_vertice, test_vertice, verbose, ignored=None):
     if not len(ref_vertice) == len(test_vertice):
         if verbose:
             print("  different number of arguments " + repr(len(ref_vertice))
                   + " " + repr(len(test_vertice)))
         return False
     for key in ref_vertice.keys():
+        if ignored is not None and key in ignored:
+            continue
         if key not in test_vertice:
             if verbose:
                 print(repr(key) + " not in test_vertice")
@@ -214,6 +191,40 @@ def _same_vertice(ref_vertice, test_vertice, verbose):
                       + " != " + str(test_vertice[key]))
             return False
     return True
+
+
+class SulcusComparator:
+    ignored = {'ss_label', 'bottom_label', 'other_label', 'Tmtktri_label'}
+
+    def __call__(self, ref_vertice, test_vertice, verbose):
+        return _same_vertice(ref_vertice, test_vertice, verbose, self.ignored)
+
+
+class FuzzySulcusComparator(SulcusComparator):
+    def __init__(self, nmax):
+        self.num_diff = 0
+        self.num_diff_max = nmax
+
+    def __call__(self, ref_vertice, test_vertice, verbose):
+        ref_keys = [k for k in ref_vertice.keys() if k != 'label']
+        test_keys = [k for k in test_vertice.keys() if k != 'label']
+        if not len(ref_keys) == len(test_keys):
+            return False
+        for key in ref_keys:
+            if self.ignored is not None and key in self.ignored:
+                continue
+            if key not in test_vertice:
+                return False
+            ref_value = ref_vertice[key]
+            test_value = test_vertice[key]
+            if not _same_value(ref_value, test_value):
+                return False
+        ref_label = ref_vertice.get('label')
+        test_label = test_vertice.get('label')
+        if ref_label != test_label:
+            self.num_diff += 1
+            return self.num_diff <= self.num_diff_max
+        return True
 
 
 def _same_edge(ref_edge, test_edge, verbose):
