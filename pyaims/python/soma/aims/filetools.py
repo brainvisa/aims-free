@@ -152,7 +152,7 @@ def print_hdr(hdr, hidden=None):
     print(clean_hdr(hdr, hidden))
 
 
-def cmp(ref_file, test_file, skip_suffixes=None):
+def cmp(ref_file, test_file, skip_suffixes=None, graph_max_label_diff=0):
     '''
     Compare files, taking into account their neuroimaging nature.
     Some specific comparison function will be called for graphs, meshes,
@@ -172,7 +172,8 @@ def cmp(ref_file, test_file, skip_suffixes=None):
         if ref_file.endswith(ext):
             return True
     if ref_file.endswith(".arg"):
-        return same_graphs(ref_file, test_file)
+        return same_graphs(ref_file, test_file,
+                           max_label_diff=graph_max_label_diff)
     elif ref_file.endswith(".csv"):
         if filecmp.cmp(ref_file, test_file):
             return True

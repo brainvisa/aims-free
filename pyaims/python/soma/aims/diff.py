@@ -490,7 +490,7 @@ def diff_trm(reference_trm, test_trm):
 
 
 def diff_objects(reference_data, test_data,
-                 min_value=None, max_value=None):
+                 min_value=None, max_value=None, graph_max_label_diff=0):
     """Print the differences between two files read by AIMS."""
     kind = get_data_kind(type(reference_data))
     if get_data_kind(type(test_data)) != kind:
@@ -546,7 +546,8 @@ def diff_objects(reference_data, test_data,
         data_difference_found = diff_trm(reference_data, test_data)
     elif type(reference_data) is aims.Graph:
         difference_found = not graph_comparison.same_graphs(
-            reference_data, test_data, verbose=True)
+            reference_data, test_data, verbose=True,
+            max_label_diff=graph_max_label_diff)
     else:
         raise NotImplementedError("Comparison of {} is not implemented"
                                   .format(type(reference_data)))
