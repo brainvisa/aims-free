@@ -667,6 +667,7 @@ int main( int argc, const char **argv )
       Object options = Object::value( Dictionary() );
       if( !mode.empty() )
         options->setProperty( "saving_mode", mode );
+      options->setProperty( "save_only_modified", false );
 
       Writer<Graph> gw( fileout, options );
       gw.write( g );
