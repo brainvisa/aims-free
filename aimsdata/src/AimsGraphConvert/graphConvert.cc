@@ -658,7 +658,6 @@ int main( int argc, const char **argv )
       }
 
       // write
-      AimsGraphWriter agw( fileout );
       string mode;
       if( global )
         mode = "global";
