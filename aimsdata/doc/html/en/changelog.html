@@ -17,6 +17,7 @@
 <hr width="100%"> <br>
 
  <b><a href="#version-5.2.0">Version 5.2.0</a></b><br>
+ <b><a href="#version-5.1.2">Version 5.1.2</a></b><br>
  <b><a href="#version-5.1.1">Version 5.1.1</a></b><br>
  <b><a href="#version-5.1.0">Version 5.1.0</a></b><br>
  <b><a href="#version-5.0.4">Version 5.0.4</a></b><br>
@@ -82,6 +83,23 @@
   </li>
 
   <li>Many other bug fixes</li>
+</ul>
+
+
+<!-- -->
+<h4> <a name="version-5.1.2"></a>Jun. 28, 2024, Version 5.1.2</h4>
+
+<ul>
+  <li>New command AimsClassifyTransformation.py</li>
+  <li>New command AimsRigidifyTransformation.py</li>
+  <li>Fixes AimsGraphConvert which might not save all objects if he thought they were not modified. Now force-write everything.
+  </li>
+  <li>Fixes and improvements in GLTF IO</li>
+  <li>Memory leak fix in C++/Python bindings</li>
+  <li>RawConverter_Bucker_Volume.printToVolume() clips the bucket to the size of the volume, allowing to use it on unmatching sized buckets
+  </li>
+  <li>Various bugs fixed (sparse matrix reading, FFD field reading from nifti file...)
+  </li>
 </ul>
 
 
