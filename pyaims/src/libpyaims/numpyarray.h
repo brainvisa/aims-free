@@ -34,6 +34,12 @@
 #ifndef PYAIMS_NUMPYARRAY_H
 #define PYAIMS_NUMPYARRAY_H
 
+#ifdef slots  // Qt defines this as a macro
+#pragma push_macro("slots")
+#define _slots_saved_
+#undef slots
+#endif
+
 #include <Python.h>
 #ifndef PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL PyAims_NumpyAPI
@@ -43,5 +49,10 @@
 #endif
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
+
+#ifdef _slots_saved_
+#pragma pop_macro("slots")
+#undef _slots_saved_
+#endif
 
 #endif
