@@ -55,4 +55,10 @@
 #undef _slots_saved_
 #endif
 
+// numpy 1.x / 2.x compatibility
+#if NPY_ABI_VERSION < 0x02000000
+  #define PyDataType_ELSIZE(descr) ((descr)->elsize)
+  #define PyDataType_SET_ELSIZE(descr, val) ((descr)->elsize = val)
+#endif
+
 #endif
