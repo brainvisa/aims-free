@@ -74,8 +74,10 @@ namespace carto
     /** copy properties from other to this, avoiding forbidden
         properties like size.
     */
-    virtual void copyHeaderFrom( const PropertySet & other );
-    virtual void copyHeaderFrom( const Object & other );
+    virtual void copyHeaderFrom( const PropertySet & other,
+                                 bool stopOnError = true );
+    virtual void copyHeaderFrom( const Object & other,
+                                 bool stopOnError = true );
 
   protected:
 
@@ -136,9 +138,10 @@ namespace carto
 
   template < typename T >
   inline
-  void VolumeProxy< T >::copyHeaderFrom( const PropertySet & other )
+  void VolumeProxy< T >::copyHeaderFrom( const PropertySet & other,
+                                         bool stopOnError )
   {
-    copyHeaderFrom( Object::reference( other ) );
+    copyHeaderFrom( Object::reference( other), stopOnError );
   }
 
 

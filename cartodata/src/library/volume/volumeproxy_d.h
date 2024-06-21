@@ -187,7 +187,8 @@ namespace carto
 
 
   template < typename T >
-  void VolumeProxy< T >::copyHeaderFrom( const Object & other )
+  void VolumeProxy< T >::copyHeaderFrom( const Object & other,
+                                         bool stopOnError )
   {
     if( other.isNull() )
       return;
@@ -200,14 +201,28 @@ namespace carto
     forbidden.insert( "volume_dimension" );
 
     PropertySet & hdr = header();
+    std::string err_msg;
 
     Object it = other->objectIterator();
     while( it->isValid() )
     {
       if( forbidden.find( it->key() ) == forbidden.end() )
-        hdr.setProperty( it->key(), it->currentValue() );
+        try
+        {
+          hdr.setProperty( it->key(), it->currentValue() );
+        }
+        catch( std::exception & e )
+        {
+          std::cerr << "header property " << it->key() << " could not be copied: probably the destination already exists as a builtin with a different type.\n";
+          std::cerr << "error message: " << e.what() << std::endl;
+          if( stopOnError )
+            throw;
+          err_msg = e.what();
+        }
       it->next();
     }
+    if( !err_msg.empty() )
+      throw std::runtime_error( err_msg );
   }
 
 }

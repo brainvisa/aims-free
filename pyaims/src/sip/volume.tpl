@@ -129,8 +129,10 @@ Set voxel sizes in mm (list of at least 4 floats)
 
     void setVoxelSize( float vx, float vy=1., float vz=1., float vt=1. );
 
-    virtual void copyHeaderFrom( const carto::PropertySet & other );
-    virtual void copyHeaderFrom( const carto::Object & other );
+    virtual void copyHeaderFrom( const carto::PropertySet & other,
+                                 bool stopOnError = true );
+    virtual void copyHeaderFrom( const carto::Object & other,
+                                 bool stopOnError = true );
 
     carto::AllocatorContext & allocatorContext();
 %MethodCode

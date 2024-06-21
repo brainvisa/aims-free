@@ -1748,9 +1748,10 @@ namespace carto
     }
 
     obj->blockSignals( true );
-    obj->header().copyProperties( header );
+    obj->copyHeaderFrom( header );
     // restore original sizes : temporary too...
     obj->blockSignals( false );
+
     return obj;
   }
 
