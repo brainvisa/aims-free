@@ -1748,7 +1748,14 @@ namespace carto
     }
 
     obj->blockSignals( true );
-    obj->copyHeaderFrom( header );
+    try
+    {
+      obj->copyHeaderFrom( header, false );
+    }
+    catch( std::exception & )
+    {
+      // not beautiful, but don't crash for that
+    }
     // restore original sizes : temporary too...
     obj->blockSignals( false );
 
