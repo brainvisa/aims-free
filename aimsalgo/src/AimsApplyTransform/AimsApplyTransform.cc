@@ -181,10 +181,7 @@ void set_geometry_from_header(ApplyTransformProc& proc,
                               bool dimension_ok,
                               bool voxel_size_ok)
 {
-  cout << "set_geometry_from_header dim_ok: " << dimension_ok << endl;
-  cout << "hdr size: " << header.size() << endl;
   if(!voxel_size_ok) {
-    cout << "get voxel_size\n";
     Object voxel_size = header.getProperty("voxel_size");
     if(!(proc.sx > 0))
       proc.sx = voxel_size->getArrayItem(0)->getScalar();
@@ -192,10 +189,8 @@ void set_geometry_from_header(ApplyTransformProc& proc,
       proc.sy = voxel_size->getArrayItem(1)->getScalar();
     if(!(proc.sz > 0))
       proc.sz = voxel_size->getArrayItem(2)->getScalar();
-    cout << "vs done\n";
   }
   if(!dimension_ok) {
-    cout << "get dimension\n";
     Object volume_dimension = header.getProperty("volume_dimension");
     if(!(proc.dx > 0))
       proc.dx = volume_dimension->getArrayItem(0)->getScalar();
@@ -203,7 +198,6 @@ void set_geometry_from_header(ApplyTransformProc& proc,
       proc.dy = volume_dimension->getArrayItem(1)->getScalar();
     if(!(proc.dz > 0))
       proc.dz = volume_dimension->getArrayItem(2)->getScalar();
-    cout << "dim done\n";
   }
 }
 
