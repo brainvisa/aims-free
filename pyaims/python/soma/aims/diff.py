@@ -91,7 +91,7 @@ def testable_exts():
         for fmt in aims.supported_io_formats(_TESTABLE_TYPES_STR, 'r'):
             _TESTABLE_EXTS |= (
                 set(aims.Finder.extensions(fmt))
-                | set(soma.aims.soma.DataSourceInfoLoader.extensions(fmt))
+                | set(aims.soma.DataSourceInfoLoader.extensions(fmt))
             )
         _TESTABLE_EXTS = frozenset(_TESTABLE_EXTS)
     return _TESTABLE_EXTS
