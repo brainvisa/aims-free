@@ -73,6 +73,20 @@ TESTABLE_TYPES = (
 IGNORED_FIELDS = ['uuid']
 
 
+_TESTABLE_TYPES_STR = ['Graph', 'Bucket', 'Volume', 'Texture', 'Mesh']
+_TESTABLE_EXTS = None
+
+def testable_exts():
+    """Set of filename extensions that aims.diff is able to compare."""
+    global _TESTABLE_EXTS
+    if _TESTABLE_EXTS is None:
+        _TESTABLE_EXTS = {'trm'}
+        for fmt in aims.supported_io_formats(_TESTABLE_TYPES_STR, 'r'):
+            _TESTABLE_EXTS |= set(aims.Finder.extensions(fmt))
+        _TESTABLE_EXTS = frozenset(_TESTABLE_EXTS)
+    return _TESTABLE_EXTS
+
+
 def get_data_kind(data_type):
     # Names of data kinds are the human-readable AIMS names (see the list of
     # types for --input in AimsFileConvert --help).
