@@ -38,9 +38,6 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL licence and that you accept its terms.
 
-import argparse
-import sys
-
 import numpy
 
 from soma import aims
@@ -210,7 +207,13 @@ def diff_arrays(reference_arr, test_arr, text_bits=DEFAULT_TEXT_BITS,
               .format(reference_arr.dtype, test_arr.dtype, **text_bits))
         return True
 
-    if numpy.array_equiv(reference_arr, test_arr):
+    # broadcast + array_equal is the same as array_equiv, except we can pass
+    # the equal_nan parameter. asarray is used to "copy" the array structure,
+    # i.e. to avoid changing the shape of the original objects.
+    reference_arr = numpy.asarray(reference_arr)
+    test_arr = numpy.asarray(test_arr)
+    numpy.broadcast_arrays(reference_arr, test_arr)
+    if numpy.array_equal(reference_arr, test_arr, equal_nan=True):
         return False
 
     print("{indent}{Arrays} have different data:"
