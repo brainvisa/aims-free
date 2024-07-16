@@ -70,7 +70,7 @@ TESTABLE_TYPES = (
     + MESH_TYPES
 )
 
-IGNORED_FIELDS = ['uuid']
+IGNORED_FIELDS = ['referential', 'uuid']
 
 
 _TESTABLE_TYPES_STR = ['Graph', 'Bucket', 'Volume', 'Texture', 'Mesh']
