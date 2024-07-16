@@ -79,16 +79,20 @@ IGNORED_FIELDS = [
 ]
 
 
-_TESTABLE_TYPES_STR = ['Graph', 'Bucket', 'Volume', 'Texture', 'Mesh']
+_TESTABLE_TYPES_STR = ['Graph', 'AffineTransformation3d',
+                       'Bucket', 'Volume', 'Texture', 'Mesh']
 _TESTABLE_EXTS = None
 
 def testable_exts():
     """Set of filename extensions that aims.diff is able to compare."""
     global _TESTABLE_EXTS
     if _TESTABLE_EXTS is None:
-        _TESTABLE_EXTS = {'trm'}
+        _TESTABLE_EXTS = set()
         for fmt in aims.supported_io_formats(_TESTABLE_TYPES_STR, 'r'):
-            _TESTABLE_EXTS |= set(aims.Finder.extensions(fmt))
+            _TESTABLE_EXTS |= (
+                set(aims.Finder.extensions(fmt))
+                | set(soma.aims.soma.DataSourceInfoLoader.extensions(fmt))
+            )
         _TESTABLE_EXTS = frozenset(_TESTABLE_EXTS)
     return _TESTABLE_EXTS
 
