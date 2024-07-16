@@ -70,7 +70,13 @@ TESTABLE_TYPES = (
     + MESH_TYPES
 )
 
-IGNORED_FIELDS = ['referential', 'uuid']
+# Header fields containing variable data (e.g. UUIDs) are ignored
+IGNORED_FIELDS = [
+    'destination_referential',
+    'referential',
+    'source_referential',
+    'uuid',
+]
 
 
 _TESTABLE_TYPES_STR = ['Graph', 'Bucket', 'Volume', 'Texture', 'Mesh']
