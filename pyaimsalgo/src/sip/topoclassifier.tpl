@@ -13,7 +13,7 @@ typedef TopologicalClassifier<carto::VolumeRef<%Template1%> > TopologicalClassif
 %End
 
 %Docstring
-Topological classification of voxels (normally on a skeleton)
+Topological classification of voxels (normally on a skeleton) for a whole volume
 %End
 
 public:
@@ -26,4 +26,27 @@ public:
   carto::VolumeRef< %Template1% > res = sipCpp->doit( *a0 );
   sipRes = new carto::rc_ptr<carto::Volume< %Template1% > >( res.get() );
 %End
+};
+
+
+class TopologicalClassification_%Template1typecode%
+  : TopologicalClassificationBase
+{
+%TypeHeaderCode
+#include <aims/topology/topoClassif.h>
+
+#ifndef PYAIMSALGOSIP_TOPOCLASSIFFICATION_%Template1typecode%_DEFINED
+#define PYAIMSALGOSIP_TOPOCLASSIFFICATION_%Template1typecode%_DEFINED
+typedef TopologicalClassification<%Template1%> TopologicalClassification_%Template1typecode%;
+#endif
+%End
+
+%Docstring
+Topological classification per voxel
+%End
+
+public:
+
+  TopologicalClassification_%Template1typecode% ( const rc_ptr_Volume_%Template1typecode% & );
+  virtual ~TopologicalClassification_%Template1typecode%();
 };
