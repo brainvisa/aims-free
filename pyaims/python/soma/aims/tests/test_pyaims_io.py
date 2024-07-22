@@ -529,6 +529,17 @@ class TestPyaimsIO(unittest.TestCase):
         #print('- read format')
         #print(aims.carto.IOObjectTypesDictionary.readTypes())
 
+    def check_optional_format_support(self, fname):
+        for ot, dts in aims.IOObjectTypesDictionary.objectsTypes().items():
+            for dt in dts:
+                if fname in aims.IOObjectTypesDictionary.formats(ot, dt):
+                    return True
+        for ot, fmts \
+                in aims.carto.IOObjectTypesDictionary.writeTypes().items():
+            if fname in fmts:
+                return True
+        return False
+
     def test_minf_uuid(self):
         '''
             check that uuid in minf is rightly written and conserved 
@@ -670,7 +681,6 @@ class TestPyaimsIO(unittest.TestCase):
         #aims.carto.setVerbose(1)
         #aims.carto.setDebugMessageLevel(4)
 
-        
         #read_only_formats = (('FDF', '.fdf'), 
                              #('GENESIS', '.hdr'),
                              #('GIF', '.gif'),
@@ -682,33 +692,39 @@ class TestPyaimsIO(unittest.TestCase):
                              #('SVGZ', '.svgz'),
                              #('TGA', '.tga'))
 
-        read_write_formats = (('BMP', '.bmp'), 
-                              ('ECAT', '.v'),  
-                              ('GIS', '.ima'),
-                              ('ICO', '.ico'), 
-                              ('JPEG(Qt)', '.jpeg'),
-                              ('JPG', '.jpg'), 
-                              ('NIFTI-1', '.nii'),
-                              ('NIFTI-2', '.nii'),
-                              ('PBM', '.pbm'),
-                              ('PGM', '.pgm'),
-                              ('PNG', '.png'),
-                              ('PPM', '.ppm'),
-                              ('TIFF', '.tiff'),
-                              ('TIFF(Qt)', '.tiff'),
-                              ('XBM', '.xbm'),
-                              ('XPM', '.xpm'),
-                              ('VIDA', '.vimg'))
+        read_write_formats = (('BMP', '.bmp', False),
+                              ('ECAT', '.v', False),
+                              ('GIS', '.ima', True),
+                              ('ICO', '.ico', False),
+                              ('JPEG(Qt)', '.jpeg', False),
+                              ('JPG', '.jpg', True),
+                              ('NIFTI-1', '.nii', True),
+                              ('NIFTI-2', '.nii', True),
+                              ('PBM', '.pbm', False),
+                              ('PGM', '.pgm', False),
+                              ('PNG', '.png', False),
+                              ('PPM', '.ppm', False),
+                              ('TIFF', '.tiff', True),
+                              ('TIFF(Qt)', '.tiff', False),
+                              ('XBM', '.xbm', False),
+                              ('XPM', '.xpm', False),
+                              ('VIDA', '.vimg', False))
 
-        for s, e in read_write_formats:
-            
+        for s, e, m in read_write_formats:
+
+            if not m and not self.check_optional_format_support(s):
+                print('Format', s,
+                      'is not supported in the current build. It will be '
+                      'skipped.')
+                continue
+
             if self.verbose:
                 print('== Check meta informations for format', s)
-                
+
             # Check write/rewrite meta informations for a format
             f = os.path.join(self.work_dir, 'test_uuid_%s%s' % (s, e))
             check_meta_write_rewrite(f, s)
-                
+
             if self.verbose:
                 print()
 
