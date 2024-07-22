@@ -729,14 +729,22 @@ class TestPyaimsIO(unittest.TestCase):
                 print()
 
     def test_io_with_strides(self):
-        #formats = ['.nii', '.ima', '.mnc', '.tiff', '.v', '.jpg', '.bmp']
-        formats = ['.nii', '.ima', '.mnc', '.tiff', '.v', '.vimg', '.bmp']
+        formats = (('BMP', '.bmp', False),
+                   ('ECAT', '.v', False),
+                   ('GIS', '.ima', True),
+                   ('NIFTI-1', '.nii', True),
+                   ('TIFF', '.tiff', True),
+                   ('VIDA', '.vimg', False))
         failing_files = set()
         view = ((3, 1, 0, 0), (3, 3, 1, 1),
                 (4, 2, 1, 0), (3, 3, 1, 1))
         options = {}
 
-        for format in formats:
+        for fname, format, mandatory in formats:
+            if not mandatory \
+                    and not self.check_optional_format_support(fname):
+                print('skipping format', fname)
+                continue
             arr = np.arange(100, dtype=np.int16).reshape((10, 5, 2, 1))
             vol = aims.Volume(arr)
             vol.header()['voxel_size'] = [0.8, 0.7, 0.6, 1.]
