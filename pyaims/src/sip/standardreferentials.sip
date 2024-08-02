@@ -70,6 +70,36 @@ namespace aims
     Return a header with size and characteristics of the ICBM2009c MNI
     template volume.
 %End
+
+    static std::string referentialID( const std::string & refName,
+                                      bool commonScannerBased = false,
+                                      bool genNewIds = true,
+                                      const std::string & commonSuffix = "" );
+%Docstring
+    try to identify referential ID from its string name or description.
+
+    for instance "Talairach-MNI template-SPM" will be translated to its
+    AIMS uuid, "803552a6-ac4d-491d-99f5-b938392b674b"
+
+    If commonScannerBased is true, then "Scanner-based anatomical
+    coordinates" will be translated to the value of
+    commonScannerBasedReferentialID(), so that other ref names
+    of the same kind will match. If commonScannerBased is false, then
+    a scanner-based ref name will be either translated to a new UUID, or
+    returned unchanged or with a suffix, depending on the values of
+    genNewIds (see below) and commonSuffix. If commonSuffix has a value, it
+    will be appended after the name "Scanner-based anatomical coordinates".
+
+    if genNewIds is true, then:
+    if the refName is an unkwnown referential name (and not an UUID), then
+    a new UUID will be generated for it, each time this function is called:
+    so calling it twice with the same name will result in two distinct
+    IDs.
+    if genNewIds is false, and the refName is not recognized, then it
+    will be returned unchanged.
+%End
+
+    static bool isUUID( const std::string & refName );
   };
 
 };

@@ -40,6 +40,7 @@
 #include <aims/io/reader.h>
 #include <aims/data/pheader.h>
 #include <cartobase/config/paths.h>
+#include <cartobase/uuid/uuid.h>
 
 using namespace aims;
 using namespace carto;
@@ -180,4 +181,54 @@ const AffineTransformation3d &
   return *tal_to_icbm_template;
 }
 
+
+bool StandardReferentials::isUUID( const std::string & refName )
+{
+  if( refName.length() != 36 )
+    return false;
+  string::size_type i, n = refName.length();
+  for( i=0; i<n; ++i )
+  {
+    if( i == 8 || i == 13 || i == 18 || i == 23 )
+    {
+      if( refName[i] != '-' )
+        return false;
+    }
+    else
+    {
+      char c = refName[i];
+      if( c < '0' || c > 'f' || (c > '9' && c < 'a' ) )
+        return false;
+    }
+  }
+  return true;
+}
+
+
+string StandardReferentials::referentialID( const string & refName,
+                                            bool commonScannerBased,
+                                            bool genNewIds,
+                                            const string & commonSuffix )
+{
+  if( isUUID( refName ) )
+    return refName;
+  if( refName == mniTemplateReferential() )
+    return mniTemplateReferentialID();
+  if( refName == acPcReferential() )
+    return acPcReferentialID();
+  if( refName == talairachReferential() )
+    return mniTemplateReferentialID();
+  if( refName == commonScannerBasedReferential() )
+  {
+    if( commonScannerBased )
+      return commonScannerBasedReferentialID();
+    else if( !commonSuffix.empty() )
+      return refName + commonSuffix;
+  }
+  if( !genNewIds )
+    return refName;  // unchanged
+  UUID uuid;
+  uuid.generate();
+  return uuid.toString();
+}
 

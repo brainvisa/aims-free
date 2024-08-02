@@ -299,6 +299,26 @@ namespace aims
     carto::rc_ptr<soma::Transformation3d>
       loadTransformation( Edge *edge, bool affine_only=false ) const;
 
+    /** Insert all transformations / referentials found in an object header.
+
+        Returns the translated referentials names in the order they are in the
+        object header. For instance for a header with the properties:
+        {
+          "referential": "A",
+          "referentials": ["B", "Talairach-MNI template-SPM",
+                           "Scanner-based anatomical coordinates"],
+          "transformations": [...]  // list of 3 transformations
+        }
+
+        it will return:
+        ["A", "803552a6-ac4d-491d-99f5-b938392b674b",
+         "Scanner-based anatomical coordinates_A"]
+    */
+    std::vector<std::string> updateFromObjectHeader( carto::Object header );
+    /// Insert all transformations / referentials found in an object header
+    std::vector<std::string>  updateFromObjectHeader(
+      carto::DictionaryInterface *header );
+
   private:
     mutable std::map<std::string, Vertex *> _refs_by_id;
     mutable std::map<std::string, Edge *> _tr_by_id;

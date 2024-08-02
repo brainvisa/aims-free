@@ -761,6 +761,25 @@ public:
               file name (.trm format), but as an embedded 4x4 matrix.
 %End
 
+    vector_STRING updateFromObjectHeader( carto::Object header );
+%Docstring
+    Insert all transformations / referentials found in an object header.
+
+    Returns the translated referentials names in the order they are in the
+    object header. For instance for a header with the properties::
+
+      {
+        "referential": "A",
+        "referentials": ["B", "Talairach-MNI template-SPM",
+                          "Scanner-based anatomical coordinates"],
+        "transformations": [...]  // list of 3 transformations
+      }
+
+    it will return::
+
+      ["A", "803552a6-ac4d-491d-99f5-b938392b674b",
+        "Scanner-based anatomical coordinates_A"]
+%End
   };
 
 };

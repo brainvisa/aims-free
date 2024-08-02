@@ -36,6 +36,7 @@
 #include <aims/transformation/affinetransformation3d.h>
 #include <aims/graph/graphmanip.h>
 #include <aims/io/reader.h>
+#include <aims/resampling/standardreferentials.h>
 #include <graph/graph/dedge.h>
 #include <cartobase/uuid/uuid.h>
 #include <cartobase/stream/fileutil.h>
@@ -835,6 +836,96 @@ list<Edge *> TransformationGraph3d::loadAffineTransformations()
 
   return loaded;
 }
+
+
+vector<string> TransformationGraph3d::updateFromObjectHeader(
+  carto::Object header )
+{
+  DictionaryInterface *dh = header->getInterface<DictionaryInterface>();
+  if( dh )
+    return updateFromObjectHeader( dh );
+  return vector<string>();
+}
+
+
+vector<string> TransformationGraph3d::updateFromObjectHeader(
+  carto::DictionaryInterface *header )
+{
+  bool changed = false;
+  string ref;
+  try
+  {
+    ref = header->getProperty( "referential" )->getString();
+  }
+  catch( ... )
+  {
+  }
+  Object refs;
+  try
+  {
+    refs = header->getProperty( "referentials" );
+  }
+  catch( ... )
+  {
+  }
+
+  Object trans;
+  try
+  {
+    trans = header->getProperty( "transformations" );
+  }
+  catch( ... )
+  {
+  }
+
+  vector<string> trefs;
+
+  if( !trans.isNull() && !refs.isNull() )
+  {
+    int i;
+    trefs.reserve( std::min( trans->size(), refs->size() ) );
+    Object it = trans->objectIterator(), ir = refs->objectIterator();
+    for( i=0; it->isValid() && ir->isValid(); it->next(), ir->next(), ++i )
+    {
+      string dref;
+      try
+      {
+        dref = ir->currentValue()->getString();
+      }
+      catch( ... )
+      {
+        cerr << "referential num. " << i << " could not be parsed.\n";
+        trefs.push_back( "" );
+        continue;
+      }
+
+      Object ot = it->currentValue();
+      string dref_id;
+
+      try
+      {
+        AffineTransformation3d *tr = new AffineTransformation3d( ot );
+        dref_id = StandardReferentials::referentialID(
+          dref, false, false, string( "_" ) + ref );
+        registerTransformation( ref, dref_id, rc_ptr<Transformation3d>( tr ) );
+        changed = true;
+      }
+      catch( ... )
+      {
+        cerr << "transformation num. " << i << " could not be parsed.\n";
+        dref_id = dref;
+      }
+
+      trefs.push_back( dref_id );
+    }
+  }
+
+  if( changed )
+    clearCache();
+
+  return trefs;
+}
+
 
 
 #include <cartobase/object/object_d.h>
