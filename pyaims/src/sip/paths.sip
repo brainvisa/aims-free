@@ -11,6 +11,7 @@ namespace carto
     const std::string & home();
     const std::string & tempDir();
     const std::string & memmap();
+    const std::string & installRoot();
     const std::string & globalShared();
     const std::string & shfjShared();
     const list_STRING & resourceSearchPath();
