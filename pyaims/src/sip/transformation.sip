@@ -567,7 +567,59 @@ public:
 
     Vertex* referentialById( const std::string & id ) const;
 %Docstring
-    Get the vertex (referential) with given ID
+    Get the vertex (referential) with given ID.
+
+    The id may be a referential ID or name, or a code identifying a
+    particular referential, like:
+
+    - "mni", or "mni152", or "NIFTI_XFORM_MNI_152" or
+      "Talairach-MNI template-SPM"
+      (``StandardReferentials.mniTemplateReferential()``), to designate the
+      ICBM152 standard referential
+    - "acpc", or "talairach", or "NIFTI_XFORM_TALAIRACH", or
+      "Talairach-AC/PC-Anatomist"
+      (``StandardReferentials.acPcReferential()``), to designate AIMS
+      Talairach referential
+%End
+
+    Vertex* referentialByCode( const std::string & id,
+                               carto::Object header,
+                               const vector_STRING & refs ) const;
+%Docstring
+    Same as referentialById(id), but with the help of
+    an object header, can look for additional codes:
+
+    - "AIMS": the internal AIMS referential of the object
+    - "first": first referential in the transformations destinations in the
+      given header
+    - "last": last referential in the header
+    - a numpber or lexical number as string to designate the referential in
+      referenced transformations destinations in the object header        -
+      "auto": last referential in header, if one is present, or fallback to
+      the internal AIMS referential of the object otherwise.
+    - "aligned", or "NIFTI_XFORM_ALIGNED_ANAT", or
+      "Coordinates aligned to another file or to anatomical truth", to
+      designate a transformation (NIFTI-like) going to another object space
+      as described this way
+    - "NIFTI_XFORM_TEMPLATE_OTHER" to designate a different template as
+      described in the object header (NIFTI-like)
+    - other codes may be supported later, like "qform", "sform", "ITK",
+      "ANTS", but are not implemented yet.
+
+    The object header should have been included in the transformations
+    graph using updateFromObjectHeader() before calling this method.
+
+    The object header is still needed here because looking for the
+    specified transformations are linked tot the order the specific header
+    and the order they are given in it.
+
+    The additional parameter, refs, should be the list returned by
+    updateFromObjectHeader(). It is the list of destinaton referentials in
+    the object header, but with possibly different codes or IDs because the
+    original header may use ambiguous, non-specific identifiers.
+
+    If not found for a known reason, the function will throw a
+    runtime_error exception with a message. Otherwise 0 might be returned.
 %End
 
     Edge* transformationById( const std::string & id ) const;
@@ -766,7 +818,8 @@ public:
     Insert all transformations / referentials found in an object header.
 
     Returns the translated referentials names in the order they are in the
-    object header. For instance for a header with the properties::
+    object header, beginning with the object referential itself.
+    For instance for a header with the properties::
 
       {
         "referential": "A",
@@ -777,8 +830,11 @@ public:
 
     it will return::
 
-      ["A", "803552a6-ac4d-491d-99f5-b938392b674b",
+      ["A", "B", "803552a6-ac4d-491d-99f5-b938392b674b",
         "Scanner-based anatomical coordinates_A"]
+
+    If the header does not contain a "referential" property, then a new
+    UUID will be generated for it.
 %End
   };
 

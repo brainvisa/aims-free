@@ -40,6 +40,10 @@
 #include <graph/graph/dedge.h>
 #include <cartobase/uuid/uuid.h>
 #include <cartobase/stream/fileutil.h>
+//--- boost ------------------------------------------------------------------
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace aims;
 using namespace carto;
@@ -168,6 +172,29 @@ Vertex* TransformationGraph3d::referentialById( const std::string & id ) const
   map<string, Vertex *>::const_iterator i = _refs_by_id.find( id );
   if( i != _refs_by_id.end() )
     return i->second;
+
+  if( id == "mni" || id == "mni152" || id == "NIFTI_XFORM_MNI_152"
+      || id == StandardReferentials::mniTemplateReferential() )
+  {
+    i = _refs_by_id.find( StandardReferentials::mniTemplateReferentialID() );
+    if( i != _refs_by_id.end() )
+      return i->second;
+    i = _refs_by_id.find( StandardReferentials::mniTemplateReferential() );
+    if( i != _refs_by_id.end() )
+      return i->second;
+  }
+
+  if( id == "acpc" || id == "talairach" || id == "NIFTI_XFORM_TALAIRACH"
+      || id == StandardReferentials::acPcReferential() )
+  {
+    i = _refs_by_id.find( StandardReferentials::acPcReferentialID() );
+    if( i != _refs_by_id.end() )
+      return i->second;
+    i = _refs_by_id.find( StandardReferentials::acPcReferential() );
+    if( i != _refs_by_id.end() )
+      return i->second;
+  }
+
   return 0;
 }
 
@@ -841,7 +868,7 @@ list<Edge *> TransformationGraph3d::loadAffineTransformations()
 vector<string> TransformationGraph3d::updateFromObjectHeader(
   carto::Object header )
 {
-  DictionaryInterface *dh = header->getInterface<DictionaryInterface>();
+  const DictionaryInterface *dh = header->getInterface<DictionaryInterface>();
   if( dh )
     return updateFromObjectHeader( dh );
   return vector<string>();
@@ -849,41 +876,60 @@ vector<string> TransformationGraph3d::updateFromObjectHeader(
 
 
 vector<string> TransformationGraph3d::updateFromObjectHeader(
-  carto::DictionaryInterface *header )
+  const carto::DictionaryInterface *header )
 {
   bool changed = false;
   string ref;
-  try
+  if( header )
+    try
+    {
+      ref = header->getProperty( "referential" )->getString();
+    }
+    catch( ... )
+    {
+    }
+  if( ref.empty() )
   {
-    ref = header->getProperty( "referential" )->getString();
+    UUID uuid = UUID();
+    uuid.generate();
+    ref = uuid.toString();
   }
-  catch( ... )
+
+  Vertex *v = referentialById( ref );
+  if( !v )
   {
+    v = addVertex( "referential" );
+    v->setProperty( "uuid", ref );
+    _refs_by_id[ ref ] = v;
   }
+
   Object refs;
-  try
-  {
-    refs = header->getProperty( "referentials" );
-  }
-  catch( ... )
-  {
-  }
+  if( header )
+    try
+    {
+      refs = header->getProperty( "referentials" );
+    }
+    catch( ... )
+    {
+    }
 
   Object trans;
-  try
-  {
-    trans = header->getProperty( "transformations" );
-  }
-  catch( ... )
-  {
-  }
+  if( header )
+    try
+    {
+      trans = header->getProperty( "transformations" );
+    }
+    catch( ... )
+    {
+    }
 
-  vector<string> trefs;
+  vector<string> trefs( 1 );
+  trefs[0] = ref;
 
   if( !trans.isNull() && !refs.isNull() )
   {
     int i;
-    trefs.reserve( std::min( trans->size(), refs->size() ) );
+    trefs.reserve( std::min( trans->size(), refs->size() ) + 1 );
     Object it = trans->objectIterator(), ir = refs->objectIterator();
     for( i=0; it->isValid() && ir->isValid(); it->next(), ir->next(), ++i )
     {
@@ -921,10 +967,149 @@ vector<string> TransformationGraph3d::updateFromObjectHeader(
   }
 
   if( changed )
+  {
     clearCache();
+    registerInverseTransformations();
+  }
 
   return trefs;
 }
+
+
+Vertex* TransformationGraph3d::referentialByCode(
+  const string & id, Object header, const vector<string> & refs ) const
+{
+  return referentialByCode( id, header.get(), refs );
+}
+
+
+Vertex* TransformationGraph3d::referentialByCode(
+  const string & id, const DictionaryInterface *header,
+  const vector<string> & refs ) const
+{
+  // boost::iequals is used for case-insensitive comparison
+  using boost::iequals;
+
+  Vertex *v = referentialById( id );
+  if( v )
+    return v;
+
+  string ref = refs[0];  // ref[0] is the object AIMS ref
+
+  if( iequals( id, "AIMS" ) || id.empty() )
+    return referentialById( ref );
+
+  int transform_position = -1;
+
+  if( iequals( id, "first" ) )
+    transform_position = 0;
+  else if( iequals( id, "last" )
+           || iequals( id, "auto" ) )
+    transform_position = refs.size() - 2;
+  else if( iequals( id, "qform" )
+           || iequals( id, "ITK" )
+           || iequals( id, "ANTS" ) )
+  {
+    // TODO determine transform_position
+    throw runtime_error("referential ID as qform not implemented yet");
+  }
+  else if( iequals( id, "sform" ) )
+  {
+    // TODO determine transform_position
+    throw runtime_error("referential ID as sform not implemented yet");
+  }
+  else
+  {
+    try
+    {
+      transform_position = boost::lexical_cast<int>( id );
+    }
+    catch( const boost::bad_lexical_cast & )
+    {
+    }
+  }
+
+  string referential_name, referential_id;
+
+  if( transform_position >= 0 )
+  {
+    if( !( transform_position < refs.size() - 1 ) )
+    {
+      stringstream error_message;
+      error_message
+        << "referential ID as number cannot use transform in position "
+        << transform_position
+        << " (0-based), the header contains only "
+        << refs.size() - 1 << " transformations.";
+      throw runtime_error( error_message.str() );
+    }
+    referential_id = refs[transform_position + 1];
+  }
+  else
+  {
+    if( iequals( id, "scanner" )
+        || iequals( id, "NIFTI_XFORM_SCANNER_ANAT" ) )
+    {
+      referential_name
+        = StandardReferentials::commonScannerBasedReferential() + "_" + ref;
+      referential_id = referential_name;
+    }
+    else if( iequals( id, "aligned" )
+             || iequals( id, "NIFTI_XFORM_ALIGNED_ANAT" ) )
+    {
+      referential_name
+        = "Coordinates aligned to another file or to anatomical truth";
+    }
+    else if( iequals( id, "NIFTI_XFORM_TEMPLATE_OTHER" ) )
+    {
+      referential_name = "Other template";
+    }
+    else
+      return 0;  // we have already looked for id
+  }
+
+  if( !referential_name.empty() )
+  {
+    // look for this name in the header referenatials, and use the same
+    // index in refs
+    if( !header )
+      throw runtime_error(
+        "No header provided, and we need one to parse referentials" );
+    Object hrefs;
+    try
+    {
+      hrefs = header->getProperty( "referentials" );
+    }
+    catch( ... )
+    {
+      throw runtime_error( "The header has no referentials information" );
+    }
+
+    Object it;
+    int i = 1;
+    for( it=hrefs->objectIterator(); it->isValid(); it->next(), ++i )
+    {
+      string rname;
+      try
+      {
+        rname = it->currentValue()->getString();
+      }
+      catch( ... )
+      {
+        continue;
+      }
+      if( rname == referential_name )
+      {
+        if( refs.size() > i )
+          referential_id = refs[i];
+        break;
+      }
+    }
+  }
+
+  return referentialById( referential_id );
+}
+
 
 
 
