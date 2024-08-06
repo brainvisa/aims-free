@@ -3,6 +3,7 @@
 from soma import aims, aimsalgo
 from soma.aimsalgo.topo_distance import trim_distance_homotopic
 import numpy as np
+import os.path as osp
 
 
 def get_bottom_image(skeleton, graph):
@@ -63,25 +64,42 @@ def get_ss_image(skeleton, graph):
 def trim_extremities(skeleton, graph, tminss):
     # start: skeleton, graph
 
+    # Idea:
+    # 1. trim bottom lines, removing ends of bottom line.
+    # The removed voxels will be seeds in the last step: distance map in SS
+    # 2. trim hull junction lines, the same way
+    # Regular Junction lines should stay immportals (and perhaps dilated for
+    # this)
+    # However to remove spurious end points in botom and HJ lines (BHJ), which
+    # can be interrupted at some places, we want to add additional constraints
+    # on ends of lines:
+    # a. BHJ ends which are too far one from the others (bottom from HJ) are
+    # not really endpoints. To do this we make distance maps in SS from line
+    # end points.
+    # b. Regular junction lines should prevent BHJ ends in their vicinity
+    # c. however we should not elagate too much: we have to keep at least 2
+    # points in each connected component. This is done approximately, for now.
+
+    max_bottom_hj_dist = 3.
+
     # 1. trim bottom:
     # keep bottom image
     # topo classif of bottom points
     # distance map from end points of bottom lines
     # trim distance < tmin with topology preservation
     # remaining border voxels become immortals in the later SS processing
+    # the distance map and remaining steps is postponed after pruning (a, b)
 
     print('1. trim bottom')
     dmap_sc = 50
     tmin_sc = int(tminss * dmap_sc)
     bottom = get_bottom_image(skeleton, graph)
+    # aims.write(bottom, '/tmp/bottom.nii.gz')
     tcls = aimsalgo.TopologicalClassifier_Volume_S16()
-    rcls = tcls.doit(bottom)
-    rcls[np.logical_and(rcls.np != 30, rcls.np != 0)] = 1
-    # aims.write(rcls, '/tmp/bottom_seeds.nii.gz')
-    aimsalgo.AimsDistanceFrontPropagation(rcls, 1, 0, 3, 3, 3, dmap_sc, False)
-    # aims.write(rcls, '/tmp/bottom_dmap.nii.gz')
-    tbottom = trim_distance_homotopic(rcls, tmin_sc)
-    # aims.write(tbottom, '/tmp/trimmed_bottom.nii.gz')
+    bottom_cls = tcls.doit(bottom)
+    bottom_cls[np.logical_and(bottom_cls.np != 30, bottom_cls.np != 0)] = 1
+    # 1: line, 30: end points
+    # aims.write(bottom_cls, '/tmp/bottom_seeds1.nii.gz')
 
     # 2. same for hull junction
     # hj should be skeletonized before their topo classif can be done
@@ -94,13 +112,67 @@ def trim_extremities(skeleton, graph, tminss):
     junc = get_junction_image(skeleton, graph)
     # aims.write(hj, '/tmp/hj.nii.gz')
     tcls = aimsalgo.TopologicalClassifier_Volume_S16()
-    rcls = tcls.doit(hj)
-    rcls[np.logical_and(rcls.np != 30, rcls.np != 0)] = 1
-    # aims.write(rcls, '/tmp/hj_seeds.nii.gz')
-    aimsalgo.AimsDistanceFrontPropagation(rcls, 1, 0, 3, 3, 3, dmap_sc, False)
+    hj_cls = tcls.doit(hj)
+    hj_cls[np.logical_and(hj_cls.np != 30, hj_cls.np != 0)] = 1
+    # 1: line, 30: end points
+    # aims.write(hjcls, '/tmp/hj_seeds1.nii.gz')
+
+    ss = get_ss_image(skeleton, graph)
+
+    print('a. filter hj and bottom')
+    # dist map in SS with bottom ends as seeds
+    ssseeds = aims.Volume(ss)
+    ssseeds[bottom_cls.np == 30] = 100
+    ssseeds[hj_cls.np != 0] = 60
+    aimsalgo.AimsDistanceFrontPropagation(ssseeds, 60, 0, 3, 3, 3, dmap_sc,
+                                          False)
+    dhj = np.where(hj_cls.np == 30)
+    # dhjn = np.array(dhj).T
+    # hjs = sorted(zip(dhjn, ssseeds[dhj]), key=lambda x: x[1])
+    # filter out hj points too far from bottom
+    dhj_filt = ssseeds[dhj] > max_bottom_hj_dist * dmap_sc
+    hj_cls[tuple(x[dhj_filt] for x in dhj)] = 1
+
+    # now reverse to filter bottom
+    ssseeds = aims.Volume(ss)
+    ssseeds[hj_cls.np != 0] = 60
+    ssseeds[hj_cls.np == 30] = 100
+    aimsalgo.AimsDistanceFrontPropagation(ssseeds, 60, 0, 3, 3, 3, dmap_sc,
+                                          False)
+    db = np.where(bottom_cls.np == 30)
+    db_filt = ssseeds[db] > max_bottom_hj_dist * dmap_sc
+    bottom_cls[tuple(x[db_filt] for x in db)] = 1
+    # aims.write(bottom_cls, '/tmp/bottom_seeds2.nii.gz')
+
+    print('b. remove junctions')
+    junc_dil = aims.Volume(junc)
+    junc_dil[1:, :, :, 0][junc[:-1, :, :, 0] != 0] = 1
+    junc_dil[:-1, :, :, 0][junc[1:, :, :, 0] != 0] = 1
+    junc_dil[:, 1:, :, 0][junc[:, :-1, :, 0] != 0] = 1
+    junc_dil[:, :-1, :, 0][junc[:, 1:, :, 0] != 0] = 1
+    junc_dil[:, :, 1:, 0][junc[:, :, :-1, 0] != 0] = 1
+    junc_dil[:, :, :-1, 0][junc[:, :, 1:, 0] != 0] = 1
+    bottom_cls[np.logical_and(junc_dil.np != 0, bottom_cls.np != 0)] = 1
+    hj_cls[np.logical_and(junc_dil.np != 0, hj_cls.np != 0)] = 1
+
+    print('2.c. trim, continued')
+    # distance map from end points of bottom lines
+    aimsalgo.AimsDistanceFrontPropagation(bottom_cls, 1, 0, 3, 3, 3, dmap_sc,
+                                          False)
+    # un-attained points are still valid: set distance 5000 (not inf)
+    bottom_cls[np.logical_and(bottom_cls.np == 32500, bottom.np != 0)] = 5000
+    # aims.write(bottom_cls, '/tmp/bottom_dmap.nii.gz')
+    tbottom = trim_distance_homotopic(bottom_cls, tmin_sc)
+    # aims.write(tbottom, '/tmp/trimmed_bottom.nii.gz')
+
+    # distance map from end points of HJ
+    aimsalgo.AimsDistanceFrontPropagation(hj_cls, 1, 0, 3, 3, 3, dmap_sc,
+                                          False)
+    # un-attained points are still valid: set distance 5000 (not inf)
+    hj_cls[np.logical_and(hj_cls.np == 32500, hj.np != 0)] = 5000
     # print junctions as immortals
-    rcls[junc.np != 0] = 32000
-    thj = trim_distance_homotopic(rcls, tmin_sc)
+    hj_cls[junc.np != 0] = 32000
+    thj = trim_distance_homotopic(hj_cls, tmin_sc)
     # aims.write(thj, '/tmp/trimmed_hj.nii.gz')
 
     # 3. set the remaining voxels of bottom and hull_junctions as immortals
@@ -110,7 +182,6 @@ def trim_extremities(skeleton, graph, tminss):
     # trim distance < tminss with topology preservation
 
     print('3. trim ss')
-    ss = get_ss_image(skeleton, graph)
     # aims.write(ss, '/tmp/ss.nii.gz')
     ss[bottom.np != 0] = 100
     ss[hj.np != 0] = 100
@@ -164,10 +235,15 @@ if __name__ == '__main__':
     trimmed = trim_distance_homotopic(dist, maxdist)
     aims.write(trimmed, '/tmp/trimmed.nii.gz')
 
+    dpaths = ['/volatile/riviere/basetests-3.1.0',
+              '/volatile/home/dr144257/data/baseessai']
+    dpath = [p for p in dpaths if osp.exists(p)][0]
     tminss = 3.
-    skeleton = aims.read(
-        '/volatile/riviere/basetests-3.1.0/subjects/sujet01/t1mri/default_acquisition/default_analysis/segmentation/Lskeleton_sujet01.nii')
-    graph = aims.read(
-        '/volatile/riviere/basetests-3.1.0/subjects/sujet01/t1mri/default_acquisition/default_analysis/folds/3.1/Lsujet01.arg')
+    skeleton = aims.read(osp.join(
+        dpath,
+        'subjects/sujet01/t1mri/default_acquisition/default_analysis/segmentation/Lskeleton_sujet01.nii'))
+    graph = aims.read(osp.join(
+        dpath,
+        'subjects/sujet01/t1mri/default_acquisition/default_analysis/folds/3.1/Lsujet01.arg'))
     ss, trimmed = trim_extremities(skeleton, graph, tminss)
     aims.write(trimmed, '/tmp/skel_trimmed.nii.gz')
