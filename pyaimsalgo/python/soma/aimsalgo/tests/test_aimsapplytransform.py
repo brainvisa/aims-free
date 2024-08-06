@@ -42,12 +42,15 @@ class AimsApplyTransformTestCase(unittest.TestCase):
         vol[4, 8, 9] = 200
         return vol
 
-    def get_test_vol(self, with_ref=False):
+    def get_test_vol(self, with_ref=False, ref=None):
         vol = self._get_test_vol()
-        if with_ref:
-            ref = str(uuid.uuid4())
-            h = vol.header()
+        h = vol.header()
+        if ref is not None:
             h['referential'] = ref
+        if with_ref:
+            if ref is None:
+                ref = str(uuid.uuid4())
+                h['referential'] = ref
             h['referentials'] = [
                 'A',
                 aims.StandardReferentials.mniTemplateReferential(),
@@ -81,12 +84,15 @@ class AimsApplyTransformTestCase(unittest.TestCase):
         vol.fill(0)
         return vol
 
-    def get_ref_vol(self, with_ref=False, with_common_ref=True):
+    def get_ref_vol(self, with_ref=False, with_common_ref=True, ref=None):
         vol = self._get_ref_vol()
-        if with_ref:
-            ref = str(uuid.uuid4())
-            h = vol.header()
+        h = vol.header()
+        if ref is not None:
             h['referential'] = ref
+        if with_ref:
+            if ref is None:
+                ref = str(uuid.uuid4())
+                h['referential'] = ref
             h['referentials'] = [
                 'R',
                 aims.StandardReferentials.commonScannerBasedReferential()]
@@ -121,15 +127,32 @@ class AimsApplyTransformTestCase(unittest.TestCase):
 
         return vol
 
-    def prepare_vols(self, with_in_ref, with_out_ref, with_common_ref=True):
-        vol = self.get_test_vol(with_in_ref)
-        rvol = self.get_ref_vol(with_out_ref, with_common_ref)
+    def get_vols(self, with_in_ref, with_out_ref, with_common_ref=True,
+                 refs=None):
+        if refs is None:
+            refs = (None, None)
+        vol = self.get_test_vol(with_in_ref, ref=refs[0])
+        rvol = self.get_ref_vol(with_out_ref, with_common_ref, ref=refs[1])
+        return vol, rvol
+
+    def prepare_vols(self, with_in_ref, with_out_ref, with_common_ref=True,
+                     refs=None):
         test = osp.join(self.work_dir, 'test.nii')
         ref = osp.join(self.work_dir, 'ref.nii')
+        vol, rvol = self.get_vols(with_in_ref, with_out_ref, with_common_ref,
+                                  refs=refs)
         out = osp.join(self.work_dir, 'out.nii')
         aims.write(vol, test)
         aims.write(rvol, ref)
         return test, ref, out
+
+    def prepare_graph(self, vols):
+        print('vols:', vols)
+        graph = aims.TransformationGraph3d()
+        refs = []
+        for vol in vols:
+            refs.append(graph.updateFromObjectHeader(vol.header()))
+        return graph, refs
 
     def test_01_simple_id(self):
         test, ref, out = self.prepare_vols(False, False)
@@ -261,7 +284,27 @@ class AimsApplyTransformTestCase(unittest.TestCase):
         self.assertEqual(set(graph[oref].keys()), orefs)
         self.assertEqual(set(graph['A'].keys()), arefs)
 
+    def test_08_graph_via_mni(self):
+        test, ref = self.get_vols(True, True, True)
+        graph, refs = self.prepare_graph((test, ref))
+        graph_f = osp.join(self.work_dir, 'graph.yaml')
+        aims.write(graph, graph_f, options={'embed_affines': True})
+
+        test, ref, out = self.prepare_vols(
+            False, False, False,
+            refs=(test.header()['referential'], ref.header()['referential']))
+
+        cmd = ['AimsApplyTransform', '-t', 'n', '-i', test, '-r', ref,
+               '-o', out, '-g', graph_f]
+        subprocess.check_call(cmd)
+        ovol = aims.read(out)
+        self.assertEqual(list(ovol.getSize()), [14, 19, 27, 1])
+        self.assertEqual(ovol[6, 2, 5, 0], 100)
+        self.assertEqual(ovol[5, 2, 5, 0], 0)
+        self.assertEqual(ovol[10, 15, 13, 0], 100)
+        self.assertEqual(ovol[8, 9, 10, 0], 200)
+
 
 if __name__ == '__main__':
-    # AimsApplyTransformTestCase.base_work_dir = '/tmp/aims_test_applytrans'
+    AimsApplyTransformTestCase.base_work_dir = '/tmp/aims_test_applytrans'
     unittest.main()
