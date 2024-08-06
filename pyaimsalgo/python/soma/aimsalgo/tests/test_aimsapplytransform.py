@@ -306,5 +306,5 @@ class AimsApplyTransformTestCase(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    AimsApplyTransformTestCase.base_work_dir = '/tmp/aims_test_applytrans'
+    # AimsApplyTransformTestCase.base_work_dir = '/tmp/aims_test_applytrans'
     unittest.main()
