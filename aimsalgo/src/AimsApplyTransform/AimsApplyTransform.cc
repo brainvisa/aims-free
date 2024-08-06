@@ -9,6 +9,7 @@
 #include <aims/graph/graphmanip.h>                           // storeTalairach
 #include <aims/transformation/affinetransformation3d.h> // AffineTransformation3d
 #include <aims/transformation/transformation_chain.h> // TransformationChain3d
+#include <aims/transformation/transformationgraph3d.h>
 #include <aims/transform/transform_objects.h>
 #include <aims/resampling/linearresampler.h>                // LinearResampler
 #include <aims/resampling/cubicresampler.h>                  // CubicResampler
@@ -65,7 +66,11 @@ public:
   string  output;
   vector<string> direct_transform_list;
   vector<string> inverse_transform_list;
+  string transform_graph_file;
+  string output_transform_graph_file;
+//   rc_ptr<TransformationGraph3d> transform_graph;
   string  input_coords;
+  string  output_coords;
   bool    points_mode;
   string  interp_type;
   string  background_value;
@@ -82,12 +87,14 @@ public:
   bool    mmap_fields;
   string  progress_file;
   bool    volume_id;
+  rc_ptr<TransformationGraph3d> trans_graph;
 };
 
 
 ApplyTransformProc::ApplyTransformProc()
   : Process(),
     input_coords("AIMS"),
+    output_coords("AIMS"),
     points_mode(false),
     interp_type("linear"),
     background_value("0"),
@@ -616,158 +623,79 @@ load_transformation(const string &filename_arg,
 
 // FatalError is thrown if the transformations cannot be loaded properly.
 std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
-load_transformations(const ApplyTransformProc& proc,
+load_transformations(ApplyTransformProc& proc,
                      const DictionaryInterface* input_header = nullptr,
-                     const Finder & finder = Finder())
+                     const Finder & finder = Finder(),
+                     const Object reference_header = Object())
 {
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > ret;
-  rc_ptr<AffineTransformation3d> aims_to_input_space_transform; // null
+  rc_ptr<Transformation3d> aims_to_input_space_transform; // null
 
   // boost::iequals is used for case-insensitive comparison
   using boost::iequals;
-  string effective_input_coords = boost::trim_copy(proc.input_coords);
+  string input_coords = boost::trim_copy(proc.input_coords);
+  string output_coords = boost::trim_copy(proc.output_coords);
+
   if(proc.points_mode) {
-    if(iequals(effective_input_coords, "auto"))
-      effective_input_coords = "AIMS";
-    else if(!iequals(effective_input_coords, "AIMS"))
+    if(iequals(input_coords, "auto"))
+      input_coords = "AIMS";
+    else if(!iequals(input_coords, "AIMS"))
       throw FatalError("--input-coords cannot be used in points mode");
   }
 
-  if(!iequals(effective_input_coords, "AIMS")) {
-    if(!input_header || !input_header->isDictionary()) {
-      throw FatalError("--input-coords cannot be used, because no header "
-                       "could be read for the input data");
-    }
+  rc_ptr<TransformationGraph3d> tg( 0 );
+  if( !proc.transform_graph_file.empty() )
+  {
+    Reader<TransformationGraph3d> r( proc.transform_graph_file );
+    tg.reset( r.read() );
+    cout << "read transformations graph.\n";
+  }
+  else
+    tg.reset( new TransformationGraph3d );
 
-    carto::Object referentials;
-    carto::Object transformations;
+  proc.trans_graph = tg;
+
+  vector<string> trefs, otrefs;
+  string ref, oref;
+
+  trefs = tg->updateFromObjectHeader( input_header );
+  otrefs = tg->updateFromObjectHeader( reference_header );
+  ref = trefs[0];
+  oref = otrefs[0];
+
+  // determine input and output spaces
+
+  Vertex *rv1 = 0, *rv2 = 0;  // referentials in graph
+  try
+  {
+    rv1 = tg->referentialByCode( input_coords, input_header, trefs );
+  }
+  catch( runtime_error & e )
+  {
+    cerr << "Could not determine input space with the given --input-coords\n";
+    throw;
+  }
+  if( !rv1 )
+    throw FatalError( "Could not find the input space referential" );
+
+  if( reference_header )
     try
     {
-      referentials = input_header->getProperty( "referentials" );
-      transformations = input_header->getProperty( "transformations" );
+      rv2 = tg->referentialByCode( output_coords, reference_header, otrefs );
     }
-    catch( ... )
+    catch( runtime_error & e )
     {
-      throw FatalError("--input-coords cannot be used, because no "
-                       "transformations could be read in the input header");
+      cerr << "Could not determine outputput space with the given "
+           << "--output-coords and --reference\n";
+      throw;
     }
-    if(referentials.isNull() || transformations.isNull()) {
-      throw FatalError("--input-coords cannot be used, because no "
-                       "transformations could be read in the input header");
-    }
+  if( !rv1 )
+    throw FatalError( "Could not find the input space referential" );
 
-    // Valid values are >= 0
-    int transform_position = -1;
-    // Detect special values
-    if(iequals(effective_input_coords, "first")) {
-      transform_position = 0;
-    } else if(iequals(effective_input_coords, "last")
-              || iequals(effective_input_coords, "auto")) {
-      transform_position = std::min(referentials->size(),
-                                    transformations->size()) - 1;
-    } else if(iequals(effective_input_coords, "qform")
-       || iequals(effective_input_coords, "ITK")
-       || iequals(effective_input_coords, "ANTS")) {
-      // TODO determine transform_position
-      throw FatalError("--input-coords qform not implemented yet");
-    } else if(iequals(effective_input_coords, "sform")) {
-      // TODO determine transform_position
-      throw FatalError("--input-coords sform not implemented yet");
-    } else {
-      try {
-        transform_position = boost::lexical_cast<int>(effective_input_coords);
-      } catch(const boost::bad_lexical_cast &) {}
-    }
-
-    if(transform_position < 0) {
-      string referential_name, referential_id;
-
-      if(iequals(effective_input_coords, "mni")
-         || iequals(effective_input_coords, "mni152")
-         || iequals(effective_input_coords, "NIFTI_XFORM_MNI_152")) {
-        referential_name = StandardReferentials::mniTemplateReferential();
-        referential_id = StandardReferentials::mniTemplateReferentialID();
-      } else if(iequals(effective_input_coords, "scanner")
-                || iequals(effective_input_coords, "NIFTI_XFORM_SCANNER_ANAT")) {
-        referential_name = StandardReferentials::commonScannerBasedReferential();
-        referential_id = StandardReferentials::commonScannerBasedReferentialID();
-      } else if(iequals(effective_input_coords, "acpc")) {
-        referential_name = StandardReferentials::acPcReferential();
-        referential_id = StandardReferentials::acPcReferentialID();
-      } else if(iequals(effective_input_coords, "talairach")
-                || iequals(effective_input_coords, "NIFTI_XFORM_TALAIRACH")) {
-        referential_name = StandardReferentials::talairachReferential();
-      } else if(iequals(effective_input_coords, "aligned")
-                || iequals(effective_input_coords, "NIFTI_XFORM_ALIGNED_ANAT")) {
-        referential_name = "Coordinates aligned to another file or to anatomical truth";
-      } else if(iequals(effective_input_coords, "NIFTI_XFORM_TEMPLATE_OTHER")) {
-        referential_name = "Other template";
-      } else {
-        referential_name = proc.input_coords;
-      }
-
-      // Look for the target referential or id in header['referentials']
-      size_t i = 0;
-      for( carto::Object it = referentials->objectIterator();
-           it->isValid();
-           it->next(), ++i ) {
-        const carto::Object referential_obj = it->currentValue();
-        if(!referential_obj.isNone() && referential_obj->isString()) {
-          const string current_ref_name = referential_obj->getString();
-          if(current_ref_name == referential_name
-             || (!referential_id.empty()
-                 && current_ref_name == referential_id)) {
-            transform_position = i;
-            if(carto::verbose)
-            break;
-          }
-        }
-      }
-    }
-
-    if(transform_position >= 0) {
-      carto::Object transformation_object;
-      if(!transformations->isArray())
-        throw FatalError("--input-coords cannot find a valid 'transformations'"
-                         "header field");
-      if(!(transform_position < transformations->size())) {
-        stringstream error_message;
-        error_message << "--input-coords cannot use transform in position "
-                      << transform_position
-                      << " (0-based), the header contains only "
-                      << transformations->size() << " transformations.";
-        throw FatalError(error_message.str());
-      }
-      transformation_object = transformations->getArrayItem(transform_position);
-      if(!transformation_object.isNull()) {
-        aims_to_input_space_transform.reset(
-          new AffineTransformation3d(transformation_object));
-        if(carto::verbose) {
-          std::cout << "--input-coords will use the referential in position "
-                    << transform_position
-                    << " (0-based) which is named '"
-                    << referentials->getArrayItem(transform_position)->getString()
-                    << "'\n";
-          std::cout << "--input-coords transformation:\n"
-                    << *aims_to_input_space_transform
-                    << "\n";
-        }
-      } else {
-        throw FatalError("Error in the input header, --input-coords failed");
-      }
-    } else if(iequals(effective_input_coords, "auto")) {
-      // Do nothing: fall back to AIMS coordinates
-      // (aims_to_input_space_transform is a null pointer)
-    } else {
-      throw FatalError("Cannot find the header transformation corresponding "
-                       "to --input-coords '" + proc.input_coords + "'");
-    }
-  }
-
-  if(!proc.direct_transform_list.empty()) {
+  if(!proc.direct_transform_list.empty())
+  {
+    cout << "loading direct transformations\n";
     TransformationChain3d direct_chain;
-    if(!aims_to_input_space_transform.isNull())
-      direct_chain.push_back(aims_to_input_space_transform);
 
     for(vector<string>::const_iterator filename_it = proc.direct_transform_list.begin();
         filename_it != proc.direct_transform_list.end();
@@ -777,10 +705,22 @@ load_transformations(const ApplyTransformProc& proc,
         = load_transformation(*filename_it, proc);
       direct_chain.push_back(transform);
     }
-    ret.first = direct_chain.simplify();
+    const_ref<Transformation3d> tcr = direct_chain.simplify();
+    // indirect convert const_ref -> rc_ptr (non-const)
+    rc_ptr<Transformation3d> tc( const_cast<Transformation3d *>(
+      tcr.pointer() ) );
+    // cout << "register direct trans " << tc.get() << endl;
+    // cout << "between " << rv1->getProperty( "uuid" )->getString() << " and " << rv2->getProperty( "uuid" )->getString() << endl;
+    // insert transformation in the graph
+    // if an older iverse did exist, remove it
+    Edge * oi = tg->getTransformation_raw( rv2, rv1 );
+    if( oi )
+      tg->removeEdge( oi );
+    tg->registerTransformation( rv1, rv2, tc );
   }
 
-  if(!proc.inverse_transform_list.empty()) {
+  if(!proc.inverse_transform_list.empty())
+  {
     TransformationChain3d inverse_chain;
 
     for(vector<string>::const_iterator filename_it = proc.inverse_transform_list.begin();
@@ -791,25 +731,34 @@ load_transformations(const ApplyTransformProc& proc,
         = load_transformation(*filename_it, proc);
       inverse_chain.push_back(transform);
     }
-    if(!aims_to_input_space_transform.isNull()) {
-      if(!aims_to_input_space_transform->invertible()) {
-        throw FatalError("Error using --input-coords: the transformation "
-                         "is not invertible");
-      }
-      unique_ptr<Transformation> ti
-        = aims_to_input_space_transform->getInverse();
-      Transformation3d *ti3 = dynamic_cast<Transformation3d *>( ti.get() );
-      if( !ti3 )
-        throw FatalError( "An inverse transformation is not a 3D "
-                          "transformation" );
-      inverse_chain.push_back( rc_ptr<Transformation3d>( ti3 ) );
-      ti.release();
-    }
-    ret.second = inverse_chain.simplify();
+    const_ref<Transformation3d> tcr = inverse_chain.simplify();
+    rc_ptr<Transformation3d> itc( const_cast<Transformation3d *>(
+      tcr.pointer() ) );
+    // insert transformation in the graph
+    // if an older iverse did exist, remove it
+    Edge * oi = tg->getTransformation_raw( rv1, rv2 );
+    if( oi )
+      tg->removeEdge( oi );
+    tg->registerTransformation( rv2, rv1, itc );
   }
+  tg->registerInverseTransformations();
 
-  if(ret.first.isNull() && ret.second.isNull()) {
-    if(aims_to_input_space_transform.isNull()) {
+  // now get the complete transform chains
+  Edge *tde = tg->getTransformation( ref, oref, true );
+  Edge *tie = tg->getTransformation( oref, ref, true );
+  if( tde )
+    ret.first = tg->transformation( tde );
+  if( tie )
+    ret.second = tg->transformation( tie );
+
+  if(ret.first.isNull() && ret.second.isNull())
+  {
+    // get aims -> input space, if it exists, assume this is the one
+    tde = tg->getTransformation( tg->referentialById( ref ), rv1, true );
+    if( tde )
+      ret.first = tg->transformation( tde );
+    else
+    {
       clog << "No transformation provided, identity will be used." << endl;
       ret.first = const_ref<Transformation3d>(new TransformationChain3d);
       ret.second = const_ref<Transformation3d>(new TransformationChain3d);
@@ -859,12 +808,6 @@ load_transformations(const ApplyTransformProc& proc,
           new AffineTransformation3d( *t->inverse() ) );
       }
     }
-    else
-    {
-      TransformationChain3d direct_chain;
-      direct_chain.push_back(aims_to_input_space_transform);
-      ret.first = direct_chain.simplify();
-    }
   }
 
   if(ret.first.isNull() && ret.second->invertible()) {
@@ -912,7 +855,8 @@ bool doVolume(Process & process, const string & fileref, Finder & finder)
   const_ref<Transformation3d> inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, &input_image.header(), finder);
+      = load_transformations(proc, &input_image.header(), finder,
+                             reference_header);
     inverse_transform = transforms.second;
     if(inverse_transform.isNull()) {
       clog << "Error: no inverse transform provided" << endl;
@@ -988,11 +932,13 @@ bool doMesh(Process & process, const string & fileref, Finder & finder)
   AimsTimeSurface<D, Void> mesh;
   input_reader.read(mesh);
 
+  const carto::Object reference_header = read_reference_header(proc.reference);
+
   // Load the transformation
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, &mesh.header(), finder);
+      = load_transformations(proc, &mesh.header(), finder, reference_header);
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -1001,7 +947,6 @@ bool doMesh(Process & process, const string & fileref, Finder & finder)
     }
   }
 
-  const carto::Object reference_header = read_reference_header(proc.reference);
   adjust_header_transforms(proc, mesh.header(), inverse_transform.pointer(),
                            reference_header);
   // The UUID should NOT be preserved, because the output is a different file
@@ -1046,7 +991,8 @@ bool doBucket(Process & process, const string & fileref, Finder & finder)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, &input_bucket.header(), finder);
+      = load_transformations(proc, &input_bucket.header(), finder,
+                             reference_header);
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -1098,11 +1044,14 @@ bool doBundles(Process & process, const string & fileref, Finder & finder)
   // Prepare the Bundle reader
   aims::BundleReader bundle_reader(fileref);
 
+  const carto::Object reference_header = read_reference_header(proc.reference);
+
   // Load the transformation
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, bundle_reader.readHeader().get(), finder);
+      = load_transformations(proc, bundle_reader.readHeader().get(), finder,
+                             reference_header);
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -1115,8 +1064,6 @@ bool doBundles(Process & process, const string & fileref, Finder & finder)
   // will just be ignored for Bundles.
   //
   // carto::Object header = bundle_reader.readHeader();
-  // const carto::Object reference_header
-  //   = read_reference_header(proc.reference);
   // adjust_header_transforms(proc, header, inverse_transform.pointer(),
   //                          reference_header);
 
@@ -1167,7 +1114,7 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc, graph.get(), f);
+      = load_transformations(proc, graph.get(), f, reference_header);
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -1425,10 +1372,23 @@ int main(int argc, const char **argv)
                         "passed on the command-line. The file name may be "
                         "prefixed with 'inv:', in which case the inverse of "
                         "the transformation is used.");
+    app.addOption(proc.transform_graph_file, "--graph",
+                  "transformation graph (yaml format), can be given as an "
+                  "alternative to --direct-transform and --inverse-transform, "
+                  "if such a graph contains all the needed transformations, "
+                  "and if the input and output data spaces are clearly "
+                  "specified.", true);
     app.addOption(proc.input_coords, "--input-coords",
                   "How to interpret coordinates in the input image w.r.t. "
                   "the transformations written in the image header. See above."
                   " [default: AIMS]", true);
+    app.addOption(proc.output_coords, "--output-coords",
+                  "Output space identifier, or how to interpret coordinates "
+                  "in the output image w.r.t. the transformations written in "
+                  "the reference image header. See above. [default: AIMS]", true);
+    app.addOption(proc.output_transform_graph_file, "--out-graph",
+                  "write the output transformation graph (yaml format), "
+                  "since it may be built or modified.", true);
     app.addOption(proc.points_mode, "--points",
                   "Points mode: transform point coordinates (see above).", true);
     app.addOption(proc.interp_type, "--interp",
@@ -1486,6 +1446,7 @@ int main(int argc, const char **argv)
     app.alias("--motion",       "--direct-transform");
     app.alias("-d",             "--direct-transform");
     app.alias("-I",             "--inverse-transform");
+    app.alias("-g",             "--graph");
     app.alias("-M",             "--inverse-transform");
     app.alias("--type",         "--interp");
     app.alias("-t",             "--interp");
@@ -1527,6 +1488,14 @@ int main(int argc, const char **argv)
     }
     if(!ok)
       result = EXIT_FAILURE;
+    else if( !proc.output_transform_graph_file.empty() )
+    {
+      Writer<TransformationGraph3d> w( proc.output_transform_graph_file );
+      Object options = Object::value( Dictionary() );
+      options->setProperty( "embed_affines", true );
+      w.setOptions( options );
+      w.write( *proc.trans_graph );
+    }
 
   }
   catch(std::exception &e) {

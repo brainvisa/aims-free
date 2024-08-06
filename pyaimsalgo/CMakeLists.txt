@@ -10,3 +10,5 @@ brainvisa_add_test(pyaimsalgo-resampling-tests
     "${PYTHON_EXECUTABLE_NAME}" -m soma.aimsalgo.tests.test_resampling)
 brainvisa_add_test(pyaimsalgo-geometric-tests
     "${PYTHON_EXECUTABLE_NAME}" -m soma.aimsalgo.tests.test_geometric)
+brainvisa_add_test(pyaimsalgo-applytransform-tests
+    "${PYTHON_EXECUTABLE_NAME}" -m soma.aimsalgo.tests.test_aimsapplytransform)
