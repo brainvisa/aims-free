@@ -1,4 +1,4 @@
-class GraphObject : carto::GenericObject
+class GraphObject : carto::AttributedObject
 {
 %TypeHeaderCode
 #include <graph/graph/graphobject.h>

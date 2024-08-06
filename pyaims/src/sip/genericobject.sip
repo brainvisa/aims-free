@@ -11,7 +11,7 @@ typedef aims::BucketMap< Void > BucketMap_VOID;
 namespace carto
 {
 
-  class GenericObject : carto::RCObject /Abstract/
+  class GenericObject
   {
 %TypeHeaderCode
 #include <pyaims/object/object.h>
@@ -899,10 +899,8 @@ namespace carto
     virtual carto::Object keyObject() const = 0;
     virtual carto::Object clone() const = 0;
 
-  protected:
-    GenericObject();
-
   private:
+    GenericObject();
     GenericObject( const carto::GenericObject & );
     // void _sip_dont_instantiate_() = 0;
   };
@@ -921,4 +919,91 @@ namespace carto
     static long asLong( const carto::GenericObject & x );
   };
 
+// --------
+
+  class AttributedObject : carto::GenericObject
+  {
+%TypeHeaderCode
+#include <cartobase/object/attributed.h>
+%End
+
+  public:
+    AttributedObject( const std::string & s = "" );
+    AttributedObject( const AttributedObject & x );
+    virtual ~AttributedObject();
+
+    virtual void setValue( Object val );
+
+    // This function should be pure virtual but it is mandatory to
+    // do explicit instantiation of TypedObject and it is not possible
+    // with pure virtual classes.
+    virtual Object clone() const;
+
+    virtual std::string type() const;
+
+    // ScalarInterface methods
+    virtual bool isScalar() const;
+    virtual double getScalar() const;
+    virtual void setScalar( double );
+
+    // StringInterface methods
+    virtual bool isString() const;
+    virtual std::string getString() const;
+    virtual void setString( const std::string & );
+
+    // ArrayInterface methods
+    virtual bool isArray() const;
+    virtual bool isContiguous() const;
+    virtual bool hasItem( int index ) const;
+    virtual Object getArrayItem( int index ) const;
+    virtual void setArrayItem( int, Object );
+    virtual size_t size() const;
+
+    // DynArrayInterface methods
+    virtual bool isDynArray() const;
+    virtual void reserveArray( size_t );
+    virtual void resizeArray( size_t );
+    virtual void removeArrayItem( int );
+    virtual void insertArrayItem( int, Object );
+
+    // DictionaryInterface methods
+    virtual bool getProperty( const std::string &, Object & ) const;
+    virtual bool isDictionary() const;
+
+    virtual void setProperty( const std::string &, Object );
+
+    virtual bool removeProperty( const std::string & );
+    virtual bool hasProperty( const std::string & ) const;
+    virtual void clearProperties();
+
+    // IterableInterface methods
+    virtual bool isIterable() const;
+    virtual Object objectIterator() const;
+
+    // IteratorInterface methods
+    virtual bool isIterator() const;
+    virtual bool isValid() const;
+    virtual Object currentValue() const;
+    virtual void next();
+
+    // KeyIteratorInterface methods
+    virtual bool isKeyIterator() const;
+    virtual Object keyObject() const;
+
+    // DictionaryIteratorInterface methods
+    virtual bool isDictionaryIterator() const;
+    virtual std::string key() const;
+
+    // IntKeyIteratorInterface methods
+    virtual bool isIntKeyIterator() const;
+    virtual long intKey() const;
+
+    // NoneInterface methods
+    virtual bool isNone() const;
+
+    virtual bool operator == ( const carto::GenericObject & other ) const;
+
+  };
+
 };
+
