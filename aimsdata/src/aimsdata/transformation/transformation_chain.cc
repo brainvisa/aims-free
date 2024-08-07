@@ -42,6 +42,10 @@
 using namespace carto;
 
 
+aims::TransformationChain3d::FFDChainReductorMethod
+  aims::TransformationChain3d::_reductorMethod = 0;
+
+
 aims::TransformationChain3d::TransformationChain3d()
   : Transformation3d(),
   _transformations()
@@ -51,6 +55,14 @@ aims::TransformationChain3d::TransformationChain3d()
 aims::TransformationChain3d::~TransformationChain3d()
 {
 }
+
+
+void aims::TransformationChain3d::registerFFDReductor(
+  FFDChainReductorMethod method )
+{
+  _reductorMethod = method;
+}
+
 
 void aims::TransformationChain3d::
 push_back(const carto::const_ref<Transformation3d>& transformation)
@@ -187,7 +199,7 @@ transformFloat( float x, float y, float z ) const
 }
 
 carto::const_ref<soma::Transformation3d>
-aims::TransformationChain3d::simplify() const
+aims::TransformationChain3d::simplify( bool allow_ffd ) const
 {
   // 1. flat_chain is built by applying simplify() recursively to sub-chains,
   // and inserting the elements of the resulting chains in a flat chain.
@@ -254,6 +266,9 @@ aims::TransformationChain3d::simplify() const
   if(new_chain->_transformations.size() == 1) {
     return *new_chain->_transformations.begin();
   }
+
+  if( allow_ffd && _reductorMethod )
+    return _reductorMethod( new_chain );
 
   return new_chain;
 }

@@ -86,6 +86,7 @@ Vector fields are stored in volumes rc_ptr_Volume_POINT3DF.
     operator rc_ptr_Volume_POINT3DF & ();
 
     bool isIdentity() const;
+    bool isDirect() const;
 
     //--- Control Knots ------------------------------------------------------
     Point3df     getCtrlKnot( int nx, int ny, int nz ) const;
@@ -125,6 +126,13 @@ Vector fields are stored in volumes rc_ptr_Volume_POINT3DF.
 
     //--- Output -------------------------------------------------------------
     void   write( const std::string & filename ) const;
+
+    //--- Composition --------------------------------------------------------
+    void buildFromOther( const soma::Transformation3d & other );
+    virtual rc_ptr_Transformation3d composed(
+      const rc_ptr_Transformation3d & other ) const = 0;
+    virtual rc_ptr_Transformation3d leftComposed(
+      const rc_ptr_Transformation3d & other ) const = 0;
 
   protected:
     virtual Point3dd _deformation( const Point3dd& p_mm ) const = 0;
@@ -261,6 +269,11 @@ of objects.
 
     double spline3( double x ) const;
 
+    virtual rc_ptr_Transformation3d composed(
+      const rc_ptr_Transformation3d & other ) const;
+    virtual rc_ptr_Transformation3d leftComposed(
+      const rc_ptr_Transformation3d & other ) const;
+
   private:
     virtual Point3dd _deformation( const Point3dd& p_mm ) const;
     virtual Point3dd transformDouble( double x, double y, double z ) const;
@@ -317,6 +330,11 @@ between displacement vectors. See SplineFfd for details.
 
     TrilinearFfd( const aims::TrilinearFfd & other );
     TrilinearFfd( const rc_ptr_Volume_POINT3DF & other );
+
+    virtual rc_ptr_Transformation3d composed(
+      const rc_ptr_Transformation3d & other ) const;
+    virtual rc_ptr_Transformation3d leftComposed(
+      const rc_ptr_Transformation3d & other ) const;
 
   private:
     virtual Point3dd _deformation( const Point3dd& p_mm ) const;

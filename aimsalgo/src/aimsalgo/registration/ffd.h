@@ -125,6 +125,17 @@ namespace aims {
     //--- Output -------------------------------------------------------------
     void   write( const std::string & filename ) const;
 
+    //--- Composition --------------------------------------------------------
+    carto::rc_ptr<soma::Transformation3d> operator * (
+      const soma::Transformation3d & other ) const;
+    virtual carto::rc_ptr<soma::Transformation3d> operator * (
+      const carto::rc_ptr<soma::Transformation3d> & other ) const;
+    void buildFromOther( const soma::Transformation3d & other );
+    virtual carto::rc_ptr<soma::Transformation3d> composed (
+      const carto::rc_ptr<soma::Transformation3d> & other ) const = 0;
+    virtual carto::rc_ptr<soma::Transformation3d> leftComposed (
+      const carto::rc_ptr<soma::Transformation3d> & other ) const = 0;
+
   protected:
     //--- Protected methods --------------------------------------------------
     Point3dd     splineVoxToMm( const Point3dd& p ) const;
@@ -245,6 +256,12 @@ namespace aims {
     Point3dd     deformation( const Point3dd& p_mm ) const;
     double spline3( double x ) const { return _spline(x); }
 
+    //--- Composition --------------------------------------------------------
+    virtual carto::rc_ptr<soma::Transformation3d> composed(
+      const carto::rc_ptr<soma::Transformation3d> & other ) const;
+    virtual carto::rc_ptr<soma::Transformation3d> leftComposed (
+      const carto::rc_ptr<soma::Transformation3d> & other ) const;
+
   private:
     virtual Point3dd transformDouble( double x, double y, double z ) const;
     virtual Point3dd _deformation( const Point3dd& p_mm ) const
@@ -308,6 +325,13 @@ namespace aims {
 
     //--- Deformation --------------------------------------------------------
     Point3dd deformation( const Point3dd& p_mm ) const;
+
+    //--- Composition --------------------------------------------------------
+    virtual carto::rc_ptr<soma::Transformation3d> composed(
+      const carto::rc_ptr<soma::Transformation3d> & other ) const;
+    virtual carto::rc_ptr<soma::Transformation3d> leftComposed (
+      const carto::rc_ptr<soma::Transformation3d> & other ) const;
+
   private:
     virtual Point3dd transformDouble( double x, double y, double z ) const;
     virtual Point3dd _deformation( const Point3dd& p_mm ) const

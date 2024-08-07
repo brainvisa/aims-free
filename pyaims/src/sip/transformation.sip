@@ -460,7 +460,7 @@ public:
   rc_ptr_Transformation getInverse() const;
   virtual bool isDirect() const;
 
-  rc_ptr_Transformation3d simplify() const;
+  rc_ptr_Transformation3d simplify( bool allow_ffd = false ) const;
 %Docstring
       Compute a simpler transformation that is equivalent to the chain.
 
@@ -489,10 +489,15 @@ public:
 
       No deep copy is made, so the result can contain pointers to the same
       transformations as the original chain.
+
+      If the parameter allow_ffd is set to True, and if the chain contains at
+      least a FFD deformation field, then the whole chain is reduced to a
+      single FFD field, with the resolution of the first one found in the
+      chain.
 %End
 
 %MethodCode
-  carto::const_ref<soma::Transformation3d> simple = sipCpp->simplify();
+  carto::const_ref<soma::Transformation3d> simple = sipCpp->simplify( a0 );
   carto::rc_ptr<soma::Transformation3d> *res
     = new carto::rc_ptr<soma::Transformation3d>(
       const_cast<soma::Transformation3d *>( simple.pointer() ) );

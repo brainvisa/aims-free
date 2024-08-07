@@ -19,6 +19,7 @@
 #include <aims/math/bspline2.h>
 #include <aims/io/reader_d.h>
 #include <aims/graph/graphmanip.h>
+#include <aims/transformation/transformation_chain.h>
 #include <graph/graph/graph.h>
 #include <cartobase/containers/nditerator.h>
 #include <soma-io/reader/formatreader.h>
@@ -34,6 +35,58 @@ using namespace carto;
 
 namespace aims {
 
+
+class FFDChainReductor
+{
+public:
+  static void registerReductor();
+  static const_ref<soma::Transformation3d> reduceChain(
+    const rc_ptr<TransformationChain3d> & );
+};
+
+
+void FFDChainReductor::registerReductor()
+{
+  TransformationChain3d::registerFFDReductor( &reduceChain );
+}
+
+const_ref<soma::Transformation3d> FFDChainReductor::reduceChain(
+  const rc_ptr<TransformationChain3d> & chain )
+{
+  TransformationChain3d::const_iterator ic, ec = chain->end();
+  FfdTransformation *ffd = 0;
+  const FfdTransformation *cffd;
+
+  for( ic=chain->begin(); ic!=ec; ++ic )
+  {
+    cffd = dynamic_cast<const FfdTransformation *>( ic->pointer() );
+    if( cffd )
+    {
+      vector<int> dims = static_cast<
+        const carto::rc_ptr<carto::Volume<Point3df> > & >( *cffd )->getSize();
+      vector<float> vs = static_cast<
+        const carto::rc_ptr<carto::Volume<Point3df> > & >( *cffd )
+        ->getVoxelSize();
+
+      if( dynamic_cast<const SplineFfd *>( cffd ) )
+        ffd = new SplineFfd( dims[0], dims[1], dims[2], vs[0], vs[1], vs[2] );
+      else
+        ffd = new TrilinearFfd( dims[0], dims[1], dims[2],
+                                vs[0], vs[1], vs[2] );
+      break;
+    }
+  }
+
+  if( !ffd )
+    return chain;
+
+  ffd->buildFromOther( *chain );
+  const_ref<soma::Transformation3d> reduced( ffd );
+
+  return reduced;
+}
+
+
 //============================================================================
 //   FFD TRANSFORMATION
 //============================================================================
@@ -46,6 +99,9 @@ FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
 {
   _ctrlPointDelta = Point3df(0., 0., 0.);
   _ctrlPointDelta.setVoxelSize( sizeX, sizeY, sizeZ );
+
+  // register reductor in TransformationChain3d
+  FFDChainReductor::registerReductor();
 }
 
 FfdTransformation::FfdTransformation( const FfdTransformation & other ):
@@ -591,6 +647,40 @@ void FfdTransformation::write( const string & filename ) const
 }
 
 
+rc_ptr<Transformation3d> FfdTransformation::operator * (
+  const Transformation3d & other ) const
+{
+  rc_ptr<Transformation3d> reft(
+    const_cast<Transformation3d *>( &other ) );
+  rc_ptr<Transformation3d> res = composed( reft );
+  reft.release();
+  return res;
+}
+
+
+rc_ptr<Transformation3d> FfdTransformation::operator * (
+  const rc_ptr<Transformation3d> & other ) const
+{
+  return composed( other );
+}
+
+
+void FfdTransformation::buildFromOther( const Transformation3d & trans )
+{
+  vector<int> dims = _ctrlPointDelta.getSize();
+  vector<float> vs = _ctrlPointDelta.getVoxelSize();
+  int x, y, z;
+
+  for( z=0; z<dims[2]; ++z )
+    for( y=0; y<dims[1]; ++y )
+      for( x=0; x<dims[0]; ++x )
+      {
+        Point3df p( x * vs[0], y * vs[1], z * vs[2] );
+        _ctrlPointDelta( x, y, z ) = trans.transform( p ) - p;
+      }
+}
+
+
 
 //============================================================================
 //   FFD SPLINE RESAMPLED TRANSFORMATION
@@ -709,6 +799,65 @@ Point3dd SplineFfd::deformation_private( const Point3dd& pImage ) const
 }
 
 
+rc_ptr<Transformation3d> SplineFfd::composed(
+  const rc_ptr<Transformation3d> & other ) const
+{
+  TransformationChain3d tc; // = new TransformationChain3d;
+  rc_ptr<Transformation3d> tref( const_cast<Transformation3d *>(
+    static_cast<const Transformation3d *>( this ) ) );
+  tc.push_back( tref );
+  tc.push_back( other );
+
+  vector<int> dims = _ctrlPointDelta.getSize();
+  vector<float> vs = _ctrlPointDelta.getVoxelSize();
+
+  SplineFfd *result = new SplineFfd( dims[0], dims[1], dims[2],
+                                     vs[0], vs[1], vs[2] );
+  rc_ptr<Transformation3d> composed( result );
+
+  result->buildFromOther( tc );
+
+  tref.release();
+  return composed;
+}
+
+
+rc_ptr<Transformation3d> SplineFfd::leftComposed(
+  const rc_ptr<Transformation3d> & other ) const
+{
+  FfdTransformation *other_ffd
+    = dynamic_cast<FfdTransformation *>( other.get() );
+  if( other_ffd )
+  {
+    // left side is a FFD: compose from that one
+    rc_ptr<Transformation3d> myref( const_cast<Transformation3d *>(
+      static_cast<const Transformation3d *>( this ) ) );
+    rc_ptr<Transformation3d> composed = other_ffd->composed( myref );
+    myref.release();
+    return composed;
+  }
+
+  TransformationChain3d tc; // = new TransformationChain3d;
+  rc_ptr<Transformation3d> tref( const_cast<Transformation3d *>(
+    static_cast<const Transformation3d *>( this ) ) );
+  tc.push_back( other );
+  tc.push_back( tref );
+
+  // other is not a FFD: use our grid size because we have no other info.
+  vector<int> dims = _ctrlPointDelta.getSize();
+  vector<float> vs = _ctrlPointDelta.getVoxelSize();
+
+  SplineFfd *result = new SplineFfd( dims[0], dims[1], dims[2],
+                                     vs[0], vs[1], vs[2] );
+  rc_ptr<Transformation3d> composed( result );
+
+  result->buildFromOther( tc );
+
+  tref.release();
+  return composed;
+}
+
+
 //============================================================================
 //   FFD TRILINEAR RESAMPLED TRANSFORMATION
 //============================================================================
@@ -815,6 +964,65 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
 {
   Point3dd p(x, y, z);
   return p + deformation_private(p);
+}
+
+
+rc_ptr<Transformation3d> TrilinearFfd::composed(
+  const rc_ptr<Transformation3d> & other ) const
+{
+  TransformationChain3d tc; // = new TransformationChain3d;
+  rc_ptr<Transformation3d> tref( const_cast<Transformation3d *>(
+    static_cast<const Transformation3d *>( this ) ) );
+  tc.push_back( tref );
+  tc.push_back( other );
+
+  vector<int> dims = _ctrlPointDelta.getSize();
+  vector<float> vs = _ctrlPointDelta.getVoxelSize();
+
+  TrilinearFfd *result = new TrilinearFfd( dims[0], dims[1], dims[2],
+                                           vs[0], vs[1], vs[2] );
+  rc_ptr<Transformation3d> composed( result );
+
+  result->buildFromOther( tc );
+
+  tref.release();
+  return composed;
+}
+
+
+rc_ptr<Transformation3d> TrilinearFfd::leftComposed(
+  const rc_ptr<Transformation3d> & other ) const
+{
+  FfdTransformation *other_ffd
+    = dynamic_cast<FfdTransformation *>( other.get() );
+  if( other_ffd )
+  {
+    // left side is a FFD: compose from that one
+    rc_ptr<Transformation3d> myref( const_cast<Transformation3d *>(
+      static_cast<const Transformation3d *>( this ) ) );
+    rc_ptr<Transformation3d> composed = other_ffd->composed( myref );
+    myref.release();
+    return composed;
+  }
+
+  TransformationChain3d tc; // = new TransformationChain3d;
+  rc_ptr<Transformation3d> tref( const_cast<Transformation3d *>(
+    static_cast<const Transformation3d *>( this ) ) );
+  tc.push_back( other );
+  tc.push_back( tref );
+
+  // other is not a FFD: use our grid size because we have no other info.
+  vector<int> dims = _ctrlPointDelta.getSize();
+  vector<float> vs = _ctrlPointDelta.getVoxelSize();
+
+  TrilinearFfd *result = new TrilinearFfd( dims[0], dims[1], dims[2],
+                                           vs[0], vs[1], vs[2] );
+  rc_ptr<Transformation3d> composed( result );
+
+  result->buildFromOther( tc );
+
+  tref.release();
+  return composed;
 }
 
 

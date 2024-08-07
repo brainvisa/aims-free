@@ -42,6 +42,10 @@
 
 namespace aims
 {
+
+  // private class defined in FFD souce code (not even in a .h)
+  class FFDChainReductor;
+
   /** Container for a composition of multiple transformations.
 
       This container holds a list of transformations, and acts as the
@@ -118,17 +122,31 @@ public:
 
       No deep copy is made, so the result can contain pointers to the same
       transformations as the original chain.
+
+      If the parameter allow_ffd is set to true, and if the chain contains at
+      least a FFD deformation field, then the whole chain is reduced to a
+      single FFD field, with the resolution of the first one found in the
+      chain.
    */
-  carto::const_ref<soma::Transformation3d> simplify() const;
+  carto::const_ref<soma::Transformation3d>
+  simplify( bool allow_ffd = false ) const;
+
+  friend class aims::FFDChainReductor;
 
 protected:
+  typedef carto::const_ref<soma::Transformation3d> (
+    *FFDChainReductorMethod)( const carto::rc_ptr<TransformationChain3d> & );
+
   ListType _transformations;
+  static FFDChainReductorMethod _reductorMethod;
+
 
   Point3dd transformDouble( double x, double y, double z ) const CARTO_OVERRIDE;
   Point3df transformFloat( float x, float y, float z ) const CARTO_OVERRIDE;
   Point3dd transformPoint3dd( const Point3dd & pos ) const CARTO_OVERRIDE;
   Point3df transformPoint3df( const Point3df & dir ) const CARTO_OVERRIDE;
   void setReferentialsInHeader();
+  static void registerFFDReductor( FFDChainReductorMethod method );
 };
 
 
