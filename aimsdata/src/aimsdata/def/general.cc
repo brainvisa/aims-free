@@ -69,7 +69,7 @@ void AimsClear()
 void AimsPrintVersion(void)
 {
   cout << "A.I.M.S. Library " << aims::aimsVersion() 
-       << " - (c)1995-2018, CEA/NeuroSpin (France)"
+       << " - (c)1995-2024, CEA/NeuroSpin (France)"
        << "http://www.brainvisa.info" << std::endl;
 }
 
