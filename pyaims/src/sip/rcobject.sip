@@ -23,6 +23,7 @@ class RCObject
   }
   else if( dynamic_cast<carto::PropertySet *>( sipCpp ) )
   {
+    // std::cout << "I'm a PropertySet\n";
     sipType = sipType_carto_PropertySet;
     *sipCppRet = dynamic_cast<carto::PropertySet *>( sipCpp );
   }
@@ -32,35 +33,43 @@ class RCObject
     sipType = sipType_carto_GenericObject;
     *sipCppRet = dynamic_cast<carto::GenericObject *>( sipCpp );
 
-    if( dynamic_cast<Tree *>( sipCpp ) )
+    if( dynamic_cast<carto::AttributedObject *>( sipCpp ) )
     {
-      sipType = sipType_Tree;
-      *sipCppRet = dynamic_cast<Tree *>( sipCpp );
-      if( dynamic_cast<aims::Hierarchy *>( sipCpp ) )
-      {
-        sipType = sipType_aims_Hierarchy;
-        *sipCppRet = dynamic_cast<aims::Hierarchy *>( sipCpp );
-      }
-    }
-    else if( dynamic_cast<GraphObject *>( sipCpp ) )
-    {
-      sipType = sipType_GraphObject;
-      *sipCppRet = dynamic_cast<GraphObject *>( sipCpp );
+      // std::cout << "I'm an AttributedObject\n";
+      sipType = sipType_carto_AttributedObject;
+      *sipCppRet = dynamic_cast<carto::AttributedObject *>( sipCpp );
 
-      if( dynamic_cast<Vertex *>( sipCpp ) )
+      if( dynamic_cast<Tree *>( sipCpp ) )
       {
-        sipType = sipType_Vertex;
-        *sipCppRet = dynamic_cast<Vertex *>( sipCpp );
+        sipType = sipType_Tree;
+        *sipCppRet = dynamic_cast<Tree *>( sipCpp );
+        if( dynamic_cast<aims::Hierarchy *>( sipCpp ) )
+        {
+          sipType = sipType_aims_Hierarchy;
+          *sipCppRet = dynamic_cast<aims::Hierarchy *>( sipCpp );
+        }
       }
-      else if( dynamic_cast<Edge *>( sipCpp ) )
+      else if( dynamic_cast<GraphObject *>( sipCpp ) )
       {
-        sipType = sipType_Edge;
-        *sipCppRet = dynamic_cast<Edge *>( sipCpp );
-      }
-      else if( dynamic_cast<Graph *>( sipCpp ) )
-      {
-        sipType = sipType_Graph;
-        *sipCppRet = dynamic_cast<Graph *>( sipCpp );
+        // std::cout << "I'm a GraphObject\n";
+        sipType = sipType_GraphObject;
+        *sipCppRet = dynamic_cast<GraphObject *>( sipCpp );
+
+        if( dynamic_cast<Vertex *>( sipCpp ) )
+        {
+          sipType = sipType_Vertex;
+          *sipCppRet = dynamic_cast<Vertex *>( sipCpp );
+        }
+        else if( dynamic_cast<Edge *>( sipCpp ) )
+        {
+          sipType = sipType_Edge;
+          *sipCppRet = dynamic_cast<Edge *>( sipCpp );
+        }
+        else if( dynamic_cast<Graph *>( sipCpp ) )
+        {
+          sipType = sipType_Graph;
+          *sipCppRet = dynamic_cast<Graph *>( sipCpp );
+        }
       }
     }
   }

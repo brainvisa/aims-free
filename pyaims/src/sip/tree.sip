@@ -1,5 +1,5 @@
 
-class Tree : carto::GenericObject
+class Tree : carto::AttributedObject
 {
 %TypeHeaderCode
 #include <graph/tree/tree.h>
