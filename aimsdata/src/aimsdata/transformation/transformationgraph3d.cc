@@ -868,10 +868,9 @@ list<Edge *> TransformationGraph3d::loadAffineTransformations()
 vector<string> TransformationGraph3d::updateFromObjectHeader(
   carto::Object header )
 {
-  const DictionaryInterface *dh = header->getInterface<DictionaryInterface>();
-  if( dh )
-    return updateFromObjectHeader( dh );
-  return vector<string>();
+  const DictionaryInterface *dh
+    = header ? header->getInterface<DictionaryInterface>() : 0;
+  return updateFromObjectHeader( dh );
 }
 
 

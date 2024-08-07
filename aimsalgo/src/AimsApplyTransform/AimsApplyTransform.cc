@@ -678,18 +678,17 @@ load_transformations(ApplyTransformProc& proc,
   if( !rv1 )
     throw FatalError( "Could not find the input space referential" );
 
-  if( reference_header )
-    try
-    {
-      rv2 = tg->referentialByCode( output_coords, reference_header, otrefs );
-    }
-    catch( runtime_error & e )
-    {
-      cerr << "Could not determine outputput space with the given "
-           << "--output-coords and --reference\n";
-      throw;
-    }
-  if( !rv1 )
+  try
+  {
+    rv2 = tg->referentialByCode( output_coords, reference_header, otrefs );
+  }
+  catch( runtime_error & e )
+  {
+    cerr << "Could not determine outputput space with the given "
+          << "--output-coords and --reference\n";
+    throw;
+  }
+  if( !rv2 )
     throw FatalError( "Could not find the input space referential" );
 
   if(!proc.direct_transform_list.empty())
@@ -721,6 +720,7 @@ load_transformations(ApplyTransformProc& proc,
 
   if(!proc.inverse_transform_list.empty())
   {
+    cout << "loading inverse transformations\n";
     TransformationChain3d inverse_chain;
 
     for(vector<string>::const_iterator filename_it = proc.inverse_transform_list.begin();
@@ -766,7 +766,7 @@ load_transformations(ApplyTransformProc& proc,
       // between input and output origins
       if( proc.volume_id )
       {
-        cout << "VOLUME ID\n";
+        // cout << "VOLUME ID\n";
         Point3df vs( 1., 1., 1. );
         const PythonHeader *ph
           = dynamic_cast<const PythonHeader *>( finder.header() );
