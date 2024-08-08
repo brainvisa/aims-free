@@ -33,6 +33,7 @@
 
 #include <aims/io_soma/trm_header_formatchecker.h>
 #include <aims/transformation/affinetransformation3d.h>
+#include <aims/transformation/transformationgraph3d.h>
 #include <aims/io/finder.h>
 #include <aims/data/pheader.h>
 #include <cartobase/stream/fileutil.h>
@@ -41,6 +42,7 @@
 using namespace aims;
 using namespace soma;
 using namespace std;
+
 
 DataSourceInfo TrmHeaderFormatChecker::check( DataSourceInfo dsi,
                                               DataSourceInfoLoader &,
@@ -84,6 +86,8 @@ DataSourceInfo TrmHeaderFormatChecker::check( DataSourceInfo dsi,
     throw runtime_error( "transformation index does not exist in header" );
 
   Object refs;
+  Object tr;
+  rc_ptr<AffineTransformation3d> trp;
 
   if( trans_i < 0 )
   {
@@ -99,7 +103,15 @@ DataSourceInfo TrmHeaderFormatChecker::check( DataSourceInfo dsi,
     {
       trans_i = 0;
     }
-    if( trans_i < 0 && refs.get() )
+    if( trans_t == "disk" )
+    {
+      // dest ref is disk orientation space
+      rc_ptr<Transformation3d> a2s
+        = TransformationGraph3d::transformToDiskSpace( ph );
+      if( a2s )
+        trp.reset( dynamic_cast<AffineTransformation3d *>( a2s.get() ) );
+    }
+    else if( trans_i < 0 && refs.get() )
     {
       Object it = refs->objectIterator();
       int i;
@@ -116,36 +128,47 @@ DataSourceInfo TrmHeaderFormatChecker::check( DataSourceInfo dsi,
     }
   }
 
-  if( trans_i < 0 )
+  if( trans_i < 0 && !trp )
     throw runtime_error( "transformation not found in header" );
 
-  Object tr = trans->getArrayItem( trans_i );
-  AffineTransformation3d t( tr );
-  // cout << t << endl;
-
   Object hdr = Object::value( PropertySet() );  // header
-
-  if( !refs )
-    try
-    {
-      refs = ph->getProperty( "referentials" );
-    }
-    catch( runtime_error & )
-    {
-    }
-  if( refs.get() )
-  {
-    Object ref = refs->getArrayItem( trans_i );
-    hdr->setProperty( "destination_referential", ref->getString() );
-  }
-
+  string src_ref;
   try
   {
     Object sr = ph->getProperty( "referential" );
-    hdr->setProperty( "source_referential", sr->getString() );
+    src_ref = sr->getString();
+    hdr->setProperty( "source_referential", src_ref );
   }
   catch( runtime_error & )
   {
+  }
+
+  if( trp )
+  {
+    string dst_ref = "disk_space";
+    if( !src_ref.empty() )
+      dst_ref = dst_ref + "_" + src_ref;
+    hdr->setProperty( "destination_referential", dst_ref );
+  }
+  else
+  {
+    tr = trans->getArrayItem( trans_i );
+    trp.reset( new AffineTransformation3d( tr ) );
+    // cout << *trp << endl;
+
+    if( !refs )
+      try
+      {
+        refs = ph->getProperty( "referentials" );
+      }
+      catch( runtime_error & )
+      {
+      }
+    if( refs.get() )
+    {
+      Object ref = refs->getArrayItem( trans_i );
+      hdr->setProperty( "destination_referential", ref->getString() );
+    }
   }
 
   dsi.header() = hdr;
@@ -156,7 +179,7 @@ DataSourceInfo TrmHeaderFormatChecker::check( DataSourceInfo dsi,
     bool inv = bool( oinv->getScalar() );
     if( inv )
     {
-      t = *t.inverse();
+      trp = trp->inverse();
       Object s;
       if( hdr->hasProperty( "source_referential" ) )
       {
@@ -180,7 +203,7 @@ DataSourceInfo TrmHeaderFormatChecker::check( DataSourceInfo dsi,
   hdr->setProperty( "format", "TRMHEADER" );
   hdr->setProperty( "object_type", "AffineTransformation3d" );
   hdr->setProperty( "data_type", "VOID" );
-  hdr->setProperty( "transformation", t.toVector() );
+  hdr->setProperty( "transformation", trp->toVector() );
 
   bool docapa = !dsi.capabilities().isInit();
   if( docapa )

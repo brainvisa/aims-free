@@ -128,6 +128,11 @@ namespace aims
           as described this way
         - "NIFTI_XFORM_TEMPLATE_OTHER" to designate a different template as
           described in the object header (NIFTI-like)
+        - "disk": the "disk space" orientation: voxels in the order they are
+          stored on disk. Some software are working in this referential. Note
+          that this referential is only available in the graph if the object
+          header has been included using updateFromObjectHeader() with the
+          parameter includeDiskSpace set to true.
         - other codes may be supported later, like "qform", "sform", "ITK",
           "ANTS", but are not implemented yet.
 
@@ -372,10 +377,22 @@ namespace aims
 
         If the header does not contain a "referential" property, then a new
         UUID will be generated for it.
+
+        If the optional parameter includeDiskSpace is set to true, then
+        transformations to disk orientation (in mm) will also be included.
     */
-    std::vector<std::string> updateFromObjectHeader( carto::Object header );
+    std::vector<std::string> updateFromObjectHeader(
+      carto::Object header, bool includeDiskSpace = false );
     /// Insert all transformations / referentials found in an object header
     std::vector<std::string>  updateFromObjectHeader(
+      const carto::DictionaryInterface *header,
+      bool includeDiskSpace = false );
+
+    /** static helper function which extracts the transformation from the
+        AIMS referential to disk space orientation of the image voxels, if
+        such inforoamtion is present in the header. The returned transform is in mm (not in voxels).
+    */
+    static carto::rc_ptr<soma::Transformation3d> transformToDiskSpace(
       const carto::DictionaryInterface *header );
 
   private:

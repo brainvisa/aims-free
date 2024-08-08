@@ -608,6 +608,11 @@ public:
       as described this way
     - "NIFTI_XFORM_TEMPLATE_OTHER" to designate a different template as
       described in the object header (NIFTI-like)
+    - "disk": the "disk space" orientation: voxels in the order they are
+      stored on disk. Some software are working in this referential. Note
+      that this referential is only available in the graph if the object
+      header has been included using updateFromObjectHeader() with the
+      parameter includeDiskSpace set to True.
     - other codes may be supported later, like "qform", "sform", "ITK",
       "ANTS", but are not implemented yet.
 
@@ -818,7 +823,8 @@ public:
               file name (.trm format), but as an embedded 4x4 matrix.
 %End
 
-    vector_STRING updateFromObjectHeader( carto::Object header );
+    vector_STRING updateFromObjectHeader( carto::Object header,
+                                          bool includeDiskSpace = false );
 %Docstring
     Insert all transformations / referentials found in an object header.
 
@@ -840,6 +846,9 @@ public:
 
     If the header does not contain a "referential" property, then a new
     UUID will be generated for it.
+
+    If the optional parameter includeDiskSpace is set to true, then
+    transformations to disk orientation (in mm) will also be included.
 %End
   };
 

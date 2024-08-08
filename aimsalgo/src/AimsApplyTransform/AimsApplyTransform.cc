@@ -658,8 +658,8 @@ load_transformations(ApplyTransformProc& proc,
   vector<string> trefs, otrefs;
   string ref, oref;
 
-  trefs = tg->updateFromObjectHeader( input_header );
-  otrefs = tg->updateFromObjectHeader( reference_header );
+  trefs = tg->updateFromObjectHeader( input_header, true );
+  otrefs = tg->updateFromObjectHeader( reference_header, true );
   ref = trefs[0];
   oref = otrefs[0];
 

@@ -866,16 +866,16 @@ list<Edge *> TransformationGraph3d::loadAffineTransformations()
 
 
 vector<string> TransformationGraph3d::updateFromObjectHeader(
-  carto::Object header )
+  carto::Object header, bool includeDiskSpace )
 {
   const DictionaryInterface *dh
     = header ? header->getInterface<DictionaryInterface>() : 0;
-  return updateFromObjectHeader( dh );
+  return updateFromObjectHeader( dh, includeDiskSpace );
 }
 
 
 vector<string> TransformationGraph3d::updateFromObjectHeader(
-  const carto::DictionaryInterface *header )
+  const carto::DictionaryInterface *header, bool includeDiskSpace )
 {
   bool changed = false;
   string ref;
@@ -900,6 +900,24 @@ vector<string> TransformationGraph3d::updateFromObjectHeader(
     v = addVertex( "referential" );
     v->setProperty( "uuid", ref );
     _refs_by_id[ ref ] = v;
+  }
+
+  if( includeDiskSpace )
+  {
+    rc_ptr<Transformation3d> a2s = transformToDiskSpace( header );
+    if( a2s )
+    {
+      string diskref = "disk_space_" + ref;
+      Vertex *dv = referentialById( diskref );
+      if( !dv )
+      {
+        dv = addVertex( "referential" );
+        dv->setProperty( "uuid", diskref );
+        _refs_by_id[ diskref ] = dv;
+      }
+      registerTransformation( v, dv, a2s );
+      changed = true;
+    }
   }
 
   Object refs;
@@ -997,6 +1015,12 @@ Vertex* TransformationGraph3d::referentialByCode(
 
   if( iequals( id, "AIMS" ) || id.empty() )
     return referentialById( ref );
+
+  if( iequals( id, "disk" ) )
+  {
+    string diskref = "disk_space_" + ref;
+    return referentialById( diskref );
+  }
 
   int transform_position = -1;
 
@@ -1109,6 +1133,50 @@ Vertex* TransformationGraph3d::referentialByCode(
   return referentialById( referential_id );
 }
 
+
+rc_ptr<soma::Transformation3d> TransformationGraph3d::transformToDiskSpace(
+  const carto::DictionaryInterface *ph )
+{
+  rc_ptr<Transformation3d> tr;
+
+  try
+  {
+    Object s2mo = ph->getProperty( "storage_to_memory" );
+    AffineTransformation3d s2m_vox( s2mo );
+    unique_ptr<AffineTransformation3d> m2s_vox = s2m_vox.inverse();
+    Point3df vs( 1., 1., 1. );
+    try
+    {
+      Object vso = ph->getProperty( "voxel_size" );
+      vs[0] = vso->getArrayItem( 0 )->getScalar();
+      vs[1] = vso->getArrayItem( 1 )->getScalar();
+      vs[2] = vso->getArrayItem( 2 )->getScalar();
+    }
+    catch( runtime_error & )
+    {
+    }
+    // get s2m in mm
+    AffineTransformation3d tvs1;
+    tvs1.affine()( 0, 0 ) = 1. / vs[0];
+    tvs1.affine()( 1, 1 ) = 1. / vs[1];
+    tvs1.affine()( 2, 2 ) = 1. / vs[2];
+
+    Point3df vss = m2s_vox->transformVector( vs );  // vs in disk orientation
+    AffineTransformation3d tvs2;
+    tvs2.affine()( 0, 0 ) = fabs( vss[0] );
+    tvs2.affine()( 1, 1 ) = fabs( vss[1] );
+    tvs2.affine()( 2, 2 ) = fabs( vss[2] );
+
+    AffineTransformation3d *m2s
+      = new AffineTransformation3d( tvs2 * *m2s_vox * tvs1 );
+    tr.reset( m2s );
+  }
+  catch( runtime_error & )
+  {
+  }
+
+  return tr;
+}
 
 
 
