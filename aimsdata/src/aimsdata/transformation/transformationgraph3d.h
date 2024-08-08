@@ -321,9 +321,12 @@ namespace aims
           on non-affine transformations.
         - embed_affines: if true, affine transformations are not recorded as a
           file name (.trm format), but as an embedded 4x4 matrix.
+        - rel_to_path: if not empty, filenames will be relative to this base
+          directory (normally where the graph will be stored)
     */
     carto::Object asDict( bool affine_only = false, bool allow_read = false,
-                          bool embed_affines = false ) const;
+                          bool embed_affines = false,
+                          const std::string & rel_to_path = "" ) const;
     /** remove deduced transformations (built from composition or inversion).
 
         If chain_only is true, then inverses of direct transforms are not

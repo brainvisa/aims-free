@@ -85,12 +85,16 @@ bool TrmGraphFormatWriter::write( const TransformationGraph3d & obj,
     loaded = const_cast<TransformationGraph3d &>(
       obj ).loadAffineTransformations();
 
-  Object gobj = obj.asDict( affine_only, allow_read, embed_affines );
+  string dirname = FileUtil::dirname( dsi->url() );
+  string basename;
+  if( !allow_read )
+    basename = dirname;
+
+  Object gobj = obj.asDict( affine_only, allow_read, embed_affines, dirname );
   Writer<Object> w( ds->url() );
   w.write( gobj );
 
   // write each individual transform
-  string dirname = FileUtil::dirname( dsi->url() );
 
   Object sit = gobj->objectIterator();
   for( ; sit->isValid(); sit->next() )

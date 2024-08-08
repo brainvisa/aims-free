@@ -651,7 +651,8 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
 
 
 Object TransformationGraph3d::asDict( bool affine_only, bool allow_read,
-                                      bool embed_affines ) const
+                                      bool embed_affines,
+                                      const string & rel_to_path ) const
 {
   Object dict = Object::value( Dictionary() );
   Vertex::const_iterator ie, ee = edges().end();
@@ -715,8 +716,11 @@ Object TransformationGraph3d::asDict( bool affine_only, bool allow_read,
       string filename;
       if( e->hasProperty( "filename" ) )
       {
-        filename
-          = FileUtil::basename( e->getProperty( "filename" )->getString() );
+        string full_name = e->getProperty( "filename" )->getString();
+        if( rel_to_path.empty() )
+          filename = FileUtil::basename( full_name );
+        else
+          filename = FileUtil::relpath( full_name, rel_to_path );
         size_t p = filename.rfind( '?' );
         if( p != string::npos )
         {
