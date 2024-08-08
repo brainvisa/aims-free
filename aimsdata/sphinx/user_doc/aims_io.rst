@@ -117,9 +117,15 @@ To list information about supported data types and formats, you can use the foll
       ``inv``: bool (0, 1)
           if true, get the inverse transformation instead of the specified one
       ``index``: int
-          several transformations may be contained in a data file. This indicates which one to be taken (default is 0, the first).
+          several transformations may be contained in a data file. This
+          indicates which one to be taken (default is 0, the first).
       ``target``: string
-          instead of ``index``, the transformation may be specified by its target referential name. It should be listed in the ``referentials`` field in the ``.minf`` header or using the ``AimsFileInfo`` command.
+          instead of ``index``, the transformation may be specified by its
+          target referential name. It should be listed in the ``referentials``
+          field in the ``.minf`` header or using the ``AimsFileInfo`` command.
+          Starting with Aims 5.2, ``target`` may also take the value ``disk``:
+          in this case the transformation to disk-oriented voxels space (but in
+          mm) will be selected.
   TRMCOMPOSE: ``.trmc``, Soma-IO API
             Fake format: the ``.trmc`` file does not actually exist, but this extension indicates to the format reader to read several transformation files, and combine them using the mathematical matrix composition operator. Filenames are separated with a ``*`` sign, and composed in the order they are given in matrix operations. Ex::
 

@@ -1301,6 +1301,8 @@ int main(int argc, const char **argv)
       "- '0', '1'... or any non-negative integer: use the transformation\n"
       "  in that position (0-based) in the AIMS metadata field\n"
       "  'transformations' (0 is a synonym of 'first').\n"
+      "- 'disk': the disk orientation, using the order voxels are stored in \n"
+      "  the image file. Some software are working in this referential.\n"
       /* These options are not implemented yet. TODO(ylep)
       "- 'qform', 'ITK', or 'ANTS': use the target space of the qform stored\n"
       "  in a NIfTI file. This corresponds to the physical space used in\n"

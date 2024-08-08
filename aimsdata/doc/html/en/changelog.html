@@ -80,6 +80,11 @@
   </li>
   <li>The old command <tt>AimsResample</tt>, obsolete since 5.0.0 and replaced with <tt>AimsApplyTransform</tt>, has been removed.
   </li>
+  <li>Transformation graphs implementation and IO</li>
+  <li>AimsApplyTransform has been reworked and based on transformation graphs. It simplifies the way referentials and transformations are addressed, and in many cases also avoid the needs to supply a transformation file when all info is in the objects headers. Transformations from/to disk space is also supported.
+  </li>
+  <li>FFD transformations composition. Transformation chains may also compose FFD fields (they did not, before). AimsComposeTransformation thus now also supports non-linear FFD fields.
+  </li>
 
   <li>Many other bug fixes</li>
 </ul>
