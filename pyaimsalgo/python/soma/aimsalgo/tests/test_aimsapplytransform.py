@@ -17,7 +17,6 @@ class AimsApplyTransformTestCase(unittest.TestCase):
     base_work_dir = None
 
     def setUp(self):
-        print('setUp')
         self.tmp = []
         if self.base_work_dir is None:
             t = tempfile.mkdtemp(prefix='aims_test_applytrans_')
@@ -147,7 +146,6 @@ class AimsApplyTransformTestCase(unittest.TestCase):
         return test, ref, out
 
     def prepare_graph(self, vols):
-        print('vols:', vols)
         graph = aims.TransformationGraph3d()
         refs = []
         for vol in vols:
@@ -272,11 +270,13 @@ class AimsApplyTransformTestCase(unittest.TestCase):
             'A', aims.StandardReferentials.mniTemplateReferentialID(),
             aims.StandardReferentials.commonScannerBasedReferential() + '_'
             + tref,
+            f'disk_space_{tref}',
         }
         orefs = {
             'R',
             aims.StandardReferentials.commonScannerBasedReferential() + '_'
             + oref,
+            f'disk_space_{oref}',
         }
         arefs = {'R', }
         self.assertEqual(set(graph.keys()), refs)
