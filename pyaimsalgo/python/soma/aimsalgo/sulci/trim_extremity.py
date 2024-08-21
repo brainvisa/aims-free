@@ -61,7 +61,7 @@ def get_ss_image(skeleton, graph):
     return ss
 
 
-def trim_extremities(skeleton, graph, tminss):
+def trim_extremities(skeleton, graph, tminss, junc_dilation=2):
     # start: skeleton, graph
 
     # Idea:
@@ -145,13 +145,17 @@ def trim_extremities(skeleton, graph, tminss):
     # aims.write(bottom_cls, '/tmp/bottom_seeds2.nii.gz')
 
     print('b. remove junctions')
-    junc_dil = aims.Volume(junc)
-    junc_dil[1:, :, :, 0][junc[:-1, :, :, 0] != 0] = 1
-    junc_dil[:-1, :, :, 0][junc[1:, :, :, 0] != 0] = 1
-    junc_dil[:, 1:, :, 0][junc[:, :-1, :, 0] != 0] = 1
-    junc_dil[:, :-1, :, 0][junc[:, 1:, :, 0] != 0] = 1
-    junc_dil[:, :, 1:, 0][junc[:, :, :-1, 0] != 0] = 1
-    junc_dil[:, :, :-1, 0][junc[:, :, 1:, 0] != 0] = 1
+    junc_dil_org = junc
+    for i in range(junc_dilation):
+        junc_dil = aims.Volume(junc_dil_org)
+        junc_dil[1:, :, :, 0][junc_dil_org[:-1, :, :, 0] != 0] = 1
+        junc_dil[:-1, :, :, 0][junc_dil_org[1:, :, :, 0] != 0] = 1
+        junc_dil[:, 1:, :, 0][junc_dil_org[:, :-1, :, 0] != 0] = 1
+        junc_dil[:, :-1, :, 0][junc_dil_org[:, 1:, :, 0] != 0] = 1
+        junc_dil[:, :, 1:, 0][junc_dil_org[:, :, :-1, 0] != 0] = 1
+        junc_dil[:, :, :-1, 0][junc_dil_org[:, :, 1:, 0] != 0] = 1
+        junc_dil_org = junc_dil
+
     bottom_cls[np.logical_and(junc_dil.np != 0, bottom_cls.np != 0)] = 1
     hj_cls[np.logical_and(junc_dil.np != 0, hj_cls.np != 0)] = 1
 
@@ -228,12 +232,12 @@ if __name__ == '__main__':
     dist[3, 11, 4] = 3
     dist[2, 12, 4] = 4
 
-    aims.write(dist, '/tmp/dist.nii.gz')
+    # aims.write(dist, '/tmp/dist.nii.gz')
 
     maxdist = 5
 
     trimmed = trim_distance_homotopic(dist, maxdist)
-    aims.write(trimmed, '/tmp/trimmed.nii.gz')
+    # aims.write(trimmed, '/tmp/trimmed.nii.gz')
 
     dpaths = ['/volatile/riviere/basetests-3.1.0',
               '/volatile/home/dr144257/data/baseessai']
@@ -245,5 +249,6 @@ if __name__ == '__main__':
     graph = aims.read(osp.join(
         dpath,
         'subjects/sujet01/t1mri/default_acquisition/default_analysis/folds/3.1/Lsujet01.arg'))
-    ss, trimmed = trim_extremities(skeleton, graph, tminss)
+    ss, trimmed = trim_extremities(skeleton, graph, tminss, junc_dilation=2)
     aims.write(trimmed, '/tmp/skel_trimmed.nii.gz')
+    aims.write(ss, '/tmp/ss_dist.nii.gz')
