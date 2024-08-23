@@ -702,6 +702,16 @@ load_transformations(ApplyTransformProc& proc,
   else
     tg.reset( new TransformationGraph3d );
 
+  AllocatorContext requested_allocator(AllocatorStrategy::ReadOnly);
+  if(proc.mmap_fields) {
+    // The "use factor" is used calculate a threshold size above which
+    // memory-mapping is attempted, based on the currently available memory. By
+    // setting it to zero, we can force memory-mapping to be always attempted.
+    requested_allocator.setUseFactor(0.f);
+  }
+
+  tg->setAllocatorContext(requested_allocator);
+
   proc.trans_graph = tg;
 
   vector<string> trefs, otrefs;

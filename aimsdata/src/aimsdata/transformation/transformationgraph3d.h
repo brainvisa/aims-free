@@ -36,6 +36,7 @@
 
 #include <graph/graph/graph.h>
 #include <soma-io/transformation/transformation.h>
+#include <cartobase/allocator/allocator.h>
 
 
 namespace aims
@@ -177,6 +178,18 @@ namespace aims
     */
     carto::rc_ptr<soma::Transformation3d> transformation(
       const std::string & id ) const;
+
+    /// Allocator context used in transformations reading operations.
+    const carto::AllocatorContext & allocatorContext() const
+    { return _allocator; }
+    /** Set the allocator context used in all transformations reading
+        operations.
+
+        The allocator context may be used to push the use of memory mapping,
+        for isntance.
+    */
+    void setAllocatorContext( const carto::AllocatorContext & alloc )
+    { _allocator = alloc; }
 
     /** Get the transformation between source_ref and dst_ref. If it is not a
         registered transformation, return 0. Lazy loading will take place,
@@ -405,6 +418,7 @@ namespace aims
     mutable std::map<std::string, Vertex *> _refs_by_id;
     mutable std::map<std::string, Edge *> _tr_by_id;
     std::set<std::pair<const Vertex *, const Vertex *> > _disconnected;
+    carto::AllocatorContext _allocator;
 
   };
 

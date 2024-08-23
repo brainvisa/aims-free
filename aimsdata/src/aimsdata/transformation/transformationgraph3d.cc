@@ -378,6 +378,7 @@ TransformationGraph3d::loadTransformation( Edge *edge, bool affine_only ) const
         {
           // cout << "from file: " << filename << endl;
           Reader<Transformation3d> r( filename );
+          r.setAllocatorContext( allocatorContext() );
           trans.reset( r.read() );
           // cout << "loaded transform: " << filename << endl;
         }

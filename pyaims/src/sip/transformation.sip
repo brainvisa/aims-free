@@ -649,6 +649,20 @@ public:
     The returned reference counting pointer may contain a null pointer.
 %End
 
+    const carto::AllocatorContext & allocatorContext() const;
+%Docstring
+    Allocator context used in transformations reading operations.
+%End
+
+    void setAllocatorContext( const carto::AllocatorContext & alloc );
+%Docstring
+    Set the allocator context used in all transformations reading
+    operations.
+
+    The allocator context may be used to push the use of memory mapping,
+    for isntance.
+%End
+
     Edge* getTransformation( const std::string & src_ref,
                              const std::string & dst_ref ) const;
 %Docstring
