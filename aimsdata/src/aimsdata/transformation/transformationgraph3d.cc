@@ -906,7 +906,7 @@ vector<string> TransformationGraph3d::updateFromObjectHeader(
     _refs_by_id[ ref ] = v;
   }
 
-  if( includeDiskSpace )
+  if( includeDiskSpace && header )
   {
     rc_ptr<Transformation3d> a2s = transformToDiskSpace( header );
     if( a2s )

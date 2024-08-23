@@ -383,6 +383,9 @@ namespace aims
 
         If the optional parameter includeDiskSpace is set to true, then
         transformations to disk orientation (in mm) will also be included.
+
+        The method may be called with a null header parameter, in which case a
+        new referential UUID will be created and returned by the funciton.
     */
     std::vector<std::string> updateFromObjectHeader(
       carto::Object header, bool includeDiskSpace = false );
