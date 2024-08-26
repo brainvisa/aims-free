@@ -6,7 +6,10 @@ import numpy as np
 def trim_distance_homotopic(dist, maxdist):
     '''
     Trim a distance map: removes points under distance threshold dist,
-    only if they preserve the object topology
+    only if they preserve the object topology.
+    Points with distance values >= 32000 are considered outside the distance
+    map, or un-attained (32501 / 32500 in AimsDistanceFrontPropagation) thus
+    are excluded, and consequently, also trimmed.
     '''
     bin_vol = aims.Volume_S16(dist.shape, [1, 1, 1])  # border 1
     bin_vol.fill(0)
