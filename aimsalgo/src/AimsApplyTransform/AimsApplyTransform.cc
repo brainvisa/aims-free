@@ -66,7 +66,7 @@ public:
   string  output;
   vector<string> direct_transform_list;
   vector<string> inverse_transform_list;
-  string transform_graph_file;
+  vector<string> transform_graph_files;
   string output_transform_graph_file;
 //   rc_ptr<TransformationGraph3d> transform_graph;
   string  input_coords;
@@ -693,10 +693,19 @@ load_transformations(ApplyTransformProc& proc,
   }
 
   rc_ptr<TransformationGraph3d> tg( 0 );
-  if( !proc.transform_graph_file.empty() )
+  if( !proc.transform_graph_files.empty() )
   {
-    Reader<TransformationGraph3d> r( proc.transform_graph_file );
+    Reader<TransformationGraph3d> r( proc.transform_graph_files[0] );
     tg.reset( r.read() );
+    unsigned i;
+    for( i=1; i<proc.transform_graph_files.size(); ++i )
+    {
+      Reader<TransformationGraph3d> r2( proc.transform_graph_files[i] );
+      rc_ptr<TransformationGraph3d> tg2( r2.read() );
+      tg->loadTransformationsGraph( tg2->asDict(),
+                                    FileUtil::dirname(
+                                      proc.transform_graph_files[i] ) );
+    }
     cout << "read transformations graph.\n";
   }
   else
@@ -1475,12 +1484,14 @@ int main(int argc, const char **argv)
                         "passed on the command-line. The file name may be "
                         "prefixed with 'inv:', in which case the inverse of "
                         "the transformation is used.");
-    app.addOption(proc.transform_graph_file, "--graph",
-                  "transformation graph (yaml format), can be given as an "
-                  "alternative to --direct-transform and --inverse-transform, "
-                  "if such a graph contains all the needed transformations, "
-                  "and if the input and output data spaces are clearly "
-                  "specified.", true);
+    app.addOptionSeries(proc.transform_graph_files, "--graph",
+                        "transformation graph (yaml format), can be given as "
+                        "an alternative to --direct-transform and "
+                        "--inverse-transform, if such a graph contains all "
+                        "the needed transformations, and if the input and "
+                        "output data spaces are clearly specified. Several "
+                        "graph files may be specified: they will be merged "
+                        "into a single one.");
     app.addOption(proc.input_coords, "--input-coords",
                   "How to interpret coordinates in the input image w.r.t. "
                   "the transformations written in the image header. See above."
