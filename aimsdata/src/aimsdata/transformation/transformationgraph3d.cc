@@ -151,6 +151,13 @@ void TransformationGraph3d::updateIds()
       std::string id = v->getProperty( "uuid" )->getString();
       _refs_by_id[ id ] = v;
     }
+    if( v->hasProperty( "alias" ) )
+    {
+      Object ialias = v->getProperty( "alias" );
+      Object ait;
+      for( ait=ialias->objectIterator(); ait->isValid(); ait->next() )
+        _refs_by_id[ ait->currentValue()->getString() ] = v;
+    }
   }
 
   const set<Edge *> & edges = this->edges();
@@ -587,6 +594,24 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
          dst_it->next() )
     {
       string dest_id = dst_it->key();
+      if( dest_id == "alias" )
+      {
+        // alias should be a list of other uuids or names
+        Vertex *sv = referentialById( source_id );
+        if( !sv )
+        {
+          sv = addVertex( "referential" );
+          sv->setProperty( "uuid", source_id );
+          _refs_by_id[ source_id ] = sv;
+        }
+        Object ait;
+        for( ait = dst_it->currentValue()->objectIterator(); ait->isValid();
+             ait->next() )
+          registerReferentialAlias( ait->currentValue()->getString(),
+                                    source_id );
+        continue;
+      }
+
       string trans;
       try
       {
@@ -1183,6 +1208,89 @@ rc_ptr<soma::Transformation3d> TransformationGraph3d::transformToDiskSpace(
   return tr;
 }
 
+
+void TransformationGraph3d::registerReferentialAlias(
+  const string & uuid, const string & existing_id )
+{
+  Vertex *v1 = referentialById( existing_id );
+  if( !v1 )
+    throw runtime_error( ( string( "referential " ) + existing_id
+                           + " does not exist." ).c_str() );
+  Vertex *v2 = referentialById( uuid );
+  if( v2 )
+    return mergeReferentials( uuid, existing_id );
+
+  vector<string> aliases;
+  try
+  {
+    Object oalias = v1->getProperty( "alias" );
+    aliases.reserve( oalias->size() + 1 );
+    Object it;
+    for( it=oalias->objectIterator(); it->isValid(); it->next() )
+      aliases.push_back( it->currentValue()->getString() );
+  }
+  catch( ... )
+  {
+  }
+
+  aliases.push_back( uuid );
+  v1->setProperty( "alias", aliases );
+  cout << "alias: " << uuid << ": " << v1 << ": " << v1->getProperty( "uuid" )->getString() << endl;
+  _refs_by_id[ uuid ] = v1;
+}
+
+
+void TransformationGraph3d::mergeReferentials( const string & uuid,
+                                               const string & existing_id )
+{
+  Vertex *v1 = referentialById( existing_id );
+  if( !v1 )
+    throw runtime_error( ( string( "referential " ) + existing_id
+                           + " does not exist." ).c_str() );
+  Vertex *v2 = referentialById( uuid );
+  if( !v2 )
+    throw runtime_error( ( string( "referential " ) + uuid
+                           + " does not exist." ).c_str() );
+
+  Vertex::iterator ie, ee = v2->end();
+  for( ie=v2->begin(); ie!=ee; ++ie )
+  {
+    Vertex *s, *d, *ns, *nd;
+    Edge::iterator iv = (*ie)->begin();
+    s = *iv;
+    ++iv;
+    d = *iv;
+    if( s == v1 || d == v1 )
+      throw runtime_error(
+        "Cannot merge referentials which have a connection" );
+  }
+
+  for( ie=v2->begin(); ie!=ee; ++ie )
+  {
+    Vertex *s, *d, *ns, *nd;
+    Edge::iterator iv = (*ie)->begin();
+    s = *iv;
+    ++iv;
+    d = *iv;
+    if( s == v2 )
+    {
+      ns = v1;
+      nd = d;
+    }
+    else
+    {
+      ns = s;
+      nd = v1;
+    }
+    Edge *ne = addDirectedEdge( ns, nd, "transformation" );
+    ne->copyProperties( *ie );
+  }
+
+  delete v2;
+  _refs_by_id.erase( uuid );
+
+  registerReferentialAlias( uuid, existing_id );
+}
 
 
 #include <cartobase/object/object_d.h>

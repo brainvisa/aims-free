@@ -261,6 +261,20 @@ namespace aims
                                   const std::string & filename );
     Edge *registerTransformation( Vertex *src_ref, Vertex *dst_ref,
                                   const std::string & filename );
+    /** registers a different referential, additional UUID for an existing
+        referential.
+
+        If the new UUID corresponds to an existing referential also, both are
+        merged into the same vertex.
+    */
+    void registerReferentialAlias( const std::string & uuid,
+                                   const std::string & existing_id );
+    /** Merge two existing referentials into a single one (the second).
+
+        The first UUID will be kept as an alias in the second.
+    */
+    void mergeReferentials( const std::string & uuid,
+                            const std::string & existing_id );
 
     /** Load a full transformations graph from a dict-like object.
 
