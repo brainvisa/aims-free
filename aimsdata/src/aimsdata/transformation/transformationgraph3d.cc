@@ -1218,7 +1218,11 @@ void TransformationGraph3d::registerReferentialAlias(
                            + " does not exist." ).c_str() );
   Vertex *v2 = referentialById( uuid );
   if( v2 )
+  {
+    if( v2 == v1 )
+      return;  // already OK
     return mergeReferentials( uuid, existing_id );
+  }
 
   vector<string> aliases;
   try
@@ -1235,7 +1239,6 @@ void TransformationGraph3d::registerReferentialAlias(
 
   aliases.push_back( uuid );
   v1->setProperty( "alias", aliases );
-  cout << "alias: " << uuid << ": " << v1 << ": " << v1->getProperty( "uuid" )->getString() << endl;
   _refs_by_id[ uuid ] = v1;
 }
 
