@@ -21,6 +21,9 @@ def get_hj_image(skeleton, graph):
     # get HJ from graph. However these HJ are thick (2-3 voxels)
     # so we have to re-skeletonize them.
     # we use topological classif junction points to make them immortals
+    # Note: we cannot just mask them with topo classif junction points,
+    # beacause they are disconnected and would not make complete lines at
+    # many places.
     hj = aims.Volume(skeleton)
     hj[:] = 0
     c = aims.RawConverter_BucketMap_VOID_rc_ptr_Volume_S16()
@@ -73,14 +76,14 @@ def trim_extremities(skeleton, graph, tminss, junc_dilation=2):
     # However to remove spurious end points in botom and HJ lines (BHJ), which
     # can be interrupted at some places, we want to add additional constraints
     # on ends of lines:
-    # a. BHJ ends which are too far one from the others (bottom from HJ) are
+    # a. Regular junction lines should prevent BHJ ends in their vicinity
+    # b. BHJ ends which are too far one from the others (bottom from HJ) are
     # not really endpoints. To do this we make distance maps in SS from line
     # end points.
-    # b. Regular junction lines should prevent BHJ ends in their vicinity
     # c. however we should not elagate too much: we have to keep at least 2
     # points in each connected component. This is done approximately, for now.
 
-    max_bottom_hj_dist = 3.
+    max_bottom_hj_dist = 5.
 
     # 1. trim bottom:
     # keep bottom image
@@ -111,40 +114,17 @@ def trim_extremities(skeleton, graph, tminss, junc_dilation=2):
     hj = get_hj_image(skeleton, graph)
     junc = get_junction_image(skeleton, graph)
     # aims.write(hj, '/tmp/hj.nii.gz')
+    # aims.write(junc, '/tmp/junc.nii.gz')
     tcls = aimsalgo.TopologicalClassifier_Volume_S16()
     hj_cls = tcls.doit(hj)
+    # aims.write(hj_cls, '/tmp/hj_cls_init.nii.gz')
     hj_cls[np.logical_and(hj_cls.np != 30, hj_cls.np != 0)] = 1
     # 1: line, 30: end points
     # aims.write(hjcls, '/tmp/hj_seeds1.nii.gz')
 
     ss = get_ss_image(skeleton, graph)
 
-    print('a. filter hj and bottom')
-    # dist map in SS with bottom ends as seeds
-    ssseeds = aims.Volume(ss)
-    ssseeds[bottom_cls.np == 30] = 100
-    ssseeds[hj_cls.np != 0] = 60
-    aimsalgo.AimsDistanceFrontPropagation(ssseeds, 60, 0, 3, 3, 3, dmap_sc,
-                                          False)
-    dhj = np.where(hj_cls.np == 30)
-    # dhjn = np.array(dhj).T
-    # hjs = sorted(zip(dhjn, ssseeds[dhj]), key=lambda x: x[1])
-    # filter out hj points too far from bottom
-    dhj_filt = ssseeds[dhj] > max_bottom_hj_dist * dmap_sc
-    hj_cls[tuple(x[dhj_filt] for x in dhj)] = 1
-
-    # now reverse to filter bottom
-    ssseeds = aims.Volume(ss)
-    ssseeds[hj_cls.np != 0] = 60
-    ssseeds[hj_cls.np == 30] = 100
-    aimsalgo.AimsDistanceFrontPropagation(ssseeds, 60, 0, 3, 3, 3, dmap_sc,
-                                          False)
-    db = np.where(bottom_cls.np == 30)
-    db_filt = ssseeds[db] > max_bottom_hj_dist * dmap_sc
-    bottom_cls[tuple(x[db_filt] for x in db)] = 1
-    # aims.write(bottom_cls, '/tmp/bottom_seeds2.nii.gz')
-
-    print('b. remove junctions')
+    print('a. remove junctions')
     junc_dil_org = junc
     for i in range(junc_dilation):
         junc_dil = aims.Volume(junc_dil_org)
@@ -158,6 +138,34 @@ def trim_extremities(skeleton, graph, tminss, junc_dilation=2):
 
     bottom_cls[np.logical_and(junc_dil.np != 0, bottom_cls.np != 0)] = 1
     hj_cls[np.logical_and(junc_dil.np != 0, hj_cls.np != 0)] = 1
+
+    print('b. filter hj and bottom')
+    # dist map in SS with bottom ends as seeds
+    ssseeds = aims.Volume(ss)
+    ssseeds[bottom_cls.np == 30] = 100
+    ssseeds[hj_cls.np != 0] = 60
+    aimsalgo.AimsDistanceFrontPropagation(ssseeds, 60, 0, 3, 3, 3, dmap_sc,
+                                          False)
+    dhj = np.where(hj_cls.np == 30)
+    # dhjn = np.array(dhj).T
+    # hjs = sorted(zip(dhjn, ssseeds[dhj]), key=lambda x: x[1])
+    # filter out hj points too far from bottom
+    dhj_filt = ssseeds[dhj] > max_bottom_hj_dist * dmap_sc
+    hj_cls[tuple(x[dhj_filt] for x in dhj)] = 1
+    # aims.write(bottom_cls, '/tmp/bottom_cls0.nii.gz')
+    # aims.write(hj_cls, '/tmp/hj_cls0.nii.gz')
+
+    # now reverse to filter bottom
+    ssseeds = aims.Volume(ss)
+    ssseeds[hj_cls.np != 0] = 60
+    ssseeds[hj_cls.np == 30] = 100
+    aimsalgo.AimsDistanceFrontPropagation(ssseeds, 60, 0, 3, 3, 3, dmap_sc,
+                                          False)
+    db = np.where(bottom_cls.np == 30)
+    db_filt = ssseeds[db] > max_bottom_hj_dist * dmap_sc
+    bottom_cls[tuple(x[db_filt] for x in db)] = 1
+    # aims.write(bottom_cls, '/tmp/bottom_cls.nii.gz')
+    # aims.write(hj_cls, '/tmp/hj_cls.nii.gz')
 
     print('2.c. trim, continued')
     # distance map from end points of bottom lines
@@ -175,7 +183,8 @@ def trim_extremities(skeleton, graph, tminss, junc_dilation=2):
     # un-attained points are still valid: set distance 5000 (not inf)
     hj_cls[np.logical_and(hj_cls.np == 32500, hj.np != 0)] = 5000
     # print junctions as immortals
-    hj_cls[junc.np != 0] = 32000
+    hj_cls[junc.np != 0] = 30000
+    # aims.write(hj_cls, '/tmp/hj_dist.nii.gz')
     thj = trim_distance_homotopic(hj_cls, tmin_sc)
     # aims.write(thj, '/tmp/trimmed_hj.nii.gz')
 
