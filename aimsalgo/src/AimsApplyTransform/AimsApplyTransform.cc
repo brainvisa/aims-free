@@ -702,9 +702,9 @@ load_transformations(ApplyTransformProc& proc,
     {
       Reader<TransformationGraph3d> r2( proc.transform_graph_files[i] );
       rc_ptr<TransformationGraph3d> tg2( r2.read() );
-      tg->loadTransformationsGraph( tg2->asDict(),
-                                    FileUtil::dirname(
-                                      proc.transform_graph_files[i] ) );
+      string tdir = FileUtil::dirname( proc.transform_graph_files[i] );
+      tg->loadTransformationsGraph( tg2->asDict( false, false, false, tdir ),
+                                    tdir );
     }
     cout << "read transformations graph.\n";
   }

@@ -466,7 +466,10 @@ rc_ptr<Transformation3d> TransformationGraph3d::getTransformChain(
     }
     if( !trans )
       trans = loadTransformation( *ie );
-    tchain.push_back( trans );
+    if( trans )
+      tchain.push_back( trans );
+    else
+      cerr << "could not load transformation, chain will be incomplete !\n";
   }
 
   const_ref<Transformation3d> simple = tchain.simplify();
