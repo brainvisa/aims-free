@@ -59,6 +59,9 @@ def get_ss_image(skeleton, graph):
         for bck in ('aims_ss', 'aims_other', 'aims_bottom'):
             if bck in v:
                 c.printToVolume(v[bck], ss)
+        for e in v.edges():
+            if e.getSyntax() == 'hull_junction':
+                c.printToVolume(e['aims_junction'], ss)
     ss[ss.np != 0] = 60  # use value 60
 
     return ss
