@@ -834,7 +834,8 @@ public:
 %End
 
     carto::Object asDict( bool affine_only = false, bool allow_read = false,
-                          bool embed_affines = false ) const;
+                          bool embed_affines = false,
+                          const std::string & rel_to_path = "" ) const;
 %Docstring
         convert to a dict-like structure compatible with
         loadTransformationsGraph()
@@ -852,7 +853,10 @@ public:
             no effect on non-affine transformations.
         embed_affines: bool
             if true, affine transformations are not recorded as a
-              file name (.trm format), but as an embedded 4x4 matrix.
+            file name (.trm format), but as an embedded 4x4 matrix.
+        rel_to_path: str
+            if not empty, filenames will be relative to this base
+            directory (normally where the graph will be stored)
 %End
 
     vector_STRING updateFromObjectHeader( carto::Object header,
