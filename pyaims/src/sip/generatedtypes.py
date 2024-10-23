@@ -354,6 +354,7 @@ todo = {'system': ['Void'],
                          'int', 'unsigned', 'float', 'double', 'AimsRGB', 'AimsRGBA', 'AimsHSV'],
         'lightresampler': basetypes + ['cfloat', 'cdouble', 'Point3df'],
         'replacer': ['short', 'unsigned short', 'int', 'unsigned', 'float'],
+        'masscenter': numtypes,
         }
 
 if sip.SIP_VERSION >= 0x04130d:

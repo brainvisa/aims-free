@@ -172,6 +172,7 @@ MassCenters<T>::maskedmasscenter( aims::MaskIterator & maskIterator ){
   return tm;
 }
 
+template class MassCenters<bool>;
 template class MassCenters<uint8_t>;
 template class MassCenters<int8_t>;
 template class MassCenters<uint16_t>;

@@ -643,6 +643,15 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include lightresampler_CDOUBLE.sip
 %Include lightresampler_POINT3DF.sip
 
+%Include masscenter_BOOL.sip
+%Include masscenter_U8.sip
+%Include masscenter_S16.sip
+%Include masscenter_U16.sip
+%Include masscenter_S32.sip
+%Include masscenter_U32.sip
+%Include masscenter_FLOAT.sip
+%Include masscenter_DOUBLE.sip
+
 %Include fill.sip
 %Include referential.sip
 
