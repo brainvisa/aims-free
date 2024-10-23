@@ -123,7 +123,7 @@ namespace aims
   - AffineTransformation3d::translation does not return a reference any longer.
     Code using it as a reference should be modified. This modification however
     requires a bit more changes than for rotation() because the returned
-    Point3df cannot be used to modity the transformation itself. Instead you
+    Point3df cannot be used to modify the transformation itself. Instead you
     can use AffineTransformation3d::setTranslation(), or
     AffineTransformation3dBase::matrix()(i, 3) to modify the translation in
     place.
@@ -196,6 +196,13 @@ namespace aims
     static carto::VolumeRef<float> rotationaroundx(float rx) ;
     static carto::VolumeRef<float> rotationaroundy(float ry) ;
     static carto::VolumeRef<float> rotationaroundz(float rz) ;
+
+    /// convenient function which returns a translation transformation
+    static AffineTransformation3d translationTransform( float tx, float ty,
+                                                        float tz );
+    static AffineTransformation3d translationTransform( const Point3df & t );
+    static AffineTransformation3d translationTransform(
+      const std::vector<float> & t );
 
   };
 

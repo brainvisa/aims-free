@@ -58,6 +58,11 @@ public:
   static rc_ptr_Volume_FLOAT rotationaroundy( float );
   static rc_ptr_Volume_FLOAT rotationaroundz( float );
 
+  static AffineTransformation3d translationTransform( float tx, float ty,
+                                                      float tz );
+  static AffineTransformation3d translationTransform( const Point3df & t );
+  static AffineTransformation3d translationTransform( const vector_FLOAT & t );
+
 protected:
   virtual Point3dd transformDouble( double, double, double ) const;
 

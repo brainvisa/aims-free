@@ -604,3 +604,26 @@ void transformBoundingBox(
 }
 
 }
+
+
+AffineTransformation3d AffineTransformation3d::translationTransform(
+  float tx, float ty, float tz )
+{
+  return translationTransform( Point3df( tx, ty, tz ) );
+}
+
+
+AffineTransformation3d AffineTransformation3d::translationTransform(
+  const Point3df & t )
+{
+  AffineTransformation3d tr;
+  tr.setTranslation( t );
+  return tr;
+}
+
+AffineTransformation3d AffineTransformation3d::translationTransform(
+  const std::vector<float> & t )
+{
+  return translationTransform( Point3df( t[0], t[1], t[2] ) );
+}
+
