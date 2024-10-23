@@ -44,8 +44,15 @@ namespace carto
   template <typename T> class VolumeRef;
 }
 
+/** Mass centers, volumes, mass of ROIs in a volume
+
+    Since Aims 5.2, mass center positions are in mm. They used to be in voxels,
+    which was probably a bug, and was inconsistent with volumes which
+    were already in mm3.
+*/
 template <class T>
-class MassCenters {
+class MassCenters
+{
   public:
       
     typedef std::pair<Point3df, double> MassCenterInfo;

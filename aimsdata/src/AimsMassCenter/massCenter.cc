@@ -109,8 +109,13 @@ int main( int argc, const char **argv )
   MassCenter proc;
   ProcessInput filein( proc );
 
-  AimsApplication	app( argc, argv, "Computes position of the mass "
-                                   "center of the image" );
+  AimsApplication app( argc, argv,
+                       "Computes position of the mass center of the image. "
+                       "Also computes volume and mass of the data. \n\n"
+                       "Change in AIMS 5.2: \n"
+                       "Mass center position is now in mm, which is logical "
+                       "and consistent with volumes which are in mm3. They "
+                       "used to be in voxels, which was as a bug." );
   app.addOption( filein, "-i", "input data" );
   app.alias( "--input", "-i" );
   app.addOption( bin, "-b", "consider input image as binary data", true );

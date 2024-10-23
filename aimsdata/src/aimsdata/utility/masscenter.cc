@@ -149,6 +149,9 @@ MassCenters<T>::maskedmasscenter( aims::MaskIterator & maskIterator ){
     pos = masscenters[t];
     totpos += pos;
     pos /= sum[t];
+    pos[0] *= _data.getVoxelSize()[0];
+    pos[1] *= _data.getVoxelSize()[1];
+    pos[2] *= _data.getVoxelSize()[2];
     if (carto::verbose){
       std::cout << t << "\t\t" << pos[0] << "\t" << pos[1] << "\t" << pos[2] 
                 << "\tMass: " << vol * sum[t] << "\tVol: " << vol * np[t] << std::endl;
@@ -163,6 +166,9 @@ MassCenters<T>::maskedmasscenter( aims::MaskIterator & maskIterator ){
   }
   
   totpos /= totsum;
+  totpos[0] *= _data.getVoxelSize()[0];
+  totpos[1] *= _data.getVoxelSize()[1];
+  totpos[2] *= _data.getVoxelSize()[2];
   if (carto::verbose){
     std::cout << "---\nGeneral:\t" << totpos[0] << "\t" << totpos[1] << "\t" 
               << totpos[2] << "\tMass: " << vol * totsum << "\tVol: " << vol * totnp 
