@@ -790,6 +790,7 @@ load_transformations(ApplyTransformProc& proc,
       "Could not find the output space (--output-space) referential" );
   oref = rv3->getProperty( "uuid" )->getString();
   ret_with_ref.second = oref;
+  bool has_dir = false;
 
   if(!proc.direct_transform_list.empty())
   {
@@ -808,14 +809,15 @@ load_transformations(ApplyTransformProc& proc,
     // indirect convert const_ref -> rc_ptr (non-const)
     rc_ptr<Transformation3d> tc( const_cast<Transformation3d *>(
       tcr.pointer() ) );
-    // cout << "register direct trans " << tc.get() << endl;
+    // cout << "register direct trans " << tc.get() << ": " << typeid(*tc).name() << endl;
     // cout << "between " << rv1->getProperty( "uuid" )->getString() << " and " << rv2->getProperty( "uuid" )->getString() << endl;
     // insert transformation in the graph
     // if an older iverse did exist, remove it
-    Edge * oi = tg->getTransformation_raw( rv2, rv1 );
+    Edge *oi = tg->getTransformation_raw( rv2, rv1 );
     if( oi )
       tg->removeEdge( oi );
     tg->registerTransformation( rv1, rv2, tc );
+    has_dir = true;
   }
 
   if(!proc.inverse_transform_list.empty())
@@ -834,11 +836,16 @@ load_transformations(ApplyTransformProc& proc,
     const_ref<Transformation3d> tcr = inverse_chain.simplify();
     rc_ptr<Transformation3d> itc( const_cast<Transformation3d *>(
       tcr.pointer() ) );
+    // cout << "register inverse trans " << itc.get() << ": " << typeid(*itc).name() << endl;
+    // cout << "between " << rv2->getProperty( "uuid" )->getString() << " and " << rv1->getProperty( "uuid" )->getString() << endl;
     // insert transformation in the graph
     // if an older iverse did exist, remove it
-    Edge * oi = tg->getTransformation_raw( rv1, rv2 );
-    if( oi )
-      tg->removeEdge( oi );
+    if( !has_dir )
+    {
+      Edge *oi = tg->getTransformation_raw( rv1, rv2 );
+      if( oi )
+        tg->removeEdge( oi );
+    }
     tg->registerTransformation( rv2, rv1, itc );
   }
   tg->registerInverseTransformations();
@@ -851,10 +858,14 @@ load_transformations(ApplyTransformProc& proc,
   if( tie )
     ret.second = tg->transformation( tie );
 
+  // cout << "use direct " << ref << "->" << oref << ": " << ret.first.pointer() << ": " << typeid(*ret.first).name() << endl;
+  // cout << "use inv " << oref << "->" << ref << ": " << ret.second.pointer() << ": " << typeid(*ret.second).name() << endl;
+
   if(ret.first.isNull() && ret.second.isNull())
   {
     // get aims -> input space, if it exists, assume this is the one
     tde = tg->getTransformation( tg->referentialById( ref ), rv1, true );
+    // cout << "use aims -> input: " << tde << endl;
     if( tde )
       ret.first = tg->transformation( tde );
     else
@@ -1252,6 +1263,7 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
 
   // Perform the graph transformation
   cout << "Resampling Graph... ";
+
   transformGraph(*graph, *direct_transform, inverse_transform.pointer(),
                  Point3df(proc.sx, proc.sy, proc.sz));
   cout << endl;
