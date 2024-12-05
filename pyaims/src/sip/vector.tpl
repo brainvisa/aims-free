@@ -543,6 +543,20 @@ public:
                           (char *) &(*sipCpp)[0] );
 %End
 
+  void insert( int, %Template1PyType%%Template1deref% );
+%MethodCode
+  if( a0 < 0 )
+    a0 += sipCpp->size();
+  if( a0 >= sipCpp->size() )
+    a0 = sipCpp->size() - 1;
+  sipCpp->insert( sipCpp->begin() + a0, %Template1deref%a1 );
+  std::vector<int> dims( 1, sipCpp->size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                          (char *) &(*sipCpp)[0] );
+%End
+
   bool operator == ( const vector_%Template1typecode% & ) const;
 %MethodCode
   sipRes = ( (*sipCpp) == *a0 );
