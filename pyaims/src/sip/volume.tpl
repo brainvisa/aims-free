@@ -261,6 +261,17 @@ Set a voxel value at given position
   vector_S64 getStrides() const;
   vector_S32 getBorders() const;
 
+  void allocateBorders( int bsx, int bsy = -1, int bsz = -1 );
+%Docstring
+  reallocate the volume with given borders, keep (copy) the contents.
+%End
+
+  void allocateBorders( const vector_S32 & border );
+%Docstring
+  reallocate the volume with given borders, keep (copy) the contents.
+  only 1 value is mandatory.
+%End
+
   SIP_PYOBJECT header() /Factory/;
 %Docstring
 The header contains all meta-data.

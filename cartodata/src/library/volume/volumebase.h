@@ -363,6 +363,11 @@ namespace carto
                              const AllocatorContext& allocatorContext
                              = AllocatorContext(), bool allocate = true,
                              const std::vector<long> *strides = 0 );
+    /// reallocate the volume with given borders, keep (copy) the contents.
+    void allocateBorders( int bsx, int bsy = -1, int bsz = -1 );
+    /// reallocate the volume with given borders, keep (copy) the contents.
+    /// only 1 value is mandatory.
+    void allocateBorders( const std::vector<int> & border );
 
     //========================================================================
     //   COPY / VIEW

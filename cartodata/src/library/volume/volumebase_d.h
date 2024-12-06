@@ -106,8 +106,16 @@ namespace carto
                                       const AllocatorContext& allocatorContext,
                                       bool allocated )
   {
-    if( !bordersize.empty()
-      && bordersize != Position4Di().toVector() )
+    bool has_border = false;
+    if( !bordersize.empty() )
+    {
+      size_t i, n = bordersize.size();
+      for( i=0; !has_border && i<n; ++i )
+        if( bordersize[i] != 0 )
+          has_border = true;
+    }
+
+    if( has_border )
     {
       size_t i, n = VolumeProxy<T>::_size.size();
       size_t bsize = sizeof(T);
@@ -1294,6 +1302,45 @@ namespace carto
     else
       allocate( std::vector<int>(1, -1), alloc, ac, strides );
     // emit a signal ?
+  }
+
+
+  template < typename T >
+  void Volume< T >::allocateBorders( int bsx, int bsy, int bsz )
+  {
+    std::vector<int> border( 3 );
+    border[0] = bsx;
+    border[1] = ( bsy < 0 ? bsx : bsy );
+    border[2] = ( bsz < 0 ? bsx : bsz );
+
+    allocateBorders( border );
+  }
+
+
+  template < typename T >
+  void Volume< T >::allocateBorders( const std::vector<int> & border )
+  {
+    Volume<T> vol_copy = this->copy();
+
+    bool has_border = false;
+    if( !border.empty() )
+    {
+      size_t i, n = border.size();
+      for( i=0; !has_border && i<n; ++i )
+        if( border[i] != 0 )
+          has_border = true;
+    }
+    // constructBorders will not erase _refvol since it is normally used
+    // only in constructors.
+    if( !has_border )
+      _refvol.reset( 0 );
+
+    constructBorders( border, carto::AllocatorContext(), true );
+    _pos = border;
+    if( _pos.size() < 4 )
+      _pos.resize( 4, 0 );
+
+    this->copySubVolume( vol_copy );
   }
 
 
