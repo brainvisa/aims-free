@@ -33,9 +33,6 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-from __future__ import print_function
-from __future__ import absolute_import
-
 import sys
 import os
 import re
@@ -43,8 +40,6 @@ from optparse import OptionParser
 import subprocess
 import platform
 import importlib
-
-import six
 
 
 def convert_string_to_int(s):
@@ -251,7 +246,7 @@ if __name__ == '__main__':
     if options.subs:
         with open(options.subs, 'rb') as f:
             code = compile(f.read(), options.subs, 'exec')
-        six.exec_(code)
+        exec(code)
         types = typessub
 
     for i in range(len(args) // 2):

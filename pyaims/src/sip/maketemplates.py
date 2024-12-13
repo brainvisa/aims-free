@@ -32,12 +32,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-from __future__ import print_function
-from __future__ import absolute_import
-
 import sys
 import os
-import types
 import stat
 import shutil
 import filecmp
@@ -47,8 +43,6 @@ from optparse import OptionParser
 import platform
 import subprocess
 import importlib
-
-import six
 
 
 parser = OptionParser(description='Preprocess a template file to generate '
@@ -135,6 +129,7 @@ sys.path.insert(1, pyaimssip)
 from maketemplate import makeTemplate
 import maketemplate
 
+
 def convert_string_to_int(s):
     '''
     Allow to convert string with digit followed by non digits
@@ -145,6 +140,7 @@ def convert_string_to_int(s):
             s = s[:i]
             break
     return int(s)
+
 
 # determine Qt version
 try:
@@ -164,9 +160,9 @@ try:
     l = moc_out[1].decode()
     if l == '':
         l = moc_out[0].decode() # moc 5
-        x = re.search('^.*moc ([0-9\.]+).*$', l).group(1)
+        x = re.search('^.*moc ([0-9\\.]+).*$', l).group(1)
     else:
-        x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
+        x = re.search('^.*\\(Qt ([^\\)]*)\\).*$', l).group(1)
     qt_version = [convert_string_to_int(k) for k in x.split('.')]
 except Exception as e:
     if not options.listFilesOnly:
@@ -177,7 +173,7 @@ except Exception as e:
 # expected to fill in the 'todo' dictionary variable
 with open(options.input, 'rb') as f:
     code = compile(f.read(), options.input, 'exec')
-six.exec_(code, globals(), globals())
+exec(code, globals(), globals())
 
 if options.tpldir == '':
     dir_name = os.path.dirname(options.input)
@@ -190,7 +186,7 @@ for x in options.typessub:
     typesmtime = max(typesmtime, os.stat(x)[stat.ST_MTIME])
     with open(x, 'rb') as f:
         code = compile(f.read(), x, 'exec')
-    six.exec_(code, globals(), globals())
+    exec(code, globals(), globals())
 
 typesmtime = max(typesmtime,
                  os.stat(maketemplate.__file__)[stat.ST_MTIME])
