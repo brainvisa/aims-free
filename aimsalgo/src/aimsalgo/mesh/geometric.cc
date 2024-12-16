@@ -382,13 +382,13 @@ void GeometricProperties::doSurface()
       --elist;
       ilist = neigho[i].begin();
       while ( ilist != elist ) 
-	{
-	  v1 = *ilist;
-	  ++ilist;
-	  v2 = *ilist;
-	  t = 0.5 * ( cross(vert[v2] - vert[i], vert[v1] - vert[i]).norm() );
-	  _surface[i].push_back(t);
-	}
+      {
+        v1 = *ilist;
+        ++ilist;
+        v2 = *ilist;
+        t = 0.5 * ( cross(vert[v2] - vert[i], vert[v1] - vert[i]).norm() );
+        _surface[i].push_back(t);
+      }
     }
 
 
@@ -891,38 +891,38 @@ Texture<float> FiniteElementCurvature::doIt()
   const WeightNeighborList		& surface = getSurface() ;   
 
   for (i=0; i<n; ++i)
+  {
+    s = surface[i].size();
+    p = phi[i].size();
+    t = theta[i].size();
+    d = dot[i].size();
+    //nb =neighbourso[i].size() ;
+    if ( !( s == p && s == t && s == d && p==t && p==d && t==d ) )
     {
-      s = surface[i].size();
-      p = phi[i].size();
-      t = theta[i].size();
-      d = dot[i].size();
-      //nb =neighbourso[i].size() ;
-      if ( !( s == p && s == t && s == d && p==t && p==d && t==d ) )
-	{
-	  cout << "Problem with the mesh features..." << endl;
-	  ASSERT(0);
-	}
-      K = 0;
-      surf = 0;
-      for ( elist =  neighbourso[i].end(),ilist = neighbourso[i].begin(),
-	      iphi = phi[i].begin(),idot = dot[i].begin(),
-	      isurf = surface[i].begin(), itheta = theta[i].begin();
-	    ilist != elist;++ilist, ++iphi,++itheta,++idot,++isurf )
-	{
-	  K +=(*iphi + *itheta)*(*idot);
-	  surf += *isurf;
-	  //cout << *iphi << " " << *itheta << " " <<  *idot << " " << *isurf << endl;
-	}
-      
-     if ( surf != 0 )
-       K = K/(surf * 4);
-     else
-       {
-	 cout << "Triangle with null surface\n";
-	 K = 0;
-       }
-     tex.item(i) = K;
+      cout << "Problem with the mesh features..." << endl;
+      ASSERT(0);
     }
+    K = 0;
+    surf = 0;
+    for ( elist =  neighbourso[i].end(),ilist = neighbourso[i].begin(),
+          iphi = phi[i].begin(),idot = dot[i].begin(),
+          isurf = surface[i].begin(), itheta = theta[i].begin();
+          ilist != elist;++ilist, ++iphi,++itheta,++idot,++isurf )
+    {
+      K +=(*iphi + *itheta)*(*idot);
+      surf += *isurf;
+      //cout << *iphi << " " << *itheta << " " <<  *idot << " " << *isurf << endl;
+    }
+
+    if ( surf != 0 )
+      K = K/(surf * 4);
+    else
+    {
+      cout << "Triangle with null surface\n";
+      K = 0;
+    }
+    tex.item(i) = K;
+  }
 
   return(tex);
 }
