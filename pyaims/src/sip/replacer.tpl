@@ -1,4 +1,4 @@
-
+ 
 
 class Replacer_%Template1typecode%
 {
@@ -30,7 +30,7 @@ public:
     replace(ivol, ovol, repl)
 
     Replace values from "repl" keys, from the input volume ivol, to the
-    correspodinf repl values in the output volume ovol.
+    corresponding repl values in the output volume ovol.
 
     Only actually replaced values will be written in ovol, other will be
     left untouched.
@@ -38,5 +38,16 @@ public:
     It is OK to specify the same volume as ivol and ovol, then it will be
     replaced in-place.
 %End
+%MethodCode
+    // aims::Replacer map type has not the same comparator type, 
+    // it is necessary to copy in a new std::map with the correct
+    // comparator type
+    aims::Replacer<%Template1% >::MapType r;
+    std::map<%Template1%, %Template1%>::const_iterator it, ie = a2->end();
+    for (it=a2->begin(); it!=ie; ++it)
+      r[it->first] = it->second;
+    aims::Replacer<%Template1% >::replace(*a0, *a1, r);
+%End
+
 };
 

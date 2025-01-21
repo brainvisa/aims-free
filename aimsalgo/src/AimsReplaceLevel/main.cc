@@ -92,13 +92,14 @@ doit( Process & p, const string & fname, Finder & f )
 
   in.reset( r.read( 0, &format ) );
 
-  map<T, T>	levels;
+  typename aims::Replacer<T>::MapType	levels;
   
   for(unsigned int i = 0; i < rp.level1.size(); i++)
   {
      T l1, l2;
      carto::stringTo(rp.level1[i], l1);
      carto::stringTo(rp.level2[i], l2);
+     //std::cout << carto::toString(l1) << " => " << carto::toString(l2) << std::endl << std::flush;
      levels[l1] = l2;
   }
 
@@ -118,7 +119,7 @@ vector<string>		graylevel, newlevel;
   AimsApplication	app( argc, argv, "Replace gray levels by others");
   
   app.addOption(filein,"-i", "input");
-  app.addOption(fileout,"-o", "outpout");
+  app.addOption(fileout,"-o", "output");
   app.addOptionSeries(graylevel,"-g", 
                       "gray levels or RGB/RGBA values to replace", true);
   app.addOptionSeries(newlevel,"-n", "new values for gray levels or RGB/RGBA", 
