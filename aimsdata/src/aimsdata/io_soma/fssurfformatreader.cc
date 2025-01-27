@@ -49,9 +49,10 @@ using namespace std;
 //   I N I T
 //============================================================================
 
+namespace carto {
 template class FsSurfFormatReader<3>;
 // template class FsSurfFormatReader<4>;
-
+}
 
 namespace
 {

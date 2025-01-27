@@ -49,9 +49,10 @@ using namespace std;
 //   I N I T
 //============================================================================
 
+namespace carto {
 template class FsCurvFormatReader<float>;
 // template class FsCurvFormatReader<int16_t>;
-
+}
 
 namespace
 {

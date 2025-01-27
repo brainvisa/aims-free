@@ -49,9 +49,10 @@ using namespace std;
 //   I N I T
 //============================================================================
 
+namespace carto {
 template class FsAnnotFormatReader<float>;
 // template class FsAnnotFormatReader<int16_t>;
-
+}
 
 namespace
 {
