@@ -324,7 +324,7 @@ int main( int argc, const char **argv )
       {
         LabelReader lrd( filevoi);
         VolumeRef< short > label;
-        lrd.read( label );
+        lrd.read( *label );
         roi.setLabel( label );
         roi.data2bucket();
         VolumeRef< short > zero(1,1,1);

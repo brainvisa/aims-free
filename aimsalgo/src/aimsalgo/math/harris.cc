@@ -385,6 +385,7 @@ bool HarrisDetector<T, 2>::isSpatialMaxima(const int x,
   return true;
 }
 
+namespace aims {
 template class BaseHarrisDetector<uint8_t>;
 template class BaseHarrisDetector<int8_t>;
 template class BaseHarrisDetector<uint16_t>;
@@ -398,3 +399,4 @@ template class HarrisDetector<uint16_t, 2>;
 template class HarrisDetector<int16_t, 2>;
 template class HarrisDetector<uint32_t, 2>;
 template class HarrisDetector<int32_t, 2>;
+}
