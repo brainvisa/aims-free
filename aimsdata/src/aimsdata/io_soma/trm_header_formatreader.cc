@@ -110,5 +110,6 @@ FormatReader<AffineTransformation3d>* TrmHeaderFormatReader::clone() const
 // instantiate FormatReader<AffineTransformation3d>
 #include <soma-io/reader/formatreader_d.h>
 
+namespace carto {
 template class FormatReader<AffineTransformation3d>;
-
+}

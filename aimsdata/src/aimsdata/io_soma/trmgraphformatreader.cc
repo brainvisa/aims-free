@@ -136,5 +136,6 @@ FormatReader<TransformationGraph3d>* TrmGraphFormatReader::clone() const
 // instantiate FormatReader<TransformationGraph3d>
 #include <soma-io/reader/formatreader_d.h>
 
+namespace carto {
 template class FormatReader<TransformationGraph3d>;
-
+}

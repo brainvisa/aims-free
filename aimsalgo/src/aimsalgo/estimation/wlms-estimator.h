@@ -93,7 +93,7 @@ float WLMSEstimator<D>::sigma(
     error->at( n ) = fabs( error->at(  n ) );
   }
 
-  carto::VolumeRef<float> errorbis = error->copy();
+  carto::Volume<float> errorbis( &(*error) );
   carto::sort( errorbis );
 
   return 1.4826 * errorbis( N / 2 );

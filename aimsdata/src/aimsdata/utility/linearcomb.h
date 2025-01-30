@@ -42,7 +42,7 @@
 #include <cartobase/containers/nditerator.h>
 
 namespace aims
-{
+{ 
 
   /** The template class to make linear combinations.
       This class is useful to make a linear combination
@@ -100,6 +100,13 @@ namespace aims
   class Replacer
   {
   public:
+
+    // [NS-2024-01-15] - std::map<T>::find does not work with multichannel (i.e.: VoxelValue<uint8_t, 3>)
+    // because std::map<T>::find uses std::less<T> functor to compare multichannel VoxelValue but it
+    // implicitely convert VoxelValue to boolean. To fix this bug we uses an std::map type with 
+    // VoxelValue comparison support
+    typedef typename std::map<T, T, carto::KeyComparatorLess<T> > MapType;
+
     Replacer() {}
     ~Replacer() {}
 
@@ -114,7 +121,7 @@ namespace aims
     */
     inline static void replace( const carto::Volume<T> & ivol,
                                 carto::Volume<T> & ovol,
-                                const std::map<T, T> & repl );
+                                const aims::Replacer<T>::MapType & repl );
   };
 
 
@@ -153,11 +160,12 @@ namespace aims
     return comb;
   }
 
+  
 
   template <typename T>
   inline void Replacer<T>::replace( const carto::Volume<T> & ivol,
                                     carto::Volume<T> & ovol,
-                                    const std::map<T, T> & repl )
+                                    const aims::Replacer<T>::MapType & repl )
   {
     carto::const_line_NDIterator<T> it( &ivol.at(0), ivol.getSize(),
                                         ivol.getStrides(), true );
@@ -165,7 +173,8 @@ namespace aims
     T *dp;
     int ds;
     std::vector<int> pos;
-    typename std::map<T, T>::const_iterator im, em = repl.end();
+
+    typename aims::Replacer<T>::MapType::const_iterator im, em = repl.end();
 
     for( ; !it.ended(); ++it )
     {
@@ -179,7 +188,11 @@ namespace aims
       {
         im = repl.find( *p );
         if( im != em )
+        {
+          // if (im->first != (*p))
+          //   std::cout << "Found value: " << carto::toString(im->first) << " did not match searched key: " << carto::toString(*p) << std::endl << std::flush;
           *dp = im->second;
+        } 
       }
     }
   }

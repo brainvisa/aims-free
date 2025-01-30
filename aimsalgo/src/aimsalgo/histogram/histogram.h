@@ -78,10 +78,10 @@ class Histogram
     { return &_data.at( _maxValid - _minValid + 1 ); }
 
     /// return the constant iterator to the first valid value of the histogram
-    int32_t * beginValid() const
+    const int32_t * beginValid() const
     { return &*_data.begin(); }
     /// return the constant iterator to the last valid value of the histogram
-    int32_t * endValid() const
+    const int32_t * endValid() const
     { return &_data.at( _maxValid - _minValid + 1 ); }
     //@}
 
