@@ -178,7 +178,10 @@ int main( int argc, const char **argv )
       "sum, var[iance], sd, gab[or] "
       "(default = majority)",
       true );
-    app.addOption( proc.shape, "-s", "Structuring element type [default:cube]", true );
+    app.addOption( proc.shape, "-s", "Structuring element type [default:cube]\n"
+      "cube, squarexy, squarexz, squareyz, "
+      "sphere, diskxy, diskxz, diskyz",
+      true );
     app.addOptionSeries( proc.amplitude, "-a", "Structuring element amplitude [default:1.]", 0, 3 );
     app.addOption( proc.unit, "-u", "Amplitude unit: v[oxel], m[m] [default:v]", true );
     app.addOption( gabSigma, "--gabSigma", "Gabor Filter: standard deviation of the gaussian function (mm) [default:1.0]", true );
