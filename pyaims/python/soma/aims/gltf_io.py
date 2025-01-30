@@ -32,6 +32,7 @@ from functools import partial
 from soma import aims
 import json
 import subprocess
+import sys
 try:
     import DracoPy
 except ImportError:
@@ -54,8 +55,8 @@ def vec_to_bytes(vector):
 def image_as_buffer(image, format):
     if format == 'webp':
         if webp is not None:
-            arr = np.asarray(image.np['v'][:, :, 0, 0, :].transpose(1, 0, 2),
-                             order='C')
+            arr = np.asarray(image.np['v'][:, :, 0, 0, :].transpose(
+                1, 0, 2), order='C')
             webp_data = webp.WebPPicture.from_numpy(arr)
             webp_data = webp_data.encode()
             data = bytes(webp_data.buffer())
@@ -676,7 +677,12 @@ def save_gltf(gltf, filename, use_draco=True):
         try:
             if not gltf_convert_draco(filename, gltf_filename, fail=False):
                 print('warning: gltf-transform is not found. Cannot compress '
-                      'using Draco.')
+                      'using Draco. You may install it by ensuring forst that '
+                      'node.js is installed and the "npm" command is '
+                      'available, then type:\n'
+                      'npm install -g @gltf-transform/core @gltf-transform/'
+                      'extensions @gltf-transform/functions @gltf-transform/'
+                      'cli')
             else:
                 filename = gltf_filename
         except subprocess.CalledProcessError:
@@ -883,6 +889,16 @@ class GLTFParser:
     def __init__(self, base_uri=''):
         self.base_uri = base_uri
 
+    def dracopy_install_help(self):
+        help = 'The DracoPy module is not installed. Draco compression used ' \
+            'in this file cannot be decoded. Please consider installing ' \
+            'DracoPy.\nYou may install it using the following command:\n'
+        if 'PIXI_PROJECT_ROOT' in os.environ:
+            help += 'pixi add --pypi dracopy'
+        else:
+            help += 'python -m pip install dracopy'
+        return help
+
     def parse(self, gltf, mesh, arrays=None):
         pmesh = {}
         if 'name' in mesh:
@@ -904,6 +920,7 @@ class GLTFParser:
             if 'KHR_draco_mesh_compression' in ext:
                 # Draco-compressed mesh
                 if DracoPy is None:
+                    print(self.dracopy_install_help(), file=sys.stderr)
                     # raise an ImportError
                     import DracoPy
                 draco = ext['KHR_draco_mesh_compression']
@@ -1084,6 +1101,11 @@ class GLTFParser:
             # mtype should be 'image/<format>'
             format = mtype[6:]
             teximage = self.image_from_buffer(data, format)
+
+        # endure RGB or RGBA mode, not greyscale
+        if not type(teximage).__name__.split('_')[-1].startswith(
+                'RGB'):
+            teximage = teximage.astype('RGB')
 
         if arrays is not None:
             images = arrays.setdefault('images', [])
