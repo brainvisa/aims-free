@@ -202,7 +202,11 @@ namespace aims
     const QImage	& im = *imp;
     int			y, dx = data.getSizeX(), dy = data.getSizeY();
 
-    if( im.depth() == sizeof(T) && im.colorCount() == 0 )
+/*     std::cout << "-- QTPLUGIN::readFrame - image depth: " << carto::toString(im.depth()) << std::endl
+              << "-- QTPLUGIN::readFrame - sizeof(T): " << carto::toString(sizeof(T)) << std::endl
+              << "-- QTPLUGIN::readFrame - im.colorCount(): " << carto::toString(im.colorCount()) << std::endl; */
+
+    if( im.depth() == (sizeof(T) * 8) && im.colorCount() == 0 )
       for( y=0; y<dy; ++y )
         memcpy( &data.at( 0, y, z, t ), im.scanLine( y ), dx * sizeof( T ) );
     else
