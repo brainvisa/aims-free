@@ -1192,7 +1192,7 @@ class AimsGLTFParser(GLTFParser):
                 else:
                     ttype = aims.typeCode(ttype)
                 atex = aims.TimeTexture(ttype)
-                atex[0].data().assign(texture)
+                atex[0].assign(texture)
                 atex.header()['allow_normalize_coords'] = 0
                 mattex = mat.get('textures', {}).get(tex, {})
                 if mattex:
