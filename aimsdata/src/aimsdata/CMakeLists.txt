@@ -159,6 +159,8 @@ set( _headers
     io_soma/fssurfformatchecker.h
     io_soma/fssurfformatreader.h
     io_soma/fssurfformatreader_d.h
+    io_soma/ltaformatchecker.h
+    io_soma/ltaformatreader.h
     io_soma/trmformatchecker.h
     io_soma/trmformatwriter.h
     io_soma/trmformatreader.h
@@ -388,6 +390,8 @@ set(_aimsdata_sources
     io_soma/fscurvformatreader.cc
     io_soma/fssurfformatchecker.cc
     io_soma/fssurfformatreader.cc
+    io_soma/ltaformatchecker.cc
+    io_soma/ltaformatreader.cc
     io_soma/trmformatchecker.cc
     io_soma/trmformatreader.cc
     io_soma/trmformatwriter.cc
