@@ -298,7 +298,6 @@ void QtFormatsHeader::read()
     dt = pdt[0];
   if( !dt.empty() )
     setProperty( "data_type", dt );
-  _type = dt;
   if( !pdt.empty() )
     setProperty( "possible_data_types", pdt );
 
@@ -327,6 +326,8 @@ void QtFormatsHeader::read()
 
   // add meta-info to header
   readMinf( fname + ".minf" );
+  getProperty( "data_type", dt );  // in case is overriden in the .minf
+  _type = dt;
 
   inputFilenames();
 

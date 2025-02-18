@@ -103,6 +103,7 @@ namespace aims
 
     hdr.setProperty( "file_type", format() );
     hdr.setProperty( "filenames", files );
+    hdr.setProperty( "data_type", carto::DataTypeCode<T>::name() );
     if( !dir.empty() )
       dir += carto::FileUtil::separator();
 
