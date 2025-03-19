@@ -267,6 +267,10 @@ aims::TransformationChain3d::simplify( bool allow_ffd ) const
     return *new_chain->_transformations.begin();
   }
 
+  if(new_chain->_transformations.size() == 0) {
+    return carto::const_ref<AffineTransformation3d>(new AffineTransformation3d());
+  }
+
   if( allow_ffd && _reductorMethod )
     return _reductorMethod( new_chain );
 
