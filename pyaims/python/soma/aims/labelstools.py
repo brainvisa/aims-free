@@ -11,6 +11,7 @@ import json
 import os.path as osp
 import xml.etree.cElementTree as ET
 import argparse
+import numpy as np
 
 
 read_labels_formats = ['json', 'hie', 'csv', 'xml']
@@ -199,6 +200,26 @@ def read_labels_xml(nomenclature):
         todo = region[:] + todo
 
     return gifti_label_map
+
+
+def read_labels_bsa(nomenclature):
+    '''
+    Read a nomenclature as labels dict.
+
+    CSV (Brain Sulci Atlas, BrainVisa 2008 nomenclature)::
+
+        i, x, y, z, r, g, b, brainvisa_acronym, label
+    (all colors will be black)
+    '''
+    with open(nomenclature) as f:
+        labels = f.read().strip().split('\n')
+    labels = [l.strip().split(',') for l in labels[1:]]
+    labels = {
+        int(l[0]): {'Label': l[7],
+                    'RGB': [float(l[4]), float(l[5]), float(l[6])]}
+        for l in labels}
+
+    return labels
 
 
 def set_labels_to_object(aims_object, gifti_label_map):
