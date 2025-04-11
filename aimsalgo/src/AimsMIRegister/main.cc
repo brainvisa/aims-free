@@ -212,7 +212,7 @@ void RegistrationProcess<S>::initializeObjectiveFunc() {
                   interpolator, 
                   comb, 
                   procparams.maskSize);
-    cout << "objective function   : mutual information" << endl;
+    cout << "Objective function   : mutual information" << endl;
   }
   else if (procparams.objfunc == "cr") {
     objfunc = new CorRatioFunc<VoxelType, ParameterType, S>(
@@ -220,7 +220,7 @@ void RegistrationProcess<S>::initializeObjectiveFunc() {
                   interpolator, 
                   comb,
                   procparams.maskSize);
-    cout << "objective function   : correlation ratio" << endl;
+    cout << "Objective function   : correlation ratio" << endl;
   }
   else ASSERT(false);
 }
@@ -241,7 +241,7 @@ void RegistrationProcess<S>::initializeOptimizer() {
     optimizer = new PowellOptimizer<ParameterType, S>(
                                         *objfunc,
                                         procparams.error);
-    cout << "optimizer            : powell" << endl;
+    cout << "Optimizer            : powell" << endl;
   }
   else if( procparams.optimizer == "random" ) {
     optimizer = new DetermOptimizer<ParameterType, S>(
@@ -250,12 +250,12 @@ void RegistrationProcess<S>::initializeOptimizer() {
                                         10000, 
                                         100, 
                                         true);
-    cout << "optimizer            : deterministic" << endl;
+    cout << "Optimizer            : deterministic" << endl;
   }
   else if( procparams.optimizer == "single" ) {
     optimizer = new SingleOptimizer<ParameterType, S>(
                                         *objfunc);
-    cout << "optimizer            : singleoptimizer" << endl;
+    cout << "Optimizer            : singleoptimizer" << endl;
   }
   else ASSERT(false);
 }
