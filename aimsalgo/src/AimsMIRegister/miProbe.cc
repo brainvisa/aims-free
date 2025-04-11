@@ -163,7 +163,7 @@ MIRegistrationProbe<T,D>::iteration( const AimsVector<T,D> & parameters,
     
     for( int y = 0 ; y < joint.getSizeY()  ; ++y )
       for( int x = 0 ; x < joint.getSizeX()  ; ++x ){
-	(*_pdfOverIterations)(x, y, _iteration ) = joint(x, y, 0) ;
+	      (*_pdfOverIterations)(x, y, _iteration ) = joint(x, y, 0) ;
       }
     
     //     cout << "Copy done" << endl ;

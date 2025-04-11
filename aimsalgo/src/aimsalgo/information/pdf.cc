@@ -477,7 +477,6 @@ void AimsJointMaskPdf(const rc_ptr<Volume<short> >& data1,
         }
 }
 
-
 void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
                     const rc_ptr<Volume<short> >& data2,
                     const rc_ptr<Volume<PVItem> >& comb,
@@ -485,30 +484,38 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
                     rc_ptr<Volume<float> >& p1,
                     rc_ptr<Volume<float> >& p2 )
 {
+    long d2x = data2->getSizeX(), 
+         d2y = data2->getSizeY(),
+         d2z = data2->getSizeZ();
+    
     int levels = p12->getSizeX();
     const int  TWO_THEN_SIXTEEN  = 65536;
     const float TWO_THEN_SIXTEEN_CUBE = 65536.0 * 65536.0 * 65536.0;
 
     ASSERT( p12->getSizeY() == levels &&
-        p1->getSizeX() == levels &&
-        p2->getSizeX() == levels );
+            p1->getSizeX() == levels &&
+            p2->getSizeX() == levels );
     
+    float h1 = 1., h2 = 1.;
+
     //   float mini1 = float( data1->min() );
     float mini1 = minMask( data1 );
     float maxi1 = float( data1->max() );
-    ASSERT( maxi1 != mini1 );
+
+    if ( maxi1 == mini1 )
+      cerr << "Warning ! AimsJointPdf : maxi1 == mini1" << endl;
+    else
+      h1 = ( maxi1 - mini1 ) / levels;
 
     //   float mini2 = float( data2.minimum() );
     float mini2 = minMask( data2 );
     float maxi2 = float( data2->max() );
-    if ( maxi2 == mini2 )
-    {
-        cerr << "Warning ! AimsJointPdf : maxi2 == mini2" << endl;
-        return;
-    }
 
-    float h1 = ( maxi1 - mini1 ) / levels;
-    float h2 = ( maxi2 - mini2 ) / levels;
+    if ( maxi2 == mini2 )
+        cerr << "Warning ! AimsJointPdf : maxi2 == mini2" << endl;
+    else
+      h2 = ( maxi2 - mini2 ) / levels;
+    
     #ifdef DEBUG
     cout << "DEBUG>> min1 max1 min2 max2 " << mini1 << " " << maxi1 << " " << mini2 << " " << maxi2 << endl;
     #endif
@@ -517,7 +524,7 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
     *p12 = 0.0;
 
     const_NDIterator<PVItem> it( &comb->at( 0 ), comb->getSize(),
-                                 comb->getStrides() );
+                                  comb->getStrides() );
     const_NDIterator<short>  it1( &data1->at( 0 ), data1->getSize(),
                                   data1->getStrides() );
     vector<long> n2str = data2->getStrides();
@@ -525,98 +532,129 @@ void AimsJointPVPdf(const rc_ptr<Volume<short> >& data1,
 
     float                    tmp;
 
-//     cout << endl;
-
+    long x, y, z;
     for( ; !it.ended(); ++it, ++it1 )
-        if ( it->offset != -1L && *it1 != -32768)
-        {
+        if ( it->offset != -1L && *it1 != -32768) {
+            // Coordinates in data2 image because comb 
+            // resampling PVItem has been processed on data2
+            z = it->offset / n2str[2];
+            y = (it->offset % n2str[2]) / n2str[1];
+            x = (it->offset % n2str[1]) / n2str[0];
+ 
             n1 = (int) ((*it1 - mini1)/h1);
             if (n1 == levels) n1--;
 
             n2ptr =  &data2->at(0) + it->offset;
-
             n2 = (int) (( *n2ptr - mini2 ) / h2 );
             if (n2 == levels) n2--;
             tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
-                (float)(TWO_THEN_SIXTEEN - it->y) *
-                (float)(TWO_THEN_SIXTEEN - it->z);
+                  (float)(TWO_THEN_SIXTEEN - it->y) *
+                  (float)(TWO_THEN_SIXTEEN - it->z);
             p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
 
+            if ((x+1) < d2x) {
+              n2ptr += n2str[0];
+              n2 = (int) (( *n2ptr - mini2)/h2);
+              if (n2 == levels) n2--;
+              tmp = (float)(it->x) *
+                    (float)(TWO_THEN_SIXTEEN - it->y) *
+                    (float)(TWO_THEN_SIXTEEN - it->z);
+              p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            } 
 
-            n2ptr += n2str[0];
-            n2 = (int) (( *n2ptr - mini2)/h2);
-            if (n2 == levels) n2--;
-            tmp = (float)(it->x) *
-                (float)(TWO_THEN_SIXTEEN - it->y) *
-                (float)(TWO_THEN_SIXTEEN - it->z);
-            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            if ((x+1) < d2x 
+             && (y+1) < d2y) {
+              n2ptr += n2str[1];
+              n2 = (int) (( *n2ptr - mini2)/h2);
+              if (n2 == levels) n2--;
+              tmp = (float)(it->x) *
+                    (float)(it->y) *
+                    (float)(TWO_THEN_SIXTEEN - it->z);
+              p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            } 
 
+            if ((y+1) < d2y) {
+              n2ptr -= n2str[0];
+              n2 = (int) (( *n2ptr - mini2)/h2);
+              if (n2 == levels) n2--;
+              tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
+                    (float)(it->y) *
+                    (float)(TWO_THEN_SIXTEEN - it->z);
+              p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            }
 
-            n2ptr += n2str[1];
-            n2 = (int) (( *n2ptr - mini2)/h2);
-            if (n2 == levels) n2--;
-            tmp = (float)(it->x) *
-                (float)(it->y) *
-                (float)(TWO_THEN_SIXTEEN - it->z);
-            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            if ((z+1) < d2z) {
+              n2ptr += n2str[2] - n2str[1];
+              n2 = (int) (( *n2ptr - mini2)/h2);
+              if (n2 == levels) n2--;
+              tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
+                    (float)(TWO_THEN_SIXTEEN - it->y)*
+                    (float)(it->z);
+              p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            }
 
+            if ((x+1) < d2x 
+             && (z+1) < d2z) {
+              n2ptr += n2str[0];
+              n2 = (int) (( *n2ptr - mini2)/h2);
+              if (n2 == levels) n2--;
+              tmp = (float)(it->x) *
+                    (float)(TWO_THEN_SIXTEEN - it->y) *
+                    (float)(it->z);
+              p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            }
 
-            n2ptr -= n2str[0];
-            n2 = (int) (( *n2ptr - mini2)/h2);
-            if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
-                (float)(it->y) *
-                (float)(TWO_THEN_SIXTEEN - it->z);
-            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            if ((x+1) < d2x 
+             && (y+1) < d2y
+             && (z+1) < d2z) {
+              n2ptr += n2str[1];
+              n2 = (int) (( *n2ptr - mini2)/h2);
+              if (n2 == levels) n2--;
+              tmp = (float)(it->x)*
+                    (float)(it->y)*
+                    (float)(it->z);
+              p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            }
 
-            n2ptr += n2str[2] - n2str[1];
-            n2 = (int) (( *n2ptr - mini2)/h2);
-            if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
-                (float)(TWO_THEN_SIXTEEN - it->y)*
-                (float)(it->z);
-            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
-
-            n2ptr += n2str[0];
-            n2 = (int) (( *n2ptr - mini2)/h2);
-            if (n2 == levels) n2--;
-            tmp = (float)(it->x) *
-                (float)(TWO_THEN_SIXTEEN - it->y) *
-                (float)(it->z);
-            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
-
-            n2ptr += n2str[1];
-            n2 = (int) (( *n2ptr - mini2)/h2);
-            if (n2 == levels) n2--;
-            tmp = (float)(it->x)*
-                (float)(it->y)*
-                (float)(it->z);
-            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
-
-            n2ptr -= n2str[0];
-            n2 = (int) (( *n2ptr - mini2)/h2);
-            if (n2 == levels) n2--;
-            tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
-                (float)(it->y)*
-                (float)(it->z);
-            p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            if ((y+1) < d2y 
+             && (z+1) < d2z) {
+              n2ptr -= n2str[0];
+              n2 = (int) (( *n2ptr - mini2)/h2);
+              if (n2 == levels) n2--;
+              tmp = (float)(TWO_THEN_SIXTEEN - it->x) *
+                    (float)(it->y)*
+                    (float)(it->z);
+              p12->at( n1, n2 ) += tmp / TWO_THEN_SIXTEEN_CUBE;
+            }
         }
+        // [NS-2025-04-11]: The way choosen to build histograms
+        // exclude values outside the domain of source data. This
+        // leads to have different histograms than using AimsJointMaskPdf.
+        // A closest estimation may use:
+        // else {  
+        //   n1 = (int) ((*it1 - mini1)/h1);
+        //   if (n1 == levels) n1--;
+        //   n2 = 0;
+        //   if (n2 == levels) n2--;
+        //   p12->at( n1, n2 ) += 1.;
+        // }
 
     // Normalization
     double sum = p12->sum();
 
+    // std::cout << "AimsJointPVPdf, sum(p12): " 
+    //           << carto::toString(sum) << std::endl << std::flush;
     if (sum)
       *p12 /= sum;
 
     // Partial pdf's
     *p1 = 0.0;
     *p2 = 0.0;
-    int x, y;
-    for ( y = 0; y < levels; y++ )
-        for ( x = 0; x < levels; x++ )
-        {
-            p1->at( x ) += p12->at( x, y );
-            p2->at( y ) += p12->at( x, y );
+    int lx, ly;
+    for ( ly = 0; ly < levels; ly++ )
+        for ( lx = 0; lx < levels; lx++ ) {
+            p1->at( lx ) += p12->at( lx, ly );
+            p2->at( ly ) += p12->at( lx, ly );
         }
 }
 

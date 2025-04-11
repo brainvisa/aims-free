@@ -48,11 +48,13 @@ template <class T>
 class Pyramid
 {
   public:
+    typedef AimsVector<bool, 3> AxesType;
 
     Pyramid( const PyramidFunc<T>& func ) 
-           : _func( func ), _ref( 0 ), _level( 0 ), _ppItem ( 0 ) { }
+           : _func( func ), _ref( 0 ), _level( 0 ), _ppItem ( 0 ), _axes(true, true, true) { }
     virtual ~Pyramid() { _free_ppItem(); }
 
+    void setAxes(const AxesType & axes);
     void setRef( carto::rc_ptr<carto::Volume<T> > ref );
     void setLevel( int level );
     const carto::rc_ptr<carto::Volume<T> > item( int level ) const;
@@ -68,8 +70,15 @@ class Pyramid
     void _new_ppItem( int level );
     void _free_ppItem();
     void _build();
+
+    // Axes along which pyramid is built
+    AxesType _axes;
 };
 
+template <class T> inline
+void Pyramid<T>::setAxes(const AxesType & axes) {
+  _axes = axes;
+}
 
 template <class T> inline
 void Pyramid<T>::setRef( carto::rc_ptr<carto::Volume<T> > ref )
@@ -102,19 +111,24 @@ void Pyramid<T>::_new_ppItem( int level )
 
   for ( int k = 0; k < level; k++ )
   {
-    dimX /= 2;
-    dimY /= 2;
-    dimZ /= 2;
+    if (_axes[0]) { 
+      dimX /= 2;
+      sizeX *= 2.0;
+    }
+    if (_axes[1]) {
+      dimY /= 2;
+      sizeY *= 2.0;
+    } 
+    if (_axes[2]) { 
+      dimZ /= 2;
+      sizeZ *= 2.0;
+    }
     if( dimX == 0 )
       dimX = 1 ;
     if( dimY == 0 )
       dimY = 1 ;
     if( dimZ == 0 )
       dimZ = 1 ;
-    
-    sizeX *= 2.0;
-    sizeY *= 2.0;
-    sizeZ *= 2.0;
     
 //     std::cout << "Pyramid: Creating new volume ("
 //               << carto::toString(dimX) << ","
@@ -162,41 +176,64 @@ void Pyramid<T>::_build()
   carto::rc_ptr<carto::Volume<T> > pUp;
   carto::rc_ptr<carto::Volume<T> > pDown = _ref;
 
-  carto::VolumeRef<T> tab( 8 );
+  int count = 0;
+  for (int i = 0; i < 3; ++i)
+    if (_axes[i])
+      count++;
 
-  for ( k = 0; k < _level; k++ )
+  carto::VolumeRef<T> tab(pow(2, count));
+
+  for (k = 0; k < _level; k++)
     {
-      pUp = _ppItem[ k ];
+      pUp = _ppItem[k];
 
-      int lowerLvlDimX = dimX ;
-      int lowerLvlDimY = dimY ;
-      int lowerLvlDimZ = dimZ ;
+      int lowerLvlDimX = dimX;
+      int lowerLvlDimY = dimY;
+      int lowerLvlDimZ = dimZ;
       
-      dimX /= 2;
-      dimY /= 2;
-      dimZ /= 2;
-      
+      if (_axes[0])
+        dimX /= 2;
+      if (_axes[1])
+        dimY /= 2;
+      if (_axes[2])
+        dimZ /= 2;
+
       if( dimX == 0 )
         dimX = 1 ;
       if( dimY == 0 )
         dimY = 1 ;
       if( dimZ == 0 )
         dimZ = 1 ;
-      for ( t = 0; t < dimT; t++ )
-        for ( z = 0; z < dimZ; z++ )
-          for ( y = 0; y < dimY; y++ )
-            for ( x = 0; x < dimX; x++ )
+
+      // std::cout << "Pyramid level " << carto::toString(k) << " dimensions: [" 
+      //           << carto::toString(dimX) << ", "
+      //           << carto::toString(dimY) << ", "
+      //           << carto::toString(dimZ) << "]"
+      //           << std::endl << std::flush;
+
+      for (t = 0; t < dimT; t++)
+        for (z = 0; z < dimZ; z++)
+          for (y = 0; y < dimY; y++)
+            for (x = 0; x < dimX; x++)
             {
               n = 0;
-              for ( nz = 0; nz < 2; nz++ )
-                for ( ny = 0; ny < 2; ny++ )
-                  for ( nx = 0; nx < 2; nx++ )
-                  {
-                    tab(n++) = pDown->at( std::min(2 * x + nx, lowerLvlDimX - 1 ),
-                            std::min(2 * y + ny, lowerLvlDimY - 1 ),
-                            std::min(2 * z + nz, lowerLvlDimZ - 1 ), t );
+              for (nz = 0; nz < 2; nz++)
+                for (ny = 0; ny < 2; ny++)
+                  for (nx = 0; nx < 2; nx++) {
+                    // Add only values along selected axes
+                    if ((!_axes[0] && nx > 0) || 
+                        (!_axes[1] && ny > 0) ||
+                        (!_axes[2] && nz > 0))
+                      continue;
+
+                    Point3d src;
+                    src[0] = (_axes[0] ? std::min(2 * x + nx, lowerLvlDimX - 1) : x);
+                    src[1] = (_axes[1] ? std::min(2 * y + ny, lowerLvlDimY - 1) : y);
+                    src[2] = (_axes[2] ? std::min(2 * z + nz, lowerLvlDimZ - 1) : z);
+
+                    tab(n++) = pDown->at(src[0], src[1], src[2], t);
                   }
-              pUp->at( x, y, z, t ) = _func.doit( tab );
+              pUp->at(x, y, z, t) = _func.doit(tab);
             }
       pDown = pUp;
     }

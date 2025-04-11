@@ -42,7 +42,6 @@
 #include <aims/bucket/bucketMap.h>
 #include <vector>
 
-
 typedef struct {
   unsigned short x, y, z;
   int            offset;
@@ -53,7 +52,6 @@ namespace carto
 {
   extern template class Volume<PVItem>;
 }
-
 
 template <class T>
 class Sampler
@@ -145,11 +143,17 @@ Sampler<T>::doit( const Motion& motion, carto::rc_ptr<carto::Volume<PVItem> >& t
       start[ 2 ] += invMotion->rotation()( 2, 2 );
     }
   }
-  //cout << endl;
-
+#ifdef DEBUG
+  std::cout << std::endl;
+#endif
 }
 
-
+// This method processes resampling information (offset and neighbor voxel contributions) 
+// for each pixel of a 2D slice. In order to use only integers, floating point values 
+// are scaled by 2^16.
+// Each voxel in target space is scanned to calculate the offset from source space
+// Non integer part of voxel contributions are stored in x, y and z. The 16 bits corresponding
+// to floating point contributions are retrived using the bitwise operation: & 0xffff.
 template <class T> inline
 void Sampler<T>::_sliceResamp( carto::rc_ptr<carto::Volume<PVItem> >& resamp,
                                PVItem* out,
@@ -157,21 +161,33 @@ void Sampler<T>::_sliceResamp( carto::rc_ptr<carto::Volume<PVItem> >& resamp,
                                const carto::rc_ptr<carto::Volume<float> >& Rinv )
                                    const
 {
+  // Dimensions of source space
   int dimX1 = (*_ref)->getSizeX();
+
+  // Dimensions of target space
   int dimX2 = resamp->getSizeX();
   int dimY2 = resamp->getSizeY();
 
   const int SIXTEEN = 16;
   const int TWO_THEN_SIXTEEN = 65536;
 
+  // Source space, maximum coordinates shifted using size of short type (2^16). 
+  // This is used for direct pointer comparisons.
   int maxX = TWO_THEN_SIXTEEN * ( dimX1 - 1 );
   int maxY = TWO_THEN_SIXTEEN * ( (*_ref)->getSizeY() - 1 );
   int maxZ = TWO_THEN_SIXTEEN * ( (*_ref)->getSizeZ() - 1 );
 
+  // The start variable contains the coordinates offset in the source space 
+  // for the origin (0, 0) in the target space.
+  // Source space, start coordinate scaled using size of short type (2^16). 
+  // This is used to initialize each line pointer coordinate.
   int xLinCurrent = ( int )( 65536.0 * start[ 0 ] );
   int yLinCurrent = ( int )( 65536.0 * start[ 1 ] );
   int zLinCurrent = ( int )( 65536.0 * start[ 2 ] );
 
+  // Source space, increments used for rotations. 
+  // Values are shifted using size of short type (2^16)
+  // to deal with floating point part as integer.
   int xu = ( int )( 65536.0 * Rinv->at( 0, 0 ) );
   int yu = ( int )( 65536.0 * Rinv->at( 1, 0 ) );
   int zu = ( int )( 65536.0 * Rinv->at( 2, 0 ) );
@@ -179,9 +195,17 @@ void Sampler<T>::_sliceResamp( carto::rc_ptr<carto::Volume<PVItem> >& resamp,
   int yv = ( int )( 65536.0 * Rinv->at( 1, 1 ) );
   int zv = ( int )( 65536.0 * Rinv->at( 2, 1 ) );
 
+  // std::cout << "- xu: " << carto::toString(xu) << std::endl 
+  //           << "- yu: " << carto::toString(yu) << std::endl 
+  //           << "- zu: " << carto::toString(zu) << std::endl 
+  //           << "- xv: " << carto::toString(xv) << std::endl 
+  //           << "- yv: " << carto::toString(yv) << std::endl 
+  //           << "- zv: " << carto::toString(zv) << std::endl 
+  //           << std::flush;
+  
   int xCurrent, yCurrent, zCurrent;
   const T *it;
-  int   incr_vois[8] = { 0,
+  int incr_vois[8] = { 0,
             int( &(*_ref)->at( 1 ) - &(*_ref)->at( 0 ) ),
             int( &(*_ref)->at( 1, 1 ) - &(*_ref)->at( 0 ) ),
             int( &(*_ref)->at( 0, 1 ) - &(*_ref)->at( 0 ) ),
@@ -189,53 +213,63 @@ void Sampler<T>::_sliceResamp( carto::rc_ptr<carto::Volume<PVItem> >& resamp,
             int( &(*_ref)->at( 1, 0, 1 ) - &(*_ref)->at( 0 ) ),
             int( &(*_ref)->at( 1, 1, 1 ) - &(*_ref)->at( 0 ) ),
             int( &(*_ref)->at( 0, 1, 1 ) - &(*_ref)->at( 0 ) ) };
-  for ( int v = dimY2; v--; )
-    {
+
+  // Loop around voxels in the target space to process 
+  // pointer offset and neighbor voxel contributions (x, y, z) 
+  // in the source space.
+  for (int v = dimY2; v--;) {
     xCurrent = xLinCurrent;
     yCurrent = yLinCurrent;
     zCurrent = zLinCurrent;
 
-    for ( int u = dimX2; u--; )
-      {
-      if ( xCurrent >= 0 && xCurrent < maxX &&
-           yCurrent >= 0 && yCurrent < maxY &&
-           zCurrent >= 0 && zCurrent < maxZ  )
-	{
-        it = &(*_ref)->at( xCurrent >> SIXTEEN, yCurrent >> SIXTEEN, zCurrent >> SIXTEEN, t );
-  	
-	if (*(it + incr_vois[0]) == -32768 ||
-	    *(it + incr_vois[1]) == -32768 ||
-	    *(it + incr_vois[2]) == -32768 ||
-	    *(it + incr_vois[3]) == -32768 ||
-	    *(it + incr_vois[4]) == -32768 ||
-	    *(it + incr_vois[5]) == -32768 ||
-	    *(it + incr_vois[6]) == -32768 ||
-	    *(it + incr_vois[7]) == -32768 )
-	  {
-	    out->offset = -1;
-	  }
-	else
-	  {
-	    out->x =  xCurrent & 0xffff;
-	    out->y =  yCurrent & 0xffff;
-	    out->z =  zCurrent & 0xffff;
-	    out->offset =  &(*_ref)->at( xCurrent >> SIXTEEN, yCurrent >> SIXTEEN,
-                                     zCurrent >> SIXTEEN ) - &(*_ref)->at( 0 );
-	  }
-	}
-      else
-	{
-	  out->offset = -1;
-	}
+    for (int u = dimX2; u--;) {
+      // [NS-2025-04-11]: following test was changed to support 
+      // 2D images. This can lead to changes in results.
+      if (xCurrent >= 0 && (xCurrent <= maxX) &&
+          yCurrent >= 0 && (yCurrent <= maxY) &&
+          zCurrent >= 0 && (zCurrent <= maxZ)) {
+        // Pointer to the value in source space
+        it = &(*_ref)->at(xCurrent >> SIXTEEN,
+                          yCurrent >> SIXTEEN,
+                          zCurrent >> SIXTEEN,
+                          t);
+
+        if (*(it + incr_vois[0]) == -32768 ||
+            ((xCurrent < maxX) && *(it + incr_vois[1]) == -32768) ||
+            ((xCurrent < maxX) && (yCurrent < maxY) && *(it + incr_vois[2]) == -32768) ||
+            ((yCurrent < maxY) && *(it + incr_vois[3]) == -32768) ||
+            ((zCurrent < maxZ) && *(it + incr_vois[4]) == -32768) ||
+            ((xCurrent < maxX) && (zCurrent < maxZ) && *(it + incr_vois[5]) == -32768) ||
+            ((xCurrent < maxX) && (yCurrent < maxY) && (zCurrent < maxZ) && *(it + incr_vois[6]) == -32768) ||
+            ((yCurrent < maxY) && (zCurrent < maxZ) && *(it + incr_vois[7]) == -32768)) {
+
+          out->offset = -1;
+        }
+	      else {
+          // The floating point part, (i.e. the 16 bits given using the bitwise operation: & 0xffff),
+          // is later used to process contribution of neighbors in interpolation. 
+          // These contributions are stored in x, y and z
+          out->x = xCurrent & 0xffff;
+          out->y = yCurrent & 0xffff;
+          out->z = zCurrent & 0xffff;
+
+          out->offset = &(*_ref)->at( xCurrent >> SIXTEEN, 
+                                      yCurrent >> SIXTEEN,
+                                      zCurrent >> SIXTEEN ) - &(*_ref)->at( 0 );
+        }
+	    }
+      else {
+        out->offset = -1;
+      }
       out++;
       xCurrent += xu;
       yCurrent += yu;
       zCurrent += zu;
-      }
+    }
     xLinCurrent += xv;
     yLinCurrent += yv;
     zLinCurrent += zv;
-    }
+  }
 }
 
 template <class T> inline
@@ -318,6 +352,106 @@ BucketSampler<T>::doit( const Motion& motion,
 	}
       
       thing[i] = item ;
+    }
+}
+
+inline
+void AimsSamplePV(const carto::rc_ptr<carto::Volume<short> >& in,
+                  carto::rc_ptr<carto::Volume<short> >& out,
+                  const carto::rc_ptr<carto::Volume<PVItem> >& comb)
+{
+  short *inptr;
+  float                    tmp;
+  long x, y, z;
+
+  long inx = out->getSizeX(), 
+       iny = out->getSizeY(),
+       inz = out->getSizeZ();
+
+  const int  TWO_THEN_SIXTEEN  = 65536;
+  const float TWO_THEN_SIXTEEN_CUBE = 65536.0 * 65536.0 * 65536.0;
+
+  carto::const_NDIterator<PVItem> it(&comb->at(0), 
+                                      comb->getSize(),
+                                      comb->getStrides());
+  carto::NDIterator<short>  it1(&out->at(0),
+                                out->getSize(),
+                                out->getStrides());
+  std::vector<long> instr = in->getStrides();
+
+  for( ; !it.ended(); ++it, ++it1 )
+    if ( it->offset != -1L) {
+      z = it->offset / instr[2];
+      y = (it->offset % instr[2]) / instr[1];
+      x = (it->offset % instr[1]) / instr[0];
+
+      inptr = &in->at(0) + it->offset;
+      tmp = (*inptr) *
+            (float)(TWO_THEN_SIXTEEN - it->x) *
+            (float)(TWO_THEN_SIXTEEN - it->y) *
+            (float)(TWO_THEN_SIXTEEN - it->z);
+
+      if ((x+1) < inx) {
+        inptr += instr[0];
+        tmp += (*inptr) *
+               (float)(it->x) *
+               (float)(TWO_THEN_SIXTEEN - it->y) *
+               (float)(TWO_THEN_SIXTEEN - it->z);
+      } 
+
+      if ((x+1) < inx 
+       && (y+1) < iny) {
+        inptr += instr[1];
+        tmp += (*inptr) *
+               (float)(it->x) *
+               (float)(it->y) *
+               (float)(TWO_THEN_SIXTEEN - it->z);
+      } 
+
+      if ((y+1) < iny) {
+        inptr -= instr[0];
+        tmp += (*inptr) *
+               (float)(TWO_THEN_SIXTEEN - it->x) *
+               (float)(it->y) *
+               (float)(TWO_THEN_SIXTEEN - it->z);
+      }
+
+      if ((z+1) < inz) {
+        inptr += instr[2] - instr[1];
+        tmp += (float)(TWO_THEN_SIXTEEN - it->x) *
+               (float)(TWO_THEN_SIXTEEN - it->y)*
+               (float)(it->z);
+      }
+
+      if ((x+1) < inx 
+       && (z+1) < inz) {
+        inptr += instr[0];
+        tmp += (*inptr) *
+               (float)(it->x) *
+               (float)(TWO_THEN_SIXTEEN - it->y) *
+               (float)(it->z);
+      }
+
+      if ((x+1) < inx 
+       && (y+1) < iny
+       && (z+1) < inz) {
+        inptr += instr[1];
+        tmp += (*inptr) *
+               (float)(it->x)*
+               (float)(it->y)*
+               (float)(it->z);
+      }
+
+      if ((y+1) < iny 
+       && (z+1) < inz) {
+        inptr -= instr[0];
+        tmp += (*inptr) *
+               (float)(TWO_THEN_SIXTEEN - it->x) *
+               (float)(it->y)*
+               (float)(it->z);
+      }
+
+      *it1 = (short)(tmp / TWO_THEN_SIXTEEN_CUBE);
     }
 }
 

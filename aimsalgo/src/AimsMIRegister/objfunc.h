@@ -40,192 +40,353 @@
 #include <aims/resampling/resampler.h>
 #include <aims/information/pdf.h>
 #include <aims/information/information.h>
+#include <aims/io/writer.h>
 #include <time.h>
 
-class ObjFunc : public ObjectiveFunc<float,6>
+// #define DEBUG 1
+
+// ============================================================
+// Declaration
+// ============================================================
+typedef short DefaultVoxelType;
+typedef float DefaultParameterType;
+static const unsigned int DefaultParametersSize = 6;
+
+// ------------------------------------------------------------
+// VolumeObjectiveFunc
+// ------------------------------------------------------------
+template <class T=DefaultVoxelType, 
+          class P=DefaultParameterType, 
+          int S=DefaultParametersSize>
+class VolumeObjectiveFunc: public ObjectiveFunc<P, S>
 {
 public:
+  static const unsigned int parameterscount = S;
+
+  // ------------------------------------------------------------
+  // Public type definitions
+  // ------------------------------------------------------------
+  typedef ObjectiveFunc<P, S> BaseType;
+
+  typedef T VoxelType;
+  typedef carto::VolumeRef<T> VolumeRefType;
+  typedef aims::Resampler<T> ResamplerType;
+  typedef Sampler<T> SamplerType;
+
+  typedef P ParameterType;
+  typedef typename BaseType::ParametersType ParametersType;
   
-  ObjFunc( int numLevel,
-	   aims::Resampler<short>* interpolator,
-	   Sampler<short>* comb,	     
-	   int maskSize );
-  virtual ~ObjFunc();
-  
-  virtual float eval( const AimsVector<float,6>& ) const { return 0.0; }
-  
-  void setRef( const AimsData<short>& ref ) ;
-  void setTest( const AimsData<short>& test ) ;
+  // ------------------------------------------------------------
+  // Public methods
+  // ------------------------------------------------------------
+  VolumeObjectiveFunc(int numLevel,
+                      ResamplerType* interpolator,
+                      SamplerType* comb,	     
+                      int maskSize);
+  virtual ~VolumeObjectiveFunc();
+
+  virtual float eval(const ParametersType &) const { return 0.0; }
+  void setRef(const VolumeRefType &);
+  void setTest(const VolumeRefType &);
   void setGcRef(const float x, const float y, const float z);
   void setGcTest(const float x, const float y, const float z); 
   bool dataSettingOK() const { return _refOK && _testOK; };
   bool usePV() const { return !_interpolator; };
 
-  Motion getDepl( const AimsVector<float,6> &p) const;
+  virtual aims::AffineTransformation3d getTransformation(const ParametersType &) const;
+  virtual Point3df getRotation(const ParametersType &) const = 0;
+  virtual Point3df getTranslation(const ParametersType &) const = 0;
 
-  // This method adds int the attributed object ueseful parameters of the
-  // objective function to be monitored
-  virtual void fillMonitoredParameters( carto::AttributedObject& ) const  ; 
+  // This method adds the attributed object useful parameters
+  // of the objective function to be monitored
+  virtual void fillMonitoredParameters(carto::AttributedObject &) const; 
   
 protected:
+  // ------------------------------------------------------------
+  // Protected methods
+  // ------------------------------------------------------------
+  virtual void doPdf( const ParametersType& param ) const;
   
-  void doPdf( const AimsVector<float,6>& param ) const;
+  // ------------------------------------------------------------
+  // Protected attributes
+  // ------------------------------------------------------------
+  mutable VolumeRefType             _ref;    // Master Reference image managed as reference
+  mutable VolumeRefType             _test;   // Master Test image managed as reference
+  VolumeRefType*                    _reg;
+  carto::VolumeRef<PVItem>        * _regc;
   
+  int                               _numLevel;
+  ResamplerType*                    _interpolator;
+  SamplerType*                      _comb;
+  carto::VolumeRef<float>         * _mask;
+  carto::VolumeRef<float>         * _p1;
+  carto::VolumeRef<float>         * _p2;
+  carto::VolumeRef<float>         * _p12;
   
-  mutable AimsData<short>  _ref;    // Master ref image geree comme reference
-  mutable AimsData<short>  _test;   // Master Test image gere comme reference
-  AimsData<short>*  _reg;
-  AimsData<PVItem>*  _regc;
+  AimsVector<float, 3>              _gcref;
+  AimsVector<float, 3>              _gctest;
   
-  int                    _numLevel;
-  aims::Resampler<short>*_interpolator;
-  Sampler<short>*        _comb;
-  AimsData<float>*       _mask;
-  AimsData<float>*       _p1;
-  AimsData<float>*       _p2;
-  AimsData<float>*       _p12;
-  
-  
-  AimsVector<float,3>    _gcref;
-  AimsVector<float,3>    _gctest;
-  
-  bool                   _refOK, _testOK;
+  bool                              _refOK, _testOK;
 };
 
-
-inline
-ObjFunc::ObjFunc( int numLevel, 
-		  aims::Resampler<short>* interpolator,
-		  Sampler<short>* comb,
-		  int maskSize )
-        : ObjectiveFunc<float,6>(), _ref(), _test(),
-	                      _numLevel( numLevel ),
-                              _interpolator( interpolator ),
-                              _comb( comb )
+// ------------------------------------------------------------
+// ObjFunc
+// ------------------------------------------------------------
+template <class T=DefaultVoxelType, 
+          class P=DefaultParameterType, 
+          int S=DefaultParametersSize>
+class ObjFunc: public VolumeObjectiveFunc<T, P, S>
 {
+public:
+  // ------------------------------------------------------------
+  // Public type definitions
+  // ------------------------------------------------------------
+  typedef VolumeObjectiveFunc<T, P, S> BaseType;
+  typedef typename BaseType::VoxelType VoxelType;
+  typedef typename BaseType::ResamplerType ResamplerType;
+  typedef typename BaseType::SamplerType SamplerType;
+
+  typedef typename BaseType::ParameterType ParameterType;
+  typedef typename BaseType::ParametersType ParametersType;
+  
+  // ------------------------------------------------------------
+  // Public methods
+  // ------------------------------------------------------------
+  ObjFunc(int numLevel,
+          ResamplerType * interpolator,
+          SamplerType * comb,	     
+          int maskSize);
+  virtual ~ObjFunc(){}
+
+  virtual Point3df getRotation(const ParametersType &) const;
+  virtual Point3df getTranslation(const ParametersType &) const;
+};
+
+// ------------------------------------------------------------
+// ObjFunc<T, 3> specialization
+// ------------------------------------------------------------
+template <class T, class P>
+class ObjFunc<T, P, 3>: public VolumeObjectiveFunc<T, P, 3>
+{
+public:
+  // ------------------------------------------------------------
+  // Public type definitions
+  // ------------------------------------------------------------
+  typedef VolumeObjectiveFunc<T, P, 3> BaseType;
+
+  typedef typename BaseType::VoxelType VoxelType;
+  typedef typename BaseType::ResamplerType ResamplerType;
+  typedef typename BaseType::SamplerType SamplerType;
+
+  typedef typename BaseType::ParameterType ParameterType;
+  typedef typename BaseType::ParametersType ParametersType;
+  
+  // ------------------------------------------------------------
+  // Public methods
+  // ------------------------------------------------------------
+  ObjFunc(int numLevel,
+          ResamplerType * interpolator,
+          SamplerType * comb,	     
+          int maskSize);
+  virtual ~ObjFunc(){}
+
+  virtual int getAxis() const;
+  virtual void setAxis(const int &);
+  virtual Point3df getRotation(const ParametersType &) const;
+  virtual Point3df getTranslation(const ParametersType &) const;
+
+protected:
+  int _axis;
+};
+
+// ------------------------------------------------------------
+// ObjFunc<T, 6> specialization
+// ------------------------------------------------------------
+template <class T, class P>
+class ObjFunc<T, P, 6>: public VolumeObjectiveFunc<T, P, 6>
+{
+public:
+  // ------------------------------------------------------------
+  // Public type definitions
+  // ------------------------------------------------------------
+  typedef VolumeObjectiveFunc<T, P, 6> BaseType;
+
+  typedef typename BaseType::VoxelType VoxelType;
+  typedef typename BaseType::ResamplerType ResamplerType;
+  typedef typename BaseType::SamplerType SamplerType;
+
+  typedef typename BaseType::ParameterType ParameterType;
+  typedef typename BaseType::ParametersType ParametersType;
+  
+  // ------------------------------------------------------------
+  // Public methods
+  // ------------------------------------------------------------
+  ObjFunc(int numLevel,
+          ResamplerType * interpolator,
+          SamplerType * comb,	     
+          int maskSize);
+  virtual ~ObjFunc(){}
+
+  virtual Point3df getRotation(const ParametersType &) const;
+  virtual Point3df getTranslation(const ParametersType &) const;
+};
+
+// ============================================================
+// Implementation
+// ============================================================
+
+// ------------------------------------------------------------
+// VolumeObjectiveFunc
+// ------------------------------------------------------------
+template <class T, class P, int S>
+inline
+VolumeObjectiveFunc<T, P, S>::VolumeObjectiveFunc(int numLevel, 
+                                                  ResamplerType * interpolator,
+                                                  SamplerType * comb,
+                                                  int maskSize)
+  :BaseType(), 
+    _ref(), _test(),
+    _numLevel(numLevel),
+    _interpolator(interpolator),
+    _comb(comb) {
+
   _refOK = _testOK = false;
-  _mask = new AimsData<float>( maskSize );
+  _mask = new carto::VolumeRef<float>( maskSize );
 
   for ( int n = 0; n < maskSize; n++ )  
     (*_mask)( n ) = exp( - 0.5 * aims::sqr( n - maskSize / 2 ) );
 
 
-  _p1  = new AimsData<float>( _numLevel );
-  _p2  = new AimsData<float>( _numLevel );
-  _p12 = new AimsData<float>( _numLevel, _numLevel );
+  _p1  = new carto::VolumeRef<float>( _numLevel );
+  _p2  = new carto::VolumeRef<float>( _numLevel );
+  _p12 = new carto::VolumeRef<float>( _numLevel, _numLevel );
  
   _gctest = _gcref = AimsVector<float, 3>(0., 0., 0.) ;
   
 }
 
-
+template <class T, class P, int S>
 inline
-void ObjFunc::setGcRef(const float x, const float y, const float z)
-{
+void VolumeObjectiveFunc<T, P, S>::setGcRef(const float x, const float y, const float z) {
   _gcref[0] = x;
   _gcref[1] = y;
-  _gcref[2] = z;
+
+  if (S > 2)
+    _gcref[2] = z;
 }
 
+template <class T, class P, int S>
 inline
-void ObjFunc::setGcTest(const float x, const float y, const float z)
-{
+void VolumeObjectiveFunc<T, P, S>::setGcTest(const float x, const float y, const float z) {
   _gctest[0] = x;
   _gctest[1] = y;
-  _gctest[2] = z;
+  if (S > 2)
+    _gctest[2] = z;
 }
 
-
+template <class T, class P, int S>
 inline
-void ObjFunc::setTest( const AimsData<short>& test )
-{
+void VolumeObjectiveFunc<T, P, S>::setTest(const VolumeRefType & test) {
 
   _test = test;
-  //_Vtest = converter.doit( _test );
-  // Ici insertion des codes de seuils et morpho
   _testOK = true;
+
+#if DEBUG
+  std::cout << "VolumeObjectiveFunc<T, P, S>::setTest test image infos" << std::endl
+            << "  - dimensions: [" 
+            << carto::toString(_test.getSizeX()) << ", "
+            << carto::toString(_test.getSizeY()) << ", "
+            << carto::toString(_test.getSizeZ()) << "]" << std::endl
+            << "  - voxel size: [" 
+            << carto::toString(_test.getVoxelSize()[0]) << ", "
+            << carto::toString(_test.getVoxelSize()[1]) << ", "
+            << carto::toString(_test.getVoxelSize()[2]) << "]" << std::endl;
+#endif
+
 }
 
+template <class T, class P, int S>
 inline
-void ObjFunc::setRef( const AimsData<short>& ref )
-{
-
+void VolumeObjectiveFunc<T, P, S>::setRef(const VolumeRefType & ref) {
   _ref = ref;
-  if ( usePV() )
-    {
-      _regc = new AimsData<PVItem>(  ref.dimX(), ref.dimY(), ref.dimZ() );
-      _regc->setSizeXYZT( ref.sizeX(), ref.sizeY(), ref.sizeZ(), 1.0);
-    }
-  else
-    {
-      _reg = new AimsData<short>( ref.dimX(), ref.dimY(), ref.dimZ() );
-      _reg->setSizeXYZT( ref.sizeX(), ref.sizeY(), ref.sizeZ(), 1.0);
-    }
+  if (usePV()) {
+    _regc = new carto::VolumeRef<PVItem>(ref.getSizeX(), ref.getSizeY(), ref.getSizeZ());
+    _regc->setVoxelSize(ref.getVoxelSize()[0] , ref.getVoxelSize()[1], ref.getVoxelSize()[2], 1.0);
+  }
+  else {
+    _reg = new VolumeRefType(ref.getSizeX(), ref.getSizeY(), ref.getSizeZ());
+    _reg->setVoxelSize(ref.getVoxelSize()[0], ref.getVoxelSize()[1], ref.getVoxelSize()[2], 1.0);
+  }
 
   _refOK = true;
+
+#if DEBUG 
+  std::cout << "VolumeObjectiveFunc<T, P, S>::setRef reference image infos:" << std::endl
+            << "  - dimensions: [" 
+            << carto::toString(_ref->getSizeX()) << ", "
+            << carto::toString(_ref->getSizeY()) << ", "
+            << carto::toString(_ref->getSizeZ()) << "]" << std::endl
+            << "  - voxel size: [" 
+            << carto::toString(_ref->getVoxelSize()[0]) << ", "
+            << carto::toString(_ref->getVoxelSize()[1]) << ", "
+            << carto::toString(_ref->getVoxelSize()[2]) << "]" << std::endl;
+  std::cout << std::flush;
+#endif  
 }
 
-
-
+template <class T, class P, int S>
 inline
-ObjFunc::~ObjFunc()
-{
-  if ( _p12 )
-    delete _p12;
-  if ( _p2 )
-    delete _p2;
-  if ( _p1 )
-    delete _p1;
-  if ( _mask )
-    delete _mask;
-  if ( _reg ) delete( _reg );
+void VolumeObjectiveFunc<T, P, S>::doPdf(const ParametersType & param) const {
+  aims::AffineTransformation3d motion = getTransformation(param);
+
+  if (usePV()) {
+    // Partial values pdf processing
+    _comb->setRef(_test);
+    _comb->doit(motion, *_regc);
+
+    AimsJointPVPdf(_ref, _test, *_regc,  *_p12, *_p1, *_p2);    
+  }
+  else {
+    // Direct pdf processing: an interpolator is required
+    ASSERT( _interpolator );
+    // Disable interpolation progress display
+    std::ofstream ofs;
+    ofs.setstate(std::ios_base::badbit);
+    _interpolator->setVerboseStream(ofs);
+    _interpolator->setRef(_test);
+    _interpolator->doit(motion, **_reg);
+    AimsJointMaskPdf(_ref, *_reg, *_p12, *_p1, *_p2);
+  }
 }
 
+template <class T, class P, int S>
 inline
-void ObjFunc::doPdf( const AimsVector<float,6>& param ) const
+aims::AffineTransformation3d 
+VolumeObjectiveFunc<T, P, S>::getTransformation(const ParametersType & param) const
 {
-  Motion motion;
+  // std::cout << "VolumeObjectiveFunc<T, P, S>::getTransformation" << std::endl << std::flush;
 
-  // rotation autout du centre de gravite dans l'image test.
-  motion.setRotationAffine( param[4], param[5], param[2], _gctest );
+  aims::AffineTransformation3d transformation;
 
-  // translation des centres de gravite  
-  motion.setTranslation(_gcref-_gctest+Point3df(param[0],param[1],param[3]));
+  // Rotation around gravity center of test image
+  Point3df rotation = getRotation(param);
+  transformation.setRotationAffine(rotation[0], 
+                                   rotation[1], 
+                                   rotation[2], 
+                                   this->_gctest);
 
-  //------------------- 
-  //clock_t start = clock();
-  if ( usePV() ) // Calcul pdf par PV
-    {
-      _comb->setRef( _test );
-      _comb->doit( motion, *_regc );
-      AimsJointPVPdf( _ref, _test, *_regc,  *_p12, *_p1, *_p2 );
-    }
-  else         // Calcul direct de la pdf
-    {
-      ASSERT( _interpolator );  // il doit exister necesaire un interpolateur
-      _interpolator->setRef( _test );
-      
-      _interpolator->doit( motion, *_reg->volume() );
-      AimsJointMaskPdf( _ref, *_reg, *_p12, *_p1, *_p2 );
-    }
+  // Translation of gravity centers
+  Point3df translation = this->_gcref
+                         - this->_gctest 
+                         + getTranslation(param);
+  transformation.setTranslation(translation);
+
+  return transformation;
 }
 
-
+template <class T, class P, int S>
 inline
-Motion ObjFunc::getDepl( const AimsVector< float,6 > &param ) const
-{
-  Motion motion;
-
-  // rotation autout du centre de gravite dans l'image test.
-  motion.setRotationAffine(param[4], param[5], param[2], _gctest);
-  // translation des centres de gravite  
-  motion.setTranslation(_gcref-_gctest+Point3df(param[0],param[1],param[3]));
-
-  return(motion);
-}
-
-void ObjFunc::fillMonitoredParameters( carto::AttributedObject& o ) const 
-{
+void VolumeObjectiveFunc<T, P, S>::fillMonitoredParameters(carto::AttributedObject & o) const {
   o.setProperty( "joint_histogram", *_p12 ) ;
   o.setProperty( "mask", *_mask ) ;
   o.setProperty( "gc_ref", _gcref ) ;
@@ -233,5 +394,101 @@ void ObjFunc::fillMonitoredParameters( carto::AttributedObject& o ) const
   
   return ;
 } 
+
+template <class T, class P, int S>
+inline
+VolumeObjectiveFunc<T, P, S>::~VolumeObjectiveFunc() {
+  std::cout << "VolumeObjectiveFunc<T, S>::~VolumeObjectiveFunc" << std::endl << std::flush;
+  if (_p12) delete _p12;
+  if (_p2) delete _p2;
+  if (_p1) delete _p1;
+  if (_mask) delete _mask;
+  if (_reg) delete _reg;
+}
+
+// ------------------------------------------------------------
+// ObjFunc
+// ------------------------------------------------------------
+
+// ------------------------------------------------------------
+// ObjFunc<T, P, 3> specialization
+// ------------------------------------------------------------
+// Partial specialization for 2D registration with 3 parameters
+// ------------------------------------------------------------
+template <class T, class P>
+inline
+ObjFunc<T, P, 3>::ObjFunc(int numLevel, 
+                          ResamplerType * interpolator,
+                          SamplerType * comb,
+                          int maskSize)
+  :BaseType(
+      numLevel, 
+      interpolator,
+      comb,
+      maskSize), 
+  _axis(2) {
+}
+
+template <class T, class P>
+inline
+Point3df ObjFunc<T, P, 3>::getRotation(const ParametersType & param) const {
+  Point3df rotation(0, 0, 0);
+  rotation[_axis] = param[2];
+  return rotation;
+} 
+
+template <class T, class P>
+inline
+Point3df ObjFunc<T, P, 3>::getTranslation(const ParametersType & param) const {
+  // For rotation axis around X, axis is 0 and translation is (0.0, param[0], param[1])
+  // For rotation axis around Y, axis is 1 and translation is (param[1], 0.0, param[0])
+  // For rotation axis around Z, axis is 2 and translation is (param[0], param[1], 0.0)
+  Point3df translation(0, 0, 0);
+  translation[(_axis + 1) % 3] = param[0];
+  translation[(_axis + 2) % 3] = param[1];
+  return translation;
+}
+
+template <class T, class P>
+inline
+int ObjFunc<T, P, 3>::getAxis() const {
+  return _axis;
+} 
+
+template <class T, class P>
+inline
+void ObjFunc<T, P, 3>::setAxis(const int & axis) {
+  _axis = axis;
+}
+
+// ------------------------------------------------------------
+// ObjFunc<T, 6> specialization
+// ------------------------------------------------------------
+// Partial specialization for 3D registration with 6 parameters
+// ------------------------------------------------------------
+template <class T, class P>
+inline
+ObjFunc<T, P, 6>::ObjFunc(int numLevel, 
+                          ResamplerType * interpolator,
+                          SamplerType * comb,
+                          int maskSize)
+  :BaseType(
+      numLevel, 
+      interpolator,
+      comb,
+      maskSize)
+{}
+
+template <class T, class P>
+inline
+Point3df ObjFunc<T, P, 6>::getRotation(const ParametersType & param) const {
+  return Point3df(param[4], param[5], param[2]);
+}
+
+template <class T, class P>
+inline
+Point3df ObjFunc<T, P, 6>::getTranslation(const ParametersType & param) const {
+  return Point3df(param[0], param[1], param[3]);
+}
 
 #endif

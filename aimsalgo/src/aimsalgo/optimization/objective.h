@@ -43,14 +43,16 @@ template <class T, int D> class AimsVector;
 // class ObjectiveFunc
 // Base class for cost functions
 //
-template <class T, int D>
+template <class T, int P>
 class ObjectiveFunc
 {
 public:
+  typedef AimsVector<T, P> ParametersType;
+
   ObjectiveFunc( ) { }
   virtual ~ObjectiveFunc() { }
   
-  virtual T eval( const AimsVector<T,D>& ) const { return (T)0; }
+  virtual T eval( const ParametersType& ) const { return (T)0; }
   
   // This method adds int the attributed object ueseful parameters of the
   // objective function to be monitored
