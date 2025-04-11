@@ -129,6 +129,11 @@ namespace aims
   }
 
   template<class OUTP>
+  void ChannelReader<OUTP>::setFileName(const std::string & filename) {
+    _filename = filename;
+  }
+
+  template<class OUTP>
   void ChannelReader<OUTP>::read( OUTP & data, 
                                   uint8_t channel, int border, 
                                   const std::string*, int frame )

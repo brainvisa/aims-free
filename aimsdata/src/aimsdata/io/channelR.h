@@ -78,6 +78,8 @@ namespace aims
                        int border = 0, 
                        const std::string* format = 0, 
                        int frame = -1 );
+
+    void setFileName( const std::string &fileName );
     void setAllowedInputDataTypes(
                        const std::map<std::string, std::set<std::string> > & );
 
