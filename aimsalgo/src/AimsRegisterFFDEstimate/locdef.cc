@@ -250,47 +250,73 @@ int main( int argc, const char **argv )
     //      Check control knots parameters for the pyramid
     //
     //========================================================================
-    if (!is2d[0] && ((init_ctrl_numx < 4) || (init_ctrl_numx > 10))) {
+    if (!is2d[0] && (init_ctrl_numx < 4)) {
       cerr << "Wrong -icx option value: " << carto::toString(init_ctrl_numx)
-           << ". Available values for this option are in the range 4-10."
+           << ". Minimal value for this option is 4."
            << endl << flush;
       return EXIT_FAILURE;
     }
 
-    if (!is2d[1] && ((init_ctrl_numy < 4) || (init_ctrl_numy > 10))) {
+    if (!is2d[1] && (init_ctrl_numy < 4)) {
       cerr << "Wrong -icy option value: " << carto::toString(init_ctrl_numy)
-           << ". Available values for this option are in the range 4-10."
+           << ". Minimal value for this option is 4."
            << endl << flush;
       return EXIT_FAILURE;
     }
 
-    if (!is2d[2] && ((init_ctrl_numz < 4) || (init_ctrl_numz > 10))) {
+    if (!is2d[2] && (init_ctrl_numz < 4)) {
       cerr << "Wrong -icz option value: " << carto::toString(init_ctrl_numz)
-           << ". Available values for this option are in the range 4-10."
+           << ". Minimal value for this option is 4."
            << endl << flush;
       return EXIT_FAILURE;
     }
 
-    if (!is2d[0] && ((final_ctrl_numx < init_ctrl_numx) || (final_ctrl_numx > 10))) {
+    if (!is2d[0] && (final_ctrl_numx < init_ctrl_numx)) {
       cerr << "Wrong -fcx option value: " << carto::toString(final_ctrl_numx)
-           << ". Available values for this option are in the range "
-           << carto::toString(init_ctrl_numx) << "-10." << endl << flush;
+           << ". Minimal value for this option is "
+           << carto::toString(init_ctrl_numx) << "." << endl << flush;
       return EXIT_FAILURE;
     }
 
-    if (!is2d[1] && ((final_ctrl_numy < init_ctrl_numy) || (final_ctrl_numy > 10))) {
+    if (!is2d[1] && (final_ctrl_numy < init_ctrl_numy)) {
       cerr << "Wrong -fcy option value: " << carto::toString(final_ctrl_numy)
-           << ". Available values for this option are in the range "
-           << carto::toString(init_ctrl_numy) << "-10." << endl << flush;
+           << ". Minimal value for this option is "
+           << carto::toString(init_ctrl_numy) << "." << endl << flush;
       return EXIT_FAILURE;
     }
 
-    if (!is2d[2] && ((final_ctrl_numz < init_ctrl_numz) || (final_ctrl_numz > 10))) {
+    if (!is2d[2] && (final_ctrl_numz < init_ctrl_numz)) {
       cerr << "Wrong -fcz option value: " << carto::toString(final_ctrl_numz)
-           << ". Available values for this option are in the range "
-           << carto::toString(init_ctrl_numz) << "-10." << endl << flush;
+           << ". Minimal value for this option is "
+           << carto::toString(init_ctrl_numz) << "." << endl << flush;
       return EXIT_FAILURE;
     }
+
+    // Optimizer can only support 3000 parameters, each parameter is a 
+    // 3d coordinates. This is the reason why FFD grid is limited to
+    // 1000 knots.
+    if ((init_ctrl_numx * init_ctrl_numy * init_ctrl_numz) > 1000){
+      cerr << "Wrong initial number of control points in the deformation grid." << endl
+           << "Initial number of control points can not exceed 1000. " << endl
+           << "Please change the -icx: "  << carto::toString(init_ctrl_numx)
+           << ", -icy: " << carto::toString(init_ctrl_numy) 
+           << " and -icz option values: " << carto::toString(init_ctrl_numz) << endl
+           << carto::toString(init_ctrl_numx) << " * "
+           << carto::toString(init_ctrl_numy) << " * " 
+           << carto::toString(init_ctrl_numz) << " > 1000." << endl << flush;
+      return EXIT_FAILURE;
+    } 
+    if ((final_ctrl_numx * final_ctrl_numy * final_ctrl_numz) > 1000){
+      cerr << "Wrong final number of control points in the deformation grid." << endl
+           << "Final number of control points can not exceed 1000. " << endl
+           << "Please change the -fcx: "  << carto::toString(final_ctrl_numx)
+           << ", -fcy: " << carto::toString(final_ctrl_numy) 
+           << " and -fcz option values: " << carto::toString(final_ctrl_numz) << endl
+           << carto::toString(final_ctrl_numx) << " * "
+           << carto::toString(final_ctrl_numy) << " * " 
+           << carto::toString(final_ctrl_numz) << " > 1000." << endl << flush;
+      return EXIT_FAILURE;
+    } 
 
     //========================================================================
     //
