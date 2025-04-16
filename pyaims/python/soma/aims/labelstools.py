@@ -216,7 +216,8 @@ def read_labels_bsa(nomenclature):
     labels = [l.strip().split(',') for l in labels[1:]]
     labels = {
         int(l[0]): {'Label': l[7],
-                    'RGB': [float(l[4]), float(l[5]), float(l[6])]}
+                    'RGB': [float(l[4]), float(l[5]), float(l[6])],
+                    'FullLabel': l[8]}
         for l in labels}
 
     return labels
