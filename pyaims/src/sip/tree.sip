@@ -57,7 +57,13 @@ public:
   {
     t = dynamic_cast<Tree *>( *i );
     if( t )
-      PyTuple_SetItem( l, c, sipConvertFromType( t, sipType_Tree, 0 ) );
+    {
+      PyObject *elem = sipConvertFromType( t, sipType_Tree, 0 );
+      PyTuple_SetItem( l, c, elem );
+      // keep a ref to self to avoid crashes if the C++ tree is deleted
+      // before the python children
+      PyObject_SetAttrString( elem, "_tree", sipSelf );
+    }
   }
   sipRes = l;
 %End
