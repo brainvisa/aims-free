@@ -321,6 +321,10 @@ class AIMSDATA_API AimsTimeSurface
       const_iterator;
     /// Constructor does nothing special
     AimsTimeSurface() : std::map< int, AimsSurface<D,T> >() { }
+    AimsTimeSurface( const AimsTimeSurface<D, T> & other )
+      : std::map< int, AimsSurface<D,T> >( other ),
+      _mini( other._mini ), _maxi( other._maxi )
+    { _header.copy( other._header ); }
     /// Destructor does nothing
     virtual ~AimsTimeSurface() { }
 
@@ -385,6 +389,14 @@ class AIMSDATA_API AimsTimeSurface
     inline bool operator != ( const AimsTimeSurface<D, T> & other ) const
     {
       return !( *this == other );
+    }
+
+    AimsTimeSurface<D, T> & operator = ( const AimsTimeSurface<D, T> & other )
+    {
+      std::map<int, AimsSurface<D, T> >::operator = ( other );
+      _header.copy( other._header );
+      _mini = other._mini;
+      _maxi = other._maxi;
     }
 
     /// Output stream operator
