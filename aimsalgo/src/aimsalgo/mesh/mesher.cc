@@ -62,12 +62,24 @@ namespace
     forbidden.insert( "object_type" );
     forbidden.insert( "data_type" );
     forbidden.insert( "uuid" );
+    forbidden.insert( "volume_dimension" );
+    forbidden.insert( "sizeX" );
+    forbidden.insert( "sizeY" );
+    forbidden.insert( "sizeZ" );
+    forbidden.insert( "sizeT" );
+    forbidden.insert( "referential" );
 
     Object it = src->objectIterator();
     for( ; it->isValid(); it->next() )
     {
       if( forbidden.find( it->key() ) == forbidden.end() )
         dest.setProperty( it->key(), it->currentValue() );
+    }
+    if( src->hasProperty( "referential" ) )
+    {
+      // deep copy referential which is a builtin in Volume
+      string ref = src->getProperty( "referential" )->getString();
+      dest.setProperty( "referential", ref );
     }
   }
 
