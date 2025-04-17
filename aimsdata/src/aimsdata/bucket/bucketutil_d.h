@@ -50,7 +50,7 @@ namespace aims
     Point3d size = bbmax - bbmin + Point3d( 1, 1, 1 );
 
     // fill in volume with all buckets
-    carto::VolumeRef<U>	vol( size[0], size[1], size[2], 1, 1 );
+    carto::VolumeRef<U>	vol( size[0], size[1], size[2], 1, borderwidth );
     std::vector<float> vs;
     vs.push_back( bucket.sizeX() );
     vs.push_back( bucket.sizeY() );
