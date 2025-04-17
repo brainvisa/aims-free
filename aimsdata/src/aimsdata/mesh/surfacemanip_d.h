@@ -152,6 +152,22 @@ namespace aims
         }
       }
     }
+
+    carto::Object mat;
+    if( surface.header().hasProperty( "material" ) )
+      mat = surface.header().getProperty( "material" );
+    else
+      mat = carto::Object::value( carto::Dictionary() );
+    std::string fface = "counterclockwise";
+    if( mat->hasProperty( "front_face" ) )
+    {
+      std::string oldface = mat->getProperty( "front_face" )->getString();
+      if( oldface == "counterclockwise" )
+        fface = "clockwise";
+    }
+    mat->setProperty( "front_face", fface );
+    surface.header().setProperty( "material", mat );
+
   }
 
 
