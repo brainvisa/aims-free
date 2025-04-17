@@ -152,8 +152,11 @@ class GLTFFormat(aims.FileFormat_Object):
             if opt in options:
                 opts[opt] = options[opt]
 
+        if not obj.isDictionary():
+            # not a dict-like object: consider it as a list of meshes
+            obj = {'objects': [{'mesh': m} for m in obj]}
+
         gltf = gltf_io.meshes_dict_to_gltf(obj, **opts)
-        save_opt = {}
         use_draco = options.get('use_draco', True)
         gltf_io.save_gltf(gltf, filename, use_draco=use_draco)
 
@@ -235,6 +238,7 @@ class GLTFFinderFormat(aims.FinderFormat):
             return True
         return False
 
+
 aims.Finder.registerFormat('GLTF', GLTFFinderFormat(), ['gltf', 'glb'])
 aims.FileFormatDictionary_Object.registerFormat(
     'GLTF', GLTFFormat(), ['gltf', 'glb'])
@@ -251,6 +255,8 @@ def remove_python_formats():
     aims.FileFormatDictionary_SparseOrDenseMatrix.unregisterFormat('NUMPY')
     aims.FileFormatDictionary_Object.unregisterFormat('YAML')
     aims.FileFormatDictionary_Object.unregisterFormat('GLTF')
+    aims.FileFormatDictionary_AimsTimeSurface_3_VOID.unregisterFormat('GLTF')
+    aims.FileFormatDictionary_AimsTimeSurface_2_VOID.unregisterFormat('GLTF')
 
 
 atexit.register(remove_python_formats)
