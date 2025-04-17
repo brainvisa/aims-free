@@ -496,6 +496,14 @@ class Writer(object):
                 else:
                     break
             if W is None:
+                if not isinstance(obj, (Object, carto.GenericObject)):
+                    try:
+                        obj = Object(obj)
+                        return self.write(obj, filename, format=format,
+                                          options=options)
+                    except Exception:
+                        # oh, well...
+                        pass
                 raise AttributeError('no Writer for type ' +
                                      obj.__class__.__name__)
         w = W(filename, options)
