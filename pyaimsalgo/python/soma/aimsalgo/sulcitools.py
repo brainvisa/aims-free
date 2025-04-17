@@ -4,7 +4,8 @@
 from soma import aims, aimsalgo
 
 
-def graph_to_meshes(graph, label_att='label', nomenclature=None):
+def graph_to_meshes(graph, label_att='label', nomenclature=None,
+                    mni_space=False):
     ''' Make one mesh for each sucus in a labelled sulcal graph.
 
     graph may be either a Graph object, or a filename.
@@ -44,9 +45,13 @@ def graph_to_meshes(graph, label_att='label', nomenclature=None):
                             for p in b[0].keys():
                                 bk[p] = 1
 
+    mni = aims.GraphManip.getICBMTransform(graph)
+    ref = graph.get('referential')
+
     mesher = aimsalgo.Mesher()
     mesher.setDecimation(0.99, 3., 0.2, 180.)
     mesher.setSmoothing(mesher.LOWPASS, 50, 0.4)
+    mesher.setVerbose(False)
 
     print('meshing buckets...')
     n = len(labelmap)
@@ -73,13 +78,24 @@ def graph_to_meshes(graph, label_att='label', nomenclature=None):
             if color is not None:
                 surface.header()['material'] = {'diffuse': list(color) + [1.]}
 
+        if mni_space:
+            aims.SurfaceManip.meshTransform(surface, mni)
+            surface.header()['referential'] \
+                = aims.StandardReferentials.mniTemplateReferentialID()
+        else:
+            if ref is not None:
+                surface.header()['referential'] = ref
+            surface.header()['referentials'] \
+                = [aims.StandardReferentials.mniTemplateReferentialID()]
+            surface.header()['transformations'] = [mni.toVector()]
+
         meshes[label] = surface
 
     return meshes, labelmap
 
 
 def save_graph_to_meshes(graph, filename_pattern, label_att='label',
-                         nomenclature=None, format=None):
+                         nomenclature=None, format=None, mni_space=False):
     ''' Call graph_to_meshes and save mesh files according to a filename
     pattern.
 
@@ -92,8 +108,9 @@ def save_graph_to_meshes(graph, filename_pattern, label_att='label',
     filename extension is ambiguous (like ``.obj`` which may be Wavefront or
     MNI mesh), ex: ``WAVERONT``).
     '''
-    meshes, buckets = graph_to_meshes(graph, label_att=label_att,
-                                      nomenclature=nomenclature)
+    meshes, buckets = graph_to_meshes(
+        graph, label_att=label_att, nomenclature=nomenclature,
+        mni_space=mni_space)
 
     for label, mesh in meshes.items():
         fname = filename_pattern % {'label': label}
