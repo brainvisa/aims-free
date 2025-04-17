@@ -397,6 +397,8 @@ class AIMSDATA_API AimsTimeSurface
       _header.copy( other._header );
       _mini = other._mini;
       _maxi = other._maxi;
+
+      return *this;
     }
 
     /// Output stream operator
