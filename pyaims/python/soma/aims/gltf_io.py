@@ -706,10 +706,13 @@ def meshes_dict_to_gltf(meshes, gltf=None, matrix=None, tex_format='webp',
             todo += [(o, parent_ref) for o in obj]
             continue
         mesh = obj['mesh']  # mesh is mandatory
+        name = mesh.header().get('name')
+        if name is None:
+            name = mesh.header().get('label')
         tex = obj.get('textures')
         ref = mesh.header().get('referential')
         tr = None
-        if ref is not None:
+        if parent_ref is not None and ref is not None:
             tr = trans_dict.get(parent_ref, {}).get(ref)
             if tr is None:
                 refs = mesh.header().get('referentials', [])
@@ -718,12 +721,12 @@ def meshes_dict_to_gltf(meshes, gltf=None, matrix=None, tex_format='webp',
                     tl = mesh.header().get('transformations', [])
                     tr = aims.AffineTransformation3d(tl[ri])
         if tex:
-            tex_mesh_to_gltf(mesh, tex, matrix=tr, name=None, gltf=gltf,
+            tex_mesh_to_gltf(mesh, tex, matrix=tr, name=name, gltf=gltf,
                              tex_format=tex_format,
                              images_as_buffers=images_as_buffers,
                              single_buffer=single_buffer)
         else:
-            mesh_to_gltf(mesh, matrix=tr, name=None, gltf=gltf,
+            mesh_to_gltf(mesh, matrix=tr, name=name, gltf=gltf,
                          tex_format=tex_format,
                          images_as_buffers=images_as_buffers,
                          single_buffer=single_buffer)
