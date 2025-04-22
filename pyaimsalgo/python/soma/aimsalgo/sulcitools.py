@@ -66,12 +66,12 @@ def graph_to_meshes(graph, label_att='label', nomenclature=None,
         for sl in surfaces.values():
             for s in sl:
                 aims.SurfaceManip.meshMerge(surface, s)
-            # additional decimation/smothing
-            mesher.decimate(surface)
-            mesher.smooth(surface)
-            mesher.decimate(surface)
-            mesher.smooth(surface)
-            mesher.decimate(surface)
+        # additional decimation/smothing
+        mesher.decimate(surface)
+        mesher.smooth(surface)
+        mesher.decimate(surface)
+        mesher.smooth(surface)
+        mesher.decimate(surface)
 
         if nomenclature is not None:
             color = nomenclature.find_color(label, None)
