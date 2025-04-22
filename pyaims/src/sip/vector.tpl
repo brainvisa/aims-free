@@ -447,7 +447,7 @@ public:
 %End
 
 
-  void __setitem__( int, %Template1PyType%%Template1deref% );
+  void __setitem__( int, %Template1PyType%%Template1deref% /DisallowNone/ );
 %MethodCode
   if( a0 < 0 )
     a0 = sipCpp->size() + a0;
@@ -469,7 +469,7 @@ public:
   sipRes = sipCpp->size();
 %End
 
-  int __contains__( %Template1PyType%%Template1deref% ) const;
+  int __contains__( %Template1PyType%%Template1deref% /DisallowNone/ ) const;
 %MethodCode
   std::vector<%Template1% >::const_iterator i, e = sipCpp->end();
   sipRes = 0;
@@ -481,7 +481,7 @@ public:
     }
 %End
 
-  int index( %Template1PyType%%Template1deref% ) const;
+  int index( %Template1PyType%%Template1deref% /DisallowNone/ ) const;
 %MethodCode
   std::vector<%Template1% >::const_iterator i, e = sipCpp->end();
   sipRes = -1;
@@ -499,7 +499,7 @@ public:
   }
 %End
 
-  void append( %Template1PyType%%Template1deref% );
+  void append( %Template1PyType%%Template1deref% /DisallowNone/ );
 %MethodCode
   sipCpp->push_back( %Template1deref%a0 );
   std::vector<int> dims( 1, sipCpp->size() );
@@ -543,7 +543,7 @@ public:
                           (char *) &(*sipCpp)[0] );
 %End
 
-  void insert( int, %Template1PyType%%Template1deref% );
+  void insert( int, %Template1PyType%%Template1deref% /DisallowNone/ );
 %MethodCode
   if( a0 < 0 )
     a0 += sipCpp->size();
@@ -590,7 +590,7 @@ public:
 %End
 
 
-  void remove( %Template1PyType%%Template1deref% );
+  void remove( %Template1PyType%%Template1deref% /DisallowNone/ );
 %MethodCode
   std::vector<%Template1% >::iterator i, e = sipCpp->end();
   for( i=sipCpp->begin(); i!=e; ++i )
