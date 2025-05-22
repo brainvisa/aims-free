@@ -202,7 +202,7 @@ def read_labels_xml(nomenclature):
     return gifti_label_map
 
 
-def read_labels_bsa(nomenclature):
+def read_labels_bsa(nomenclature, all_cols=False):
     '''
     Read a nomenclature as labels dict.
 
@@ -213,12 +213,15 @@ def read_labels_bsa(nomenclature):
     '''
     with open(nomenclature) as f:
         labels = f.read().strip().split('\n')
-    labels = [l.strip().split(',') for l in labels[1:]]
-    labels = {
-        int(l[0]): {'Label': l[7],
-                    'RGB': [float(l[4]), float(l[5]), float(l[6])],
-                    'FullLabel': l[8]}
-        for l in labels}
+    ilabels = [l.strip().split(',') for l in labels[1:]]
+    labels = {}
+    for l in ilabels:
+        item = {'Label': l[7],
+                'RGB': [float(l[4]), float(l[5]), float(l[6])],
+                'FullLabel': l[8]}
+        if all_cols:
+            item['GC'] = [float(x) for x in l[1:4]]
+        labels[int(l[0])] = item
 
     return labels
 
