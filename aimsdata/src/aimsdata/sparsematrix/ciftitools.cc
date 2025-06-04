@@ -344,10 +344,11 @@ void CiftiTools::getParcelsInfo( Object cifti_info,
           for( size_t i=0; i<nnodes; ++i )
             roi[i] = background;
         }
-        else if( roi.nItem() != nnodes )
+        /* else if( roi.nItem() != nnodes )
         {
           cerr << "Warning: size mismatch in surfaces\n";
-        }
+          cerr << "roi: " << roi.nItem() << ", nodes: " << nnodes << endl;
+        } */
       }
       Object viter = elem->objectIterator();
       int64_t v;
@@ -1243,10 +1244,11 @@ void CiftiTools::getParcelsTexture(
           for( size_t i=0; i<nnodes; ++i )
             roi[i] = background;
         }
-        else if( roi.nItem() != nnodes )
+        /* else if( roi.nItem() != nnodes )
         {
           cerr << "Warning: size mismatch in surfaces\n";
-        }
+          cerr << "roi: " << roi.nItem() << ", nodes: " << nnodes << endl;
+        } */
       }
       Object viter = elem->objectIterator();
       int64_t v;
