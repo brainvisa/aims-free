@@ -244,7 +244,7 @@ namespace soma
         else if( val[0] == "voxelsize" )
         {
           std::vector<std::string> svs = StringUtil::split( val[1], " " );
-          std::vector<float> vs( vs.size() );
+          std::vector<float> vs( svs.size() );
           for( int j=0; j<svs.size(); ++j )
           {
             std::stringstream s( svs[j] );
