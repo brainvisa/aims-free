@@ -45,6 +45,7 @@
 #include <aims/mesh/texture.h>
 #include <cartobase/thread/mutex.h>
 #include <cstdio>
+#include <locale.h>
 
 using namespace aims;
 using namespace carto;
@@ -106,6 +107,8 @@ namespace
 bool GiftiHeader::read()
 {
   // cout << "GiftiHeader::read\n";
+
+  setlocale( LC_NUMERIC, "C" );
 
   gifti_image   *gim = 0;
   string fname = _name;

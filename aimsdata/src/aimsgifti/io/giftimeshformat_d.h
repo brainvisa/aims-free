@@ -43,6 +43,7 @@
 #include <aims/io/reader.h>
 #include <cartobase/thread/mutex.h>
 #include <aims/io/gifti.h>
+#include <locale.h>
 
 namespace aims 
 {
@@ -158,6 +159,7 @@ namespace aims
     D, T> & vol, const carto::AllocatorContext & /*context*/,
     carto::Object options) 
   {
+    setlocale( LC_NUMERIC, "C" );
     GiftiHeader hdr(filename);
 
     setOptions(options);
@@ -368,7 +370,8 @@ namespace aims
     const AimsTimeSurface<D, T> & thing, carto::Object )
   {
     // std::cout << "gifti mesh write\n";
-    try 
+    setlocale( LC_NUMERIC, "C" );
+    try
     {
       const PythonHeader & thdr = thing.header();
       GiftiHeader hdr(filename);

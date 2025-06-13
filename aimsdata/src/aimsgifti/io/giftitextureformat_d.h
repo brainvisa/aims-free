@@ -39,6 +39,7 @@
 #include <aims/io/giftiutil.h>
 #include <cartobase/thread/mutex.h>
 #include <aims/io/gifti.h>
+#include <locale.h>
 
 
 namespace aims
@@ -54,6 +55,7 @@ namespace aims
 
     // std::cout << "gifti texture read\n";
 
+    setlocale( LC_NUMERIC, "C" );
     GiftiHeader hdr( filename );
 
     setOptions(options);
@@ -117,6 +119,8 @@ namespace aims
   {
 
     // std::cout << "gifti texture write\n";
+
+    setlocale( LC_NUMERIC, "C" );
 
     try
     {
