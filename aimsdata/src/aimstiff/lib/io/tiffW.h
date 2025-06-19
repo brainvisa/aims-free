@@ -115,17 +115,10 @@ namespace aims
                                   unsigned t )
   {
     int bps, spp, photometric;
-    // Define an image
-    TIFF *tif;
-
-    // Open the TIFF file
-    if((tif = TIFFOpen(filename.c_str(), "w")) == NULL){
-      std::cout << "Could not open '" << filename << "' for writing." << std::endl;
-      throw carto::file_not_found_error( _name );
-    }
-
     std::string name = carto::DataTypeCode<T>().name();
     uint16_t sampleformat = SAMPLEFORMAT_UINT;
+    uint16_t extrasampletype = EXTRASAMPLE_UNASSALPHA;
+    uint16_t extrasamplescount = 0;
 
     if ( name == "U8"  )
     {
@@ -186,6 +179,7 @@ namespace aims
       spp = 4;
       bps = 8;
       photometric = PHOTOMETRIC_RGB;
+      extrasamplescount = 1;
     }
     else
     {
@@ -194,11 +188,33 @@ namespace aims
       photometric = PHOTOMETRIC_RGB;
     }
 
-//     std::cout << "Filename : " << filename << std::endl;
-//     std::cout << "Type : " << name << ", Size : " << sizeof(T) << ", Spp : " << spp << ", Bps : " << bps << std::endl;
-//     std::cout << "DimX : " << data.dimX() << ", DimY : " << data.dimY() << std::endl;
-//     std::cout << "SizeX : " << data.sizeX() << ", SizeY : " << data.sizeY() << std::endl;
-//     std::cout << "Photometric : " << photometric << std::endl;
+    // std::cout << "-- TIFF Filename : " << filename << std::endl;
+    // std::cout << "-- TIFF Type : " << name << ", Size : " << sizeof(T) << ", Spp : " << spp << ", Bps : " << bps << std::endl;
+    // std::cout << "-- TIFF DimX : " << data.dimX() << ", DimY : " << data.dimY() << std::endl;
+    // std::cout << "-- TIFF SizeX : " << data.sizeX() << ", SizeY : " << data.sizeY() << std::endl;
+    // std::cout << "-- TIFF Photometric : " << photometric << std::endl;
+    // std::cout << "-- TIFF data size: " << carto::toString((long)spp * data.dimX() * data.dimY()) << std::endl << std::flush;
+    // std::cout << "-- TIFF data size limit: " << carto::toString(std::numeric_limits<uint32_t>::max()) << std::endl << std::flush;
+
+    // Define an image
+    TIFF *tif;
+
+    if (((long)spp * data.dimX() * data.dimY()) <= std::numeric_limits<uint32_t>::max()) { 
+      // Use standard tiff
+      // std::cout << "-- TIFF support: standard" << std::endl;
+      tif = TIFFOpen(filename.c_str(), "w");
+    }
+    else {
+      // Use big tiff
+      // std::cout << "-- TIFF support: big tiff" << std::endl;
+      tif = TIFFOpen(filename.c_str(), "w8");
+    }
+
+    // Open the TIFF file
+    if(tif == NULL){
+      std::cout << "Could not open '" << filename << "' for writing." << std::endl;
+      throw carto::file_not_found_error( _name );
+    }
 
     // We need to set some values for basic tags before we can add any data
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, data.dimX() );
@@ -214,6 +230,10 @@ namespace aims
     TIFFSetField(tif, TIFFTAG_YRESOLUTION, 10. / data.sizeY());
     TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, RESUNIT_CENTIMETER);
     TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, sampleformat);
+
+    if (extrasamplescount > 0) {
+        TIFFSetField(tif, TIFFTAG_EXTRASAMPLES, extrasamplescount, &extrasampletype);
+    }
 
     tsize_t res;
     int y, ny = data.dimY(), nx = data.dimX();

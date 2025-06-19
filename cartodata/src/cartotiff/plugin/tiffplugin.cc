@@ -34,7 +34,7 @@
 //--- plugin -----------------------------------------------------------------
 #include <cartodata/plugin/tiffplugin.h>
 #include <soma-io/image/tiffimagereader.h>
-//#include <soma-io/image/tiffimagewriter.h>
+#include <soma-io/image/tiffimagewriter.h>
 //--- cartodata --------------------------------------------------------------
 #include <cartodata/io/volumeformatreader.h>
 #include <cartodata/io/volumeformatwriter.h>
@@ -214,6 +214,15 @@ TiffPlugin::TiffPlugin() : Plugin()
     VolumeRefFormatReader<VoxelRGBA> *rfr_rgba = new VolumeRefFormatReader<VoxelRGBA>;
     rfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new TiffImageReader<VoxelRGBA> ) );
     FormatDictionary<VolumeRef<VoxelRGBA> >::registerFormat( "TIFF", rfr_rgba, exts );
+
+    // VolumeRefFormatWriter<VoxelRGB> *rfw_rgb = new VolumeRefFormatWriter<VoxelRGB>;
+    // rfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new TiffImageWriter<VoxelRGB> ) );
+    // FormatDictionary<VolumeRef<VoxelRGB> >::registerFormat( "TIFF", rfw_rgb, exts );
+    // rfw_rgb = new VolumeRefFormatWriter<VoxelRGB>;
+
+    // VolumeRefFormatWriter<VoxelRGBA> *rfw_rgba = new VolumeRefFormatWriter<VoxelRGBA>;
+    // rfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >( new TiffImageWriter<VoxelRGBA> ) );
+    // FormatDictionary<VolumeRef<VoxelRGBA> >::registerFormat( "TIFF", rfw_rgba, exts );
 
 //     VolumeRefFormatReader<VoxelHSV> *rfr_hsv = new VolumeRefFormatReader<VoxelHSV>;
 //     rfr_hsv->attach( rc_ptr<ImageReader<VoxelHSV> >( new TiffImageReader<VoxelHSV> ) );
