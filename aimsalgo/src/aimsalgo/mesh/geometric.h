@@ -264,6 +264,10 @@ namespace aims
 //     bool operator()( size_t i );
     bool operator()( VertexPointer & i );
 
+    /// clean a whole mesh
+    static void cleanMesh( AimsSurfaceTriangle & mesh, float maxCurv = 0.5,
+                           bool verbose=false );
+
   private: // functions
 
   // NB: neighbors should be a std::vector so far
