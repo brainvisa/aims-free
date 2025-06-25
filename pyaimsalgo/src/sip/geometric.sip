@@ -151,6 +151,14 @@ namespace aims
     VertexRemover( rc_ptr_GeometricProperties geom );
     VertexRemover( rc_ptr_AimsTimeSurface_3_VOID & mesh );
     aims::GeometricProperties & geometricProperties();
+    bool verbose() const;
+    void setVerbose( bool v );
+
+    static void cleanMesh( AimsSurfaceTriangle & mesh, float maxCurv = 0.5,
+                           bool verbose=false );
+%Docstring
+    clean a whole mesh
+%End
 
   };
 
@@ -158,9 +166,10 @@ namespace aims
 
 
 vector_AimsVector_U32_3*
-simple_delaunay_triangulation( const vector_POINT2DF & points ) /Factory/;
+simple_delaunay_triangulation( const vector_POINT2DF & points,
+  bool verbose = false ) /Factory/;
 %Docstring
-    triangles = simple_delaunay_triangulation(points)
+    triangles = simple_delaunay_triangulation(points, verbose=False)
 
     Get a Delaunay triangulation for a polygon. Poins in the polygon should
     be ordered in a clockwise or counterclockwise order.

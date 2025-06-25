@@ -1376,14 +1376,14 @@ void GaussianCurvature::localProcess(
 
 
 VertexRemover::VertexRemover( rc_ptr<GeometricProperties> geom )
-  : _geom( geom )
+  : _geom( geom ), _verbose( false )
 {
   _geom->doGraph();
 }
 
 
 VertexRemover::VertexRemover( rc_ptr<AimsSurfaceTriangle> mesh )
-  : _geom( new GeometricProperties( mesh ) )
+  : _geom( new GeometricProperties( mesh ) ), _verbose( false )
 {
   _geom->doGraph();
 }
@@ -1533,10 +1533,11 @@ bool VertexRemover::operator()( VertexPointer & i )
   }
   // For two points or less, do not add any face. Note that if this happens, it means that the mesh
   // is in really bad shape -- actually the following might crash.
-  else std::cout << "w2!";
+  else if( _verbose )
+    std::cout << "w2!";
 
   // Check consistency between number of points and number of faces
-  if (m_tri.size() != m_neighbors.size() - 2)
+  if( _verbose && m_tri.size() != m_neighbors.size() - 2 )
   {
     std::cout << "wK!" << m_tri.size() << "-" << m_neighbors.size() - 2;
   }
@@ -1678,7 +1679,7 @@ bool VertexRemover::operator()( VertexPointer & i )
       if (flag) { if (p == p0) break; }
       else flag = true;
       m_neighbors[j]->neighbors().push_back(p->value);
-      if (p->to.size() != 1)
+      if( _verbose && p->to.size() != 1 )
       {
         std::cout << "wW!";
       }
@@ -1794,6 +1795,7 @@ void VertexRemover::cleanMesh( AimsSurfaceTriangle & mesh, float maxCurv,
   unsigned int count = 0;
 
   VertexRemover vertexRemover( gp );
+  vertexRemover.setVerbose( verbose );
   bool flagFinished;
   unsigned int iter = 0;
   do
@@ -1985,7 +1987,8 @@ namespace
 
 
 std::list< AimsVector<uint, 3> >
-aims::simple_delaunay_triangulation( const std::vector<Point2df> & in_points )
+aims::simple_delaunay_triangulation( const std::vector<Point2df> & in_points,
+                                     bool verbose )
 {
   std::vector<Point2df> points = in_points; // we will modify points
   typedef AimsVector<uint, 3> Face;
@@ -2134,14 +2137,15 @@ aims::simple_delaunay_triangulation( const std::vector<Point2df> & in_points )
 
   // Check that normals are ok
   {
-    for (FaceList::iterator f = faces.begin(); f != faces.end(); ++f)
-    {
-      if( cross( points[(*f)[1]] - points[(*f)[0]],
-                 points[(*f)[2]] - points[(*f)[0]] ) < 0 )
+    if( verbose )
+      for (FaceList::iterator f = faces.begin(); f != faces.end(); ++f)
       {
-        std::cout << "wS!";
+        if( cross( points[(*f)[1]] - points[(*f)[0]],
+                  points[(*f)[2]] - points[(*f)[0]] ) < 0 )
+        {
+          std::cout << "wS!";
+        }
       }
-    }
   }
 
 
@@ -2202,7 +2206,7 @@ aims::simple_delaunay_triangulation( const std::vector<Point2df> & in_points )
     }
 
     // Check again that we have the expected number of faces
-    if (faces.size() != n-2)
+    if( verbose && faces.size() != n-2 )
     {
       std::cout << "NI2!" << faces.size() << "-" << n << std::endl;
       {
@@ -2235,7 +2239,7 @@ aims::simple_delaunay_triangulation( const std::vector<Point2df> & in_points )
         }
       }
     }
-    if (outer_edges.size() != n)
+    if( verbose && outer_edges.size() != n )
     {
       std::cout << "wU!";
     }

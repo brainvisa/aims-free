@@ -252,6 +252,8 @@ namespace aims
 
     VertexRemover( carto::rc_ptr<GeometricProperties> geom );
     VertexRemover( carto::rc_ptr<AimsSurfaceTriangle> mesh );
+    bool verbose() const { return _verbose; }
+    void setVerbose( bool v ) { _verbose = v; }
 
     // set & get
 
@@ -284,6 +286,7 @@ namespace aims
 
     // data, input
     carto::rc_ptr<GeometricProperties> _geom;
+    bool _verbose;
 
   };
 
@@ -297,7 +300,8 @@ namespace aims
       a cloud point (and its convex hull), not a polygon as here.
   */
   std::list<AimsVector<uint, 3> >
-  simple_delaunay_triangulation( const std::vector<Point2df> & points );
+  simple_delaunay_triangulation( const std::vector<Point2df> & points,
+                                 bool verbose = false );
 
 }
 
