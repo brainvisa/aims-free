@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from soma import aims, aimsalgo
+import numpy as np
 
 
 def graph_to_meshes(graph, label_att='label', nomenclature=None,
-                    mni_space=False):
+                    mni_space=False, transform=None, referential=None,
+                    removed_labels=None):
     ''' Make one mesh for each sucus in a labelled sulcal graph.
 
     graph may be either a Graph object, or a filename.
@@ -18,6 +20,10 @@ def graph_to_meshes(graph, label_att='label', nomenclature=None,
 
     meshes = {}
     labelmap = {}
+    if removed_labels is None:
+        removed_labels = set()
+    elif not isinstance(removed_labels, set):
+        removed_labels = set(removed_labels)
 
     if nomenclature is None:
         nomenc_f = aims.carto.Paths.findResourceFile(
@@ -27,7 +33,7 @@ def graph_to_meshes(graph, label_att='label', nomenclature=None,
 
     for v in graph.vertices():
         label = v.get(label_att)
-        if label is not None:
+        if label is not None and label not in removed_labels:
             bck = labelmap.setdefault(label, aims.BucketMap_VOID())
             bk = bck[0]
             for bname in ('aims_ss', 'aims_bottom', 'aims_other'):
@@ -78,10 +84,21 @@ def graph_to_meshes(graph, label_att='label', nomenclature=None,
             if color is not None:
                 surface.header()['material'] = {'diffuse': list(color) + [1.]}
 
+        if 'GIFTI_labels_table' in surface.header():
+            del surface.header()['GIFTI_labels_table']
+
         if mni_space:
             aims.SurfaceManip.meshTransform(surface, mni)
             surface.header()['referential'] \
                 = aims.StandardReferentials.mniTemplateReferentialID()
+        elif transform is not None:
+            if referential is not None:
+                surface.header()['referential'] = referential
+            aims.SurfaceManip.meshTransform(surface, transform)
+            to_mni = mni * transform.inverse()
+            surface.header()['referentials'] \
+                = [aims.StandardReferentials.mniTemplateReferentialID()]
+            surface.header()['transformations'] = [to_mni.toVector()]
         else:
             if ref is not None:
                 surface.header()['referential'] = ref
@@ -95,7 +112,9 @@ def graph_to_meshes(graph, label_att='label', nomenclature=None,
 
 
 def save_graph_to_meshes(graph, filename_pattern, label_att='label',
-                         nomenclature=None, format=None, mni_space=False):
+                         nomenclature=None, format=None, mni_space=False,
+                         transform=None, referential=None,
+                         removed_labels=None):
     ''' Call graph_to_meshes and save mesh files according to a filename
     pattern.
 
@@ -110,10 +129,113 @@ def save_graph_to_meshes(graph, filename_pattern, label_att='label',
     '''
     meshes, buckets = graph_to_meshes(
         graph, label_att=label_att, nomenclature=nomenclature,
-        mni_space=mni_space)
+        mni_space=mni_space, transform=transform, referential=referential,
+        removed_labels=removed_labels)
 
-    for label, mesh in meshes.items():
-        fname = filename_pattern % {'label': label}
-        aims.write(mesh, fname, format=format)
+    if format in ('GLTF', 'GLB') or \
+            (format is None and (filename_pattern.endswith('.glb')
+                                 or filename_pattern.endswith('.gltf'))):
+        fname = filename_pattern
+        aims.write(list(meshes.values()), fname, format=format)
+    else:
+        for label, mesh in meshes.items():
+            fname = filename_pattern % {'label': label}
+            aims.write(mesh, fname, format=format)
 
     return meshes, buckets
+
+
+def spam_to_graphs(spam, labels=None):
+    def new_graph(tal_trans):
+        graph = aims.Graph('CorticalFoldArg')
+        graph['filename_base'] = '*'
+        graph['voxel_size'] = [1., 1., 1.]
+        graph['boundingbox_min'] = [-90, -80, -90]
+        graph['boundingbox_max'] = [90, 120, 60]
+        graph['fold.global.tri'] = 'fold aims_Tmtktri Tmtktri_label'
+        graph['label_property'] = 'name'
+        graph['type.global.tri'] = 'fold.global.tri'
+        graph['referential'] = 'a2a820ac-a686-461e-bcf8-856400740a6c'
+        aims.GraphManip.storeTalairach(graph, tal_trans)
+
+        return graph
+
+    def new_vertex(graph, label):
+        v = graph.addVertex('fold')
+        v['bottom_point_number'] = 0
+        v['name'] = label
+        v['point_number'] = 0
+        v['size'] = 0
+        v['ss_point_number'] = 0
+
+        return v
+
+    if labels is None:
+        labels = spam.header()['GIFTI_labels_table']
+
+    vol = aims.Volume(spam.shape[0], spam.shape[1], spam.shape[2], 1, 1,
+                      dtype='S16')
+    vol.copyHeaderFrom(spam.header())
+    vol.fillBorder(-1)
+    mesher = aimsalgo.Mesher()
+    mesher.setDecimation(0.99, 3., 0.2, 180.)
+    mesher.setSmoothing(mesher.LOWPASS, 50, 0.4)
+    mesher.setVerbose(False)
+
+    try:
+        tali = spam.header()['referentials'].index(
+            aims.StandardReferentials.acPcReferentialID())
+        tal = aims.AffineTransformation3d(spam.header()[
+            'transformations'][tali])
+    except ValueError:
+        try:
+            icbmi = spam.header()['referentials'].index(
+                aims.StandardReferentials.mniTemplateReferential())
+        except ValueError:
+            icbmi = spam.header()['referentials'].index(
+                aims.StandardReferentials.mniTemplateReferentialID())
+        icbm = aims.AffineTransformation3d(spam.header()['transformations'][
+            icbmi])
+        tal = aims.StandardReferentials.talairachToICBM().inverse() * icbm
+
+    allmeshes = {0.2: {}, 0.4: {}, 0.7: {}}
+    graphs = {0.2: [new_graph(tal), new_graph(tal)],
+              0.4: [new_graph(tal), new_graph(tal)],
+              0.7: [new_graph(tal), new_graph(tal)]}
+
+    for i, labeld in labels.items():
+        label = labeld['Label']
+        lmax = np.max(spam[:, :, :, i])
+        for th, amesh in allmeshes.items():
+            vol.fill(0)
+            vol[spam[:, :, :, i] >= th * lmax] = 1
+            meshes = mesher.doit(vol)
+            mesh = aims.AimsSurfaceTriangle()
+            mesh.header()['label'] = label
+            color = labeld['RGB'] + [th + 0.3]
+            mesh.header()['material'] = {'diffuse': color}
+
+            for sl in meshes.values():
+                for s in sl:
+                    aims.SurfaceManip.meshMerge(mesh, s)
+            # additional decimation/smothing
+            mesher.decimate(mesh)
+            mesher.smooth(mesh)
+            mesher.decimate(mesh)
+            mesher.smooth(mesh)
+            mesher.decimate(mesh)
+            if label.endswith('_right'):
+                side = 1
+            else:
+                side = 0
+            graph = graphs[th][side]
+            glabel = label
+            if glabel.startswith('unknown'):
+                glabel = 'unknown'
+            v = new_vertex(graph, glabel)
+            aims.GraphManip.storeAims(graph, v, 'aims_Tmtktri', mesh)
+            v['skeleton_label'] = i
+
+            amesh[label] = mesh
+
+    return graphs, allmeshes
