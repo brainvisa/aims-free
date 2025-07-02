@@ -239,3 +239,86 @@ def spam_to_graphs(spam, labels=None):
             amesh[label] = mesh
 
     return graphs, allmeshes
+
+
+def build_hierarchy_for_labels(labels):
+    ''' labels is a GIFTI-like labels table
+    ({index: {"Label": label, "RGB": color}})
+    '''
+    h = aims.Hierarchy()
+    h.setSyntax('hierarchy')
+    h['graph_syntax'] = 'CorticalFoldArg'
+    t = aims.Tree()
+    t.setSyntax('fold_name')
+    t['name'] = 'brain'
+    h.insert(t)
+    tl = aims.Tree()
+    tl.setSyntax('fold_name')
+    tl['name'] = 'hemisph_left'
+    t.insert(tl)
+    tr = aims.Tree()
+    tr.setSyntax('fold_name')
+    tr['name'] = 'hemisph_right'
+    t.insert(tr)
+
+    for i, ldef in labels.items():
+        label = ldef['Label']
+        col = ldef['RGB']
+        col = [int(round(c * 255)) for c in col]
+        if label.endswith('_right'):
+            parent = tr
+        else:
+            parent = tl
+        tc = aims.Tree()
+        tc.setSyntax('fold_name')
+        tc['name'] = label
+        tc['label'] = '%02d' % i
+        tc['color'] = col
+        parent.insert(tc)
+
+    return h
+
+
+def symmetrize_hierarchy_colors(hierarchy, left_to_right=True):
+    def get_other_name(name):
+        if name.endswith('_left'):
+            return name[:-4] + 'right'
+        else:
+            return name[:-5] + 'left'
+
+    brain = [c for c in hierarchy.children() if c.get('name') == 'brain'][0]
+    lh = [c for c in brain.children() if c.get('name') == 'hemisph_left'][0]
+    rh = [c for c in brain.children() if c.get('name') == 'hemisph_right'][0]
+    if left_to_right:
+        src = lh
+        dst = rh
+    else:
+        src = rh
+        dst = lh
+
+    tree_map = {}
+    todo = [dst]
+    while todo:
+        item = todo.pop(0)
+        name = item.get('name')
+        if name is not None:
+            tree_map[name] = item
+        todo += item.children()
+    print('dest map:', len(tree_map))
+    print(tree_map)
+
+    todo = [src]
+    while todo:
+        item = todo.pop(0)
+        name = item.get('name')
+        if name is not None:
+            color = item.get('color')
+            if color is not None:
+                other_name = get_other_name(name)
+                ditem = tree_map.get(other_name)
+                if ditem is not None:
+                    ditem['color'] = color
+                else:
+                    print('cannot find match for:', other_name)
+        todo += item.children()
+
