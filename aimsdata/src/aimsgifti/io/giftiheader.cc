@@ -798,12 +798,22 @@ void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
               = LabelTable->getProperty( "Label" )->getString();
             glt.label[i] = strdup( label.c_str() );
             // std::cout << glt.label[i] << "\n";
-            Object rgba = LabelTable->getProperty( "RGB" );
-            Object itrgb = rgba->objectIterator();
-            for( int j = 0; itrgb->isValid(); itrgb->next(), j++ )
+            try
             {
-              glt.rgba[4*i + j] = float( itrgb->currentValue()->getScalar() );
-              // std::cout << itrgb->currentValue()->getScalar() << " ";
+              Object rgba = LabelTable->getProperty( "RGB" );
+              Object itrgb = rgba->objectIterator();
+              for( int j = 0; itrgb->isValid(); itrgb->next(), j++ )
+              {
+                glt.rgba[4*i + j] = float( itrgb->currentValue()->getScalar() );
+                // std::cout << itrgb->currentValue()->getScalar() << " ";
+              }
+            }
+            catch( ... )
+            {
+              glt.rgba[4*i] = 0.5F;
+              glt.rgba[4*i + 1] = 0.5F;
+              glt.rgba[4*i + 2] = 0.5F;
+              glt.rgba[4*i + 2] = 1.F;
             }
           }
         }
