@@ -146,6 +146,19 @@ namespace aims
       photometric = PHOTOMETRIC_MINISBLACK;
       sampleformat = SAMPLEFORMAT_INT;
     }
+    else if ( name == "U32"  )
+    {
+      spp = 1;
+      bps = 32;
+      photometric = PHOTOMETRIC_MINISBLACK;
+    }
+    else if ( name == "S32"  )
+    {
+      spp = 1;
+      bps = 32;
+      photometric = PHOTOMETRIC_MINISBLACK;
+      sampleformat = SAMPLEFORMAT_INT;
+    }
     else if ( name == "FLOAT"  )
     {
       spp = 1;
