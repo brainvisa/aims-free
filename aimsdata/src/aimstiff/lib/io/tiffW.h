@@ -212,7 +212,7 @@ namespace aims
     // Define an image
     TIFF *tif;
 
-    if (((long)spp * data.dimX() * data.dimY()) <= std::numeric_limits<uint32_t>::max()) { 
+    if (((long)(bps / 8) * spp * data.dimX() * data.dimY()) <= std::numeric_limits<uint32_t>::max()) { 
       // Use standard tiff
       // std::cout << "-- TIFF support: standard" << std::endl;
       tif = TIFFOpen(filename.c_str(), "w");
@@ -272,7 +272,12 @@ namespace aims
         ptr = (void *) &buffer[0];
       }
 
+      // std::cout << "-- TIFF writing strip (data size: "
+      //           << carto::toString((bps / 8) * spp * data.dimX()) 
+      //           << ")" << std::endl << std::flush;
       res = TIFFWriteEncodedStrip(tif, y, ptr, (bps / 8) * spp * data.dimX() );
+      // std::cout << "-- TIFF strip written (result: " << carto::toString(res) 
+      //           << ")" << std::endl << std::flush;
 
       if( res < 0 )
         throw carto::file_error( filename );
