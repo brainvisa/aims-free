@@ -112,6 +112,8 @@ namespace aims
 
     bool exactformat = false;
     carto::Object options = carto::Object::value( carto::Dictionary() );
+
+    errno = 0;  // start with a clean situation
     
     // Copy aims settings to options
     options->copyProperties(
@@ -179,6 +181,7 @@ namespace aims
     }
     catch( ... )
     {
+      carto::io_error::checkFatalIOErrno( _filename );
     }
 
     // if it failed, continue with aims writer.
@@ -203,14 +206,19 @@ namespace aims
         {
           if( writer->write( _filename, obj, options ) )
             return true;
-          else if( exactformat )
-            throw carto::wrong_format_error( std::string( "1. Cannot write "
-              "object in format " ) + *format, _filename );
+          else
+          {
+            carto::io_error::checkFatalIOErrno( _filename );
+            if( exactformat )
+              throw carto::wrong_format_error( std::string( "1. Cannot write "
+                "object in format " ) + *format, _filename );
+          }
         }
         catch( std::exception & e )
         {
           if( exactformat )
             throw;
+          carto::io_error::checkFatalIOErrno( _filename );
           carto::io_error::keepExceptionPriority( e, excp, exct, excm,
                                                   5 );
         }
@@ -269,14 +277,20 @@ namespace aims
               {
                 if( writer->write( _filename, obj, options ) )
                   return true;
-                else if( exactformat )
-                  throw carto::wrong_format_error( std::string( "2. Cannot write "
-                    "object in format " ) + defformat, _filename );
+                else
+                {
+                  carto::io_error::checkFatalIOErrno( _filename );
+                  if( exactformat )
+                    throw carto::wrong_format_error(
+                      std::string( "2. Cannot write object in format " )
+                      + defformat, _filename );
+                }
               }
               catch( std::exception & e )
               {
                 if( exactformat )
                   throw;
+                carto::io_error::checkFatalIOErrno( _filename );
                 carto::io_error::keepExceptionPriority( e, excp, exct, excm,
                                                         5 );
               }
@@ -312,9 +326,14 @@ namespace aims
             {
               if( writer->write( _filename, obj, options ) )
                 return true;
-              else if( exactformat )
-                throw carto::wrong_format_error( std::string( "3. Cannot write "
-                  "object in format " ) + *ie, _filename );
+              else
+              {
+                carto::io_error::checkFatalIOErrno( _filename );
+                if( exactformat )
+                  throw carto::wrong_format_error(
+                    std::string( "3. Cannot write object in format " )
+                    + *ie, _filename );
+              }
             }
             catch( std::exception & e )
             {
@@ -324,6 +343,7 @@ namespace aims
 #endif
               if( exactformat )
                 throw;
+              carto::io_error::checkFatalIOErrno( _filename );
               carto::io_error::keepExceptionPriority( e, excp, exct,
                                                       excm );
             }
@@ -351,14 +371,20 @@ namespace aims
               {
                 if( writer->write( _filename, obj, options ) )
                   return true;
-                else if( exactformat )
-                  throw carto::wrong_format_error( std::string( "4. Cannot write "
-                    "object in format " ) + *ie, _filename );
+                else
+                {
+                  carto::io_error::checkFatalIOErrno( _filename );
+                  if( exactformat )
+                    throw carto::wrong_format_error(
+                      std::string( "4. Cannot write object in format " )
+                      + *ie, _filename );
+                }
               }
               catch( std::exception & e )
               {
                 if( exactformat )
                   throw;
+                carto::io_error::checkFatalIOErrno( _filename );
                 carto::io_error::keepExceptionPriority( e, excp, exct,
                                                         excm );
               }
@@ -382,14 +408,20 @@ namespace aims
             {
               if( writer->write( _filename, obj, options ) )
                 return true;
-              else if( exactformat )
-                throw carto::wrong_format_error( std::string( "5. Cannot write "
-                "object in format " ) + *ie, _filename );
+              else
+              {
+                carto::io_error::checkFatalIOErrno( _filename );
+                if( exactformat )
+                  throw carto::wrong_format_error(
+                    std::string( "5. Cannot write object in format " )
+                    + *ie, _filename );
+              }
             }
             catch( std::exception & e )
             {
               if( exactformat )
                 throw;
+              carto::io_error::checkFatalIOErrno( _filename );
               carto::io_error::keepExceptionPriority( e, excp, exct,
                                                       excm );
             }
@@ -413,7 +445,11 @@ namespace aims
 
       soma::Writer<T> writer( uri );
       return writer.write( obj, _options, 4, 4 );
-    } catch( ... ) {}
+    }
+    catch( ... )
+    {
+      carto::io_error::checkFatalIOErrno( _filename );
+    }
     // if it failed, it's hopeless
 
     // still not succeeded, it's hopeless...
