@@ -20,7 +20,7 @@ from six.moves import range
 
 FLOAT_DATA_TYPES = ("FLOAT", "CFLOAT", "DOUBLE", "CDOUBLE")
 NO_NAN_FORMATS = ("DICOM", )
-NO_INF_FORMATS = ["MINC", "FREESURFER (MINC)"] # Minc supports NaN but not inf
+NO_INF_FORMATS = ["MINC", "FREESURFER (MINC)"]  # Minc supports NaN but not inf
 
 class TestPyaimsIO(unittest.TestCase):
 
