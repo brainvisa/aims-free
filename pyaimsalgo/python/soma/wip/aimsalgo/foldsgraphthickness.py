@@ -169,6 +169,7 @@ class FoldsGraphThickness:
                 vertex_mesh(self, v, skel)
             except:
                 pass
+        fat.makeSummaryGlobalAttributes()
         return self.fold_graph
 
     def process(self):
