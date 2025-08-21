@@ -41,15 +41,15 @@ using namespace std;
 //Instanciation
 template
 Texture<float> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
-                              const Texture<float> & inittex, float threshold, int mode=1 );
+                              const Texture<float> & inittex, float threshold, int mode=1, int verbose=0 );
 
 template
 Texture<int> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
-                              const Texture<int> & inittex, int threshold, int mode=1 );
+                              const Texture<int> & inittex, int threshold, int mode=1, int verbose=0 );
 
 template
 Texture<short> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
-                              const Texture<short> & inittex, short threshold, int mode=1 );
+                              const Texture<short> & inittex, short threshold, int mode=1, int verbose=0 );
 
 template
 unsigned AimsMeshLabelNbConnectedComponent( const AimsSurface<3,Void> & mesh,

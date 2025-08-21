@@ -51,7 +51,7 @@ AIMSALGO_API
 template<class T>
 Texture<T> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
                              const Texture<T> & inittex,
-                             T threshold, int mode=1);
+                             T threshold, int mode=1, int verbose=0 );
 template<class T>
 unsigned AimsMeshLabelNbConnectedComponent( const AimsSurface<3,Void> & mesh,
                            const Texture<T> & inittex, const T lab );

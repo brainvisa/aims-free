@@ -48,7 +48,7 @@
 
 template<class T>
 Texture<T> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
-                             const Texture<T> & inittex, T threshold, int mode )
+                             const Texture<T> & inittex, T threshold, int mode, int verbose )
 {
   Texture<T>                  tex;
   const std::vector<Point3df>      & vert = mesh.vertex();
@@ -65,7 +65,9 @@ Texture<T> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
   int nnode = 0;
 
   // init texture
-  std::cout << "Thresholding: " << threshold << std::endl;
+  if (verbose) {
+    std::cout << "Thresholding: " << threshold << std::endl;
+  }
   if (mode==1)
   {
      for( i=0; i<n; ++i )
@@ -95,7 +97,9 @@ Texture<T> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
      std::cerr << "AimsMeshLabelConnectedComponent : thresholding mode unknown" << std::endl;
      exit(1);
    }
-  std::cout << nnode << "/" << n << std::endl;
+  if (verbose) {
+    std::cout << nnode << "/" << n << std::endl;
+  }
 
   //Detect connectivity
   for( i=0; i<poly.size(); ++i )
@@ -128,9 +132,10 @@ Texture<T> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
   std::stack<unsigned> current;
   std::set<unsigned>::iterator          in, fn;
 
-
-  printf("Computing connected component\n");
-  fflush(stdout);
+  if (verbose) {
+    printf("Computing connected component\n");
+    fflush(stdout);
+  }
   for( i=0; i<n; ++i )
     {
       if(tex.item(i)==0)
@@ -150,7 +155,9 @@ Texture<T> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
          }
      }
     }
-  std::cout << "nb cc: " << label << std::endl;
+  if (verbose) {
+    std::cout << "nb cc: " << label << std::endl;
+  }
 
   return tex;
 }
