@@ -646,6 +646,7 @@ int mat_rblk(FILE *fptr, int blkno, char *bufr,  int nblks);
 int mat_wblk(FILE *fptr, int blkno, char *bufr,  int nblks);
 void swaw(short *from, short *to, int length);
 int insert_mdir(struct MatDir	matdir,MatDirList	*dirlist);
+FILE *mat_create( char *fname, Main_header *mhead );
 
 #if defined(__cplusplus)
 }

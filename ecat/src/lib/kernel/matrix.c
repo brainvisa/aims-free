@@ -89,7 +89,7 @@ char* typeFilterLabel[NumDataMasks] =
 FILE *mat_open( fname, fmode)
   char *fname, *fmode;
 {
-	FILE *fopen(), *fptr;
+	FILE *fptr;
 
 	matrix_errno = MAT_OK;
 	matrix_errtxt[0] = '\0';
@@ -642,9 +642,7 @@ mat_wblk(fptr, blkno, bufr, nblks)
 	return (0);
 }
 
-FILE *mat_create( fname, mhead)
-  char *fname;
-  Main_header *mhead;
+FILE *mat_create( char *fname, Main_header *mhead )
 {
 	FILE *fptr;
 	int bufr[MatBLKSIZE/sizeof(int)];
@@ -863,11 +861,19 @@ void fix_selector( s1, s2)
 	string_replace(s1, temp, ": ", ":");
 }
 
+char* next_word(char *s, char *w)
+{
+	while (*s && *s!=' ') *w++ = *s++;
+	*w='\0';
+	if (*s) s++;
+	return (s);
+}
+
 void decode_selector(s1, ranges)
 	char           *s1;
 	int             ranges[2][5];
 {
-	char            xword[16], *next_word();
+	char            xword[16];
 	int             i;
 
 	fix_selector(s1, s1);
@@ -883,15 +889,6 @@ void decode_selector(s1, ranges)
 			ranges[1][i] = ranges[0][i];
 		}
 	}
-}
-
-char* next_word(s, w)
-  char *s, *w;
-{
-	while (*s && *s!=' ') *w++ = *s++;
-	*w='\0';
-	if (*s) s++;
-	return (s);
 }
 
 int map_main_header(bufr,header)

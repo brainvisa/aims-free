@@ -4,7 +4,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include <ecat/kernel//matrix.h>
 #include <ecat/lib_compress/compress.h>
 #include <ecat/lib_compress/dclz.h>
 #include <ecat/lib_compress/uvlc.h>
@@ -213,10 +212,7 @@ char *str;
 	return 1;
 }
 
-int compress(matrix_data, data_type, z_data, mode)
-MatrixData *matrix_data;
-char  *z_data;
-int data_type, mode;
+int compress(MatrixData *matrix_data, int data_type, char *z_data, int mode)
 {
 	char line[80];
 	FILE *fp=NULL;
@@ -273,10 +269,8 @@ int data_type, mode;
 	return z_data_size;
 }
 	
-int uncompress(z_data, z_data_size, matrix_data, mode)
-char  *z_data;
-MatrixData *matrix_data;
-int z_data_size, mode;
+int uncompress(char *z_data, int z_data_size, MatrixData *matrix_data,
+	       int mode)
 {
 	FILE *fp=NULL;
 	char line[80];

@@ -46,7 +46,7 @@ int	matnum;
 	}
 	z_data = (caddr_t)calloc(1,nblks*512);
 	if (z_data == NULL) return(ERROR) ;
-	z_size = compress(data,data_type,z_data, compress_method);
+	z_size = compress(data, data_type, z_data, compress_method);
 	if (z_size == 0 ) {
 		free(z_data);
 		return (ERROR);

@@ -36,19 +36,21 @@ typedef struct view2d
 
 #if defined(__cplusplus)
 extern "C" {
-	matmpy(Matrix res, Matrix a, Matrix b);
-	mat_print(Matrix);
-	mat_unity(Matrix);
+#endif /* __cplusplus */
+	void matmpy(Matrix res, Matrix a, Matrix b);
+	void mat_print(Matrix);
+	void mat_unity(Matrix);
 	Matrix mat_alloc(int ncols, int nrows);
-	mat_copy(Matrix a, Matrix b);
-	rotate(Matrix a,float rx, float ry, float rz);
-	translate(Matrix a,float tx, float ty, float tz);
-	scale(Matrix a,float sx, float sy, float sz);
-	mat_free(Matrix);
+	void mat_copy(Matrix a, Matrix b);
+	void rotate(Matrix a,float rx, float ry, float rz);
+	void translate(Matrix a,float tx, float ty, float tz);
+	void scale(Matrix a,float sx, float sy, float sz);
+	void mat_free(Matrix);
+	/* Matrix mat_alloc(); */
+	Vol3d make3d_volume();
+	Stack3d make3d_stack();
+#if defined(__cplusplus)
 }
 #endif /* __cplusplus */
 
-Matrix mat_alloc();
-Vol3d make3d_volume();
-Stack3d make3d_stack();
 #endif /* matpkg_h_defined */

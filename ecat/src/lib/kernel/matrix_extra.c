@@ -108,7 +108,7 @@ int is_acs(fname)
 	   return(FALSE) ;
 }
 
-int matrix_convert_data()
+int matrix_convert_data(MatrixData *, int)
 {
 	return OK ;	/* dummy for now */
 }
@@ -517,19 +517,10 @@ MatrixFile *matrix_open(fname, fmode, mtype)
 	return(NULL) ;
 }
 
-#ifdef __STDC__
 MatrixFile     *matrix_create(const char *fname, int fmode, Main_header * proto_mhptr)
-/**INDENT** Error@2: Unmatched #else */
-#else
-	MatrixFile     *matrix_create(fname, fmode, proto_mhptr)
-	char           *fname;
-	int             fmode;
-	Main_header    *proto_mhptr;
-/**INDENT** Error@7: Unmatched #endif */
-#endif
 {
 	MatrixFile     *mptr = NULL;
-	FILE           *fptr, *mat_create();
+	FILE           *fptr;
 
 	matrix_errno = MAT_OK;
 	matrix_errtxt[0] = '\0';

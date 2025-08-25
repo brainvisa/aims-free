@@ -41,8 +41,7 @@ void mat_unity(a)
 	    a->data[i+j*a->ncols]=(i==j)?1.0:0.0;
 }
 
-Matrix mat_alloc(ncols,nrows)
-  int ncols,nrows;
+Matrix mat_alloc(int ncols, int nrows)
 {
 	Matrix t;
 
@@ -54,15 +53,13 @@ Matrix mat_alloc(ncols,nrows)
 	return t;
 }
 
-void mat_free(a)
-  Matrix a;
+void mat_free(Matrix a)
 {
 	free(a->data);
 	free(a);
 }
 
-void mat_copy(a,b)
-  Matrix a,b;
+void mat_copy(Matrix a, Matrix b)
 {
 	int i;
 
@@ -70,9 +67,7 @@ void mat_copy(a,b)
 	  a->data[i] = b->data[i];
 }
 
-void rotate(a,rx,ry,rz)
-  Matrix a;
-  float rx,ry,rz;
+void rotate(Matrix a, float rx, float ry, float rz)
 {
 	Matrix t,b;
 	double sint,cost;
