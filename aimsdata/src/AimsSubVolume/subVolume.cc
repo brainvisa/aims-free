@@ -44,6 +44,7 @@
 #include <aims/io/fileFormat.h>
 #include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/stream/fileutil.h>
+#include <soma-io/io/formatdictionary.h>
 #include <iomanip>
 
 using namespace aims;
@@ -108,35 +109,73 @@ bool subvolume( Process & p, const string & filein, Finder & f )
 {
   SubVolume &sv = (SubVolume &) p;
 
-  AimsData<T>		data;
-  Reader< AimsData<T> >	r( filein );
+  VolumeRef<T>		data;
+  Reader< Volume<T> >	r( filein );
   string		format = f.format();
-  r.read( data, 0, &format );
+  data.reset( r.read( 0, &format ) );
   bool	first = true;
+  vector<float> vs = data->getVoxelSize();
 
   if( sv.split4d )
   {
-    size_t i, nt = data.dimT();
+    size_t i, nt = data->getSizeT();
     sv.st.clear();
     sv.et.clear();
     sv.st.reserve( nt );
     sv.et.reserve( nt );
     string outfilename = sv.fileout[0];
     string extsuf;
-    const map<string, list<string> > & ext
-      = FileFormatDictionary<AimsData<T> >::extensions();
-    map<string, list<string> >::const_iterator ile, ele = ext.end();
-    for( ile=ext.begin(); ile!=ele; ++ile )
+
+    const multimap<string, string> & wext
+      = soma::FormatDictionary<Volume<T> >::writeExtensions ();
+    multimap<string, string>::const_iterator ifm, efm = wext.end();
+    set<string> done;
+    string init_ofilename = outfilename;
+    for( ifm=wext.begin(); ifm!=efm; ++ifm )
     {
-      if( outfilename.substr( outfilename.length() - ile->first.length() - 1,
-        ile->first.length() + 1 ) == "." + ile->first )
+      if( done.find( ifm->first ) != done.end() )
+        continue;
+      done.insert( ifm->first );
+
+      if( init_ofilename.substr(
+        init_ofilename.length() - ifm->first.length() - 1,
+        ifm->first.length() + 1 ) == "." + ifm->first )
       {
-        outfilename = outfilename.substr( 0, outfilename.length()
-          - ile->first.length() - 1 );
-        extsuf = "." + ile->first;
-        break;
+        if( extsuf.empty()
+            || ( extsuf.size() < ifm->first.size()
+                 && ifm->first.substr( ifm->first.size() - extsuf.size() )
+                    == extsuf ) )
+        {
+          outfilename = init_ofilename.substr( 0, init_ofilename.length()
+            - ifm->first.length() - 1 );
+          extsuf = "." + ifm->first;
+        }
       }
     }
+
+    if( extsuf.empty() )
+    {
+      const map<string, list<string> > & ext
+        = FileFormatDictionary<AimsData<T> >::extensions();
+      map<string, list<string> >::const_iterator ile, ele = ext.end();
+      for( ile=ext.begin(); ile!=ele; ++ile )
+      {
+        if( outfilename.substr( outfilename.length() - ile->first.length() - 1,
+          ile->first.length() + 1 ) == "." + ile->first )
+        {
+          if( extsuf.empty()
+              || ( extsuf.size() < ile->first.size()
+                  && ile->first.substr( ile->first.size() - extsuf.size() )
+                      == extsuf ) )
+          {
+            outfilename = outfilename.substr( 0, outfilename.length()
+              - ile->first.length() - 1 );
+            extsuf = "." + ile->first;
+          }
+        }
+      }
+    }
+
     bool addout = false;
     if( sv.fileout.size() != nt )
     {
@@ -167,6 +206,8 @@ bool subvolume( Process & p, const string & filein, Finder & f )
   vector<int>::iterator iez = sv.ez.begin();
   vector<int>::iterator iet = sv.et.begin();
 
+  cout << "sv.fileout: " << sv.fileout.size() << endl;
+
   for( vector<string>::iterator ifileout = sv.fileout.begin();
        ifileout != sv.fileout.end(); ++ifileout )
   {
@@ -196,117 +237,123 @@ bool subvolume( Process & p, const string & filein, Finder & f )
       ++ist;
     }
     if ( iex == sv.ex.end() ) {
-      ex  = data.dimX()-1;
+      ex  = data->getSizeX()-1;
     } else {
       ex = *iex;
       ++iex;
     }
     if ( iey == sv.ey.end() ) {
-      ey  = data.dimY()-1;
+      ey  = data->getSizeY()-1;
     } else {
       ey = *iey;
       ++iey;
     }
     if ( iez == sv.ez.end() ) {
-      ez  = data.dimZ()-1;
+      ez  = data->getSizeZ()-1;
     } else {
       ez = *iez;
       ++iez;
     }
     if ( iet == sv.et.end() ) {
-      et  = data.dimT()-1;
+      et  = data->getSizeT()-1;
     } else {
       et = *iet;
       ++iet;
     }
     string fileout = *ifileout;
 
-    AimsData<T> outimage;
+    vector<int> out_dim( 4, 1 );
+//     VolumeRef<T> outimage;
     if (lap) {
       //cout << "dim: " << ex << ", " << ey << ", " << ez << ", " << et 
-			//<< endl;
-      outimage = AimsData<T>(ex, ey, ez, et);
-      outimage.setSizeXYZT( data.sizeX(), data.sizeY(), data.sizeZ(),
-                            data.sizeT() );
-    } else {
+                        //<< endl;
+      out_dim[0] = ex;
+      out_dim[1] = ey;
+      out_dim[2] = ez;
+      out_dim[3] = et;
+//       outimage.reset( new Volume<T>( ex, ey, ez, et );
+//       outimage->setVoxelSize( data->voxelSize() );
+    }
+    else
+    {
       //cout << "dim: " << ex-sx+1 << ", " << ey-sy+1 << ", " << ez-sz+1 << ", "
-			//		 << et-st+1 << endl;
-      outimage = AimsData<T>( ex-sx+1, ey-sy+1, ez-sz+1, et-st+1 );
-      outimage.setSizeXYZT( data.sizeX(), data.sizeY(), data.sizeZ(),
-                            data.sizeT() );
+                        //		 << et-st+1 << endl;
+      out_dim[0] = ex - sx + 1;
+      out_dim[1] = ey - sy + 1;
+      out_dim[2] = ez - sz + 1;
+      out_dim[3] = et - st + 1;
+//       outimage.reset( new Volume<T>( ex-sx+1, ey-sy+1, ez-sz+1, et-st+1 );
+//       outimage->setVoxelSize( data->voxelSize() );
     }
 
-    cout << "Input volume dimensions : " << data.dimX() << " "
-        << data.dimY() << " "
-        << data.dimZ() << " "
-        << data.dimT() << endl;
-    cout << "Output volume dimensions : " << outimage.dimX() << " "
-        << outimage.dimY() << " "
-        << outimage.dimZ() << " "
-        << outimage.dimT() << endl;
-    int i, j, k, l;
-    ForEach4d(outimage, i, j, k, l)
-      outimage(i, j, k, l) = data(i+sx, j+sy, k+sz, l+st);
+    cout << "Input volume dimensions : " << data->getSizeX() << " "
+        << data->getSizeY() << " "
+        << data->getSizeZ() << " "
+        << data->getSizeT() << endl;
+    cout << "Output volume dimensions : " << out_dim[0] << " "
+        << out_dim[1] << " "
+        << out_dim[2] << " "
+        << out_dim[3] << endl;
+
+    vector<int> pos( 3 );
+    pos[0] = sx;
+    pos[1] = sy;
+    pos[2] = sz;
+    VolumeRef outimage( data, pos, out_dim );
+
+//     int i, j, k, l;
+
+//     ForEach4d(outimage, i, j, k, l)
+//       outimage(i, j, k, l) = data(i+sx, j+sy, k+sz, l+st);
 
     // keep track of transformations
     AffineTransformation3d motion, im;
     im.setToIdentity();
-    im.setTranslation( Point3df( sx * data.sizeX(), sy * data.sizeY(),
-                       sz * data.sizeZ()) );
+    im.setTranslation( Point3df( sx * vs[0], sy * vs[1], sz * vs[2] ) );
     motion = *im.inverse();
 
     // setup output header
-    if( ( first || !sv.nominf ) && data.header() )
+    if( ( first || !sv.nominf ) )
     {
-      const PythonHeader
-          *pheader = dynamic_cast<const PythonHeader *>( data.header() );
-      if ( pheader && !pheader->hasProperty("zero_start_time") )
-        outimage.setHeader( data.header()->cloneHeader() );
+      const PropertySet & header = data->header();
+      if( !header.hasProperty("zero_start_time") )
+        outimage->copyHeaderFrom( data->header() );
       else
       {
-        PythonHeader
-            *outHeader = dynamic_cast<PythonHeader *>
-            (data.header()->cloneHeader() ) ;
-        if( outHeader )
+        PropertySet outHeader = data->header();
+        vector<int> tmp;
+        if( header.getProperty( "start_time", tmp ) )
         {
-          if ( !outHeader->hasProperty("zero_start_time") )
-            outimage.setHeader( data.header()->cloneHeader() );
-          else
+          vector<int> out(et - st + 1) ;
+          for( int i = std::max( st, 0 );
+               i <= std::min( et, data->getSizeT()-1 ); ++i )
           {
-            vector<int> tmp;
-            if( pheader->getProperty( "start_time", tmp ) ){
-              vector<int> out(et - st + 1) ;
-              for( int i = std::max( st, 0 );
-                   i <= std::min( et, data.dimT()-1 ); ++i )
-              {
-                out[i - st] = tmp[i] ;
-              }
-              outHeader->setProperty("start_time", out);
-            }
-            if( pheader->getProperty( "duration_time", tmp ) ){
-              vector<int> out(et - st + 1) ;
-              for( int i = std::max( st, 0 );
-                   i <= std::min( et, data.dimT()-1 ); ++i )
-              {
-                out[i - st] = tmp[i] ;
-              }
-              outHeader->setProperty("duration_time", out) ;
-            }
-            outimage.setHeader( outHeader );
+            out[i - st] = tmp[i] ;
           }
+          outHeader.setProperty("start_time", out);
         }
+        if( header.getProperty( "duration_time", tmp ) )
+        {
+          vector<int> out(et - st + 1) ;
+          for( int i = std::max( st, 0 );
+               i <= std::min( et, data->getSizeT()-1 ); ++i )
+          {
+            out[i - st] = tmp[i] ;
+          }
+          outHeader.setProperty("duration_time", out) ;
+        }
+        outimage->copyHeaderFrom( outHeader );
       }
 
-      PythonHeader
-          *outHeader = dynamic_cast<PythonHeader *>(outimage.header() );
+      PropertySet & outHeader = outimage->header();
       // set transformation info
-      if( outHeader && !motion.isIdentity() )
+      if( !motion.isIdentity() )
       {
         try
         {
           // remove any referential ID since we are no longer in the
           // same ref
-          outHeader->removeProperty( "referential" );
+          outHeader.removeProperty( "referential" );
         }
         catch( ... )
         {
@@ -314,7 +361,7 @@ bool subvolume( Process & p, const string & filein, Finder & f )
         try
         {
           carto::Object
-              trs = outHeader->getProperty( "transformations" );
+              trs = outHeader.getProperty( "transformations" );
           carto::Object tit = trs->objectIterator();
           std::vector<std::vector<float> > trout;
           trout.reserve( trs->size() );
@@ -324,37 +371,37 @@ bool subvolume( Process & p, const string & filein, Finder & f )
             m *= im;
             trout.push_back( m.toVector() );
           }
-          outHeader->setProperty( "transformations", trout );
+          outHeader.setProperty( "transformations", trout );
         }
         catch( ... )
         {
           // setup a new transformations list
           std::vector<std::vector<float> > trout;
           std::vector<std::string> refsout;
-          if( pheader )
-            try
-            {
-              carto::Object iref = pheader->getProperty( "referential" );
-              std::string refid = iref->getString();
-              refsout.push_back( refid );
-            }
-            catch( ... )
-            {
-            }
+          try
+          {
+            carto::Object iref = header.getProperty( "referential" );
+            std::string refid = iref->getString();
+            refsout.push_back( refid );
+          }
+          catch( ... )
+          {
+          }
           if( refsout.empty() )
             refsout.push_back( "Coordinates aligned to another file or to "
                 "anatomical truth" );
 
           trout.push_back( im.toVector() );
-          outHeader->setProperty( "transformations", trout );
-          outHeader->setProperty( "referentials", refsout );
+          outHeader.setProperty( "transformations", trout );
+          outHeader.setProperty( "referentials", refsout );
         }
       }
     }
 
     //
-    Writer< AimsData<T> > w(fileout);
-    w << outimage;
+    cout << "write: " << fileout << endl;
+    Writer< Volume<T> > w(fileout);
+    w.write( *outimage );
 
     if( sv.writemotion == true )
     {
@@ -371,9 +418,9 @@ bool subvolume( Process & p, const string & filein, Finder & f )
       }
 
       im.setToIdentity();
-      im.setTranslation( Point3df( sx * data.sizeX(),
-                                    sy * data.sizeY(),
-                                    sz * data.sizeZ()) );
+      im.setTranslation( Point3df( sx * vs[0],
+                                   sy * vs[1],
+                                   sz * vs[2] ) );
 
       m = *im.inverse();
 
