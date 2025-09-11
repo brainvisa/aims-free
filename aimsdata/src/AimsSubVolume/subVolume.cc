@@ -263,7 +263,6 @@ bool subvolume( Process & p, const string & filein, Finder & f )
     string fileout = *ifileout;
 
     vector<int> out_dim( 4, 1 );
-//     VolumeRef<T> outimage;
     if (lap) {
       //cout << "dim: " << ex << ", " << ey << ", " << ez << ", " << et 
                         //<< endl;
@@ -271,8 +270,6 @@ bool subvolume( Process & p, const string & filein, Finder & f )
       out_dim[1] = ey;
       out_dim[2] = ez;
       out_dim[3] = et;
-//       outimage.reset( new Volume<T>( ex, ey, ez, et );
-//       outimage->setVoxelSize( data->voxelSize() );
     }
     else
     {
@@ -282,9 +279,13 @@ bool subvolume( Process & p, const string & filein, Finder & f )
       out_dim[1] = ey - sy + 1;
       out_dim[2] = ez - sz + 1;
       out_dim[3] = et - st + 1;
-//       outimage.reset( new Volume<T>( ex-sx+1, ey-sy+1, ez-sz+1, et-st+1 );
-//       outimage->setVoxelSize( data->voxelSize() );
     }
+
+    vector<int> pos( 4 );
+    pos[0] = sx;
+    pos[1] = sy;
+    pos[2] = sz;
+    pos[3] = st;
 
     cout << "Input volume dimensions : " << data->getSizeX() << " "
         << data->getSizeY() << " "
@@ -293,18 +294,11 @@ bool subvolume( Process & p, const string & filein, Finder & f )
     cout << "Output volume dimensions : " << out_dim[0] << " "
         << out_dim[1] << " "
         << out_dim[2] << " "
-        << out_dim[3] << endl;
+        << out_dim[3] << ", pos: "
+        << pos[0] << ", " << pos[1] << ", " << pos[2] << ", " << pos[3]
+        << endl;
 
-    vector<int> pos( 3 );
-    pos[0] = sx;
-    pos[1] = sy;
-    pos[2] = sz;
     VolumeRef outimage( data, pos, out_dim );
-
-//     int i, j, k, l;
-
-//     ForEach4d(outimage, i, j, k, l)
-//       outimage(i, j, k, l) = data(i+sx, j+sy, k+sz, l+st);
 
     // keep track of transformations
     AffineTransformation3d motion, im;
