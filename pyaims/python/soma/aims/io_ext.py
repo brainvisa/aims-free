@@ -152,7 +152,7 @@ class GLTFFormat(aims.FileFormat_Object):
             if opt in options:
                 opts[opt] = options[opt]
 
-        if not obj.isDictionary():
+        if not isinstance(obj, dict) and not obj.isDictionary():
             # not a dict-like object: consider it as a list of meshes
             obj = {'objects': [{'mesh': m} for m in obj]}
 
