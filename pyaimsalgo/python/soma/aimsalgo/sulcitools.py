@@ -203,6 +203,7 @@ def spam_to_graphs(spam, labels=None):
               0.4: [new_graph(tal), new_graph(tal)],
               0.7: [new_graph(tal), new_graph(tal)]}
 
+    bboxes = {}
     for i, labeld in labels.items():
         label = labeld['Label']
         lmax = np.max(spam[:, :, :, i])
@@ -237,6 +238,24 @@ def spam_to_graphs(spam, labels=None):
             v['skeleton_label'] = i
 
             amesh[label] = mesh
+            bbox = bboxes.setdefault(th, [None, None])[side]
+            bbmin = np.min(mesh.vertex(), axis=0)
+            bbmax = np.max(mesh.vertex(), axis=0)
+            if bbox is None:
+                bbox = [bbmin, bbmax]
+            else:
+                bbox = [np.min((bbox[0], bbmin), axis=0),
+                        np.max((bbox[1], bbmax), axis=0)]
+            bboxes[th][side] = bbox
+
+    for th, graphs in graphs.items():
+        for side, graph in enumerate(graphs):
+            vs = graph['voxel_size'][:3]
+            bbox = bboxes[th][side]
+            bboxi = [np.floor(bbox[0][:3] / vs).astype(int),
+                     np.ceil(bbox[1][:3] / vs).astype(int)]
+            graph['boundingbox_min'] = bboxi[0]
+            graph['boundingbox_max'] = bboxi[1]
 
     return graphs, allmeshes
 
