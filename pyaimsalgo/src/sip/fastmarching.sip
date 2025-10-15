@@ -129,7 +129,7 @@ midInterfaceVol(label1, label2)
 get the interface between Voronoi regions label1 and label2, as a volume.
 
 the mid_interface option must have been used when instantiating the
-FastMarching object, and propagation maust have taken place.
+FastMarching object, and propagation must have taken place.
 %End
 
     const BucketMap_FLOAT & midInterface( short label1, short label2 ) const;
@@ -139,7 +139,7 @@ midInterface(label1, label2)
 get the interface between Voronoi regions label1 and label2, as a bucket.
 
 The mid_interface option must have been used when instantiating the
-FastMarching object, and propagation maust have taken place.
+FastMarching object, and propagation must have taken place.
 %End
 
     rc_ptr_Volume_S16 voronoiVol() const;
@@ -345,7 +345,7 @@ midInterfaceVol(label1, label2)
 get the interface between Voronoi regions label1 and label2, as a volume.
 
 the mid_interface option must have been used when instantiating the
-FastMarching object, and propagation maust have taken place.
+FastMarching object, and propagation must have taken place.
 %End
 
     const BucketMap_FLOAT & midInterface( short label1, short label2 ) const;
@@ -355,7 +355,7 @@ midInterface(label1, label2)
 get the interface between Voronoi regions label1 and label2, as a bucket.
 
 The mid_interface option must have been used when instantiating the
-FastMarching object, and propagation maust have taken place.
+FastMarching object, and propagation must have taken place.
 %End
 
     rc_ptr_BucketMap_S16 voronoiVol() const;
