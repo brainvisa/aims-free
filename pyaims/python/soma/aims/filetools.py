@@ -152,7 +152,46 @@ def print_hdr(hdr, hidden=None):
     print(clean_hdr(hdr, hidden))
 
 
-def cmp(ref_file, test_file, skip_suffixes=None, graph_max_label_diff=0):
+def compare_csv(ref_file, test_file, max_diff=1e-5, max_rel_diff=None,
+                delimiter=None):
+    if filecmp.cmp(ref_file, test_file):
+        return True
+    delimiters = [',', ';', '\t', ' ']
+    if delimiter is not None:
+        delimiters = [delimiter] + [x for x in delimiters if x != delimiter]
+    for delim in delimiters:
+        arr1 = np.genfromtxt(ref_file, delimiter=delim)
+        if arr1.shape == 2:
+            break
+    if len(arr1.shape) >= 2 and np.any(np.isnan(arr1[0, :])):
+        arr1 = arr1[1:, :]
+    print("arr1:", arr1)
+    delimiters = [delim] + [x for x in delimiters if x != delim]
+    for delim in delimiters:
+        arr2 = np.genfromtxt(test_file)
+        if arr2.shape == 2:
+            break
+    if len(arr2.shape) >= 2 and np.any(np.isnan(arr2[0, :])):
+        arr2 = arr2[1:, :]
+    print("arr2:", arr2)
+    wnan = np.where(np.isnan(arr1))
+    if np.where(np.isnan(arr2)) != wnan:
+        return False
+    winf = np.where(np.isinf(arr1))
+    if np.where(np.isinf(arr2)) != winf:
+        return False
+    w = np.where(np.logical_and(~np.isnan(arr1), ~np.isinf(arr1)))
+    narr1 = arr1[w]
+    narr2 = arr2[w]
+
+    if max_diff is not None:
+        return np.max(np.abs(narr2 - narr1)) <= max_diff
+    else:
+        return np.max(np.abs(narr2 - narr1) / np.max(np.vstack((np.abs(narr1), np.abs(narr2))), axis=0)) <= max_rel_diff
+
+
+def cmp(ref_file, test_file, skip_suffixes=None, graph_max_label_diff=0,
+        max_diff=1e-5, max_rel_diff=None):
     '''
     Compare files, taking into account their neuroimaging nature.
     Some specific comparison function will be called for graphs, meshes,
@@ -175,15 +214,8 @@ def cmp(ref_file, test_file, skip_suffixes=None, graph_max_label_diff=0):
         return same_graphs(ref_file, test_file,
                            max_label_diff=graph_max_label_diff)
     elif ref_file.endswith(".csv"):
-        if filecmp.cmp(ref_file, test_file):
-            return True
-        arr1 = np.genfromtxt(ref_file)
-        if len(arr1.shape) >= 2 and np.any(np.isnan(arr1[0, :])):
-            arr1 = arr1[1:, :]
-        arr2 = np.genfromtxt(test_file)
-        if len(arr2.shape) >= 2 and np.any(np.isnan(arr2[0, :])):
-            arr2 = arr2[1:, :]
-        return np.max(np.abs(arr2 - arr1)) <= 1e-5
+        return compare_csv(ref_file, test_file, max_diff=max_diff,
+                           max_rel_diff=max_rel_diff)
     try:
         obj1 = aims.read(ref_file)
         obj2 = aims.read(test_file)
