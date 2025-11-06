@@ -110,8 +110,14 @@ void Mesher::getBrain( const rc_ptr<Volume<short> > & thing,
   if( sizeMax != 0 )
     getMeshFromMapOfFacet(thing, surface, *iBig);
   if( insideinterface )
+  {
     // change ext/int notions for internal mesh
     SurfaceManip::invertSurfacePolygons( surface );
+    // invertSurfacePolygons() changes the CW/CCW orientation of polygons
+    // in the material, but here we don't want that since we use it actually
+    // to fix it.
+    surface.header().removeProperty( "material" );
+  }
   clear( interface );
 }
 
