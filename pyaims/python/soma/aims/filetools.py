@@ -175,10 +175,12 @@ def compare_csv(ref_file, test_file, max_diff=1e-5, max_rel_diff=None,
         arr2 = arr2[1:, :]
     print("arr2:", arr2)
     wnan = np.where(np.isnan(arr1))
-    if np.where(np.isnan(arr2)) != wnan:
+    if any([np.any(x[0] != x[1]) for x in zip(np.where(np.isnan(arr2)),
+                                              wnan)]):
         return False
     winf = np.where(np.isinf(arr1))
-    if np.where(np.isinf(arr2)) != winf:
+    if any([np.any(x[0] != x[1]) for x in zip(np.where(np.isinf(arr2)),
+                                              winf)]):
         return False
     w = np.where(np.logical_and(~np.isnan(arr1), ~np.isinf(arr1)))
     narr1 = arr1[w]
@@ -187,7 +189,10 @@ def compare_csv(ref_file, test_file, max_diff=1e-5, max_rel_diff=None,
     if max_diff is not None:
         return np.max(np.abs(narr2 - narr1)) <= max_diff
     else:
-        return np.max(np.abs(narr2 - narr1) / np.max(np.vstack((np.abs(narr1), np.abs(narr2))), axis=0)) <= max_rel_diff
+        return (np.max(np.abs(narr2 - narr1)
+                       / np.max(np.vstack((np.abs(narr1),
+                                           np.abs(narr2))), axis=0))
+                <= max_rel_diff)
 
 
 def cmp(ref_file, test_file, skip_suffixes=None, graph_max_label_diff=0,
