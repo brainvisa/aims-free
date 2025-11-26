@@ -63,11 +63,12 @@ public:
   bool use_chamfer;
   float chamfer_factor;
   Point3d chamfer_mask_size;
+  bool bin;
 };
 
 
 Morpho::Morpho() : Process(), radius(1.), use_chamfer( true ),
-  chamfer_factor( 50.F ), chamfer_mask_size( 3, 3, 3 )
+  chamfer_factor( 50.F ), chamfer_mask_size( 3, 3, 3 ), bin( false )
 {
   registerProcessType( "Volume", "S8",     &morpho<int8_t> );
   registerProcessType( "Volume", "U8",     &morpho<uint8_t> );
@@ -98,6 +99,12 @@ bool Morpho::morpho( Process & p, const string & fileIn, Finder & f )
   Reader< carto::Volume<T> > r( fileIn );
   string                format = f.format();
   dataIn.reset( r.read( mgl.neededBorderWidth(), &format ) );
+
+  if( m.bin )
+  {
+    AimsThreshold<T, T> th( AIMS_DIFFER, 0 );
+    dataIn = th.bin( dataIn );
+  }
 
   // Specific operation
   int choice;
@@ -151,6 +158,7 @@ int main( int argc, const char **argv )
   bool dont_use_chamfer = false;
   int   xmask = 3, ymask = 3, zmask = 3;
   float factor = 50;
+  bool bin = false;
 
   AimsApplication application( argc, argv,
     "Morphological operators (erosion, dilation, closing, opening)"
@@ -166,6 +174,9 @@ int main( int argc, const char **argv )
   application.addOption( dont_use_chamfer, "-c",
     "do not use chamfer binary mathematical morphology (default: use it when "
     "available)", true );
+  application.addOption( bin, "-b",
+    "binarize: binarize the input image so that fast binary morphomath will "
+    "be used preferably", true );
   application.addOption( xmask, "-x",
     "X size of the chamfer distance mask (unused with grey level morpho) "
     "[default=3]", true );
@@ -190,6 +201,7 @@ int main( int argc, const char **argv )
       proc.use_chamfer = !dont_use_chamfer;
       proc.chamfer_factor = factor;
       proc.chamfer_mask_size = Point3d( xmask, ymask, zmask );
+      proc.bin = bin;
 
       if( !proc.execute( fileIn.filename ) )
         cout << "Couldn't process file - aborted\n";
