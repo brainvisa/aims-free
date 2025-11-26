@@ -161,15 +161,15 @@ def compare_csv(ref_file, test_file, max_diff=1e-5, max_rel_diff=None,
         delimiters = [delimiter] + [x for x in delimiters if x != delimiter]
     for delim in delimiters:
         arr1 = np.genfromtxt(ref_file, delimiter=delim)
-        if arr1.shape == 2:
+        if len(arr1.shape) == 2:
             break
     if len(arr1.shape) >= 2 and np.any(np.isnan(arr1[0, :])):
         arr1 = arr1[1:, :]
     print("arr1:", arr1)
     delimiters = [delim] + [x for x in delimiters if x != delim]
     for delim in delimiters:
-        arr2 = np.genfromtxt(test_file)
-        if arr2.shape == 2:
+        arr2 = np.genfromtxt(test_file, delimiter=delim)
+        if len(arr2.shape) == 2:
             break
     if len(arr2.shape) >= 2 and np.any(np.isnan(arr2[0, :])):
         arr2 = arr2[1:, :]
