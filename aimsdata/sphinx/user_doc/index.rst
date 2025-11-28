@@ -50,6 +50,7 @@ A non-exhaustive overview of features found in the set of AIMS libraries (cartob
 
 * IO
 
+  - multiple file formats support
   - partial IO
   - hierarchic (pyramidal) IO
 
