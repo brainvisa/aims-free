@@ -25,6 +25,57 @@ Tutorial
 
 :doc:`tutorial`
 
+Overview: what is there in the AIMS libraries
+=============================================
+
+A non-exhaustive overview of features found in the set of AIMS libraries (cartobase, soma-io, cartodata, aimsdata, aimsalgo, graph)
+
+* data structures
+
+  * "small" or "simple" objects
+
+    - AimsVector
+    - GenericObject / Object
+
+  * Neuroimaging structures
+
+    - Volume
+    - Mesh
+    - Texture
+    - Bucket
+    - Graph (ROIs, sulci, fiber bundles...)
+    - SparseMatrix
+    - Transformattion
+    - TransformationGraph
+
+* IO
+
+  - partial IO
+  - hierarchic (pyramidal) IO
+
+* Algorithms
+
+  - data Conversion
+  - Histogram
+  - Connected components
+  - connected components on meshes
+  - Resampling (linear + FFD)
+  - MorphoMath
+  - Meshing
+  - Mesh smoothing, decimation
+  - Topological classification
+  - Distance maps (chamfer, fast marching...)
+  - Distance maps on meshes (+ Dijkstra)
+  - Watershed
+  - Filering / convolution / smoothing (Gaussian, Laplacian)
+  - Smoothing on Volumes and meshes textures
+  - Registration (MIRegister, FFD)
+  - Sulci graphs tools
+  - Interpolation
+  - Mesh manipulation (merge, cut, volume, surface area, ...)
+- Mesh / Volume intersection mapping
+
+
 Developers section
 ==================
 
