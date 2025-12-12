@@ -134,7 +134,7 @@
 
   - <b><a href="../html/en/changelog.html">Change Log</a></b>
 
-  - <b>To do list:</b> <a href="https://bioproj.extra.cea.fr/redmine/projects/brainvisa-aims/issues">issues in Bioproj</a>.
+  - <b>To do list:</b> <a href="https://bioproj.cea.fr/redmine/projects/brainvisa-aims/issues">issues in Bioproj</a>.
 
 */
 

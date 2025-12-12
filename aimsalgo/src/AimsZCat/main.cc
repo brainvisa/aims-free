@@ -135,7 +135,7 @@ bool doitMesh( Process & p, const string &, Finder & )
      to be properly called, and lead to memory corruptions, use of
      uninitialized memory, and crashes.
      see:
-     https://brainvisa:Soma2009@bioproj.extra.cea.fr/redmine/issues/2832
+     https://brainvisa:Soma2009@bioproj.cea.fr/redmine/issues/2832
   */
   cout << "Meshes concatenation\n";
 #endif
@@ -232,7 +232,7 @@ bool doitBucket( Process & p, const string &, Finder & )
      to be properly called, and lead to memory corruptions, use of
      uninitialized memory, and crashes.
      see:
-     https://brainvisa:Soma2009@bioproj.extra.cea.fr/redmine/issues/2832
+     https://brainvisa:Soma2009@bioproj.cea.fr/redmine/issues/2832
   */
   cout << "Buckets concatenation\n";
 #endif
