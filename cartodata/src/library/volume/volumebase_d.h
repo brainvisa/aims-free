@@ -315,6 +315,91 @@ namespace carto
     allocate( std::vector<int>( 1, -1 ), true, allocatorContext(), strides );
   }
 
+  namespace
+  {
+
+    template <typename T>
+    void _updateHeaderFromParent( Volume<T> *vol )
+    {
+      rc_ptr<Volume<T> > parent = vol->refVolume();
+      if( !parent )
+        return; // no parent: nothing to do.
+
+      /* copy voxel_size from underlying volume, if any.
+        This should probably be more general, but cannot be applied to all
+        header properties (size, transformations...).
+        WARNING: Moreover here we do not guarantee to keep both voxel_size
+        unique: we point to the same vector of values for now, but it can be
+        replaced (thus, duplicated) by a setProperty().
+        We could use a addBuiltinProperty(), but then the voxel size has to be
+        stored in a fixed location somewhere.
+      */
+      try
+      {
+        carto::Object vs = parent->header().getProperty( "voxel_size" );
+        size_t n = vol->getSize().size();
+        if( vs->size() > n )
+        {
+          // drop additional sizes
+          size_t i;
+          std::vector<carto::Object> vs2( n );
+          for( i=0; i<n; ++i )
+            vs2[i] = vs->getArrayItem( i );
+          vol->header().setProperty( "voxel_size", vs2 );
+        }
+        else
+          vol->header().setProperty( "voxel_size", vs );
+      }
+      catch( ... )
+      {
+        // never mind.
+      }
+
+      // handle transformation to parent ref
+      std::vector<float> vs = vol->getVoxelSize();
+      while( vs.size() < 3 )
+        vs.push_back( 1.f );
+      typename Volume<T>::Position pos = vol->posInRefVolume();
+      std::vector<float> trv( 16, 0.f );
+      trv[0] = 1.f;
+      trv[5] = 1.f;
+      trv[10] = 1.f;
+      trv[15] = 1.f;
+      trv[3] = pos[0] * vs[0];
+      trv[7] = pos[1] * vs[1];
+      trv[11] = pos[2] * vs[2];
+      AffineTransformationBase tr( trv );
+
+      std::string ref = parent->referential().uuid();
+      std::vector<std::string> refs;
+      std::vector<std::vector<float> > trans;
+      refs.push_back( ref );
+      trans.push_back( trv );
+      try
+      {
+        carto::Object tl = parent->header().getProperty( "transformations" );
+        trans.reserve( tl->size() + 1 );
+        carto::Object it;
+        for( it = tl->objectIterator(); it->isValid(); it->next() )
+        {
+          AffineTransformationBase tn( it->currentValue() );
+          tn *= tr;
+          trans.push_back( tn.toVector() );
+        }
+        carto::Object rl = parent->header().getProperty( "referentials" );
+        refs.reserve( rl->size() + 1 );
+        for( it = rl->objectIterator(); it->isValid(); it->next() )
+          refs.push_back( it->currentValue()->getString() );
+      }
+      catch( ... )
+      {
+      }
+      vol->header().setProperty( "referentials", refs );
+      vol->header().setProperty( "transformations", trans );
+    }
+
+  }
+
 
   /***************************************************************************
    * View Constructor
@@ -374,35 +459,7 @@ namespace carto
     else
       allocate( -1, -1, -1, -1, true, allocContext );
 
-    /* copy voxel_size from underlying volume, if any.
-       This should probably be more general, but cannot be applied to all
-       header properties (size, transformations...).
-       WARNING: Moreover here we do not guarantee to keep both voxel_size
-       unique: we point to the same vector of values for now, but it can be
-       replaced (thus, duplicated) by a setProperty().
-       We could use a addBuiltinProperty(), but then the voxel size has to be
-       stored in a fixed location somewhere.
-    */
-    try
-    {
-      carto::Object vs = other->header().getProperty( "voxel_size" );
-      size_t n = this->getSize().size();
-      if( vs->size() > n )
-      {
-        // drop additional sizes
-        size_t i;
-        std::vector<carto::Object> vs2( n );
-        for( i=0; i<n; ++i )
-          vs2[i] = vs->getArrayItem( i );
-        this->header().setProperty( "voxel_size", vs2 );
-      }
-      else
-        this->header().setProperty( "voxel_size", vs );
-    }
-    catch( ... )
-    {
-      // never mind.
-    }
+    _updateHeaderFromParent( this );
   }
 
 
@@ -457,35 +514,7 @@ namespace carto
     else
       allocate( -1, -1, -1, -1, true, allocContext );
 
-    /* copy voxel_size from underlying volume, if any.
-       This should probably be more general, but cannot be applied to all
-       header properties (size, transformations...).
-       WARNING: Moreover here we do not guarantee to keep both voxel_size
-       unique: we point to the same vector of values for now, but it can be
-       replaced (thus, duplicated) by a setProperty().
-       We could use a addBuiltinProperty(), but then the voxel size has to be
-       stored in a fixed location somewhere.
-    */
-    try
-    {
-      carto::Object vs = other->header().getProperty( "voxel_size" );
-      size_t n = this->getSize().size();
-      if( vs->size() > n )
-      {
-        // drop additional sizes
-        size_t i;
-        std::vector<carto::Object> vs2( n );
-        for( i=0; i<n; ++i )
-          vs2[i] = vs->getArrayItem( i );
-        this->header().setProperty( "voxel_size", vs2 );
-      }
-      else
-        this->header().setProperty( "voxel_size", vs );
-    }
-    catch( ... )
-    {
-      // never mind.
-    }
+    _updateHeaderFromParent( this );
   }
 
 
