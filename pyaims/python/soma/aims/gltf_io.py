@@ -1195,6 +1195,9 @@ class AimsGLTFParser(GLTFParser):
                 else:
                     ttype = aims.typeCode(ttype)
                 atex = aims.TimeTexture(ttype)
+                if len(texture.shape) >= 2 and texture.shape[1] == 1:
+                    # ensure 1D array
+                    texture = texture.reshape((texture.shape[0], ))
                 atex[0].assign(texture)
                 atex.header()['allow_normalize_coords'] = 0
                 mattex = mat.get('textures', {}).get(tex, {})
