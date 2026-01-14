@@ -396,6 +396,32 @@ namespace carto
       }
       vol->header().setProperty( "referentials", refs );
       vol->header().setProperty( "transformations", trans );
+      try
+      {
+        carto::Object s2mo = parent->header().getProperty(
+          "storage_to_memory" );
+        AffineTransformationBase s2m( s2mo );
+        // fix shifts of s2m
+        std::vector<int> p = vol->getSize();
+        --p[0];
+        --p[1];
+        --p[2];
+        std::vector<int> tp = s2m.transform( p );
+        std::vector<int> t0 = s2m.transform( std::vector<int>( 3, 0 ) );
+        tp[0] -= t0[0];
+        tp[1] -= t0[1];
+        tp[2] -= t0[2];
+        if( tp[0] < 0 )
+          s2m.matrix()( 0, 3 ) = -tp[0];
+        if( tp[1] < 0 )
+          s2m.matrix()( 0, 3 ) = -tp[1];
+        if( tp[2] < 0 )
+          s2m.matrix()( 0, 3 ) = -tp[2];
+        vol->header().setProperty( "storage_to_memory", s2m.toVector() );
+      }
+      catch( ... )
+      {
+      }
     }
 
   }
