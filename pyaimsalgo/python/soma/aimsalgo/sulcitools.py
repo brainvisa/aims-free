@@ -213,7 +213,7 @@ def spam_to_graphs(spam, labels=None):
             meshes = mesher.doit(vol)
             mesh = aims.AimsSurfaceTriangle()
             mesh.header()['label'] = label
-            color = labeld['RGB'] + [th + 0.3]
+            color = list(labeld['RGB']) + [th + 0.3]
             mesh.header()['material'] = {'diffuse': color}
 
             for sl in meshes.values():
@@ -248,8 +248,8 @@ def spam_to_graphs(spam, labels=None):
                         np.max((bbox[1], bbmax), axis=0)]
             bboxes[th][side] = bbox
 
-    for th, graphs in graphs.items():
-        for side, graph in enumerate(graphs):
+    for th, graphx in graphs.items():
+        for side, graph in enumerate(graphx):
             vs = graph['voxel_size'][:3]
             bbox = bboxes[th][side]
             bboxi = [np.floor(bbox[0][:3] / vs).astype(int),
