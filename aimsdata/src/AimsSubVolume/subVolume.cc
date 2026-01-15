@@ -58,11 +58,12 @@ class SubVolume : public Process
 {
 public:
   SubVolume( vector<int> &sx, vector<int> &sy, vector<int> &sz, 
-	     vector<int> &st, vector<int> &ex, vector<int> &ey, 
-	     vector<int> &ez, vector<int> &et,
-	     bool lap, vector<string> &fileout, 
-	     bool nominf, bool writemotion,
-	     string motiondirect, string motioninverse, bool split4d );
+             vector<int> &st, vector<int> &ex, vector<int> &ey,
+             vector<int> &ez, vector<int> &et,
+             bool lap, vector<string> &fileout,
+             bool nominf, bool writemotion,
+             string motiondirect, string motioninverse, bool split4d,
+             bool transToParent );
   virtual ~SubVolume();
 
   vector<int> sx, sy, sz, st, ex, ey, ez, et;
@@ -72,19 +73,21 @@ public:
   bool writemotion;
   string motiondirect, motioninverse;
   bool split4d;
+  bool transToParent;
 };
 
 
 SubVolume::SubVolume( vector<int> &sx, vector<int> &sy, vector<int> &sz, 
-		      vector<int> &st, vector<int> &ex, vector<int> &ey, 
-		      vector<int> &ez, vector<int> &et,
-		      bool lap, vector<string> &fileout, 
-		      bool nominf, bool writemotion,
-		      string motiondirect, string motioninverse, bool split4d )
+                      vector<int> &st, vector<int> &ex, vector<int> &ey,
+                      vector<int> &ez, vector<int> &et,
+                      bool lap, vector<string> &fileout,
+                      bool nominf, bool writemotion,
+                      string motiondirect, string motioninverse, bool split4d,
+                      bool transToParent )
   : sx(sx),sy(sy),sz(sz),st(st),ex(ex),ey(ey),ez(ez),et(et),
     lap(lap), fileout(fileout), nominf(nominf), writemotion(writemotion),
     motiondirect(motiondirect), motioninverse(motioninverse),
-    split4d( split4d )
+    split4d( split4d ), transToParent( transToParent )
 {
   registerProcessType( "Volume", "S8",    &subvolume<int8_t> );
   registerProcessType( "Volume", "U8",    &subvolume<uint8_t> );
@@ -298,7 +301,8 @@ bool subvolume( Process & p, const string & filein, Finder & f )
         << pos[0] << ", " << pos[1] << ", " << pos[2] << ", " << pos[3]
         << endl;
 
-    VolumeRef outimage( data, pos, out_dim );
+    VolumeRef outimage( data, pos, out_dim, AllocatorContext(),
+                        sv.transToParent );
     // transforms are now already adapted in the view
 
     //
@@ -352,6 +356,7 @@ int main( int argc, const char **argv )
   bool lap = false, nominf = false;
   bool writemotion = false;
   bool split4d = false;
+  bool transToParent = false;
 
   AimsApplication	app( argc, argv, 
 			     "Carve a subvolume in the input volume ");
@@ -386,6 +391,9 @@ int main( int argc, const char **argv )
   app.addOption( motioninverse, "-minv", "Motion name : subvolume_TO_whole", true );
   app.addOption( nominf, "--singleminf", "Only write .minf meta-header on " 
                  "the first sub-volume (useful when writing a series)", true );
+  app.addOption( transToParent, "-p", "include transform to parent space",
+                 true );
+  app.alias( "--parent", "-p" );
 
 
   try
@@ -393,7 +401,7 @@ int main( int argc, const char **argv )
     app.initialize();
     SubVolume proc( sx, sy, sz, st, ex, ey, ez, et, lap, fileout,
                     nominf, writemotion, motiondirect, motioninverse,
-                    split4d );
+                    split4d, transToParent );
     if( !proc.execute( filein ) )
             cout << "Couldn't process file - aborted\n";
   }

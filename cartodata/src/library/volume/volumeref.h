@@ -127,12 +127,14 @@ namespace carto {
     explicit VolumeRef( rc_ptr<Volume<T> > other,
                         const Position4Di & pos,
                         const Position4Di & size = Position4Di( -1, -1, -1, -1 ),
-                        const AllocatorContext & allocContext = AllocatorContext() );
+                        const AllocatorContext & allocContext = AllocatorContext(),
+                        bool transToParent = false );
     explicit VolumeRef( rc_ptr<Volume<T> > other,
                         const Position & pos,
                         const Position & size = Position(),
                         const AllocatorContext & allocContext
-                          = AllocatorContext() );
+                          = AllocatorContext(),
+                        bool transToParent = false );
 
     //========================================================================
     //   VOLUME PROXY

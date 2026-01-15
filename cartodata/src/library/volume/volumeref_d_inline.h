@@ -119,16 +119,20 @@ namespace carto {
   VolumeRef<T>::VolumeRef( rc_ptr<Volume<T> > other,
                            const Position4Di & pos,
                            const Position4Di & size,
-                           const AllocatorContext & allocContext ):
-    rc_ptr<Volume<T> >( new Volume<T>( other, pos, size, allocContext ) )
+                           const AllocatorContext & allocContext,
+                           bool transToParent ):
+    rc_ptr<Volume<T> >( new Volume<T>( other, pos, size, allocContext,
+                                       transToParent ) )
   {}
 
   template <typename T>
   VolumeRef<T>::VolumeRef( rc_ptr<Volume<T> > other,
                            const Position & pos,
                            const Position & size,
-                           const AllocatorContext & allocContext ):
-    rc_ptr<Volume<T> >( new Volume<T>( other, pos, size, allocContext ) )
+                           const AllocatorContext & allocContext,
+                           bool transToParent ):
+    rc_ptr<Volume<T> >( new Volume<T>( other, pos, size, allocContext,
+                                       transToParent ) )
   {}
 
   //==========================================================================

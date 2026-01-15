@@ -1769,9 +1769,12 @@ def Volume(*args, **kwargs):
     return _createObject('Volume', default_dtype='FLOAT', *args, **kwargs)
 
 
-def VolumeView(volume, position, size):
+def VolumeView(volume, position, size, trans_to_parent=False):
     '''Create a view in an existing volume. The returned volume is of the same
     type and shares data with its "parent".
+
+    If `trans_to_parent` is True, then a transformation (translation) to the
+    origin of the parent volume will be added in the header of the view.
     '''
     volclass = type(volume)
     if volclass.__name__.startswith('Volume_'):
@@ -1788,7 +1791,8 @@ def VolumeView(volume, position, size):
     for i in range(4):
         if size[i] == 0:
             size[i] = 1
-    return volclass(vol, position, size)
+    return volclass(vol, position, size, carto.AllocatorContext(),
+                    trans_to_parent)
 
 def TimeTexture(*args, **kwargs):
     '''Create an instance of Aims texture (TimeTexture_<type>) from a type

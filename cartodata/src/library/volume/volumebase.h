@@ -237,19 +237,25 @@ namespace carto
     /// to volume instead of a volume )
     /// If parent volume is allocated, view points to its data and doesn't own
     /// it. Else, it allocates \c size and owns it.
+    /// If transToParent is true, a transformation to the parent referential
+    /// (translation) will be included in the view header.
     Volume( rc_ptr<Volume<T> > other,
             const Position4Di & pos = Position4Di( 0, 0, 0, 0 ),
             const Position4Di & size = Position4Di( -1, -1, -1, -1 ),
-            const AllocatorContext & allocContext = AllocatorContext() );
+            const AllocatorContext & allocContext = AllocatorContext(),
+            bool transToParent = false );
     /// This is the volume view constructor.
     /// Beware not to mix it up with the copy constructor ( it takes a pointer
     /// to volume instead of a volume )
     /// If parent volume is allocated, view points to its data and doesn't own
     /// it. Else, it allocates \c size and owns it.
+    /// If transToParent is true, a transformation to the parent referential
+    /// (translation) will be included in the view header.
     Volume( rc_ptr<Volume<T> > other,
             const Position & pos,
             const Position & size = Position(),
-            const AllocatorContext & allocContext = AllocatorContext() );
+            const AllocatorContext & allocContext = AllocatorContext(),
+            bool transToParent = false );
     /// This "very special" constructor should not be used in regular programs.
     /// It is meant for the IO system to map file views into memory views.
     Volume( rc_ptr<Volume<T> > other,

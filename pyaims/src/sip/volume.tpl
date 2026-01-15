@@ -70,7 +70,7 @@ public:
       const vector_S32 & pos = vector_S32( 4, 0 ),
       const vector_S32 & size = vector_S32(),
       const carto::AllocatorContext & allocContext
-        = carto::AllocatorContext() );
+        = carto::AllocatorContext(), bool transToParent = false );
     Volume_%Template1typecode%( const vector_S32 &,
       const carto::AllocatorContext& allocatorContext,
       bool = true ) /ReleaseGIL/;

@@ -319,7 +319,7 @@ namespace carto
   {
 
     template <typename T>
-    void _updateHeaderFromParent( Volume<T> *vol )
+    void _updateHeaderFromParent( Volume<T> *vol, bool transToParent )
     {
       rc_ptr<Volume<T> > parent = vol->refVolume();
       if( !parent )
@@ -355,6 +355,9 @@ namespace carto
         // never mind.
       }
 
+      std::vector<std::string> refs;
+      std::vector<std::vector<float> > trans;
+
       // handle transformation to parent ref
       std::vector<float> vs = vol->getVoxelSize();
       while( vs.size() < 3 )
@@ -370,11 +373,13 @@ namespace carto
       trv[11] = pos[2] * vs[2];
       AffineTransformationBase tr( trv );
 
-      std::string ref = parent->referential().uuid();
-      std::vector<std::string> refs;
-      std::vector<std::vector<float> > trans;
-      refs.push_back( ref );
-      trans.push_back( trv );
+      if( transToParent )
+      {
+        std::string ref = parent->referential().uuid();
+        refs.push_back( ref );
+        trans.push_back( trv );
+      }
+
       try
       {
         carto::Object tl = parent->header().getProperty( "transformations" );
@@ -433,7 +438,8 @@ namespace carto
   template<typename T> inline
   Volume<T>::Volume( rc_ptr<Volume<T> > other,
                      const Position4Di & pos, const Position4Di & size,
-                     const AllocatorContext & allocContext )
+                     const AllocatorContext & allocContext,
+                     bool transToParent )
     : VolumeProxy<T>( size[0] >= 0 ? size[0] :
           other->allocatorContext().isAllocated() ? other->getSizeX() : 1,
         size[1] >= 0 ? size[1] :
@@ -485,14 +491,15 @@ namespace carto
     else
       allocate( -1, -1, -1, -1, true, allocContext );
 
-    _updateHeaderFromParent( this );
+    _updateHeaderFromParent( this, transToParent );
   }
 
 
   template<typename T> inline
   Volume<T>::Volume( rc_ptr<Volume<T> > other,
                      const Position & pos, const Position & size,
-                     const AllocatorContext & allocContext )
+                     const AllocatorContext & allocContext,
+                     bool transToParent )
     : VolumeProxy<T>( Position4Di::fixed_size( size ) ),
       _items( 0U, allocContext ),
       _refvol( other ),
@@ -540,7 +547,7 @@ namespace carto
     else
       allocate( -1, -1, -1, -1, true, allocContext );
 
-    _updateHeaderFromParent( this );
+    _updateHeaderFromParent( this, transToParent );
   }
 
 
