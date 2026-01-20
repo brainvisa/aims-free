@@ -58,7 +58,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.extlinks',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.autosummary',
-              napoleon]
+              napoleon,
+              'myst_parser']
 
 todo_include_todos = True
 

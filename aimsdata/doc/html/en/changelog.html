@@ -11,12 +11,11 @@
  alink="#ff0000">
 
 <center>
-<h2>AIMSdata ChangeLog</h2>
+<h2>AIMSdata versions 5 and earlier</h2>
  </center>
 
 <hr width="100%"> <br>
 
- <b><a href="#version-6.0.0">Version 6.0.0</a></b><br>
  <b><a href="#version-5.1.2">Version 5.1.2</a></b><br>
  <b><a href="#version-5.1.1">Version 5.1.1</a></b><br>
  <b><a href="#version-5.1.0">Version 5.1.0</a></b><br>
@@ -53,46 +52,6 @@
  <b><a href="#version-2.12">Version 2.12</a></b><br>
  <b><a href="#version-2.11">Version 2.11</a></b><br>
  <b><a href="#version-2.10">Version 2.10</a></b><br>
-
-
-<!-- -->
-<h4> <a name="version-6.0.0"></a>Dec. 3, 2025, Version 6.0.0</h4>
-
-<ul>
-  <li>Referential and axes manipulation in Volume: axes orientation is no longer fixed to LPI orientation but may be queried, and changed. Transformations are updated when axes orientation is changed.
-  </li>
-  <li>Performance improvements in conversion, copy and assignation of pyaims vector classes. They used to be versy slow, they are now fast.
-  </li>
-  <li>Improvements and optimizations in GLTF IO (gloablly more than 10 times faster).
-  </li>
-  <li>Support for MIF (MRTrix volumes) format reading</li>
-  <li>pyaims functions to handle FSL warp fields</li>
-  <li>Complete rework of Transformation classes: N-dimensional transforms are supported, non-linear ones (warp fields as FFD) etc.
-  </li>
-  <li>Support for reading .xfm (Freesurfer affine normalization transformations) files format</li>
-  <li>Experimental support for reading .lta (Freesurfer affine transformations) files format</li>
-  <li>Support for reading Freesurfer surface files format (meshes, such as lh.white, lh.pial etc)
-  </li>
-  <li>Support for reading Freesurfer texture files format (curvcature, such as lh.curv)
-  </li>
-  <li>Support for reading Freesurfer annotation files format (label textures, such as lh.aparc.annot)
-  </li>
-  <li>New module <tt>soma.aims.demotools</tt> in pyaims, providing functions to list and install demo and test datasets from the BrainVisa server.
-  </li>
-  <li>The old command <tt>AimsResample</tt>, obsolete since 5.0.0 and replaced with <tt>AimsApplyTransform</tt>, has been removed.
-  </li>
-  <li>Transformation graphs implementation and IO</li>
-  <li>AimsApplyTransform has been reworked and based on transformation graphs. It simplifies the way referentials and transformations are addressed, and in many cases also avoid the needs to supply a transformation file when all info is in the objects headers. Transformations from/to disk space is also supported. Output space can be completely specified also.
-  </li>
-  <li>FFD transformations composition. Transformation chains may also compose FFD fields (they did not, before). AimsComposeTransformation thus now also supports non-linear FFD fields.
-  </li>
-  <li>Volume views transformations are now autmatically adapted from the parent ones.
-  </li>
-  <li>Several API additions to make things easier, such as Volume::allocateBorder().
-  </li>
-
-  <li>Many other bug fixes</li>
-</ul>
 
 
 <!-- -->

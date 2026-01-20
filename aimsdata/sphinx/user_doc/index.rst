@@ -74,7 +74,7 @@ A non-exhaustive overview of features found in the set of AIMS libraries (cartob
   - Sulci graphs tools
   - Interpolation
   - Mesh manipulation (merge, cut, volume, surface area, ...)
-- Mesh / Volume intersection mapping
+  - Mesh / Volume intersection mapping
 
 
 Developers section
