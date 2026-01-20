@@ -6,6 +6,7 @@
 
 - Volume view transform to parent is now an option in `Volume` view constructor
 - `AimsSubVolume` has now an option (`-p` / `--parent`) to optionally add the transformation from the extracted sub-volume to its parent space. It used to be the mandatory behavior in 6.0.0 but appeared to be confusing for external (but popular) software making too many assumptions on transformations target spaces.
+- Preserve disk orientation when extracting a volume view
 
 
 ## [6.6.0] 2026-01-12
@@ -37,6 +38,7 @@
 ### Removed
 
 - The old command `AimsResample`, obsolete since 5.0.0 and replaced with `AimsApplyTransform`, has been removed.
+
 
 ```{raw} html
 :file: ../../doc/html/en/changelog.html
