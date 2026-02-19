@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [6.0.1] 2026-02-06
 
 ### Changed
 
@@ -9,7 +9,7 @@
 - Preserve disk orientation when extracting a volume view
 
 
-## [6.6.0] 2026-01-12
+## [6.0.0] 2026-01-12
 
 ### Added
 

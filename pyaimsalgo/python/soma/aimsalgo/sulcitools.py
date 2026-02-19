@@ -145,7 +145,7 @@ def save_graph_to_meshes(graph, filename_pattern, label_att='label',
     return meshes, buckets
 
 
-def spam_to_graphs(spam, labels=None):
+def spam_to_graphs(spam, labels=None, thresholds=[0.2, 0.4, 0.7]):
     def new_graph(tal_trans):
         graph = aims.Graph('CorticalFoldArg')
         graph['filename_base'] = '*'
@@ -198,10 +198,8 @@ def spam_to_graphs(spam, labels=None):
             icbmi])
         tal = aims.StandardReferentials.talairachToICBM().inverse() * icbm
 
-    allmeshes = {0.2: {}, 0.4: {}, 0.7: {}}
-    graphs = {0.2: [new_graph(tal), new_graph(tal)],
-              0.4: [new_graph(tal), new_graph(tal)],
-              0.7: [new_graph(tal), new_graph(tal)]}
+    allmeshes = {t: {} for t in thresholds}
+    graphs = {t: [new_graph(tal), new_graph(tal)] for t in thresholds}
 
     bboxes = {}
     for i, labeld in labels.items():
