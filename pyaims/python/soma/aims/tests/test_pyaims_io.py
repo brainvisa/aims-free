@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 
-from __future__ import absolute_import
-import glob
 import cmath
 import tempfile
 import os
 import sys
 import unittest
 import shutil
-import six
 from soma import aims
 from soma.aims import soma
 import numpy as np
 import glob
 from soma.aims.volumetools import compare_images
-from six.moves import range
 
 
 FLOAT_DATA_TYPES = ("FLOAT", "CFLOAT", "DOUBLE", "CDOUBLE")
@@ -314,10 +309,7 @@ class TestPyaimsIO(unittest.TestCase):
             return (o, d)
 
         def get_python_type(type_code):
-            if six.PY2:
-                longtype = long
-            else:
-                longtype = int
+            longtype = int
             tmap = {'U8': int, 'S8': int,
                     'U16': int, 'S16': int,
                     'U32': int, 'S32': int,
@@ -403,8 +395,7 @@ class TestPyaimsIO(unittest.TestCase):
         format_exceptions = { 'DICOM': {'read_pattern': 'Volume_%s_%d_%s*%s'} }
 
         dsil = soma.DataSourceInfoLoader()
-        for t, lf in \
-                six.iteritems(aims.carto.IOObjectTypesDictionary.writeTypes()):
+        for t, lf in aims.carto.IOObjectTypesDictionary.writeTypes().items():
             object_type, data_type = get_type_info(t)
             if is_volume_type(object_type):
                 try:
@@ -556,7 +547,6 @@ class TestPyaimsIO(unittest.TestCase):
         '''
         from soma import aims, uuid
 
-        import six
         import os
 
         def write_minf(attributes, filename, options={}):
@@ -598,7 +588,7 @@ class TestPyaimsIO(unittest.TestCase):
                 if self.verbose:
                     print('Re-read header:', h)
                     
-                for k, v in six.iteritems(meta):
+                for k, v in meta.items():
                     if self.verbose:
                         print('Re-read', k, '(%s)' % str(h.get(k)), 
                             '==', 'written', k, '(%s)' % str(v), ':', 
