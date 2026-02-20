@@ -75,6 +75,7 @@ class MedianSmoothing_%Template1typecode%
 {
 %TypeHeaderCode
 #include <aims/signalfilter/medianfilter.h>
+#include <aims/signalfilter/filteringfunction_element_d.h>
 
 #ifndef PYAIMSALGOSIP_MEDIANSMOOTHING_%Template1typecode%_DEFINED
 #define PYAIMSALGOSIP_MEDIANSMOOTHING_%Template1typecode%_DEFINED
