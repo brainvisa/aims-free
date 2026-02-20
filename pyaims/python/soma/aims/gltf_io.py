@@ -955,12 +955,12 @@ class GLTFParser:
                         indices = indices.reshape((int(indices.shape[0]/ns),
                                                    ns))
                     mesh_def['polygons'] = indices
-                if pos_i:
+                if pos_i is not None:
                     acc = gltf['accessors'][pos_i]
                     accessor = Accessor(gltf, acc, arrays)
                     vert = accessor.data()
                     mesh_def['vertices'] = vert
-                if normal_i:
+                if normal_i is not None:
                     acc = gltf['accessors'][normal_i]
                     accessor = Accessor(gltf, acc, arrays)
                     norm = accessor.data()
@@ -969,7 +969,7 @@ class GLTFParser:
                 for k, v in attdict.items():
                     if k.startswith('TEXCOORD_') and v is not None:
                         texcoords_i[int(k[9:])] = v
-                if texcoords_i:
+                if texcoords_i is not None:
                     texcoords = {}
                     for tex, tci in texcoords_i.items():
                         acc = gltf['accessors'][tci]
