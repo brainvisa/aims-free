@@ -40,6 +40,7 @@
 #include <aims/math/math_g.h>
 #include <aims/utility/utility_g.h>
 #include <aims/signalfilter/medianfilter.h>
+#include <aims/signalfilter/filteringfunction_element_d.h>
 
 using namespace aims;
 using namespace carto;

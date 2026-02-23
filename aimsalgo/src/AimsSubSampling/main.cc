@@ -20,6 +20,7 @@
 #include <aims/utility/utility_g.h>
 #include <aims/utility/progress.h>
 #include <aims/math/math_g.h>
+#include <aims/signalfilter/filteringfunction_element_d.h>
 #include <aims/resampling/subsamplingimagealgorithm.h>
 #include <aims/resampling/extremadifferencesubsampling.h>
 #include <aims/resampling/mediansubsampling.h>
