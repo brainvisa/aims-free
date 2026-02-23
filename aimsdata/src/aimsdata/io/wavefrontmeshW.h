@@ -353,6 +353,24 @@ namespace aims
 
       try
       {
+        carto::Object emission = material->getProperty( "emission" );
+        carto::Object it = emission->objectIterator();
+        std::stringstream s;
+        int i;
+        for( i=0; it->isValid() && i < 3; it->next(), ++i )
+        {
+          if( i != 0 )
+            s << " ";
+          s << it->currentValue()->getScalar();
+        }
+        mtldict->setProperty( "Ke", s.str() );
+      }
+      catch( ... )
+      {
+      }
+
+      try
+      {
         carto::Object specular = material->getProperty( "specular" );
         carto::Object it = specular->objectIterator();
         std::stringstream s;

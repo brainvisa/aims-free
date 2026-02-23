@@ -196,6 +196,17 @@ namespace aims
         s >> ambient[0] >> ambient[1] >> ambient[2];
         current_mat->setProperty( "ambient", ambient );
       }
+      else if( element == "Ke" )
+      {
+        if( !current_obj )
+        {
+          std::cerr << "MTL error: no current object.\n";
+          continue;
+        }
+        std::vector<float> emission( 3 );
+        s >> emission[0] >> emission[1] >> emission[2];
+        current_mat->setProperty( "emission", emission );
+      }
       else if( element == "Kd" )
       {
         if( !current_obj )
@@ -328,6 +339,18 @@ namespace aims
         s >> illum;
         current_obj->setProperty( "illum", illum );
         // don't know what to do with this...
+      }
+      else if( element == "Ni" )
+      {
+        if( !current_obj )
+        {
+          std::cerr << "MTL error: no current object.\n";
+          continue;
+        }
+        float ni;
+        s >> ni;
+        current_obj->setProperty( "optical_density", ni );
+        // don't know what to do with this... (refraction index)
       }
       else
       {
