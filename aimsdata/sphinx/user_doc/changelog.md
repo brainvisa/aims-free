@@ -1,5 +1,15 @@
 # Changelog
 
+## [6.0.2] 2026-02-27
+
+### Changed
+
+- MINC IO fix: try to read only files with matching extensions to prevent resource leaks in underlying libminc/hdf5 when reading fails
+- MINC IO fix: properly handle .mnc.gz files
+- GLTF IO: fixed reading files using index=0
+- fixed compilation with older compilers
+- WAVEFRONT IO: completed previously unsupported tags in .mtl files, which thus caused reading to fail
+
 ## [6.0.1] 2026-02-06
 
 ### Changed
