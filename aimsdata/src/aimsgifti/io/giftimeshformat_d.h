@@ -492,6 +492,9 @@ namespace aims
           //			 csnew->xform[2][2] = 1;
           //			 csnew->xform[3][3] = 1;
 
+          // transormations
+          hdr.giftiSetTransformations( carto::Object::reference( thdr ), da );
+
           // metadata
           carto::Object dainf
           = GiftiHeader::giftiFindHdrDA( hdrmeshda, da_info,
