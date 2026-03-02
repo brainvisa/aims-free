@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.0.3] 2026-03-02
+
+### Added
+
+- STL mesh format support
+
+
 ## [6.0.2] 2026-02-27
 
 ### Changed
