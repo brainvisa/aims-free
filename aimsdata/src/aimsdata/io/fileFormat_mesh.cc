@@ -91,6 +91,12 @@ FileFormatDictionary<AimsSurfaceTriangle>::registerBaseFormats()
   WavefrontMeshFormat<3, Void> *wo = new WavefrontMeshFormat<3, Void>;
   registerFormat( "WAVEFRONT", wo, ext );
   ext.clear();
+
+  ext.push_back( "stl" );
+  ext.push_back( "STL" );
+  STLMeshFormat *so = new STLMeshFormat;
+  registerFormat( "STL", so, ext );
+  ext.clear();
 }
 
 

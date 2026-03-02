@@ -140,6 +140,10 @@ void Finder::initPrivate()
       ext.push_back( "OBJ" );
       registerFormat( "WAVEFRONT", new FinderWavefrontFormat, ext );
       ext.clear();
+      ext.push_back( "stl" );
+      ext.push_back( "STL" );
+      registerFormat( "STL", new FinderSTLFormat, ext );
+      ext.clear();
       ext.push_back( "tex" );
       registerFormat( "TEX", new FinderTexFormat, ext );
       ext.clear();
