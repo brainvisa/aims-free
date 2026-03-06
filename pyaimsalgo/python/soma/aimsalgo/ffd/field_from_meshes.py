@@ -58,7 +58,7 @@ def field_from_deformed_mesh(orig_mesh, deformed_mesh, output_field=None,
     return field
 
 
-if __name__ == '__main__':
+def main():
 
     import argparse
 
@@ -80,3 +80,7 @@ if __name__ == '__main__':
 
     field_from_deformed_mesh(mesh1_f, mesh2_f, output_field=output_f,
                              max_seeds=max_seeds)
+
+
+if __name__ == '__main__':
+    main()
