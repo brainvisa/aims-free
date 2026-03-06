@@ -1,10 +1,14 @@
 # Changelog
 
-## [6.0.3] 2026-03-02
+## [6.0.3] 2026-03-06
 
 ### Added
 
 - STL mesh format support
+- new soma.aimsalgo.ffd module, containing:
+  - field_extrapolate: extrapolate FFD deformation fields outside a validity domain mask using Voronoi propagation
+  - field_from_meshes: build a FFD field from a pair of (origin mesh, deformed mesh)
+  - new commandline: AimsFFDFromMeshDeformation.py
 
 
 ## [6.0.2] 2026-02-27
