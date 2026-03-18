@@ -124,6 +124,13 @@ namespace aims
     virtual bool check( const std::string & filename, Finder & f ) const;
   };
 
+  class FinderSTLFormat : public FinderFormat
+  {
+  public:
+    virtual ~FinderSTLFormat() {}
+    virtual bool check( const std::string & filename, Finder & f ) const;
+  };
+
   class FinderTexFormat : public FinderFormat
   {
   public:

@@ -92,14 +92,29 @@ namespace aims
     // dur is the duration of the heat equation 
     // !! dur is the TOTAL time of diffusion, not the nb of iteration as for surfaceBlockSmooth
     AIMSALGO_API 
-    static Texture<float> FiniteElementSmoothing( const Texture<float> &inittex, 
-						  float dt, float dur,
-						  float Smax,
-						  const std::map<unsigned, std::set< std::pair<unsigned,float> > > & weightLapl);
-    
-    static Texture<float> FiniteElementSmoothingWithSource( const Texture<float> &inittex, const Texture<float> &sourcetex, 
-							    float dt, float dur,
-							    const std::map<unsigned, std::set< std::pair<unsigned,float> > > & weightLapl);
+    static Texture<float> FiniteElementSmoothing(
+      const Texture<float> &inittex,
+      float dt, float dur,
+      float Smax,
+      const std::map<unsigned, std::set< std::pair<unsigned,float> > > & weightLapl);
+
+    static TimeTexture<float> *FiniteElementSmoothing(
+      const TimeTexture<float> &inittex,
+      float dt, float dur,
+      float Smax,
+      const std::map<unsigned, std::set< std::pair<unsigned,float> > > & weightLapl);
+
+    static Texture<float> FiniteElementSmoothingWithSource(
+      const Texture<float> &inittex, const Texture<float> &sourcetex,
+      float dt, float dur,
+      const std::map<unsigned, std::set< std::pair<unsigned,float> > > & weightLapl);
+
+    static TimeTexture<float> *FiniteElementSmoothingWithSource(
+      const TimeTexture<float> &inittex, const TimeTexture<float> &sourcetex,
+      float dt, float dur,
+      const std::map<unsigned, std::set< std::pair<unsigned,float> > > & weightLapl);
+
+
   private : 
 
     /**	Gaussian diffusion along a surface - subroutine.

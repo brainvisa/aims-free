@@ -139,6 +139,38 @@ namespace aims
       carto::Object options = carto::none() );
   };
 
+
+  class STLMeshFormat : public FileFormat<AimsTimeSurface<3, Void> >
+  {
+  public:
+    virtual ~STLMeshFormat();
+
+    virtual bool read( const std::string & filename,
+                       AimsTimeSurface<3, Void>&obj,
+                       const carto::AllocatorContext & context,
+                       carto::Object options );
+
+    virtual bool write(const std::string & filename,
+      const AimsTimeSurface<3, Void> &vol,
+      carto::Object options = carto::none() );
+
+  protected:
+    bool readAscii( const std::string & filename,
+                    AimsTimeSurface<3, Void>&obj,
+                    const carto::AllocatorContext & context,
+                    carto::Object options, PythonHeader & hdr );
+    bool readBinary( const std::string & filename,
+                     AimsTimeSurface<3, Void>&obj,
+                     const carto::AllocatorContext & context,
+                     carto::Object options, PythonHeader & hdr );
+    bool writeAscii( const std::string & filename,
+                     const AimsTimeSurface<3, Void>&obj,
+                     carto::Object options );
+    bool writeBinary( const std::string & filename,
+                      const AimsTimeSurface<3, Void>&obj,
+                      carto::Object options );
+  };
+
 }
 
 

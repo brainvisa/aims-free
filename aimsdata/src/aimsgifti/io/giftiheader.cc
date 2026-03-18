@@ -917,40 +917,65 @@ std::string GiftiHeader::niftiRefFromAimsString( const std::string & space )
 
 void GiftiHeader::giftiSetTransformations( carto::Object cs, giiDataArray *da )
 {
-  std::vector<std::vector<float> > trs;
-  std::vector<std::string> refs;
+  Object trs, refs;
+  std::string referential;
   std::vector<std::string> datarefs;
-  if( cs->getProperty( "transformations", trs )
-    && cs->getProperty( "referentials", refs ) )
+
+  try
+  {
+    trs = cs->getProperty( "transformations" );
+    refs = cs->getProperty( "referentials" );
+    referential = cs->getProperty( "referential" )->getString();
+  }
+  catch( ... )
+  {
+  }
+
+  if( refs && trs )
   {
     if( !cs->getProperty( "data_referentials", datarefs ) )
     {
-      std::string dataref;
-      if( cs->getProperty( "referential", dataref ) )
-        datarefs.push_back( dataref );
+      if( !referential.empty() )
+        datarefs.push_back( referential );
     }
-    unsigned i, n = trs.size(), m = datarefs.size();
-    if( refs.size() < n )
-      n = refs.size();
+    if( datarefs.empty() )
+      datarefs.push_back( "NIFTI_XFORM_UNKNOWN" );
+    unsigned m = datarefs.size();
     if( da->numCS != 0 )
       // erase older CS
       gifti_free_CS_list( da );
-    for( i=0; i<n; ++i )
+
+    Object itr, iref;
+    for( itr=trs->objectIterator(), iref=refs->objectIterator();
+         itr->isValid() && iref->isValid(); itr->next(), iref->next() )
     {
       gifti_add_empty_CS( da );
+      unsigned i = da->numCS - 1;
       giiCoordSystem *c = da->coordsys[i];
-      if( i < m )
-        c->dataspace
+      if( i >= m )
+        i = m - 1;
+      c->dataspace
         = strdup( niftiRefFromAimsString( datarefs[i] ).c_str() );
-      else
-        c->dataspace = strdup( "NIFTI_XFORM_UNKNOWN" );
-      c->xformspace = strdup( niftiRefFromAimsString( refs[i] ).c_str() );
+      c->xformspace = strdup( niftiRefFromAimsString(
+        iref->currentValue()->getString() ).c_str() );
+      Object tit = itr->currentValue()->objectIterator();
+      double v;
       for( unsigned j=0; j<4; ++j )
-      {
-        c->xform[j][0] = trs[i][j*4];
-        c->xform[j][1] = trs[i][j*4+1];
-        c->xform[j][2] = trs[i][j*4+2];
-        c->xform[j][3] = trs[i][j*4+3];
+        for( unsigned k=0; k<4; ++k )
+        {
+          if( tit->isValid() )
+          {
+            v = tit->currentValue()->getScalar();
+            tit->next();
+          }
+          else
+          {
+            if( k == j )
+              v = 1.;
+            else
+              v = 0.;
+          }
+        c->xform[j][k] = v;
       }
     }
   }

@@ -93,3 +93,4 @@
 %Include topoclassifier_U32.sip
 %Include topoclassifier_FLOAT.sip
 %Include topoclassifier_DOUBLE.sip
+%Include texturesmoothing.sip
