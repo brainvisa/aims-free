@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.0.15] 2026-03-17
+
+### Added
+
+- Laplacian smoothing has been extended for TimeTexture (it was formetly implemented only for Texture), and python bindings have been added.
+
+
 ## [6.0.3] 2026-03-06
 
 ### Added
