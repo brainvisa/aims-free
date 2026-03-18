@@ -56,13 +56,14 @@ int main( int argc, const char** argv )
   Writer<Texture1d>   texW;
   float	sigma = 0, dt=0, dur = 0, FWHM, H=10000;
   float Wmax = 0.98;
-  int T=0;
+  int T=-12;
 
   //
   // Parser of options
   //
   AimsApplication app( argc, argv,
-    "Geodesic smoothing of the input texture (Laplacian: heat equation)" );
+    "Geodesic smoothing of the input texture (Laplacian: heat equation)."
+    "Can work on a TimeTexture since Aims 6.0.15." );
   app.addOption( texR, "-i", "input object definition texture" );
   app.alias( "--input", "-i" );
   app.addOption( texW, "-o", "output texture file" );
@@ -82,7 +83,7 @@ int main( int argc, const char** argv )
   app.addOption( dt, "-t", "timestep. Default = automatic estimation", true );
   app.alias( "--timestep", "-t" );
   app.addOption( T, "-T",
-    "Timepoint in the input texture to be smoothed. Default: 0", true );
+    "Timepoint in the input texture to be smoothed. Default: all", true );
   app.alias( "--Time", "-T" );
   app.alias( "--time", "-T" );
   app.addOption( Wmax, "-W", "weight ratio threshold. Default: 0.98", true );
@@ -110,11 +111,8 @@ int main( int argc, const char** argv )
 
     cout << "reading texture " << texR.fileName() << endl;
     texR >> inpTex ;
-    unsigned n=inpTex[(unsigned)T].nItem();
 
-
-    Texture<float> itex(n),otex(n);
-    TimeTexture<float>  outTex(1,n);
+    TimeTexture<float>  *outTex = 0;
 
     map<unsigned, set< pair<unsigned,float> > > weightLapl;
     weightLapl = AimsMeshWeightFiniteElementLaplacian(surface[0],Wmax);
@@ -131,30 +129,42 @@ int main( int argc, const char** argv )
       }
     */
 
-    set<float>   hval;
-    for (unsigned i=0; i<n; ++i)
+    if( H == 0 )
+    {
+      //The  smoothed texture values are threshold.
+      //The threshold is the max of the input texture.
+
+      if( T >= 0 )
       {
-        itex.item(i)= inpTex[(unsigned)T].item(i);
-        hval.insert(fabs(inpTex[(unsigned)T].item(i)));
+        const Texture<float> & itex = inpTex[(unsigned) T];
+        unsigned n = itex.nItem();
+        float v;
+
+        for( unsigned i=0; i<n; ++i )
+        {
+          v = fabs( itex[i] );
+          if( v > H )
+            H = v;
+        }
       }
-
-    //The  smoothed texture values are threshold.
-    //The threshold is the max of the input texture.
-    if (H == 0)
-      H = *hval.rbegin() ;
-
-    if (dt == 0)
+      else
       {
-        cout << "Estime the laplacian\n";
-        otex =  AimsMeshLaplacian(itex,weightLapl);
-        float dte;
-        cout << "Estime dt\n";
-        dte = AimsMeshFiniteElementDt(itex,otex,H);
-        cout << "dt estimated : " << dte << endl;
-        dt =  dte;
+        TimeTexture<float>::const_iterator it, et = inpTex.end();
+        for( it=inpTex.begin(); it!=et; ++it )
+        {
+          const Texture<float> & itex = it->second;
+          unsigned n = itex.nItem();
+          float v;
+
+          for( unsigned i=0; i<n; ++i )
+          {
+            v = fabs( itex[i] );
+            if( v > H )
+              H = v;
+          }
+        }
       }
-
-
+    }
 
     if( dur == 0 )
       {
@@ -168,19 +178,37 @@ int main( int argc, const char** argv )
 
 
     FWHM = 4 * sqrt ( ::log(2) * dur  );
-    cout << "dur=" << dur*dt << " and equivalent FWHM =" << FWHM << " mm" << endl;
+    cout << "dur=" << dur << " and equivalent FWHM =" << FWHM << " mm" << endl;
     cout << "Weight ratio thresold: " << Wmax << endl;
     cout << "output threshold: "<< H << endl;
 
     TimeTexture<float> stex;
     if ( texRs.fileName().empty() )
-      outTex[0] = TextureSmoothing::FiniteElementSmoothing(
-        itex, dt, dur, H, weightLapl );
+    {
+      if( T >= 0 )
+      {
+        const Texture<float> & itex = inpTex[(unsigned) T];
+        outTex = new TimeTexture<float>;
+        (*outTex)[0] = TextureSmoothing::FiniteElementSmoothing(
+          itex, dt, dur, H, weightLapl );
+      }
+      else
+        outTex = TextureSmoothing::FiniteElementSmoothing(
+          inpTex, dt, dur, H, weightLapl );
+    }
     else
     {
       texRs >> stex;
-      outTex[0] = TextureSmoothing::FiniteElementSmoothingWithSource(
-        itex, stex[0], dt, dur, weightLapl );
+      if( T >= 0 )
+      {
+        const Texture<float> & itex = inpTex[(unsigned) T];
+        outTex = new TimeTexture<float>;
+        (*outTex)[0] = TextureSmoothing::FiniteElementSmoothingWithSource(
+          itex, stex[0], dt, dur, weightLapl );
+      }
+      else
+        outTex = TextureSmoothing::FiniteElementSmoothingWithSource(
+          inpTex, stex, dt, dur, weightLapl );
     }
 
     float m=0;
@@ -201,7 +229,8 @@ int main( int argc, const char** argv )
     cout << "min: " << *values.begin() << " max: " << *values.rbegin() << endl;
 
     cout << "writing texture : " << flush;
-    texW.write( outTex );
+    texW.write( *outTex );
+    delete outTex;
     cout << "done " << endl;
   }
   catch( user_interruption & )

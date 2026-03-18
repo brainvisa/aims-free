@@ -575,15 +575,16 @@ TimeTexture<float> TextureSmoothing::derivative( const string & latt_filename,
 
 
 
-Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &inittex,
-                                                         float dt, float dur,
-                                                         float Smax,
-                                                         const map<unsigned, set< pair<unsigned,float> > > & weightLapl)
+Texture<float> TextureSmoothing::FiniteElementSmoothing(
+  const Texture<float> &inittex,
+  float dt, float dur,
+  float Smax,
+  const map<unsigned, set< pair<unsigned,float> > > & weightLapl )
 {
 
   unsigned                      t;
   float                         s;
-  Texture<float>                smooth = inittex ,lapl;
+  Texture<float>                smooth = inittex, lapl;
   unsigned                      i,n=smooth.nItem();
 
   // TimeTexture<float> temp;
@@ -595,6 +596,15 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
 // use_matpow: for test only: for a single texture it is far slower than the
 // normal version.
 #ifdef use_matpow
+    if( dt == 0 )
+    {
+      cout << "Estimate the laplacian\n";
+      lapl = AimsMeshLaplacian( smooth, weightLapl );
+      dt = AimsMeshFiniteElementDt( smooth, lapl, Smax );
+      cout << "Estimated dt: " << dt << endl;
+      haslapl = true;
+    }
+
     LaplacianWeights *weightLaplPow
       = makeLaplacianSmoothingCoefficients( weightLapl, rint(dur/dt), dt,
                                             0.0001 );
@@ -604,6 +614,16 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
 
 #else
 
+    bool haslapl = false;
+    if( dt == 0 )
+    {
+      cout << "Estimate the laplacian\n";
+      lapl = AimsMeshLaplacian( smooth, weightLapl );
+      dt = AimsMeshFiniteElementDt( smooth, lapl, Smax );
+      cout << "Estimated dt: " << dt << endl;
+      haslapl = true;
+    }
+
     for (t=0; t< rint(dur/dt); ++t)
       {
         //if (t%10 == 0)
@@ -611,7 +631,9 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
           cout << "                ";
           cout << "\r" << rint(100*t*dt/dur) << "%" << flush;
         }
-        lapl =  AimsMeshLaplacian(smooth,weightLapl);
+        if( !haslapl )
+          lapl =  AimsMeshLaplacian( smooth, weightLapl );
+        haslapl = false;
         for ( i=0; i<n; ++i)
           {
             s = smooth.item(i) + dt * lapl.item(i);
@@ -637,7 +659,7 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
   else
     {
       cout << "Estimation of the Laplacian of the texture\n";
-      smooth =  AimsMeshLaplacian(smooth,weightLapl);
+      smooth =  AimsMeshLaplacian( smooth, weightLapl );
     }
 
 /*
@@ -651,9 +673,31 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
   return smooth;
 }
 
-Texture<float> TextureSmoothing::FiniteElementSmoothingWithSource( const Texture<float> &inittex, const Texture<float> &sourcetex,
-                                                                   float dt, float dur,
-                                                                   const map<unsigned, set< pair<unsigned,float> > > & weightLapl)
+
+TimeTexture<float> *TextureSmoothing::FiniteElementSmoothing(
+  const TimeTexture<float> &inittex,
+  float dt, float dur,
+  float Smax,
+  const map<unsigned, set< pair<unsigned,float> > > & weightLapl )
+{
+  TimeTexture<float> *res = new TimeTexture<float>;
+  TimeTexture<float>::const_iterator i, e = inittex.end();
+
+  for( i=inittex.begin(); i!=e; ++i )
+  {
+    const Texture<float> & itex = i->second;
+    (*res)[i->first]
+      = FiniteElementSmoothing( itex, dt, dur, Smax, weightLapl );
+  }
+
+  return res;
+}
+
+
+Texture<float> TextureSmoothing::FiniteElementSmoothingWithSource(
+  const Texture<float> &inittex, const Texture<float> &sourcetex,
+  float dt, float dur,
+  const map<unsigned, set< pair<unsigned,float> > > & weightLapl)
 {
 
   unsigned                      t;
@@ -678,7 +722,7 @@ Texture<float> TextureSmoothing::FiniteElementSmoothingWithSource( const Texture
             cout << max << endl;
           }
 
-        lapl =  AimsMeshLaplacian(smooth,weightLapl);
+        lapl =  AimsMeshLaplacian(smooth, weightLapl);
 
         for ( i=0; i<n; ++i)
           if (sourcetex.item(i) == 0)
@@ -691,4 +735,30 @@ Texture<float> TextureSmoothing::FiniteElementSmoothingWithSource( const Texture
       }
 
   return smooth;
+}
+
+
+TimeTexture<float> *TextureSmoothing::FiniteElementSmoothingWithSource(
+  const TimeTexture<float> &inittex, const TimeTexture<float> &sourcetex,
+  float dt, float dur,
+  const map<unsigned, set< pair<unsigned,float> > > & weightLapl )
+{
+  TimeTexture<float> *res = new TimeTexture<float>;
+  TimeTexture<float>::const_iterator i, e = inittex.end();
+  TimeTexture<float>::const_iterator si, se = sourcetex.end(), st;
+
+  for( i=inittex.begin(), si=sourcetex.begin(); i!=e; ++i )
+  {
+    const Texture<float> & itex = i->second;
+    st = si;
+    si = sourcetex.lower_bound( i->first );
+    if( si == se || si->first > i->first )
+      si = st;
+    const Texture<float> & sitex = si->second;
+
+    (*res)[i->first]
+      = FiniteElementSmoothingWithSource( itex, sitex, dt, dur, weightLapl );
+  }
+
+  return res;
 }
