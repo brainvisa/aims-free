@@ -1473,6 +1473,22 @@ namespace aims
   }
 
 
+  template <typename T>
+  TimeTexture<T> *applyLaplacianMatrix( const TimeTexture<T> &inittex,
+                                        const LaplacianWeights &lapl )
+  {
+    TimeTexture<T> *outtex = new TimeTexture<T>;
+    typename TimeTexture<T>::const_iterator i, e = inittex.end();
+    for( i=inittex.begin(); i!=e; ++i )
+    {
+      Texture<T> & otex = (*outtex)[i->first];
+      applyLaplacianMatrix( i->second.data(), otex.data(), lapl );
+    }
+
+    return outtex;
+  }
+
+
   // --- template instanciations ---
 
 
@@ -1480,6 +1496,12 @@ namespace aims
     vector<float> & outtex, const LaplacianWeights &lapl);
   template void applyLaplacianMatrix( const vector<double> &inittex,
     vector<double> & outtex, const LaplacianWeights &lapl);
+  template TimeTexture<float> *
+  applyLaplacianMatrix( const TimeTexture<float> &inittex,
+                        const LaplacianWeights &lapl );
+  template TimeTexture<double> *
+  applyLaplacianMatrix( const TimeTexture<double> &inittex,
+                        const LaplacianWeights &lapl );
 
 }
 

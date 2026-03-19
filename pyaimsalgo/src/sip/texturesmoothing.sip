@@ -100,6 +100,7 @@ namespace aims
 
   };
 
+
 };
 
 
@@ -109,5 +110,41 @@ aims::LaplacianWeights AimsMeshWeightFiniteElementLaplacian( const AimsTimeSurfa
     aims::LaplacianWeights *weights = new aims::LaplacianWeights(
         AimsMeshWeightFiniteElementLaplacian( mesh, a1 ) );
     sipRes = weights;
+%End
+
+
+aims::LaplacianWeights* makeLaplacianSmoothingCoefficients(
+  const aims::LaplacianWeights & weights, unsigned niter, float dt,
+  float sparseThresh=0 ) /Factory/;
+%Docstring
+    Compute Laplacian smoothing coefficients matrix for niter smoothing
+    iterations.
+    Input weights should be the output of
+    AimsMeshWeightFiniteElementLaplacian().
+    sparseThresh can be used to threshold the weights of the sparse matrix
+    at each smoothing iteration, to reduce the sparse matrix size.
+%End
+%MethodCode
+    sipRes = aims::makeLaplacianSmoothingCoefficients( *a0, a1, a2, a3 );
+%End
+
+
+void applyLaplacianMatrix( const vector_FLOAT &inittex,
+                           vector_FLOAT & outtex,
+                           const aims::LaplacianWeights &lapl );
+%Docstring
+Apply Laplacian smoothing coefficients (output of
+makeLaplacianSmoothingCoefficients()) to a data texture vector.
+%End
+%MethodCode
+    aims::applyLaplacianMatrix( *a0, *a1, *a2 );
+%End
+
+
+TimeTexture_FLOAT *applyLaplacianMatrix(
+  const TimeTexture_FLOAT &inittex,
+  const aims::LaplacianWeights &lapl ) /Factory/;
+%MethodCode
+    sipRes = aims::applyLaplacianMatrix( *a0, *a1 );
 %End
 
