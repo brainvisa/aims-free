@@ -46,6 +46,11 @@ except ImportError as e:
         except ImportError:
             raise Exception("DICOM aggregator requires pydicom.")
 
+if int(dicom.__version_info__[0]) >= 3:
+    dicom_read = dicom.dcmread
+else:
+    dicom_read = dicom.read_file
+
 class DicomAggregator( object ):
     def __init__( self ):
         self._dicom_sources = []
@@ -68,7 +73,7 @@ class DicomAggregator( object ):
         positions_and_orientations = []
         for f in self._dicom_sources:
             try:
-                ds = dicom.read_file( f, stop_before_pixels=True )
+                ds = dicom_read( f, stop_before_pixels=True )
             except Exception as e:
                 print(e)
                 continue
