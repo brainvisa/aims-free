@@ -5,6 +5,9 @@
 ### Added
 
 - Laplacian smoothing has been extended for TimeTexture (it was formetly implemented only for Texture), and python bindings have been added.
+
+### Changed
+
 - fixes for pydicom >= 3 in dicom aggregator
 
 
