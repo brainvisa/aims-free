@@ -303,9 +303,9 @@ namespace
 
   template <typename T>
   inline
-  bool first_comparator ( const pair<T, T> & l, const pair<T, T> & r )
+  bool first_comparator ( const tuple<T, T> & l, const tuple<T, T> & r )
   {
-    return l.first < r.first;
+    return get<0>(l) < get<0>(r);
   }
 
 }
@@ -388,8 +388,9 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
   int                               min_cyl, max_cyl;
   T                                 val=0, nlabel, nlabel_max, label_max,
                                     cur_label, apply_val = 0;
-  typename vector< pair<T, T> >::iterator    lab, endlab;
-  vector< pair<T, T> >              label;
+  typedef vector< tuple<T, T> >      label_type;
+  typename label_type::iterator     lab, endlab;
+  label_type                        label;
   vector< float >                   vs = data->getVoxelSize();
 
   vs.resize( 3, 1. );
@@ -504,7 +505,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
           {
             if( apply_to.get() )
               apply_val = apply_to->at( (*ic)[0], (*ic)[1], (*ic)[2], t );
-            label.push_back( make_pair( val, apply_val ) );
+            label.push_back( make_tuple( val, apply_val ) );
           }
         }
 
@@ -516,9 +517,9 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
             endlab = label.end();
             for( lab=label.begin(); lab!=endlab; ++lab )
               if( apply_to.get() )
-                sum += lab->second;
+                sum += get<1>(*lab);
               else
-                sum += lab->first; // labels are actually values here
+                sum += get<0>(*lab); // labels are actually values here
             otex.push_back( sum / label.size() );
           }
           else
@@ -534,7 +535,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
               label_max = 0;
               for(lab=label.begin(); lab!=endlab; ++lab )
               {
-                if( lab->first != cur_label )
+                if( get<0>(*lab) != cur_label )
                 {
                     if( nlabel > nlabel_max )
                     {  // the largest label
@@ -542,7 +543,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
                       label_max = cur_label;
                     }
                     // new label
-                    cur_label = lab->first;
+                    cur_label = get<0>(*lab);
                     nlabel = 1;
                 }
                 else
@@ -559,23 +560,23 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
             else if( vmode == MAX )
             {
               if( apply_to.get() )
-                otex.push_back( label.back().second );
+                otex.push_back( get<1>(label.back()) );
               else
-                otex.push_back( label.back().first );
+                otex.push_back( get<0>(label.back()) );
             }
             else if( vmode == MIN )
             {
               if( apply_to.get() )
-                otex.push_back( label.front().second );
+                otex.push_back( get<1>(label.front()) );
               else
-                otex.push_back( label.front().first );
+                otex.push_back( get<0>(label.front()) );
             }
             else if( vmode == MEDIAN )
             {
               if( apply_to.get() )
-                otex.push_back( label[ ( label.size() + 1 ) / 2 ].second );
+                otex.push_back( get<1>(label[ ( label.size() + 1 ) / 2 ]) );
               else
-                otex.push_back( label[ ( label.size() + 1 ) / 2 ].first );
+                otex.push_back( get<0>(label[ ( label.size() + 1 ) / 2 ]) );
             }
           }
         }
