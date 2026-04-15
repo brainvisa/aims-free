@@ -301,9 +301,9 @@ bool ConvReader<U>::doit( Process & p, const string & fname, Finder & f )
 namespace
 {
 
-  template <typename T>
+  template <typename T, typename U>
   inline
-  bool first_comparator ( const tuple<T, T> & l, const tuple<T, T> & r )
+  bool first_comparator ( const tuple<T, T, U> & l, const tuple<T, T, U> & r )
   {
     return get<0>(l) < get<0>(r);
   }
@@ -388,10 +388,15 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
   int                               min_cyl, max_cyl;
   T                                 val=0, nlabel, nlabel_max, label_max,
                                     cur_label, apply_val = 0;
-  typedef vector< tuple<T, T> >      label_type;
-  typename label_type::iterator     lab, endlab;
-  label_type                        label;
+  typedef Volume<int16_t> OutputVoxelVolumeType;
+  typedef OutputVoxelVolumeType::Position4Di CoordType;
+  typedef vector< tuple<T, T, CoordType> > LabelType;
+  typename LabelType::iterator      lab, endlab;
+  LabelType                         label;
   vector< float >                   vs = data->getVoxelSize();
+
+  OutputVoxelVolumeType chosen_voxel_volume(data.getSizeX(), data.getSizeY(), data.getSizeZ());
+  chosen_voxel_volume.fill(0);
 
   vs.resize( 3, 1. );
 
@@ -505,7 +510,8 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
           {
             if( apply_to.get() )
               apply_val = apply_to->at( (*ic)[0], (*ic)[1], (*ic)[2], t );
-            label.push_back( make_tuple( val, apply_val ) );
+            label.push_back( make_tuple( val, apply_val,
+                                         CoordType((*ic)[0], (*ic)[1], (*ic)[2])) );
           }
         }
 
@@ -524,7 +530,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
           }
           else
           {
-            sort( label.begin(), label.end(), first_comparator<T> );
+            sort( label.begin(), label.end(), first_comparator<T, CoordType> );
 
             if( vmode == MAJORITY )
             {
@@ -563,6 +569,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
                 otex.push_back( get<1>(label.back()) );
               else
                 otex.push_back( get<0>(label.back()) );
+              chosen_voxel_volume.at(get<2>(label.back())) = 1;
             }
             else if( vmode == MIN )
             {
@@ -570,6 +577,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
                 otex.push_back( get<1>(label.front()) );
               else
                 otex.push_back( get<0>(label.front()) );
+              chosen_voxel_volume.at(get<2>(label.back())) = 1;
             }
             else if( vmode == MEDIAN )
             {
@@ -577,6 +585,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
                 otex.push_back( get<1>(label[ ( label.size() + 1 ) / 2 ]) );
               else
                 otex.push_back( get<0>(label[ ( label.size() + 1 ) / 2 ]) );
+              chosen_voxel_volume.at(get<2>(label[ ( label.size() + 1 ) / 2 ])) = 1;
             }
           }
         }
@@ -589,6 +598,10 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
   if(verbose)
     cout << "writing texture..." << endl;
   aims::write( otext, otexf );
+
+  if(verbose)
+    cout << "writing output voxel volume..." << endl;
+  aims::write( chosen_voxel_volume, "chosen_voxels.nii.gz" );
 
   if(verbose)
     cout << "End of the process." << endl;
