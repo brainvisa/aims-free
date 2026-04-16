@@ -396,6 +396,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
   vector< float >                   vs = data->getVoxelSize();
 
   OutputVoxelVolumeType chosen_voxel_volume(data.getSizeX(), data.getSizeY(), data.getSizeZ());
+  chosen_voxel_volume.copyHeaderFrom(data.header());
   chosen_voxel_volume.fill(0);
 
   vs.resize( 3, 1. );
