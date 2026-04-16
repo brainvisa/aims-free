@@ -153,6 +153,10 @@ namespace aims
                              std::vector<T> & outtex,
                              const LaplacianWeights &lapl );
 
+  template <typename T>
+  TimeTexture<T> *applyLaplacianMatrix( const TimeTexture<T> &inittex,
+                                        const LaplacianWeights &lapl );
+
   void laplacianMatrixThreshold( LaplacianWeights & lmat, float threshold );
 
   /** Compute Laplacian smoothing coefficients matrix for niter smoothing

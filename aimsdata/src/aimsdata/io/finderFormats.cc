@@ -59,6 +59,7 @@
 #include <aims/io/argheader.h>
 #include <aims/io/mniobjheader.h>
 #include <aims/io/wavefrontheader.h>
+#include <aims/io/stlheader.h>
 #include <aims/io/imasparseheader.h>
 #include <aims/io/byteswap.h>
 #include <cartobase/exception/ioexcept.h>
@@ -446,6 +447,50 @@ bool FinderWavefrontFormat::check( const string & filename, Finder & f ) const
   vt.push_back( type );
   f.setPossibleDataTypes( vt );
   f.setFormat( "WAVEFRONT" );
+
+  return true;
+}
+
+
+bool FinderSTLFormat::check( const string & filename, Finder & f ) const
+{
+  STLHeader  *hdr = new STLHeader( filename );
+  try
+    {
+      if( !hdr->read() )
+      {
+        delete hdr;
+        return( false );
+      }
+    }
+  catch( exception & )
+    {
+      delete hdr;
+      throw;
+    }
+
+  f.setHeader( hdr );
+  f.setObjectType( "Mesh" );
+  int ps = 0;
+  if( hdr->getProperty( "polygon_dimension", ps ) )
+    switch( ps )
+      {
+      case 2:
+        f.setObjectType( "Segments" );
+        break;
+      case 4:
+        f.setObjectType( "Mesh4" );
+        break;
+      default:
+        break;
+      }
+  string  type;
+  hdr->getProperty( "data_type", type );
+  f.setDataType( type );
+  vector<string>  vt;
+  vt.push_back( type );
+  f.setPossibleDataTypes( vt );
+  f.setFormat( "STL" );
 
   return true;
 }

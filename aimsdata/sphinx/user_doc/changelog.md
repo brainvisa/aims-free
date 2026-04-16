@@ -1,6 +1,34 @@
 # Changelog
 
-## [Unreleased]
+## [6.0.15] 2026-03-17
+
+### Added
+
+- Laplacian smoothing has been extended for TimeTexture (it was formetly implemented only for Texture), and python bindings have been added.
+
+
+## [6.0.3] 2026-03-06
+
+### Added
+
+- STL mesh format support
+- new soma.aimsalgo.ffd module, containing:
+  - field_extrapolate: extrapolate FFD deformation fields outside a validity domain mask using Voronoi propagation
+  - field_from_meshes: build a FFD field from a pair of (origin mesh, deformed mesh)
+  - new commandline: AimsFFDFromMeshDeformation.py
+
+
+## [6.0.2] 2026-02-27
+
+### Changed
+
+- MINC IO fix: try to read only files with matching extensions to prevent resource leaks in underlying libminc/hdf5 when reading fails
+- MINC IO fix: properly handle .mnc.gz files
+- GLTF IO: fixed reading files using index=0
+- fixed compilation with older compilers
+- WAVEFRONT IO: completed previously unsupported tags in .mtl files, which thus caused reading to fail
+
+## [6.0.1] 2026-02-06
 
 ### Changed
 
@@ -9,7 +37,7 @@
 - Preserve disk orientation when extracting a volume view
 
 
-## [6.6.0] 2026-01-12
+## [6.0.0] 2026-01-12
 
 ### Added
 

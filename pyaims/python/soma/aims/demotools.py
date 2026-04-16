@@ -111,7 +111,7 @@ def get_demo_datasets(download_url='https://brainvisa.info/download/data'):
 
 def install_demo_data(dataset='test_data.zip', download_dir=None,
                       download_url='https://brainvisa.info/download/data',
-                      install_dir=None):
+                      install_dir=None, test_exist_files=None):
     ''' Downoad a demo dataset from brainvisa server to the ``download_dir`` directory, and install it in the local filesystem in ``install_dir``.
     If ``download_dir`` is not given, the output download location will be guessed as such:
 
@@ -122,6 +122,8 @@ def install_demo_data(dataset='test_data.zip', download_dir=None,
 
     If ``install_dir`` is not given, download and install will be done in the same directory, namely ``download_dir``.
     If ``install_dir`` is given, the archive will be extracted to this directory.
+
+    If test_exist_files is specified, it should be a path or a list pf paths, relative to the install directory. If all paths here exist, then the dataset is considered up-to-date and is not downloadd again.
 
     The return value is the dataset directories on the local filesystem.
     '''
@@ -156,6 +158,17 @@ def install_demo_data(dataset='test_data.zip', download_dir=None,
         install_dir = download_dir
     elif not osp.exists(install_dir):
         os.makedirs(install_dir)
+    elif test_exist_files:
+        if isinstance(test_exist_files, str):
+            test_exist_files = [test_exist_files]
+        up_to_date = True
+        for fname in test_exist_files:
+            if not osp.exists(osp.join(install_dir, fname)):
+                up_to_date = False
+                break
+        if up_to_date:
+            print('data already installed')
+            return install_dir
     print('install dir:', install_dir)
 
     zf = osp.join(download_dir, dataset)
