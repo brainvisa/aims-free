@@ -513,6 +513,8 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
               apply_val = apply_to->at( (*ic)[0], (*ic)[1], (*ic)[2], t );
             label.push_back( make_tuple( val, apply_val,
                                          CoordType((*ic)[0], (*ic)[1], (*ic)[2])) );
+            if(chosen_voxel_volume.at((*ic)[0], (*ic)[1], (*ic)[2]) == 0)
+              chosen_voxel_volume.at((*ic)[0], (*ic)[1], (*ic)[2]) = 1;
           }
         }
 
@@ -570,7 +572,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
                 otex.push_back( get<1>(label.back()) );
               else
                 otex.push_back( get<0>(label.back()) );
-              chosen_voxel_volume.at(get<2>(label.back())) = 1;
+              chosen_voxel_volume.at(get<2>(label.back())) = 2;
             }
             else if( vmode == MIN )
             {
@@ -578,7 +580,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
                 otex.push_back( get<1>(label.front()) );
               else
                 otex.push_back( get<0>(label.front()) );
-              chosen_voxel_volume.at(get<2>(label.back())) = 1;
+              chosen_voxel_volume.at(get<2>(label.back())) = 2;
             }
             else if( vmode == MEDIAN )
             {
@@ -586,7 +588,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
                 otex.push_back( get<1>(label[ ( label.size() + 1 ) / 2 ]) );
               else
                 otex.push_back( get<0>(label[ ( label.size() + 1 ) / 2 ]) );
-              chosen_voxel_volume.at(get<2>(label[ ( label.size() + 1 ) / 2 ])) = 1;
+              chosen_voxel_volume.at(get<2>(label[ ( label.size() + 1 ) / 2 ])) = 2;
             }
           }
         }
