@@ -46,7 +46,8 @@ public:
                    float radius, float height, float int_height, int mode,
                    int vmode, const string & projtexfile, float bg,
                    int16_t mbg, const string & apply_to,
-                   const string & mesh_to_volf );
+                   const string & mesh_to_volf,
+                   const string & chosen_voxels_filename);
   
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
@@ -63,6 +64,7 @@ private:
   float        bg;
   int16_t      mbg;
   string       mesh_to_volf;
+  string       chosen_voxels_filename;
 };
 
 LabelMapTexture::LabelMapTexture( const string & meshfile,
@@ -72,11 +74,13 @@ LabelMapTexture::LabelMapTexture( const string & meshfile,
                                   int mod, int vmode,
                                   const string & projtexfile, float bg,
                                   int16_t mbg, const string & apply_to,
-                                  const string & mesh_to_volf )
+                                  const string & mesh_to_volf,
+                                  const string & chosen_voxels_filename)
     : Process(), meshf( meshfile ), brainf(brainfile), otexf( outexfile ),
       radius( rad ), height( hei ), int_height( int_height ), mode( mod ),
       vmode( vmode ), projtexfile( projtexfile ), bg( bg ), mbg( mbg ),
-      apply_tof( apply_to ), mesh_to_volf( mesh_to_volf )
+      apply_tof( apply_to ), mesh_to_volf( mesh_to_volf ),
+      chosen_voxels_filename( chosen_voxels_filename )
 {
     registerProcessType( "Volume", "S8", &doit<int8_t> );
     registerProcessType( "Volume", "U8", &doit<uint8_t> );
@@ -602,9 +606,11 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
     cout << "writing texture..." << endl;
   aims::write( otext, otexf );
 
-  if(verbose)
-    cout << "writing output voxel volume..." << endl;
-  aims::write( chosen_voxel_volume, "chosen_voxels.nii.gz" );
+  if(!chosen_voxels_filename.empty()) {
+    if(verbose)
+      cout << "writing output voxel volume..." << endl;
+    aims::write( chosen_voxel_volume, chosen_voxels_filename );
+  }
 
   if(verbose)
     cout << "End of the process." << endl;
@@ -614,7 +620,7 @@ bool LabelMapTexture::labelMap( VolumeRef<T> data )
 
 int main( int argc, const char** argv )
 {
-  string                       volumefile, outexfile, apply_to;
+  string                       volumefile, outexfile, apply_to, chosen_voxels_filename;
   Reader<AimsSurfaceTriangle>  meshfile;
   Reader<Transformation3d>     mesh_to_volf;
   float                        radius = 1., height = 1., int_height = 0;
@@ -674,6 +680,10 @@ int main( int argc, const char** argv )
                  "The apply_to volume is converted into the same data type as "
                  "the main input volume.",
                  true );
+  app.addOption( chosen_voxels_filename, "--chosen-voxels",
+                 "output a mask of explored/chosen voxels: 0=background, "
+                 "1=all cylinder voxels, 2=chosen voxel (for min, max, and "
+                 "median modes only)." );
   app.addOption( mesh_to_volf, "-t",
                  "Optional transformation between the mesh and the volume "
                  "(mesh to volume) - any 3D transform is accepted including "
@@ -693,7 +703,8 @@ int main( int argc, const char** argv )
                             outexfile,
                             radius, height, int_height, mode, vmode,
                             projtexfile.fileName(), bg, mbg, apply_to,
-                            mesh_to_volf.fileName() );
+                            mesh_to_volf.fileName(),
+                            chosen_voxels_filename );
     if( verbose )
       cout << "Starting program.." << endl;
     if( !proc.execute( volumefile ) )
