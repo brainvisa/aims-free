@@ -90,6 +90,8 @@ public:
   string  progress_file;
   bool    volume_id;
   rc_ptr<TransformationGraph3d> trans_graph;
+  bool auto_reference;
+  Object reference_header;
 };
 
 
@@ -108,7 +110,8 @@ ApplyTransformProc::ApplyTransformProc()
     sx(0.), sy(0.), sz(0.),
     vfinterp("linear"),
     mmap_fields(false),
-    volume_id( false )
+    volume_id( false ),
+    auto_reference( false )
 {
   registerProcessType("Volume", "S8",      &doVolume<int8_t, int8_t>);
   registerProcessType("Volume", "U8",      &doVolume<uint8_t, uint8_t>);
@@ -213,11 +216,16 @@ void set_geometry_from_header(ApplyTransformProc& proc,
 }
 
 
-// Return the header of the reference object, or a null reference if there is
-// no reference object.
-carto::Object read_reference_header(const std::string reference_filename)
+// Set and return the header of the reference object, or a null reference if
+// there is no reference object.
+carto::Object read_reference_header( ApplyTransformProc & proc )
 {
-  carto::Object reference_header;
+  string reference_filename = proc.reference;
+  if( reference_filename == "auto" )
+  {
+    proc.auto_reference = true;
+    return proc.reference_header;
+  }
   if(!reference_filename.empty()) {
     Finder finder;
     if(!finder.check(reference_filename)) {
@@ -229,12 +237,12 @@ carto::Object read_reference_header(const std::string reference_filename)
       // graphs are their own header, thus we have to read them entirely
       Reader<Graph> r( reference_filename );
       Graph *g = r.read();
-      reference_header.reset( g );
+      proc.reference_header.reset( g );
     }
     else
-      reference_header = finder.headerObject();
+      proc.reference_header = finder.headerObject();
   }
-  return reference_header;
+  return proc.reference_header;
 }
 
 
@@ -242,7 +250,6 @@ carto::Object read_reference_header(const std::string reference_filename)
 // of priority, use commandline flags, else the reference object, else the
 // input object passed as fallback_header.
 void set_geometry(ApplyTransformProc& proc,
-                  const carto::Object& reference_header,
                   const DictionaryInterface& fallback_header,
                   bool set_dimensions)
 {
@@ -252,9 +259,10 @@ void set_geometry(ApplyTransformProc& proc,
     return;
 
   // Reference volume
-  if(!reference_header.isNull()) {
+  if(!proc.reference_header.isNull()) {
+    // cout << "REF HDR:\n";
     try {
-      set_geometry_from_header(proc, *reference_header, dimension_ok,
+      set_geometry_from_header(proc, *proc.reference_header, dimension_ok,
                                voxel_size_ok);
     } catch(...) {
       throw FatalError("Failed to retrieve volume_dimension and voxel_size "
@@ -391,7 +399,6 @@ insert_transformation_to_old_referential(DictionaryInterface& header,
 void adjust_header_transforms(const ApplyTransformProc& proc,
                               DictionaryInterface& header,
                               const Transformation3d * inverse_transform,
-                              const carto::Object reference_header,
                               const string & out_ref)
 {
   if(proc.keep_transforms) {
@@ -413,7 +420,7 @@ void adjust_header_transforms(const ApplyTransformProc& proc,
   const AffineTransformation3d * affine_inverse_transform
     = dynamic_cast<const AffineTransformation3d*>(inverse_transform);
 
-  if(!proc.ignore_reference_transforms && !reference_header.isNull()) {
+  if(!proc.ignore_reference_transforms && !proc.reference_header.isNull()) {
     // Case 2: copy the referential and transformations from the reference
     // object if enabled and available.
 
@@ -428,7 +435,7 @@ void adjust_header_transforms(const ApplyTransformProc& proc,
     std::string reference_referential;
     try {
       reference_referential =
-        reference_header->getProperty("referential")->getString();
+        proc.reference_header->getProperty("referential")->getString();
     } catch(...) {
     }
     string out_ref2 = out_ref;
@@ -443,8 +450,8 @@ void adjust_header_transforms(const ApplyTransformProc& proc,
     carto::Object new_referentials_obj, new_transforms_obj;
     try {
       copy_referentials_and_transformations(
-        reference_header->getProperty("referentials"),
-        reference_header->getProperty("transformations"),
+        proc.reference_header->getProperty("referentials"),
+        proc.reference_header->getProperty("transformations"),
         new_referentials_obj,
         new_transforms_obj,
         reference_referential, out_ref2, *proc.trans_graph
@@ -669,8 +676,7 @@ std::pair<std::pair<const_ref<Transformation3d>,
                     const_ref<Transformation3d> >, string>
 load_transformations(ApplyTransformProc& proc,
                      const DictionaryInterface* input_header = nullptr,
-                     const Finder & finder = Finder(),
-                     const Object reference_header = Object())
+                     const Finder & finder = Finder() )
 {
   std::pair<std::pair<const_ref<Transformation3d>,
                       const_ref<Transformation3d> >, string> ret_with_ref;
@@ -743,7 +749,7 @@ load_transformations(ApplyTransformProc& proc,
   }
   else
     trefs = tg->updateFromObjectHeader( input_header, true );
-  otrefs = tg->updateFromObjectHeader( reference_header, true );
+  otrefs = tg->updateFromObjectHeader( proc.reference_header, true );
   ref = trefs[0];
 
   // determine input and output spaces
@@ -763,7 +769,7 @@ load_transformations(ApplyTransformProc& proc,
 
   try
   {
-    rv2 = tg->referentialByCode( output_coords, reference_header, otrefs );
+    rv2 = tg->referentialByCode( output_coords, proc.reference_header, otrefs );
   }
   catch( runtime_error & e )
   {
@@ -777,7 +783,7 @@ load_transformations(ApplyTransformProc& proc,
 
   try
   {
-    rv3 = tg->referentialByCode( output_space, reference_header, otrefs );
+    rv3 = tg->referentialByCode( output_space, proc.reference_header, otrefs );
   }
   catch( runtime_error & e )
   {
@@ -805,6 +811,7 @@ load_transformations(ApplyTransformProc& proc,
         = load_transformation(*filename_it, proc);
       direct_chain.push_back(transform);
     }
+
     const_ref<Transformation3d> tcr = direct_chain.simplify();
     // indirect convert const_ref -> rc_ptr (non-const)
     rc_ptr<Transformation3d> tc( const_cast<Transformation3d *>(
@@ -909,7 +916,7 @@ load_transformations(ApplyTransformProc& proc,
         vs[0] = vs[0] - proc.sx;
         vs[1] = vs[1] - proc.sy;
         vs[2] = vs[2] - proc.sz;
-        cout << "translation: " << vs << endl;
+        // cout << "translation: " << vs << endl;
 
         AffineTransformation3d *t = new AffineTransformation3d;
         rc_ptr<Transformation3d> tid( t );
@@ -939,6 +946,63 @@ load_transformations(ApplyTransformProc& proc,
     ret.second = const_ref<Transformation3d>( ti3 );
   }
 
+  if( proc.auto_reference )
+  {
+    // get reference from last field
+    if( !ret.second.isNull() )
+    {
+      if( !ret.second->header().isNull()
+          && ret.second->header()->hasProperty( "voxel_size" ) )
+      {
+        // cout << "auto ref from inverse trans\n";
+        if( proc.reference_header.isNull() )
+          proc.reference_header = Object::value( Dictionary() );
+        proc.reference_header->copyProperties( ret.second->header() );
+      }
+      else if( dynamic_cast<const TransformationChain3d *>(
+                 ret.second.pointer() ) )
+      {
+        const TransformationChain3d *tc
+          = dynamic_cast<const TransformationChain3d *>(
+              ret.second.pointer() );
+        Object auto_hdr;
+        for( auto it=tc->begin(); it!=tc->end(); ++it )
+          if( !(*it)->header().isNull()
+              && (*it)->header()->hasProperty( "voxel_size" ) )
+          {
+            auto_hdr = (*it)->header();
+            break;
+          }
+        if( !auto_hdr.isNull() )
+        {
+          // cout << "set reference from transform chain\n";
+          if( proc.reference_header.isNull() )
+            proc.reference_header = Object::value( Dictionary() );
+          proc.reference_header->copyProperties( auto_hdr );
+
+          // stop at this referential (which is the "output-coords" space)
+          if( proc.reference_header->hasProperty( "referential" ) )
+          {
+            string dref = proc.reference_header->getProperty( "referential" )
+              ->getString();
+            if( dref != oref )
+            {
+              // cout << "rebuild transform graph to previous ref\n";
+              oref = dref;
+              tde = tg->getTransformation( ref, oref, true );
+              tie = tg->getTransformation( oref, ref, true );
+              if( tde )
+                ret.first = tg->transformation( tde );
+              if( tie )
+                ret.second = tg->transformation( tie );
+            }
+          }
+        }
+      }
+    }
+
+  }
+
   return ret_with_ref;
 }
 
@@ -959,15 +1023,14 @@ bool doVolume(Process & process, const string & fileref, Finder & finder)
   stringTo(proc.background_value, background_value);
 
   // Compute dimensions of the output volume
-  const carto::Object reference_header = read_reference_header(proc.reference);
-  set_geometry(proc, reference_header, input_image.header(), true);
+  read_reference_header(proc);
 
   // Load the transformation
   const_ref<Transformation3d> inverse_transform;
   std::pair<std::pair<const_ref<Transformation3d>,
                       const_ref<Transformation3d> >, string> transforms_ref
-    = load_transformations(proc, &input_image.header(), finder,
-                            reference_header);
+    = load_transformations(proc, &input_image.header(), finder);
+  set_geometry(proc, input_image.header(), true);
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
     transforms = transforms_ref.first;
   inverse_transform = transforms.second;
@@ -1005,7 +1068,7 @@ bool doVolume(Process & process, const string & fileref, Finder & finder)
   }
 
   adjust_header_transforms(proc, out.header(), inverse_transform.pointer(),
-                           reference_header, transforms_ref.second);
+                           transforms_ref.second);
   // The UUID should NOT be preserved, because the output is a different file
   // from the input. Keeping it triggers the infamous "duplicate UUID" problem
   // in BrainVISA/Axon...
@@ -1045,13 +1108,13 @@ bool doMesh(Process & process, const string & fileref, Finder & finder)
   AimsTimeSurface<D, Void> mesh;
   input_reader.read(mesh);
 
-  const carto::Object reference_header = read_reference_header(proc.reference);
+  read_reference_header(proc);
 
   // Load the transformation
   const_ref<Transformation3d> direct_transform, inverse_transform;
   std::pair<std::pair<const_ref<Transformation3d>,
                       const_ref<Transformation3d> >, string> transforms_ref
-    = load_transformations(proc, &mesh.header(), finder, reference_header);
+    = load_transformations(proc, &mesh.header(), finder);
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
     transforms = transforms_ref.first;
   direct_transform = transforms.first;
@@ -1062,7 +1125,7 @@ bool doMesh(Process & process, const string & fileref, Finder & finder)
   }
 
   adjust_header_transforms(proc, mesh.header(), inverse_transform.pointer(),
-                           reference_header, transforms_ref.second);
+                           transforms_ref.second);
   // The UUID should NOT be preserved, because the output is a different file
   // from the input. Keeping it triggers the infamous "duplicate UUID" problem
   // in BrainVISA/Axon...
@@ -1097,8 +1160,8 @@ bool doBucket(Process & process, const string & fileref, Finder & finder)
   input_reader.read(input_bucket);
 
   // Prepare the output dimensions
-  const carto::Object reference_header = read_reference_header(proc.reference);
-  set_geometry(proc, reference_header, input_bucket.header(), false);
+  read_reference_header(proc);
+  set_geometry(proc, input_bucket.header(), false);
   cout << "Output voxel size: "
        << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
 
@@ -1106,8 +1169,7 @@ bool doBucket(Process & process, const string & fileref, Finder & finder)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   std::pair<std::pair<const_ref<Transformation3d>,
                       const_ref<Transformation3d> >, string> transforms_ref
-    = load_transformations(proc, &input_bucket.header(), finder,
-                            reference_header);
+    = load_transformations(proc, &input_bucket.header(), finder);
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
     transforms = transforms_ref.first;
   direct_transform = transforms.first;
@@ -1145,7 +1207,7 @@ bool doBucket(Process & process, const string & fileref, Finder & finder)
   out->header().setProperty( "referential", transforms_ref.second );
 
   adjust_header_transforms(proc, out->header(), inverse_transform.pointer(),
-                           reference_header, transforms_ref.second);
+                           transforms_ref.second);
 
   // Write the resampled volume
   Writer<BucketMap<Void> > w3(proc.output);
@@ -1162,14 +1224,13 @@ bool doBundles(Process & process, const string & fileref, Finder & finder)
   // Prepare the Bundle reader
   aims::BundleReader bundle_reader(fileref);
 
-  const carto::Object reference_header = read_reference_header(proc.reference);
+  read_reference_header(proc);
 
   // Load the transformation
   const_ref<Transformation3d> direct_transform, inverse_transform;
   std::pair<std::pair<const_ref<Transformation3d>,
                       const_ref<Transformation3d> >, string> transforms_ref
-    = load_transformations(proc, bundle_reader.readHeader().get(), finder,
-                            reference_header);
+    = load_transformations(proc, bundle_reader.readHeader().get(), finder);
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
     transforms = transforms_ref.first;
   direct_transform = transforms.first;
@@ -1223,8 +1284,8 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   unique_ptr<Graph> graph(input_reader.read());
 
   // Deduce the voxel size of the output Graph
-  const carto::Object reference_header = read_reference_header(proc.reference);
-  set_geometry(proc, reference_header, *graph, false);
+  read_reference_header(proc);
+  set_geometry(proc, *graph, false);
   cout << "Output voxel size: "
        << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
 
@@ -1233,7 +1294,7 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   std::pair<std::pair<const_ref<Transformation3d>,
                       const_ref<Transformation3d> >, string> transforms_ref
-    = load_transformations(proc, graph.get(), f, reference_header);
+    = load_transformations(proc, graph.get(), f);
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
     transforms = transforms_ref.first;
   direct_transform = transforms.first;
@@ -1245,7 +1306,7 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
 
   adjust_header_transforms(proc, *graph,
                            inverse_transform.pointer(),
-                           reference_header, transforms_ref.second);
+                           transforms_ref.second);
   // Update the transformation to Talairach stored in the old attributes
   // (Talairach_rotation, Talairach_translation, and Talairach_scale) to
   // reflect the updated transformations.
@@ -1562,7 +1623,20 @@ int main(int argc, const char **argv)
     app.addOption(proc.reference, "--reference",
                   "Volume used to define output voxel size and volume "
                   "dimension (values are overridden by --dx, --dy, "
-                  "--dz, --sx, --sy and --sz)", true);
+                  "--dz, --sx, --sy and --sz). If \"auto\" and if the last "
+                  "(or before-last) transformation in the chain is a "
+                  "deformation field which has a field of view, then use this "
+                  "one. In this latest \"auto\" case for the before-last "
+                  "transform, the target referential will be set to this "
+                  "reference, and the last transform will be interpreted for "
+                  "the image storage transform, like for the output-space "
+                  "parameter. This means, for example, that specifying "
+                  "-r auto --output-space 'MNI 152 ICBM 2009c Nonlinear "
+                  "Asymmetric' for an image, or "
+                  "-r auto --output-space "
+                  "13a0d07c-65c8-e861-2172-c5a41e525fd2 (the AIMS oriented "
+                  "referential of MNI 152) with the standard graph, will be "
+                  "the same.", true);
     app.addOption(proc.keep_transforms, "--keep-transforms",
                   "Preserve the transformations of the input image", true);
     app.addOption(proc.ignore_reference_transforms,
