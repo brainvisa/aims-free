@@ -33,6 +33,8 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 //----------------------------------------------------------------------------
+// #include <soma-io/writer/pythonwriter.h>
+
 
 using namespace aims;
 using namespace std;
@@ -690,6 +692,8 @@ load_transformations(ApplyTransformProc& proc,
   string input_coords = boost::trim_copy(proc.input_coords);
   string output_coords = boost::trim_copy(proc.output_coords);
   string output_space = boost::trim_copy(proc.output_space);
+  cout << "output coords: " << output_coords << endl;
+  cout << "output_space: " << output_space << endl;
 
   if(proc.points_mode) {
     if(iequals(input_coords, "auto"))
@@ -769,7 +773,8 @@ load_transformations(ApplyTransformProc& proc,
 
   try
   {
-    rv2 = tg->referentialByCode( output_coords, proc.reference_header, otrefs );
+    rv2 = tg->referentialByCode( output_coords, proc.reference_header,
+                                 otrefs );
   }
   catch( runtime_error & e )
   {
@@ -780,6 +785,67 @@ load_transformations(ApplyTransformProc& proc,
   if( !rv2 )
     throw FatalError(
       "Could not find the output space (--output-coords) referential" );
+
+  if( output_space == "AIMS" && proc.auto_reference )
+  {
+    // look for a header in the transform chain
+    // cout << "look for output_space\n";
+    Vertex::const_iterator ie, ee = rv2->end();
+    for( ie=rv2->begin(); ie!=ee; ++ie )
+      if( *(*ie)->begin() == rv2 )
+      {
+        rc_ptr<Transformation3d> t = tg->transformation( *ie );
+
+        if( !t.get() && (*ie)->hasProperty( "filename" ) )
+        {
+          string filename = (*ie)->getProperty( "filename" )->getString();
+          if( ( filename.length() > 4
+                && filename.substr( filename.length() - 4, 4 ) == ".trm" )
+              || ( filename.length() > 10
+                   && filename.substr( filename.length() - 10, 10 )
+                     == ".trm?inv=1" ) )
+          {
+            Edge *e = tg->getTransformation(
+              rv2->getProperty("uuid")->getString(),
+              (*(*ie)->rbegin())->getProperty("uuid")->getString() );
+            t = tg->transformation( e );
+          }
+        }
+
+        if( t.get() && dynamic_cast<AffineTransformation3d *>( t.get() ) )
+        {
+          AffineTransformation3d *at = dynamic_cast<AffineTransformation3d *>(
+            t.get() );
+          bool match = true;
+          for( int y=0; y<3; ++y )
+            for( int x=0; x<3; ++x )
+            {
+              double z = std::abs( at->affine().at( x, y ) );
+              if( x == y )
+              {
+                if( z < 0.9999 || z > 1.0001 )
+                {
+                  match = false;
+                  break;
+                }
+              }
+              else if( z > 0.0001 )
+              {
+                match = false;
+                break;
+              }
+            }
+          if( match )
+          {
+            output_space = (*(*ie)->rbegin())
+              ->getProperty( "uuid" )->getString();
+            cout << "found AIMS output_space: " << output_space << endl;
+            proc.output_space = output_space;
+            break;
+          }
+        }
+      }
+  }
 
   try
   {
@@ -795,8 +861,10 @@ load_transformations(ApplyTransformProc& proc,
     throw FatalError(
       "Could not find the output space (--output-space) referential" );
   oref = rv3->getProperty( "uuid" )->getString();
+  proc.output_space = oref;
   ret_with_ref.second = oref;
   bool has_dir = false;
+  // cout << "oref: " << oref << endl;
 
   if(!proc.direct_transform_list.empty())
   {
@@ -951,50 +1019,76 @@ load_transformations(ApplyTransformProc& proc,
     // get reference from last field
     if( !ret.second.isNull() )
     {
-      if( !ret.second->header().isNull()
-          && ret.second->header()->hasProperty( "voxel_size" ) )
+      // cout << "auto ref: look for reference from inverse trans\n";
+      output_coords = rv2->getProperty( "uuid" )->getString();
+      Edge *tis = tg->getTransformation( output_coords, ref, true );
+      if( tis )
       {
-        // cout << "auto ref from inverse trans\n";
-        if( proc.reference_header.isNull() )
-          proc.reference_header = Object::value( Dictionary() );
-        proc.reference_header->copyProperties( ret.second->header() );
-      }
-      else if( dynamic_cast<const TransformationChain3d *>(
-                 ret.second.pointer() ) )
-      {
-        const TransformationChain3d *tc
-          = dynamic_cast<const TransformationChain3d *>(
-              ret.second.pointer() );
-        Object auto_hdr;
-        for( auto it=tc->begin(); it!=tc->end(); ++it )
-          if( !(*it)->header().isNull()
-              && (*it)->header()->hasProperty( "voxel_size" ) )
-          {
-            auto_hdr = (*it)->header();
-            break;
-          }
-        if( !auto_hdr.isNull() )
+        const_ref<Transformation3d> ts = tg->transformation( tis );
+        if( ts->header()->hasProperty( "voxel_size" ) )
         {
-          // cout << "set reference from transform chain\n";
+          cout << "auto ref: set reference from inverse trans\n";
           if( proc.reference_header.isNull() )
             proc.reference_header = Object::value( Dictionary() );
-          proc.reference_header->copyProperties( auto_hdr );
-
-          // stop at this referential (which is the "output-coords" space)
-          if( proc.reference_header->hasProperty( "referential" ) )
-          {
-            string dref = proc.reference_header->getProperty( "referential" )
-              ->getString();
-            if( dref != oref )
+          proc.reference_header->copyProperties( ts->header() );
+        }
+        else if( dynamic_cast<const TransformationChain3d *>( ts.pointer() ) )
+        {
+          const TransformationChain3d *tc
+            = dynamic_cast<const TransformationChain3d *>( ts.pointer() );
+          Object auto_hdr;
+          for( auto it=tc->begin(); it!=tc->end(); ++it )
+            if( !(*it)->header().isNull()
+                && (*it)->header()->hasProperty( "voxel_size" ) )
             {
-              // cout << "rebuild transform graph to previous ref\n";
-              oref = dref;
-              tde = tg->getTransformation( ref, oref, true );
-              tie = tg->getTransformation( oref, ref, true );
-              if( tde )
-                ret.first = tg->transformation( tde );
-              if( tie )
-                ret.second = tg->transformation( tie );
+              auto_hdr = (*it)->header();
+              break;
+            }
+
+          if( !auto_hdr.isNull() )
+          {
+            // cout << "auto ref: set reference from transform chain\n";
+            if( proc.reference_header.isNull() )
+              proc.reference_header = Object::value( Dictionary() );
+            proc.reference_header->copyProperties( auto_hdr );
+            if( proc.reference_header->hasProperty( "storage_to_memory" ) )
+              proc.reference_header->removeProperty( "storage_to_memory" );
+
+            // this referential is the "output-coords" space
+            proc.reference_header->setProperty( "referential", oref );
+
+            if( oref != output_coords )
+            {
+
+              tis = tg->getTransformation( oref, output_coords, true );
+              if( tis )
+              {
+                ts = tg->transformation( tis );
+                if( dynamic_cast<const TransformationChain3d *>(
+                    ts.pointer() ) )
+                  ts = dynamic_cast<const TransformationChain3d *>(
+                    ts.pointer() )->simplify();
+                if( dynamic_cast<const AffineTransformation3d *>(
+                    ts.pointer() ) )
+                {
+                  const AffineTransformation3d *at
+                    = dynamic_cast<const AffineTransformation3d *>(
+                      ts.pointer() );
+                  // cout << "set in reference new transform to " << proc.output_coords << endl;
+                  vector<vector<float> > reftrans( 1 );
+                  reftrans[0] = at->toVector();
+                  proc.reference_header->setProperty( "transformations",
+                                                      reftrans );
+                  vector<string> refrefs( 1 );
+                  refrefs[0] = proc.output_coords;
+                  proc.reference_header->setProperty( "referentials",
+                                                      refrefs );
+                  // cout << "done.\n";
+                  // PythonWriter pw;
+                  // pw.attach(cout);
+                  // pw.write(proc.reference_header);
+                }
+              }
             }
           }
         }
@@ -1081,6 +1175,10 @@ bool doVolume(Process & process, const string & fileref, Finder & finder)
   resampler->resample_inv(input_image, *inverse_transform,
                           background_value, out, true);
   cout << endl;
+
+  // PythonWriter pw;
+  // pw.attach( cout );
+  // pw.write(Object::reference(out.header()));
 
   // Write the resampled volume. The allow_orientation_change instructs the
   // NIfTI writer to avoid writing dummy transformations to the header of the
@@ -1572,14 +1670,12 @@ int main(int argc, const char **argv)
     app.addOption(proc.output_coords, "--output-coords",
                   "Output space identifier, or how to interpret coordinates "
                   "in the output image w.r.t. the transformations written in "
-                  "the reference image header. Note that this parameter "
+                  "the reference image header (thus, the destination of this "
+                  "transformation). Note that this parameter "
                   "specifies the destination space of the transformations "
                   "passed (using -d / -I), but *not* the space we want to "
                   "produce outputs for: they may differ - see the "
-                  "--output-space option for this. Especially, if -d/-I "
-                  "options are not used (if a transformations graph is "
-                  "specified or if transformations information is in data "
-                  "headers), then this option is not used at all. See above. "
+                  "--output-space option for this. "
                   "[default: AIMS]",
                   true);
     app.addOption(proc.output_space, "--output-space",
@@ -1624,19 +1720,10 @@ int main(int argc, const char **argv)
                   "Volume used to define output voxel size and volume "
                   "dimension (values are overridden by --dx, --dy, "
                   "--dz, --sx, --sy and --sz). If \"auto\" and if the last "
-                  "(or before-last) transformation in the chain is a "
+                  "transformation in the chain is a "
                   "deformation field which has a field of view, then use this "
-                  "one. In this latest \"auto\" case for the before-last "
-                  "transform, the target referential will be set to this "
-                  "reference, and the last transform will be interpreted for "
-                  "the image storage transform, like for the output-space "
-                  "parameter. This means, for example, that specifying "
-                  "-r auto --output-space 'MNI 152 ICBM 2009c Nonlinear "
-                  "Asymmetric' for an image, or "
-                  "-r auto --output-space "
-                  "13a0d07c-65c8-e861-2172-c5a41e525fd2 (the AIMS oriented "
-                  "referential of MNI 152) with the standard graph, will be "
-                  "the same.", true);
+                  "one. It is normally used when --output-coords is "
+                  "specified, and --output-space is left to AIMS.", true);
     app.addOption(proc.keep_transforms, "--keep-transforms",
                   "Preserve the transformations of the input image", true);
     app.addOption(proc.ignore_reference_transforms,
