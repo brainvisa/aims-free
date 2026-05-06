@@ -692,14 +692,13 @@ load_transformations(ApplyTransformProc& proc,
   string input_coords = boost::trim_copy(proc.input_coords);
   string output_coords = boost::trim_copy(proc.output_coords);
   string output_space = boost::trim_copy(proc.output_space);
+  cout << "input_coords: " << input_coords << endl;
   cout << "output coords: " << output_coords << endl;
   cout << "output_space: " << output_space << endl;
 
   if(proc.points_mode) {
     if(iequals(input_coords, "auto"))
       input_coords = "AIMS";
-    else if(!iequals(input_coords, "AIMS"))
-      throw FatalError("--input-coords cannot be used in points mode");
   }
 
   rc_ptr<TransformationGraph3d> tg( 0 );
@@ -770,6 +769,8 @@ load_transformations(ApplyTransformProc& proc,
   }
   if( !rv1 )
     throw FatalError( "Could not find the input space referential" );
+
+  ref = rv1->getProperty( "uuid" )->getString();
 
   try
   {
