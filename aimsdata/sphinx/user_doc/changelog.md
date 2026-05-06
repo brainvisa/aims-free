@@ -1,5 +1,16 @@
 # Changelog
 
+## [6.0.16] 2026-05-06
+
+### Added
+
+- AimsApplyTransform improvements: support --output-coords with transformations graph, and implement --reference auto (takes from deformation fields, when available)
+
+### Changed
+
+- fix in gray-level variants of Qt image reader
+
+
 ## [6.0.15] 2026-04-07
 
 ### Added
