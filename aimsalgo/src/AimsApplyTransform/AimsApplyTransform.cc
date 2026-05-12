@@ -685,8 +685,6 @@ load_transformations(ApplyTransformProc& proc,
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > & ret
     = ret_with_ref.first;
 
-  rc_ptr<Transformation3d> aims_to_input_space_transform; // null
-
   // boost::iequals is used for case-insensitive comparison
   using boost::iequals;
   string input_coords = boost::trim_copy(proc.input_coords);
@@ -757,7 +755,11 @@ load_transformations(ApplyTransformProc& proc,
 
   // determine input and output spaces
 
-  Vertex *rv1 = 0, *rv2 = 0, *rv3 = 0;  // referentials in graph
+  Vertex *rv0 = 0, *rv1 = 0, *rv2 = 0, *rv3 = 0;  // referentials in graph
+  // rv0: input (aims object) space
+  // rv1: space of source of direct transform
+  // rv2: space of destg of direct transform
+  // rv3: output (aims object) space
   try
   {
     rv1 = tg->referentialByCode( input_coords, input_header, trefs );
@@ -770,7 +772,24 @@ load_transformations(ApplyTransformProc& proc,
   if( !rv1 )
     throw FatalError( "Could not find the input space referential" );
 
+  if( input_header->hasProperty( "referential" ) )
+  {
+    try
+    {
+      rv0 = tg->referentialByCode(
+        input_header->getProperty( "referential" )->getString(), input_header,
+                                  trefs );
+    }
+    catch( runtime_error & )
+    {
+    }
+  }
+  if( !rv0 )
+    rv0 = rv1;
+  string iref = rv0->getProperty( "uuid" )->getString();
+
   ref = rv1->getProperty( "uuid" )->getString();
+  // cout << "input ref: " << ref << endl;
 
   try
   {
@@ -927,20 +946,20 @@ load_transformations(ApplyTransformProc& proc,
   tg->registerInverseTransformations();
 
   // now get the complete transform chains
-  Edge *tde = tg->getTransformation( ref, oref, true );
-  Edge *tie = tg->getTransformation( oref, ref, true );
+  Edge *tde = tg->getTransformation( iref, oref, true );
+  Edge *tie = tg->getTransformation( oref, iref, true );
   if( tde )
     ret.first = tg->transformation( tde );
   if( tie )
     ret.second = tg->transformation( tie );
 
-  // cout << "use direct " << ref << "->" << oref << ": " << ret.first.pointer() << ": " << typeid(*ret.first).name() << endl;
-  // cout << "use inv " << oref << "->" << ref << ": " << ret.second.pointer() << ": " << typeid(*ret.second).name() << endl;
+  // cout << "use direct " << iref << "->" << oref << ": " << ret.first.pointer() << ": " << typeid(*ret.first).name() << endl;
+  // cout << "use inv " << oref << "->" << iref << ": " << ret.second.pointer() << ": " << typeid(*ret.second).name() << endl;
 
   if(ret.first.isNull() && ret.second.isNull())
   {
     // get aims -> input space, if it exists, assume this is the one
-    tde = tg->getTransformation( tg->referentialById( ref ), rv1, true );
+    tde = tg->getTransformation( tg->referentialById( iref ), rv1, true );
     // cout << "use aims -> input: " << tde << endl;
     if( tde )
       ret.first = tg->transformation( tde );
@@ -1022,7 +1041,7 @@ load_transformations(ApplyTransformProc& proc,
     {
       // cout << "auto ref: look for reference from inverse trans\n";
       output_coords = rv2->getProperty( "uuid" )->getString();
-      Edge *tis = tg->getTransformation( output_coords, ref, true );
+      Edge *tis = tg->getTransformation( output_coords, iref, true );
       if( tis )
       {
         const_ref<Transformation3d> ts = tg->transformation( tis );
