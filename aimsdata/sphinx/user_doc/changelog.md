@@ -1,10 +1,12 @@
 # Changelog
 
-## [6.0.16] 2026-05-06
+## [6.0.16] 2026-05-21
 
 ### Added
 
-- AimsApplyTransform improvements: support --output-coords with transformations graph, and implement --reference auto (takes from deformation fields, when available)
+- AimsApplyTransform improvements:
+  - support `--output-coords` with transformations graph, and implement `--reference` auto (takes from deformation fields, when available)
+  - take into account `--input-coords` also in the context of a transformations graph
 
 ### Changed
 
