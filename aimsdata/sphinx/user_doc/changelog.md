@@ -1,6 +1,6 @@
 # Changelog
 
-## [6.0.16] 2026-05-21
+## [6.0.16] 2026-05-29
 
 ### Added
 
@@ -11,6 +11,7 @@
 ### Changed
 
 - fix in gray-level variants of Qt image reader
+- fix in GIFTI mesh reader for 4D meshes with missing timesteps
 
 
 ## [6.0.15] 2026-04-07
