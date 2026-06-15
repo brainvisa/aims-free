@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.10 )
+cmake_minimum_required( VERSION 4.2 )
 find_package( brainvisa-cmake REQUIRED )
 BRAINVISA_PROJECT( CXX Fortran )
 enable_testing()
@@ -29,6 +29,7 @@ if( BLITZ_FOUND )
   set( BLITZ_FIND_PACKAGE "find_package( Blitz REQUIRED )" )
   BRAINVISA_DEPENDENCY( DEV DEPENDS blitz++ DEV )
 endif()
+
 
 if( NOT DESIRED_QT_VERSION )
   find_package( Qt )

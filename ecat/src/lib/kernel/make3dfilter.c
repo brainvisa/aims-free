@@ -4,13 +4,34 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+float damping( f, ftype, cutoff)
+  float f, cutoff;
+  int ftype;
+{
+	float d;
+
+	switch( ftype)
+	{
+	  case 1:
+		return (f<=cutoff) ? 1.0 : 0.0;
+	  case 3:
+		d = 0.5+0.5*cos(M_PI*f/cutoff);
+		return (f<=cutoff) ? d : 0.0;
+	  case 4:
+		d = 0.54+0.46*cos(M_PI*f/cutoff);
+		return (f<=cutoff) ? d : 0.0;
+	  default:
+		return (f<=cutoff) ? 1.0 : 0.0;
+	}
+}
+
 void make3dfilter( nprojs, nslices, phi, phi0, filter, ftype_x, cutoff_x, ftype_y, cutoff_y)
   int nprojs, nslices, ftype_x, ftype_y;
   float phi, phi0, *filter, cutoff_x, cutoff_y;
 {
 
 	float u, v, delta_u, delta_v, rho, rho_sqr, fval /*, cosphi */;
-	float cond, sin2_phi, sin2_phi0, dx, dy, damping(), fmax;
+	float cond, sin2_phi, sin2_phi0, dx, dy, fmax;
 	int x, y;
 
 
@@ -59,27 +80,6 @@ void make3dfilter( nprojs, nslices, phi, phi0, filter, ftype_x, cutoff_x, ftype_
 	    if (y>0) filter[x +(nslices-y)*nprojs] = fval;
 	    if (x*y>0) filter[nprojs-x+(nslices-y)*nprojs] = fval;
 	  }
-	}
-}
-
-float damping( f, ftype, cutoff)
-  float f, cutoff;
-  int ftype;
-{
-	float d;
-
-	switch( ftype)
-	{
-	  case 1:
-		return (f<=cutoff) ? 1.0 : 0.0;
-	  case 3:
-		d = 0.5+0.5*cos(M_PI*f/cutoff);
-		return (f<=cutoff) ? d : 0.0;
-	  case 4:
-		d = 0.54+0.46*cos(M_PI*f/cutoff);
-		return (f<=cutoff) ? d : 0.0;
-	  default:
-		return (f<=cutoff) ? 1.0 : 0.0;
 	}
 }
 
