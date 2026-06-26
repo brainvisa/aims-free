@@ -772,7 +772,7 @@ load_transformations(ApplyTransformProc& proc,
   if( !rv1 )
     throw FatalError( "Could not find the input space referential" );
 
-  if( input_header->hasProperty( "referential" ) )
+  if( input_header && input_header->hasProperty( "referential" ) )
   {
     try
     {
