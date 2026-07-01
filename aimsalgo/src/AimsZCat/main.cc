@@ -71,7 +71,7 @@ private:
   friend bool doitMesh( Process &, const string &, Finder & );
   friend bool doitBucket( Process &, const string &, Finder & );
   template<class T>
-  bool cat( AimsData<T> & );
+  bool cat( Volume<T> & );
   template<int D>
   bool catMesh( AimsTimeSurface<D, Void> & );
   bool catBucket( BucketMap<Void> & );
@@ -116,7 +116,7 @@ bool doit( Process & p, const string &, Finder & )
   cout << "concatenate...\n";
   Allocator	al;
 
-  AimsData<T> out( zp.dims[0], zp.dims[1], zp.dims[2], zp.dims[3] );
+  Volume<T> out(zp.dims[0], zp.dims[1], zp.dims[2], zp.dims[3]);
 
   return( zp.cat( out ) );
 }
@@ -143,7 +143,7 @@ bool doitMesh( Process & p, const string &, Finder & )
 }
 
 
-template<class T> bool ZCat::cat( AimsData<T> & out )
+template<class T> bool ZCat::cat( Volume<T> & out )
 {
   long x, y, z, t, Z = 0;
   list<string>::const_iterator	it;
@@ -151,27 +151,35 @@ template<class T> bool ZCat::cat( AimsData<T> & out )
   bool copy_header = true;
 
   for ( it = listName.begin() ; it != listName.end(); it++, ++n )
-    {
-      cout << n << " : adding " << *it << "..." << endl;
-      Reader<AimsData<T> > dataR( *it );
-      dataR.setAllocatorContext( AllocatorContext
-                                 ( AllocatorStrategy::ReadOnly,
-                                   DataSource::none(), false, 0.1 ) );
-      AimsData<T> in;
-      dataR >> in;
+  {
+    cout << n << " : adding " << *it << "..." << endl;
+    Reader<Volume<T> > volR( *it );
+    volR.setAllocatorContext( AllocatorContext
+                                ( AllocatorStrategy::ReadOnly,
+                                  DataSource::none(), false, 0.1 ) );
+    Volume<T> in;
+    volR >> in;
 
-      if ( copy_header ) {
-        out.volume()->copyHeaderFrom( in.volume()->header() );
-        copy_header = false;
-      }
-
-      ForEach4d( in, x, y, z, t )
-        out( x, y, Z + z, t ) = in( x, y, z, t );
-      Z += in.dimZ();
+    if ( copy_header ) {
+      out.copyHeaderFrom( in.header() );
+      copy_header = false;
     }
+
+    int dx = in.getSizeX(), 
+        dy = in.getSizeY(),
+        dz = in.getSizeZ(),
+        dt = in.getSizeT();
+    for (int t = 0; t < dt; ++t)
+      for (int z = 0; z < dz; ++z)
+        for (int y = 0; y < dy; ++y)
+          for (int x = 0; x < dx; ++x)
+            out( x, y, Z + z, t ) = in( x, y, z, t );
+
+    Z += dz;
+  }
   // It is necessary to set voxel size here, because copy_header could have set wrong voxel sizes
-  out.setSizeXYZT( vs[0], vs[1], vs[2], vs[3] );
-  Writer<AimsData<T> > dataW( fileOut );
+  out.setVoxelSize( vs[0], vs[1], vs[2], vs[3] );
+  Writer<Volume<T> > dataW( fileOut );
   dataW << out;
 
   return true;
@@ -279,10 +287,10 @@ int main( int argc, const char** argv )
     const PythonHeader	*hdr
       = dynamic_cast<const PythonHeader *>( f.header() );
     if( !hdr )
-      {
-	cerr << "Could not read header of " << *it << endl;
-	return EXIT_FAILURE;
-      }
+    {
+      cerr << "Could not read header of " << *it << endl;
+      return EXIT_FAILURE;
+    }
 
     string	otype = f.objectType();
     string	dtype = f.dataType();
@@ -294,13 +302,13 @@ int main( int argc, const char** argv )
       ASSERT( hdr->getProperty( "voxel_size", vs ) );
 
       while( dims.size() < 4 )
-	  dims.push_back( 1 );
+	      dims.push_back( 1 );
 
       while( vs.size() < 4 )
-	vs.push_back( 1 );
+	      vs.push_back( 1 );
 
       for(int i=0; i<3; ++i)
-      if( voxelsize[i] != 0 )
+        if( voxelsize[i] != 0 )
         {
           vs[i] = voxelsize[i];
           nocheckvs = 1;
@@ -325,7 +333,7 @@ int main( int argc, const char** argv )
           && ( ( dims2.size() < 4 && dims[3] == 1 )
               || ( dims2.size() == 4 &&  dims[3] == dims2[3] ) ) );
         dimZ += dims2[2];
-              if( !nocheckvs )
+        if( !nocheckvs )
           ASSERT( vs[0] == vs2[0] && vs[1] == vs2[1] && vs[2] == vs2[2] );
       }
       cout << endl << dimZ << " slices\n";
@@ -333,7 +341,7 @@ int main( int argc, const char** argv )
       dims[2] = dimZ;
     }
     ZCat proc( listName, fileOut, dims, vs );
-    if( !proc.execute( f, "toto" ) )
+    if( !proc.execute( f, "none" ) )
     {
       cerr << "Failed\n";
       return EXIT_FAILURE;
