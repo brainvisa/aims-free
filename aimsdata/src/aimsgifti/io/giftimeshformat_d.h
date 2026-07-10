@@ -186,14 +186,14 @@ namespace aims
         gifti_free_image(gim);
         throw carto::parse_error( "no data arrays", "", hdr.name(), 0 );
       }
-      switch (da->intent) 
+      switch (da->intent)
       {
-      case NIFTI_INTENT_POINTSET: 
+      case NIFTI_INTENT_POINTSET:
         {
           ++tmesh;
           char *ts = gifti_get_meta_value(&da->meta, "Timestep");
           if (ts)
-                  sscanf(ts, "%d", &tmesh);
+            sscanf(ts, "%d", &tmesh);
           int vnum = da->dims[0];
           int j;
 
@@ -328,9 +328,11 @@ namespace aims
       }*/
     // verify polygons are all in the vertices range
     bool broken = false;
-    for (i = 0; i < tmesh; ++i) 
+    typename AimsTimeSurface<D, T>::iterator im, em = vol.end();
+    for( im=vol.begin(); im!=em; ++im )
     {
-      AimsSurface<D, T> & surf = vol[i];
+      i = im->first;
+      AimsSurface<D, T> & surf = im->second;
       std::vector<Point3df> & vert = surf.vertex();
       std::vector<AimsVector<uint, D> > & poly = surf.polygon();
       typename std::vector<AimsVector<uint, D> >::iterator ip;

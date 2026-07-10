@@ -1,10 +1,36 @@
 # Changelog
 
-## [6.0.15] 2026-03-17
+## [6.0.18] 2026-06-26
+
+### Changed
+
+- AimsApplyTransform: fix in load_transformations() when no input header is provided
+- fixed transformations graph reading from a relative path
+
+
+## [6.0.16] 2026-05-29
+
+### Added
+
+- AimsApplyTransform improvements:
+  - support `--output-coords` with transformations graph, and implement `--reference` auto (takes from deformation fields, when available)
+  - take into account `--input-coords` also in the context of a transformations graph
+
+### Changed
+
+- fix in gray-level variants of Qt image reader
+- fix in GIFTI mesh reader for 4D meshes with missing timesteps
+
+
+## [6.0.15] 2026-04-07
 
 ### Added
 
 - Laplacian smoothing has been extended for TimeTexture (it was formetly implemented only for Texture), and python bindings have been added.
+
+### Changed
+
+- fixes for pydicom >= 3 in dicom aggregator
 
 
 ## [6.0.3] 2026-03-06

@@ -580,10 +580,11 @@ void TransformationGraph3d::loadTransformationsGraph( Object desc,
   string sep;
   if( !dirname.empty() )
   {
-    string last = dirname.substr( dirname.length() - 2, 1 );
+    string last = dirname.substr( dirname.length() - 1, 1 );
     if( last != "/" && last != "\\" )
       sep = "/";
   }
+
 
   Object src_it;
   for( src_it=desc->objectIterator(); src_it && src_it->isValid();

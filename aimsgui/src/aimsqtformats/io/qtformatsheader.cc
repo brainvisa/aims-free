@@ -213,8 +213,9 @@ void QtFormatsHeader::read()
   vector<string>	pdt;
 
   bool gray = im.allGray();
-  // cout << "gray: " << gray << ", alpha: " << im.hasAlphaChannel() << endl;
-  if( im.hasAlphaChannel() )
+  bool alpha = im.hasAlphaChannel();
+  // cout << "gray: " << gray << ", alpha: " << alpha << endl << flush;
+  if( alpha )
     {
       if( dt.empty() )
         dt = DataTypeCode<AimsRGBA>().dataType();
@@ -223,10 +224,12 @@ void QtFormatsHeader::read()
     }
   if( gray )
     {
-      // cout << "gray image, numCol: " << im.colorCount() << endl;
-      if( im.colorCount() == 0 )
+      // cout << "gray image, numCol: " << im.colorCount() << endl << flush;
+      if( im.colorCount() == 0 ) 
+      {
+        // cout << "gray image, depth: " << im.depth() << endl << flush;
         switch( im.depth() )
-          {
+        {
           case 1:
           case 8:
             if( dt.empty() )
@@ -258,8 +261,9 @@ void QtFormatsHeader::read()
           default:
             break;
           }
+      } 
       else
-        {
+      {
           if( im.colorCount() <= 256 )
             {
               dt = DataTypeCode<::byte>().dataType();
@@ -276,23 +280,23 @@ void QtFormatsHeader::read()
             dt = DataTypeCode<uint32_t>().dataType();
           pdt.push_back( DataTypeCode<uint32_t>().dataType() );
           pdt.push_back( DataTypeCode<int32_t>().dataType() );
-        }
-    }
+      }
+  }
   if( !im.hasAlphaChannel() )
-    {
+  {
       if( dt.empty() )
         dt = DataTypeCode<AimsRGB>().dataType();
       pdt.push_back( DataTypeCode<AimsRGB>().dataType() );
       pdt.push_back( DataTypeCode<AimsRGBA>().dataType() );
-    }
+  }
   if( !gray )
-    {
+  {
       pdt.push_back( DataTypeCode<uint32_t>().dataType() );
       pdt.push_back( DataTypeCode<int32_t>().dataType() );
       pdt.push_back( DataTypeCode<uint16_t>().dataType() );
       pdt.push_back( DataTypeCode<int16_t>().dataType() );
       pdt.push_back( DataTypeCode<uint8_t>().dataType() );
-    }
+  }
 
   if( dt.empty() && !pdt.empty() )
     dt = pdt[0];

@@ -104,17 +104,17 @@ void TrmGraphFormatReader::read( TransformationGraph3d & obj,
   Object desc;
   try
   {
-  Finder f;
-  if( !f.check( dsi->url() ) )
-    throw wrong_format_error( "not a transformations graph" );
-  if( f.objectType() != "TransformationGraph3d"
-      && f.objectType() != "genericobject" )
-    // possibly a deformation field
-    throw wrong_format_error( "not a transformations graph" );
-  Reader<Object> r( dsi->url() );
-  Object *tmp = r.read();
-  desc = *tmp;
-  delete tmp;
+    Finder f;
+    if( !f.check( dsi->url() ) )
+      throw wrong_format_error( "not a transformations graph" );
+    if( f.objectType() != "TransformationGraph3d"
+        && f.objectType() != "genericobject" )
+      // possibly a deformation field
+      throw wrong_format_error( "not a transformations graph" );
+    Reader<Object> r( dsi->url() );
+    Object *tmp = r.read();
+    desc = *tmp;
+    delete tmp;
   }
   catch( exception & e )
   {
