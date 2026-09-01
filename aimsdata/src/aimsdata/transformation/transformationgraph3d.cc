@@ -766,6 +766,24 @@ Object TransformationGraph3d::asDict( bool affine_only, bool allow_read,
     }
   }
 
+  // save aliases
+  Graph::iterator iv, ev = vertices().end();
+  for( iv=vertices().begin(); iv!=ev; ++iv )
+    if( (*iv)->hasProperty( "alias" ) )
+    {
+      string suid = referential( *iv );
+      Object alias = (*iv)->getProperty( "alias" );
+      Object sdict;
+      if( dict->hasProperty( suid ) )
+        sdict = dict->getProperty( suid );
+      else
+      {
+        sdict = Object::value( Dictionary() );
+        dict->setProperty( suid, sdict );
+      }
+      sdict->setProperty( "alias", alias );
+    }
+
   return dict;
 }
 
