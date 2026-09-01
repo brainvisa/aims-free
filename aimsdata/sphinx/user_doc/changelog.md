@@ -1,18 +1,18 @@
 # Changelog
 
+## [6.0.20] 2026-08-06
+
+### Changed
+
+- fix in Tiff reader (`volume_dimension` in header)
+
+
 ## [6.0.18] 2026-06-26
 
 ### Changed
 
 - AimsApplyTransform: fix in load_transformations() when no input header is provided
 - fixed transformations graph reading from a relative path
-
-
-## [6.0.20] 2026-08-06
-
-### Changed
-
-- fix in Tiff reader (`volume_dimension` in header)
 
 
 ## [6.0.16] 2026-05-29
