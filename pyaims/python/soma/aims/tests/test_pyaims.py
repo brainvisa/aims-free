@@ -31,7 +31,7 @@ class PyaimsNBTest(unittest.TestCase):
         print('testing pyaims tutorial notebook')
         tnb.test_notebook(
             os.path.join(os.path.dirname(sys.argv[0]),
-                          'pyaims_tutorial_nb.ipynb'),
+                         'pyaims_tutorial_nb.ipynb'),
             timeout=300)
 
     @unittest.skipIf(tnb.main_jupyter is None, 'Notebook tests not supported')
@@ -40,7 +40,7 @@ class PyaimsNBTest(unittest.TestCase):
         print('testing volume orientation notebook')
         tnb.test_notebook(
             os.path.join(os.path.dirname(sys.argv[0]),
-                          'volume_orientation.ipynb'),
+                         'volume_orientation.ipynb'),
             timeout=30)
 
 
