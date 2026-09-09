@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.0.21] 2026-09-09
+
+### Added
+
+- Test class and tests for python/C++ reference counters bindings
+- aims.rc_ptr() function supports type search to find a correct C++ rc_ptr type matching the object to wrap
+
+
 ## [6.0.20] 2026-08-06
 
 ### Changed
