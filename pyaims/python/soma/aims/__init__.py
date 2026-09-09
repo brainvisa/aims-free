@@ -223,8 +223,8 @@ except:
 
 
 def RCObject_init(self, *args):
-    # print('RCObject init:', self)
     carto.RCObject.__oldinit__(self, *args)
+    # print('RCObject_init', self, ', pyowned:', sip.ispyowned(self))
     carto.RCObject._setupRC(self)
 
 
@@ -2101,13 +2101,38 @@ def stdList(*args, **kwargs):
 
 
 def rc_ptr(*args, **kwargs):
-    '''Create an instance of aims reference-counting object (rc_ptr_<type>) from
-    a type parameter, which may be specified as the dtype keyword argument, or
-    as one of the arguments if one is identitied as a type.
+    '''Create an instance of aims reference-counting object (rc_ptr_<type>)
+    from a type parameter or an object instance. The type may be specified as
+    the dtype keyword argument, or as one of the arguments if one is identitied
+    as a type, otherwise it will be the type of the first argument and the
+    instance of that argument will be set inside the rc_ptr.
 
     Type definitions should match those accepted by typeCode().
+
+    If the type of the given object does not match in rc_ptr_<type> types, then
+    the base types of this type are tried until one is found or none can match.
+
+    Thus::
+
+        x = aims.carto.TestRCObject()
+        rc = aims.rc_ptr(x)
+        print(type(rc))
+
+    will print: `<class 'soma.aims.rc_ptr_RCObject'>`
     '''
-    return _createObject('rc_ptr', *args, **kwargs)
+    try:
+        return _createObject('rc_ptr', *args, **kwargs)
+    except (AttributeError, KeyError):
+        todo = [type(args[0])]
+        while todo:
+            try_type = todo.pop(0)
+            todo += try_type.__bases__
+            try:
+                return _createObject('rc_ptr', try_type, *args, **kwargs)
+            except (AttributeError, KeyError):
+                pass  # try next
+        raise AttributeError(
+            f'Could not build a rc_ptr for type {type(args[0])}')
 
 
 # callback to fix sys.stderr / sys.stdout after use of carto::fdinhibitor
