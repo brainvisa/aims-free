@@ -240,28 +240,24 @@ public:
 #ifdef PYAIMS_DEBUG_RC
   std::cout << "setupRC for " << a0 << " / " << typeid( *a0 ).name() << ", c++ refcount: "
     << carto::rc_ptr_trick::refCount( *a0 ) << ", pyowned: "
-    << sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) << std::endl;
+    << sipIsOwnedByPython( (sipSimpleWrapper *) a0Wrapper ) << std::endl;
 #endif
-#if SIP_VERSION >= 0x040800
-if( sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) 
+  /* in sip > 6.10 sipIsOwnedByPython() returns false if the object is the
+     return value of a Factory function, and sets its ownership later.
+     This new behavior breaks the former test sipIsOwnedByPython(...)
+     so we now increase the RC uncondiotionally even if it's 0 and not owned
+     by python. So we need to figure it out at destruction time. */
+/*  if( sipIsOwnedByPython( (sipSimpleWrapper *) a0Wrapper )
       || carto::rc_ptr_trick::refCount( *a0 ) > 0 )
-#else
-if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
-      || carto::rc_ptr_trick::refCount( *a0 ) > 0 )
-#endif
-  {
+  { */
     // increase C++ ref counter to avoid destruction by C++
     ++carto::rc_ptr_trick::refCount( *a0 );
-#if PY_VERSION_HEX >= 0x03000000
     PyObject_SetAttrString( a0Wrapper, "_cpp_rcptr", PyLong_FromLong( 1 ) );
-#else
-    PyObject_SetAttrString( a0Wrapper, "_cpp_rcptr", PyInt_FromLong( 1 ) );
-#endif
 #ifdef PYAIMS_DEBUG_RC
     std::cout << "inc rc: " << carto::rc_ptr_trick::refCount( *a0 )
       << std::endl;
 #endif
-  }
+  // }
 %End
 
   Aims_hash_t __hash__() const;
@@ -274,7 +270,7 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
 #ifdef PYAIMS_DEBUG_RC
   std::cout << "releaseRC for " << a0 << ", c++ refcount: "
     << carto::rc_ptr_trick::refCount( *a0 ) << ", pyowned: "
-    << sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) << std::endl;
+    << sipIsOwnedByPython( (sipSimpleWrapper *) a0Wrapper ) << std::endl;
   if( carto::rc_ptr_trick::refCount( *a0 ) > 0 )
     std::cout << "    " << typeid(*a0).name() << std::endl;
 #endif
@@ -291,7 +287,10 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
 #ifdef PYAIMS_DEBUG_RC
       std::cout << "dec rc: " << rc << std::endl;
 #endif
-      if( rc == 0 )
+      /* we now increment the RC in setupRC() even if the object is not pyowned
+         so it can drop to 0 and still being used in C++ as a non-counted
+         object. So in this case we prevent destruction. */
+      if( rc == 0 && sipIsOwnedByPython( (sipSimpleWrapper *) a0Wrapper ) )
       {
 #ifdef PYAIMS_DEBUG_RC
         std::cout << "zero count - destruction by python\n";
@@ -322,7 +321,7 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
       std::cout << "no _cpp_ptr\n";
 #endif
   }
-  else if( sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) )
+  else if( sipIsOwnedByPython( (sipSimpleWrapper *) a0Wrapper ) )
   {
     // this situation should not happen, it is caused after forced
     // destruction in C++ layer
@@ -359,7 +358,6 @@ private:
     static unsigned long globalCount();
     static carto::RCObject* newTestObject() /Factory/;
   };
-
 
 };
 
