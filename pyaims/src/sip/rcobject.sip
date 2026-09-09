@@ -217,6 +217,11 @@ class RCObject
       *sipCppRet = dynamic_cast<soma::AffineTransformationBase *>( sipCpp );
     }
   }
+  else if( dynamic_cast<carto::TestRCObject *>( sipCpp ) )
+  {
+    sipType = sipType_carto_TestRCObject;
+    *sipCppRet = dynamic_cast<carto::TestRCObject *>( sipCpp );
+  }
 %End
 
 public:
@@ -338,6 +343,23 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
 private:
   RCObject();
 };
+
+
+  class TestRCObject : public RCObject
+  {
+%TypeHeaderCode
+#include <cartobase/smart/test_rcobject.h>
+%End
+
+  public:
+    TestRCObject( bool verbose = false );
+    virtual ~TestRCObject();
+    void setVerbose( bool verbose );
+    bool verbose() const;
+    static unsigned long globalCount();
+    static carto::RCObject* newTestObject() /Factory/;
+  };
+
 
 };
 

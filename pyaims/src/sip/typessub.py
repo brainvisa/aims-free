@@ -3100,6 +3100,9 @@ typessub = {'bool':
                'testPyType': 'pyaimsRcptr_TimeSurface_3_VOID_Check',
             },
 
+            'carto::RCObject':
+            classInCartoNamespace('cartobase/smart/rcobject.h', 'RCObject'),
+
 
             }
 

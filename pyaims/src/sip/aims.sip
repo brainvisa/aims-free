@@ -232,6 +232,7 @@ typedef int int32_t;
 %Include rcptr_TimeTexture_FLOAT.sip
 %Include rcptr_TimeTexture_DOUBLE.sip
 %Include rcptr_TimeTexture_POINT2DF.sip
+%Include rcptr_RCObject.sip
 
 %Include reader_Graph.sip
 %Include reader_Hierarchy.sip
