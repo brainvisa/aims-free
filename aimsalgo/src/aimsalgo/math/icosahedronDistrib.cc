@@ -30,7 +30,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
+ 
 
 // activate deprecation warning
 #ifdef AIMSDATA_CLASS_NO_DEPREC_WARNING
@@ -44,8 +44,7 @@
 
 using namespace std;
 
-struct my_comp : public binary_function<Point3df,Point3df,
-                                        bool>
+struct my_comp
 { bool operator() (const Point3df& pt1,
                    const Point3df& pt2) const
   { return((pt1.item(0) + pt1.item(1)*10 + pt1.item(2)*100) < 

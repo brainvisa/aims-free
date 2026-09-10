@@ -172,10 +172,10 @@ namespace internal
 {
 
   template <typename LEFT, typename OP>
-  struct thresh1: public std::unary_function<LEFT, LEFT>
+  struct thresh1
   {
     thresh1( LEFT threshold, LEFT background )
-      : std::unary_function<LEFT, LEFT>(), threshold( threshold ),
+      : threshold( threshold ),
         background( background )
     {
     }
@@ -271,10 +271,10 @@ namespace internal
 
 
   template <typename LEFT, typename OP>
-  struct thresh2: public std::unary_function<LEFT, LEFT>
+  struct thresh2
   {
     thresh2( LEFT threshold1, LEFT threshold2, LEFT background )
-      : std::unary_function<LEFT, LEFT>(), threshold1( threshold1 ),
+      : threshold1( threshold1 ),
         threshold2( threshold2), background( background )
     {
     }
@@ -393,10 +393,10 @@ namespace internal
 {
 
   template <typename LEFT, typename OP>
-  struct clip1: public std::unary_function<LEFT, LEFT>
+  struct clip1
   {
     clip1( LEFT threshold )
-      : std::unary_function<LEFT, LEFT>(), threshold( threshold )
+      : threshold( threshold )
     {
     }
 
@@ -458,10 +458,10 @@ namespace internal
 
 
   template <typename LEFT, typename OP>
-  struct clip2: public std::unary_function<LEFT, LEFT>
+  struct clip2
   {
-    clip2( LEFT threshold1, LEFT threshold2 )
-      : std::unary_function<LEFT, LEFT>(), threshold1( threshold1 ),
+    clip2( LEFT threshold1, LEFT threshold2 ) :
+        threshold1( threshold1 ),
         threshold2( threshold2)
     {
     }
@@ -661,10 +661,10 @@ namespace internal
 {
 
   template <typename LEFT, typename RIGHT, typename OP>
-  struct thresh1_bin: public std::unary_function<LEFT, RIGHT>
+  struct thresh1_bin
   {
     thresh1_bin( LEFT threshold, RIGHT foreground )
-      : std::unary_function<LEFT, RIGHT>(), threshold( threshold ),
+      : threshold( threshold ),
         foreground( foreground )
     {
     }
@@ -680,10 +680,10 @@ namespace internal
 
 
   template <typename LEFT, typename RIGHT, typename OP>
-  struct thresh2_bin: public std::unary_function<LEFT, RIGHT>
+  struct thresh2_bin
   {
     thresh2_bin( LEFT threshold1, LEFT threshold2, RIGHT foreground )
-      : std::unary_function<LEFT, RIGHT>(), threshold1( threshold1 ),
+      : threshold1( threshold1 ),
         threshold2( threshold2 ), foreground( foreground )
     {
     }

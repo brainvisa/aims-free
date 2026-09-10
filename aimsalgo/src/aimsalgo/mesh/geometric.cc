@@ -1723,8 +1723,7 @@ VertexRemover::simple_neighborhood_flattening(
   std::partial_sum(angles.begin(), angles.end(), angles.begin());
 
   std::transform(angles.begin(), angles.end(), angles.begin(),
-                 std::bind2nd(std::multiplies<double>(),
-                              2*M_PI/angles.back()));
+                 [x=2*M_PI/angles.back()](const auto p) { return std::multiplies<double>(p,x); });
 
   std::vector<Point2df> res(neighbors.size());
   for (std::size_t i = 0; i < res.size(); ++i)
@@ -1765,8 +1764,7 @@ VertexRemover::simple_neighborhood_flattening(
   std::partial_sum(angles.begin(), angles.end(), angles.begin());
 
   std::transform(angles.begin(), angles.end(), angles.begin(),
-                 std::bind2nd(std::multiplies<double>(),
-                              2*M_PI/angles.back()));
+                 [x=2*M_PI/angles.back()](const auto p) {return std::multiplies<double>(p,x);});
 
   std::vector<Point2df> res(neighbors.size());
   for (std::size_t i = 0; i < res.size(); ++i)

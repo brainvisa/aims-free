@@ -20,7 +20,6 @@ namespace
 {
 
   struct Point3dfCompare
-    : public std::binary_function<Point3df,Point3df, bool>
   {
     bool operator () ( const Point3df & p1, const Point3df & p2 ) const
     {

@@ -761,431 +761,422 @@ namespace volumeutil {
   // These function objects are then used to perform basic operations
   // between containers (volumes).
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct select_left: public std::binary_function<LEFT, RIGHT, LEFT>
-  {
-    const LEFT & operator() ( const LEFT & x, const RIGHT & ) const
-    {
-      return x;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct select_left
+  // {
+  //   const LEFT & operator() ( const LEFT & x, const RIGHT & ) const
+  //   {
+  //     return x;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct select_right: public std::binary_function<LEFT, RIGHT, RIGHT>
-  {
-    const RIGHT & operator() ( const LEFT & , const RIGHT & y ) const
-    {
-      return y;
-    }
-  };
+  // template <typename T>
+  // struct identity
+  // {
+  //   const T & operator() ( const T & x ) const
+  //   {
+  //     return x;
+  //   }
+  // };
 
-  template <typename T>
-  struct identity: public std::unary_function<T, T>
-  {
-    const T & operator() ( const T & x ) const
-    {
-      return x;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct plus
+  // {
+  //   typename plus_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x + y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct plus: public std::binary_function<LEFT, RIGHT, typename plus_result<LEFT,RIGHT>::result_type>
-  {
-    typename plus_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x + y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct minus
+  // {
+  //   typename minus_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x - y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct minus: public std::binary_function<LEFT, RIGHT, typename minus_result<LEFT,RIGHT>::result_type>
-  {
-    typename minus_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x - y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct multiplies
+  // {
+  //   typename multiplies_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x * y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct multiplies: public std::binary_function<LEFT, RIGHT, typename multiplies_result<LEFT,RIGHT>::result_type>
-  {
-    typename multiplies_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x * y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct divides
+  // {
+  //   typename divides_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x / y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct divides: public std::binary_function<LEFT, RIGHT, typename divides_result<LEFT,RIGHT>::result_type>
-  {
-    typename divides_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x / y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct modulus
+  // {
+  //   typename modulus_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x % y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct modulus: public std::binary_function<LEFT, RIGHT, typename modulus_result<LEFT,RIGHT>::result_type>
-  {
-    typename modulus_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x % y;
-    }
-  };
+  // template <typename T>
+  // struct negate
+  // {
+  //   T operator() (const T & x) const
+  //   {
+  //     return -x;
+  //   }
+  // };
 
-  template <typename T>
-  struct negate: public std::unary_function<T, T>
-  {
-    T operator() (const T & x) const
-    {
-      return -x;
-    }
-  };
+  // template <typename T>
+  // struct increment
+  // {
+  //   T operator() (T x) const
+  //   {
+  //     return ++x;
+  //   }
+  // };
 
-  template <typename T>
-  struct increment: public std::unary_function<T, T>
-  {
-    T operator() (T x) const
-    {
-      return ++x;
-    }
-  };
+  // template <typename T>
+  // struct decrement
+  // {
+  //   T operator() (T x) const
+  //   {
+  //     return --x;
+  //   }
+  // };
 
-  template <typename T>
-  struct decrement: public std::unary_function<T, T>
-  {
-    T operator() (T x) const
-    {
-      return --x;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct equal_to
+  // {
+  //   bool operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x == y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct equal_to: public std::binary_function<LEFT, RIGHT, bool>
-  {
-    bool operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x == y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct not_equal_to
+  // {
+  //   bool operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x != y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct not_equal_to: public std::binary_function<LEFT, RIGHT, bool>
-  {
-    bool operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x != y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct greater
+  // {
+  //   bool operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x > y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct greater: public std::binary_function<LEFT, RIGHT, bool>
-  {
-    bool operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x > y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct less
+  // {
+  //   bool operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x < y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct less: public std::binary_function<LEFT, RIGHT, bool>
-  {
-    bool operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x < y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct greater_equal
+  // {
+  //   bool operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x >= y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct greater_equal: public std::binary_function<LEFT, RIGHT, bool>
-  {
-    bool operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x >= y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct less_equal
+  // {
+  //   bool operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x <= y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct less_equal: public std::binary_function<LEFT, RIGHT, bool>
-  {
-    bool operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x <= y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct logical_and
+  // {
+  //   bool operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x && y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct logical_and: public std::binary_function<LEFT, RIGHT, bool>
-  {
-    bool operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x && y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct logical_or
+  // {
+  //   bool operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x || y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct logical_or: public std::binary_function<LEFT, RIGHT, bool>
-  {
-    bool operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x || y;
-    }
-  };
+  // template <typename T>
+  // struct logical_not
+  // {
+  //   bool operator() (const T & x) const
+  //   {
+  //     return !x;
+  //   }
+  // };
 
-  template <typename T>
-  struct logical_not: public std::unary_function<T, bool>
-  {
-    bool operator() (const T & x) const
-    {
-      return !x;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct bitwise_and
+  // {
+  //   typename bitwise_and_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x & y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_and: public std::binary_function<LEFT, RIGHT, typename bitwise_and_result<LEFT,RIGHT>::result_type>
-  {
-    typename bitwise_and_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x & y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct bitwise_or
+  // {
+  //   typename bitwise_or_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x | y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_or: public std::binary_function<LEFT, RIGHT, typename bitwise_or_result<LEFT,RIGHT>::result_type>
-  {
-    typename bitwise_or_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x | y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct bitwise_xor
+  // {
+  //   typename bitwise_xor_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x ^ y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_xor: public std::binary_function<LEFT, RIGHT, typename bitwise_xor_result<LEFT,RIGHT>::result_type>
-  {
-    typename bitwise_xor_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x ^ y;
-    }
-  };
+  // template <typename T>
+  // struct bitwise_not
+  // {
+  //   T operator() (const T & x) const
+  //   {
+  //     return ~x;
+  //   }
+  // };
 
-  template <typename T>
-  struct bitwise_not: public std::unary_function<T, T>
-  {
-    T operator() (const T & x) const
-    {
-      return ~x;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct bitwise_left_shift
+  // {
+  //   LEFT operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x << y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_left_shift: public std::binary_function<LEFT, RIGHT, LEFT>
-  {
-    LEFT operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x << y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct bitwise_right_shift
+  // {
+  //   LEFT operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return x >> y;
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_right_shift: public std::binary_function<LEFT, RIGHT, LEFT>
-  {
-    LEFT operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return x >> y;
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct select_min
+  // {
+  //   typename select_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return ( x <= y ? x : y );
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct select_min: public std::binary_function<LEFT, RIGHT, typename select_result<LEFT,RIGHT>::result_type>
-  {
-    typename select_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return ( x <= y ? x : y );
-    }
-  };
+  // template <typename LEFT, typename RIGHT = LEFT>
+  // struct select_max
+  // {
+  //   typename select_result<LEFT,RIGHT>::result_type
+  //   operator() (const LEFT & x, const RIGHT & y) const
+  //   {
+  //     return ( x >= y ? x : y );
+  //   }
+  // };
 
-  template <typename LEFT, typename RIGHT = LEFT>
-  struct select_max: public std::binary_function<LEFT, RIGHT, typename select_result<LEFT,RIGHT>::result_type>
-  {
-    typename select_result<LEFT,RIGHT>::result_type
-    operator() (const LEFT & x, const RIGHT & y) const
-    {
-      return ( x >= y ? x : y );
-    }
-  };
+  // //==========================================================================
+  // //   Specialization: cfloat/cdouble
+  // //==========================================================================
 
-  //==========================================================================
-  //   Specialization: cfloat/cdouble
-  //==========================================================================
+  // // By default, cfloat values can only be multiplied/divided by floats
+  // // and cdouble by doubles.
 
-  // By default, cfloat values can only be multiplied/divided by floats
-  // and cdouble by doubles.
+  // template <>
+  // struct multiplies<cfloat, double>
+  // {
+  //   cfloat operator() (const cfloat & x, const double & y) const
+  //   {
+  //     return x * (float)y;
+  //   }
+  // };
 
-  template <>
-  struct multiplies<cfloat, double>: public std::binary_function<cfloat, double, cfloat>
-  {
-    cfloat operator() (const cfloat & x, const double & y) const
-    {
-      return x * (float)y;
-    }
-  };
+  // template <>
+  // struct multiplies<cfloat, long>
+  // {
+  //   cfloat operator() (const cfloat & x, const long & y) const
+  //   {
+  //     return x * (float)y;
+  //   }
+  // };
 
-  template <>
-  struct multiplies<cfloat, long>: public std::binary_function<cfloat, long, cfloat>
-  {
-    cfloat operator() (const cfloat & x, const long & y) const
-    {
-      return x * (float)y;
-    }
-  };
+  // template <>
+  // struct multiplies<cdouble, float>
+  // {
+  //   cdouble operator() (const cdouble & x, const float & y) const
+  //   {
+  //     return x * (double)y;
+  //   }
+  // };
 
-  template <>
-  struct multiplies<cdouble, float>: public std::binary_function<cdouble, float, cdouble>
-  {
-    cdouble operator() (const cdouble & x, const float & y) const
-    {
-      return x * (double)y;
-    }
-  };
+  // template <>
+  // struct multiplies<cdouble, long>
+  // {
+  //   cdouble operator() (const cdouble & x, const long & y) const
+  //   {
+  //     return x * (double)y;
+  //   }
+  // };
 
-  template <>
-  struct multiplies<cdouble, long>: public std::binary_function<cdouble, long, cdouble>
-  {
-    cdouble operator() (const cdouble & x, const long & y) const
-    {
-      return x * (double)y;
-    }
-  };
+  // template <>
+  // struct divides<cfloat, double>
+  // {
+  //   cfloat operator() (const cfloat & x, const double & y) const
+  //   {
+  //     return x * (float)( 1. / y );
+  //   }
+  // };
 
-  template <>
-  struct divides<cfloat, double>: public std::binary_function<cfloat, double, cfloat>
-  {
-    cfloat operator() (const cfloat & x, const double & y) const
-    {
-      return x * (float)( 1. / y );
-    }
-  };
+  // template <>
+  // struct divides<cfloat, long>
+  // {
+  //   cfloat operator() (const cfloat & x, const long & y) const
+  //   {
+  //     return x * (float)( 1. / (double)y );
+  //   }
+  // };
 
-  template <>
-  struct divides<cfloat, long>: public std::binary_function<cfloat, long, cfloat>
-  {
-    cfloat operator() (const cfloat & x, const long & y) const
-    {
-      return x * (float)( 1. / (double)y );
-    }
-  };
+  // template <>
+  // struct divides<cdouble, float>
+  // {
+  //   cdouble operator() (const cdouble & x, const float & y) const
+  //   {
+  //     return x * (double)( 1. / y );
+  //   }
+  // };
 
-  template <>
-  struct divides<cdouble, float>: public std::binary_function<cdouble, float, cdouble>
-  {
-    cdouble operator() (const cdouble & x, const float & y) const
-    {
-      return x * (double)( 1. / y );
-    }
-  };
+  // template <>
+  // struct divides<cdouble, double>
+  // {
+  //   cdouble operator() (const cdouble & x, const double & y) const
+  //   {
+  //     return x * ( 1. / y );
+  //   }
+  // };
 
-  template <>
-  struct divides<cdouble, double>: public std::binary_function<cdouble, double, cdouble>
-  {
-    cdouble operator() (const cdouble & x, const double & y) const
-    {
-      return x * ( 1. / y );
-    }
-  };
+  // template <>
+  // struct divides<cdouble, long>
+  // {
+  //   cdouble operator() (const cdouble & x, const long & y) const
+  //   {
+  //     return x * (double)( 1. / (double)y );
+  //   }
+  // };
 
-  template <>
-  struct divides<cdouble, long>: public std::binary_function<cdouble, long, cdouble>
-  {
-    cdouble operator() (const cdouble & x, const long & y) const
-    {
-      return x * (double)( 1. / (double)y );
-    }
-  };
+  // template <>
+  // struct logical_and<bool, cfloat>
+  // {
+  //   bool operator() (const bool & x, const cfloat & y) const
+  //   {
+  //     return x && ( y.imag() || y.real() );
+  //   }
+  // };
 
-  template <>
-  struct logical_and<bool, cfloat>: public std::binary_function<bool, cfloat, bool>
-  {
-    bool operator() (const bool & x, const cfloat & y) const
-    {
-      return x && ( y.imag() || y.real() );
-    }
-  };
+  // template <>
+  // struct logical_and<bool, cdouble>
+  // {
+  //   bool operator() (const bool & x, const cdouble & y) const
+  //   {
+  //     return x && ( y.imag() || y.real() );
+  //   }
+  // };
 
-  template <>
-  struct logical_and<bool, cdouble>: public std::binary_function<bool, cdouble, bool>
-  {
-    bool operator() (const bool & x, const cdouble & y) const
-    {
-      return x && ( y.imag() || y.real() );
-    }
-  };
+  // template <>
+  // struct logical_or<bool, cfloat>
+  // {
+  //   bool operator() (const bool & x, const cfloat & y) const
+  //   {
+  //     return x || y.imag() || y.real();
+  //   }
+  // };
 
-  template <>
-  struct logical_or<bool, cfloat>: public std::binary_function<bool, cfloat, bool>
-  {
-    bool operator() (const bool & x, const cfloat & y) const
-    {
-      return x || y.imag() || y.real();
-    }
-  };
+  // template <>
+  // struct logical_or<bool, cdouble>
+  // {
+  //   bool operator() (const bool & x, const cdouble & y) const
+  //   {
+  //     return x || y.imag() || y.real();
+  //   }
+  // };
 
-  template <>
-  struct logical_or<bool, cdouble>: public std::binary_function<bool, cdouble, bool>
-  {
-    bool operator() (const bool & x, const cdouble & y) const
-    {
-      return x || y.imag() || y.real();
-    }
-  };
+  // template <>
+  // struct logical_not<cfloat>
+  // {
+  //   bool operator() (const cfloat & x) const
+  //   {
+  //     return !( x.imag() || x.real() );
+  //   }
+  // };
 
-  template <>
-  struct logical_not<cfloat>: public std::unary_function<cfloat, bool>
-  {
-    bool operator() (const cfloat & x) const
-    {
-      return !( x.imag() || x.real() );
-    }
-  };
+  // template <>
+  // struct logical_not<cdouble>
+  // {
+  //   bool operator() (const cdouble & x) const
+  //   {
+  //     return !( x.imag() || x.real() );
+  //   }
+  // };
 
-  template <>
-  struct logical_not<cdouble>: public std::unary_function<cdouble, bool>
-  {
-    bool operator() (const cdouble & x) const
-    {
-      return !( x.imag() || x.real() );
-    }
-  };
+  // //==========================================================================
+  // //   Specialization: bool
+  // //==========================================================================
 
-  //==========================================================================
-  //   Specialization: bool
-  //==========================================================================
+  // template <>
+  // struct increment<bool>
+  // {
+  //   bool operator() ( bool )
+  //   {
+  //     return true;
+  //   }
+  // };
 
-  template <>
-  struct increment<bool>: public std::unary_function<bool, bool>
-  {
-    bool operator() ( bool )
-    {
-      return true;
-    }
-  };
-
-  template <>
-  struct decrement<bool>: public std::unary_function<bool, bool>
-  {
-    bool operator() ( bool )
-    {
-      return false;
-    }
-  };
+  // template <>
+  // struct decrement<bool>
+  // {
+  //   bool operator() ( bool )
+  //   {
+  //     return false;
+  //   }
+  // };
 
 } // namespace volumeutil
 } // namespace carto
@@ -1205,32 +1196,32 @@ namespace volumeutil {
 namespace carto {
 namespace volumeutil {
 
-  template <>
-  struct negate<VoxelRGB>: public std::unary_function<VoxelRGB, VoxelRGB>
-  {
-    VoxelRGB operator() ( const VoxelRGB & x )
-    {
-      return x * -1.f;
-    }
-  };
+  // template <>
+  // struct negate<VoxelRGB>
+  // {
+  //   VoxelRGB operator() ( const VoxelRGB & x )
+  //   {
+  //     return x * -1.f;
+  //   }
+  // };
 
-  template <>
-  struct negate<VoxelRGBA>: public std::unary_function<VoxelRGBA, VoxelRGBA>
-  {
-    VoxelRGBA operator() ( const VoxelRGBA & x )
-    {
-      return x * -1.f;
-    }
-  };
+  // template <>
+  // struct negate<VoxelRGBA>
+  // {
+  //   VoxelRGBA operator() ( const VoxelRGBA & x )
+  //   {
+  //     return x * -1.f;
+  //   }
+  // };
 
-  template <>
-  struct negate<VoxelHSV>: public std::unary_function<VoxelHSV, VoxelHSV>
-  {
-    VoxelHSV operator() ( const VoxelHSV & x )
-    {
-      return x * -1.f;
-    }
-  };
+  // template <>
+  // struct negate<VoxelHSV>
+  // {
+  //   VoxelHSV operator() ( const VoxelHSV & x )
+  //   {
+  //     return x * -1.f;
+  //   }
+  // };
 
 } // namespace volumeutil
 } // namespace carto

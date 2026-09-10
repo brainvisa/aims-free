@@ -1,36 +1,3 @@
-/* This software and supporting documentation are distributed by
- *     Institut Federatif de Recherche 49
- *     CEA/NeuroSpin, Batiment 145,
- *     91191 Gif-sur-Yvette cedex
- *     France
- *
- * This software is governed by the CeCILL-B license under
- * French law and abiding by the rules of distribution of free software.
- * You can  use, modify and/or redistribute the software under the
- * terms of the CeCILL-B license as circulated by CEA, CNRS
- * and INRIA at the following URL "http://www.cecill.info".
- *
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability.
- *
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or
- * data to be ensured and,  more generally, to use and operate it in the
- * same conditions as regards security.
- *
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
- */
-
 #ifndef CARTODATA_VOLUME_VOLUMEUTIL_H
 #define CARTODATA_VOLUME_VOLUMEUTIL_H
 
@@ -80,16 +47,16 @@ namespace carto
     /// (create output version)
     /// @{
     template <typename T, typename UnaryFunction>
-    Volume<typename UnaryFunction::result_type>
+    auto
     apply( const Volume<T> & vol, UnaryFunction func );
     template <typename T, typename U, typename BinaryFunction>
-    Volume<typename BinaryFunction::result_type>
+    auto
     apply( const Volume<T> & vol1, const Volume<U> & vol2, BinaryFunction func );
     template <typename T, typename UnaryFunction>
-    rc_ptr<Volume<typename UnaryFunction::result_type> >
+    auto
     apply( const rc_ptr<Volume<T> > & vol, UnaryFunction func );
     template <typename T, typename U, typename BinaryFunction>
-    rc_ptr<Volume<typename BinaryFunction::result_type> >
+    auto
     apply( const rc_ptr<Volume<T> > & vol1, const Volume<U> & vol2, BinaryFunction func );
 
     /// Apply a function to all the elements of a volume
@@ -861,7 +828,7 @@ namespace carto
   inline
   void transfer( const Volume<INP> & src, Volume<OUTP> & dst )
   {
-    volumeutil::applyTowards( src, dst, volumeutil::identity<INP>() );
+    volumeutil::applyTowards( src, dst, [](const INP &x) { return x; } );
   }
 
   template <typename OUTP, typename INP>
@@ -1136,7 +1103,7 @@ namespace carto
     if( vol.getSizeX() == 0 && vol.getSizeY() == 0 &&
         vol.getSizeZ() == 0 && vol.getSizeT() == 0 )
       throw std::runtime_error("Cannot compute min of an empty volume");
-    return accumulate( vol, volumeutil::select_min<T>(), vol.at(0, 0, 0, 0) );
+    return volumeutil::accumulate( vol, [](const T &x, const T &y) { return ( x <= y ? x : y ); }, vol.at(0, 0, 0, 0) );
   }
 
   template <typename T>
@@ -1146,7 +1113,7 @@ namespace carto
     if( !vol.get() || ( vol->getSizeX() == 0 && vol->getSizeY() == 0 &&
                         vol->getSizeZ() == 0 && vol->getSizeT() == 0 ) )
       throw std::runtime_error("Cannot compute min of an empty volume");
-    return accumulate( vol, volumeutil::select_min<T>(), vol->at(0, 0, 0, 0) );
+    return volumeutil::accumulate( vol, [](const T &x, const T &y) { return ( x <= y ? x : y ); }, vol->at(0, 0, 0, 0) );
   }
 
   template <typename T>
@@ -1156,7 +1123,7 @@ namespace carto
     if( vol.getSizeX() == 0 && vol.getSizeY() == 0 &&
         vol.getSizeZ() == 0 && vol.getSizeT() == 0 )
       throw std::runtime_error("Cannot compute max of an empty volume");
-    return accumulate( vol, volumeutil::select_max<T>(), vol.at(0, 0, 0, 0) );
+    return volumeutil::accumulate( vol, [](const T &x, const T &y) { return ( x >= y ? x : y ); }, vol.at(0, 0, 0, 0) );
   }
 
   template <typename T>
@@ -1166,7 +1133,7 @@ namespace carto
     if( !vol.get() || ( vol->getSizeX() == 0 && vol->getSizeY() == 0 &&
                         vol->getSizeZ() == 0 && vol->getSizeT() == 0 ) )
       throw std::runtime_error("Cannot compute max of an empty volume");
-    return accumulate( vol, volumeutil::select_max<T>(), vol->at(0, 0, 0, 0) );
+    return volumeutil::accumulate( vol, [](const T &x, const T &y) { return ( x >= y ? x : y ); }, vol->at(0, 0, 0, 0) );
   }
 
   template <typename T>
@@ -1181,7 +1148,7 @@ namespace carto
   inline
   OUTP sum( const Volume<T> & vol )
   {
-    return accumulate( vol, volumeutil::plus<OUTP,T>(), static_cast<OUTP>(0) );
+    return volumeutil::accumulate( vol, [](const OUTP &x, const T &y){ return x+y; }, static_cast<OUTP>(0) );
   }
 
   template <typename T>
@@ -1197,35 +1164,35 @@ namespace carto
   {
     if( !vol.get() )
       return static_cast<OUTP>(0);
-    return accumulate( vol, volumeutil::plus<OUTP,T>(), static_cast<OUTP>(0) );
+    return volumeutil::accumulate( vol, [](const OUTP &x, const T &y){ return x+y; }, static_cast<OUTP>(0) );
   }
 
   template <typename T>
   inline
   bool all( const Volume<T> & vol )
   {
-    return volumeutil::accumulate( vol, volumeutil::logical_and<bool,T>(), true );
+    return volumeutil::accumulate( vol, [](bool x, const T &y){ return x && y; }, true );
   }
 
   template <typename T>
   inline
   bool all( const rc_ptr<Volume<T> > & vol )
   {
-    return volumeutil::accumulate( *vol, volumeutil::logical_and<bool,T>(), true );
+    return volumeutil::accumulate( *vol, [](bool x, const T &y){ return x && y; }, true );
   }
 
   template <typename T>
   inline
   bool any( const Volume<T> & vol )
   {
-    return volumeutil::accumulate( vol, volumeutil::logical_or<bool,T>(), false );
+    return volumeutil::accumulate( vol, [](bool x, const T &y){ return x || y; }, false );
   }
 
   template <typename T>
   inline
   bool any( const rc_ptr<Volume<T> > & vol )
   {
-    return volumeutil::accumulate( *vol, volumeutil::logical_or<bool,T>(), false );
+    return volumeutil::accumulate( *vol, [](bool x, const T &y){ return x || y; }, false );
   }
 
   //==========================================================================
@@ -1234,7 +1201,7 @@ namespace carto
 
   namespace internal {
     template <typename T, typename U>
-    struct inSet: public std::binary_function<T, U, bool>
+    struct inSet
     {
       bool operator() ( const T & x, const U & y )
       {
@@ -1251,7 +1218,7 @@ namespace carto
   Volume<bool> valuesIn( const Volume<T> & volume, const U & set )
   {
     Volume<bool> output = copyStructure<bool, T>( volume );
-    volumeutil::applyTowards( volume, output, std::bind2nd( internal::inSet<T,U>(), set ) );
+    volumeutil::applyTowards( volume, output, [&set]( const T & x ) { return internal::inSet<T,U>()( x, set ); } );
     return output;
   }
 
@@ -1260,13 +1227,13 @@ namespace carto
   rc_ptr<Volume<bool> > valuesIn( const rc_ptr<Volume<T> > & volume, const U & set )
   {
     rc_ptr<Volume<bool> > output = copyStructure<bool, T>( volume );
-    volumeutil::applyTowards( *volume, *output, std::bind2nd( internal::inSet<T,U>(), set ) );
+    volumeutil::applyTowards( *volume, *output, [&set]( const T & x ) { return internal::inSet<T,U>()( x, set ); } );
     return output;
   }
 
   namespace internal {
     template <typename T, typename U>
-    struct notInSet: public std::binary_function<T, U, bool>
+    struct notInSet
     {
       bool operator() ( const T & x, const U & y )
       {
@@ -1283,7 +1250,7 @@ namespace carto
   Volume<bool> valuesNotIn( const Volume<T> & volume, const U & set )
   {
     Volume<bool> output = copyStructure<bool, T>( volume );
-    volumeutil::applyTowards( volume, output, std::bind2nd( internal::notInSet<T,U>(), set ) );
+    volumeutil::applyTowards( volume, output, [&set]( const T & x ) { return internal::notInSet<T,U>()( x, set ); } );
     return output;
   }
 
@@ -1292,13 +1259,13 @@ namespace carto
   rc_ptr<Volume<bool> > valuesNotIn( const rc_ptr<Volume<T> > & volume, const U & set )
   {
     rc_ptr<Volume<bool> > output = copyStructure<bool, T>( volume );
-    volumeutil::applyTowards( *volume, *output, std::bind2nd( internal::notInSet<T,U>(), set ) );
+    volumeutil::applyTowards( *volume, *output, [&set]( const T & x ) { return internal::notInSet<T,U>()( x, set ); } );
     return output;
   }
 
   namespace internal {
     template <typename T, typename U>
-    struct changeIf: public std::binary_function<T, U, T>
+    struct changeIf
     {
       changeIf( const T & value ): _value(value) {}
       bool operator() ( const T & x, const U & y )
@@ -1326,7 +1293,7 @@ namespace carto
 
   namespace internal {
     template <typename T>
-    struct invMinMax: public std::unary_function<T, T>
+    struct invMinMax
     {
       invMinMax( const T & min, const T & max ):
         _min(min),

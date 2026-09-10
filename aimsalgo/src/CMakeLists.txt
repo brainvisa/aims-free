@@ -78,8 +78,9 @@ if( DCMTK_FOUND )
   endforeach()
 endif()
 
-# Targets linking with gfortran
-if( CMAKE_Fortran_COMPILER )
+# Targets linking with LBFGS++
+find_package(lbfgspp REQUIRED)
+if( lbfgspp_FOUND )
   foreach( _command AimsRegisterFFDEstimate )
     file( GLOB _pro "${_command}/*.pro" )
     BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"
@@ -90,7 +91,8 @@ if( CMAKE_Fortran_COMPILER )
       set( _sources ${_sources} ${_command}/${_f} )
     endforeach()
     BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
-    target_link_libraries( ${_target} aimsalgo gfortran )
+    target_link_libraries( ${_target} aimsalgo ${LBFGSpp_LIBRARIES} )
+    target_include_directories( ${_target} PRIVATE ${LBFGSpp_INCLUDE_DIRS} )
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin
                   COMPONENT ${PROJECT_NAME} )

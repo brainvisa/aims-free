@@ -47,8 +47,7 @@ namespace aims
   
 
     //Def of the operator < for the Point3df (required by the map and the set)
-    struct Point3dfCompare 
-      : public std::binary_function<Point3df,Point3df, bool>
+    struct Point3dfCompare
     {
       bool operator () ( const Point3df & p1, const Point3df & p2 ) const
 	{
@@ -61,7 +60,7 @@ namespace aims
     };
 
     //Def of the operator < for the Point3df (required by the map and the set)
-    struct Point3dCompare : public std::binary_function<Point3d,Point3d, bool>
+    struct Point3dCompare
     {
       bool operator () ( const Point3d & p1, const Point3d & p2 ) const
 	{
@@ -74,8 +73,7 @@ namespace aims
     };
 
   template <class T>
-struct PairCompare 
-: public std::binary_function<std::pair<T,T>, std::pair<T,T>, bool>
+struct PairCompare
 {
   bool operator () ( const std::pair<T,T> & p, 
 		     const std::pair<T,T> & r ) const
@@ -89,7 +87,6 @@ struct PairCompare
 // Def of the operator "<" for the set<T> (required by the map)
 template <class T>
 struct SetCompare 
-  : public std::binary_function<std::set<T>,std::set<T>, bool>
 {
   bool operator () ( const std::set<T> & s1, const std::set<T> & s2 ) const
       {
