@@ -4,6 +4,8 @@ TARGET = AimsRegisterFFDEstimate
 
 SOURCES = \
            lbfgsb.cc		    \
+           l-bfgs-b_wrapper.f	 \
+           l-bfgs-b.f	   \
            dataModel.cc    \
            ppdf.cc         \
            scaleControl.cc \
@@ -14,6 +16,10 @@ SOURCES = \
 #           ffd.h           \
 #           ppdf.h          \
 #           scaleControl.h  \
-#           lbfgsb.h
-
-LIBS =
+#           fortran.h       \
+#           f77char.h       \
+#           f77cmplx.h      \
+#           f77matrx.h      \
+#           lbfgsb.h 
+			  
+LIBS = ${LIBS_FORTRAN}

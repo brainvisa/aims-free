@@ -1,11 +1,9 @@
-cmake_minimum_required( VERSION 3.10 )
+cmake_minimum_required( VERSION 4.2 )
 find_package( brainvisa-cmake REQUIRED )
-BRAINVISA_PROJECT( CXX )
+BRAINVISA_PROJECT( CXX Fortran )
 enable_testing()
 
-# Add our custom CMake modules directory
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
+BRAINVISA_DEPENDENCY(RUN DEPENDS libgfortran2 RUN)
 
 BRAINVISA_DEPENDENCY( DEV DEPENDS "${BRAINVISA_PACKAGE_NAME}" RUN "= ${${BRAINVISA_PACKAGE_NAME}_VERSION}" )
 
