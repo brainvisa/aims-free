@@ -1,36 +1,3 @@
-/* This software and supporting documentation are distributed by
- *     Institut Federatif de Recherche 49
- *     CEA/NeuroSpin, Batiment 145,
- *     91191 Gif-sur-Yvette cedex
- *     France
- *
- * This software is governed by the CeCILL-B license under
- * French law and abiding by the rules of distribution of free software.
- * You can  use, modify and/or redistribute the software under the
- * terms of the CeCILL-B license as circulated by CEA, CNRS
- * and INRIA at the following URL "http://www.cecill.info".
- *
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability.
- *
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or
- * data to be ensured and,  more generally, to use and operate it in the
- * same conditions as regards security.
- *
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
- */
-
 /*
  *  Threshold operators
  */
@@ -168,129 +135,6 @@ AimsTexThreshold<T,U>::AimsTexThreshold( threshold_t type,T level,T level2,
 {
 }
 
-namespace internal
-{
-
-  template <typename LEFT, typename OP>
-  struct thresh1
-  {
-    thresh1( LEFT threshold, LEFT background )
-      : threshold( threshold ),
-        background( background )
-    {
-    }
-
-    LEFT operator() (const LEFT & x) const
-    {
-      return OP()( x, threshold ) ? x : background;
-    }
-
-    LEFT threshold;
-    LEFT background;
-  };
-
-
-  template <typename T>
-  struct between_with_bounds
-  {
-    bool operator() (const T & x, const T & y, const T & z) const
-    {
-      return x >= y && x <= z;
-    }
-  };
-
-
-  template <typename T>
-  struct between_with_upper_bound
-  {
-    bool operator() (const T & x, const T & y, const T & z) const
-    {
-      return x > y && x <= z;
-    }
-  };
-
-
-  template <typename T>
-  struct between_with_lower_bound
-  {
-    bool operator() (const T & x, const T & y, const T & z) const
-    {
-      return x >= y && x < z;
-    }
-  };
-
-
-  template <typename T>
-  struct between_without_bounds
-  {
-    bool operator() (const T & x, const T & y, const T & z) const
-    {
-      return x > y && x < z;
-    }
-  };
-
-
-  template <typename T>
-  struct outside_with_bounds
-  {
-    bool operator() (const T & x, const T & y, const T & z) const
-    {
-      return x <= y || x >= z;
-    }
-  };
-
-
-  template <typename T>
-  struct outside_with_upper_bound
-  {
-    bool operator() (const T & x, const T & y, const T & z) const
-    {
-      return x < y || x >= z;
-    }
-  };
-
-
-  template <typename T>
-  struct outside_with_lower_bound
-  {
-    bool operator() (const T & x, const T & y, const T & z) const
-    {
-      return x <= y || x > z;
-    }
-  };
-
-
-  template <typename T>
-  struct outside_without_bounds
-  {
-    bool operator() (const T & x, const T & y, const T & z) const
-    {
-      return x < y || x > z;
-    }
-  };
-
-
-  template <typename LEFT, typename OP>
-  struct thresh2
-  {
-    thresh2( LEFT threshold1, LEFT threshold2, LEFT background )
-      : threshold1( threshold1 ),
-        threshold2( threshold2), background( background )
-    {
-    }
-
-    LEFT operator() (const LEFT & x) const
-    {
-      return OP()( x, threshold1, threshold2 ) ? x : background;
-    }
-
-    LEFT threshold1;
-    LEFT threshold2;
-    LEFT background;
-  };
-
-}
-
 template <class T,class U> inline
 carto::VolumeRef<T> AimsThreshold<T,U>::operator () (const carto::VolumeRef<T> &sqv)
 {
@@ -303,85 +147,72 @@ carto::VolumeRef<T> AimsThreshold<T,U>::operator () (const carto::VolumeRef<T> &
   { case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1<T, carto::volumeutil::less<T> >( _level, _backgd ) );
+        [level=_level, background=_backgd](const auto &x) { return x < level ? x : background; });
       break;
     case AIMS_LOWER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1<T, carto::volumeutil::less_equal<T> >( _level,
-                                                                 _backgd ) );
+        [level=_level, background=_backgd](const auto &x) { return x <= level ? x : background; });
       break;
     case AIMS_GREATER_THAN :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1<T, carto::volumeutil::greater<T> >( _level,
-                                                              _backgd ) );
+        [level=_level, background=_backgd](const auto &x) { return x > level ? x : background; });
       break;
     case AIMS_GREATER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1<T, carto::volumeutil::greater_equal<T> >(
-          _level, _backgd ) );
+        [level=_level, background=_backgd](const auto &x) { return x >= level ? x : background; });
       break;
     case AIMS_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1<T, carto::volumeutil::equal_to<T> >(
-          _level, _backgd ) );
+        [level=_level, background=_backgd](const auto &x) { return x == level ? x : background; });
       break;
     case AIMS_DIFFER :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1<T, carto::volumeutil::not_equal_to<T> >(
-          _level, _backgd ) );
+        [level=_level, background=_backgd](const auto &x) { return x != level ? x : background; });
       break;
     case AIMS_BETWEEN :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2<T, ::internal::between_with_bounds<T> >(
-          _level, _level2, _backgd ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) { return x >= level1 and x<= level2 ? x : background; });
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2<T, ::internal::between_with_upper_bound<T> >(
-          _level, _level2, _backgd ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) { return x > level1 and x<= level2 ? x : background; });
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2<T, ::internal::between_with_lower_bound<T> >(
-          _level, _level2, _backgd ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) { return x >= level1 and x< level2 ? x : background; });
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2<T, ::internal::between_without_bounds<T> >(
-          _level, _level2, _backgd ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) { return x > level1 and x< level2 ? x : background; });
       break;
     case AIMS_OUTSIDE :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2<T, ::internal::outside_without_bounds<T> >(
-          _level, _level2, _backgd ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) { return x < level1 || x > level2 ? x : background; });
       break;
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2<T, ::internal::outside_with_lower_bound<T> >(
-          _level, _level2, _backgd ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) { return x <= level1 || x > level2 ? x : background; });
       break;
     case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2<T, ::internal::outside_with_upper_bound<T> >(
-          _level, _level2, _backgd ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) { return x < level1 || x >= level2 ? x : background; });
       break;
     case AIMS_OUTSIDE_INCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2<T, ::internal::outside_with_bounds<T> >(
-          _level, _level2, _backgd ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) { return x <= level1 || x >= level2 ? x : background; });
       break;
   }
 
@@ -389,102 +220,6 @@ carto::VolumeRef<T> AimsThreshold<T,U>::operator () (const carto::VolumeRef<T> &
   return(res);
 }
 
-namespace internal
-{
-
-  template <typename LEFT, typename OP>
-  struct clip1
-  {
-    clip1( LEFT threshold )
-      : threshold( threshold )
-    {
-    }
-
-    LEFT operator() (const LEFT & x) const
-    {
-      return OP()( x, threshold ) ? x : threshold;
-    }
-
-    LEFT threshold;
-  };
-
-
-  template <typename T>
-  struct rel_between_with_bounds
-  {
-    int operator() (const T & x, const T & y, const T & z) const
-    {
-      if( x < y )
-        return -1;
-      return x <= z ? 0 : 1;
-    }
-  };
-
-
-  template <typename T>
-  struct rel_between_with_lower_bound
-  {
-    int operator() (const T & x, const T & y, const T & z) const
-    {
-      if( x <= y )
-        return -1;
-      return x <= z ? 0 : 1;
-    }
-  };
-
-
-  template <typename T>
-  struct rel_between_with_upper_bound
-  {
-    int operator() (const T & x, const T & y, const T & z) const
-    {
-      if( x < y )
-        return -1;
-      return x < z ? 0 : 1;
-    }
-  };
-
-
-  template <typename T>
-  struct rel_between_without_bounds
-  {
-    int operator() (const T & x, const T & y, const T & z) const
-    {
-      if( x <= y )
-        return -1;
-      return x < z ? 0 : 1;
-    }
-  };
-
-
-  template <typename LEFT, typename OP>
-  struct clip2
-  {
-    clip2( LEFT threshold1, LEFT threshold2 ) :
-        threshold1( threshold1 ),
-        threshold2( threshold2)
-    {
-    }
-
-    LEFT operator() (const LEFT & x) const
-    {
-      switch( OP()( x, threshold1, threshold2 ) )
-      {
-        case -1:
-          return threshold1;
-        case 0:
-          return x;
-        case 1:
-          return threshold2;
-      }
-      return x; // should not happen, just avoids a warning.
-    }
-
-    LEFT threshold1;
-    LEFT threshold2;
-  };
-
-}
 
 template <class T,class U> inline
 carto::VolumeRef<T> AimsThreshold<T,U>::clip (const carto::VolumeRef<T> &sqv)
@@ -501,46 +236,46 @@ carto::VolumeRef<T> AimsThreshold<T,U>::clip (const carto::VolumeRef<T> &sqv)
   { case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::clip1<T, carto::volumeutil::less<T> >( _level ) );
+        [level=_level](const auto &x) { return x < level ? x : level; });
       break;
     case AIMS_LOWER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::clip1<T, carto::volumeutil::less_equal<T> >( _level ) );
+        [level=_level](const auto &x) { return x <= level ? x : level; });
       break;
     case AIMS_GREATER_THAN :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::clip1<T, carto::volumeutil::greater<T> >( _level ) );
+        [level=_level](const auto &x) { return x > level ? x : level; });
       break;
     case AIMS_GREATER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::clip1<T, carto::volumeutil::greater_equal<T> >( _level ) );
+        [level=_level](const auto &x) { return x >= level ? x : level; });
       break;
     case AIMS_BETWEEN :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::clip2<T, ::internal::rel_between_with_bounds<T> >(
-          _level, _level2 ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) 
+        { return x < level1 ? level1 : ( x <= level2 ? x : level2); });
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::clip2<T, ::internal::rel_between_with_upper_bound<T> >(
-          _level, _level2 ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) 
+        { return x <= level1 ? level1 : ( x <= level2 ? x : level2); });
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::clip2<T, ::internal::rel_between_with_lower_bound<T> >(
-          _level, _level2 ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) 
+        { return x < level1 ? level1 : ( x < level2 ? x : level2); });
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::clip2<T, ::internal::rel_between_without_bounds<T> >(
-          _level, _level2 ) );
+        [level1=_level, level2=_level, background=_backgd](const auto &x) 
+        { return x <= level1 ? level1 : ( x < level2 ? x : level2); });
       break;
     case AIMS_OUTSIDE :
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND :
@@ -657,49 +392,6 @@ TimeTexture<T> AimsTexThreshold<T,U>::operator () (const TimeTexture<T> &sqv)
   return(res);
 }
 
-namespace internal
-{
-
-  template <typename LEFT, typename RIGHT, typename OP>
-  struct thresh1_bin
-  {
-    thresh1_bin( LEFT threshold, RIGHT foreground )
-      : threshold( threshold ),
-        foreground( foreground )
-    {
-    }
-
-    RIGHT operator() (const LEFT & x) const
-    {
-      return OP()( x, threshold ) ? foreground : 0;
-    }
-
-    LEFT threshold;
-    RIGHT foreground;
-  };
-
-
-  template <typename LEFT, typename RIGHT, typename OP>
-  struct thresh2_bin
-  {
-    thresh2_bin( LEFT threshold1, LEFT threshold2, RIGHT foreground )
-      : threshold1( threshold1 ),
-        threshold2( threshold2 ), foreground( foreground )
-    {
-    }
-
-    RIGHT operator() (const LEFT & x) const
-    {
-      return OP()( x, threshold1, threshold2 ) ? foreground : 0;
-    }
-
-    LEFT threshold1;
-    LEFT threshold2;
-    RIGHT foreground;
-  };
-
-}
-
 template <class T,class U> inline
 carto::VolumeRef<U> AimsThreshold<T,U>::bin(const carto::VolumeRef<T> &sqv)
 {
@@ -717,86 +409,72 @@ carto::VolumeRef<U> AimsThreshold<T,U>::bin(const carto::VolumeRef<T> &sqv)
     case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1_bin<T, U, carto::volumeutil::less<T> >(
-          _level, _foregd ) );
+        [level=_level, foreground=_foregd](const auto &x) { return x < level ? foreground : 0; });
       break;
     case AIMS_LOWER_OR_EQUAL_TO : 
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1_bin<T, U, carto::volumeutil::less_equal<T> >(
-          _level, _foregd ) );
+        [level=_level, foreground=_foregd](const auto &x) { return x <= level ? foreground : 0; });
       break;
     case AIMS_GREATER_THAN : 
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1_bin<T, U, carto::volumeutil::greater<T> >(
-          _level, _foregd ) );
+        [level=_level, foreground=_foregd](const auto &x) { return x > level ? foreground : 0; });
       break;
     case AIMS_GREATER_OR_EQUAL_TO : 
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1_bin<T, U, carto::volumeutil::greater_equal<T> >(
-          _level, _foregd ) );
+        [level=_level, foreground=_foregd](const auto &x) { return x >= level ? foreground : 0; });
       break;
     case AIMS_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1_bin<T, U, carto::volumeutil::equal_to<T> >(
-          _level, _foregd ) );
+        [level=_level, foreground=_foregd](const auto &x) { return x == level ? foreground : 0; });
       break;
     case AIMS_DIFFER :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh1_bin<T, U, carto::volumeutil::not_equal_to<T> >(
-          _level, _foregd ) );
+        [level=_level, foreground=_foregd](const auto &x) { return x != level ? foreground : 0; });
       break;
     case AIMS_BETWEEN :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2_bin<T, U, ::internal::between_with_bounds<T> >(
-          _level, _level2, _foregd ) );
+        [level1=_level, level2=_level, foreground=_foregd](const auto &x) { return x >= level1 and x<= level2 ? foreground : 0; });
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2_bin<T, U, ::internal::between_with_upper_bound<T> >(
-          _level, _level2, _foregd ) );
+        [level1=_level, level2=_level, foreground=_foregd](const auto &x) { return x > level1 and x<= level2 ? foreground : 0; });
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2_bin<T, U, ::internal::between_with_lower_bound<T> >(
-          _level, _level2, _foregd ) );
+        [level1=_level, level2=_level, foreground=_foregd](const auto &x) { return x >= level1 and x< level2 ? foreground : 0; });
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2_bin<T, U, ::internal::between_without_bounds<T> >(
-          _level, _level2, _foregd ) );
+        [level1=_level, level2=_level, foreground=_foregd](const auto &x) { return x > level1 and x< level2 ? foreground : 0; });
       break;
     case AIMS_OUTSIDE :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2_bin<T, U, ::internal::outside_without_bounds<T> >(
-          _level, _level2, _foregd ) );
+        [level1=_level, level2=_level, foreground=_foregd](const auto &x) { return x < level1 || x > level2 ? foreground : 0; });
       break;
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND : 
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2_bin<T, U, ::internal::outside_with_lower_bound<T> >(
-          _level, _level2, _foregd ) );
+        [level1=_level, level2=_level, foreground=_foregd](const auto &x) { return x <= level1 || x > level2 ? foreground : 0; });
       break;
     case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND : 
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2_bin<T, U, ::internal::outside_with_upper_bound<T> >(
-          _level, _level2, _foregd ) );
+        [level1=_level, level2=_level, foreground=_foregd](const auto &x) { return x < level1 || x >= level2 ? foreground : 0; });
       break;
     case AIMS_OUTSIDE_INCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv, *res,
-        ::internal::thresh2_bin<T, U, ::internal::outside_with_bounds<T> >(
-          _level, _level2, _foregd ) );
+        [level1=_level, level2=_level, foreground=_foregd](const auto &x) { return x <= level1 || x >= level2 ? foreground : 0; });
       break;
   }
 
