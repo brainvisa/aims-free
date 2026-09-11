@@ -93,6 +93,7 @@ namespace carto
     return res;
   }
 
+  #if 0
 
   namespace internal
   {
@@ -144,7 +145,6 @@ namespace carto
 
   }
 
-#if 0
   template <typename T> template <class BinaryFunction>
   VolumeRef<T> VolumeUtil<T>::apply( BinaryFunction f,
                                      const VolumeRef<T> & o1,

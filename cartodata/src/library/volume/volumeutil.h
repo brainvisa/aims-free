@@ -486,10 +486,11 @@ namespace carto
 
     template <typename T, typename UnaryFunction>
     inline
-    Volume<typename UnaryFunction::result_type>
+    auto
     apply( const Volume<T> & vol, UnaryFunction func )
+      -> decltype(func(std::declval<T>()))
     {
-      typedef typename UnaryFunction::result_type OUTP;
+      typedef decltype(func(std::declval<T>())) OUTP;
       Volume<OUTP> output = deepcopy<OUTP,T>(vol);
       applyTowards( vol, output, func );
       return output;
@@ -497,10 +498,11 @@ namespace carto
 
     template <typename T, typename U, typename BinaryFunction>
     inline
-    Volume<typename BinaryFunction::result_type>
+    auto
     apply( const Volume<T> & vol1, const Volume<U> & vol2, BinaryFunction func )
+      -> decltype(func(std::declval<T>(), std::declval<U>()))
     {
-      typedef typename BinaryFunction::result_type OUTP;
+      typedef decltype(func(std::declval<T>(), std::declval<U>())) OUTP;
       Volume<OUTP> output = deepcopy<OUTP,T>(
         vol1, maxSize( vol1.getSize(), vol2.getSize() ) );
       applyTowards( vol1, vol2, output, func );
@@ -511,10 +513,11 @@ namespace carto
 
     template <typename T, typename UnaryFunction>
     inline
-    rc_ptr<Volume<typename UnaryFunction::result_type> >
+    auto
     apply( const rc_ptr<Volume<T> > & vol, UnaryFunction func )
+      -> decltype(func(std::declval<T>()))
     {
-      typedef typename UnaryFunction::result_type OUTP;
+      typedef decltype(func(std::declval<T>())) OUTP;
       rc_ptr<Volume<OUTP> > output = deepcopy<OUTP,T>(vol);
       applyTowards( *vol, *output, func );
       return output;
@@ -522,10 +525,11 @@ namespace carto
 
     template <typename T, typename U, typename BinaryFunction>
     inline
-    rc_ptr<Volume<typename BinaryFunction::result_type> >
+    auto
     apply( const rc_ptr<Volume<T> > & vol1, const Volume<U> & vol2, BinaryFunction func )
+      -> decltype(func(std::declval<T>(), std::declval<U>()))
     {
-      typedef typename BinaryFunction::result_type OUTP;
+      typedef decltype(func(std::declval<T>(), std::declval<U>())) OUTP;
       rc_ptr<Volume<OUTP> > output = deepcopy<OUTP,T>(
         vol1, maxSize( vol1->getSize(), vol2.getSize()) );
       applyTowards( *vol1, vol2, *output, func );
