@@ -48,16 +48,20 @@ namespace carto
     /// @{
     template <typename T, typename UnaryFunction>
     auto
-    apply( const Volume<T> & vol, UnaryFunction func );
+    apply( const Volume<T> & vol, UnaryFunction func )
+    -> Volume<T>;
     template <typename T, typename U, typename BinaryFunction>
     auto
-    apply( const Volume<T> & vol1, const Volume<U> & vol2, BinaryFunction func );
+    apply( const Volume<T> & vol1, const Volume<U> & vol2, BinaryFunction func )
+    -> Volume<decltype(func(std::declval<T>(), std::declval<U>()))>;
     template <typename T, typename UnaryFunction>
     auto
-    apply( const rc_ptr<Volume<T> > & vol, UnaryFunction func );
+    apply( const rc_ptr<Volume<T> > & vol, UnaryFunction func )
+    -> rc_ptr<T>;
     template <typename T, typename U, typename BinaryFunction>
     auto
-    apply( const rc_ptr<Volume<T> > & vol1, const Volume<U> & vol2, BinaryFunction func );
+    apply( const rc_ptr<Volume<T> > & vol1, const Volume<U> & vol2, BinaryFunction func )
+    -> rc_ptr<Volume<decltype(func(std::declval<T>(), std::declval<U>()))> >;
 
     /// Apply a function to all the elements of a volume
     /// (in place version)

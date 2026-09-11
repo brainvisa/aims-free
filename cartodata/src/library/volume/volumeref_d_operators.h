@@ -610,28 +610,28 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   auto operator+ ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
-    return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return x + y; } );
+    return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x + y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator- ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
-    return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return x - y; } );
+    return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x - y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator* ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
-    return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return x * y; } );
+    return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x * y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator/ ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
-    return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return x / y; } );
+    return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x / y); } );
   }
 
   template <typename T, typename U>
@@ -686,35 +686,35 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   auto operator+ ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x + y; } );
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x + y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator- ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x - y; } );
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x - y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator* ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x * y; } );
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x * y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator/ ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x / y; } );
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x / y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator% ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x % y; });
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x % y); });
   }
 
   template <typename T, typename U>
@@ -759,35 +759,35 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   auto operator+ ( const carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x + y; } );
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x + y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator- ( const carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x - y; } );
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x - y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator* ( const carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x * y; } );
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x * y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator/ ( const carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x / y; } );
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x / y); } );
   }
 
   template <typename T, typename U>
   inline
   auto operator% ( const carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return x % y; } );
+    return carto::volumeutil::apply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x % y); } );
   }
 
   template <typename T, typename U>
@@ -904,7 +904,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator+= ( carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
-    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return x + y; } );
+    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x + y); } );
     return vol;
   }
 
@@ -912,7 +912,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator-= ( carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
-    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return x - y; } );
+    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x - y); } );
     return vol;
   }
 
@@ -920,7 +920,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator*= ( carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
-    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return x * y; } );
+    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x * y); } );
     return vol;
   }
 
@@ -928,7 +928,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator/= ( carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
-    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return x / y; } );
+    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x / y); } );
     return vol;
   }
 
@@ -936,7 +936,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator%= ( carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
-    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return x % y; } );
+    carto::volumeutil::selfApply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x % y); } );
     return vol;
   }
 
@@ -970,35 +970,35 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::Volume<T> & operator+= ( carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x + y; } );
+    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x + y); } );
   }
 
   template <typename T, typename U>
   inline
   carto::Volume<T> & operator-= ( carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x - y; } );
+    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x - y); } );
   }
 
   template <typename T, typename U>
   inline
   carto::Volume<T> & operator*= ( carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x - y; } );
+    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x - y); } );
   }
 
   template <typename T, typename U>
   inline
   carto::Volume<T> & operator/= ( carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x / y; } );
+    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x / y); } );
   }
 
   template <typename T, typename U>
   inline
   carto::Volume<T> & operator%= ( carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
-    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x % y; } );
+    return carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x % y); } );
   }
 
   template <typename T, typename U>
@@ -1028,7 +1028,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator+= ( carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x + y; } );
+    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x + y); } );
     return vol;
   }
 
@@ -1036,7 +1036,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator-= ( carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x - y; } );
+    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x - y); } );
     return vol;
   }
 
@@ -1044,7 +1044,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator*= ( carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x * y; } );
+    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x * y); } );
     return vol;
   }
 
@@ -1052,7 +1052,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator/= ( carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x / y; } );
+    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x / y); } );
     return vol;
   }
 
@@ -1060,7 +1060,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator%= ( carto::VolumeRef<T> & vol, const carto::VolumeRef<U> & other )
   {
-    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return x % y; } );
+    carto::volumeutil::selfApply( vol, *other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x % y); } );
     return vol;
   }
 
