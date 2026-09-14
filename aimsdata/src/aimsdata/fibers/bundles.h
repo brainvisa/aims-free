@@ -263,6 +263,8 @@ protected:
 };
 
 
+class  BundleFormatReader;
+
 
   //----------------//
  //  BundleReader  //
@@ -282,6 +284,8 @@ class BundleReader : public BundleProducer, public BundleListener
 {
 public:
 
+  typedef BundleFormatReader* (*BundleReaderCreator)();
+
   BundleReader( const std::string &fileName );
   virtual ~BundleReader();
 
@@ -289,9 +293,12 @@ public:
   */
   void read();
   virtual carto::Object readHeader();
-  static std::set<std::string> supportedFormats();
+  static const std::set<std::string> & supportedFormats();
   static std::set<std::string> formatExtensions(
     const std::string & format = "ALL" );
+  static carto::rc_ptr<BundleFormatReader>
+    bundleReaderForExt( const std::string & ext );
+  static void registerBundleReader( const std::string & name, const std::set<std::string> & exts, BundleReaderCreator creator );
 
 protected:
 
@@ -307,6 +314,9 @@ protected:
 
 private:
 
+  static std::map<std::string, BundleReaderCreator> & _bundleReaderCreators();
+  static std::set<std::string> & _supportedFormats();
+  static std::map<std::string, std::set<std::string> > & _formatsExtensions();
   std::string _fileName;
 };
 
@@ -327,10 +337,14 @@ public:
   BundleFormatReader();
   virtual ~BundleFormatReader();
 
+  void setFilename( const std::string & filename )
+  { _fileName = filename; }
+  const std::string & filename() const { return _fileName; }
+
   virtual void read() = 0;
   virtual carto::Object readHeader();
 
-private:
+protected:
 
   std::string _fileName;
 };
@@ -344,15 +358,13 @@ class ConnectomistBundlesReader : public BundleFormatReader
 {
 public:
 
-  ConnectomistBundlesReader( const std::string &fileName );
+  ConnectomistBundlesReader();
   virtual ~ConnectomistBundlesReader();
 
   virtual void read();
   virtual carto::Object readHeader();
 
-private:
-
-  std::string _fileName;
+  static BundleFormatReader* create();
 };
 
 

@@ -42,6 +42,7 @@
 #include <aims/io/defaultItemW.h>
 #include <aims/fibers/bundles.h>
 #include <cartobase/exception/ioexcept.h>
+#include <cartobase/stream/fileutil.h>
 #include <soma-io/datasource/streamdatasource.h>
 
 using namespace aims;
@@ -51,17 +52,12 @@ using namespace std;
 
 string ArgHeader::filename() const
 {
-  if( _name.length() >= 4 && _name.substr( _name.length() - 4, 4 ) == ".arg" )
-    return( _name );
-  if( _name.length() >= 8 && 
-      _name.substr( _name.length() - 8, 8 ) == ".bundles" )
-    return( _name );
-  if( _name.length() >= 4 &&
-      _name.substr( _name.length() - 4, 4 ) == ".trk" )
-    return( _name );
-  if( _name.length() >= 4 &&
-      _name.substr( _name.length() - 4, 4 ) == ".tck" )
-    return( _name );
+  set<string> exts = BundleReader::formatExtensions( "ALL" );
+  string ext = FileUtil::extension( _name );
+  if( exts.find( ext ) != exts.end() )
+    return _name;
+  if( ext == ".arg" )
+    return _name;
   return( _name + ".arg" );
 }
 
@@ -69,12 +65,9 @@ string ArgHeader::filename() const
 void ArgHeader::read( size_t * )
 {
   string fileName = filename();
-  if( ( fileName.length() >= 8 &&
-        fileName.substr( _name.length() - 8, 8 ) == ".bundles" )
-      || ( fileName.length() >= 4 &&
-           fileName.substr( _name.length() - 4, 4 ) == ".trk" )
-      || ( fileName.length() >= 4 &&
-           fileName.substr( _name.length() - 4, 4 ) == ".tck" ) )
+  set<string> exts = BundleReader::formatExtensions( "ALL" );
+  string ext = FileUtil::extension( fileName );
+  if( exts.find( ext ) != exts.end() )
   {
     BundleReader bundelReader( fileName );
     Object hdr = bundelReader.readHeader();
@@ -151,10 +144,7 @@ void ArgHeader::write()
 
 set<string> ArgHeader::extensions() const
 {
-  set<string>	exts;
+  set<string> exts = BundleReader::formatExtensions( "ALL" );
   exts.insert( ".arg" );
-  exts.insert( ".bundles" );
-  exts.insert( ".trk" );
-  exts.insert( ".tck" );
   return exts;
 }
