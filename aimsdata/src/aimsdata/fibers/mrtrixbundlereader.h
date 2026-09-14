@@ -49,16 +49,14 @@ namespace aims
   {
   public:
 
-    MRTrixBundleReader( const std::string &fileName );
+    MRTrixBundleReader();
     virtual ~MRTrixBundleReader();
 
     virtual void read();
     carto::Object readHeaderStream( std::istream & );
     virtual carto::Object readHeader();
 
-  private:
-
-    std::string _fileName;
+    static BundleFormatReader* create();
   };
 
 }

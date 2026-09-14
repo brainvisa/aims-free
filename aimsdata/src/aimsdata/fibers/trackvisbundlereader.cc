@@ -48,10 +48,9 @@ using namespace std;
 
 
 //-----------------------------------------------------------------------------
-TrackvisBundleReader::TrackvisBundleReader( const string &fileName )
+TrackvisBundleReader::TrackvisBundleReader()
   : BundleFormatReader()
 {
-  _fileName = fileName;
 }
 
 
@@ -389,3 +388,8 @@ void TrackvisBundleReader::read()
 
 }
 
+
+BundleFormatReader* TrackvisBundleReader::create()
+{
+  return new TrackvisBundleReader;
+}

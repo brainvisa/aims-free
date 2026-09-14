@@ -49,16 +49,13 @@ namespace aims
   {
   public:
 
-    TrackvisBundleReader( const std::string &fileName );
+    TrackvisBundleReader();
     virtual ~TrackvisBundleReader();
 
     virtual void read();
     carto::Object readHeaderStream( std::istream & );
     virtual carto::Object readHeader();
-
-  private:
-
-    std::string _fileName;
+    static BundleFormatReader* create();
   };
 
 }
