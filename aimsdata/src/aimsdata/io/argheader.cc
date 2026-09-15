@@ -56,7 +56,7 @@ string ArgHeader::filename() const
   string ext = FileUtil::extension( _name );
   if( exts.find( ext ) != exts.end() )
     return _name;
-  if( ext == ".arg" )
+  if( ext == "arg" )
     return _name;
   return( _name + ".arg" );
 }
