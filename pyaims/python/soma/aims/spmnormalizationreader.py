@@ -41,7 +41,7 @@ __docformat__ = 'restructuredtext en'
 
 def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
     '''
-    Read a SPM \*_sn.mat normalization file and converts it to an Aims
+    Read a SPM *_sn.mat normalization file and converts it to an Aims
     AffineTransformation3d.
     The converted transformation has for source the AIMS referential of the
     source image, and for destination the template referential of the SPM .mat
@@ -56,13 +56,13 @@ def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
 
     - matfilename: *string*
 
-      file name of the \*_sn.mat normalization file to reading
+      file name of the *_sn.mat normalization file to reading
 
     - source: *filename* (*string*), or *Volume*
       :py:class:`Volume <soma.aims.Volume_FLOAT>`,
       or *volume header* (*MappingType*)
 
-      file name of the \*_sn.mat normalization file to reading
+      file name of the *_sn.mat normalization file to reading
 
     - destref: *string* or *UUID* (:py:class:`Uuid <soma.uuid.Uuid>`)
 
@@ -73,9 +73,9 @@ def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
     - srcref: *string* or *UUID*
 
       source referential for the transformation. If not specified,
-      an attempt will be made to take it from the source image, otherwise it will
-      not be set. If provided as a symbolic name ('Talairach-MNI template-SPM'),
-      it will be converted to an UUID string.
+      an attempt will be made to take it from the source image, otherwise it
+      will not be set. If provided as a symbolic name ('Talairach-MNI
+      template-SPM'), it will be converted to an UUID string.
 
     - returns:
       :py:class:`AffineTransformation3d <soma.aims.AffineTransformation3d>`
