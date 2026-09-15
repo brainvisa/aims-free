@@ -3291,6 +3291,7 @@ Volume_RGB & __idiv__( Volume_RGB &, double )
 
 // RGBA + U8
 
+/*
 Volume_RGBA* __add__( Volume_RGBA &, Volume_U8 & )
   /Factory, ReleaseGIL, PyName=__add_Volume_RGBA__/;
 
@@ -3419,6 +3420,8 @@ Volume_RGBA* __div__( Volume_RGBA &, Volume_DOUBLE & )
 Volume_RGBA & __idiv__( Volume_RGBA &, Volume_DOUBLE & )
   /ReleaseGIL, PyName=__idiv_Volume_RGBA__/;
 
+*/
+
 // RGBA + RGBA
 
 Volume_RGBA* __add__( Volume_RGBA &, Volume_RGBA & )
@@ -3454,7 +3457,7 @@ Volume_RGBA* __sub__( Volume_RGBA &, double )
 Volume_RGBA* __sub__( Volume_RGBA &, double )
   /Factory, ReleaseGIL, PyName=__rsub_Volume_RGBA__/;
 %MethodCode
-  sipRes = __sub__( a1, *a0 );
+  sipRes = __sub__<double, carto::VoxelRGBA>( a1, *a0 );
 %End
 Volume_RGBA & __isub__( Volume_RGBA &, double )
   /ReleaseGIL, PyName=__isub_Volume_RGBA__/;

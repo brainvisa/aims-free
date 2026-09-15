@@ -159,7 +159,7 @@ namespace carto {
   carto::VolumeRef<bool> operator== ( const carto::VolumeRef<T> & vol, const U & value )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p == value;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p == static_cast<T>(value);} );
     return output;
   }
 
@@ -168,7 +168,7 @@ namespace carto {
   carto::VolumeRef<bool> operator!= ( const carto::VolumeRef<T> & vol, const U & value )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p != value;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p != static_cast<T>(value);} );
     return output;
   }
 
@@ -177,7 +177,7 @@ namespace carto {
   carto::VolumeRef<bool> operator>= ( const carto::VolumeRef<T> & vol, const U & value )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p >= value;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p >= static_cast<T>(value);} );
     return output;
   }
 
@@ -186,7 +186,7 @@ namespace carto {
   carto::VolumeRef<bool> operator<= ( const carto::VolumeRef<T> & vol, const U & value )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p <= value;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p <= static_cast<T>(value);} );
     return output;
   }
 
@@ -195,7 +195,7 @@ namespace carto {
   carto::VolumeRef<bool> operator>  ( const carto::VolumeRef<T> & vol, const U & value )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p > value;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p > static_cast<T>(value);} );
     return output;
   }
 
@@ -204,7 +204,7 @@ namespace carto {
   carto::VolumeRef<bool> operator<  ( const carto::VolumeRef<T> & vol, const U & value )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p < value;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p < static_cast<T>(value);} );
     return output;
   }
 
@@ -215,7 +215,7 @@ namespace carto {
   carto::VolumeRef<bool> operator== ( const U & value, const carto::VolumeRef<T> & vol )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return value == p;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return static_cast<T>(value) == p;} );
     return output;
   }
 
@@ -224,7 +224,7 @@ namespace carto {
   carto::VolumeRef<bool> operator!= ( const U & value, const carto::VolumeRef<T> & vol )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return value != p;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return static_cast<T>(value) != p;} );
     return output;
   }
 
@@ -233,7 +233,7 @@ namespace carto {
   carto::VolumeRef<bool> operator>= ( const U & value, const carto::VolumeRef<T> & vol )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return value >= p;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return static_cast<T>(value) >= p;} );
     return output;
   }
 
@@ -242,7 +242,7 @@ namespace carto {
   carto::VolumeRef<bool> operator<= ( const U & value, const carto::VolumeRef<T> & vol )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return value <= p;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return static_cast<T>(value) <= p;} );
     return output;
   }
 
@@ -251,7 +251,7 @@ namespace carto {
   carto::VolumeRef<bool> operator>  ( const U & value, const carto::VolumeRef<T> & vol )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return value > p;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return static_cast<T>(value) > p;} );
     return output;
   }
 
@@ -260,7 +260,7 @@ namespace carto {
   carto::VolumeRef<bool> operator<  ( const U & value, const carto::VolumeRef<T> & vol )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool, T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return value < p;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return static_cast<T>(value) < p;} );
     return output;
   }
 
@@ -469,58 +469,66 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
 
   template <typename T, typename U>
   inline
-  auto operator+ ( const carto::VolumeRef<T> & vol, const U & value )
+  carto::VolumeRef<decltype(std::declval<T>() + std::declval<U>())>
+  operator+ ( const carto::VolumeRef<T> & vol, const U & value )
   {
-    return carto::volumeutil::apply( vol, [&value](const auto &p) {return p + value;} );
+    return carto::volumeutil::apply( vol, [&value](const T &p) {return p + value;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator- ( const carto::VolumeRef<T> & vol, const U & value )
+  carto::VolumeRef<decltype(std::declval<T>() - std::declval<U>())>
+  operator- ( const carto::VolumeRef<T> & vol, const U & value )
   {
-    return carto::volumeutil::apply( vol, [&value](const auto &p) {return p - value;} );
+    return carto::volumeutil::apply( vol, [&value](const T &p) {return p - value;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator* ( const carto::VolumeRef<T> & vol, const U & value )
+  carto::VolumeRef<decltype(std::declval<T>() *std::declval<U>())>
+  operator* ( const carto::VolumeRef<T> & vol, const U & value )
   {
-    return carto::volumeutil::apply( vol, [&value](const auto &p) {return p * value;} );
+    return carto::volumeutil::apply( vol, [&value](const T &p) {return p * value;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator/ ( const carto::VolumeRef<T> & vol, const U & value )
+  carto::VolumeRef<decltype(std::declval<T>() / std::declval<U>())>
+  operator/ ( const carto::VolumeRef<T> & vol, const U & value )
   {
-    return carto::volumeutil::apply( vol, [&value](const auto &p) {return p / value;} );
+    return carto::volumeutil::apply( vol, [&value](const T &p) {return p / value;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator% ( const carto::VolumeRef<T> & vol, const U & value )
+  carto::VolumeRef<decltype(std::declval<T>() % std::declval<U>())>
+  operator% ( const carto::VolumeRef<T> & vol, const U & value )
   {
-    return carto::volumeutil::apply( vol, [&value](const auto &p) {return p % value;} );
+    return carto::volumeutil::apply( vol, [&value](const T &p) {return p % value;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator& ( const carto::VolumeRef<T> & vol, const U & value )
+  carto::VolumeRef<decltype(std::declval<T>() & std::declval<U>())>
+  operator& ( const carto::VolumeRef<T> & vol, const U & value )
   {
-    return carto::volumeutil::apply( vol, [&value](const auto &p) {return p & value;} );
+    return carto::volumeutil::apply( vol, [&value](const T &p) {return p & value;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator| ( const carto::VolumeRef<T> & vol, const U & value )
+  carto::VolumeRef<decltype(std::declval<T>() | std::declval<U>())>
+  operator| ( const carto::VolumeRef<T> & vol, const U & value )
   {
-    return carto::volumeutil::apply( vol, [&value](const auto &p) {return p | value;} );
+    return carto::volumeutil::apply( vol, [&value](const T &p) {return p | value;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator^ ( const carto::VolumeRef<T> & vol, const U & value )
+  carto::VolumeRef<decltype(std::declval<T>() ^ std::declval<U>())>
+  operator^ ( const carto::VolumeRef<T> & vol, const U & value )
   {
-    return carto::volumeutil::apply( vol, [&value](const auto &p) {return p ^ value;} );
+    return carto::volumeutil::apply( vol, [&value](const T &p) {return p ^ value;} );
   }
 
   template <typename T, typename U>
@@ -528,7 +536,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   carto::VolumeRef<bool> operator&& ( const carto::VolumeRef<T> & vol, const U & value )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool,T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p && value;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const T &p) {return p && value;} );
     return output;
   }
 
@@ -537,7 +545,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   carto::VolumeRef<bool> operator|| ( const carto::VolumeRef<T> & vol, const U & value )
   {
     carto::VolumeRef<bool> output = carto::copyStructure<bool,T>( vol );
-    carto::volumeutil::applyTowards( *vol, *output, [&value](const auto &p) {return p || value;} );
+    carto::volumeutil::applyTowards( *vol, *output, [&value](const T &p) {return p || value;} );
     return output;
   }
 
@@ -545,28 +553,32 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
 
   template <typename T, typename U>
   inline
-  auto operator+ ( const U & value, const carto::VolumeRef<T> & vol )
+  carto::VolumeRef<decltype(std::declval<T>() + std::declval<U>())>
+  operator+ ( const U & value, const carto::VolumeRef<T> & vol )
   {
     return carto::volumeutil::apply( vol, [&value](const auto &p) {return value + p;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator- ( const U & value, const carto::VolumeRef<T> & vol )
+  carto::VolumeRef<decltype(std::declval<T>() - std::declval<U>())>
+  operator- ( const U & value, const carto::VolumeRef<T> & vol )
   {
     return carto::volumeutil::apply( vol, [&value](const auto &p) {return value - p;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator* ( const U & value, const carto::VolumeRef<T> & vol )
+  carto::VolumeRef<decltype(std::declval<T>() * std::declval<U>())>
+  operator* ( const U & value, const carto::VolumeRef<T> & vol )
   {
     return carto::volumeutil::apply( vol, [&value](const auto &p) {return value * p;} );
   }
 
   template <typename T, typename U>
   inline
-  auto operator/ ( const U & value, const carto::VolumeRef<T> & vol )
+  carto::VolumeRef<decltype(std::declval<T>() / std::declval<U>())>
+  operator/ ( const U & value, const carto::VolumeRef<T> & vol )
   {
     return carto::volumeutil::apply( vol, [&value](const auto &p) {return value / p;} );
   }
@@ -575,56 +587,64 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
 
   template <typename T, typename U>
   inline
-  auto operator+ ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
+  carto::VolumeRef<decltype(std::declval<T>() + std::declval<U>())>
+  operator+ ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
     return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x + y); } );
   }
 
   template <typename T, typename U>
   inline
-  auto operator- ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
+  carto::VolumeRef<decltype(std::declval<T>() - std::declval<U>())>
+  operator- ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
     return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x - y); } );
   }
 
   template <typename T, typename U>
   inline
-  auto operator* ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
+  carto::VolumeRef<decltype(std::declval<T>() * std::declval<U>())>
+  operator* ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
     return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x * y); } );
   }
 
   template <typename T, typename U>
   inline
-  auto operator/ ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
+  carto::VolumeRef<decltype(std::declval<T>() / std::declval<U>())>
+  operator/ ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
     return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return volumeutil::cast_operator_result<T,U>(x / y); } );
   }
 
   template <typename T, typename U>
   inline
-  auto operator% ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
+  carto::VolumeRef<decltype(std::declval<T>() % std::declval<U>())>
+  operator% ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
     return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return x % y; } );
   }
 
   template <typename T, typename U>
   inline
-  auto operator& ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
+  carto::VolumeRef<decltype(std::declval<T>() & std::declval<U>())>
+  operator& ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
     return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return x & y; } );
   }
 
   template <typename T, typename U>
   inline
-  auto operator| ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
+  carto::VolumeRef<decltype(std::declval<T>() | std::declval<U>())>
+  operator| ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
     return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return x | y; } );
   }
 
   template <typename T, typename U>
   inline
-  auto operator^ ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
+  carto::VolumeRef<decltype(std::declval<T>() ^ std::declval<U>())>
+  operator^ ( const carto::VolumeRef<T> & vol, const carto::Volume<U> & other )
   {
     return carto::volumeutil::apply( vol, other, [](const T &x, const U &y) { return x ^ y; } );
   }
@@ -805,7 +825,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator+= ( carto::VolumeRef<T> & vol, const U & value )
   {
-    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p + value;} );
+    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p + static_cast<T>(value);} );
     return vol;
   }
 
@@ -813,7 +833,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator-= ( carto::VolumeRef<T> & vol, const U & value )
   {
-    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p - value;} );
+    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p - static_cast<T>(value);} );
     return vol;
   }
 
@@ -821,7 +841,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator*= ( carto::VolumeRef<T> & vol, const U & value )
   {
-    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p * value;} );
+    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p * static_cast<T>(value);} );
     return vol;
   }
 
@@ -829,7 +849,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator/= ( carto::VolumeRef<T> & vol, const U & value )
   {
-    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p / value;} );
+    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p / static_cast<T>(value);} );
     return vol;
   }
 
@@ -837,7 +857,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator%= ( carto::VolumeRef<T> & vol, const U & value )
   {
-    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p % value;} );
+    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p % static_cast<T>(value);} );
     return vol;
   }
 
@@ -845,7 +865,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator&= ( carto::VolumeRef<T> & vol, const U & value )
   {
-    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p & value;} );
+    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p & static_cast<T>(value);} );
     return vol;
   }
 
@@ -853,7 +873,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator|= ( carto::VolumeRef<T> & vol, const U & value )
   {
-    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p | value;} );
+    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p | static_cast<T>(value);} );
     return vol;
   }
 
@@ -861,7 +881,7 @@ carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::V
   inline
   carto::VolumeRef<T> & operator^= ( carto::VolumeRef<T> & vol, const U & value )
   {
-    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p ^ value;} );
+    carto::volumeutil::selfApply( vol, [&value](const T &p) {return p ^ static_cast<T>(value);} );
     return vol;
   }
 

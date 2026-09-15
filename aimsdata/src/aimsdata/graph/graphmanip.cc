@@ -374,18 +374,6 @@ namespace aims
     template void insertElement( AimsSurfaceFacet & dest, int index,
                                 const AimsSurfaceFacet & src );
 
-    template PropertySet & getHeader( Volume<short> & );
-    template PropertySet & getHeader( Volume<int32_t> & );
-    template PropertySet & getHeader( rc_ptr<Volume<short> > & );
-    template PropertySet & getHeader( rc_ptr<Volume<int32_t> > & );
-    template PropertySet & getHeader( BucketMap<Void> & );
-    template PropertySet & getHeader( AimsSurfaceTriangle & );
-    template PropertySet & getHeader( AimsTimeSurface<2, Void> & );
-    template PropertySet & getHeader( AimsSurfaceFacet & );
-    template PropertySet & getHeader( Texture1d & );
-    template PropertySet & getHeader( Texture2d & );
-    template PropertySet & getHeader( TimeTexture<short> & );
-
     template void setHeaderInfo( Volume<short> &, const GenericObject & );
     template void setHeaderInfo( Volume<int32_t> &, const GenericObject & );
     template void setHeaderInfo( BucketMap<Void> &, const GenericObject & );

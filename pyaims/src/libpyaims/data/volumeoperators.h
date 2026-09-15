@@ -1,6 +1,7 @@
 #ifndef PYAIMS_DATA_VOLUMEOPERATORS_H
 #define PYAIMS_DATA_VOLUMEOPERATORS_H
 
+#include <stdexcept>
 #include <cartodata/volume/volume.h>
 
 namespace
@@ -16,8 +17,8 @@ namespace
 
   // Specialization for Volume types to handle VolumeRef
   template <typename Op, typename L, typename R>
-  auto inline apply_volume_operation(L& l, R& r, Op op)
-    -> decltype(op(l, r))
+  inline auto apply_volume_operation(L& l, R& r, Op op)
+    -> decltype(op(l, r)) *
   {
     carto::VolumeRef<typename std::decay<decltype(l)>::type::datatype> rl(&l);
     carto::VolumeRef<typename std::decay<decltype(r)>::type::datatype> rr(&r);
@@ -50,6 +51,26 @@ namespace
   inline
   auto __sub__( 
     carto::Volume<T> & l, const U & r )
+    -> carto::Volume<decltype(std::declval<T>() - std::declval<U>())> *
+  {
+    return apply_volume_operation(l, r, [](auto &x, auto &y) {return x - y;});
+  }
+
+  template <typename T, typename U>
+  inline
+  auto __sub__( 
+    const T & l,
+    carto::Volume<U> & r )
+    -> carto::Volume<decltype(std::declval<T>() - std::declval<U>())> *
+  {
+    return apply_volume_operation(l, r, [](auto &x, auto &y) {return x - y;});
+  }
+
+  template <typename T, typename U>
+  inline
+  auto __sub__( 
+    carto::Volume<T> & l,
+    carto::Volume<U> & r )
   {
     return apply_volume_operation(l, r, [](auto &x, auto &y) {return x - y;});
   }
@@ -81,13 +102,35 @@ namespace
     return l;
   }
 
+
   template <typename T, typename U>
   inline
   auto __div__( 
     carto::Volume<T> & l, const U & r )
+    -> carto::Volume<decltype(std::declval<T>() / std::declval<U>())> *
   {
     return apply_volume_operation(l, r, [](auto &x, auto &y) {return x / y;});
   }
+
+  template <typename T, typename U>
+  inline
+  auto __div__( 
+    const T & l,
+    carto::Volume<U> & r )
+    -> carto::Volume<decltype(std::declval<T>() / std::declval<U>())> *
+  {
+    return apply_volume_operation(l, r, [](auto &x, auto &y) {return x / y;});
+  }
+
+  template <typename T, typename U>
+  inline
+  auto __div__( 
+    carto::Volume<T> & l,
+    carto::Volume<U> & r )
+  {
+    return apply_volume_operation(l, r, [](auto &x, auto &y) {return x / y;});
+  }
+
 
   template <typename T, typename U>
   inline

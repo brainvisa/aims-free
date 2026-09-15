@@ -57,7 +57,7 @@ namespace carto
     template <typename T, typename UnaryFunction>
     auto
     apply( const rc_ptr<Volume<T> > & vol, UnaryFunction func )
-    -> rc_ptr<decltype(func(std::declval<T>()))>;
+    -> rc_ptr<Volume<decltype(func(std::declval<T>()))>>;
     template <typename T, typename U, typename BinaryFunction>
     auto
     apply( const rc_ptr<Volume<T> > & vol1, const Volume<U> & vol2, BinaryFunction func )
