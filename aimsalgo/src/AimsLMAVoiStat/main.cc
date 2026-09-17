@@ -63,8 +63,12 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-struct PointLess : public std::binary_function< Point3d, Point3d , bool>
+struct PointLess
 {
+  typedef Point3d first_argument_type;
+  typedef Point3d second_argument_type;
+  typedef bool result_type;
+
   bool operator () ( const Point3d & p1, const Point3d & p2 ) const
   {
     return( p1[2] < p2[2] 

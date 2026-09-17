@@ -44,9 +44,13 @@
 
 using namespace std;
 
-struct my_comp : public binary_function<Point3df,Point3df,
-                                        bool>
-{ bool operator() (const Point3df& pt1,
+struct my_comp
+{
+  typedef Point3df first_argument_type;
+  typedef Point3df second_argument_type;
+  typedef bool result_type;
+
+  bool operator() (const Point3df& pt1,
                    const Point3df& pt2) const
   { return((pt1.item(0) + pt1.item(1)*10 + pt1.item(2)*100) < 
            (pt2.item(0) + pt2.item(1)*10 + pt2.item(2)*100));

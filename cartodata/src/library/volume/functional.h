@@ -762,8 +762,12 @@ namespace volumeutil {
   // between containers (volumes).
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct select_left: public std::binary_function<LEFT, RIGHT, LEFT>
+  struct select_left
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef LEFT result_type;
+
     const LEFT & operator() ( const LEFT & x, const RIGHT & ) const
     {
       return x;
@@ -771,8 +775,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct select_right: public std::binary_function<LEFT, RIGHT, RIGHT>
+  struct select_right
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef RIGHT result_type;
+
     const RIGHT & operator() ( const LEFT & , const RIGHT & y ) const
     {
       return y;
@@ -780,8 +788,11 @@ namespace volumeutil {
   };
 
   template <typename T>
-  struct identity: public std::unary_function<T, T>
+  struct identity
   {
+    typedef T argument_type;
+    typedef T result_type;
+
     const T & operator() ( const T & x ) const
     {
       return x;
@@ -789,8 +800,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct plus: public std::binary_function<LEFT, RIGHT, typename plus_result<LEFT,RIGHT>::result_type>
+  struct plus
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename plus_result<LEFT,RIGHT>::result_type result_type;
+
     typename plus_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -799,8 +814,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct minus: public std::binary_function<LEFT, RIGHT, typename minus_result<LEFT,RIGHT>::result_type>
+  struct minus
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename minus_result<LEFT,RIGHT>::result_type result_type;
+
     typename minus_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -809,8 +828,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct multiplies: public std::binary_function<LEFT, RIGHT, typename multiplies_result<LEFT,RIGHT>::result_type>
+  struct multiplies
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename multiplies_result<LEFT,RIGHT>::result_type result_type;
+
     typename multiplies_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -819,8 +842,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct divides: public std::binary_function<LEFT, RIGHT, typename divides_result<LEFT,RIGHT>::result_type>
+  struct divides
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename divides_result<LEFT,RIGHT>::result_type result_type;
+
     typename divides_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -829,8 +856,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct modulus: public std::binary_function<LEFT, RIGHT, typename modulus_result<LEFT,RIGHT>::result_type>
+  struct modulus
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename modulus_result<LEFT,RIGHT>::result_type result_type;
+
     typename modulus_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -839,8 +870,11 @@ namespace volumeutil {
   };
 
   template <typename T>
-  struct negate: public std::unary_function<T, T>
+  struct negate
   {
+    typedef T argument_type;
+    typedef T result_type;
+
     T operator() (const T & x) const
     {
       return -x;
@@ -848,8 +882,11 @@ namespace volumeutil {
   };
 
   template <typename T>
-  struct increment: public std::unary_function<T, T>
+  struct increment
   {
+    typedef T argument_type;
+    typedef T result_type;
+
     T operator() (T x) const
     {
       return ++x;
@@ -857,8 +894,11 @@ namespace volumeutil {
   };
 
   template <typename T>
-  struct decrement: public std::unary_function<T, T>
+  struct decrement
   {
+    typedef T argument_type;
+    typedef T result_type;
+
     T operator() (T x) const
     {
       return --x;
@@ -866,8 +906,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct equal_to: public std::binary_function<LEFT, RIGHT, bool>
+  struct equal_to
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const LEFT & x, const RIGHT & y) const
     {
       return x == y;
@@ -875,8 +919,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct not_equal_to: public std::binary_function<LEFT, RIGHT, bool>
+  struct not_equal_to
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const LEFT & x, const RIGHT & y) const
     {
       return x != y;
@@ -884,8 +932,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct greater: public std::binary_function<LEFT, RIGHT, bool>
+  struct greater
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const LEFT & x, const RIGHT & y) const
     {
       return x > y;
@@ -893,8 +945,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct less: public std::binary_function<LEFT, RIGHT, bool>
+  struct less
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const LEFT & x, const RIGHT & y) const
     {
       return x < y;
@@ -902,8 +958,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct greater_equal: public std::binary_function<LEFT, RIGHT, bool>
+  struct greater_equal
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const LEFT & x, const RIGHT & y) const
     {
       return x >= y;
@@ -911,8 +971,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct less_equal: public std::binary_function<LEFT, RIGHT, bool>
+  struct less_equal
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const LEFT & x, const RIGHT & y) const
     {
       return x <= y;
@@ -920,8 +984,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct logical_and: public std::binary_function<LEFT, RIGHT, bool>
+  struct logical_and
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const LEFT & x, const RIGHT & y) const
     {
       return x && y;
@@ -929,8 +997,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct logical_or: public std::binary_function<LEFT, RIGHT, bool>
+  struct logical_or
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const LEFT & x, const RIGHT & y) const
     {
       return x || y;
@@ -938,8 +1010,11 @@ namespace volumeutil {
   };
 
   template <typename T>
-  struct logical_not: public std::unary_function<T, bool>
+  struct logical_not
   {
+    typedef T argument_type;
+    typedef bool result_type;
+
     bool operator() (const T & x) const
     {
       return !x;
@@ -947,8 +1022,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_and: public std::binary_function<LEFT, RIGHT, typename bitwise_and_result<LEFT,RIGHT>::result_type>
+  struct bitwise_and
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename bitwise_and_result<LEFT,RIGHT>::result_type result_type;
+
     typename bitwise_and_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -957,8 +1036,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_or: public std::binary_function<LEFT, RIGHT, typename bitwise_or_result<LEFT,RIGHT>::result_type>
+  struct bitwise_or
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename bitwise_or_result<LEFT,RIGHT>::result_type result_type;
+
     typename bitwise_or_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -967,8 +1050,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_xor: public std::binary_function<LEFT, RIGHT, typename bitwise_xor_result<LEFT,RIGHT>::result_type>
+  struct bitwise_xor
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename bitwise_xor_result<LEFT,RIGHT>::result_type result_type;
+
     typename bitwise_xor_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -977,8 +1064,11 @@ namespace volumeutil {
   };
 
   template <typename T>
-  struct bitwise_not: public std::unary_function<T, T>
+  struct bitwise_not
   {
+    typedef T argument_type;
+    typedef T result_type;
+
     T operator() (const T & x) const
     {
       return ~x;
@@ -986,8 +1076,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_left_shift: public std::binary_function<LEFT, RIGHT, LEFT>
+  struct bitwise_left_shift
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef LEFT result_type;
+
     LEFT operator() (const LEFT & x, const RIGHT & y) const
     {
       return x << y;
@@ -995,8 +1089,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct bitwise_right_shift: public std::binary_function<LEFT, RIGHT, LEFT>
+  struct bitwise_right_shift
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef LEFT result_type;
+
     LEFT operator() (const LEFT & x, const RIGHT & y) const
     {
       return x >> y;
@@ -1004,8 +1102,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct select_min: public std::binary_function<LEFT, RIGHT, typename select_result<LEFT,RIGHT>::result_type>
+  struct select_min
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename select_result<LEFT,RIGHT>::result_type result_type;
+
     typename select_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -1014,8 +1116,12 @@ namespace volumeutil {
   };
 
   template <typename LEFT, typename RIGHT = LEFT>
-  struct select_max: public std::binary_function<LEFT, RIGHT, typename select_result<LEFT,RIGHT>::result_type>
+  struct select_max
   {
+    typedef LEFT first_argument_type;
+    typedef RIGHT second_argument_type;
+    typedef typename select_result<LEFT,RIGHT>::result_type result_type;
+
     typename select_result<LEFT,RIGHT>::result_type
     operator() (const LEFT & x, const RIGHT & y) const
     {
@@ -1031,8 +1137,12 @@ namespace volumeutil {
   // and cdouble by doubles.
 
   template <>
-  struct multiplies<cfloat, double>: public std::binary_function<cfloat, double, cfloat>
+  struct multiplies<cfloat, double>
   {
+    typedef cfloat first_argument_type;
+    typedef double second_argument_type;
+    typedef cfloat result_type;
+
     cfloat operator() (const cfloat & x, const double & y) const
     {
       return x * (float)y;
@@ -1040,8 +1150,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct multiplies<cfloat, long>: public std::binary_function<cfloat, long, cfloat>
+  struct multiplies<cfloat, long>
   {
+    typedef cfloat first_argument_type;
+    typedef long second_argument_type;
+    typedef cfloat result_type;
+
     cfloat operator() (const cfloat & x, const long & y) const
     {
       return x * (float)y;
@@ -1049,8 +1163,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct multiplies<cdouble, float>: public std::binary_function<cdouble, float, cdouble>
+  struct multiplies<cdouble, float>
   {
+    typedef cdouble first_argument_type;
+    typedef float second_argument_type;
+    typedef cdouble result_type;
+
     cdouble operator() (const cdouble & x, const float & y) const
     {
       return x * (double)y;
@@ -1058,8 +1176,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct multiplies<cdouble, long>: public std::binary_function<cdouble, long, cdouble>
+  struct multiplies<cdouble, long>
   {
+    typedef cdouble first_argument_type;
+    typedef long second_argument_type;
+    typedef cdouble result_type;
+
     cdouble operator() (const cdouble & x, const long & y) const
     {
       return x * (double)y;
@@ -1067,8 +1189,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct divides<cfloat, double>: public std::binary_function<cfloat, double, cfloat>
+  struct divides<cfloat, double>
   {
+    typedef cfloat first_argument_type;
+    typedef double second_argument_type;
+    typedef cfloat result_type;
+
     cfloat operator() (const cfloat & x, const double & y) const
     {
       return x * (float)( 1. / y );
@@ -1076,8 +1202,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct divides<cfloat, long>: public std::binary_function<cfloat, long, cfloat>
+  struct divides<cfloat, long>
   {
+    typedef cfloat first_argument_type;
+    typedef long second_argument_type;
+    typedef cfloat result_type;
+
     cfloat operator() (const cfloat & x, const long & y) const
     {
       return x * (float)( 1. / (double)y );
@@ -1085,8 +1215,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct divides<cdouble, float>: public std::binary_function<cdouble, float, cdouble>
+  struct divides<cdouble, float>
   {
+    typedef cdouble first_argument_type;
+    typedef float second_argument_type;
+    typedef cdouble result_type;
+
     cdouble operator() (const cdouble & x, const float & y) const
     {
       return x * (double)( 1. / y );
@@ -1094,8 +1228,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct divides<cdouble, double>: public std::binary_function<cdouble, double, cdouble>
+  struct divides<cdouble, double>
   {
+    typedef cdouble first_argument_type;
+    typedef double second_argument_type;
+    typedef cdouble result_type;
+
     cdouble operator() (const cdouble & x, const double & y) const
     {
       return x * ( 1. / y );
@@ -1103,8 +1241,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct divides<cdouble, long>: public std::binary_function<cdouble, long, cdouble>
+  struct divides<cdouble, long>
   {
+    typedef cdouble first_argument_type;
+    typedef long second_argument_type;
+    typedef cdouble result_type;
+
     cdouble operator() (const cdouble & x, const long & y) const
     {
       return x * (double)( 1. / (double)y );
@@ -1112,8 +1254,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct logical_and<bool, cfloat>: public std::binary_function<bool, cfloat, bool>
+  struct logical_and<bool, cfloat>
   {
+    typedef bool first_argument_type;
+    typedef cfloat second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const bool & x, const cfloat & y) const
     {
       return x && ( y.imag() || y.real() );
@@ -1121,8 +1267,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct logical_and<bool, cdouble>: public std::binary_function<bool, cdouble, bool>
+  struct logical_and<bool, cdouble>
   {
+    typedef bool first_argument_type;
+    typedef cdouble second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const bool & x, const cdouble & y) const
     {
       return x && ( y.imag() || y.real() );
@@ -1130,8 +1280,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct logical_or<bool, cfloat>: public std::binary_function<bool, cfloat, bool>
+  struct logical_or<bool, cfloat>
   {
+    typedef bool first_argument_type;
+    typedef cfloat second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const bool & x, const cfloat & y) const
     {
       return x || y.imag() || y.real();
@@ -1139,8 +1293,12 @@ namespace volumeutil {
   };
 
   template <>
-  struct logical_or<bool, cdouble>: public std::binary_function<bool, cdouble, bool>
+  struct logical_or<bool, cdouble>
   {
+    typedef bool first_argument_type;
+    typedef cdouble second_argument_type;
+    typedef bool result_type;
+
     bool operator() (const bool & x, const cdouble & y) const
     {
       return x || y.imag() || y.real();
@@ -1148,8 +1306,11 @@ namespace volumeutil {
   };
 
   template <>
-  struct logical_not<cfloat>: public std::unary_function<cfloat, bool>
+  struct logical_not<cfloat>
   {
+    typedef cfloat argument_type;
+    typedef bool result_type;
+
     bool operator() (const cfloat & x) const
     {
       return !( x.imag() || x.real() );
@@ -1157,8 +1318,11 @@ namespace volumeutil {
   };
 
   template <>
-  struct logical_not<cdouble>: public std::unary_function<cdouble, bool>
+  struct logical_not<cdouble>
   {
+    typedef cdouble argument_type;
+    typedef bool result_type;
+
     bool operator() (const cdouble & x) const
     {
       return !( x.imag() || x.real() );
@@ -1170,8 +1334,11 @@ namespace volumeutil {
   //==========================================================================
 
   template <>
-  struct increment<bool>: public std::unary_function<bool, bool>
+  struct increment<bool>
   {
+    typedef bool argument_type;
+    typedef bool result_type;
+
     bool operator() ( bool )
     {
       return true;
@@ -1179,8 +1346,11 @@ namespace volumeutil {
   };
 
   template <>
-  struct decrement<bool>: public std::unary_function<bool, bool>
+  struct decrement<bool>
   {
+    typedef bool argument_type;
+    typedef bool result_type;
+
     bool operator() ( bool )
     {
       return false;
@@ -1206,8 +1376,11 @@ namespace carto {
 namespace volumeutil {
 
   template <>
-  struct negate<VoxelRGB>: public std::unary_function<VoxelRGB, VoxelRGB>
+  struct negate<VoxelRGB>
   {
+    typedef VoxelRGB argument_type;
+    typedef VoxelRGB result_type;
+
     VoxelRGB operator() ( const VoxelRGB & x )
     {
       return x * -1.f;
@@ -1215,8 +1388,11 @@ namespace volumeutil {
   };
 
   template <>
-  struct negate<VoxelRGBA>: public std::unary_function<VoxelRGBA, VoxelRGBA>
+  struct negate<VoxelRGBA>
   {
+    typedef VoxelRGBA argument_type;
+    typedef VoxelRGBA result_type;
+
     VoxelRGBA operator() ( const VoxelRGBA & x )
     {
       return x * -1.f;
@@ -1224,8 +1400,11 @@ namespace volumeutil {
   };
 
   template <>
-  struct negate<VoxelHSV>: public std::unary_function<VoxelHSV, VoxelHSV>
+  struct negate<VoxelHSV>
   {
+    typedef VoxelHSV argument_type;
+    typedef VoxelHSV result_type;
+
     VoxelHSV operator() ( const VoxelHSV & x )
     {
       return x * -1.f;

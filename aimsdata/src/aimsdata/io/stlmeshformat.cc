@@ -20,8 +20,11 @@ namespace
 {
 
   struct Point3dfCompare
-    : public std::binary_function<Point3df,Point3df, bool>
   {
+    typedef Point3df first_argument_type;
+    typedef Point3df second_argument_type;
+    typedef bool result_type;
+
     bool operator () ( const Point3df & p1, const Point3df & p2 ) const
     {
       return p1[2] < p2[2] ||

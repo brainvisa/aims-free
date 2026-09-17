@@ -1234,8 +1234,12 @@ namespace carto
 
   namespace internal {
     template <typename T, typename U>
-    struct inSet: public std::binary_function<T, U, bool>
+    struct inSet
     {
+      typedef T first_argument_type;
+      typedef U second_argument_type;
+      typedef bool result_type;
+
       bool operator() ( const T & x, const U & y )
       {
         for( typename U::const_iterator k = y.begin(); k != y.end(); ++k )
@@ -1266,8 +1270,12 @@ namespace carto
 
   namespace internal {
     template <typename T, typename U>
-    struct notInSet: public std::binary_function<T, U, bool>
+    struct notInSet
     {
+      typedef T first_argument_type;
+      typedef U second_argument_type;
+      typedef bool result_type;
+
       bool operator() ( const T & x, const U & y )
       {
         for( typename U::const_iterator k = y.begin(); k != y.end(); ++k )
@@ -1298,8 +1306,12 @@ namespace carto
 
   namespace internal {
     template <typename T, typename U>
-    struct changeIf: public std::binary_function<T, U, T>
+    struct changeIf
     {
+      typedef T first_argument_type;
+      typedef U second_argument_type;
+      typedef T result_type;
+
       changeIf( const T & value ): _value(value) {}
       bool operator() ( const T & x, const U & y )
       {
@@ -1326,8 +1338,11 @@ namespace carto
 
   namespace internal {
     template <typename T>
-    struct invMinMax: public std::unary_function<T, T>
+    struct invMinMax
     {
+      typedef T argument_type;
+      typedef T result_type;
+
       invMinMax( const T & min, const T & max ):
         _min(min),
         _max(max)
