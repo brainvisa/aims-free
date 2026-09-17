@@ -46,7 +46,7 @@ set(__command "${PYTHON_HOST_EXECUTABLE}"
 if(CMAKE_CROSSCOMPILING AND WIN64)
     list(APPEND __command -T "windows-64")
 endif()
-message("RUN MAKETEMPLATES: ${__command}")
+message(STATUS "RUN MAKETEMPLATES: ${__command}")
 execute_process( COMMAND ${__command}
   OUTPUT_VARIABLE _generatedSipFileList 
   RESULT_VARIABLE _returnValue )
