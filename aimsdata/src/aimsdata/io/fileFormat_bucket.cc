@@ -301,6 +301,17 @@ template class FileFormatDictionary<AimsBucket<vector<uint32_t> > >;
 template class FileFormatDictionary<AimsBucket<vector<float> > >;
 template class FileFormatDictionary<AimsBucket<vector<double> > >;
 
+template class FileFormat<BucketMap<Void> >;
+template class FileFormat<BucketMap<int8_t> >;
+template class FileFormat<BucketMap<int16_t> >;
+template class FileFormat<BucketMap<int32_t> >;
+template class FileFormat<BucketMap<uint8_t> >;
+template class FileFormat<BucketMap<uint16_t> >;
+template class FileFormat<BucketMap<uint32_t> >;
+template class FileFormat<BucketMap<float> >;
+template class FileFormat<BucketMap<double> >;
+template class FileFormat<BucketMap<DtiTensor> >;
+
 } // namespace aims
 
 
