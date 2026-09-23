@@ -60,6 +60,12 @@ def get_npy_bucket_format(dtype):
             bk0 = obj[0]
             for p in mat:
                 bk0[p] = 1
+            minff = filename + '.minf'
+            hdr = obj.header()
+            hdr['nb_t_pos'] = len(obj)
+            if os.path.exists(minff):
+                minf = aims.read(minff)
+                hdr.update(minf)
             if ret_obj:
                 return obj
             return True
@@ -88,6 +94,12 @@ def get_npy_texture_format(dtype):
             else:
                 tex = obj[0]
                 tex.assign(mat)
+            minff = filename + '.minf'
+            hdr = obj.header()
+            hdr['vertex_number'] = next(iter(obj)).np.shape[0]
+            if os.path.exists(minff):
+                minf = aims.read(minff)
+                hdr.update(minf)
             if ret_obj:
                 return obj
             return True
@@ -98,14 +110,23 @@ def get_npy_texture_format(dtype):
             for t, tex in obj.items():
                 shape[0] = max(shape[0], len(tex))
                 if len(tex) != 0:
-                    dt = t.np.dtype
+                    dt = tex.np.dtype
+            has_time = True
             if shape[2] == 1:
                 shape = shape[0:1]
+                has_time = False
             mat = np.zeros(shape, dtype=dt)
-            mat = np.asarray(obj[0].keys()).T
+            for t, tex in obj.items():
+                if has_time:
+                    smat = mat[:, 0, t]
+                else:
+                    smat = mat
+                smat[:] = tex.np
+                del smat
+            del t, tex
             np.save(filename, mat)
             hdr = obj.header()
-            aims.write(hdr, '%s.minf' % filename)
+            aims.write(aims.Object(hdr), f'{filename}.minf')
             return True
 
     return NumpyTextureFormat
