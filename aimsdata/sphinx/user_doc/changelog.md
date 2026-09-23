@@ -6,6 +6,7 @@
 
 - Test class and tests for python/C++ reference counters bindings
 - aims.rc_ptr() function supports type search to find a correct C++ rc_ptr type matching the object to wrap
+- allow to read .npy tables with a .minf metadata file, in order to read tham as buckets, or textures.
 
 
 ## [6.0.20] 2026-08-06
