@@ -11,11 +11,12 @@ YAML format for Object
 import numpy as np
 import atexit
 import sys
+import os
 from . import gltf_io
 aims = sys.modules['soma.aims']
 
 
-class NpyFormat(aims.FileFormat_SparseOrDenseMatrix):
+class NpyMatrixFormat(aims.FileFormat_SparseOrDenseMatrix):
     def read(self, filename, obj, context, options=None):
         mat = np.load(filename)
         # currently we need to perform a full copy of the array because
@@ -47,24 +48,98 @@ class NpyFormat(aims.FileFormat_SparseOrDenseMatrix):
         return True
 
 
+def get_npy_bucket_format(dtype):
+    class NumpyBucketFormat(getattr(aims, f'FileFormat_BucketMap_{dtype}')):
+        def read(self, filename, obj, context, options=None):
+            mat = np.load(filename)
+            if mat.shape[1] != 3:
+                mat = mat.T
+            ret_obj = isinstance(obj, aims.carto.AllocatorContext)
+            if ret_obj:
+                obj = aims.BucketMap(dtype)
+            bk0 = obj[0]
+            for p in mat:
+                bk0[p] = 1
+            if ret_obj:
+                return obj
+            return True
+
+        def write(self, filename, obj, options):
+            mat = np.asarray(obj[0].keys()).T
+            np.save(filename, mat)
+            hdr = obj.header()
+            aims.write(hdr, '%s.minf' % filename)
+            return True
+
+    return NumpyBucketFormat
+
+
+def get_npy_texture_format(dtype):
+    class NumpyTextureFormat(getattr(aims, f'FileFormat_TimeTexture_{dtype}')):
+        def read(self, filename, obj, context, options=None):
+            mat = np.load(filename)
+            ret_obj = isinstance(obj, aims.carto.AllocatorContext)
+            if ret_obj:
+                obj = aims.TimeTexture(dtype)
+            if len(mat.shape) >= 3:
+                for t in range(mat.shape[2]):
+                    tex = obj[t]
+                    tex.assign(mat[:, :, t])
+            else:
+                tex = obj[0]
+                tex.assign(mat)
+            if ret_obj:
+                return obj
+            return True
+
+        def write(self, filename, obj, options):
+            shape = [1, 1, obj.size()]
+            dt = float
+            for t, tex in obj.items():
+                shape[0] = max(shape[0], len(tex))
+                if len(tex) != 0:
+                    dt = t.np.dtype
+            if shape[2] == 1:
+                shape = shape[0:1]
+            mat = np.zeros(shape, dtype=dt)
+            mat = np.asarray(obj[0].keys()).T
+            np.save(filename, mat)
+            hdr = obj.header()
+            aims.write(hdr, '%s.minf' % filename)
+            return True
+
+    return NumpyTextureFormat
+
+
 class NpyFinderFormat(aims.FinderFormat):
     def check(self, filename, finder):
         if filename.endswith('.npy'):
             hdr = {
-                'file_type': 'NPY',
+                'file_type': 'NUMPY',
                 'object_type': 'SparseMatrix',
                 'data_type': 'DOUBLE',
             }
+            minff = filename + '.minf'
+            if os.path.exists(minff):
+                minf = aims.read(minff)
+                hdr.update(minf)
             finder.setHeader(hdr)
-            finder.setObjectType('SparseMatrix')
-            finder.setDataType('DOUBLE')
+            finder.setObjectType(hdr['object_type'])
+            finder.setDataType(hdr['data_type'])
+            finder.setFormat('NUMPY')
             return True
         return False
 
 
 aims.Finder.registerFormat('NUMPY', NpyFinderFormat(), ['npy'])
 aims.FileFormatDictionary_SparseOrDenseMatrix.registerFormat(
-    'NUMPY', NpyFormat(), ['npy'])
+    'NUMPY', NpyMatrixFormat(), ['npy'])
+aims.FileFormatDictionary_BucketMap_VOID.registerFormat(
+    'NUMPY', get_npy_bucket_format('VOID')(), ['npy'])
+for dt in ('U8', 'S16', 'U16', 'S32', 'U32', 'FLOAT', 'DOUBLE', 'POINT2DF'):
+    getattr(aims, f'FileFormatDictionary_TimeTexture_{dt}').registerFormat(
+        'NUMPY', get_npy_texture_format(dt)(), ['npy'])
+del dt
 
 
 # ---

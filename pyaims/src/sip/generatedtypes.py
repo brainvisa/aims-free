@@ -312,6 +312,7 @@ todo = {'system': ['Void'],
                    'aims::TransformationGraph3d',
                    'aims::Hierarchy', 'carto::Object',
                    'aims::SparseMatrix', 'aims::SparseOrDenseMatrix',
+                   'aims::BucketMap<Void>',
                    ],
 
         'soma_reader': [
