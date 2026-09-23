@@ -95,8 +95,8 @@ namespace aims
     ~Finder();
 
     static void registerFormat( const std::string & fmtid, 
-				FinderFormat* format, 
-				const std::vector<std::string> & extensions,
+                                FinderFormat* format,
+                                const std::vector<std::string> & extensions,
                                 const std::string & before = "" );
     ///	Finds the FinderFormat associated with the given string ID
     static FinderFormat* finderFormat( const std::string & format );

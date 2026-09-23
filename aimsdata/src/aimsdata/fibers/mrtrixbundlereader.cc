@@ -49,10 +49,9 @@ using namespace std;
 
 
 //-----------------------------------------------------------------------------
-MRTrixBundleReader::MRTrixBundleReader( const string &fileName )
+MRTrixBundleReader::MRTrixBundleReader()
   : BundleFormatReader()
 {
-  _fileName = fileName;
 }
 
 
@@ -303,5 +302,11 @@ void MRTrixBundleReader::read()
   terminateBundle( currentBundle );
   noMoreBundle();
 
+}
+
+
+BundleFormatReader* MRTrixBundleReader::create()
+{
+  return new MRTrixBundleReader;
 }
 

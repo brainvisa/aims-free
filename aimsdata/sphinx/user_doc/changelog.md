@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.0.21] 2026-09-09
+
+### Added
+
+- Test class and tests for python/C++ reference counters bindings
+- aims.rc_ptr() function supports type search to find a correct C++ rc_ptr type matching the object to wrap
+- allow to read .npy tables with a .minf metadata file, in order to read tham as buckets, or textures.
+
+
+## [6.0.20] 2026-08-06
+
+### Changed
+
+- fix in Tiff reader (`volume_dimension` in header)
+
+
 ## [6.0.18] 2026-06-26
 
 ### Changed

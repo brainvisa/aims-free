@@ -59,6 +59,7 @@
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/object/pythonwriter.h>
 #include <cartobase/object/pythonreader.h>
+#include <cartobase/stream/fileutil.h>
 #include <aims/graph/graphmanip.h>
 #include <aims/io/writer.h>
 #include <sstream>
@@ -597,13 +598,91 @@ void BundleReader::noMoreBundle( const BundleProducer & )
 }
 
 
-set<string> BundleReader::supportedFormats()
+map<string, BundleReader::BundleReaderCreator>
+  & BundleReader::_bundleReaderCreators()
 {
-  set<string> formats;
-  formats.insert( "CONNECTOMIST" );
-  formats.insert( "TRACKVIZ" );
-  formats.insert( "MRTRIX" );
+  static map<string, BundleReaderCreator> creators;
+  if( creators.empty() )
+  {
+    creators["CONNECTOMIST"] = ConnectomistBundlesReader::create;
+    creators["TRACKVIZ"] = TrackvisBundleReader::create;
+    creators["MRTRIX"] = MRTrixBundleReader::create;
+  }
+
+  return creators;
+}
+
+rc_ptr<BundleFormatReader>
+  BundleReader::bundleReaderForExt( const std::string & ext )
+{
+  auto fi = _supportedFormats().begin(), ei = _supportedFormats().end();
+  string reader;
+  for( ; fi!=ei; ++fi )
+  {
+    auto exts = formatExtensions( *fi );
+    if( exts.find( ext ) != exts.end() )
+    {
+      reader = *fi;
+      break;
+    }
+  }
+  if( reader.empty() )
+    return rc_ptr<BundleFormatReader>( 0 );
+
+  map<string, BundleReaderCreator>::const_iterator
+    i = _bundleReaderCreators().find( reader );
+  if( i == _bundleReaderCreators().end() )
+    return rc_ptr<BundleFormatReader>( 0 );
+  return rc_ptr<BundleFormatReader>( i->second() );
+}
+
+
+void BundleReader::registerBundleReader(
+  const std::string & name,  const std::set<std::string> & exts,
+  BundleReaderCreator creator )
+{
+  _supportedFormats().insert( name );
+  _bundleReaderCreators()[name] = creator;
+  _formatsExtensions()[name].insert( exts.begin(), exts.end() );
+}
+
+
+const set<string> & BundleReader::supportedFormats()
+{
+  return _supportedFormats();
+}
+
+
+set<string> & BundleReader::_supportedFormats()
+{
+  static set<string> formats;
+  if( formats.empty() )
+  {
+    formats.insert( "CONNECTOMIST" );
+    formats.insert( "TRACKVIZ" );
+    formats.insert( "MRTRIX" );
+  }
   return formats;
+}
+
+
+map<std::string, std::set<std::string> > & BundleReader::_formatsExtensions()
+{
+  static map<string, set<string> > extensions;
+  if( extensions.empty() )
+  {
+    set<string> se;
+    se.insert( "bundles" );
+    extensions["CONNECTOMIST"] = se;
+    se.clear();
+    se.insert( "trk" );
+    extensions["TRACKVIZ"] = se;
+    se.clear();
+    se.insert( "tck" );
+    extensions["MRTRIX"] = se;
+  }
+
+  return extensions;
 }
 
 
@@ -621,17 +700,11 @@ set<string> BundleReader::formatExtensions( const string & format )
       exts.insert( extf.begin(), extf.end() );
     }
   }
-  else if( format == "CONNECTOMIST" )
+  else
   {
-    exts.insert( "bundles" );
-  }
-  else if( format == "TRACKVIZ" )
-  {
-    exts.insert( "trk" );
-  }
-  else if( format == "MRTRIX" )
-  {
-    exts.insert( "tck" );
+    auto i = _formatsExtensions().find( format );
+    if( i != _formatsExtensions().end() )
+      exts.insert( i->second.begin(), i->second.end() );
   }
 
   return exts;
@@ -642,17 +715,12 @@ set<string> BundleReader::formatExtensions( const string & format )
 //-----------------------------------------------------------------------------
 void BundleReader::read()
 {
-  rc_ptr<BundleFormatReader> low_reader;
+  string ext = FileUtil::extension( _fileName );
+  rc_ptr<BundleFormatReader> low_reader = bundleReaderForExt( ext );
+  if( !low_reader )
+    throw wrong_format_error( string( "unrecognized extension " ) + ext );
 
-  if( _fileName.length() >= 4
-      && _fileName.substr( _fileName.size() - 4 ) == ".trk" )
-    low_reader.reset( new TrackvisBundleReader( _fileName ) );
-  else if( _fileName.length() >= 4
-      && _fileName.substr( _fileName.size() - 4 ) == ".tck" )
-    low_reader.reset( new MRTrixBundleReader( _fileName ) );
-  else
-    low_reader.reset( new ConnectomistBundlesReader( _fileName ) );
-
+  low_reader->setFilename( _fileName );
   low_reader->addBundleListener( *this );
   low_reader->read();
 }
@@ -661,19 +729,15 @@ void BundleReader::read()
 //-----------------------------------------------------------------------------
 Object BundleReader::readHeader()
 {
-  rc_ptr<BundleFormatReader> low_reader;
+  string ext = FileUtil::extension( _fileName );
+  rc_ptr<BundleFormatReader> low_reader = bundleReaderForExt( ext );
+  if( !low_reader )
+    throw wrong_format_error( string( "unrecognized extension " ) + ext );
 
-  if( _fileName.length() >= 4
-      && _fileName.substr( _fileName.size() - 4 ) == ".trk" )
-    low_reader.reset( new TrackvisBundleReader( _fileName ) );
-  else if( _fileName.length() >= 4
-      && _fileName.substr( _fileName.size() - 4 ) == ".tck" )
-    low_reader.reset( new MRTrixBundleReader( _fileName ) );
-  else
-    low_reader.reset( new ConnectomistBundlesReader( _fileName ) );
-
+  low_reader->setFilename( _fileName );
   return low_reader->readHeader();
 }
+
 
   //---------------------//
  //  BundleFormaReader  //
@@ -699,15 +763,9 @@ Object BundleFormatReader::readHeader()
  //  ConnectomistBundlesFormaReader  //
 //----------------------------------//
 //-----------------------------------------------------------------------------
-ConnectomistBundlesReader::ConnectomistBundlesReader( const string &fileName )
+ConnectomistBundlesReader::ConnectomistBundlesReader()
   : BundleFormatReader()
 {
-  if ( fileName.size() > 8 &&
-       fileName.substr( fileName.size() - 8 ) == ".bundles" ) {
-    _fileName = fileName.substr( 0, fileName.size() - 8 );
-  } else {
-    _fileName = fileName;
-  }
 }
 
 
@@ -720,28 +778,11 @@ ConnectomistBundlesReader::~ConnectomistBundlesReader()
 //-----------------------------------------------------------------------------
 void ConnectomistBundlesReader::read()
 {
-  if( _fileName.length() >= 4
-    && _fileName.substr( _fileName.size() - 4 ) == ".trk" )
-  {
-    TrackvisBundleReader tbr( _fileName );
-    tbr.read();
-
-    return;
-  }
-
-  if( _fileName.length() >= 4
-    && _fileName.substr( _fileName.size() - 4 ) == ".tck" )
-  {
-    MRTrixBundleReader tbr( _fileName );
-    tbr.read();
-
-    return;
-  }
-
   // Read header
   Object header;
   header = Object::value( Dictionary() );
-  PythonReader out( _fileName + ".bundles" );
+  string basename = FileUtil::removeExtension( _fileName );
+  PythonReader out( _fileName );
   out.read( *header );
 
   // Check format
@@ -784,7 +825,7 @@ void ConnectomistBundlesReader::read()
     fiberCount = (int) header->getProperty( "fibers_count" )->value<double>();
   }
 
-  ifstream dataFile( ( _fileName + ".bundlesdata" ).c_str(),
+  ifstream dataFile( ( basename + ".bundlesdata" ).c_str(),
                      ( binary ? ios::in | ios::binary : ios::in ) );
 
   Object bundlesObj = header->getProperty( "bundles" );
@@ -867,7 +908,8 @@ Object ConnectomistBundlesReader::readHeader()
 {
   Object header;
   header = Object::value( Dictionary() );
-  PythonReader out( _fileName + ".bundles" );
+  string basename = FileUtil::removeExtension( _fileName );
+  PythonReader out( _fileName );
   out.read( *header );
 
   vector<float> vs( 3, 1. );
@@ -900,7 +942,7 @@ Object ConnectomistBundlesReader::readHeader()
 
   // get data size
   struct stat st;
-  if( ::stat( ( _fileName + ".bundlesdata" ).c_str(), &st ) == 0 )
+  if( ::stat( ( basename + ".bundlesdata" ).c_str(), &st ) == 0 )
   {
     header->setProperty( "data_size", st.st_size );
   }
@@ -908,6 +950,11 @@ Object ConnectomistBundlesReader::readHeader()
   return header;
 }
 
+
+BundleFormatReader* ConnectomistBundlesReader::create()
+{
+  return new ConnectomistBundlesReader;
+}
 
   //-----------------//
  //  BundleToGraph  //

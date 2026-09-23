@@ -51,6 +51,11 @@ IF(EXPAT_FOUND)
   set(HEADERS ${HEADERS} ${AIMSGIFTI_HEADERS})
 ENDIF(EXPAT_FOUND)
 
+if(trx-cpp_FOUND)
+  add_subdirectory(aimstrx)
+  set(HEADERS ${HEADERS} ${AMSTRX_HEADERS})
+endif()
+
 # list of header files for doxygen
 set(HEADERS ${HEADERS} PARENT_SCOPE)
 #------------------------------------------------------------------------------

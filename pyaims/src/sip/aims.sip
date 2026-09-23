@@ -232,6 +232,7 @@ typedef int int32_t;
 %Include rcptr_TimeTexture_FLOAT.sip
 %Include rcptr_TimeTexture_DOUBLE.sip
 %Include rcptr_TimeTexture_POINT2DF.sip
+%Include rcptr_RCObject.sip
 
 %Include reader_Graph.sip
 %Include reader_Hierarchy.sip
@@ -341,6 +342,15 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include fileformat_SparseOrDenseMatrix.sip
 %Include fileformat_AimsTimeSurface_2_VOID.sip
 %Include fileformat_AimsTimeSurface_3_VOID.sip
+%Include fileformat_BucketMap_VOID.sip
+%Include fileformat_TimeTexture_S16.sip
+%Include fileformat_TimeTexture_S32.sip
+%Include fileformat_TimeTexture_U8.sip
+%Include fileformat_TimeTexture_U16.sip
+%Include fileformat_TimeTexture_U32.sip
+%Include fileformat_TimeTexture_FLOAT.sip
+%Include fileformat_TimeTexture_DOUBLE.sip
+%Include fileformat_TimeTexture_POINT2DF.sip
 
 %Include aimsgraphreader.sip
 %Include iotypes.sip
