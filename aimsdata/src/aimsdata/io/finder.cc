@@ -43,6 +43,7 @@
 #include <aims/io/finderFormats.h>
 #include <aims/data/header.h>
 #include <aims/io/spmattribconverter.h>
+#include <aims/fibers/bundles.h>
 #include <cartobase/plugin/plugin.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
@@ -153,9 +154,8 @@ void Finder::initPrivate()
       ext.push_back( "arg" );
       registerFormat( "ARG", new FinderGraphFormat, ext );
       ext.clear();
-      ext.push_back( "bundles" );
-      ext.push_back( "trk" );
-      ext.push_back( "tck" );
+      set<string> sext = BundleReader::formatExtensions( "ALL" );
+      ext.insert( ext.begin(), sext.begin(), sext.end() );
       registerFormat( "BUNDLES", new FinderGraphFormat, ext );
       ext.clear();
       ext.push_back( "hie" );

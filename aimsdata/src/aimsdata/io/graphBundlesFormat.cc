@@ -118,7 +118,6 @@ bool GraphBundlesFormat::read( const string & filename, Graph & obj,
                                const carto::AllocatorContext & /*context*/, 
                                carto::Object options )
 {
-  cout << "GraphBundlesFormat::read " << filename << endl;
   obj.clear();
   obj.clearProperties();
   BundleReader reader( filename );

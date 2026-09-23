@@ -102,6 +102,16 @@ if( ZLIB_FOUND )
 endif()
 BRAINVISA_DEPENDENCY( DEV RECOMMENDS zlib DEV )
 
+find_package(trx-cpp CONFIG)
+message("####################### TRX: ${trx-cpp_FOUND}")
+if(trx-cpp_FOUND)
+  message("TRX FOUND !!!!!!!")
+  BRAINVISA_DEPENDENCY( RUN DEPENDS trx-cpp RUN )
+  BRAINVISA_DEPENDENCY( DEV RECOMMENDS trx-cpp DEV )
+else()
+  message("####################### TRX NOT FOUND #############")
+endif()
+
 find_package( LibKDTree QUIET )
 
 
