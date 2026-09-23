@@ -12,6 +12,7 @@ attributes = {
     'libaimsgifti.so',
     'libaimscifti.so',
     'libpyaimsplugin.so',
-    'libconnect-fiber-clustering-plugin-aims.so'
+    'libaimstrx.so',
+#    'libconnect-fiber-clustering-plugin-aims.so'
   ], 
 }

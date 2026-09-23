@@ -643,6 +643,7 @@ void BundleReader::registerBundleReader(
 {
   _supportedFormats().insert( name );
   _bundleReaderCreators()[name] = creator;
+  _formatsExtensions()[name].insert( exts.begin(), exts.end() );
 }
 
 
