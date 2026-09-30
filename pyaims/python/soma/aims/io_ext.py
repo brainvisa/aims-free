@@ -58,11 +58,18 @@ def get_npy_bucket_format(dtype):
             if ret_obj:
                 obj = aims.BucketMap(dtype)
             bk0 = obj[0]
-            for p in mat:
+            indices = aims.BucketMap_U32.Bucket()
+            for i, p in enumerate(mat):
                 bk0[p] = 1
+                # indices order
+                indices[p] = i
+            porder = [v for p, v in indices.items()]
             minff = filename + '.minf'
             hdr = obj.header()
             hdr['nb_t_pos'] = len(obj)
+            if np.any(porder != np.arange(len(bk0))):
+                # store indices order
+                hdr['point_indices'] = porder
             if os.path.exists(minff):
                 minf = aims.read(minff)
                 hdr.update(minf)
