@@ -344,7 +344,7 @@ private:
 };
 
 
-  class TestRCObject : public RCObject
+  class TestRCObject : public carto::RCObject
   {
 %TypeHeaderCode
 #include <cartobase/smart/test_rcobject.h>
